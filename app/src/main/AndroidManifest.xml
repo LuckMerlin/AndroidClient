@@ -7,9 +7,7 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
-        android:roundIcon="@mipmap/ic_launcher_round">
+        android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
         <activity
             android:name=".MainActivity">
             <intent-filter>

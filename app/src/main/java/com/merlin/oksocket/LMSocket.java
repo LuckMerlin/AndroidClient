@@ -135,7 +135,7 @@ public final class LMSocket {
         public void onSocketReadResponse(ConnectionInfo info, String action, OriginalData data) {
             FrameParser parser = null != data ? mFrameParser : null;
             if (null != parser) {
-                parser.onFrameReceived(data.getHeadBytes(), data.getBodyBytes());
+                parser.onFrameBytesReceived(data.getHeadBytes(), data.getBodyBytes());
             }
         }
 
