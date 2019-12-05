@@ -1,12 +1,9 @@
-package com.merlin.server;
+package com.merlin.oksocket;
 
-import com.merlibn.global.Global;
 import com.merlibn.global.Protocol;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class Heartbeat  implements IPulseSendable {
     private String str = "大道";
@@ -18,7 +15,6 @@ public class Heartbeat  implements IPulseSendable {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-//        return bb.array();
         return null;
     }
 

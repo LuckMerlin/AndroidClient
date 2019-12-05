@@ -15,8 +15,6 @@ public final class Protocol {
     public byte[] generateFrame(byte[] head,byte[] data,String decoding){
         int headLength=null!=head?head.length:0;
         int dataLength=null!=data?data.length:0;
-//        long maxLength = 1099511627775L;
-//        int maxLengthByte = 5;
         byte codeByte=(byte)0;
         byte encoding=(byte)(null!=decoding&&decoding.equalsIgnoreCase("utf-8")?1:0);
         byte[] headLengthBytes=integer2ByteArray(headLength, 5);
@@ -25,19 +23,19 @@ public final class Protocol {
         result[0]=codeByte;
         result[1]=encoding;
         System.arraycopy(headLengthBytes,0,result,2,5);
+        System.arraycopy(dataLengthBytes,0,result,7,5);
         if (headLength>0){
-            System.arraycopy(head,0,result,7,headLength);
+            System.arraycopy(head,0,result,12,headLength);
         }
-        System.arraycopy(dataLengthBytes,0,result,7+headLength,5);
         if (dataLength>0){
             System.arraycopy(data,0,result,12+headLength,dataLength);
         }
 //
-        String ddd="";
-        for (byte f:result ) {
-            ddd+=" "+ Integer.toHexString(f & 0xFF);
-        }
-        Debug.D(getClass(),ddd);
+//        String ddd="Generate ";
+//        for (byte f:result ) {
+//            ddd+=" "+ Integer.toHexString(f & 0xFF);
+//        }
+//        Debug.D(getClass(),ddd);
 //        head
 //        byte[] dataBytes=integer2ByteArray(dataLength, 5);
 //        data
@@ -69,5 +67,32 @@ public final class Protocol {
         Debug.W(Protocol.class,"Can't integer to byte array.length="+length);
         return null;
     }
+//0 0 0 0 -72
 
+    public static Long bytes2Long(byte[] bytes,int offset,boolean big,int start,int end) {
+        int length=null!=bytes?bytes.length:-1;
+        if (length<=0||(start>end)||end>length){
+//            Debug.D(Protocol.class," "+start+" "+end+" "+length);
+            return null;
+        }
+        long result=0;
+        for (int i = start; i < end; i++) {
+//            Debug.D(Protocol.class," i="+i+" "+(bytes[i]&0xff));
+            result|=(bytes[i]&0xff)<<(8*(big?(end-i-1):(i-start)));
+        }
+//        Debug.D(Protocol.class,"RRRRRRRRRRR "+result);
+        return result;
+    }
+
+    public static String dumpBytes(byte[] bytes,boolean print){
+        String buffer=new String();
+        int count=null!=bytes?bytes.length:0;
+        for (int i = 0; i < count; i++) {
+            buffer+=(bytes[i]+" ");
+        }
+        if (print){
+            Debug.D(Protocol.class,buffer);
+        }
+        return buffer;
+    }
 }
