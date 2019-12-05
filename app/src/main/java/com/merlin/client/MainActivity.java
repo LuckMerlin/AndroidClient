@@ -17,7 +17,6 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.SocketActionAdapter;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
-import java.nio.ByteOrder;
 
 public class MainActivity extends Activity {
 

@@ -21,10 +21,10 @@ public final class FrameReader implements IReaderProtocol {
         }
         byte code=header[0];
         byte encoding=header[1];
-        int head_length= Arrays.copyOfRange(header,2,MIN_LENGTH);
+        byte[] headLengthBytes= Arrays.copyOfRange(header,2,MIN_LENGTH);
         String ddd=" code="+code+" encoding="+encoding+" ";
-        if(null!=header){
-            for (byte b:header){
+        if(null!=headLengthBytes){
+            for (byte b:headLengthBytes){
                 ddd+=b+" ";
             }
         }
