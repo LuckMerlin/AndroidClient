@@ -8,11 +8,11 @@ public final class Protocol {
    public final static String ENCODING="utf-8";
    public final static ByteOrder BYTE_ORDER=ByteOrder.BIG_ENDIAN;
 
-    public byte[] generateFrame(byte[] head,byte[] data){
+    public static byte[] generateFrame(byte[] head,byte[] data){
         return generateFrame(head,data,ENCODING);
     }
 
-    public byte[] generateFrame(byte[] head,byte[] data,String decoding){
+    public static byte[] generateFrame(byte[] head,byte[] data,String decoding){
         int headLength=null!=head?head.length:0;
         int dataLength=null!=data?data.length:0;
         byte codeByte=(byte)0;

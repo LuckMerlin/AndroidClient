@@ -52,7 +52,7 @@ public class Frame {
             byte[] headBytes= headSize >0 && headSize<= size? Arrays.copyOfRange(body,0,headSize):null;
             byte[] bodyBytes= headSize >0 && total< size?Arrays.copyOfRange(body,headSize,total):null;
 
-            String headJson=Frame.decodeText(headBytes,encoding,null);
+            String headJson=Frame.decodeString(headBytes,encoding,null);
             if (null==headJson || headJson.length()<=0){
                 Debug.E(Frame.class,"Can't build frame head data.Head is EMPTY.encoding="+encoding);
                 return null;
@@ -78,7 +78,7 @@ public class Frame {
         byte[] bytes=mBodySrc;
         String type=frameType;
         if (null!=bytes&&(null==type ||!(type.equals(LABEL_FRAME_BYTE_DATA)))){
-            return  Frame.decodeText(bytes,mEncoding,null);
+            return  Frame.decodeString(bytes,mEncoding,null);
         }
         return null;
     }
@@ -123,7 +123,7 @@ public class Frame {
         return mCode;
     }
 
-    public static String decodeText(byte[] bytes,String encoding,String def){
+    public static String decodeString(byte[] bytes,String encoding,String def){
         try {
             encoding = encoding==null||encoding.length()<=0?"utf-8":encoding;
             return null!=bytes&&bytes.length>0?new String(bytes,encoding):def;
@@ -132,6 +132,18 @@ public class Frame {
             e.printStackTrace();
         }
         return def;
+    }
+
+    public static byte[] encodeString(String string,String encoding){
+        if (null!=string&&string.length()>0){
+            try {
+                return string.getBytes(null!=encoding&&encoding.length()>0?encoding:"utf-8");
+            } catch (UnsupportedEncodingException e) {
+                Debug.E(Frame.class,"Can't encode string.e="+e+" encoding="+encoding,e);
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     @Override

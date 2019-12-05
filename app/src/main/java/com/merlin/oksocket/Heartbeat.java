@@ -10,8 +10,9 @@ public class Heartbeat  implements IPulseSendable {
 
     @Override
     public byte[] parse() {
+
         try {
-            return new Protocol().generateFrame("test".getBytes("utf-8"),"林强".getBytes("utf-8"));
+            return Protocol.generateFrame("test".getBytes("utf-8"),"林强".getBytes("utf-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

@@ -23,7 +23,8 @@ public class MainActivity extends Activity implements FrameParser.OnFrameParseLi
 
     @Override
     public void OnFrameParsed(Frame frame) {
-        Debug.D(getClass(),"shouda "+frame);
+        Debug.D(getClass(),"shouda "+frame.getCode()+" "+frame);
+
     }
 
     public void ddd(View view){
