@@ -1,6 +1,7 @@
 package com.merlin.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,35 +13,84 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.classes.Classes;
 import com.merlin.client.BR;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseModel> extends Activity {
     private V mBinding;
     private VM mViewModel;
 
-    protected abstract int findContentViewId();
 
-    private VM createViewModel(){
+    private void createViewModel(){
         Type type=getClass().getGenericSuperclass();
         if (null!=type&&type instanceof ParameterizedType){
             Type[] args=((ParameterizedType)type).getActualTypeArguments();
             if (null!=args&&args.length>0){
                 Classes classes=new Classes();
+                VM vm=null;
+                Integer bindingId=null;
                 for (Type f:args){
                     if (null!=f&&f instanceof Class){
-                        if (classes.isAssignableFrom((Class<?>) f,ViewDataBinding.class)){
-                            Debug.D(getClass(),"找到  "+f);
+                        if (null==vm&&classes.isAssignableFrom((Class<?>) f,BaseModel.class)){
+                            Class cls=(Class)f;
+                            try {
+                                Constructor constructor=cls.getConstructor(Context.class);
+                                if (null!=constructor){
+                                    constructor.setAccessible(true);
+                                    vm=(VM)constructor.newInstance(this);
+                                }
+                            } catch (Exception e) {
+                                //Do nothing
+                                //e.printStackTrace();
+                            }
+                            try {
+                                Constructor constructor= cls.getConstructor();
+                                if (null!=constructor) {
+                                    constructor.setAccessible(true);
+                                     vm=(VM)constructor.newInstance();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }else if (null==bindingId&&classes.isAssignableFrom((Class<?>) f,ViewDataBinding.class)){
+                            Field[] fields=R.layout.class.getDeclaredFields();
+                            if (null!=fields&&fields.length>0){
+                                String target=((Class<?>) f).getSimpleName().toLowerCase(Locale.CHINESE);
+                                for (Field field:fields){
+                                    if (null!=field){
+                                        field.setAccessible(true);
+                                        String name=field.getName();
+                                        name=null!=name?name.replaceAll("_",""):null;
+                                        if (null!=name&&(name+"binding").equals(target)){
+                                            try {
+                                                bindingId=field.getInt(null);
+                                                break;
+                                            } catch (IllegalAccessException e) {
+                                               //Do nothing
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (null!=bindingId&&null!=vm){
+                            mViewModel=vm;
+                            mBinding = DataBindingUtil.setContentView(this, bindingId);
+                            mBinding.setVariable(BR.vm, vm);
+                            return;
                         }
                     }
                 }
             }
         }
-        return null;
     }
 
     @Override
@@ -58,9 +108,11 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
             decorView.setSystemUiVisibility(option);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-        mBinding = DataBindingUtil.setContentView(this, findContentViewId());
         createViewModel();
+//        createViewModel();
+//        mBinding = DataBindingUtil.setContentView(this, findContentViewId());
 //        mBinding.setVariable(BR.vm, mViewModel = createViewModel());
+       // Debug.D(getClass(),"DDDDDDDDDDD "+mViewModel);
     }
 
 
