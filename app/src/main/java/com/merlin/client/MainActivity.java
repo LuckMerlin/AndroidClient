@@ -1,14 +1,13 @@
 package com.merlin.client;
 
 import android.view.View;
-import android.widget.Toast;
 
 import com.merlin.activity.BaseActivity;
-import com.merlin.model.BaseModel;
+import com.merlin.client.databinding.ActivityMainBinding;
 import com.merlin.model.LoginModel;
 
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity<ActivityMainBinding,LoginModel> {
 
     @Override
     protected int findContentViewId() {
@@ -19,13 +18,4 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         System.exit(1);
     }
 
-    @Override
-    protected BaseModel createViewModel() {
-              return new LoginModel();
-    }
-
-    @Override
-    public void onClick(View v) {
-        Toast.makeText(getApplicationContext(),"dianjie "+v,Toast.LENGTH_LONG).show();
-    }
 }

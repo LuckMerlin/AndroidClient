@@ -7,7 +7,7 @@
         type="android.view.View.OnClickListener" />
     <variable
         name="vm"
-        type="com.merlin.client.MainActivity" />
+        type="com.merlin.model.LoginModel" />
   </data>
   <RelativeLayout
       android:layout_width="match_parent"

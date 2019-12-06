@@ -10,9 +10,14 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.classes.Classes;
 import com.merlin.client.BR;
+import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseModel> extends Activity {
     private V mBinding;
@@ -20,7 +25,21 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
 
     protected abstract int findContentViewId();
 
-    protected VM createViewModel(){
+    private VM createViewModel(){
+        Type type=getClass().getGenericSuperclass();
+        if (null!=type&&type instanceof ParameterizedType){
+            Type[] args=((ParameterizedType)type).getActualTypeArguments();
+            if (null!=args&&args.length>0){
+                Classes classes=new Classes();
+                for (Type f:args){
+                    if (null!=f&&f instanceof Class){
+                        if (classes.isAssignableFrom((Class<?>) f,ViewDataBinding.class)){
+                            Debug.D(getClass(),"找到  "+f);
+                        }
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -40,7 +59,8 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         mBinding = DataBindingUtil.setContentView(this, findContentViewId());
-        mBinding.setVariable(BR.vm, mViewModel = createViewModel());
+        createViewModel();
+//        mBinding.setVariable(BR.vm, mViewModel = createViewModel());
     }
 
 
