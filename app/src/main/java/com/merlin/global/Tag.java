@@ -1,4 +1,4 @@
-package com.merlibn.global;
+package com.merlin.global;
 
 public interface Tag {
     String TAG_FROM ="from";
@@ -32,4 +32,8 @@ public interface Tag {
     String TAG_FRAME_TEXT_MESSAGE="textMessageFrame";
     String TAG_FRAME_TEXT_DATA="textDataFrame";
     String TAG_FRAME_BYTE_DATA="byteDataFrame";
+    String TAG_ACCOUNT = "account";
+    String TAG_PASSWORD = "password";
+    String TAG_LOGIN = "login";
+    String TAG_META = "meta";
 }

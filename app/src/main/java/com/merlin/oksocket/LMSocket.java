@@ -12,7 +12,7 @@ import com.xuhao.didi.core.pojo.OriginalData;
 import com.xuhao.didi.socket.client.sdk.OkSocket;
 import com.xuhao.didi.socket.client.sdk.client.ConnectionInfo;
 import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
-import com.xuhao.didi.socket.client.sdk.client.action.SocketActionAdapter;
+import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
 import org.json.JSONException;
@@ -25,14 +25,19 @@ public class LMSocket implements Tag {
    private final Handler mHandler=new Handler();
    private final Map<String,RequestingRunnable> mRequesting=new HashMap<>();
    private OnFrameReceiveListener mReceiveListener;
-   private Listener mListener;
+   private IConnectionManager mManager;
    private int mHeartbeat = 0;
    private final String mIp;
    private final int mPort;
-   private int mTimeout=5000;
+   private int mTimeout=10000;
 
    public interface OnFrameReceiveListener{
         void onFrameReceived(Frame frame);
+   }
+
+   public interface OnSocketConnectListener{
+       int CONNECT_SUCCEED =1110;
+       void onSocketConnectChanged(boolean connected,int what);
    }
 
    public interface Callback{
@@ -42,11 +47,11 @@ public class LMSocket implements Tag {
       int REQUEST_FAILED_TIMEOUT=10003;
    }
 
-   interface SynchronizationCallback{
+   public interface SynchronizationCallback{
 
    }
 
-   interface OnRequestFinish extends Callback{
+   public interface OnRequestFinish extends Callback{
         void onRequestFinish(boolean succeed,int what,Frame frame);
    }
 
@@ -59,9 +64,9 @@ public class LMSocket implements Tag {
        mReceiveListener=listener;
    }
 
-   public final boolean connect(){
-       IConnectionManager manager=getManager();
-       if (null!=manager){
+   public final boolean connect(OnSocketConnectListener connectListener){
+       IConnectionManager currManager=mManager;
+       if (null!=currManager){
            Debug.D(getClass(),"Not need connect again while connected.");
            return false;
        }
@@ -72,7 +77,7 @@ public class LMSocket implements Tag {
            return false;
        }
        Debug.D(getClass(),"Connect server.ip="+ip+" port="+port);
-       manager= OkSocket.open(new ConnectionInfo(ip, port));
+       final IConnectionManager manager= OkSocket.open(new ConnectionInfo(ip, port));
        if (null!=manager){
            final FrameParser.OnFrameParseListener listener=(frame)->{
                String unique=null!=frame?frame.getUnique():null;
@@ -86,7 +91,58 @@ public class LMSocket implements Tag {
                if (null!=receiveListener){
                    receiveListener.onFrameReceived(frame);
                }};
-           manager.registerReceiver(mListener=new Listener(manager,new FrameParser(listener)));
+           final FrameParser parser=new FrameParser(listener);
+           ISocketActionListener innerListener=new ISocketActionListener(){
+               @Override
+               public void onSocketConnectionSuccess(ConnectionInfo info, String action) {
+                   Debug.D(getClass(), "连接成功");
+                   mManager=manager;
+                   manager.getPulseManager().setPulseSendable(new Heartbeat()).pulse();
+                   if (null!=connectListener){
+                       connectListener.onSocketConnectChanged(true,OnSocketConnectListener.CONNECT_SUCCEED);
+                   }
+               }
+
+               @Override
+               public void onSocketConnectionFailed(ConnectionInfo info, String action, Exception e) {
+                   Debug.D(getClass(), "onSocketConnectionFailed");
+               }
+
+               @Override
+               public void onSocketDisconnection(ConnectionInfo info, String action, Exception e) {
+                   Debug.D(getClass(), "onSocketDisconnection");
+                   mManager=null;
+               }
+
+               @Override
+               public void onSocketIOThreadShutdown(String action, Exception e) {
+                   Debug.D(getClass(), "onSocketIOThreadShutdown");
+                   mManager=null;
+               }
+
+               @Override
+               public void onSocketIOThreadStart(String action) {
+                   Debug.D(getClass(), "onSocketIOThreadStart");
+               }
+
+               @Override
+               public void onSocketReadResponse(ConnectionInfo info, String action, OriginalData data) {
+                   if (null != parser) {
+                       parser.onFrameBytesReceived(data.getHeadBytes(), data.getBodyBytes());
+                   }
+               }
+
+               @Override
+               public void onSocketWriteResponse(ConnectionInfo info, String action, ISendable data) {
+                   Debug.D(getClass(), "onSocketWriteResponse");
+               }
+
+               @Override
+               public void onPulseSend(ConnectionInfo info, IPulseSendable data) {
+                   mManager.getPulseManager().feed();
+               }
+           };
+           manager.registerReceiver(innerListener);
            OkSocketOptions.Builder builder = new OkSocketOptions.Builder(manager.getOption());
            builder.setReaderProtocol(new FrameReader());
            int heartbeat=mHeartbeat;
@@ -100,23 +156,18 @@ public class LMSocket implements Tag {
    }
 
    public final boolean isOnline(){
-       IConnectionManager manager=getManager();
+       IConnectionManager manager=mManager;
        return null!=manager&&manager.isConnect();
    }
 
    public final boolean isConnected(){
-       return null!=getManager();
+       return null!=mManager;
    }
 
    public final boolean disconnect(String debug){
-       IConnectionManager manager=getManager();
-       Listener listener=mListener;
-       mListener=null;
+       IConnectionManager manager=mManager;
        if (null!=manager){
            Debug.D(getClass(),"Disconnect server "+(null!=debug?debug:"."));
-           if (null!=listener){
-               manager.unRegisterReceiver(listener);
-           }
            manager.disconnect();
            return true;
        }
@@ -124,7 +175,7 @@ public class LMSocket implements Tag {
    }
 
    public final boolean isConnecting() {
-        IConnectionManager manager = getManager();
+        IConnectionManager manager = mManager;
         return null!=manager&&manager.isDisconnecting();
     }
 
@@ -137,87 +188,43 @@ public class LMSocket implements Tag {
     }
 
    protected final boolean sendBytes(final byte[] bytes){
-       Listener listener=mListener;
-       IConnectionManager manager=null!=listener?listener.mManager:null;
+       IConnectionManager manager=mManager;
        if (null!=manager){
            return null!=manager.send(()->bytes);
        }
        return false;
    }
 
-   private IConnectionManager getManager(){
-       Listener listener=mListener;
-       return null!=listener?listener.mManager:null;
-   }
-
-   private static class  Listener extends  SocketActionAdapter{
-        private IConnectionManager mManager;
-        private FrameParser mFrameParser;
-
-        private Listener(IConnectionManager manager,FrameParser parser){
-            mManager=manager;
-            mFrameParser=parser;
+   public final boolean sendMessage(String body,Callback...callbacks) {
+        byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
+        if (null==bodyBytes||bodyBytes.length<=0){
+            notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
+            return false;
         }
+        return sendBytes(bodyBytes,TAG_FRAME_TEXT_MESSAGE,null,null,mTimeout,callbacks);
+    }
 
-        @Override
-        public void onSocketConnectionSuccess(ConnectionInfo info, String action) {
-            Debug.D(getClass(), "连接成功");
-            mManager.getPulseManager().setPulseSendable(new Heartbeat()).pulse();
+   public final boolean sendText(String body,Callback...callbacks) {
+        byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
+        if (null==bodyBytes||bodyBytes.length<=0){
+            notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
+            return false;
         }
+        return sendBytes(bodyBytes,TAG_FRAME_TEXT_DATA,null,null,mTimeout,callbacks);
+    }
 
-        @Override
-        public void onSocketConnectionFailed(ConnectionInfo info, String action, Exception e) {
-            super.onSocketConnectionFailed(info, action, e);
-            Debug.D(getClass(), "onSocketConnectionFailed");
-        }
+   public final boolean sendBytes(byte[] body, String type, Callback...callbacks) {
+        return sendBytes(body,type,null,null,mTimeout,callbacks);
+    }
 
-        @Override
-        public void onSocketDisconnection(ConnectionInfo info, String action, Exception e) {
-            super.onSocketDisconnection(info, action, e);
-            Debug.D(getClass(), "onSocketDisconnection");
-
-        }
-
-        @Override
-        public void onSocketIOThreadShutdown(String action, Exception e) {
-            super.onSocketIOThreadShutdown(action, e);
-            Debug.D(getClass(), "onSocketIOThreadShutdown");
-        }
-
-        @Override
-        public void onSocketIOThreadStart(String action) {
-            super.onSocketIOThreadStart(action);
-            Debug.D(getClass(), "onSocketIOThreadStart");
-        }
-
-        @Override
-        public void onSocketReadResponse(ConnectionInfo info, String action, OriginalData data) {
-            FrameParser parser = null != data ? mFrameParser : null;
-            if (null != parser) {
-                parser.onFrameBytesReceived(data.getHeadBytes(), data.getBodyBytes());
-            }
-        }
-
-        @Override
-        public void onSocketWriteResponse(ConnectionInfo info, String action, ISendable data) {
-            Debug.D(getClass(), "onSocketWriteResponse");
-        }
-
-        @Override
-        public void onPulseSend(ConnectionInfo info, IPulseSendable data) {
-            super.onPulseSend(info, data);
-            mManager.getPulseManager().feed();
-        }
-    };
-
-   public final boolean sendBytes(byte[] body, String type, String msgTo, String unique,int timeout, Callback...callbacks){
+   public final boolean sendBytes(byte[] body, String type, String msgTo, String uniqueValue,int timeout, Callback...callbacks){
         if (null==type||type.length()<=0){
             Debug.E(getClass(),"Can't send bytes,NONE type defined.");
             notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,callbacks);
             return false;
         }
         long timestamp=System.currentTimeMillis();
-        unique=null!=unique&&unique.length()>0?unique:Long.toString(timestamp)+hashCode()+(Math.random()*Integer.MAX_VALUE);
+        final String unique=null!=uniqueValue&&uniqueValue.length()>0?uniqueValue:Long.toString(timestamp)+hashCode()+(Math.random()*Integer.MAX_VALUE);
         JSONObject head=new JSONObject();
         putIfNotNull(head,TAG_TO,msgTo);
         putIfNotNull(head,TAG_TYPE,type);
@@ -233,6 +240,7 @@ public class LMSocket implements Tag {
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
             @Override
             public void run() {
+                Debug.D(getClass(),"ddddd "+unique);
                 notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,callbacks);
             }
 
@@ -251,7 +259,7 @@ public class LMSocket implements Tag {
        return false;
     }
 
-    public final boolean putIfNotNull(JSONObject json,String key,Object value){
+   public final boolean putIfNotNull(JSONObject json,String key,Object value){
         if (null!=json&&null!=key&&null!=value){
             try {
                 json.put(key,value);
@@ -264,17 +272,21 @@ public class LMSocket implements Tag {
         return false;
     }
 
-    private boolean removeResponseWaiting(String unique,String debug){
+   private boolean removeResponseWaiting(String unique,String debug){
        Map<String,RequestingRunnable> requesting=mRequesting;
+       Handler handler=mHandler;
        RequestingRunnable runnable= null!=unique&&null!=requesting?requesting.remove(unique):null;
        if (null!=runnable){
+           if (null!=handler){
+               handler.removeCallbacks(runnable);
+           }
            Debug.D(getClass(),"Remove response waiting "+(null!=debug?debug:".")+" "+unique);
            return true;
        }
        return false;
     }
 
-    private void notifyResponse(boolean succeed,int what,Frame frame,Callback[] callbacks){
+   protected final void notifyResponse(boolean succeed,int what,Frame frame,Callback[] callbacks){
         if (null!=callbacks&&callbacks.length>0){
             for (Callback callback:callbacks) {
                  if (null==callback){
@@ -292,7 +304,7 @@ public class LMSocket implements Tag {
         }
     }
 
-    private static abstract class RequestingRunnable implements Runnable{
+   private static abstract class RequestingRunnable implements Runnable{
        private final Callback[]  mCallbacks;
        private final int mTimeout;
        private final String mUnique;

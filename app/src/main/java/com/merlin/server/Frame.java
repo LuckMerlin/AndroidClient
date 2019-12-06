@@ -1,5 +1,6 @@
 package com.merlin.server;
 
+import com.merlibn.global.Protocol;
 import com.merlibn.global.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.HeadReader;
@@ -131,6 +132,10 @@ public final class Frame implements Tag {
             e.printStackTrace();
         }
         return def;
+    }
+
+    public static byte[] encodeString(String string){
+            return encodeString(string, Protocol.ENCODING);
     }
 
     public static byte[] encodeString(String string,String encoding){

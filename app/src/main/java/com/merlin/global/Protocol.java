@@ -1,4 +1,4 @@
-package com.merlibn.global;
+package com.merlin.global;
 
 import com.merlin.debug.Debug;
 
