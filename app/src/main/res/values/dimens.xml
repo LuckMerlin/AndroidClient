@@ -1,2 +1,3 @@
 <resources>
+    <dimen name="textSmall">13sp</dimen>
 </resources>

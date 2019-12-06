@@ -1,7 +1,7 @@
 package com.merlin.server;
 
-import com.merlibn.global.Protocol;
-import com.merlibn.global.Tag;
+import com.merlin.global.Protocol;
+import com.merlin.global.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.HeadReader;
 
