@@ -10,7 +10,7 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.SocketActionAdapter;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
-public final class LMSocket {
+public class LMSocket {
    private Listener mListener;
    private int mHeartbeat = 0;
    private final String mIp;
@@ -21,7 +21,7 @@ public final class LMSocket {
        mPort=port;
    }
 
-   public boolean connect(FrameParser parser){
+   public final boolean connect(FrameParser parser){
        IConnectionManager manager=getManager();
        if (null!=manager){
            Debug.D(getClass(),"Not need connect again while connected.");
@@ -49,16 +49,16 @@ public final class LMSocket {
        return null!=manager;
    }
 
-   public boolean isOnline(){
+   public final boolean isOnline(){
        IConnectionManager manager=getManager();
        return null!=manager&&manager.isConnect();
    }
 
-   public boolean isConnected(){
+   public final boolean isConnected(){
        return null!=getManager();
    }
 
-   public boolean disconnect(String debug){
+   public final boolean disconnect(String debug){
        IConnectionManager manager=getManager();
        Listener listener=mListener;
        mListener=null;
@@ -73,16 +73,16 @@ public final class LMSocket {
        return false;
    }
 
-   public boolean isConnecting() {
+   public final boolean isConnecting() {
         IConnectionManager manager = getManager();
         return null!=manager&&manager.isDisconnecting();
     }
 
-   public String getmIp() {
+   public final String getmIp() {
         return mIp;
     }
 
-   public int getPort() {
+   public final int getPort() {
         return mPort;
     }
 

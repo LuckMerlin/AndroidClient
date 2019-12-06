@@ -1,22 +1,16 @@
 package com.merlin.oksocket;
 
 import com.merlibn.global.Protocol;
+import com.merlibn.global.Tag;
+import com.merlin.server.Frame;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 
-import java.io.UnsupportedEncodingException;
-
-public class Heartbeat  implements IPulseSendable {
-    private String str = "大道";
+public final class Heartbeat  implements IPulseSendable {
+    private byte[] mHeartbeatBytes=Protocol.generateFrame(Frame.encodeString(Tag.TAG_HEART_BEAT,"utf-8"),null);
 
     @Override
     public byte[] parse() {
-
-        try {
-            return Protocol.generateFrame("test".getBytes("utf-8"),"林强".getBytes("utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return mHeartbeatBytes;
     }
 
 }
