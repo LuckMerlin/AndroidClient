@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 public final class Protocol {
    public final static String ENCODING="utf-8";
    public final static ByteOrder BYTE_ORDER=ByteOrder.BIG_ENDIAN;
+   public final static String PROTOCOL_VERSION="0.0.1";
 
     public static byte[] generateFrame(byte[] head,byte[] data){
         return generateFrame(head,data,ENCODING);

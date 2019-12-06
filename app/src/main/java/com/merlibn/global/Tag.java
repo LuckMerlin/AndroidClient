@@ -2,6 +2,8 @@ package com.merlibn.global;
 
 public interface Tag {
     String TAG_FROM ="from";
+    String TAG_TO = "msgTo";
+    String TAG_TYPE = "frameType";
     String TAG_SOURCE ="source";
     String TAG_PLATFORM ="platform";
     String TAG_NAME ="name";
@@ -21,4 +23,13 @@ public interface Tag {
     String TAG_SIZE ="size";
     String TAG_GET_CLIENTS ="getClients";
     String TAG_HEART_BEAT ="heartbeat";
+    String TAG_UNIQUE = "unique";
+    String TAG_TIMESTAMP = "timestamp";
+    String TAG_VERSION = "version";
+    String TAG_SECRET_KEY = "secretKey";
+    String TAG_FRAME_TYPE="frameType";
+    String TAG_DATA="data";
+    String TAG_FRAME_TEXT_MESSAGE="textMessageFrame";
+    String TAG_FRAME_TEXT_DATA="textDataFrame";
+    String TAG_FRAME_BYTE_DATA="byteDataFrame";
 }

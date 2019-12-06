@@ -1,12 +1,13 @@
 package com.merlin.server;
 
+import com.merlibn.global.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.HeadReader;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-public class Frame {
+public final class Frame implements Tag {
     /**
      * msg_type : message
      * timestamp : 1.5755296186155417E9
@@ -19,18 +20,11 @@ public class Frame {
     private double timestamp;
     private String secretKey;
     private String version;
+    private String unique;
     private Response response;
     private byte[] mBodySrc;
     private final byte mCode;
     private final String mEncoding;
-    private final static String LABEL_FRAME_TYPE="frameType";
-    private final static String LABEL_TIMESTAMP="timestamp";
-    private final static String LABEL_SECRET_KEY="secretKey";
-    private final static String LABEL_VERSION="version";
-    private final static String LABEL_DATA="data";
-    private final static String LABEL_FRAME_TEXT_MESSAGE="textMessageFrame";
-    private final static String LABEL_FRAME_TEXT_DATA="textDataFrame";
-    private final static String LABEL_FRAME_BYTE_DATA="byteDataFrame";
 
     private Frame(byte code,String encoding){
         mCode=code;
@@ -59,11 +53,12 @@ public class Frame {
             }
             JsonReader reader=new JsonReader(headJson);
             Frame frame=new Frame(header.getCode(),encoding);
-            frame.frameType=reader.getString(LABEL_FRAME_TYPE,null);
-            frame.timestamp=reader.getDouble(LABEL_TIMESTAMP,0);
-            frame.secretKey=reader.getString(LABEL_SECRET_KEY,null);
-            frame.version=reader.getString(LABEL_VERSION,null);
-            frame.response=Response.buildFromJson(reader.getJsonObject(LABEL_DATA,null));
+            frame.frameType=reader.getString(TAG_FRAME_TYPE,null);
+            frame.timestamp=reader.getDouble(TAG_TIMESTAMP,0);
+            frame.secretKey=reader.getString(TAG_SECRET_KEY,null);
+            frame.unique=reader.getString(TAG_UNIQUE,null);
+            frame.version=reader.getString(TAG_VERSION,null);
+            frame.response=Response.buildFromJson(reader.getJsonObject(TAG_DATA,null));
             frame.mBodySrc=bodyBytes;
             return frame;
         }
@@ -74,25 +69,29 @@ public class Frame {
         return mBodySrc;
     }
 
+    public String getUnique() {
+        return unique;
+    }
+
     public String getBodyText(){
         byte[] bytes=mBodySrc;
         String type=frameType;
-        if (null!=bytes&&(null==type ||!(type.equals(LABEL_FRAME_BYTE_DATA)))){
+        if (null!=bytes&&(null==type ||!(type.equals(TAG_FRAME_BYTE_DATA)))){
             return  Frame.decodeString(bytes,mEncoding,null);
         }
         return null;
     }
 
     public boolean isBodyBytes(){
-        return null!=frameType&&frameType.equals(LABEL_FRAME_BYTE_DATA);
+        return null!=frameType&&frameType.equals(TAG_FRAME_BYTE_DATA);
     }
 
     public boolean isBodyMessage(){
-        return null!=frameType&&frameType.equals(LABEL_FRAME_TEXT_MESSAGE);
+        return null!=frameType&&frameType.equals(TAG_FRAME_TEXT_MESSAGE);
     }
 
     public boolean isBodyText(){
-        return null!=frameType&&frameType.equals(LABEL_FRAME_TEXT_DATA);
+        return null!=frameType&&frameType.equals(TAG_FRAME_TEXT_DATA);
     }
 
     public String getFrameType() {

@@ -16,7 +16,7 @@ public class MainActivity extends Activity implements FrameParser.OnFrameParseLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Client server = new Client("www.luckmerlin.com", 5005);
-        server.connect(new FrameParser(this));
+        server.connect();
     }
 
     @Override
