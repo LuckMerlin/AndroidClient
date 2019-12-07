@@ -11,7 +11,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.classes.Classes;
-import com.merlin.client.BR;
 import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
