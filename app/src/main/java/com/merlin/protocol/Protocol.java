@@ -1,7 +1,8 @@
-package com.merlin.global;
+package com.merlin.protocol;
 
 import com.merlin.debug.Debug;
 
+import java.lang.reflect.Proxy;
 import java.nio.ByteOrder;
 
 public final class Protocol {

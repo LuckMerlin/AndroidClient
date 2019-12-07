@@ -2,10 +2,10 @@ package com.merlin.client;
 
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.LMSocket;
+import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.server.Frame;
 
 import org.json.JSONObject;
-
 
 public final class Client extends LMSocket {
     private String mAccount=null;
@@ -14,10 +14,10 @@ public final class Client extends LMSocket {
         super(ip,port);
     }
 
-    public boolean login(String account,String password,Callback ...callbacks){
+    public boolean login(String account,String password){
         if (null==account||account.length()<=0){
             Debug.W(getClass(),"Can't login without account.");
-            notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,callbacks);
+            notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,null);
             return true;
         }
         JSONObject json=new JSONObject();
@@ -28,11 +28,27 @@ public final class Client extends LMSocket {
         putIfNotNull(json,TAG_META,meta);
         String data=null!=json?json.toString():null;
         byte[] bytes=null!=data? Frame.encodeString(data):null;
-        return sendBytes(bytes,TAG_LOGIN,callbacks);
+        return sendBytes(bytes, TAG_LOGIN,(OnRequestFinish)(succeed,what,frame)->{
+            Debug.D(getClass(),"Login finish."+succeed);
+            mAccount = succeed?account:null;
+            notifyStatusChanged(false,OnClientStatusChange.LOGIN_IN,account);
+        });
     }
 
     public boolean logout(){
         return false;
+    }
+
+    public boolean requestClientMeta(){
+        return false;
+    }
+
+    public boolean isLogined(){
+        return null!=mAccount;
+    }
+
+    public String getLoginedAccount(){
+        return mAccount;
     }
 
 }

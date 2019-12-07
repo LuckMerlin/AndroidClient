@@ -1,4 +1,4 @@
-package com.merlin.global;
+package com.merlin.protocol;
 
 public interface Tag {
     String TAG_FROM ="from";
@@ -30,6 +30,7 @@ public interface Tag {
     String TAG_FRAME_TYPE="frameType";
     String TAG_DATA="data";
     String TAG_FRAME_TEXT_MESSAGE="textMessageFrame";
+    String TAG_FRAME_TEXT_MESSAGE_SYSTEM = "textSystemMessageFrame";
     String TAG_FRAME_TEXT_DATA="textDataFrame";
     String TAG_FRAME_BYTE_DATA="byteDataFrame";
     String TAG_ACCOUNT = "account";

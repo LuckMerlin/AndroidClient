@@ -1,7 +1,7 @@
 package com.merlin.server;
 
-import com.merlin.global.Protocol;
-import com.merlin.global.Tag;
+import com.merlin.protocol.Protocol;
+import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.HeadReader;
 
@@ -45,8 +45,7 @@ public final class Frame implements Tag {
                 return null; //Invalid
             }
             byte[] headBytes= headSize >0 && headSize<= size? Arrays.copyOfRange(body,0,headSize):null;
-            byte[] bodyBytes= headSize >0 && total< size?Arrays.copyOfRange(body,headSize,total):null;
-
+            byte[] bodyBytes= headSize >0 && total<= size?Arrays.copyOfRange(body,headSize,total):null;
             String headJson=Frame.decodeString(headBytes,encoding,null);
             if (null==headJson || headJson.length()<=0){
                 Debug.E(Frame.class,"Can't build frame head data.Head is EMPTY.encoding="+encoding);

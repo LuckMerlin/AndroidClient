@@ -2,8 +2,9 @@ package com.merlin.oksocket;
 
 import android.os.Handler;
 
-import com.merlin.global.Protocol;
-import com.merlin.global.Tag;
+import com.merlin.client.Client;
+import com.merlin.protocol.Protocol;
+import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.server.Frame;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
@@ -24,16 +25,13 @@ import java.util.Map;
 public class LMSocket implements Tag {
    private final Handler mHandler=new Handler();
    private final Map<String,RequestingRunnable> mRequesting=new HashMap<>();
-   private OnFrameReceiveListener mReceiveListener;
+   private OnFrameReceive mReceiveListener;
+   private OnClientStatusChange mStatusChange;
    private IConnectionManager mManager;
    private int mHeartbeat = 0;
    private final String mIp;
    private final int mPort;
    private int mTimeout=10000;
-
-   public interface OnFrameReceiveListener{
-        void onFrameReceived(Frame frame);
-   }
 
    public interface OnSocketConnectListener{
        int CONNECT_SUCCEED =1110;
@@ -60,7 +58,11 @@ public class LMSocket implements Tag {
        mPort=port;
    }
 
-   public void setOnFrameReceiveListener(OnFrameReceiveListener listener){
+   public void setOnClientStatusChange(OnClientStatusChange change){
+        mStatusChange=change;
+   }
+
+   public void setOnFrameReceive(OnFrameReceive listener){
        mReceiveListener=listener;
    }
 
@@ -87,9 +89,9 @@ public class LMSocket implements Tag {
                    removeResponseWaiting(unique,"While request responsed.");
                    runnable.onResponse(frame);
                }
-               OnFrameReceiveListener receiveListener=mReceiveListener;
+               OnFrameReceive receiveListener=mReceiveListener;
                if (null!=receiveListener){
-                   receiveListener.onFrameReceived(frame);
+                   receiveListener.onFrameReceived(frame,(Client)this);
                }};
            final FrameParser parser=new FrameParser(listener);
            ISocketActionListener innerListener=new ISocketActionListener(){
@@ -217,7 +219,11 @@ public class LMSocket implements Tag {
         return sendBytes(body,type,null,null,mTimeout,callbacks);
     }
 
-   public final boolean sendBytes(byte[] body, String type, String msgTo, String uniqueValue,int timeout, Callback...callbacks){
+    public final boolean sendBytesTo(byte[] body,String msgTo,Callback...callbacks) {
+           return sendBytes(body,TAG_FRAME_TEXT_DATA,msgTo,null,mTimeout,callbacks);
+    }
+
+    public final boolean sendBytes(byte[] body, String type, String msgTo, String uniqueValue,int timeout, Callback...callbacks){
         if (null==type||type.length()<=0){
             Debug.E(getClass(),"Can't send bytes,NONE type defined.");
             notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,callbacks);
@@ -240,7 +246,6 @@ public class LMSocket implements Tag {
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
             @Override
             public void run() {
-                Debug.D(getClass(),"ddddd "+unique);
                 notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,callbacks);
             }
 
@@ -302,6 +307,13 @@ public class LMSocket implements Tag {
                  }
             }
         }
+    }
+
+    protected final void notifyStatusChanged(boolean autoNotify,int what,Object data){
+       OnClientStatusChange change=mStatusChange;
+       if (null!=change){
+           change.onClientStatusChanged(autoNotify,what,data,(Client)this);
+       }
     }
 
    private static abstract class RequestingRunnable implements Runnable{

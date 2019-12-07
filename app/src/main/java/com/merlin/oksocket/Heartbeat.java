@@ -1,7 +1,7 @@
 package com.merlin.oksocket;
 
-import com.merlin.global.Protocol;
-import com.merlin.global.Tag;
+import com.merlin.protocol.Protocol;
+import com.merlin.protocol.Tag;
 import com.merlin.server.Frame;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 

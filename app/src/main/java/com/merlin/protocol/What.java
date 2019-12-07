@@ -1,0 +1,16 @@
+package com.merlin.protocol;
+
+public interface What {
+    int WHAT_SUCCEED=-2000;
+    int WHAT_NONE_LOGIN=-1985;
+    int WHAT_ARGS_INVALID=-1986;
+    int WHAT_ACCOUNT_NOT_EXIST=-1987;
+    int WHAT_PASSWORD_CHECK_FAILED=-1988;
+    int WHAT_FORCE_OUT_BY_OTHERS=-1989;
+    int WHAT_NOT_ONLINE=-1990;
+    int WHAT_ALREADY_DONE=-1991;
+    int WHAT_UNKNOWN=-1992;
+    int WHAT_NOT_EXIST=-1993;
+    int WHAT_NONE_PERMISSION=-1994;
+    int WHAT_CLIENT_ONLINE=-1995;
+}

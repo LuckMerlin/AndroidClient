@@ -1,6 +1,6 @@
 package com.merlin.oksocket;
 
-import com.merlin.global.Protocol;
+import com.merlin.protocol.Protocol;
 import com.merlin.debug.Debug;
 
 
