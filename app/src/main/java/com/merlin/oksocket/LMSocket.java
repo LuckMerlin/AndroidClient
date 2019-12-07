@@ -240,7 +240,6 @@ public class LMSocket implements Tag {
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
             @Override
             public void run() {
-                Debug.D(getClass(),"ddddd "+unique);
                 notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,callbacks);
             }
 
