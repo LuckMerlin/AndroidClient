@@ -7,6 +7,7 @@ import com.merlin.protocol.Protocol;
 import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.server.Frame;
+import com.merlin.server.Json;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 import com.xuhao.didi.core.iocore.interfaces.ISendable;
 import com.xuhao.didi.core.pojo.OriginalData;
@@ -16,13 +17,14 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class LMSocket implements Tag {
+import static com.merlin.server.Json.putIfNotNull;
+
+public class Socket implements Tag {
    private final Handler mHandler=new Handler();
    private final Map<String,RequestingRunnable> mRequesting=new HashMap<>();
    private OnFrameReceive mReceiveListener;
@@ -38,13 +40,6 @@ public class LMSocket implements Tag {
        void onSocketConnectChanged(boolean connected,int what);
    }
 
-   public interface Callback{
-      int REQUEST_SUCCEED=10000;
-      int REQUEST_FAILED_SEND_FAIL=10001;
-      int REQUEST_FAILED_ARG_INVALID=10002;
-      int REQUEST_FAILED_TIMEOUT=10003;
-   }
-
    public interface SynchronizationCallback{
 
    }
@@ -53,7 +48,7 @@ public class LMSocket implements Tag {
         void onRequestFinish(boolean succeed,int what,Frame frame);
    }
 
-   public LMSocket(String ip, int port){
+   public Socket(String ip, int port){
        mIp=ip;
        mPort=port;
    }
@@ -81,19 +76,6 @@ public class LMSocket implements Tag {
        Debug.D(getClass(),"Connect server.ip="+ip+" port="+port);
        final IConnectionManager manager= OkSocket.open(new ConnectionInfo(ip, port));
        if (null!=manager){
-           final FrameParser.OnFrameParseListener listener=(frame)->{
-               String unique=null!=frame?frame.getUnique():null;
-               Map<String,RequestingRunnable> requesting=null!=unique&&unique.length()>0?mRequesting:null;
-               RequestingRunnable runnable=null!=requesting?requesting.get(unique):null;
-               if (null!=runnable){
-                   removeResponseWaiting(unique,"While request responsed.");
-                   runnable.onResponse(frame);
-               }
-               OnFrameReceive receiveListener=mReceiveListener;
-               if (null!=receiveListener){
-                   receiveListener.onFrameReceived(frame,(Client)this);
-               }};
-           final FrameParser parser=new FrameParser(listener);
            ISocketActionListener innerListener=new ISocketActionListener(){
                @Override
                public void onSocketConnectionSuccess(ConnectionInfo info, String action) {
@@ -129,8 +111,26 @@ public class LMSocket implements Tag {
 
                @Override
                public void onSocketReadResponse(ConnectionInfo info, String action, OriginalData data) {
-                   if (null != parser) {
-                       parser.onFrameBytesReceived(data.getHeadBytes(), data.getBodyBytes());
+                   if (null==data){
+                       return;
+                   }
+                   byte[] head=data.getHeadBytes();
+                   byte[] body=data.getBodyBytes();
+                   Debug.D(getClass(),"$$$$$$$$$$$ "+body);
+                   Frame frame=Protocol.buildFromBytes(head,body);
+                   if (null==frame){
+                       return;
+                   }
+                   String unique=null!=frame?frame.getUnique():null;
+                   Map<String,RequestingRunnable> requesting=null!=unique&&unique.length()>0?mRequesting:null;
+                   RequestingRunnable runnable=null!=requesting?requesting.get(unique):null;
+                   if (null!=runnable){
+                       removeResponseWaiting(unique,"While request responsed.");
+                       runnable.onResponse(frame);
+                   }
+                   OnFrameReceive receiveListener=mReceiveListener;
+                   if (null!=receiveListener){
+                       receiveListener.onFrameReceived(frame,(Client) Socket.this);
                    }
                }
 
@@ -194,16 +194,17 @@ public class LMSocket implements Tag {
        if (null!=manager){
            return null!=manager.send(()->bytes);
        }
+       Debug.D(getClass(),"Can't send bytes,Not connected."+bytes);
        return false;
    }
 
-   public final boolean sendMessage(String body,Callback...callbacks) {
+   public final boolean sendMessage(String body,String msgTo,String msgType,Callback...callbacks) {
         byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
         if (null==bodyBytes||bodyBytes.length<=0){
             notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
             return false;
         }
-        return sendBytes(bodyBytes,TAG_FRAME_TEXT_MESSAGE,null,null,mTimeout,callbacks);
+        return sendBytes(bodyBytes,null!=msgType?msgType:TAG_FRAME_TEXT_MESSAGE,msgTo,null,mTimeout,callbacks);
     }
 
    public final boolean sendText(String body,Callback...callbacks) {
@@ -232,15 +233,14 @@ public class LMSocket implements Tag {
         long timestamp=System.currentTimeMillis();
         final String unique=null!=uniqueValue&&uniqueValue.length()>0?uniqueValue:Long.toString(timestamp)+hashCode()+(Math.random()*Integer.MAX_VALUE);
         JSONObject head=new JSONObject();
-        putIfNotNull(head,TAG_TO,msgTo);
         putIfNotNull(head,TAG_TYPE,type);
         putIfNotNull(head,TAG_UNIQUE,unique);
         putIfNotNull(head,TAG_VERSION, Protocol.PROTOCOL_VERSION);
         putIfNotNull(head,TAG_TIMESTAMP,timestamp);
         putIfNotNull(head,TAG_SECRET_KEY,null);
         String string=null!=head&&head.length()>0?head.toString():null;
-        byte[] headBytes= Frame.encodeString(string,Protocol.ENCODING);
-        byte[] bytes=Protocol.generateFrame(headBytes,body);
+        byte[] headBytes= null!=string?Frame.encodeString(string,Protocol.ENCODING):null;
+        byte[] bytes=Protocol.generateFrame(msgTo,headBytes,body);
         timeout=timeout<=0?mTimeout:timeout;
         timeout=timeout<=0?5000:timeout;
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
@@ -264,19 +264,6 @@ public class LMSocket implements Tag {
        return false;
     }
 
-   public final boolean putIfNotNull(JSONObject json,String key,Object value){
-        if (null!=json&&null!=key&&null!=value){
-            try {
-                json.put(key,value);
-            } catch (JSONException e) {
-                Debug.E(getClass(),"Can't put string into json.e="+e+" key="+key+" value="+value,e);
-                e.printStackTrace();
-            }
-            return true;
-        }
-        return false;
-    }
-
    private boolean removeResponseWaiting(String unique,String debug){
        Map<String,RequestingRunnable> requesting=mRequesting;
        Handler handler=mHandler;
@@ -291,19 +278,14 @@ public class LMSocket implements Tag {
        return false;
     }
 
-   protected final void notifyResponse(boolean succeed,int what,Frame frame,Callback[] callbacks){
+   public static final void notifyResponse(boolean succeed,int what,Frame frame,Callback[] callbacks){
         if (null!=callbacks&&callbacks.length>0){
             for (Callback callback:callbacks) {
                  if (null==callback){
                      continue;
                  }
                  if (callback instanceof OnRequestFinish){
-                     if ((callback instanceof SynchronizationCallback)){
-                         ((OnRequestFinish)callback).onRequestFinish(succeed,what,frame);
-                     }else{
-                         mHandler.post(()->((OnRequestFinish)callback).onRequestFinish(succeed,what,frame));
-                     }
-
+                     ((OnRequestFinish)callback).onRequestFinish(succeed,what,frame);
                  }
             }
         }

@@ -6,7 +6,7 @@ import com.merlin.server.Frame;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 
 public final class Heartbeat  implements IPulseSendable {
-    private byte[] mHeartbeatBytes=Protocol.generateFrame(Frame.encodeString(Tag.TAG_HEART_BEAT,"utf-8"),null);
+    private byte[] mHeartbeatBytes=Protocol.generateFrame(null,Frame.encodeString(Tag.TAG_HEART_BEAT,"utf-8"),null);
 
     @Override
     public byte[] parse() {

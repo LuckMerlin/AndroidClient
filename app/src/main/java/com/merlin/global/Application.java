@@ -10,7 +10,9 @@ import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
 
 public class Application extends android.app.Application implements ActivityLifecycle.OnActivityCreate {
-   private final Client mClient = new Client("www.luckmerlin.com", 5005);
+   private final Client mClient = new Client(
+//              "127.0.0.1",5006);
+           "www.luckmerlin.com", 5005);
    private final ActivityLifecycle mActivityLifecycle=new ActivityLifecycle(this);
    private final Invoker mInvoker=new Invoker();
 

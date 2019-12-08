@@ -10,6 +10,9 @@ import com.merlin.classes.Classes;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
+import com.merlin.oksocket.Callback;
+import com.merlin.oksocket.Socket;
+import com.merlin.protocol.What;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -51,6 +54,16 @@ public class SocketActivity <V extends ViewDataBinding, VM extends BaseModel> ex
     private Client getClient(){
         WeakReference<Client> reference=mReference;
         return null!=reference?reference.get():null;
+    }
+
+    protected final boolean sendMessage(String body, String msgTo,String msgType, Callback...callbacks) {
+        Client client=getClient();
+        if (null!=client){
+            return client.sendMessage(body,msgTo,msgType,callbacks);
+        }
+        Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        return false;
     }
 
     @Override

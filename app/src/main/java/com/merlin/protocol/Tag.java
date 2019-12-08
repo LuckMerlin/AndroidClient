@@ -18,7 +18,6 @@ public interface Tag {
     String TAG_ADDRESS ="address";
     String TAG_ONLINE ="online";
     String TAG_NOTE ="note";
-    String TAG_FILE ="file";
     String TAG_WHAT ="what";
     String TAG_SIZE ="size";
     String TAG_GET_CLIENTS ="getClients";
@@ -33,8 +32,16 @@ public interface Tag {
     String TAG_FRAME_TEXT_MESSAGE_SYSTEM = "textSystemMessageFrame";
     String TAG_FRAME_TEXT_DATA="textDataFrame";
     String TAG_FRAME_BYTE_DATA="byteDataFrame";
+    String TAG_MESSAGE_QUERY = "textQueryMessageFrame";
+
     String TAG_ACCOUNT = "account";
     String TAG_PASSWORD = "password";
     String TAG_LOGIN = "login";
     String TAG_META = "meta";
+    //Nas
+    String TAG_COMMAND_TYPE = "command";
+    String TAG_COMMAND_LIST_DIR = "commandListDir";
+    String TAG_FILE = "file";
+    String TAG_PATH_HOME = "~";
+
 }

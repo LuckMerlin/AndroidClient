@@ -3,11 +3,15 @@ package com.merlin.server;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.merlin.debug.Debug;
+import com.merlin.oksocket.Socket;
 
-public final class JsonReader {
+import org.json.JSONException;
+
+public final class Json {
     private final JSONObject mJson;
 
-    public JsonReader(String json){
+    public Json(String json){
         Object object=null!=json&&json.length()>0? JSON.parse(json):null;
         mJson =null!=object&&object instanceof JSONObject?(JSONObject)object:null;
     }
@@ -42,8 +46,26 @@ public final class JsonReader {
         return null!=object&&object instanceof JSONArray?(JSONArray) object:def;
     }
 
+    public static final boolean putIfNotNull(org.json.JSONObject json, String key, Object value){
+        if (null!=json&&null!=key&&null!=value){
+            try {
+                json.put(key,value);
+            } catch (JSONException e) {
+                Debug.E(Socket.class,"Can't put string into json.e="+e+" key="+key+" value="+value,e);
+                e.printStackTrace();
+            }
+            return true;
+        }
+        return false;
+    }
 
-
+    public static final boolean putIfNotNull(JSONObject json, String key, Object value){
+        if (null!=json&&null!=key&&null!=value){
+            json.put(key,value);
+            return true;
+        }
+        return false;
+    }
 
 
 }

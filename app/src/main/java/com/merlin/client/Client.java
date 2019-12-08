@@ -1,13 +1,16 @@
 package com.merlin.client;
 
 import com.merlin.debug.Debug;
-import com.merlin.oksocket.LMSocket;
+import com.merlin.oksocket.Callback;
+import com.merlin.oksocket.Socket;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.server.Frame;
 
 import org.json.JSONObject;
 
-public final class Client extends LMSocket {
+import static com.merlin.server.Json.putIfNotNull;
+
+public final class Client extends Socket {
     private String mAccount=null;
 
     public Client(String ip, int port){
@@ -17,7 +20,7 @@ public final class Client extends LMSocket {
     public boolean login(String account,String password){
         if (null==account||account.length()<=0){
             Debug.W(getClass(),"Can't login without account.");
-            notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,null);
+            notifyResponse(false, Callback.REQUEST_FAILED_ARG_INVALID,null,null);
             return true;
         }
         JSONObject json=new JSONObject();

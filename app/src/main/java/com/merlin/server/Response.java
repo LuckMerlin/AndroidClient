@@ -2,7 +2,7 @@ package com.merlin.server;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class Response {
+public final class Response {
     private final static String LABEL_NOTE="note";
     private final static String LABEL_WHAT="what";
     private final static String LABEL_SUCCEED="succeed";
@@ -12,18 +12,25 @@ public class Response {
      * note : Test response data 1575529618.61553
      */
 
-    private boolean succeed;
-    private int what;
-    private String note;
+    private final boolean mSucceed;
+    private int mWhat;
+    private String mNote;
+
+    private Response(boolean succeed,int what, String note){
+        mSucceed=succeed;
+        mWhat=what;
+        mNote=note;
+    }
+
 
     public static Response buildFromJson(Object json){
         if (null!=json){
             if (json instanceof JSONObject){
-                Response data=new Response();
                 JSONObject jsonObj=(JSONObject)json;
-                data.note=jsonObj.getString(LABEL_NOTE);
-                data.what=jsonObj.getIntValue(LABEL_WHAT);
-                data.succeed=jsonObj.getBoolean(LABEL_SUCCEED);
+                Response data=new Response(jsonObj.getBoolean(LABEL_SUCCEED),
+                        jsonObj.getIntValue(LABEL_WHAT),
+                        jsonObj.getString(LABEL_NOTE)
+                        );
                 return data;
             }
         }
@@ -31,23 +38,23 @@ public class Response {
     }
 
     public boolean isSucceed() {
-        return succeed;
+        return mSucceed;
     }
 
     public int getWhat() {
-        return what;
+        return mWhat;
     }
 
     public String getNote() {
-        return note;
+        return mNote;
     }
 
     @Override
     public String toString() {
         return "Data{" +
-                "succeed=" + succeed +
-                ", what=" + what +
-                ", note='" + note + '\'' +
+                "succeed=" + mSucceed +
+                ", what=" + mWhat +
+                ", note='" + mNote + '\'' +
                 '}';
     }
 }

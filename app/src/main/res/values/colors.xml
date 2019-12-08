@@ -2,4 +2,6 @@
 <resources>
     <color name="textNormal">#666666</color>
     <color name="textFocus">#999999</color>
+    <color name="textTitle">#000000</color>
+    <color name="textTitleSub">#450000</color>
 </resources>

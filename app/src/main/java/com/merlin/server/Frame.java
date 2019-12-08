@@ -3,7 +3,7 @@ package com.merlin.server;
 import com.merlin.protocol.Protocol;
 import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
-import com.merlin.oksocket.HeadReader;
+import com.merlin.oksocket.Head;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -17,52 +17,32 @@ public final class Frame implements Tag {
      * data : {"succeed":true,"what":-2000,"note":"Test response data 1575529618.61553"}
      */
 
-    private String frameType;
-    private double timestamp;
-    private String secretKey;
-    private String version;
-    private String unique;
-    private Response response;
-    private byte[] mBodySrc;
+    private final String mFrameType;
+    private final double mTimestamp;
+    private final String mSecretKey;
+    private final String mVersion;
+    private final String mUnique;
+    private final Response mResponse;
+    private final byte[] mBodySrc;
     private final byte mCode;
     private final String mEncoding;
+    private final byte[] mMsgFromBytes;
+    private final byte[] mMsgToBytes;
 
-    private Frame(byte code,String encoding){
+    public Frame(byte code,String encoding,byte[] msgFromBytes,byte[] msgToBytes,String frameType,
+               double timestamp,String secretKey,String unique,String version,Response response,byte[] bodyBytes){
+        mMsgFromBytes=msgFromBytes;
+        mMsgToBytes=msgToBytes;
+        mFrameType=frameType;
+        mTimestamp=timestamp;
+        mSecretKey=secretKey;
+        mVersion=version;
+        mUnique=unique;
+        mResponse=response;
+        mBodySrc=bodyBytes;
         mCode=code;
         mEncoding=encoding;
-    }
 
-    public static Frame buildFromBytes(byte[] head,byte[] body){
-        HeadReader header=null!=head? HeadReader.read(head,true):null;
-        if (null!=head){
-            String encoding=header.getEncodingName();
-            encoding=null!=encoding&&encoding.length()>0?encoding:"utf-8";
-            int headSize=header.getHeadSize();
-            int contentSize=header.getContentSize();
-            int total=headSize+contentSize;
-            int size=null!=body?body.length:-1;
-            if(size<total){
-                return null; //Invalid
-            }
-            byte[] headBytes= headSize >0 && headSize<= size? Arrays.copyOfRange(body,0,headSize):null;
-            byte[] bodyBytes= headSize >0 && total<= size?Arrays.copyOfRange(body,headSize,total):null;
-            String headJson=Frame.decodeString(headBytes,encoding,null);
-            if (null==headJson || headJson.length()<=0){
-                Debug.E(Frame.class,"Can't build frame head data.Head is EMPTY.encoding="+encoding);
-                return null;
-            }
-            JsonReader reader=new JsonReader(headJson);
-            Frame frame=new Frame(header.getCode(),encoding);
-            frame.frameType=reader.getString(TAG_FRAME_TYPE,null);
-            frame.timestamp=reader.getDouble(TAG_TIMESTAMP,0);
-            frame.secretKey=reader.getString(TAG_SECRET_KEY,null);
-            frame.unique=reader.getString(TAG_UNIQUE,null);
-            frame.version=reader.getString(TAG_VERSION,null);
-            frame.response=Response.buildFromJson(reader.getJsonObject(TAG_DATA,null));
-            frame.mBodySrc=bodyBytes;
-            return frame;
-        }
-        return null;
     }
 
     public byte[] getBodyBytes(){
@@ -70,48 +50,61 @@ public final class Frame implements Tag {
     }
 
     public String getUnique() {
-        return unique;
+        return mUnique;
     }
 
     public String getBodyText(){
         byte[] bytes=mBodySrc;
-        String type=frameType;
+        String type=mFrameType;
         if (null!=bytes&&(null==type ||!(type.equals(TAG_FRAME_BYTE_DATA)))){
             return  Frame.decodeString(bytes,mEncoding,null);
         }
         return null;
     }
 
-    public boolean isBodyBytes(){
-        return null!=frameType&&frameType.equals(TAG_FRAME_BYTE_DATA);
+
+    public String getMsgFrom(){
+        byte[] bytes=mMsgFromBytes;
+        return null!=bytes&&bytes.length>0?decodeString(bytes,mEncoding,null):null;
     }
 
-    public boolean isBodyMessage(){
-        return null!=frameType&&frameType.equals(TAG_FRAME_TEXT_MESSAGE);
+    public String getMsgTo(){
+        byte[] bytes=mMsgToBytes;
+        return null!=bytes&&bytes.length>0?decodeString(bytes,mEncoding,null):null;
     }
 
-    public boolean isBodyText(){
-        return null!=frameType&&frameType.equals(TAG_FRAME_TEXT_DATA);
+
+    public byte[] getMsgFromBytes() {
+        return mMsgFromBytes;
+    }
+
+    public byte[] getMsgToBytes() {
+        return mMsgToBytes;
+    }
+
+    public boolean isFrameType(String frameType){
+        String curr=mFrameType;
+        return null!=frameType&&null!=curr&&frameType.equals(curr);
     }
 
     public String getFrameType() {
-        return frameType;
+        return mFrameType;
     }
 
     public double getTimestamp() {
-        return timestamp;
+        return mTimestamp;
     }
 
     public String getSecretKey() {
-        return secretKey;
+        return mSecretKey;
     }
 
     public String getVersion() {
-        return version;
+        return mVersion;
     }
 
     public Response getResponse() {
-        return response;
+        return mResponse;
     }
 
     public String getEncoding(){
@@ -152,11 +145,17 @@ public final class Frame implements Tag {
     @Override
     public String toString() {
         return "Frame{" +
-                "frameType='" + frameType + '\'' +
-                ", timestamp=" + timestamp +
-                ", secretKey='" + secretKey + '\'' +
-                ", version='" + version + '\'' +
-                ", response=" + response +
+                "mFrameType='" + mFrameType + '\'' +
+                ", mTimestamp=" + mTimestamp +
+                ", mSecretKey='" + mSecretKey + '\'' +
+                ", mVersion='" + mVersion + '\'' +
+                ", mUnique='" + mUnique + '\'' +
+                ", mResponse=" + mResponse +
+                ", mBodySrc=" + Arrays.toString(mBodySrc) +
+                ", mCode=" + mCode +
+                ", mEncoding='" + mEncoding + '\'' +
+                ", mMsgFromBytes=" + Arrays.toString(mMsgFromBytes) +
+                ", mMsgToBytes=" + Arrays.toString(mMsgToBytes) +
                 '}';
     }
 }
