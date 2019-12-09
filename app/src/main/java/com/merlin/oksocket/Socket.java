@@ -116,7 +116,6 @@ public class Socket implements Tag {
                    }
                    byte[] head=data.getHeadBytes();
                    byte[] body=data.getBodyBytes();
-                   Debug.D(getClass(),"$$$$$$$$$$$ "+body);
                    Frame frame=Protocol.buildFromBytes(head,body);
                    if (null==frame){
                        return;

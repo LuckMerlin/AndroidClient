@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
-
+        <variable
+            name="vm"
+            type="com.merlin.model.FileBrowserModel" />
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
+        android:background="@drawable/test"
         android:layout_height="match_parent"
-        android:padding="5dp"
-        android:background="#fff">
+        android:padding="2dp">
         <TextView
-            android:text="当前路径"
             android:textColor="@color/textTitleSub"
             android:layout_height="wrap_content"
             android:id="@+id/fileBrowser_top"
+            android:text="1"
             android:layout_width="wrap_content" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fileBrowser_listRV"
+        <com.merlin.view.DataListLayout
+            android:id="@+id/fileBrowser_listDLV"
             android:layout_width="match_parent"
-            android:background="#f00"
+            binding:viewModel="@{vm}"
             android:layout_below="@id/fileBrowser_top"
-            android:layout_height="match_parent">
-
-        </androidx.recyclerview.widget.RecyclerView>
+            android:layout_height="match_parent"/>
     </RelativeLayout>
 </layout>

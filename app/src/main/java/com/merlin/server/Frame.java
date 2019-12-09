@@ -62,7 +62,6 @@ public final class Frame implements Tag {
         return null;
     }
 
-
     public String getMsgFrom(){
         byte[] bytes=mMsgFromBytes;
         return null!=bytes&&bytes.length>0?decodeString(bytes,mEncoding,null):null;

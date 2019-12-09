@@ -14,6 +14,7 @@ import androidx.databinding.ViewDataBinding;
 import com.merlin.classes.Classes;
 import com.merlin.client.BR;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
@@ -46,17 +47,15 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
                                     vm=(VM)constructor.newInstance(this);
                                 }
                             } catch (Exception e) {
-                                //Do nothing
-                                //e.printStackTrace();
-                            }
-                            try {
-                                Constructor constructor= cls.getConstructor();
-                                if (null!=constructor) {
-                                    constructor.setAccessible(true);
-                                     vm=(VM)constructor.newInstance();
+                                try {
+                                    Constructor constructor= cls.getConstructor();
+                                    if (null!=constructor) {
+                                        constructor.setAccessible(true);
+                                        vm=(VM)constructor.newInstance();
+                                    }
+                                } catch (Exception e1) {
+                                    Debug.E(getClass(),""+cls,e1);
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
                         }else if (null==bindingId&&classes.isAssignableFrom((Class<?>) f,ViewDataBinding.class)){
                             Field[] fields=R.layout.class.getDeclaredFields();
@@ -109,4 +108,11 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
         createViewModel();
     }
 
+    public final V getBinding() {
+        return mBinding;
+    }
+
+    public final VM getViewModel() {
+        return mViewModel;
+    }
 }

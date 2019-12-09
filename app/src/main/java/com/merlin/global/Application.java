@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import com.merlin.classes.ActivityLifecycle;
 import com.merlin.client.Client;
-import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
 
@@ -49,4 +48,8 @@ public class Application extends android.app.Application implements ActivityLife
             mInvoker.invoke(OnClientStatusChange.class,activity).onClientStatusChanged(auto,what,data,client);
         }
     };
+
+    public Client getClient() {
+        return mClient;
+    }
 }

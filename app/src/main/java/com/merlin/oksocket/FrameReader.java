@@ -1,6 +1,5 @@
 package com.merlin.oksocket;
 
-import com.merlin.debug.Debug;
 import com.merlin.protocol.Protocol;
 import com.xuhao.didi.core.protocol.IReaderProtocol;
 
@@ -10,7 +9,6 @@ public final class FrameReader implements IReaderProtocol {
 
     @Override
     public int getHeaderLength() {
-        Debug.D(getClass(),"QQQQQQQQQQQQQQ");
         return Protocol.HEAD_LENGTH;
     }
 
@@ -26,8 +24,9 @@ public final class FrameReader implements IReaderProtocol {
             throw new RuntimeException("Body build NONE.");
         }
 //      long total = headLength+contentLength;
-        Debug.D(getClass(),"总长度 "+header);
+//        Debug.D(getClass(),"总长度 "+header);
         return head.getBodySize();
+//        return 0;
     }
 
 }

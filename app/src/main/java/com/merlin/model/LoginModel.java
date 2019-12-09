@@ -1,5 +1,6 @@
 package com.merlin.model;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
@@ -12,6 +13,10 @@ import com.merlin.protocol.What;
 import com.merlin.server.Frame;
 
 public class LoginModel extends BaseModel implements OnFrameReceive, OnClientStatusChange {
+
+    public LoginModel(Context context){
+        super(context);
+    }
 
     @Override
     public void onViewClick(View v, int id) {

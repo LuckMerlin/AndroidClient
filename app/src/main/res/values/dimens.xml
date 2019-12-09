@@ -1,3 +1,5 @@
 <resources>
     <dimen name="textSmall">13sp</dimen>
+    <dimen name="textTitle">18sp</dimen>
+    <dimen name="listItemNormal">55dp</dimen>
 </resources>
