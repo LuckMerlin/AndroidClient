@@ -11,18 +11,57 @@
         android:background="@drawable/test"
         android:layout_height="match_parent"
         android:padding="2dp">
+        <RelativeLayout
+            android:id="@+id/fileBrowser_topRL"
+            android:layout_alignParentTop="true"
+            android:background="#f00"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/listItemNormal">
+            <LinearLayout
+                android:layout_alignParentLeft="true"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                    <TextView
+                        android:textSize="@dimen/textTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@(view){vm.back(view)}"
+                        android:text="返回" />
+                    <TextView
+                        android:text="Nas 存储"
+                        android:textSize="@dimen/textTitle"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="搜索"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="设置"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </RelativeLayout>
         <TextView
-            android:textColor="@color/textTitleSub"
-            android:layout_height="wrap_content"
-            android:id="@+id/fileBrowser_top"
-            android:text="1"
-            android:layout_width="wrap_content" />
+            android:id="@+id/fileBrowser_cloud_meta"
+            android:layout_below="@id/fileBrowser_topRL"
+            android:text="Free:1.2TB Used:0.6TB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <com.merlin.view.DataListLayout
             android:id="@+id/fileBrowser_listDLV"
             android:layout_width="match_parent"
             binding:viewModel="@{vm}"
-            android:layout_below="@id/fileBrowser_top"
+            android:layout_below="@id/fileBrowser_cloud_meta"
             android:layout_height="match_parent"/>
     </RelativeLayout>
 </layout>

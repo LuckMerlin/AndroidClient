@@ -47,6 +47,12 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         mItemClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
+
+    public final OnItemClickListener getOnItemClickListener(){
+        WeakReference<OnItemClickListener>  reference= mItemClickListener;
+        return null!=reference?reference.get():null;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

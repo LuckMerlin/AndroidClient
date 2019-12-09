@@ -22,6 +22,7 @@ public final class File {
     private boolean read;
     private boolean write;
     private String extension;
+    private String path;
 
     public int getSize() {
         return size;
@@ -77,6 +78,14 @@ public final class File {
 
     public void setWrite(boolean write) {
         this.write = write;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public String getExtension() {

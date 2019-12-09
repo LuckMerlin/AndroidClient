@@ -1,12 +1,14 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.view.View;
 
 import androidx.annotation.ColorInt;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.BaseAdapter;
+import com.merlin.bean.File;
 import com.merlin.view.DataListLayout;
 
 import java.util.List;
@@ -21,10 +23,11 @@ public class DataListModel extends BaseModel {
         super(context);
         mAdapter=adapter;
         mLayoutManager=manager;
-        if (null!=adapter){
-            adapter.setOnItemClickListener();
+        if (null!=adapter&&this instanceof BaseAdapter.OnItemClickListener){
+            adapter.setOnItemClickListener((BaseAdapter.OnItemClickListener)this);
         }
     }
+
 
     public final boolean setData(List data, boolean notify){
         BaseAdapter adapter=mAdapter;

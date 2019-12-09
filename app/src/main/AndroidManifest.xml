@@ -10,7 +10,7 @@
         android:allowBackup="false"
         android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
         <activity
-            android:name=".MainActivity">
+            android:name="com.merlin.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

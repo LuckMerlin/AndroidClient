@@ -9,6 +9,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
 import com.merlin.bean.File;
 import com.merlin.client.Client;
@@ -24,8 +25,8 @@ import com.merlin.server.Response;
 import java.util.List;
 
 
-public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,OnFrameReceive, Tag {
-    private String mCurrPath=TAG_PATH_HOME;
+public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, Tag {
+    private String mCurrPath="/volume1/pythonCodes/LuckMerlin";//TAG_PATH_HOME;
     private String mLoadingPath=null;
 
     public FileBrowserModel(Context context){
@@ -38,6 +39,33 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
             setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
         }
+    }
+
+    @Override
+    public void onItemClick(View view, File bean) {
+          if (null!=bean){
+                if (!bean.isRead()){
+                    toast("文件不可读");
+                }else if (bean.isIsFile()){
+                    toast("点击了文件"+bean.getName());
+                }else{
+                    browser(bean.getPath());
+                }
+          }
+    }
+
+    public void back(View view){
+        browserParent();
+    }
+
+    public boolean browserParent(){
+        String path=mCurrPath;
+        java.io.File parent=null!=path?new java.io.File(path).getParentFile():null;
+        String parentPath=null!=parent?parent.getAbsolutePath():null;
+        if (null!=parentPath&&parentPath.length()>0){
+            return browser(parentPath);
+        }
+        return false;
     }
 
     @Override
