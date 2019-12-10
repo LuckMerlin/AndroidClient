@@ -1,33 +1,22 @@
 package com.merlin.adapter;
 
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.File;
+import com.merlin.bean.FileMeta;
 import com.merlin.client.databinding.ItemListFileBinding;
 
+import java.util.List;
 
-public class FileBrowserAdapter extends BaseAdapter<File, ItemListFileBinding>  {
 
+public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBinding>  {
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
-        ItemListFileBinding item=null!=binding&&binding instanceof ItemListFileBinding?(ItemListFileBinding)binding:null;
-        File bean=null!=item?getItem(position):null;
-        if (null!=item&&null!=bean){
-            setText(item.itemListFileTitle,bean.getName(),"None");
-            setText(item.itemListFileSub,bean.getExtension(),"None");
-            item.getRoot().setOnClickListener((view)->{
-                   OnItemClickListener listener=getOnItemClickListener();
-                   if (null!=listener){
-                       listener.onItemClick(view,bean);
-                   }
-            });
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+        if (null!=binding&&null!=data){
+            setText(binding.itemListFileTitle,data.getName(),"None");
+            setText(binding.itemListFileSub,data.getExtension(),"d");
         }
     }
 }

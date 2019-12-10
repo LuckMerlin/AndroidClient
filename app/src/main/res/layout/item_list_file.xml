@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="clickListener"
+            type="android.view.View.OnClickListener" />
+
+    </data>
     <RelativeLayout
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
-        android:background="#000000"
+        android:background="#45000000"
+        android:onClick="@{clickListener}"
         android:layout_height="@dimen/listItemNormal">
         <ImageView
             android:id="@+id/itemListFile_icon"
@@ -20,11 +27,13 @@
                 android:id="@+id/itemListFile_title"
                 android:layout_width="match_parent"
                 android:textSize="@dimen/textTitle"
+                android:singleLine="true"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/itemListFile_sub"
                 android:textSize="@dimen/textSmall"
+                android:singleLine="true"
                 android:textColor="@color/textTitleSub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

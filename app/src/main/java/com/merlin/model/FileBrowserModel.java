@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
 
+import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -11,7 +12,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
-import com.merlin.bean.File;
+import com.merlin.bean.FileBrowserMeta;
+import com.merlin.bean.FileMeta;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnFrameReceive;
@@ -26,8 +28,8 @@ import java.util.List;
 
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, Tag {
-    private String mCurrPath="/volume1/pythonCodes/LuckMerlin";//TAG_PATH_HOME;
-    private String mLoadingPath=null;
+    private String mLoadingPath=null,mParentPath;
+    private final ObservableField<String> mCurrPath=new ObservableField<>("");
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
@@ -42,16 +44,17 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     @Override
-    public void onItemClick(View view, File bean) {
-          if (null!=bean){
-                if (!bean.isRead()){
-                    toast("文件不可读");
-                }else if (bean.isIsFile()){
-                    toast("点击了文件"+bean.getName());
-                }else{
-                    browser(bean.getPath());
-                }
-          }
+    public void onItemClick(View view, int sourceId, Object data) {
+       if (null!=data&&data instanceof FileMeta){
+           FileMeta file=(FileMeta)data;
+            if (!file.isRead()){
+                toast("文件不可读");
+            }else if (file.isDirectory()){
+                browser(file.getFile());
+            }else{
+                toast("点击了文件"+file.getName());
+            }
+       }
     }
 
     public void back(View view){
@@ -59,18 +62,17 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     public boolean browserParent(){
-        String path=mCurrPath;
-        java.io.File parent=null!=path?new java.io.File(path).getParentFile():null;
-        String parentPath=null!=parent?parent.getAbsolutePath():null;
-        if (null!=parentPath&&parentPath.length()>0){
-            return browser(parentPath);
-        }
-        return false;
+        return null!=mParentPath&&browser(mParentPath);
     }
 
     @Override
     public void onRefresh() {
-        browser(mCurrPath);//Browser current path again
+        browser(mCurrPath.get());//Browser current path again
+    }
+
+
+    public ObservableField<String> getCurrentPath() {
+        return mCurrPath;
     }
 
     @Override
@@ -79,13 +81,13 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=response &&response.isSucceed()&&response.getWhat()== What.WHAT_SUCCEED){//Test
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
-                 browser(mCurrPath);
+                 browser(mCurrPath.get());
             }
         }
     }
 
     private boolean browser(String path){
-        if (null!=path&&path.length()>0){
+        if (null!=path){
             JSONObject object=new JSONObject();
             Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
             Json.putIfNotNull(object,TAG_FILE,path);
@@ -103,10 +105,19 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                         }
                     }
                     if (succeed){
-                        mCurrPath=path;
                         String data=null!=frame?frame.getBodyText():null;
-                        List<File> list=null!=data&&data.length()>0? JSON.parseArray(data, File.class):null;
-                        setData(list,true);
+                        FileBrowserMeta meta=null!=data&&data.length()>0? JSON.parseObject(data, FileBrowserMeta.class):null;
+                        if (null!=meta){
+                            if (meta.isDirectory()){
+                                mCurrPath.set(meta.getFile());
+                                mParentPath=meta.getParent();
+                                List<FileMeta> list=null!=meta?meta.getData():null;
+                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
+                                setData(list,true);
+                            }else{
+                                Debug.D(getClass(),"这是一个文件啊 ");
+                            }
+                        }
                     }
                 }
             });

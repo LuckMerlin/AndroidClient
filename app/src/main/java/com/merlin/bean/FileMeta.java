@@ -1,28 +1,33 @@
 package com.merlin.bean;
 
-public final class File {
-
-
+public class FileMeta {
     /**
+     * file : F:\LuckMerlin\SLManager\.git
      * size : 4096
-     * lastModifyTime : 1.5758523235349355E9
+     * lastModifyTime : 1.5758874842258315E9
      * name : .git
-     * exist : true
-     * isFile : false
+     * directory : true
      * read : true
      * write : true
      * extension : .py
      */
 
+    private String file;
     private int size;
     private double lastModifyTime;
     private String name;
-    private boolean exist;
-    private boolean isFile;
+    private boolean directory;
     private boolean read;
     private boolean write;
     private String extension;
-    private String path;
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
 
     public int getSize() {
         return size;
@@ -48,20 +53,12 @@ public final class File {
         this.name = name;
     }
 
-    public boolean isExist() {
-        return exist;
+    public boolean isDirectory() {
+        return directory;
     }
 
-    public void setExist(boolean exist) {
-        this.exist = exist;
-    }
-
-    public boolean isIsFile() {
-        return isFile;
-    }
-
-    public void setIsFile(boolean isFile) {
-        this.isFile = isFile;
+    public void setDirectory(boolean directory) {
+        this.directory = directory;
     }
 
     public boolean isRead() {
@@ -78,14 +75,6 @@ public final class File {
 
     public void setWrite(boolean write) {
         this.write = write;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
     }
 
     public String getExtension() {

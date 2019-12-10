@@ -191,7 +191,8 @@ public class Socket implements Tag {
    protected final boolean sendBytes(final byte[] bytes){
        IConnectionManager manager=mManager;
        if (null!=manager){
-           return null!=manager.send(()->bytes);
+            manager.send(()->bytes);
+            return true;
        }
        Debug.D(getClass(),"Can't send bytes,Not connected."+bytes);
        return false;

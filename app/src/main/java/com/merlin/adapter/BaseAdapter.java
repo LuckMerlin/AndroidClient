@@ -12,24 +12,22 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.File;
 import com.merlin.client.R;
-
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_TAIL = 2;
     public static final int TYPE_EMPTY = 3;
-    private WeakReference<OnItemClickListener> mItemClickListener;
+    private WeakReference<OnItemClickListener> mClickListener;
     private Handler mHandler;
     private List<T> mData;
 
-    public interface OnItemClickListener{
-        void onItemClick(View view, File bean);
+    public interface OnItemClickListener<T>{
+        void onItemClick(View view,int sourceId, T data);
     }
-
 
     public final void setData(List<T> data,boolean notify){
         mData= data;
@@ -43,14 +41,8 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener ){
-        mItemClickListener=null!=listener?new WeakReference<>(listener):null;
-    }
-
-
-    public final OnItemClickListener getOnItemClickListener(){
-        WeakReference<OnItemClickListener>  reference= mItemClickListener;
-        return null!=reference?reference.get():null;
+    public void setOnItemClickListener(OnItemClickListener listener){
+        mClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     @NonNull
@@ -64,6 +56,44 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
               return new BaseViewHolder(in.inflate(R.layout.list_tail, parent, false));
         }
        return new BaseViewHolder(in.inflate(R.layout.list_empty, parent, false));
+    }
+
+    protected abstract void onBindViewHolder(RecyclerView.ViewHolder holder,V binding,int position,T data, @NonNull List<Object> payloads);
+
+    @Override
+    public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        super.onBindViewHolder(holder, position, payloads);
+        ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
+        T data=getItem(position);
+        onBindViewHolder(holder,(V)binding,position,data,payloads);
+        WeakReference<OnItemClickListener> reference=mClickListener;
+        OnItemClickListener listener=null!=reference?reference.get():null;
+        Method[] methods=null!=listener&&null!=binding?binding.getClass().getDeclaredMethods():null;
+        if (null!=methods&&methods.length>0){
+            for (Method m:methods) {
+                Class[] types=null!=m?m.getParameterTypes():null;
+                Class type=null!=types&&types.length==1?types[0]:null;
+                if (null!=type&&type.equals(View.OnClickListener.class)){
+                    try {
+                        m.invoke(binding, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (null!=v) {
+                                    listener.onItemClick(v, v.getId(), data);
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        //Do nothing
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        //Do nothing
     }
 
     public final T getItem(int position){
@@ -107,7 +137,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     }
 }
 
-  protected final void setText(TextView tv,String value,String ifNull){
+    protected final void setText(TextView tv,String value,String ifNull){
         if (null!=tv){
             tv.setText(null!=value?value:(null==ifNull?"":ifNull));
         }

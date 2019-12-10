@@ -6,6 +6,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
+import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.protocol.Tag;
 

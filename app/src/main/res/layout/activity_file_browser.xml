@@ -8,26 +8,29 @@
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:background="@drawable/test"
+        android:background="@drawable/background"
         android:layout_height="match_parent"
-        android:padding="2dp">
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp">
         <RelativeLayout
             android:id="@+id/fileBrowser_topRL"
             android:layout_alignParentTop="true"
-            android:background="#f00"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/listItemNormal">
+            android:layout_height="@dimen/listItemNormal"
+            android:layout_marginTop="10dp">
             <LinearLayout
                 android:layout_alignParentLeft="true"
                 android:orientation="horizontal"
+                android:layout_centerVertical="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-                    <TextView
-                        android:textSize="@dimen/textTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <ImageView
+                        android:layout_width="@dimen/titleIconSize"
+                        android:layout_height="@dimen/titleIconSize"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="15dp"
                         android:onClick="@(view){vm.back(view)}"
-                        android:text="返回" />
+                        android:src="@drawable/ic_back"/>
                     <TextView
                         android:text="Nas 存储"
                         android:textSize="@dimen/textTitle"
@@ -38,30 +41,61 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-                <TextView
-                    android:text="搜索"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <TextView
-                    android:text="设置"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_searchgo_normal"
+                    android:padding="10dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp" />
+                <ImageView
+                    android:src="@drawable/ic_menu_normal"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="10dp"/>
             </LinearLayout>
         </RelativeLayout>
-        <TextView
-            android:id="@+id/fileBrowser_cloud_meta"
+        <LinearLayout
+            android:id="@+id/fileBrowser_cloud_meta_LL"
             android:layout_below="@id/fileBrowser_topRL"
-            android:text="Free:1.2TB Used:0.6TB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="Free:1.2TB Used:0.6TB"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+            <HorizontalScrollView
+                android:layout_weight="1"
+                android:scrollbars="none"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@{vm.getCurrentPath()}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </HorizontalScrollView>
+        </LinearLayout>
+        <View
+            android:id="@+id/fileBrowser_meta_dividerV"
+            android:background="#34000000"
+            android:layout_below="@id/fileBrowser_cloud_meta_LL"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
 
         <com.merlin.view.DataListLayout
             android:id="@+id/fileBrowser_listDLV"
             android:layout_width="match_parent"
             binding:viewModel="@{vm}"
-            android:layout_below="@id/fileBrowser_cloud_meta"
+            android:layout_below="@id/fileBrowser_meta_dividerV"
             android:layout_height="match_parent"/>
     </RelativeLayout>
 </layout>
