@@ -20,6 +20,7 @@ public class FileMeta {
     private boolean read;
     private boolean write;
     private String extension;
+    private int length;
 
     public String getFile() {
         return file;
@@ -63,6 +64,14 @@ public class FileMeta {
 
     public boolean isRead() {
         return read;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
     }
 
     public void setRead(boolean read) {

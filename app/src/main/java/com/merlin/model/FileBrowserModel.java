@@ -15,6 +15,7 @@ import com.merlin.adapter.FileBrowserAdapter;
 import com.merlin.bean.FileBrowserMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.Client;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
@@ -57,8 +58,20 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
        }
     }
 
-    public void back(View view){
-        browserParent();
+    @Override
+    public void onViewClick(View v, int id) {
+        super.onViewClick(v, id);
+        switch (id){
+            case R.id.fileBrowser_topBackIV:
+                browserParent();
+                break;
+            case R.id.fileBrowser_menuIV:
+                toast("点击了菜单");
+                break;
+            case R.id.fileBrowser_topSearchIV:
+                toast("点击了搜索");
+                break;
+        }
     }
 
     public boolean browserParent(){

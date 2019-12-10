@@ -25,11 +25,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                     <ImageView
+                        android:id="@+id/fileBrowser_topBackIV"
                         android:layout_width="@dimen/titleIconSize"
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:onClick="@(view){vm.back(view)}"
+                        android:onClick="@{vm::onClick}"
                         android:src="@drawable/ic_back"/>
                     <TextView
                         android:text="Nas 存储"
@@ -45,12 +46,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <ImageView
+                    android:id="@+id/fileBrowser_topSearchIV"
                     android:src="@drawable/ic_searchgo_normal"
+                    android:onClick="@{vm::onClick}"
                     android:padding="10dp"
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
                 <ImageView
+                    android:id="@+id/fileBrowser_menuIV"
                     android:src="@drawable/ic_menu_normal"
+                    android:onClick="@{vm::onClick}"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:padding="10dp"/>
