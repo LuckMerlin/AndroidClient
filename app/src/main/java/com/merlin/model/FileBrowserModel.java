@@ -24,6 +24,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
+import com.merlin.player.MediaPlayer;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Frame;
@@ -100,7 +101,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
 //                 browser(mCurrPath.get());
-                openFile("F:\\LuckMerlin\\SLManager\\test.png");
+                openFile(null);
             }
         }
     }
@@ -108,25 +109,36 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     public static Context MM;
 
     private boolean openFile(String path){
+//        path = "F:\\LuckMerlin\\SLManager\\test.png";
+        path = "C:\\Users\\admin\\Desktop\\linqiang.mp3";
         JSONObject object=new JSONObject();
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
         Json.putIfNotNull(object,TAG_FILE,path);
         Handler handler=new Handler(Looper.getMainLooper());
+        MediaPlayer player=new MediaPlayer();
         return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY,30*1000,new Socket.OnRequestFinish() {
             @Override
             public void onRequestFinish(boolean succeed, int what, Frame frame) {
-                Debug.D(getClass(),"收到 真 "+succeed+" "+(null!=frame?frame.getBodyBytesLength():-1));
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        byte[] bytes=frame.getBodyBytes();
-                        Dialog dialog=new Dialog(MM);
-                        ImageView imageView=new ImageView(MM);
-                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
-                        dialog.setContentView(imageView);
-                        dialog.show();
-                    }
-                });
+                if (succeed&&null!=frame){
+                  handler.post(new Runnable() {
+                      @Override
+                      public void run() {
+//                          player.play(frame);
+                      }
+                  });
+                }
+//                Debug.D(getClass(),"收到 真 "+succeed++" "+(null!=frame?frame.getBodyBytesLength():-1));
+                //                handler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        byte[] bytes=frame.getBodyBytes();
+//                        Dialog dialog=new Dialog(MM);
+//                        ImageView imageView=new ImageView(MM);
+//                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
+//                        dialog.setContentView(imageView);
+//                        dialog.show();
+//                    }
+//                });
             }
         });
     }
