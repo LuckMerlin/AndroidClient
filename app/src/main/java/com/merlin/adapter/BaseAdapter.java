@@ -106,7 +106,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         List<T> data=mData;
         int size=null!=data?data.size():0;
         if (size>0&&position>=0) {
-            return position == size+1?TYPE_TAIL:TYPE_NORMAL;
+            return position == size?TYPE_TAIL:TYPE_NORMAL;
         }
         return TYPE_EMPTY;
     }
@@ -114,7 +114,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     @Override
     public final int getItemCount() {
         List<T> data=mData;
-        return 2+(null!=data?data.size():0);
+        return 1+(null!=data?data.size():0);
     }
 
     protected final static class BaseViewHolder extends RecyclerView.ViewHolder{

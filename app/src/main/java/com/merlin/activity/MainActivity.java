@@ -20,7 +20,18 @@ public class MainActivity extends SocketActivity<ActivityFileBrowserBinding, Fil
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        FileBrowserModel model=getViewModel();
+//        if (null!=model){
+//            model.refreshCurrentPath();
+//        }
     }
 
     @Override

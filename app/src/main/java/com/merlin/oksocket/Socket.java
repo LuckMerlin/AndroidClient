@@ -123,13 +123,20 @@ public class Socket implements Tag {
                    String unique=null!=frame?frame.getUnique():null;
                    Map<String,RequestingRunnable> requesting=null!=unique&&unique.length()>0?mRequesting:null;
                    RequestingRunnable runnable=null!=requesting?requesting.get(unique):null;
+                    boolean isLaseFrame=frame.isLastFrame();
                    if (null!=runnable){
-                       removeResponseWaiting(unique,"While request responsed.");
+                       if (isLaseFrame){
+                           removeResponseWaiting(unique,"While request last frame responsed.");
+                       }else{
+                           resetResponseWaiting(unique,"While request frame responsed.");
+                       }
                        runnable.onResponse(frame);
                    }
-                   OnFrameReceive receiveListener=mReceiveListener;
-                   if (null!=receiveListener){
-                       receiveListener.onFrameReceived(frame,(Client) Socket.this);
+                   if (!frame.isFrameType(Frame.TAG_FRAME_BYTE_DATA)){
+                       OnFrameReceive receiveListener=mReceiveListener;
+                       if (null!=receiveListener){
+                           receiveListener.onFrameReceived(frame,(Client) Socket.this);
+                       }
                    }
                }
 
@@ -198,13 +205,17 @@ public class Socket implements Tag {
        return false;
    }
 
-   public final boolean sendMessage(String body,String msgTo,String msgType,Callback...callbacks) {
+    public final boolean sendMessage(String body,String msgTo,String msgType,Callback...callbacks) {
+       return sendMessage(body,msgTo,msgType,mTimeout,callbacks);
+    }
+
+    public final boolean sendMessage(String body,String msgTo,String msgType,int timeout,Callback...callbacks) {
         byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
         if (null==bodyBytes||bodyBytes.length<=0){
             notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
             return false;
         }
-        return sendBytes(bodyBytes,null!=msgType?msgType:TAG_FRAME_TEXT_MESSAGE,msgTo,null,mTimeout,callbacks);
+        return sendBytes(bodyBytes,null!=msgType?msgType:TAG_FRAME_TEXT_MESSAGE,msgTo,null,timeout,callbacks);
     }
 
    public final boolean sendText(String body,Callback...callbacks) {
@@ -242,11 +253,11 @@ public class Socket implements Tag {
         byte[] headBytes= null!=string?Frame.encodeString(string,Protocol.ENCODING):null;
         byte[] bytes=Protocol.generateFrame(msgTo,headBytes,body);
         timeout=timeout<=0?mTimeout:timeout;
-        timeout=timeout<=0?5000:timeout;
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
             @Override
             public void run() {
                 notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,callbacks);
+                removeResponseWaiting(unique,"While request timeout."+mTimeout);
             }
 
             @Override
@@ -264,6 +275,20 @@ public class Socket implements Tag {
        return false;
     }
 
+   private boolean resetResponseWaiting(String unique,String debug){
+       Map<String,RequestingRunnable> requesting=mRequesting;
+       Handler handler=mHandler;
+       RequestingRunnable runnable= null!=unique&&null!=requesting?requesting.get(unique):null;
+       if (null!=runnable&&null!=handler){
+           handler.removeCallbacks(runnable);
+           int timeout=runnable.mTimeout;
+           handler.postDelayed(runnable,timeout<=0?5000:timeout);
+//           Debug.D(getClass(),"Reset response waiting "+(null!=debug?debug:".")+" "+unique);
+           return true;
+       }
+        return false;
+   }
+
    private boolean removeResponseWaiting(String unique,String debug){
        Map<String,RequestingRunnable> requesting=mRequesting;
        Handler handler=mHandler;
@@ -273,6 +298,7 @@ public class Socket implements Tag {
                handler.removeCallbacks(runnable);
            }
            Debug.D(getClass(),"Remove response waiting "+(null!=debug?debug:".")+" "+unique);
+           requesting.remove(unique);
            return true;
        }
        return false;

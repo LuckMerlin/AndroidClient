@@ -57,8 +57,6 @@ public final class Protocol {
                 return null; //Invalid
             }
             int end=0;
-//            Debug.D(Protocol.class,"$$$$$$$$$$$ "+msgFromSize+" "+msgToSize
-//            +" "+headSize+" "+bodySize);
             byte[] msgFromDataBytes= msgFromSize > 0 ? Arrays.copyOfRange(bodyBytes,0, end=msgFromSize) : null;
             byte[] msgToDataBytes = msgToSize > 0 ? Arrays.copyOfRange(bodyBytes, end, end+=msgToSize) : null;
             byte[] headDataBytes= headSize >0 ? Arrays.copyOfRange(bodyBytes,end,end+=headSize) : null;
@@ -76,6 +74,7 @@ public final class Protocol {
                     reader.getString(Tag.TAG_SECRET_KEY,null),
                     reader.getString(Tag.TAG_UNIQUE,null),
                     reader.getString(Tag.TAG_VERSION,null),
+                    reader.getInteger(Tag.TAG_REMAIN,0),
                     Response.buildFromJson(reader.getJsonObject(Tag.TAG_DATA,null)),
                     bodyDataBytes
                     );

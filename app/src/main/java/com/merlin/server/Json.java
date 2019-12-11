@@ -31,6 +31,11 @@ public final class Json {
         return null!=object&&object instanceof Long?(Long) object:def;
     }
 
+    public int getInteger(String key,int def){
+        Object object=null!=key&&null!=mJson?mJson.get(key):null;
+        return null!=object&&object instanceof Integer?(Integer) object:def;
+    }
+
     public float getFloat(String key,float def){
         Object object=null!=key&&null!=mJson?mJson.get(key):null;
         return null!=object&&object instanceof Float?(Float) object:def;

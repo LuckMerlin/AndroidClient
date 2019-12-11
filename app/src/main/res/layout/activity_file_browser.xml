@@ -8,9 +8,9 @@
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:background="@drawable/background"
         android:layout_height="match_parent"
         android:paddingLeft="3dp"
+        android:alpha="0.3"
         android:paddingRight="3dp">
         <RelativeLayout
             android:id="@+id/fileBrowser_topRL"

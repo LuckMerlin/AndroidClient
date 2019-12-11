@@ -51,10 +51,14 @@ public class BaseModel implements View.OnClickListener {
         return null!=client?client.getLoginedAccount():null;
     }
 
-    public final boolean sendMessage(String body, String msgTo,String msgType, Callback...callbacks) {
+    public final boolean sendMessage(String body, String msgTo,String msgType,Callback...callbacks) {
+        return sendMessage(body,msgTo,msgType,10*1000,callbacks);
+    }
+
+    public final boolean sendMessage(String body, String msgTo,String msgType,int timeout, Callback...callbacks) {
         Client client=mClient;
         if (null!=client){
-            return client.sendMessage(body,msgTo,msgType,callbacks);
+            return client.sendMessage(body,msgTo,msgType,timeout,callbacks);
         }
         Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
         Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);

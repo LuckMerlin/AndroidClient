@@ -25,12 +25,13 @@ public final class Frame implements Tag {
     private final Response mResponse;
     private final byte[] mBodySrc;
     private final byte mCode;
+    private final long mRemain;
     private final String mEncoding;
     private final byte[] mMsgFromBytes;
     private final byte[] mMsgToBytes;
 
     public Frame(byte code,String encoding,byte[] msgFromBytes,byte[] msgToBytes,String frameType,
-               double timestamp,String secretKey,String unique,String version,Response response,byte[] bodyBytes){
+               double timestamp,String secretKey,String unique,String version,long remain,Response response,byte[] bodyBytes){
         mMsgFromBytes=msgFromBytes;
         mMsgToBytes=msgToBytes;
         mFrameType=frameType;
@@ -38,6 +39,7 @@ public final class Frame implements Tag {
         mSecretKey=secretKey;
         mVersion=version;
         mUnique=unique;
+        mRemain=remain;
         mResponse=response;
         mBodySrc=bodyBytes;
         mCode=code;
@@ -47,6 +49,10 @@ public final class Frame implements Tag {
 
     public byte[] getBodyBytes(){
         return mBodySrc;
+    }
+
+    public long getBodyBytesLength(){
+        return null!=mBodySrc?mBodySrc.length:-1;
     }
 
     public String getUnique() {
@@ -67,11 +73,18 @@ public final class Frame implements Tag {
         return null!=bytes&&bytes.length>0?decodeString(bytes,mEncoding,null):null;
     }
 
+    public long getRemain() {
+        return mRemain;
+    }
+
+    public boolean isLastFrame(){
+        return getRemain()<=0;
+    }
+
     public String getMsgTo(){
         byte[] bytes=mMsgToBytes;
         return null!=bytes&&bytes.length>0?decodeString(bytes,mEncoding,null):null;
     }
-
 
     public byte[] getMsgFromBytes() {
         return mMsgFromBytes;

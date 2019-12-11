@@ -1,8 +1,13 @@
 package com.merlin.model;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -94,9 +99,41 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=response &&response.isSucceed()&&response.getWhat()== What.WHAT_SUCCEED){//Test
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
-                 browser(mCurrPath.get());
+//                 browser(mCurrPath.get());
+                openFile("F:\\LuckMerlin\\SLManager\\test.png");
             }
         }
+    }
+
+    public static Context MM;
+
+    private boolean openFile(String path){
+        JSONObject object=new JSONObject();
+        Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
+        Json.putIfNotNull(object,TAG_FILE,path);
+        Handler handler=new Handler(Looper.getMainLooper());
+        return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY,30*1000,new Socket.OnRequestFinish() {
+            @Override
+            public void onRequestFinish(boolean succeed, int what, Frame frame) {
+                Debug.D(getClass(),"收到 真 "+succeed+" "+(null!=frame?frame.getBodyBytesLength():-1));
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        byte[] bytes=frame.getBodyBytes();
+                        Dialog dialog=new Dialog(MM);
+                        ImageView imageView=new ImageView(MM);
+                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
+                        dialog.setContentView(imageView);
+                        dialog.show();
+                    }
+                });
+            }
+        });
+    }
+
+    public final boolean refreshCurrentPath(){
+        browser(mCurrPath.get());
+        return false;
     }
 
     private boolean browser(String path){

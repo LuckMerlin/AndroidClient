@@ -41,7 +41,8 @@ public interface Tag {
     //Nas
     String TAG_COMMAND_TYPE = "command";
     String TAG_COMMAND_LIST_DIR = "commandListDir";
+    String TAG_COMMAND_READ_FILE = "commandReadFile";
     String TAG_FILE = "file";
-    String TAG_PATH_HOME = "~";
+    String TAG_REMAIN = "remain";
 
 }
