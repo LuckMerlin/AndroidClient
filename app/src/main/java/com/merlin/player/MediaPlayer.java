@@ -15,14 +15,14 @@ public class MediaPlayer {
 
     public MediaPlayer(){
         int samplerate = 44100 ;//44100;
-        int bufferSize = AudioTrack.getMinBufferSize(8000,
+        int bufferSize = AudioTrack.getMinBufferSize(samplerate,
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
 //        int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
 //        int bufferSizeInBytes, int mode
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                samplerate, AudioFormat.CHANNEL_OUT_STEREO,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize * 2,
+                samplerate, AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT, bufferSize,
                 AudioTrack.MODE_STREAM);
         audioTrack.play();
 //        int streamType, int sampleRateInHz, int channelConfig, int audioFormat,

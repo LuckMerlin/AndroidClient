@@ -8,6 +8,8 @@ import com.merlin.server.Frame;
 
 import org.json.JSONObject;
 
+import java.util.Map;
+
 import static com.merlin.server.Json.putIfNotNull;
 
 public final class Client extends Socket {
@@ -42,8 +44,9 @@ public final class Client extends Socket {
         return false;
     }
 
-    public boolean requestClientMeta(){
-        return false;
+    public boolean getClientMeta(com.alibaba.fastjson.JSONObject jsonObject, Callback ...callbacks){
+        String body=null!=jsonObject?jsonObject.toJSONString():null;
+        return sendMessage(body,null,TAG_GET_CLIENTS,callbacks);
     }
 
     public boolean isLogined(){

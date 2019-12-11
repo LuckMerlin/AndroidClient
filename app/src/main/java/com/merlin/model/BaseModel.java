@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSONObject;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
@@ -12,6 +13,7 @@ import com.merlin.oksocket.Socket;
 import com.merlin.protocol.What;
 
 import java.lang.ref.WeakReference;
+import java.util.Map;
 
 
 public class BaseModel implements View.OnClickListener {
@@ -40,6 +42,16 @@ public class BaseModel implements View.OnClickListener {
         if (null!=v) {
             onViewClick(v,v.getId());
         }
+    }
+
+    public final boolean getClientMeta(JSONObject jsonObject, Callback ...callbacks){
+        Client client=mClient;
+        if (null!=client){
+            return client.getClientMeta(jsonObject,callbacks);
+        }
+        Debug.D(getClass(),"Can't get client meta.client="+client);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        return false;
     }
 
     public final boolean isLogin(){

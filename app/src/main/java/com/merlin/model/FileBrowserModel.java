@@ -31,7 +31,9 @@ import com.merlin.server.Frame;
 import com.merlin.server.Json;
 import com.merlin.server.Response;
 
+import java.security.cert.TrustAnchor;
 import java.util.List;
+import java.util.Map;
 
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, Tag {
@@ -100,13 +102,24 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=response &&response.isSucceed()&&response.getWhat()== What.WHAT_SUCCEED){//Test
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
+                   JSONObject object=new JSONObject();
+//                   Json.putIfNotNull(object,TAG_ONLINE, true);
+                   Json.putIfNotNull(object,TAG_ACCOUNT,"linqiang");
+                   getClientMeta(object, new Socket.OnRequestFinish() {
+                       @Override
+                       public void onRequestFinish(boolean succeed, int what, Frame frame) {
+                           Debug.D(getClass(),"收到 meta 了。"+frame);
+                       }
+                   });
 //                 browser(mCurrPath.get());
-                openFile(null);
+//                openFile(null);
             }
         }
     }
 
-    public static Context MM;
+//    public static Context MM;
+
+
 
     private boolean openFile(String path){
 //        path = "F:\\LuckMerlin\\SLManager\\test.png";
