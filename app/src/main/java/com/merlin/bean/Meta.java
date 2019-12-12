@@ -23,8 +23,8 @@ public final class Meta implements Serializable {
     private String name;
     private String platform;
     private String root;
-    private long freeSpace;
-    private long totalSpace;
+    private long free;
+    private long total;
 
     public String getAccount() {
         return account;
@@ -90,8 +90,24 @@ public final class Meta implements Serializable {
         this.platform = platform;
     }
 
+    public void setRoot(String root) {
+        this.root = root;
+    }
 
-//    private boolean mOnline=false;
+    public void setFree(long free) {
+        this.free = free;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
+
+    public String getRoot() {
+        return root;
+    }
+
+    //    private boolean mOnline=false;
 //    private final String mAccount;
 //    private final String mName;
 //    private final String mDeviceType;
@@ -122,11 +138,11 @@ public final class Meta implements Serializable {
 //    }
 //
     public long getTotalSpace() {
-        return totalSpace;
+        return total;
     }
 
     public long getFreeSpace() {
-        return freeSpace;
+        return free;
     }
 //
 //    public String getAccount() {
@@ -146,4 +162,21 @@ public final class Meta implements Serializable {
 //        return mDeviceType;
 //    }
 
+
+    @Override
+    public String toString() {
+        return "Meta{" +
+                "account='" + account + '\'' +
+                ", timestamp=" + timestamp +
+                ", altitude=" + altitude +
+                ", longitude=" + longitude +
+                ", address='" + address + '\'' +
+                ", deviceType='" + deviceType + '\'' +
+                ", name='" + name + '\'' +
+                ", platform='" + platform + '\'' +
+                ", root='" + root + '\'' +
+                ", freeSpace=" + free +
+                ", totalSpace=" + total +
+                '}';
+    }
 }

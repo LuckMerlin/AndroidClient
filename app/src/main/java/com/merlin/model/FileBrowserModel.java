@@ -1,15 +1,19 @@
 package com.merlin.model;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.alibaba.fastjson.JSON;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
 import com.merlin.bean.FileBrowserMeta;
@@ -80,6 +84,12 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     public boolean browserParent(){
+        String currPath=mCurrPath.get();
+        Meta meta=mClientMeta.get();
+        String root=null!=meta?meta.getRoot():null;
+        if (null!=currPath&&null!=root&&root.contains(currPath)){
+            return false;
+        }
         return null!=mParentPath&&browser(mParentPath);
     }
 
@@ -109,16 +119,16 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 //                       }
 //                   });
 //                 browser(mCurrPath.get());
-//                openFile(null);
+//                openFile("/volume1/Upload/Photo/Xiamen/IMG_20190729_204708.jpg");
             }
         }
     }
 
-//    public static Context MM;
+    public static Context MM;
 
     private boolean openFile(String path){
 //        path = "F:\\LuckMerlin\\SLManager\\test.png";
-        path = "C:\\Users\\admin\\Desktop\\linqiang.mp3";
+//        path = "C:\\Users\\admin\\Desktop\\linqiang.mp3";
         JSONObject object=new JSONObject();
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
         Json.putIfNotNull(object,TAG_FILE,path);
@@ -127,26 +137,26 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY,30*1000,new Socket.OnRequestFinish() {
             @Override
             public void onRequestFinish(boolean succeed, int what, Frame frame) {
-                if (succeed&&null!=frame){
-                  handler.post(new Runnable() {
-                      @Override
-                      public void run() {
-//                          player.play(frame);
-                      }
-                  });
-                }
+//                if (succeed&&null!=frame){
+//                  handler.post(new Runnable() {
+//                      @Override
+//                      public void run() {
+////                          player.play(frame);
+//                      }
+//                  });
+//                }
 //                Debug.D(getClass(),"收到 真 "+succeed++" "+(null!=frame?frame.getBodyBytesLength():-1));
-                //                handler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        byte[] bytes=frame.getBodyBytes();
-//                        Dialog dialog=new Dialog(MM);
-//                        ImageView imageView=new ImageView(MM);
-//                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
-//                        dialog.setContentView(imageView);
-//                        dialog.show();
-//                    }
-//                });
+                                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        byte[] bytes=frame.getBodyBytes();
+                        Dialog dialog=new Dialog(MM);
+                        ImageView imageView=new ImageView(MM);
+                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
+                        dialog.setContentView(imageView);
+                        dialog.show();
+                    }
+                });
             }
         });
     }
@@ -163,7 +173,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             putIfNotNull(object,TAG_FILE,path);
             setRefreshing(true);
             mLoadingPath=path;
-            return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
+            return sendMessage(object.toString(), "nas", TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
                 @Override
                 public void onRequestFinish(boolean succeed, int what, Frame frame) {
                     if (null!=mLoadingPath){
@@ -182,7 +192,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                                 mCurrPath.set(meta.getFile());
                                 mParentPath=meta.getParent();
                                 List<FileMeta> list=null!=meta?meta.getData():null;
-                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
+//                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
                                 setData(list,true);
                             }else{
                                 Debug.D(getClass(),"这是一个文件啊 ");
@@ -212,18 +222,20 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         String account=null!=meta?meta.getAccount():null;
         if (null!=account){
             return getAccountClientMeta(account,(Socket.OnRequestFinish)(succeed, what, frame)->{
-                Debug.D(getClass(),"收 "+succeed+" "+(null!=frame?frame.getBodyText():"null"));
+//                Debug.D(getClass(),"收 "+succeed+" "+(null!=frame?frame.getBodyText():"null"));
                 if (succeed&&null!=frame){
-                     List<Meta> list=frame.getBodyArray(Meta.class,null);
-                     if (null!=list&&list.size()>0) {
-//                         mClientMeta.set(list.get(0));
-                         Debug.D(getClass(),"@@@ "+list.get(0).getClass());
-                     }
-                    Debug.D(getClass(),"收到数据 "+(null!=list?list.size():-1));
+                    List<Meta> list=JSON.parseArray(frame.getBodyText(),Meta.class);
+                    Meta newMeta=null!=list&&list.size()>0?list.get(0):null;
+                    mClientMeta.set(newMeta);
+                    Debug.D(getClass(),"对对对 "+newMeta);
                  }
             });
         }
         Debug.W(getClass(),"Can't refresh client meta "+(null!=debug?debug:".")+" account="+account);
         return false;
+    }
+
+    public ObservableField<Meta> getCurrentMeta() {
+        return mClientMeta;
     }
 }

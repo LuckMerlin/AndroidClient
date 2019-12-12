@@ -9,7 +9,7 @@
             name="meta"
             type="com.merlin.bean.Meta" />
         <import type="com.merlin.util.FileSize"/>
-        <import type="com.merlin.client.R"/>
+<!--        <import type="com.merlin.client.R"/>-->
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
@@ -39,7 +39,7 @@
                         android:onClick="@{vm::onClick}"
                         android:src="@drawable/ic_back"/>
                     <TextView
-                        android:text="@{meta.name}"
+                        android:text="@{vm.getCurrentMeta().name}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
@@ -82,7 +82,7 @@
                 android:layout_width="10dp"
                 android:layout_height="10dp"/>
             <TextView
-                android:text='@{"Free:"+FileSize.formatSizeText(meta.freeSpace)+" "+"Total:"+FileSize.formatSizeText(meta.totalSpace)}'
+                android:text='@{"Free:"+FileSize.formatSizeText(vm.getCurrentMeta().freeSpace)+" "+"Total:"+FileSize.formatSizeText(vm.getCurrentMeta().totalSpace)}'
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:singleLine="true"

@@ -19,6 +19,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
         Intent intent=getIntent();
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
