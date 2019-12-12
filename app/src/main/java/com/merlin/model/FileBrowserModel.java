@@ -1,24 +1,20 @@
 package com.merlin.model;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.ImageView;
 
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
 import com.merlin.bean.FileBrowserMeta;
 import com.merlin.bean.FileMeta;
+import com.merlin.bean.Meta;
 import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -31,14 +27,15 @@ import com.merlin.server.Frame;
 import com.merlin.server.Json;
 import com.merlin.server.Response;
 
-import java.security.cert.TrustAnchor;
+import org.json.JSONObject;
+
 import java.util.List;
-import java.util.Map;
 
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, Tag {
     private String mLoadingPath=null,mParentPath;
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
+    private final ObservableField<Meta> mClientMeta=new ObservableField<>();
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
@@ -102,15 +99,15 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=response &&response.isSucceed()&&response.getWhat()== What.WHAT_SUCCEED){//Test
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
-                   JSONObject object=new JSONObject();
+//                   JSONObject object=new JSONObject();
 //                   Json.putIfNotNull(object,TAG_ONLINE, true);
-                   Json.putIfNotNull(object,TAG_ACCOUNT,"linqiang");
-                   getClientMeta(object, new Socket.OnRequestFinish() {
-                       @Override
-                       public void onRequestFinish(boolean succeed, int what, Frame frame) {
-                           Debug.D(getClass(),"收到 meta 了。"+frame);
-                       }
-                   });
+//                   putIfNotNull(object,TAG_ACCOUNT,"nas");
+//                   getClientMeta(object, new Socket.OnRequestFinish() {
+//                       @Override
+//                       public void onRequestFinish(boolean succeed, int what, Frame frame) {
+//                           Debug.D(getClass(),"收到 meta 了。"+frame);
+//                       }
+//                   });
 //                 browser(mCurrPath.get());
 //                openFile(null);
             }
@@ -118,8 +115,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
 //    public static Context MM;
-
-
 
     private boolean openFile(String path){
 //        path = "F:\\LuckMerlin\\SLManager\\test.png";
@@ -164,8 +159,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private boolean browser(String path){
         if (null!=path){
             JSONObject object=new JSONObject();
-            Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
-            Json.putIfNotNull(object,TAG_FILE,path);
+            putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
+            putIfNotNull(object,TAG_FILE,path);
             setRefreshing(true);
             mLoadingPath=path;
             return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
@@ -181,7 +176,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                     }
                     if (succeed){
                         String data=null!=frame?frame.getBodyText():null;
-                        FileBrowserMeta meta=null!=data&&data.length()>0? JSON.parseObject(data, FileBrowserMeta.class):null;
+                        FileBrowserMeta meta=null!=data&&data.length()>0? parseObject(data, FileBrowserMeta.class):null;
                         if (null!=meta){
                             if (meta.isDirectory()){
                                 mCurrPath.set(meta.getFile());
@@ -201,4 +196,34 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         return false;
     }
 
+    public boolean setClientMeta(Meta meta){
+        String account=null!=meta&&meta.isDeviceType(TAG_NAS_DEVICE)?meta.getAccount():null;
+        if (null!=account) {
+            mClientMeta.set(meta);
+            refreshClientMeta("After meta set.");
+            return true;
+        }
+        Debug.W(getClass(),"Can't set client meta,Check meta if valid?");
+        return false;
+    }
+
+    private boolean refreshClientMeta(String debug){
+        Meta meta=mClientMeta.get();
+        String account=null!=meta?meta.getAccount():null;
+        if (null!=account){
+            return getAccountClientMeta(account,(Socket.OnRequestFinish)(succeed, what, frame)->{
+                Debug.D(getClass(),"收 "+succeed+" "+(null!=frame?frame.getBodyText():"null"));
+                if (succeed&&null!=frame){
+                     List<Meta> list=frame.getBodyArray(Meta.class,null);
+                     if (null!=list&&list.size()>0) {
+//                         mClientMeta.set(list.get(0));
+                         Debug.D(getClass(),"@@@ "+list.get(0).getClass());
+                     }
+                    Debug.D(getClass(),"收到数据 "+(null!=list?list.size():-1));
+                 }
+            });
+        }
+        Debug.W(getClass(),"Can't refresh client meta "+(null!=debug?debug:".")+" account="+account);
+        return false;
+    }
 }

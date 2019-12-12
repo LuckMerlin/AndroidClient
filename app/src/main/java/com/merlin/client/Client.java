@@ -44,9 +44,10 @@ public final class Client extends Socket {
         return false;
     }
 
-    public boolean getClientMeta(com.alibaba.fastjson.JSONObject jsonObject, Callback ...callbacks){
-        String body=null!=jsonObject?jsonObject.toJSONString():null;
-        return sendMessage(body,null,TAG_GET_CLIENTS,callbacks);
+    public boolean getClientMeta(JSONObject jsonObject, Callback ...callbacks){
+        String body=null!=jsonObject?jsonObject.toString():null;
+        byte[] bytes=null!=body? Frame.encodeString(body):null;
+        return sendBytes(bytes,TAG_GET_CLIENTS,callbacks);
     }
 
     public boolean isLogined(){

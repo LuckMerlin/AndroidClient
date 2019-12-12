@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -108,11 +109,19 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
         createViewModel();
     }
 
-    public final V getBinding() {
+    protected final V getBinding() {
         return mBinding;
     }
 
-    public final VM getViewModel() {
+    protected final VM getViewModel() {
         return mViewModel;
+    }
+
+    protected final void toast(Object value){
+        value=null!=value?value instanceof String?value:value instanceof Integer
+                ?getString((Integer)value):null:null;
+        if (null!=value&&value instanceof String){
+            Toast.makeText(this,(String)value,Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -4,19 +4,23 @@ import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.merlin.bean.FileBrowserMeta;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.oksocket.Callback;
 import com.merlin.oksocket.Socket;
+import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
+import com.merlin.server.Json;
+
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
-import java.util.Map;
 
 
-public class BaseModel implements View.OnClickListener {
+public class BaseModel implements View.OnClickListener, Tag {
     private final Client mClient;
     private final WeakReference<Context> mContext;
 
@@ -42,6 +46,17 @@ public class BaseModel implements View.OnClickListener {
         if (null!=v) {
             onViewClick(v,v.getId());
         }
+    }
+
+    public final boolean getAccountClientMeta(String account, Callback ...callbacks){
+        if (null!=account){
+            JSONObject jsonObject=new JSONObject();
+            putIfNotNull(jsonObject,TAG_ACCOUNT,account);
+            return getClientMeta(jsonObject,callbacks);
+        }
+        Debug.D(getClass(),"Can't get account client meta.account="+account);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        return false;
     }
 
     public final boolean getClientMeta(JSONObject jsonObject, Callback ...callbacks){
@@ -80,5 +95,19 @@ public class BaseModel implements View.OnClickListener {
     public final Context getContext(){
         WeakReference<Context> reference=mContext;
         return null!=reference?reference.get():null;
+    }
+
+    protected final BaseModel putIfNotNull(JSONObject json, String key, Object value){
+         Json.putIfNotNull(json,key,value);
+         return this;
+    }
+
+    protected final <T> T parseObject(String text,Class<T> cls){
+        return parseObject(text,cls,null);
+    }
+
+    protected final <T> T parseObject(String text,Class<T> cls,T def){
+        T data=null!=text&&null!=cls?JSON.parseObject(text, cls):def;
+        return null!=data?data:def;
     }
 }

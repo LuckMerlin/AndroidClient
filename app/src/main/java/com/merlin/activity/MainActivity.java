@@ -1,25 +1,35 @@
 package com.merlin.activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.bean.Meta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.protocol.Tag;
 
-public class MainActivity extends SocketActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
+public class MainActivity extends Activity implements Tag {
 
     public void ddd(View view){
         System.exit(1);
     }
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-//        FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
+        Intent intent=new Intent(this,FileBrowserActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Meta meta=new Meta();
+        meta.setAccount("nas");
+        meta.setDeviceType(TAG_NAS_DEVICE);
+        intent.putExtra(Tag.TAG_META,meta);
+        startActivity(intent);
+
 //        String ddd="/storage/sdcard0/storage/emulated/0/linqiang.mp3";
 //        MediaPlayer player=new MediaPlayer();
 //        try {
@@ -34,20 +44,5 @@ public class MainActivity extends SocketActivity<ActivityFileBrowserBinding, Fil
 //        player.play();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        FileBrowserModel model=getViewModel();
-        if (null!=model){
-            model.refreshCurrentPath();
-        }
-    }
 
-    @Override
-    public void onBackPressed() {
-        FileBrowserModel model=getViewModel();
-        if (null==model||!model.browserParent()){
-            super.onBackPressed();
-        }
-    }
 }

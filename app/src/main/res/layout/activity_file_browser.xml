@@ -5,6 +5,11 @@
         <variable
             name="vm"
             type="com.merlin.model.FileBrowserModel" />
+        <variable
+            name="meta"
+            type="com.merlin.bean.Meta" />
+        <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.client.R"/>
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
@@ -34,7 +39,7 @@
                         android:onClick="@{vm::onClick}"
                         android:src="@drawable/ic_back"/>
                     <TextView
-                        android:text="Nas 存储"
+                        android:text="@{meta.name}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
@@ -70,10 +75,17 @@
             android:paddingRight="10dp"
             android:orientation="horizontal"
             android:layout_height="wrap_content">
+            <ImageView
+                android:src="@drawable/switch_thumb_activated"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="3dp"
+                android:layout_width="10dp"
+                android:layout_height="10dp"/>
             <TextView
-                android:text="Free:1.2TB Used:0.6TB"
+                android:text='@{"Free:"+FileSize.formatSizeText(meta.freeSpace)+" "+"Total:"+FileSize.formatSizeText(meta.totalSpace)}'
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:singleLine="true"
                 android:layout_height="wrap_content"/>
             <HorizontalScrollView
                 android:layout_weight="1"
@@ -83,6 +95,7 @@
                 <TextView
                     android:text="@{vm.getCurrentPath()}"
                     android:layout_width="wrap_content"
+                    android:singleLine="true"
                     android:layout_height="wrap_content"/>
             </HorizontalScrollView>
         </LinearLayout>

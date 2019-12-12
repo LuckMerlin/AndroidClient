@@ -1,5 +1,6 @@
 package com.merlin.server;
 
+import com.alibaba.fastjson.JSON;
 import com.merlin.protocol.Protocol;
 import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
@@ -7,6 +8,7 @@ import com.merlin.oksocket.Head;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.List;
 
 public final class Frame implements Tag {
     /**
@@ -57,6 +59,16 @@ public final class Frame implements Tag {
 
     public String getUnique() {
         return mUnique;
+    }
+
+    public <T> T getBody(Class<T> cls,T def){
+        String text=getBodyText();
+        return null!=text?(T)JSON.parseObject(text):def;
+    }
+
+    public <T> List<T> getBodyArray(Class<T> cls, List<T> def){
+        String text=getBodyText();
+        return null!=text?(List<T>) JSON.parseArray(text):def;
     }
 
     public String getBodyText(){
