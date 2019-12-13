@@ -10,7 +10,6 @@ import com.merlin.bean.Meta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.player.Player;
-import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 
 import java.io.Serializable;
@@ -24,7 +23,10 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
         Intent intent=getIntent();
-        Toast.makeText(this,""+mPlayer.play("lin",0),Toast.LENGTH_LONG).show();
+        String path="li";
+//        path="/sdcard/Download/生日歌.mp3";
+        path = "/storage/151D-2906/Music/linqiang.mp3";
+        Toast.makeText(this,""+mPlayer.play(path,0),Toast.LENGTH_LONG).show();
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
         Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
         if (null==meta||null==meta.getAccount() || !meta.isDeviceType(TAG_NAS_DEVICE)){
@@ -32,13 +34,13 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             finish();
             return ;
         }
-        getViewModel().setClientMeta(meta);
+//        getViewModel().setClientMeta(meta);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        getViewModel().refreshCurrentPath();
+//        getViewModel().refreshCurrentPath();
     }
 
     @Override
