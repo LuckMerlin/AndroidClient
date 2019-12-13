@@ -1,7 +1,7 @@
 #include <jni.h>
 #include "baseclass/log.h"
 #define LOG_TAG "JNI_PLAYER_C"
-#include "FileOperator.h"
+#include "decoder/FileOperator.h"
 
 JNIEXPORT jboolean
 Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat seek){
@@ -11,7 +11,12 @@ Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat 
         return JNI_FALSE;
     }
     int fd = fileOpen(filePath,_FMODE_READ);
-
+    if(fd == -1){
+        LOGW(" Can't play media,File open failed.",filePath);
+        (*env)->ReleaseStringChars(env,path,filePath);
+        return JNI_FALSE;
+    }
+    LOGW("%d  chengdu.",fd);
     (*env)->ReleaseStringChars(env,path,filePath);
     return 1;
 }

@@ -24,7 +24,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
         Intent intent=getIntent();
-        Toast.makeText(this,""+mPlayer.play(null,0),Toast.LENGTH_LONG).show();
+        Toast.makeText(this,""+mPlayer.play("lin",0),Toast.LENGTH_LONG).show();
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
         Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
         if (null==meta||null==meta.getAccount() || !meta.isDeviceType(TAG_NAS_DEVICE)){
