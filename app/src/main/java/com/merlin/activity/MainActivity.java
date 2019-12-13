@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements Tag {
         meta.setDeviceType(TAG_NAS_DEVICE);
         intent.putExtra(Tag.TAG_META,meta);
         startActivity(intent);
-
+        finish();
 //        String ddd="/storage/sdcard0/storage/emulated/0/linqiang.mp3";
 //        MediaPlayer player=new MediaPlayer();
 //        try {

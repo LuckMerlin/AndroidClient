@@ -1,6 +1,8 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Toast;
 
@@ -21,13 +23,14 @@ import java.lang.ref.WeakReference;
 
 
 public class BaseModel implements View.OnClickListener, Tag {
+    private final Handler mHandler=new Handler(Looper.getMainLooper());
     private final Client mClient;
     private final WeakReference<Context> mContext;
 
     public BaseModel(Context context){
+        mContext=null!=context?new WeakReference<>(context):null;
         context=null!=context?(context instanceof Application?context:context.getApplicationContext()) :null;
         mClient=null!=context&&context instanceof Application?((Application)context).getClient():null;
-        mContext=null!=context?new WeakReference<>(context):null;
     }
 
     public final void toast(String msg){
@@ -109,5 +112,17 @@ public class BaseModel implements View.OnClickListener, Tag {
     protected final <T> T parseObject(String text,Class<T> cls,T def){
         T data=null!=text&&null!=cls?JSON.parseObject(text, cls):def;
         return null!=data?data:def;
+    }
+
+    protected final boolean runOnUiThread(Runnable runnable){
+        return null!=runnable&&postDelayed(runnable,0);
+    }
+
+    protected final boolean postDelayed(Runnable runnable,int delay){
+        Handler handler=mHandler;
+        if (null!=handler&&null!=runnable){
+            return handler.postDelayed(runnable,delay);
+        }
+        return false;
     }
 }

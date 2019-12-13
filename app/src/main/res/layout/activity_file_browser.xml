@@ -15,8 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="3dp"
-        android:background="@drawable/background"
-        android:alpha="1.0"
+        android:alpha="0.3"
         android:paddingRight="3dp">
         <RelativeLayout
             android:id="@+id/fileBrowser_topRL"
@@ -85,9 +84,11 @@
                 android:text='@{"Free:"+FileSize.formatSizeText(vm.getCurrentMeta().freeSpace)+" "+"Total:"+FileSize.formatSizeText(vm.getCurrentMeta().totalSpace)}'
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:textSize="@dimen/textSmall"
                 android:singleLine="true"
                 android:layout_height="wrap_content"/>
             <HorizontalScrollView
+                android:layout_marginLeft="5dp"
                 android:layout_weight="1"
                 android:scrollbars="none"
                 android:layout_width="0dp"
@@ -96,6 +97,7 @@
                     android:text="@{vm.getCurrentPath()}"
                     android:layout_width="wrap_content"
                     android:singleLine="true"
+                    android:textSize="@dimen/textSmall"
                     android:layout_height="wrap_content"/>
             </HorizontalScrollView>
         </LinearLayout>

@@ -9,7 +9,9 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -31,4 +33,5 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.62'
     implementation 'com.readystatesoftware.systembartint:systembartint:1.0.4'
     implementation 'com.android.support:recyclerview-v7'
+    implementation project(path: ':Decoder')
 }

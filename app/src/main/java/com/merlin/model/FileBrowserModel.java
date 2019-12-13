@@ -24,7 +24,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
-import com.merlin.player.MediaPlayer;
+import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Frame;
@@ -109,6 +109,13 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=response &&response.isSucceed()&&response.getWhat()== What.WHAT_SUCCEED){//Test
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            MessageDialog dialog=new MessageDialog(getContext());
+//                            dialog.show("林强","good","确定","取消");
+//                        }
+//                    });
 //                   JSONObject object=new JSONObject();
 //                   Json.putIfNotNull(object,TAG_ONLINE, true);
 //                   putIfNotNull(object,TAG_ACCOUNT,"nas");
