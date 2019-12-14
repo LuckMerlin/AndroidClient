@@ -32,7 +32,7 @@ Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat 
     }
     mp3Handle->size = st.st_size;
     fileSeek(mp3Handle->fd,start,SEEK_SET);
-//    mad_stream_init(&mp3Handle->stream);
+    mad_stream_init(&mp3Handle->stream);
 //    mad_frame_init(&mp3Handle->frame);
 //    mad_synth_init(&mp3Handle->synth);
 //    mad_timer_reset(&mp3Handle->timer);
