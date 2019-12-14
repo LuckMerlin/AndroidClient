@@ -8,7 +8,7 @@ int fileOpen(const char *filename, int access){
 	}else if(access == _WRONLY){
 		fd = open(filename,O_WRONLY|O_TRUNC);
 	}else if(access == _RDONLY){
-		fd = open(filename,O_RDONLY);
+		fd = open(filename,O_RDONLY,0666);
 	}else if(access == _RDWR){
 		fd = open(filename,O_RDWR);
 	}else{
