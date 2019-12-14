@@ -18,20 +18,8 @@ add_library( # Sets the name of the library.
 
         # Provides a relative path to your source file(s).
         src/main/jni/player.c
-        src/main/jni/decoder/FileOperator.c
-        src/main/jni/decoder/Decoder.c
-#        src/main/jni/decoder/mad/fixed.c
-#        src/main/jni/decoder/mad/frame.c
-#        src/main/jni/decoder/mad/bit.c
-#        src/main/jni/decoder/mad/decoder.c
-#        src/main/jni/decoder/mad/huffman.c
-#        src/main/jni/decoder/mad/layer3.c
-#        src/main/jni/decoder/mad/layer12.c
-#        src/main/jni/decoder/mad/minimad.c
-#        src/main/jni/decoder/mad/stream.c
-#        src/main/jni/decoder/mad/synth.c
-#        src/main/jni/decoder/mad/timer.c
-#        src/main/jni/decoder/mad/version.c
+        src/main/jni/FileOperator.c
+#        src/main/jni/mad/decoder.c
         ) #源文件所在目录
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -51,3 +39,6 @@ target_link_libraries( # Specifies the target library.
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib} )
+
+
+add_definitions("-DFPM_ARM")

@@ -47,7 +47,10 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         String path="li";
 //        path="/sdcard/Download/生日歌.mp3";
 //        path = "/storage/151D-2906/Music/linqiang.mp3";
-        path="/sdcard/Musics/西单女孩 - 原点.mp3";
+//        Debug.D(getClass(),"@@@@@@@@ "+new File("/sdcard/Musics/linqiang.mp3").exists());
+//        path="/sdcard/Musics/西单女孩 - 原点.mp3";
+        path="/mnt/sdcard/linqiang.mp3";
+        Debug.D(getClass(),"@@ "+new File(path).exists());
         Toast.makeText(this,""+mPlayer.play(path,0),Toast.LENGTH_LONG).show();
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
         Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
