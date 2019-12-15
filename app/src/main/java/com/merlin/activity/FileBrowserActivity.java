@@ -3,25 +3,32 @@ package com.merlin.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.merlin.bean.Meta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
+import com.merlin.player.OnDecodeFinishListener;
 import com.merlin.player.Player;
+import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 
 
 public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
     private Player mPlayer=new Player();
+
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -38,6 +45,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         FileBrowserModel.MM=this;
@@ -51,7 +59,24 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         path="/sdcard/Musics/西单女孩 - 原点.mp3";
 //        path="/mnt/sdcard/linqiang.mp3";
         Debug.D(getClass(),"@@ "+new File(path).exists());
-        Toast.makeText(this,""+mPlayer.play(path,0),Toast.LENGTH_LONG).show();
+        MediaPlayer dd=new MediaPlayer();
+        mPlayer.setOnDecodeFinishListener(new OnDecodeFinishListener() {
+            @Override
+            public void onDecodeFinish(byte[] bytes, int offset, int length) {
+//                Debug.D(getClass(),"收到数据了 "+(null!=bytes?bytes.length:-1)+" "+offset);
+                dd.play(bytes,0,bytes.length);
+            }
+        });
+        try {
+            FileInputStream is=new FileInputStream(path);
+            byte[] buffer=new byte[1024*1024];
+            int length=is.read(buffer);
+            boolean result=mPlayer.playBytes(buffer,0,length,true);
+            Debug.D(getClass(),"播放结果 "+result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        Toast.makeText(this,""+mPlayer.play(path,0),Toast.LENGTH_LONG).show();
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
         Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
         if (null==meta||null==meta.getAccount() || !meta.isDeviceType(TAG_NAS_DEVICE)){

@@ -558,7 +558,6 @@ int mad_decoder_run(struct mad_decoder *decoder, enum mad_decoder_mode mode)
 
   free(decoder->sync);
   decoder->sync = 0;
-
   return result;
 }
 
