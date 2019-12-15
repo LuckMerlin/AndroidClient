@@ -15,8 +15,6 @@ public class Player {
         if (null!=listener){
             listener.onDecodeFinish(bytes,offset,length);
         }
-//        Log.d("LM","今天该 "+(null!=bytes?bytes.length:-1));
-
     }
 
     public native boolean play(String path,float seek);

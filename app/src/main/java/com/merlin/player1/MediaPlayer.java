@@ -28,7 +28,7 @@ public class MediaPlayer {
 ////        int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
 ////        int bufferSizeInBytes, int mode
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                samplerate/2, AudioFormat.CHANNEL_IN_STEREO,
+                samplerate, AudioFormat.CHANNEL_IN_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize,
                 AudioTrack.MODE_STREAM);
 //        audioTrack.play();
@@ -45,7 +45,7 @@ public class MediaPlayer {
 //                AudioFormat.ENCODING_PCM_16BIT,// 设置音频数据块是8位还是16位
 //                bufferSize, AudioTrack.MODE_STREAM);// 设置模式类型，在这里设置为流类型
         audioTrack.play();
-        audioTrack.setVolume(0.02f);
+        audioTrack.setVolume(0.12f);
     }
 
     public boolean play(Frame frame){

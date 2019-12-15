@@ -23,7 +23,6 @@ jint JNI_OnLoad(JavaVM* vm,void* resolved){
     return JNI_VERSION_1_6;
 }
 
-jobject  mListener;
 /*
  * The following utility routine performs simple rounding, clipping, and
  * scaling of MAD's high-resolution samples down to 16 bits. It does not
@@ -46,35 +45,36 @@ static inline signed int scale(mad_fixed_t sample){
 
  enum mad_flow output(void *data,struct mad_header const *header, struct mad_pcm *pcm){
 //    LOGD("输出 le ");
-    unsigned int nchannels, nsamples;
+    unsigned int  nsamples;
     mad_fixed_t const *left_ch, *right_ch;
     /* pcm->samplerate contains the sampling frequency */
-    nchannels = pcm->channels;
+    unsigned int nchannels = pcm->channels;
     int length=nsamples  = pcm->length;
     left_ch   = pcm->samples[0];
     right_ch  = pcm->samples[1];
 //    int speed = pcm->samplerate * 2;    /*播放速度是采样率的两倍 */
-    unsigned char output[6912],*outputPtr;
-    outputPtr=output;
+    unsigned char* output = malloc(nsamples*nchannels*2);;
+    int index=0;
     while (nsamples--) {
         /* output sample(s) in 16-bit signed little-endian PCM */
         signed int sample = scale(*left_ch++);
-        *(outputPtr++) = sample >> 0;
-        *(outputPtr++) = sample >> 8;
+        *(output+2*nchannels*index+0)=(sample >> 0) & 0xff;
+        *(output+2*nchannels*index+1)=(sample >> 8) & 0xff;
         if (nchannels == 2) {
             sample = scale(*right_ch++);
-            *(outputPtr++) = sample >> 0;
-            *(outputPtr++) = sample >> 8;
+            *(output+2*nchannels*index+2)=(sample >> 0) & 0xff;
+            *(output+2*nchannels*index+3)=(sample >> 8) & 0xff;
         }
+        index++;
     }
-    length *= 4;         //数据长度为pcm音频的4倍
+    length *= nchannels * 2;         //数据长度为pcm音频的4倍
     JNIEnv *jniEnv;
     int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
     if(res==JNI_OK){
         jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
         jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onDecodeFinish","([BII)V");
         jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
-        (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, outputPtr);
+        (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
         (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,data,1,1);
         (*jniEnv)->DeleteLocalRef(jniEnv, data);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
@@ -196,10 +196,4 @@ Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray da
     /* release the decoder */
     mad_decoder_finish(&decoder);
     return JNI_TRUE;
-}
-
-JNIEXPORT void JNICALL
-Java_com_merlin_player_Player_setOnDecodeFinishListener(JNIEnv *env, jobject thiz,
-                                                        jobject listener) {
-//    mListener=listener;
 }

@@ -69,7 +69,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         });
         try {
             FileInputStream is=new FileInputStream(path);
-            byte[] buffer=new byte[1024*1024];
+            byte[] buffer=new byte[1024*1024*5];
             int length=is.read(buffer);
             boolean result=mPlayer.playBytes(buffer,0,length,true);
             Debug.D(getClass(),"播放结果 "+result);
