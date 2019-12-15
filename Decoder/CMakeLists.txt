@@ -5,6 +5,21 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+
+if (${ANDROID_ABI} STREQUAL "armeabi-v7a")
+    include_directories(${ANDROID_SYSROOT}/usr/include/arm-linux-androideabi)
+    set(CMAKE_C_FLAGS "-DHAVE_CONFIG_H -DFPM_ARM -ffast-math -O3")
+elseif (${ANDROID_ABI} STREQUAL "arm64-v8a")
+    include_directories(${ANDROID_SYSROOT}/usr/include/aarch64-linux-android)
+    set(CMAKE_C_FLAGS "-DHAVE_CONFIG_H -DFPM_64BIT -ffast-math -O3")
+elseif (${ANDROID_ABI} STREQUAL "x86")
+    include_directories(${ANDROID_SYSROOT}/usr/include/i686-linux-android)
+    set(CMAKE_C_FLAGS "-DHAVE_CONFIG_H -DFPM_INTEL -ffast-math -O3")
+elseif (${ANDROID_ABI} STREQUAL "x86_64")
+    include_directories(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
+    set(CMAKE_C_FLAGS "-DHAVE_CONFIG_H -DFPM_64BIT -ffast-math -O3")
+endif()
+
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
@@ -19,8 +34,23 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         src/main/jni/player.c
         src/main/jni/FileOperator.c
-#        src/main/jni/mad/decoder.c
+        src/main/jni/mad/synth.c
+        src/main/jni/mad/fixed.c
+        src/main/jni/mad/decoder.c
+        src/main/jni/mad/frame.c
+        src/main/jni/mad/stream.c
+        src/main/jni/mad/timer.c
+        src/main/jni/mad/layer3.c
+        src/main/jni/mad/synth.c
+        src/main/jni/mad/layer12.c
+        src/main/jni/mad/synth.c
+        src/main/jni/mad/huffman.c
+        src/main/jni/mad/bit.c
+        src/main/jni/mad/version.c
         ) #源文件所在目录
+
+include_directories(src/main/jni/)
+
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
@@ -40,5 +70,3 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib} )
 
-
-add_definitions("-DFPM_ARM")

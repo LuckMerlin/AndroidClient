@@ -2,12 +2,12 @@
 #ifndef _FILE_OPERATOR_H
 #define _FILE_OPERATOR_H
 
-#include "../../../../../../../../Users/luckmerlin/Library/Android/sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/unistd.h"
-#include "../../../../../../../../Users/luckmerlin/Library/Android/sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/sys/stat.h"
-#include "../../../../../../../../Users/luckmerlin/Library/Android/sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/sys/time.h"
-#include "../../../../../../../../Users/luckmerlin/Library/Android/sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/sys/types.h"
-#include "../../../../../../../../Users/luckmerlin/Library/Android/sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/local/include/stdlib.h"
-#include "../../../../../../../../Users/luckmerlin/Library/Android/sdk/ndk/20.1.5948944/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/fcntl.h"
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <fcntl.h>
 
 #define _CREATE 0
 #define _RDONLY 1

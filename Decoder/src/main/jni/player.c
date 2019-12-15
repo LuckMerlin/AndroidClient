@@ -2,6 +2,29 @@
 #include "baseclass/log.h"
 #define LOG_TAG "LM"
 #include "FileOperator.h"
+#include "mad/mad.h"
+
+/*
+ * This is a private message structure. A generic pointer to this structure
+ * is passed to each of the callback functions. Put here any data you need
+ * to access from within the callbacks.
+ */
+struct buffer {
+    unsigned char const *start;
+    unsigned long length;
+};
+
+static enum mad_flow output(void *data,struct mad_header const *header, struct mad_pcm *pcm){
+    return MAD_FLOW_CONTINUE;
+}
+
+static enum mad_flow input(void *data,struct mad_stream *stream){
+    return MAD_FLOW_CONTINUE;
+}
+
+static enum mad_flow error(void *data,struct mad_stream *stream,struct mad_frame *frame){
+    return MAD_FLOW_CONTINUE;
+}
 
 JNIEXPORT jboolean
 Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat seek){
@@ -18,31 +41,21 @@ Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat 
         return JNI_FALSE;
     }
 
+    struct buffer buffer;
+    struct mad_decoder decoder;
+    /* configure input, output, and error functions */
 
-//    MP3FileHandle* mp3Handle = (MP3FileHandle*)malloc(sizeof(MP3FileHandle));
-//    memset(mp3Handle,0,sizeof(MP3FileHandle));
-//    mp3Handle->fd = fd;
-//    mp3Handle->fileStartPos = start;
-//    struct stat st;
-//    int ret = fstat(fd, &st);
-//    if(ret < 0){
-//        LOGE("Can't play media,Fail to get file size. %s",filePath);
-//        free(mp3Handle);
-//        fileClose(fd);
-//        return JNI_FALSE;
-//    }
-//    mp3Handle->size = st.st_size;
-//    fileSeek(mp3Handle->fd,start,SEEK_SET);
-//    mad_stream_init(&mp3Handle->stream);
-//    mad_frame_init(&mp3Handle->frame);
-//    mad_synth_init(&mp3Handle->synth);
-//    mad_timer_reset(&mp3Handle->timer);
-//    Handle = mp3Handle;
-//    readNextFrame(Handle);
-//    g_Samplerate = Handle->frame.header.samplerate;
+    mad_decoder_init(&decoder, &buffer,
+                     input, 0 /* header */, 0 /* filter */, output,
+                     error, 0 /* message */);
+    /* start decoding */
+//    result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
+
 //    LOGD("%s: 采样率: %d, 文件大小: %ld",__FUNCTION__,g_Samplerate,st.st_size);
     LOGW("%d  chengdu.",fd);
-//    (*env)->ReleaseStringChars(env,path,filePath);
+    /* release the decoder */
+
+//    mad_decoder_finish(&decoder);
     return JNI_TRUE;
 }
 
