@@ -4,22 +4,15 @@
 #include "FileOperator.h"
 #include "mad/mad.h"
 
-/*
- * This is a private message structure. A generic pointer to this structure
- * is passed to each of the callback functions. Put here any data you need
- * to access from within the callbacks.
- */
 struct buffer {
     unsigned char const *start;
     unsigned long length;
 };
 
-
 static JavaVM  *VM=NULL;
 
 jint JNI_OnLoad(JavaVM* vm,void* resolved){
     VM=vm;
-    LOGD("JNI 被加载了");
     return JNI_VERSION_1_6;
 }
 
@@ -45,29 +38,36 @@ static inline signed int scale(mad_fixed_t sample){
 
  enum mad_flow output(void *data,struct mad_header const *header, struct mad_pcm *pcm){
 //    LOGD("输出 le ");
-    unsigned int  nsamples;
     mad_fixed_t const *left_ch, *right_ch;
     /* pcm->samplerate contains the sampling frequency */
-    unsigned int nchannels = pcm->channels;
-    int length=nsamples  = pcm->length;
+    unsigned int layer=header->layer;
+    unsigned int mode=header->mode;
+    unsigned long bitrate=header->bitrate;
+
+    unsigned int sampleRate=pcm->samplerate;
+    unsigned int nChannels = pcm->channels;
+    //
+    unsigned int length= pcm->length;
+    unsigned int nSamples = length;
     left_ch   = pcm->samples[0];
     right_ch  = pcm->samples[1];
-//    int speed = pcm->samplerate * 2;    /*播放速度是采样率的两倍 */
-    unsigned char* output = malloc(nsamples*nchannels*2);;
+//    int speed = pcm->sampleRate * 2;    /*播放速度是采样率的两倍 */
+    LOGD("bitrate %ld Mode %d Layer %d 通道 %d 采样率 %d",bitrate,mode,layer,nChannels,sampleRate);
+    unsigned char* output = malloc(nSamples*nChannels*2);;
     int index=0;
-    while (nsamples--) {
+    while (nSamples--) {
         /* output sample(s) in 16-bit signed little-endian PCM */
         signed int sample = scale(*left_ch++);
-        *(output+2*nchannels*index+0)=(sample >> 0) & 0xff;
-        *(output+2*nchannels*index+1)=(sample >> 8) & 0xff;
-        if (nchannels == 2) {
+        *(output+2*nChannels*index+0)=(sample >> 0) & 0xff;
+        *(output+2*nChannels*index+1)=(sample >> 8) & 0xff;
+        if (nChannels == 2) {
             sample = scale(*right_ch++);
-            *(output+2*nchannels*index+2)=(sample >> 0) & 0xff;
-            *(output+2*nchannels*index+3)=(sample >> 8) & 0xff;
+            *(output+2*nChannels*index+2)=(sample >> 0) & 0xff;
+            *(output+2*nChannels*index+3)=(sample >> 8) & 0xff;
         }
         index++;
     }
-    length *= nchannels * 2;         //数据长度为pcm音频的4倍
+    length *= nChannels * 2;         //数据长度为pcm音频的4倍
     JNIEnv *jniEnv;
     int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
     if(res==JNI_OK){
@@ -75,7 +75,7 @@ static inline signed int scale(mad_fixed_t sample){
         jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onDecodeFinish","([BII)V");
         jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
         (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
-        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,data,1,1);
+        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,data,nChannels,sampleRate);
         (*jniEnv)->DeleteLocalRef(jniEnv, data);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackMethod);
@@ -84,7 +84,6 @@ static inline signed int scale(mad_fixed_t sample){
 }
 
 static enum mad_flow input(void *data,struct mad_stream *stream){
-//    LOGD("input ");
     struct buffer *buffer = data;
     if (!buffer->length) {
         return MAD_FLOW_STOP;
@@ -97,6 +96,33 @@ static enum mad_flow input(void *data,struct mad_stream *stream){
 static enum mad_flow error(void *data,struct mad_stream *stream,struct mad_frame *frame){
     LOGD("ERROR ");
     return MAD_FLOW_CONTINUE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray data, jint offset,
+                                        jint length, jboolean reset) {
+    int byteLength = data ==NULL?-1:(*env)->GetArrayLength(env,data);
+    if(byteLength <= 0){
+        LOGW("Can'T play bytes which is NULL.%d",byteLength);
+        return JNI_FALSE;
+    }
+    LOGW("长度 %d",byteLength);
+    jbyte* bytesStart =(*env)->GetByteArrayElements(env,data, 0);
+    struct buffer buffer;
+    buffer.start =bytesStart;
+    buffer.length=byteLength;
+    struct mad_decoder decoder;
+    /* configure input, output, and error functions */
+    mad_decoder_init(&decoder, &buffer,
+                     input, 0 /* header */, 0 /* filter */, output,
+                     error, 0 /* message */);
+    /* start decoding */
+    int result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
+    LOGW("WWWWWWWW %d %d %d", result,bytesStart,byteLength);
+    (*env)->ReleaseByteArrayElements(env,data,bytesStart,0);
+    /* release the decoder */
+    mad_decoder_finish(&decoder);
+    return JNI_TRUE;
 }
 
 
@@ -129,32 +155,5 @@ Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat 
 //    /* release the decoder */
 //
 //    mad_decoder_finish(&decoder);
-    return JNI_TRUE;
-}
-
-JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray data, jint offset,
-                                        jint length, jboolean reset) {
-    int byteLength = data ==NULL?-1:(*env)->GetArrayLength(env,data);
-    if(byteLength <= 0){
-        LOGW("Can'T play bytes which is NULL.%d",byteLength);
-        return JNI_FALSE;
-    }
-    LOGW("长度 %d",byteLength);
-    jbyte* bytesStart =(*env)->GetByteArrayElements(env,data, 0);
-    struct buffer buffer;
-    buffer.start =bytesStart;
-    buffer.length=byteLength;
-    struct mad_decoder decoder;
-    /* configure input, output, and error functions */
-    mad_decoder_init(&decoder, &buffer,
-                     input, 0 /* header */, 0 /* filter */, output,
-                     error, 0 /* message */);
-    /* start decoding */
-    int result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
-    LOGW("WWWWWWWW %d %d %d", result,bytesStart,byteLength);
-    (*env)->ReleaseByteArrayElements(env,data,bytesStart,0);
-    /* release the decoder */
-    mad_decoder_finish(&decoder);
     return JNI_TRUE;
 }

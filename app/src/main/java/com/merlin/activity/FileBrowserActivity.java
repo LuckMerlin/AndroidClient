@@ -15,14 +15,13 @@ import com.merlin.bean.Meta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
-import com.merlin.player.OnDecodeFinishListener;
+import com.merlin.player.OnDecodeFinish;
 import com.merlin.player.Player;
 import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 
 
@@ -57,13 +56,13 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 //        path = "/storage/151D-2906/Music/linqiang.mp3";
 //        Debug.D(getClass(),"@@@@@@@@ "+new File("/sdcard/Musics/linqiang.mp3").exists());
         path="/sdcard/Musics/西单女孩 - 原点.mp3";
+//        path="/sdcard/Musics/Lenka - Like A Song.mp3";
 //        path="/mnt/sdcard/linqiang.mp3";
         Debug.D(getClass(),"@@ "+new File(path).exists());
         MediaPlayer dd=new MediaPlayer();
-        mPlayer.setOnDecodeFinishListener(new OnDecodeFinishListener() {
+        mPlayer.setOnDecodeFinishListener(new OnDecodeFinish() {
             @Override
-            public void onDecodeFinish(byte[] bytes, int offset, int length) {
-//                Debug.D(getClass(),"收到数据了 "+(null!=bytes?bytes.length:-1)+" "+offset);
+            public void onDecodeFinish(byte[] bytes, int channels, int sampleRate) {
                 dd.play(bytes,0,bytes.length);
             }
         });
@@ -71,7 +70,9 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             FileInputStream is=new FileInputStream(path);
             byte[] buffer=new byte[1024*1024*5];
             int length=is.read(buffer);
-            boolean result=mPlayer.playBytes(buffer,0,length,true);
+            byte[] ddd=new byte[1024*1024];
+            System.arraycopy(buffer,1024*614,ddd,0,1024*600);
+            boolean result=mPlayer.playBytes(buffer,0,buffer.length,true);
             Debug.D(getClass(),"播放结果 "+result);
         } catch (Exception e) {
             e.printStackTrace();

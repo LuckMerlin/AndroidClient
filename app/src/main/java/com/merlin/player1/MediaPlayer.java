@@ -36,7 +36,7 @@ public class MediaPlayer {
 
     public boolean play(byte[] bytes, int off, int length){
         if (null!=bytes&&bytes.length>0) {
-            Debug.D(getClass(), "### 播放  " + bytes.length);
+//            Debug.D(getClass(), "### 播放  " + bytes.length);
             audioTrack.write(bytes, off, length);
         }else{
             Debug.D(getClass(),"错误 "+bytes);
