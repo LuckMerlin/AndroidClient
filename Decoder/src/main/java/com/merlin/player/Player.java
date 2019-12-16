@@ -9,6 +9,17 @@ public class Player {
         System.loadLibrary("linqiang");
     }
 
+    public void setOnDecodeFinishListener(OnDecodeFinish listener){
+        WeakReference<OnDecodeFinish> reference=mLintener;
+        mLintener=null;
+        if (null!=reference){
+            reference.clear();
+        }
+        if (null!=listener){
+            mLintener=new WeakReference<>(listener);
+        }
+    }
+
     public static void onDecodeFinish(byte[] bytes,int offset,int length){
         WeakReference<OnDecodeFinish> reference=mLintener;
         OnDecodeFinish listener=null!=reference?reference.get():null;
@@ -21,14 +32,8 @@ public class Player {
 
     public native boolean playBytes(byte[] data,int offset,int length,boolean reset);
 
-    public void setOnDecodeFinishListener(OnDecodeFinish listener){
-        WeakReference<OnDecodeFinish> reference=mLintener;
-        mLintener=null;
-        if (null!=reference){
-            reference.clear();
-        }
-        if (null!=listener){
-            mLintener=new WeakReference<>(listener);
-        }
-    }
+//    public native boolean seek(float seek);
+
+//    public native long getDuration();
+
 }

@@ -106,7 +106,7 @@ Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray da
         LOGW("Can'T play bytes which is NULL.%d",byteLength);
         return JNI_FALSE;
     }
-    LOGW("长度 %d",byteLength);
+//    LOGW("长度 %d",byteLength);
     jbyte* bytesStart =(*env)->GetByteArrayElements(env,data, 0);
     struct buffer buffer;
     buffer.start =bytesStart;
@@ -124,7 +124,6 @@ Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray da
     mad_decoder_finish(&decoder);
     return JNI_TRUE;
 }
-
 
 
 JNIEXPORT jboolean
