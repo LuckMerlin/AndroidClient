@@ -11,11 +11,17 @@ struct buffer {
 
 static JavaVM  *VM=NULL;
 
+unsigned long currPlayingPos,cachedLength;
+
 jint JNI_OnLoad(JavaVM* vm,void* resolved){
     VM=vm;
     return JNI_VERSION_1_6;
 }
 
+char * openTempFile(int access){
+    char * tempPath="/sdcard/temp.lm";
+    return fileOpen(tempPath,access);
+}
 /*
  * The following utility routine performs simple rounding, clipping, and
  * scaling of MAD's high-resolution samples down to 16 bits. It does not
@@ -37,7 +43,7 @@ static inline signed int scale(mad_fixed_t sample){
 }
 
  enum mad_flow output(void *data,struct mad_header const *header, struct mad_pcm *pcm){
-//    LOGD("输出 le ");
+    LOGD("输出 le ");
     mad_fixed_t const *left_ch, *right_ch;
     /* pcm->samplerate contains the sampling frequency */
     unsigned int layer=header->layer;
@@ -75,7 +81,7 @@ static inline signed int scale(mad_fixed_t sample){
         jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onDecodeFinish","([BII)V");
         jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
         (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
-        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,data,nChannels,sampleRate);
+//        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,data,nChannels,sampleRate);
         (*jniEnv)->DeleteLocalRef(jniEnv, data);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackMethod);
@@ -83,19 +89,51 @@ static inline signed int scale(mad_fixed_t sample){
     return MAD_FLOW_CONTINUE;
 }
 
+
 static enum mad_flow input(void *data,struct mad_stream *stream){
-    struct buffer *buffer = data;
-    if (!buffer->length) {
-        return MAD_FLOW_STOP;
-    }
-    mad_stream_buffer(stream, buffer->start, buffer->length);
-    buffer->length = 0;
-    return MAD_FLOW_CONTINUE;
+//      int fp=openTempFile(_RDONLY);
+//      if(fp){
+//          int next=currPlayingPos+1024;
+//          int end=next<=cachedLength?next:cachedLength;
+//          if(end!=currPlayingPos){
+//              struct buffer *buffer = data;
+//
+////              mad_stream_buffer(stream, buffer->start, buffer->length);
+//          }
+//          LOGW("deeeeeeee");
+//          int size=fileTell(fp);
+//          LOGW("WWWWW 当前大小 %d",size);
+//          return MAD_FLOW_CONTINUE;
+//      }
+//    struct buffer *buffer = data;
+//    if (!buffer->length) {
+//        LOGD("Input &&&&&&&& %d",buffer->length);
+//        return MAD_FLOW;
+//    }
+//    LOGD("Input aaaaa %d %d",buffer->start,buffer->length);
+//    mad_stream_buffer(stream, buffer->start, buffer->length);
+//    buffer->length = 0;
+     // LOGW("失败了 %d",fp);
+    return MAD_FLOW_BREAK;
 }
 
 static enum mad_flow error(void *data,struct mad_stream *stream,struct mad_frame *frame){
     LOGD("ERROR ");
     return MAD_FLOW_CONTINUE;
+}
+
+
+int resetPlayer(){
+    int result=openTempFile(_WRONLY);
+    if(result){
+        LOGD("Succeed reset player. %d",result);
+        currPlayingPos=0;
+        cachedLength=0;
+        fileClose(result);
+        return -1;
+    }
+    LOGW("Failed to reset player. %d",result);
+    return 0;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -106,11 +144,11 @@ Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray da
         LOGW("Can'T play bytes which is NULL.%d",byteLength);
         return JNI_FALSE;
     }
+    resetPlayer();
 //    LOGW("长度 %d",byteLength);
     jbyte* bytesStart =(*env)->GetByteArrayElements(env,data, 0);
     struct buffer buffer;
-    buffer.start =bytesStart;
-    buffer.length=byteLength;
+    buffer.start=buffer.length =0;
     struct mad_decoder decoder;
     /* configure input, output, and error functions */
     mad_decoder_init(&decoder, &buffer,

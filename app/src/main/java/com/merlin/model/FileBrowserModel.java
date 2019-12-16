@@ -22,9 +22,10 @@ import com.merlin.bean.Meta;
 import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.TransportingDialog;
+import com.merlin.dialog.SearchDialog;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
-import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Frame;
@@ -34,7 +35,6 @@ import com.merlin.server.Response;
 import org.json.JSONObject;
 
 import java.util.List;
-
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, Tag {
     private String mLoadingPath=null,mParentPath;
@@ -78,7 +78,12 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 toast("点击了菜单");
                 break;
             case R.id.fileBrowser_topSearchIV:
-                toast("点击了搜索");
+                 new SearchDialog(v.getContext()).setOnSearchInputChange((input)->{
+                     toast("该表了 "+input);
+                 }).show();
+                break;
+            case R.id.fileBrowser_transmitIV:
+                new TransportingDialog(v.getContext()).show();
                 break;
         }
     }
@@ -109,23 +114,16 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=response &&response.isSucceed()&&response.getWhat()== What.WHAT_SUCCEED){//Test
             String note=response.getNote();
             if (null!=note&&note.contains("wuyue")){
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            MessageDialog dialog=new MessageDialog(getContext());
-//                            dialog.show("林强","good","确定","取消");
-//                        }
-//                    });
-//                   JSONObject object=new JSONObject();
-//                   Json.putIfNotNull(object,TAG_ONLINE, true);
-//                   putIfNotNull(object,TAG_ACCOUNT,"nas");
-//                   getClientMeta(object, new Socket.OnRequestFinish() {
-//                       @Override
-//                       public void onRequestFinish(boolean succeed, int what, Frame frame) {
-//                           Debug.D(getClass(),"收到 meta 了。"+frame);
-//                       }
-//                   });
-//                 browser(mCurrPath.get());
+                JSONObject object=new JSONObject();
+                Json.putIfNotNull(object,TAG_ONLINE, true);
+                putIfNotNull(object,TAG_ACCOUNT,"nas");
+                getClientMeta(object, new Socket.OnRequestFinish() {
+                       @Override
+                       public void onRequestFinish(boolean succeed, int what, Frame frame) {
+                           Debug.D(getClass(),"收到 meta 了。"+frame);
+                       }
+                   });
+                 browser(mCurrPath.get());
 //                openFile("/volume1/Upload/Photo/Xiamen/IMG_20190729_204708.jpg");
             }
         }
@@ -140,7 +138,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
         Json.putIfNotNull(object,TAG_FILE,path);
         Handler handler=new Handler(Looper.getMainLooper());
-        MediaPlayer player=new MediaPlayer();
+//        MediaPlayer player=new MediaPlayer();
         return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY,30*1000,new Socket.OnRequestFinish() {
             @Override
             public void onRequestFinish(boolean succeed, int what, Frame frame) {

@@ -2,7 +2,7 @@
 #include "FileOperator.h"
 
 int fileOpen(const char *filename, int access){
-	int fd;
+	int fd=0;
 	if(access == _CREATE){
 		fd = open(filename,O_RDWR|O_CREAT|O_EXCL,0666);
 	}else if(access == _WRONLY){
@@ -11,8 +11,6 @@ int fileOpen(const char *filename, int access){
 		fd = open(filename,O_RDONLY,0666);
 	}else if(access == _RDWR){
 		fd = open(filename,O_RDWR);
-	}else{
-		return -2;
 	}
 	return fd;
 }
@@ -23,7 +21,7 @@ int fileRead(int fd, unsigned char *buf, int size){
 
 int fileWrite(int fd, unsigned char *buf, int size){
 	return write(fd, buf, size);  
-}  
+}
 
 int64_t fileSeek(int fd, int64_t pos, int whence){
     return lseek(fd, pos, whence);    

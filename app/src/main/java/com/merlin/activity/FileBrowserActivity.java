@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -12,16 +13,15 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.merlin.bean.Meta;
+import com.merlin.client.R;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
-import com.merlin.player.OnDecodeFinish;
 import com.merlin.player.Player;
 import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.Serializable;
 
 
@@ -49,6 +49,9 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
+        new Handler().postDelayed(()->{
+            findViewById(R.id.fileBrowser_transmitIV).performClick();
+        },3000);
         checkPermission();
         Intent intent=getIntent();
         String path="li";
@@ -60,23 +63,23 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 //        path="/mnt/sdcard/linqiang.mp3";
         Debug.D(getClass(),"@@ "+new File(path).exists());
         MediaPlayer dd=new MediaPlayer();
-        mPlayer.setOnDecodeFinishListener(new OnDecodeFinish() {
-            @Override
-            public void onDecodeFinish(byte[] bytes, int channels, int sampleRate) {
-                dd.play(bytes,0,bytes.length);
-            }
-        });
-        try {
-            FileInputStream is=new FileInputStream(path);
-            byte[] buffer=new byte[1024*1024*5];
-            int length=is.read(buffer);
-            byte[] ddd=new byte[1024*1024];
-            System.arraycopy(buffer,1024*614,ddd,0,1024*600);
-            boolean result=mPlayer.playBytes(buffer,0,buffer.length,true);
-            Debug.D(getClass(),"播放结果 "+result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        mPlayer.setOnDecodeFinishListener(new OnDecodeFinish() {
+//            @Override
+//            public void onDecodeFinish(byte[] bytes, int channels, int sampleRate) {
+//                dd.play(bytes,0,bytes.length);
+//            }
+//        });
+//        try {
+//            FileInputStream is=new FileInputStream(path);
+//            byte[] buffer=new byte[1024*1024*5];
+//            int length=is.read(buffer);
+//            byte[] ddd=new byte[1];
+////            System.arraycopy(buffer,1024*614,ddd,0,1024*600);
+//            boolean result=mPlayer.playBytes(ddd,0,buffer.length,true);
+//            Debug.D(getClass(),"播放结果 "+result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 //        Toast.makeText(this,""+mPlayer.play(path,0),Toast.LENGTH_LONG).show();
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
         Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
@@ -85,13 +88,13 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             finish();
             return ;
         }
-//        getViewModel().setClientMeta(meta);
+        getViewModel().setClientMeta(meta);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        getViewModel().refreshCurrentPath();
+        getViewModel().refreshCurrentPath();
     }
 
     @Override

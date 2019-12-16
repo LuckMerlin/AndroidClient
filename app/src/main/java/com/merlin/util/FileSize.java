@@ -7,7 +7,7 @@ public final class FileSize {
     public static String formatSizeText(double fileSize){
             double kiloByte = fileSize/1024;
             if(kiloByte < 1) {
-                return fileSize + (fileSize<=1?"B":"B(s)");
+                return fileSize + "B";
             }
             double megaByte = kiloByte/1024;
             if(megaByte < 1) {

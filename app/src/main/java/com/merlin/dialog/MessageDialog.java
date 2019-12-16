@@ -14,7 +14,7 @@ public class MessageDialog extends Dialog {
 
 
     public boolean show(String title,String msg,String ...items){
-        ((TextView)findViewById(R.id.dlg_message_layout_msgTV)).setText(msg);
+        (findViewById(R.id.dlg_message_layout_msgTV,TextView.class)).setText(msg);
         super.show();
         return false;
     }
