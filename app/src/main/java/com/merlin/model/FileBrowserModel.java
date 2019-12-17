@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alibaba.fastjson.JSON;
+import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
 import com.merlin.bean.FileBrowserMeta;
@@ -22,7 +23,6 @@ import com.merlin.bean.Meta;
 import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.dialog.TransportingDialog;
 import com.merlin.dialog.SearchDialog;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
@@ -83,7 +83,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                  }).show();
                 break;
             case R.id.fileBrowser_transmitIV:
-                new TransportingDialog(v.getContext()).show();
+                startActivity(TransportActivity.class);
                 break;
         }
     }

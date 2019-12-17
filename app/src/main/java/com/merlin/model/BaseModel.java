@@ -23,7 +23,7 @@ import java.lang.ref.WeakReference;
 
 
 public class BaseModel implements View.OnClickListener, Tag {
-    private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private WeakReference<View> mRootView=null;
     private final Client mClient;
     private final WeakReference<Context> mContext;
 
@@ -31,6 +31,22 @@ public class BaseModel implements View.OnClickListener, Tag {
         mContext=null!=context?new WeakReference<>(context):null;
         context=null!=context?(context instanceof Application?context:context.getApplicationContext()) :null;
         mClient=null!=context&&context instanceof Application?((Application)context).getClient():null;
+    }
+
+    protected void onViewAttached(View root){
+        //DO nothing
+    }
+
+    private final void setRootView(View root){
+        WeakReference<View> reference=mRootView;
+        if (null!=reference){
+            reference.clear();
+            mRootView=null;
+        }
+        if (null!=root){
+            mRootView=new WeakReference<>(root);
+            onViewAttached(root);
+        }
     }
 
     public final void toast(String msg){
@@ -42,6 +58,17 @@ public class BaseModel implements View.OnClickListener, Tag {
 
     public void onViewClick(View v,int id){
         //Do nothing
+    }
+
+    public final View getRoot(){
+        WeakReference<View> reference=mRootView;
+        return null!=reference?reference.get():null;
+    }
+
+    public final <T> T findViewById(int id,Class<T> cls){
+        View root=getRoot();
+        View child=null!=root?root.findViewById(id):null;
+        return null!=child&&null!=cls?(T)child:null;
     }
 
     @Override
@@ -119,9 +146,9 @@ public class BaseModel implements View.OnClickListener, Tag {
     }
 
     protected final boolean postDelayed(Runnable runnable,int delay){
-        Handler handler=mHandler;
-        if (null!=handler&&null!=runnable){
-            return handler.postDelayed(runnable,delay);
+        View root=getRoot();
+        if (null!=root&&null!=runnable){
+            return root.postDelayed(runnable,delay);
         }
         return false;
     }

@@ -3,19 +3,24 @@ package com.merlin.dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 
 public class Dialog {
     private final android.app.Dialog mDialog;
 
     public Dialog(Context context){
-        mDialog=new android.app.Dialog(context);
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        Window window=mDialog.getWindow();
+        android.app.Dialog dialog=mDialog=new android.app.Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Window window=dialog.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        WindowManager.LayoutParams params = window.getAttributes();
+        params.dimAmount = 0f;
+        window.setAttributes(params);
     }
 
     public final Dialog setContentView(View view){

@@ -2,9 +2,11 @@ package com.merlin.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.Toast;
 
@@ -19,8 +21,11 @@ import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
@@ -29,65 +34,88 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
     private V mBinding;
     private VM mViewModel;
 
+    private Class findFieldClass(Class<?> cls,Type[] args,Classes classes){
+        if (null!=cls&&null!=args&&null!=classes) {
+            for (Type f : args) {
+                if (classes.isAssignableFrom((Class<?>) f,cls)){
+                    return (Class)f;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Object createInstance(Class cls){
+        if (null!=cls) {
+            try {
+                Constructor constructor = cls.getConstructor(Context.class);
+                if (null != constructor) {
+                    constructor.setAccessible(true);
+                    return constructor.newInstance(this);
+                }
+            } catch (NoSuchMethodException | IllegalArgumentException |
+                    InstantiationException | InvocationTargetException | IllegalAccessException e) {
+                try {
+                    Constructor constructor = cls.getConstructor();
+                    if (null != constructor) {
+                        constructor.setAccessible(true);
+                        return constructor.newInstance();
+                    }
+                } catch (Exception e1) {
+                    Debug.E(getClass(), "" + cls, e1);
+                }
+            }
+        }
+        return null;
+    }
+
     private void createViewModel(){
         Type type=getClass().getGenericSuperclass();
-        if (null!=type&&type instanceof ParameterizedType){
-            Type[] args=((ParameterizedType)type).getActualTypeArguments();
-            if (null!=args&&args.length>0){
-                Classes classes=new Classes();
-                VM vm=null;
-                Integer bindingId=null;
-                for (Type f:args){
-                    if (null!=f&&f instanceof Class){
-                        if (null==vm&&classes.isAssignableFrom((Class<?>) f,BaseModel.class)){
-                            Class cls=(Class)f;
+        Type[] args=null!=type&&type instanceof ParameterizedType?((ParameterizedType)type).getActualTypeArguments():null;
+        if (null==args||args.length<=0){
+            return;
+        }
+        Classes classes=new Classes();
+        Class cls=findFieldClass(ViewDataBinding.class,args,classes);
+        Integer bindingId=null;
+        if (null!=cls){
+            Field[] fields=R.layout.class.getDeclaredFields();
+            if (null!=fields&&fields.length>0){
+                String target=((Class<?>) cls).getSimpleName().toLowerCase(Locale.CHINESE);
+                for (Field field:fields){
+                    if (null!=field){
+                        field.setAccessible(true);
+                        String name=field.getName();
+                        name=null!=name?name.replaceAll("_",""):null;
+                        if (null!=name&&(name+"binding").equals(target)){
                             try {
-                                Constructor constructor=cls.getConstructor(Context.class);
-                                if (null!=constructor){
-                                    constructor.setAccessible(true);
-                                    vm=(VM)constructor.newInstance(this);
-                                }
-                            } catch (Exception e) {
-                                try {
-                                    Constructor constructor= cls.getConstructor();
-                                    if (null!=constructor) {
-                                        constructor.setAccessible(true);
-                                        vm=(VM)constructor.newInstance();
-                                    }
-                                } catch (Exception e1) {
-                                    Debug.E(getClass(),""+cls,e1);
-                                }
+                                bindingId=field.getInt(null);
+                                break;
+                            } catch (IllegalAccessException e) {
+                                //Do nothing
                             }
-                        }else if (null==bindingId&&classes.isAssignableFrom((Class<?>) f,ViewDataBinding.class)){
-                            Field[] fields=R.layout.class.getDeclaredFields();
-                            if (null!=fields&&fields.length>0){
-                                String target=((Class<?>) f).getSimpleName().toLowerCase(Locale.CHINESE);
-                                for (Field field:fields){
-                                    if (null!=field){
-                                        field.setAccessible(true);
-                                        String name=field.getName();
-                                        name=null!=name?name.replaceAll("_",""):null;
-                                        if (null!=name&&(name+"binding").equals(target)){
-                                            try {
-                                                bindingId=field.getInt(null);
-                                                break;
-                                            } catch (IllegalAccessException e) {
-                                               //Do nothing
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (null!=bindingId&&null!=vm){
-                            mViewModel=vm;
-                            mBinding = DataBindingUtil.setContentView(this, bindingId);
-                            mBinding.setVariable(BR.vm, vm);
-                            return;
                         }
                     }
                 }
             }
+        }
+        ViewDataBinding binding=mBinding =(null!=bindingId?DataBindingUtil.setContentView(this, bindingId):null);
+        cls=findFieldClass(BaseModel.class,args,classes);
+        final VM vm=mViewModel=null!=cls?(VM)createInstance(cls):null;
+        if (null!=binding && null!=vm) {
+            try {
+                View root = binding.getRoot();
+                if (null!=root){
+                    Method method = BaseModel.class.getDeclaredMethod("setRootView",View.class);
+                    if (null != method) {
+                        method.setAccessible(true);
+                        method.invoke(vm,new WeakReference<>(root));
+                    }
+                }
+            } catch (Exception e) {
+                //Do nothing
+            }
+            binding.setVariable(BR.vm, vm);
         }
     }
 

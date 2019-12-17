@@ -98,7 +98,7 @@ static enum mad_flow input(void *data,struct mad_stream *stream){
 //          if(end!=currPlayingPos){
 //              struct buffer *buffer = data;
 //
-////              mad_stream_buffer(stream, buffer->start, buffer->length);
+//             mad_stream_buffer(stream, buffer->start, buffer->length);
 //          }
 //          LOGW("deeeeeeee");
 //          int size=fileTell(fp);

@@ -51,7 +51,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         super.onCreate(savedInstanceState);
         new Handler().postDelayed(()->{
             findViewById(R.id.fileBrowser_transmitIV).performClick();
-        },3000);
+        },1000);
         checkPermission();
         Intent intent=getIntent();
         String path="li";
