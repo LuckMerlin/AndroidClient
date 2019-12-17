@@ -29,6 +29,10 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         void onItemClick(View view,int sourceId, T data);
     }
 
+    public final void setData(List<T> data){
+         setData(data,true);
+    }
+
     public final void setData(List<T> data,boolean notify){
         mData= data;
         if (notify){
@@ -45,13 +49,15 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         mClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
+    protected abstract int onResolveNormalTypeLayoutId();
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       final LayoutInflater in=LayoutInflater.from(parent.getContext());
       switch (viewType){
           case TYPE_NORMAL:
-              return new ViewHolder(DataBindingUtil.inflate(in,R.layout.item_list_file, parent, false));
+              return new ViewHolder(DataBindingUtil.inflate(in,onResolveNormalTypeLayoutId(), parent, false));
           case TYPE_TAIL:
               return new BaseViewHolder(in.inflate(R.layout.list_tail, parent, false));
         }

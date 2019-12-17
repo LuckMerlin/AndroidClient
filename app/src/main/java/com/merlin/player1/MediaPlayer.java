@@ -26,7 +26,7 @@ public class MediaPlayer {
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize,
                 AudioTrack.MODE_STREAM);
         audioTrack.play();
-        audioTrack.setVolume(0.12f);
+//        audioTrack.setVolume(0.12f);
     }
 
     public boolean play(Frame frame){

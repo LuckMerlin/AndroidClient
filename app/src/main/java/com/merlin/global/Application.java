@@ -8,6 +8,8 @@ import com.merlin.client.Client;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
 
+import java.util.List;
+
 public class Application extends android.app.Application implements ActivityLifecycle.OnActivityCreate {
    private final Client mClient = new Client(
 //              "172.16.20.215",5005);
@@ -15,6 +17,7 @@ public class Application extends android.app.Application implements ActivityLife
            "www.luckmerlin.com", 5005);
    private final ActivityLifecycle mActivityLifecycle=new ActivityLifecycle(this);
    private final Invoker mInvoker=new Invoker();
+
 
     @Override
     public void onCreate() {
@@ -52,5 +55,10 @@ public class Application extends android.app.Application implements ActivityLife
 
     public Client getClient() {
         return mClient;
+    }
+
+    public List<Activity> finishAllActivity(Object ...activities){
+        ActivityLifecycle lifecycle=mActivityLifecycle;
+        return null!=lifecycle&&null!=activities&&activities.length>0?lifecycle.finishAllActivity(activities):null;
     }
 }

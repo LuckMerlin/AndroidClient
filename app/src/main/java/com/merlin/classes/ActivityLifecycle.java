@@ -7,6 +7,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.merlin.debug.Debug;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -28,6 +32,46 @@ public final class ActivityLifecycle implements Application.ActivityLifecycleCal
 
     public ActivityLifecycle(Callback ...callbacks){
         mCallbacks=callbacks;
+    }
+
+    public List<Activity> finishAllActivity(Object ...activities){
+        if (null!=activities&&activities.length>0){
+            WeakHashMap<Activity,Long> weak=mRunningActivity;
+            Set<Activity> set=null!=weak&&weak.size()>0?weak.keySet():null;
+            if (null!=set){
+                List<Activity> needFinish=new ArrayList<>();
+                for (Object object:activities) {
+                    if (null != object) {
+                        for (Activity activity:set) {
+                            if (null!=activity&&((object==activity)||
+                                    (object instanceof Class &&activity.getClass().equals(object)))){
+                                needFinish.add(activity);
+                            }
+                        }
+                    }
+                 }
+                return finishActivity(needFinish);
+            }
+        }
+        return null;
+    }
+
+    public List<Activity> finishActivity(List<Activity> list){
+        if (null!=list&&list.size()>0){
+            WeakHashMap<Activity,Long> runningActivity=mRunningActivity;
+            List<Activity> finished=new ArrayList<>();
+            for (Activity activity:list) {
+                if (null!=activity&&!activity.isFinishing()){
+                    activity.finish();
+                    if (null!=runningActivity){
+                        runningActivity.remove(activity);
+                    }
+                    finished.add(activity);
+                }
+            }
+            return finished;
+        }
+        return null;
     }
 
     public Activity getTopActivity(){

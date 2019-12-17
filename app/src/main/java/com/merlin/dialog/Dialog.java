@@ -3,7 +3,6 @@ package com.merlin.dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ public class Dialog {
         android.app.Dialog dialog=mDialog=new android.app.Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window=dialog.getWindow();
+        window.setType((WindowManager.LayoutParams.TYPE_SYSTEM_ALERT));
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams params = window.getAttributes();
         params.dimAmount = 0f;

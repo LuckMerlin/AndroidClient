@@ -12,7 +12,7 @@ import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.protocol.What;
 import com.merlin.server.Frame;
 
-public class LoginModel extends BaseModel implements OnFrameReceive, OnClientStatusChange {
+public class LoginModel extends BaseModel implements OnFrameReceive, OnClientStatusChange, BaseModel.OnModelViewClick {
 
     public LoginModel(Context context){
         super(context);

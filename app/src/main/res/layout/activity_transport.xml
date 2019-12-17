@@ -5,11 +5,16 @@
         <variable
             name="vm"
             type="com.merlin.model.TransportModel" />
+        <variable
+            name="onClickListener"
+            type="android.view.View.OnClickListener" />
     </data>
     <RelativeLayout
+        android:id="@+id/activity_transport_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#000"
+        android:onClick="@{vm::onClick}"
+        android:background="#aa000000"
         android:padding="10dp">
         <LinearLayout
             android:orientation="horizontal"

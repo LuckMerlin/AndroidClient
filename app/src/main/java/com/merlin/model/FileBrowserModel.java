@@ -36,7 +36,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, Tag {
+public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, BaseModel.OnModelViewClick, Tag {
     private String mLoadingPath=null,mParentPath;
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
@@ -69,7 +69,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public void onViewClick(View v, int id) {
-        super.onViewClick(v, id);
         switch (id){
             case R.id.fileBrowser_topBackIV:
                 browserParent();

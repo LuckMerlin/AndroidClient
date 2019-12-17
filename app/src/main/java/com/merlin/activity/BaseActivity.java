@@ -109,7 +109,7 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
                     Method method = BaseModel.class.getDeclaredMethod("setRootView",View.class);
                     if (null != method) {
                         method.setAccessible(true);
-                        method.invoke(vm,new WeakReference<>(root));
+                        method.invoke(vm,root);
                     }
                 }
             } catch (Exception e) {

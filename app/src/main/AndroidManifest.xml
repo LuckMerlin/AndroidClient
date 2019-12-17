@@ -6,11 +6,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application
         android:name="com.merlin.global.Application"
         android:allowBackup="false"
-        android:theme="@android:style/Theme.Translucent">
+        android:theme="@android:style/Theme.Translucent.NoTitleBar">
         <activity
             android:name="com.merlin.activity.MainActivity">
             <intent-filter>
@@ -20,8 +21,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.FileBrowserActivity"/>
-        <activity android:name="com.merlin.activity.TransportActivity"
-             android:theme="@android:style/Theme.Translucent"/>
+        <activity android:name="com.merlin.activity.TransportActivity"/>
+        <service android:name="com.merlin.task.DownloadService"/>
     </application>
 
 </manifest>

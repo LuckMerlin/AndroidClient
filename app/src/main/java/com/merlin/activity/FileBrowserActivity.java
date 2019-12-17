@@ -20,6 +20,8 @@ import com.merlin.model.FileBrowserModel;
 import com.merlin.player.Player;
 import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
+import com.merlin.task.Download;
+import com.merlin.task.DownloadService;
 
 import java.io.File;
 import java.io.Serializable;
@@ -50,7 +52,9 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
         new Handler().postDelayed(()->{
-            findViewById(R.id.fileBrowser_transmitIV).performClick();
+//            findViewById(R.id.fileBrowser_transmitIV).performClick();
+            Download download=new Download("/src","/sdcard/linqiang.mp3","rrrrrr");
+            DownloadService.post(this,download);
         },1000);
         checkPermission();
         Intent intent=getIntent();

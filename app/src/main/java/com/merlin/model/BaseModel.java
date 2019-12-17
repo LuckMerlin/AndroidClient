@@ -1,6 +1,9 @@
 package com.merlin.model;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -20,17 +23,27 @@ import com.merlin.server.Json;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 
 public class BaseModel implements View.OnClickListener, Tag {
     private WeakReference<View> mRootView=null;
-    private final Client mClient;
     private final WeakReference<Context> mContext;
 
+
+    public  interface OnModelViewClick{
+        void onViewClick(View v,int id);
+    }
+
     public BaseModel(Context context){
-        mContext=null!=context?new WeakReference<>(context):null;
-        context=null!=context?(context instanceof Application?context:context.getApplicationContext()) :null;
-        mClient=null!=context&&context instanceof Application?((Application)context).getClient():null;
+       context=null!=context?(context instanceof Application?context:context.getApplicationContext()) :null;
+       mContext=null!=context&&context instanceof Application?new WeakReference<>(context):null;
+    }
+
+    protected final Application getApplication(){
+        Context context=getContext();
+        context=null!=context?context instanceof Application?context:context.getApplicationContext():null;
+        return null!=context&&context instanceof Application?(Application)context:null;
     }
 
     protected void onViewAttached(View root){
@@ -50,14 +63,11 @@ public class BaseModel implements View.OnClickListener, Tag {
     }
 
     public final void toast(String msg){
-        Context context=getContext();
+        View root=getRoot();
+        Context context=null!=root?root.getContext():null;
         if (null!=context&&null!=msg){
             Toast.makeText(context,msg,Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void onViewClick(View v,int id){
-        //Do nothing
     }
 
     public final View getRoot(){
@@ -73,8 +83,8 @@ public class BaseModel implements View.OnClickListener, Tag {
 
     @Override
     public final void onClick(View v) {
-        if (null!=v) {
-            onViewClick(v,v.getId());
+        if (null!=v&&this instanceof  OnModelViewClick) {
+            ((OnModelViewClick)this).onViewClick(v,v.getId());
         }
     }
 
@@ -90,7 +100,7 @@ public class BaseModel implements View.OnClickListener, Tag {
     }
 
     public final boolean getClientMeta(JSONObject jsonObject, Callback ...callbacks){
-        Client client=mClient;
+        Client client=getClient();
         if (null!=client){
             return client.getClientMeta(jsonObject,callbacks);
         }
@@ -104,7 +114,7 @@ public class BaseModel implements View.OnClickListener, Tag {
     }
 
     public final String getLoginAccount(){
-        Client client=mClient;
+        Client client=getClient();
         return null!=client?client.getLoginedAccount():null;
     }
 
@@ -113,13 +123,19 @@ public class BaseModel implements View.OnClickListener, Tag {
     }
 
     public final boolean sendMessage(String body, String msgTo,String msgType,int timeout, Callback...callbacks) {
-        Client client=mClient;
+        Client client=getClient();
         if (null!=client){
             return client.sendMessage(body,msgTo,msgType,timeout,callbacks);
         }
         Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
         Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
         return false;
+    }
+
+
+    protected final Client getClient(){
+        Application application=getApplication();
+        return null!=application?application.getClient():null;
     }
 
     public final Context getContext(){
@@ -149,6 +165,30 @@ public class BaseModel implements View.OnClickListener, Tag {
         View root=getRoot();
         if (null!=root&&null!=runnable){
             return root.postDelayed(runnable,delay);
+        }
+        return false;
+    }
+
+    protected final List<Activity> finishAllActivity(Object...activities){
+        Application application=getApplication();
+        return null!=application?application.finishAllActivity(activities):null;
+    }
+
+
+    protected final boolean startActivity(Class<? extends Activity> cls){
+        return startActivity(cls,null);
+    }
+
+    protected final boolean startActivity(Class<? extends Activity> cls, Bundle bundle){
+        Context context=getContext();
+        if (null!=context&&null!=cls){
+            Intent intent=new Intent(context,cls);
+            if (null!=bundle){
+                intent.putExtras(bundle);
+            }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            return true;
         }
         return false;
     }

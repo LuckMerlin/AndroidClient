@@ -81,20 +81,4 @@ public class DataListModel extends BaseModel {
         return mLayoutManager;
     }
 
-    protected final boolean startActivity(Class<? extends Activity> cls){
-        return startActivity(cls,null);
-    }
-
-    protected final boolean startActivity(Class<? extends Activity> cls, Bundle bundle){
-        Context context=getContext();
-        if (null!=context&&null!=cls){
-            Intent intent=new Intent(context,cls);
-            if (null!=bundle){
-                intent.putExtras(bundle);
-            }
-            context.startActivity(intent);
-            return true;
-        }
-        return false;
-    }
 }

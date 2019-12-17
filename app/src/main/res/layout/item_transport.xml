@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="transport"
+            type="com.merlin.transport.Transport" />
+    </data>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="#55ffffff"
+        android:layout_marginBottom="2dp"
+        android:padding="3dp"
+        android:layout_height="50dp">
+        <ProgressBar
+            android:id="@+id/item_transporting_progressPB"
+            android:progress="30"
+            android:layout_alignParentBottom="true"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
+        <LinearLayout
+            android:layout_above="@id/item_transporting_progressPB"
+            android:paddingLeft="5dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@{transport.name}"
+                    android:textStyle="bold"
+                    android:layout_alignParentLeft="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_alignParentRight="true"
+                    android:text="12.45kb/s"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="/sdcard 12.4MB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="/"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:text="15.45MB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</layout>
