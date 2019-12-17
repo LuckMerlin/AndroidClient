@@ -25,7 +25,7 @@ public class MediaPlayer {
                 samplerate, AudioFormat.CHANNEL_IN_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize,
                 AudioTrack.MODE_STREAM);
-        audioTrack.play();
+//        audioTrack.play();
 //        audioTrack.setVolume(0.12f);
     }
 

@@ -242,4 +242,5 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     public ObservableField<Meta> getCurrentMeta() {
         return mClientMeta;
     }
+
 }
