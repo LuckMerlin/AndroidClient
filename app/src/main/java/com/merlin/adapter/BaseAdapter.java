@@ -13,6 +13,8 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -22,11 +24,16 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     public static final int TYPE_TAIL = 2;
     public static final int TYPE_EMPTY = 3;
     private WeakReference<OnItemClickListener> mClickListener;
+    private WeakReference<OnItemLongClickListener> mLongClickListener;
     private Handler mHandler;
     private List<T> mData;
 
     public interface OnItemClickListener<T>{
         void onItemClick(View view,int sourceId, T data);
+    }
+
+    public interface OnItemLongClickListener<T>{
+        boolean onItemLongClick(View view,int sourceId, T data);
     }
 
     public final void setData(List<T> data){
@@ -47,6 +54,10 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
 
     public void setOnItemClickListener(OnItemClickListener listener){
         mClickListener=null!=listener?new WeakReference<>(listener):null;
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener listener){
+        mLongClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     protected abstract int onResolveNormalTypeLayoutId();
@@ -73,28 +84,38 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         T data=getItem(position);
         onBindViewHolder(holder,(V)binding,position,data,payloads);
         WeakReference<OnItemClickListener> reference=mClickListener;
+        WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
         OnItemClickListener listener=null!=reference?reference.get():null;
+        OnItemLongClickListener longListener=null!=longReference?longReference.get():null;
+
         Method[] methods=null!=listener&&null!=binding?binding.getClass().getDeclaredMethods():null;
         if (null!=methods&&methods.length>0){
             for (Method m:methods) {
                 Class[] types=null!=m?m.getParameterTypes():null;
                 Class type=null!=types&&types.length==1?types[0]:null;
-                if (null!=type&&type.equals(View.OnClickListener.class)){
+                if (null!=listener&&null!=type&&type.equals(View.OnClickListener.class)){
                     try {
-                        m.invoke(binding, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (null!=v) {
-                                    listener.onItemClick(v, v.getId(), data);
-                                }
+                        m.invoke(binding,(View.OnClickListener)(v)->{
+                            if (null!=v) {
+                                listener.onItemClick(v, v.getId(), data);
                             }
                         });
                     } catch (Exception e) {
                         //Do nothing
                     }
                 }
+                if (null!=longListener&&null!=type&&type.equals(View.OnLongClickListener.class)){
+                    try {
+                        m.invoke(binding,(View.OnLongClickListener)(v)->
+                                null!=v&&longListener.onItemLongClick(v, v.getId(), data));
+                    } catch (Exception e) {
+                        //Do nothing
+                    }
+                }
             }
         }
+
+
     }
 
     @Override
@@ -117,10 +138,19 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         return TYPE_EMPTY;
     }
 
+    public final int getDataCount(){
+        List<T> data=mData;
+        return null!=data?data.size():0;
+    }
+
     @Override
     public final int getItemCount() {
         List<T> data=mData;
         return 1+(null!=data?data.size():0);
+    }
+
+    public final List<T> getData() {
+        return mData;
     }
 
     protected final static class BaseViewHolder extends RecyclerView.ViewHolder{

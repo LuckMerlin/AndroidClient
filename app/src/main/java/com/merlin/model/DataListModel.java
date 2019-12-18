@@ -1,9 +1,6 @@
 package com.merlin.model;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 
 import androidx.annotation.ColorInt;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,8 +21,13 @@ public class DataListModel extends BaseModel {
         super(context);
         mAdapter=adapter;
         mLayoutManager=manager;
-        if (null!=adapter&&this instanceof BaseAdapter.OnItemClickListener){
-            adapter.setOnItemClickListener((BaseAdapter.OnItemClickListener) this);
+        if (null!=adapter){
+            if (this instanceof BaseAdapter.OnItemClickListener) {
+                adapter.setOnItemClickListener((BaseAdapter.OnItemClickListener) this);
+            }
+            if (this instanceof BaseAdapter.OnItemLongClickListener){
+                adapter.setOnItemLongClickListener((BaseAdapter.OnItemLongClickListener)this);
+            }
         }
     }
 
@@ -73,7 +75,7 @@ public class DataListModel extends BaseModel {
         return false;
     }
 
-    public final RecyclerView.Adapter getAdapter() {
+    public final BaseAdapter getAdapter() {
         return mAdapter;
     }
 

@@ -9,13 +9,13 @@
             name="meta"
             type="com.merlin.bean.Meta" />
         <import type="com.merlin.util.FileSize"/>
-<!--        <import type="com.merlin.client.R"/>-->
+        <import type="android.view.View"/>
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="3dp"
-        android:alpha="1.1"
+        android:alpha="0.2"
         android:paddingRight="3dp">
         <RelativeLayout
             android:id="@+id/fileBrowser_topRL"
@@ -35,19 +35,60 @@
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
+                        android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
                         android:onClick="@{vm::onClick}"
                         android:src="@drawable/ic_back"/>
+                    <ImageView
+                        android:id="@+id/fileBrowser_cancelIV"
+                        android:layout_width="@dimen/titleIconSize"
+                        android:layout_height="@dimen/titleIconSize"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="15dp"
+                        android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
+                        android:onClick="@{vm::onClick}"
+                        android:src="@drawable/cancel_selector"/>
                     <TextView
                         android:text="@{vm.getCurrentMeta().name}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
+                        android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:text="@{vm.multiChooseCount()}"
+                        android:textSize="@dimen/textTitle"
+                        android:textStyle="bold"
+                        android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
             </LinearLayout>
+
+            <ImageView
+                android:id="@+id/fileBrowser_chooseAllIV"
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:onClick="@{vm::onClick}"
+                android:visibility="@{vm.isMultiMode()&amp;&amp;!vm.isAllChoose()?View.VISIBLE:View.GONE}"
+                android:src="@drawable/choose_all_selector"
+                android:layout_width="@dimen/titleIconSize"
+                android:layout_height="@dimen/titleIconSize"/>
+            <ImageView
+                android:id="@+id/fileBrowser_unChooseAllIV"
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:onClick="@{vm::onClick}"
+                android:visibility="@{vm.isMultiMode()&amp;&amp;vm.isAllChoose()?View.VISIBLE:View.GONE}"
+                android:src="@drawable/ic_menu_alls"
+                android:layout_width="@dimen/titleIconSize"
+                android:layout_height="@dimen/titleIconSize"/>
+
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <ImageView

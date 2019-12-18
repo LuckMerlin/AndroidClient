@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="clickListener"
+            name="click"
             type="android.view.View.OnClickListener" />
+        <variable
+            name="longClick"
+            type="android.view.View.OnLongClickListener" />
+        <variable
+            name="isMultiChoose"
+            type="Boolean" />
+        <variable
+            name="isChoose"
+            type="Boolean" />
+        <import type="android.view.View"/>
 
     </data>
     <RelativeLayout
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
         android:background="#45000000"
-        android:onClick="@{clickListener}"
+        binding:OnLongClickListener="@{longClick}"
+        android:onClick="@{click}"
         android:layout_height="@dimen/listItemNormal">
         <ImageView
             android:id="@+id/itemListFile_icon"
@@ -38,5 +50,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+        <CheckBox
+            android:id="@+id/itemListFile_selectCB"
+            android:layout_alignParentRight="true"
+            style="@style/checkboxStyle"
+            android:clickable="false"
+            android:visibility="@{isMultiChoose?View.VISIBLE:View.GONE}"
+            android:checked="@{isChoose}"
+            android:layout_width="@dimen/titleIconSize"
+            android:layout_height="@dimen/titleIconSize"/>
     </RelativeLayout>
 </layout>

@@ -46,7 +46,6 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        FileBrowserModel.MM=this;
         super.onCreate(savedInstanceState);
         new Handler().postDelayed(()->{
 //            findViewById(R.id.fileBrowser_transmitIV).performClick();
@@ -100,7 +99,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 
     @Override
     public void onBackPressed() {
-        if (!getViewModel().browserParent()){
+        if (!getViewModel().onBackPressed()){
             super.onBackPressed();
         }
     }

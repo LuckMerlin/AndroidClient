@@ -1,5 +1,7 @@
 package com.merlin.bean;
 
+import androidx.annotation.Nullable;
+
 public class FileMeta {
     /**
      * file : F:\LuckMerlin\SLManager\.git
@@ -92,5 +94,18 @@ public class FileMeta {
 
     public void setExtension(String extension) {
         this.extension = extension;
+    }
+
+    public final  boolean isPathEquals(String path){
+        String filePath=file;
+        return null!=path&&null!=filePath&&filePath.equals(path);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (null!=obj&&obj instanceof FileMeta){
+            return isPathEquals(((FileMeta)obj).getFile());
+        }
+        return super.equals(obj);
     }
 }

@@ -7,8 +7,10 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.ImageView;
 
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -24,6 +26,7 @@ import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
+import com.merlin.global.Application;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
 import com.merlin.protocol.Tag;
@@ -34,12 +37,17 @@ import com.merlin.server.Response;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener, BaseAdapter.OnItemClickListener,OnFrameReceive, BaseModel.OnModelViewClick, Tag {
+public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
+        BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive, BaseModel.OnModelViewClick, Tag {
     private String mLoadingPath=null,mParentPath;
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
+    private final ObservableField<String> mMultiCount=new ObservableField<>();
+    private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
+    private final ObservableBoolean mMultiMode=new ObservableBoolean(true);
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
@@ -57,21 +65,42 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     public void onItemClick(View view, int sourceId, Object data) {
        if (null!=data&&data instanceof FileMeta){
            FileMeta file=(FileMeta)data;
-            if (!file.isRead()){
-                toast("文件不可读");
-            }else if (file.isDirectory()){
-                browser(file.getFile());
-            }else{
-                toast("点击了文件"+file.getName());
-            }
+           if (isMultiMode().get()){
+               multiChoose(file);
+           }else{
+               if (!file.isRead()){
+                   toast("文件不可读");
+               }else if (file.isDirectory()){
+                   browser(file.getFile());
+               }else{
+                   toast("点击了文件"+file.getName());
+               }
+           }
        }
+    }
+
+    @Override
+    public boolean onItemLongClick(View view, int sourceId, Object data) {
+        if (null!=data&&data instanceof FileMeta){
+            return !isMultiMode().get()&&multiMode(true);
+        }
+        return false;
     }
 
     @Override
     public void onViewClick(View v, int id) {
         switch (id){
+            case R.id.fileBrowser_cancelIV:
+                onBackPressed();
+                break;
             case R.id.fileBrowser_topBackIV:
                 browserParent();
+                break;
+            case R.id.fileBrowser_chooseAllIV:
+                chooseAll(true);
+                break;
+            case R.id.fileBrowser_unChooseAllIV:
+                chooseAll(false);
                 break;
             case R.id.fileBrowser_menuIV:
                 toast("点击了菜单");
@@ -87,7 +116,14 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         }
     }
 
-    public boolean browserParent(){
+    public boolean onBackPressed(){
+        if (isMultiMode().get()){
+            return chooseAll(false)||multiMode(false);
+        }
+        return browserParent();
+    }
+
+    private boolean browserParent(){
         String currPath=mCurrPath.get();
         Meta meta=mClientMeta.get();
         String root=null!=meta?meta.getRoot():null;
@@ -101,7 +137,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     public void onRefresh() {
         browser(mCurrPath.get());//Browser current path again
     }
-
 
     public ObservableField<String> getCurrentPath() {
         return mCurrPath;
@@ -128,8 +163,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         }
     }
 
-    public static Context MM;
-
     private boolean openFile(String path){
 //        path = "F:\\LuckMerlin\\SLManager\\test.png";
 //        path = "C:\\Users\\admin\\Desktop\\linqiang.mp3";
@@ -137,28 +170,18 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
         Json.putIfNotNull(object,TAG_FILE,path);
         Handler handler=new Handler(Looper.getMainLooper());
-//        MediaPlayer player=new MediaPlayer();
         return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY,30*1000,new Socket.OnRequestFinish() {
             @Override
             public void onRequestFinish(boolean succeed, int what, Frame frame) {
-//                if (succeed&&null!=frame){
-//                  handler.post(new Runnable() {
-//                      @Override
-//                      public void run() {
-////                          player.play(frame);
-//                      }
-//                  });
-//                }
-//                Debug.D(getClass(),"收到 真 "+succeed++" "+(null!=frame?frame.getBodyBytesLength():-1));
-                                handler.post(new Runnable() {
+                    handler.post(new Runnable() {
                     @Override
                     public void run() {
                         byte[] bytes=frame.getBodyBytes();
-                        Dialog dialog=new Dialog(MM);
-                        ImageView imageView=new ImageView(MM);
-                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
-                        dialog.setContentView(imageView);
-                        dialog.show();
+//                        Dialog dialog=new Dialog(MM);
+//                        ImageView imageView=new ImageView(MM);
+//                        imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
+//                        dialog.setContentView(imageView);
+//                        dialog.show();
                     }
                 });
             }
@@ -167,6 +190,15 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public final boolean refreshCurrentPath(){
         browser(mCurrPath.get());
+        return false;
+    }
+
+    public final boolean chooseAll(boolean choose){
+        FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
+        if (isMultiMode().get()&&null!=adapter&&adapter.chooseAll(choose)){
+            multiChooseCount();
+            return true;
+        }
         return false;
     }
 
@@ -243,4 +275,43 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         return mClientMeta;
     }
 
+    public ObservableBoolean isMultiMode() {
+        return mMultiMode;
+    }
+
+    private boolean multiMode(boolean entry){
+        boolean curr=mMultiMode.get();
+        if (entry!=curr){
+            FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
+            adapter.multiMode(entry);
+            mMultiMode.set(entry);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean multiChoose(FileMeta meta){
+        FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
+        if (null!=meta&&mMultiMode.get()&&adapter.multiChoose(meta)){
+            multiChooseCount();
+            return true;
+        }
+        return false;
+    }
+
+    public ObservableField<Boolean> isAllChoose() {
+        return mAllChoose;
+    }
+
+    public ObservableField<String> multiChooseCount() {
+        int count=((FileBrowserAdapter)getAdapter()).getChooseCount();
+        mMultiCount.set(count<=0?"None selected":"Selected("+count+")");
+        BaseAdapter adapter=getAdapter();
+        if (null!=adapter){
+            List<FileMeta> data=adapter.getData();
+            int size=null!=data?data.size():0;
+            mAllChoose.set(size==count&&size>0);
+        }
+        return mMultiCount;
+    }
 }
