@@ -26,7 +26,6 @@ import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
-import com.merlin.global.Application;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
 import com.merlin.protocol.Tag;
@@ -37,7 +36,6 @@ import com.merlin.server.Response;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
@@ -47,7 +45,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
-    private final ObservableBoolean mMultiMode=new ObservableBoolean(true);
+    private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
@@ -311,6 +309,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             List<FileMeta> data=adapter.getData();
             int size=null!=data?data.size():0;
             mAllChoose.set(size==count&&size>0);
+            Debug.D(getClass(),"DDDDDDDDDDD "+mAllChoose.get());
         }
         return mMultiCount;
     }

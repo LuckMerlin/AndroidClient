@@ -3,6 +3,8 @@
         android:drawable="@drawable/checkbox_on_normal"
         android:state_checked="true"/>
     <item
-        android:drawable="@drawable/checkbox_on_disable_dark"/>
+        android:drawable="@drawable/checkbox_on_disable_dark"
+        android:state_checked="false"/>
+    <item android:drawable="@drawable/checkbox_on_disable_dark"/>
 
 </selector>

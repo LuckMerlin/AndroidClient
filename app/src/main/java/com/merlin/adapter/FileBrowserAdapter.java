@@ -28,9 +28,7 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data){
             boolean multiChoose=null!=mMultiChoose;
-            if (multiChoose) {
-                binding.setIsChoose(isChoose(data));
-            }
+            binding.setIsChoose(isChoose(data));
             binding.setIsMultiChoose(multiChoose);
             setText(binding.itemListFileTitle,data.getName(),"None");
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -68,9 +66,8 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
             list.addAll(data);
             notifyDataSetChanged();
             return true;
-        } else if (!choose && null!=list) {
+        } else if (!choose && null!=list&&list.size()>0) {
             list.clear();
-            mMultiChoose=null;
             notifyDataSetChanged();
             return true;
         }
@@ -83,7 +80,7 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
             if (null==list?(list=new ArrayList<>()).add(meta):
                     (list.contains(meta)?list.remove(meta):list.add(meta))){
                 mMultiChoose=null!=list&&list.size()>0?list:null;
-                notifyDataSetChanged();
+                notifyItemChanged(index(meta));
                 return true;
             }
         }

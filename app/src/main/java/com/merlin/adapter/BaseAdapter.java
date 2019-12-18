@@ -178,4 +178,10 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
             tv.setText(null!=value?value:(null==ifNull?"":ifNull));
         }
   }
+
+    protected final int index(T data){
+        List<T> list=null!=data?mData:null;
+        return null!=list?list.indexOf(data):-1;
+    }
+
 }
