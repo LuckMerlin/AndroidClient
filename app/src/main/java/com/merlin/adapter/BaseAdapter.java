@@ -1,8 +1,10 @@
 package com.merlin.adapter;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -25,11 +27,16 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     public static final int TYPE_EMPTY = 3;
     private WeakReference<OnItemClickListener> mClickListener;
     private WeakReference<OnItemLongClickListener> mLongClickListener;
+    private WeakReference<OnItemDobuleClickListener> mDoubleClickListener;
     private Handler mHandler;
     private List<T> mData;
 
     public interface OnItemClickListener<T>{
         void onItemClick(View view,int sourceId, T data);
+    }
+
+    public interface OnItemDobuleClickListener<T>{
+        void onItemDoubleClick(View view,int sourceId, T data);
     }
 
     public interface OnItemLongClickListener<T>{
@@ -83,39 +90,21 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
         T data=getItem(position);
         onBindViewHolder(holder,(V)binding,position,data,payloads);
-        WeakReference<OnItemClickListener> reference=mClickListener;
-        WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
-        OnItemClickListener listener=null!=reference?reference.get():null;
-        OnItemLongClickListener longListener=null!=longReference?longReference.get():null;
-
-        Method[] methods=null!=listener&&null!=binding?binding.getClass().getDeclaredMethods():null;
-        if (null!=methods&&methods.length>0){
-            for (Method m:methods) {
-                Class[] types=null!=m?m.getParameterTypes():null;
-                Class type=null!=types&&types.length==1?types[0]:null;
-                if (null!=listener&&null!=type&&type.equals(View.OnClickListener.class)){
-                    try {
-                        m.invoke(binding,(View.OnClickListener)(v)->{
-                            if (null!=v) {
-                                listener.onItemClick(v, v.getId(), data);
-                            }
-                        });
-                    } catch (Exception e) {
-                        //Do nothing
-                    }
+        View root=null!=binding?binding.getRoot():null;
+        if (null!=root){
+                WeakReference<OnItemClickListener> reference=mClickListener;
+                OnItemClickListener listener=null!=reference?reference.get():null;
+                WeakReference<OnItemDobuleClickListener> doubleReference=mDoubleClickListener;
+                OnItemDobuleClickListener doubleListener=null!=doubleReference?doubleReference.get():null;
+                if (null!=listener||null!=doubleListener){
+                    root.setOnClickListener((view)-> listener.onItemClick(view, view.getId(), data));
                 }
-                if (null!=longListener&&null!=type&&type.equals(View.OnLongClickListener.class)){
-                    try {
-                        m.invoke(binding,(View.OnLongClickListener)(v)->
-                                null!=v&&longListener.onItemLongClick(v, v.getId(), data));
-                    } catch (Exception e) {
-                        //Do nothing
-                    }
-                }
+            WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
+            OnItemLongClickListener longClickListener=null!=longReference?longReference.get():null;
+            if (null!=listener){
+                root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),data));
             }
         }
-
-
     }
 
     @Override
@@ -182,6 +171,11 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     protected final int index(T data){
         List<T> list=null!=data?mData:null;
         return null!=list?list.indexOf(data):-1;
+    }
+
+    private static abstract class DoubleClick implements Runnable{
+            private long mTime;
+
     }
 
 }

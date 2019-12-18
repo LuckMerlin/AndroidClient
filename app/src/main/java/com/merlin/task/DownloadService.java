@@ -9,12 +9,14 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.bean.FileMeta;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.DownloadFileExistDialog;
 import com.merlin.global.Application;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class DownloadService extends Service {
@@ -73,10 +75,27 @@ public class DownloadService extends Service {
         return false;
     }
 
-    public static boolean post(Context context,Download download){
+    public static boolean post(Context context, List<FileMeta> download) {
+        if (null!=download&&download.size()>0){
+            for (FileMeta fileMeta:download){
+                if (null!=fileMeta){
+//                    String src,String target,String unique
+                    new Download(fileMeta.getFile(),fileMeta.getName(),null);
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean post(Context context, Collection<Download> download){
         if (null!=context&&null!=download){
             Intent intent=new Intent(context,DownloadService.class);
-            intent.putExtra(LABEL_DOWNLOAD,download);
+            if (!(download instanceof ArrayList)){
+                List<Download> list=new ArrayList<>();
+                list.addAll(download);
+                download=list;
+            }
+            intent.putParcelableArrayListExtra(LABEL_DOWNLOAD,(ArrayList<Download>) download);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 return null!=context.startForegroundService(intent);
             }else{

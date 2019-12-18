@@ -55,7 +55,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
-                        android:text="@{vm.multiChooseCount()}"
+                        android:text="@{vm.getMultiChooseCount()}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
                         android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
@@ -166,5 +166,54 @@
             binding:viewModel="@{vm}"
             android:layout_below="@id/fileBrowser_meta_dividerV"
             android:layout_height="match_parent"/>
+        <LinearLayout
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/fileBrowser_downloadTV"
+                android:drawableTop="@drawable/ic_back"
+                android:onClick="@{vm::onClick}"
+                android:text="Download"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:layout_weight="1"
+                android:layout_width="@dimen/listIconNormal"
+                android:layout_height="@dimen/listIconNormal"/>
+            <TextView
+                android:id="@+id/fileBrowser_copyTV"
+                android:drawableTop="@drawable/ic_back"
+                android:text="Copy"
+                android:layout_weight="1"
+                android:onClick="@{vm::onClick}"
+                android:layout_width="@dimen/listIconNormal"
+                android:layout_height="@dimen/listIconNormal"/>
+            <TextView
+                android:id="@+id/fileBrowser_moveTV"
+                android:drawableTop="@drawable/ic_back"
+                android:text="Move"
+                android:layout_weight="1"
+                android:onClick="@{vm::onClick}"
+                android:layout_width="@dimen/listIconNormal"
+                android:layout_height="@dimen/listIconNormal"/>
+            <TextView
+                android:id="@+id/fileBrowser_deleteTV"
+                android:drawableTop="@drawable/ic_back"
+                android:text="Delete"
+                android:layout_weight="1"
+                android:onClick="@{vm::onClick}"
+                android:layout_width="@dimen/listIconNormal"
+                android:layout_height="@dimen/listIconNormal"/>
+            <TextView
+                android:id="@+id/fileBrowser_moreTV"
+                android:drawableTop="@drawable/ic_back"
+                android:text="More"
+                android:layout_weight="1"
+                android:onClick="@{vm::onClick}"
+                android:layout_width="@dimen/listIconNormal"
+                android:layout_height="@dimen/listIconNormal"/>
+        </LinearLayout>
     </RelativeLayout>
 </layout>

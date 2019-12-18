@@ -1,14 +1,10 @@
 package com.merlin.model;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.Adapter;
-import android.widget.ImageView;
 
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
@@ -33,6 +29,7 @@ import com.merlin.protocol.What;
 import com.merlin.server.Frame;
 import com.merlin.server.Json;
 import com.merlin.server.Response;
+import com.merlin.task.DownloadService;
 
 import org.json.JSONObject;
 
@@ -44,8 +41,12 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
-    private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
+    private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
+
+    private interface OnChooseExist{
+        void onChooseExist(List<FileMeta> list);
+    }
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
@@ -110,6 +111,9 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 break;
             case R.id.fileBrowser_transmitIV:
                 startActivity(TransportActivity.class);
+                break;
+            case R.id.fileBrowser_downloadTV:
+                runChoose((list)->DownloadService.post(v.getContext(),list),true);
                 break;
         }
     }
@@ -301,7 +305,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         return mAllChoose;
     }
 
-    public ObservableField<String> multiChooseCount() {
+    private void multiChooseCount() {
         int count=((FileBrowserAdapter)getAdapter()).getChooseCount();
         mMultiCount.set(count<=0?"None selected":"Selected("+count+")");
         BaseAdapter adapter=getAdapter();
@@ -309,8 +313,22 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             List<FileMeta> data=adapter.getData();
             int size=null!=data?data.size():0;
             mAllChoose.set(size==count&&size>0);
-            Debug.D(getClass(),"DDDDDDDDDDD "+mAllChoose.get());
         }
+    }
+
+    public ObservableField<String> getMultiChooseCount() {
         return mMultiCount;
+    }
+
+    private void runChoose(OnChooseExist exit,boolean emptyToast){
+        FileBrowserAdapter adapter=((FileBrowserAdapter)getAdapter());
+        List<FileMeta> list=null!=adapter?adapter.getChoose():null;
+        if (null==list||list.size()<=0){
+            if (emptyToast){
+                toast("Choose nothing.");
+            }
+        }else if(null!=exit){
+            exit.onChooseExist(list);
+        }
     }
 }

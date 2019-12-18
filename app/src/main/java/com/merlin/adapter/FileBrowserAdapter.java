@@ -91,4 +91,9 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
         List<FileMeta> list=mMultiChoose;
         return null!=list?list.size():0;
     }
+
+    public List<FileMeta> getChoose(){
+        List<FileMeta> list=mMultiChoose;
+        return list;
+    }
 }

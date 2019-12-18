@@ -7,9 +7,5 @@
         android:state_pressed = "true"
         android:drawable = "@drawable/ic_menu_all_press"/>
 
-    <item
-        android:state_accelerated="true"
-        android:drawable = "@drawable/ic_menu_alls"/>
-
     <item android:drawable = "@drawable/ic_menu_all" />
 </selector>

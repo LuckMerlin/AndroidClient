@@ -56,8 +56,9 @@
             style="@style/checkboxStyle"
             android:clickable="false"
             android:visibility="@{isMultiChoose?View.VISIBLE:View.GONE}"
+            android:layout_centerVertical="true"
             android:checked="@{isChoose}"
-            android:layout_width="@dimen/titleIconSize"
-            android:layout_height="@dimen/titleIconSize"/>
+            android:layout_width="@dimen/listIconNormal"
+            android:layout_height="@dimen/listIconNormal"/>
     </RelativeLayout>
 </layout>
