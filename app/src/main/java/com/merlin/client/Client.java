@@ -1,10 +1,14 @@
 package com.merlin.client;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.Callback;
 import com.merlin.oksocket.Socket;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.server.Frame;
+import com.merlin.server.Json;
 
 import org.json.JSONObject;
 
@@ -56,6 +60,18 @@ public final class Client extends Socket {
 
     public String getLoginedAccount(){
         return mAccount;
+    }
+
+    public boolean download(String from,String path,OnRequestFinish callback){
+        if (null==path||null==callback||null==from){
+            Debug.W(getClass(),"Can't download file with client."+from+" "+path+" "+callback);
+            return false;
+        }
+        JSONObject object=new JSONObject();
+        Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
+        Json.putIfNotNull(object,TAG_FILE,path);
+        return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY,30*1000,(OnRequestFinish)(succeed,what,frame)->
+                callback.onRequestFinish(succeed,what,frame));
     }
 
 }

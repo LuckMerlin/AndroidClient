@@ -3,12 +3,6 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="click"
-            type="android.view.View.OnClickListener" />
-        <variable
-            name="longClick"
-            type="android.view.View.OnLongClickListener" />
-        <variable
             name="isMultiChoose"
             type="Boolean" />
         <variable
@@ -21,8 +15,6 @@
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
         android:background="#45000000"
-        binding:OnLongClickListener="@{longClick}"
-        android:onClick="@{click}"
         android:layout_height="@dimen/listItemNormal">
         <ImageView
             android:id="@+id/itemListFile_icon"

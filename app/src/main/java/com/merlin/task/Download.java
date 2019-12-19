@@ -3,22 +3,39 @@ package com.merlin.task;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Download  implements Parcelable {
-
+public final class Download  implements Parcelable {
+    public final static int TYPE_REPLACE=123;
+    public final static int TYPE_NORMAL=124;
+    private String mFrom;
     private String mSrc;
     private String mTarget;
     private String mUnique;
+    private String mName;
+    private int mType=TYPE_REPLACE;
 
     private Download(Parcel in){
         mSrc= in.readString();
         mTarget = in.readString();
         mUnique=in.readString();
+        mName=in.readString();
+        mType=in.readInt();
+        mFrom=in.readString();
     }
 
-    public Download(String src,String target,String unique){
+    public Download(String from,String src,String name,String target,String unique){
+        mFrom=from;
         mSrc=src;
+        mName=name;
         mTarget=target;
         mUnique=unique;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String mName) {
+        this.mName = mName;
     }
 
     public String getSrc() {
@@ -33,6 +50,14 @@ public class Download  implements Parcelable {
         return mUnique;
     }
 
+    public String getFrom() {
+        return mFrom;
+    }
+
+    public int getType() {
+        return mType;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -43,6 +68,9 @@ public class Download  implements Parcelable {
         dest.writeString(mSrc);
         dest.writeString(mTarget);
         dest.writeString(mUnique);
+        dest.writeString(mName);
+        dest.writeInt(mType);
+        dest.writeString(mFrom);
     }
 
     public static final Parcelable.Creator<Download> CREATOR = new Parcelable.Creator<Download>(){

@@ -96,13 +96,13 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
                 WeakReference<OnItemDobuleClickListener> doubleReference=mDoubleClickListener;
                 OnItemDobuleClickListener doubleListener=null!=doubleReference?doubleReference.get():null;
                 if (null!=listener||null!=doubleListener){
-                    root.setOnClickListener((view)-> listener.onItemClick(view, view.getId(), data));
+                    root.setOnClickListener((view)->listener.onItemClick(view, view.getId(), data));
                 }
-            WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
-            OnItemLongClickListener longClickListener=null!=longReference?longReference.get():null;
-            if (null!=listener){
-                root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),data));
-            }
+                WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
+                OnItemLongClickListener longClickListener=null!=longReference?longReference.get():null;
+                if (null!=listener){
+                    root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),data));
+                }
         }
     }
 

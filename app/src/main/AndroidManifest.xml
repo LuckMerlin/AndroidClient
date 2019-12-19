@@ -10,8 +10,8 @@
 
     <application
         android:name="com.merlin.global.Application"
-        android:allowBackup="false"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:allowBackup="false">
         <activity
             android:name="com.merlin.activity.MainActivity">
             <intent-filter>

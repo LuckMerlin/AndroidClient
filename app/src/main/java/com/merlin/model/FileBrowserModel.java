@@ -51,6 +51,10 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
+        FileMeta test=new FileMeta();
+        test.setFile("/volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/S01E17 Fetching.avi");
+        test.setName("linqiang.avi");
+        DownloadService.postDownload(getContext(),test,null);
     }
 
     @Override
@@ -58,6 +62,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (bound){
             setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
             setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
+//            multiMode(true);
         }
     }
 
@@ -74,6 +79,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                    browser(file.getFile(),"After directory click.");
                }else{
                    toast("点击了文件"+file.getName());
+                   Debug.D(getClass(),"点击了文件 "+file.getFile());
+                   DownloadService.postDownload(getContext(),file,null);
                }
            }
        }
@@ -89,7 +96,13 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public boolean onViewLongClick(View v, int id) {
-        Debug.D(getClass()," onViewLongClick "+v);
+        switch (id){
+            case R.id.fileBrowser_downloadTV:
+                runChoose((list)->{
+
+                },true);
+                return true;
+        }
         return false;
     }
 
@@ -121,7 +134,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 startActivity(TransportActivity.class);
                 break;
             case R.id.fileBrowser_downloadTV:
-                runChoose((list)->DownloadService.post(v.getContext(),list),true);
+                runChoose((list)->DownloadService.postDownload(v.getContext(),list,null),true);
                 break;
         }
     }

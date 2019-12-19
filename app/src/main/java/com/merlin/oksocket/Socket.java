@@ -314,6 +314,9 @@ public class Socket implements Tag {
                      ((OnRequestFinish)callback).onRequestFinish(succeed,what,frame);
                  }
             }
+//            if (null!=frame&&frame.isLastFrame()){
+//                Debug.D(Socket.class,"最后一针 ");
+//            }
         }
     }
 

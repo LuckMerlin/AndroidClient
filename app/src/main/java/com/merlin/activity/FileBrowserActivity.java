@@ -16,7 +16,6 @@ import com.merlin.bean.Meta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
-import com.merlin.player.Player;
 import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 
@@ -25,7 +24,7 @@ import java.io.Serializable;
 
 
 public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
-    private Player mPlayer=new Player();
+//    private Player mPlayer=new Player();
 
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
