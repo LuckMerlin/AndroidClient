@@ -1,8 +1,10 @@
 package com.merlin.adapter;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -16,14 +18,15 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_TAIL = 2;
     public static final int TYPE_EMPTY = 3;
-    private OnItemClickListener mClickListener;
-    private OnItemLongClickListener mLongClickListener;
+    private WeakReference<OnItemClickListener> mClickListener;
+    private WeakReference<OnItemLongClickListener> mLongClickListener;
     private WeakReference<OnItemDobuleClickListener> mDoubleClickListener;
     private Handler mHandler;
     private List<T> mData;
@@ -57,11 +60,11 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){
-        mClickListener=listener;
+        mClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener listener){
-        mLongClickListener=listener;
+        mLongClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     protected abstract int onResolveNormalTypeLayoutId();
@@ -89,13 +92,17 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         onBindViewHolder(holder,(V)binding,position,data,payloads);
         View root=null!=binding?binding.getRoot():null;
         if (null!=root){
-            OnItemClickListener listener=mClickListener;
-            if (null!=listener) {
-                root.setOnClickListener((view) -> listener.onItemClick(view, view.getId(), data));
-            }
-            OnItemLongClickListener longListener=mLongClickListener;
-            if (null!=longListener){
-                root.setOnLongClickListener((view)->(null!=longListener&& longListener.onItemLongClick(view, view.getId(),data)));
+                WeakReference<OnItemClickListener> reference=mClickListener;
+                OnItemClickListener listener=null!=reference?reference.get():null;
+                WeakReference<OnItemDobuleClickListener> doubleReference=mDoubleClickListener;
+                OnItemDobuleClickListener doubleListener=null!=doubleReference?doubleReference.get():null;
+                if (null!=listener||null!=doubleListener){
+                    root.setOnClickListener((view)-> listener.onItemClick(view, view.getId(), data));
+                }
+            WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
+            OnItemLongClickListener longClickListener=null!=longReference?longReference.get():null;
+            if (null!=listener){
+                root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),data));
             }
         }
     }
