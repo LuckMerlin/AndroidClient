@@ -18,7 +18,6 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
