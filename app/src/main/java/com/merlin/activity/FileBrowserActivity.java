@@ -94,7 +94,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
     @Override
     protected void onResume() {
         super.onResume();
-        getViewModel().refreshCurrentPath();
+        getViewModel().refreshCurrentPath("After activity onResume.");
     }
 
     @Override

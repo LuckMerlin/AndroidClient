@@ -14,9 +14,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background"
-        android:paddingLeft="3dp"
-        android:paddingRight="3dp">
+        android:paddingBottom="1dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp">
         <RelativeLayout
             android:id="@+id/fileBrowser_topRL"
             android:layout_alignParentTop="true"
@@ -176,9 +177,12 @@
                 android:id="@+id/fileBrowser_downloadTV"
                 android:drawableTop="@drawable/ic_back"
                 android:onClick="@{vm::onClick}"
+                binding:OnLongClickListener="@{vm}"
                 android:text="Download"
+                android:background="#000000"
                 android:textColor="#fff"
                 android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
                 android:layout_width="@dimen/listIconNormal"
                 android:layout_height="@dimen/listIconNormal"/>
@@ -187,6 +191,7 @@
                 android:drawableTop="@drawable/ic_back"
                 android:text="Copy"
                 android:layout_weight="1"
+                android:layout_gravity="center_horizontal"
                 android:onClick="@{vm::onClick}"
                 android:layout_width="@dimen/listIconNormal"
                 android:layout_height="@dimen/listIconNormal"/>
@@ -195,6 +200,7 @@
                 android:drawableTop="@drawable/ic_back"
                 android:text="Move"
                 android:layout_weight="1"
+                android:layout_gravity="center_horizontal"
                 android:onClick="@{vm::onClick}"
                 android:layout_width="@dimen/listIconNormal"
                 android:layout_height="@dimen/listIconNormal"/>
@@ -202,6 +208,7 @@
                 android:id="@+id/fileBrowser_deleteTV"
                 android:drawableTop="@drawable/ic_back"
                 android:text="Delete"
+                android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
                 android:onClick="@{vm::onClick}"
                 android:layout_width="@dimen/listIconNormal"
@@ -210,6 +217,7 @@
                 android:id="@+id/fileBrowser_moreTV"
                 android:drawableTop="@drawable/ic_back"
                 android:text="More"
+                android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
                 android:onClick="@{vm::onClick}"
                 android:layout_width="@dimen/listIconNormal"

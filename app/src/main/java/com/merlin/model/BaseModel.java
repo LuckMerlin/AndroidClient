@@ -26,13 +26,16 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 
-public class BaseModel implements View.OnClickListener, Tag {
+public class BaseModel implements View.OnClickListener, View.OnLongClickListener, Tag {
     private WeakReference<View> mRootView=null;
     private final WeakReference<Context> mContext;
 
-
     public  interface OnModelViewClick{
         void onViewClick(View v,int id);
+    }
+
+    public  interface OnModelViewLongClick{
+        boolean onViewLongClick(View v,int id);
     }
 
     public BaseModel(Context context){
@@ -50,6 +53,9 @@ public class BaseModel implements View.OnClickListener, Tag {
         //DO nothing
     }
 
+    /**
+     * Just for kernel call
+     */
     private final void setRootView(View root){
         WeakReference<View> reference=mRootView;
         if (null!=reference){
@@ -86,6 +92,14 @@ public class BaseModel implements View.OnClickListener, Tag {
         if (null!=v&&this instanceof  OnModelViewClick) {
             ((OnModelViewClick)this).onViewClick(v,v.getId());
         }
+    }
+
+    @Override
+    public final boolean onLongClick(View v) {
+        if (null!=v&&this instanceof  OnModelViewLongClick) {
+            return ((OnModelViewLongClick)this).onViewLongClick(v,v.getId());
+        }
+        return false;
     }
 
     public final boolean getAccountClientMeta(String account, Callback ...callbacks){
@@ -132,7 +146,6 @@ public class BaseModel implements View.OnClickListener, Tag {
         return false;
     }
 
-
     protected final Client getClient(){
         Application application=getApplication();
         return null!=application?application.getClient():null;
@@ -174,7 +187,6 @@ public class BaseModel implements View.OnClickListener, Tag {
         return null!=application?application.finishAllActivity(activities):null;
     }
 
-
     protected final boolean startActivity(Class<? extends Activity> cls){
         return startActivity(cls,null);
     }
@@ -192,6 +204,5 @@ public class BaseModel implements View.OnClickListener, Tag {
         }
         return false;
     }
-
 
 }
