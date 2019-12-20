@@ -26,7 +26,7 @@ public final class Client extends Socket {
     public boolean login(String account,String password){
         if (null==account||account.length()<=0){
             Debug.W(getClass(),"Can't login without account.");
-            notifyResponse(false, Callback.REQUEST_FAILED_ARG_INVALID,null,null);
+            notifyResponse(false, Callback.REQUEST_FAILED_ARG_INVALID,null,"None account.",null);
             return true;
         }
         JSONObject json=new JSONObject();
@@ -37,7 +37,7 @@ public final class Client extends Socket {
         putIfNotNull(json,TAG_META,meta);
         String data=null!=json?json.toString():null;
         byte[] bytes=null!=data? Frame.encodeString(data):null;
-        return sendBytes(bytes, TAG_LOGIN,(OnRequestFinish)(succeed,what,frame)->{
+        return sendBytes(bytes, TAG_LOGIN,(OnRequestFinish)(succeed,what,note,frame)->{
             Debug.D(getClass(),"Login finish."+succeed);
             mAccount = succeed?account:null;
             notifyStatusChanged(false,OnClientStatusChange.LOGIN_IN,account);
@@ -70,8 +70,8 @@ public final class Client extends Socket {
         JSONObject object=new JSONObject();
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
         Json.putIfNotNull(object,TAG_FILE,path);
-        return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY,30*1000,(OnRequestFinish)(succeed,what,frame)->
-                callback.onRequestFinish(succeed,what,frame));
+        return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY,30*1000,(OnRequestFinish)(succeed,what,note,frame)->
+                callback.onRequestFinish(succeed,what,note,frame));
     }
 
 }

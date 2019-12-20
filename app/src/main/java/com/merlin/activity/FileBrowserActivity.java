@@ -18,6 +18,8 @@ import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
+import com.merlin.task.Download;
+import com.merlin.task.DownloadService;
 
 import java.io.File;
 import java.io.Serializable;
@@ -37,6 +39,18 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             }
             //申请权限
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+        } else {
+            Toast.makeText(this, "授权成功！", Toast.LENGTH_SHORT).show();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            //用户已经拒绝过一次，再次弹出权限申请对话框需要给用户一个解释
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                    .WRITE_EXTERNAL_STORAGE)) {
+                Toast.makeText(this, "请开通相关权限，否则无法正常使用本应用！", Toast.LENGTH_SHORT).show();
+            }
+            //申请权限
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         } else {
             Toast.makeText(this, "授权成功！", Toast.LENGTH_SHORT).show();
         }

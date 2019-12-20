@@ -52,8 +52,9 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
         FileMeta test=new FileMeta();
-        test.setFile("/volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/S01E17 Fetching.avi");
-        test.setName("linqiang.avi");
+//        test.setFile("/volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/S01E17 Fetching.avi");
+        test.setFile("C:\\Users\\admin\\Desktop\\Genymotio_18525.zip");
+        test.setName("linqiang.zip");
         DownloadService.postDownload(getContext(),test,null);
     }
 
@@ -196,7 +197,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         Handler handler=new Handler(Looper.getMainLooper());
         return sendMessage(object.toString(), "linqiang", TAG_MESSAGE_QUERY,30*1000,new Socket.OnRequestFinish() {
             @Override
-            public void onRequestFinish(boolean succeed, int what, Frame frame) {
+            public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
                     handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -233,10 +234,10 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             putIfNotNull(object,TAG_FILE,path);
             setRefreshing(true);
             mLoadingPath=path;
-            Debug.D(getClass(),"Browsing "+path+(null!=debug?debug:"."));
+            Debug.D(getClass(),"Browsing "+path+" "+(null!=debug?debug:"."));
             return sendMessage(object.toString(), "nas", TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
                 @Override
-                public void onRequestFinish(boolean succeed, int what, Frame frame) {
+                public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
                     if (null!=mLoadingPath){
                         synchronized (mLoadingPath){
                             if (mLoadingPath.equals(path)){
@@ -282,7 +283,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         Meta meta=mClientMeta.get();
         String account=null!=meta?meta.getAccount():null;
         if (null!=account){
-            return getAccountClientMeta(account,(Socket.OnRequestFinish)(succeed, what, frame)->{
+            return getAccountClientMeta(account,(Socket.OnRequestFinish)(succeed, what,note, frame)->{
                 if (succeed&&null!=frame){
                     List<Meta> list=JSON.parseArray(frame.getBodyText(),Meta.class);
                     Meta newMeta=null!=list&&list.size()>0?list.get(0):null;

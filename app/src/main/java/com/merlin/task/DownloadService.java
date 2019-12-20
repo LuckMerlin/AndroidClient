@@ -112,23 +112,23 @@ public class DownloadService extends Service {
             os=new FileOutputStream(targetFile);
             from="linqiang";
             srcPath="/volumes/pythonCodes/linqiang.mp3";
-            return client.download(from, srcPath,(succeed,what,frame)->{
+            return client.download(from, srcPath,(succeed,what,note,frame)->{
                 if (succeed) {
                     byte[] body = null != frame ? frame.getBodyBytes() : null;
                     int length = null != body ? body.length : 0;
                     if (null!=frame&&frame.isLastFrame()){
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Intent intent=new Intent();
-                                intent.setAction(Intent.ACTION_VIEW);
-                                String type = "video/*";
-                                Uri uri = Uri.parse(targetFile.getAbsolutePath());
-                                intent.setDataAndType(uri,type);
-                                DownloadService.this.startActivity(intent);
-                            }
-                        });
-                        Debug.D(getClass(),"下载完成了");
+//                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Intent intent=new Intent();
+//                                intent.setAction(Intent.ACTION_VIEW);
+//                                String type = "video/*";
+//                                Uri uri = Uri.parse(targetFile.getAbsolutePath());
+//                                intent.setDataAndType(uri,type);
+//                                DownloadService.this.startActivity(intent);
+//                            }
+//                        });
+                        Debug.D(getClass(),"下载完成了 "+note);
                     }
                     Debug.D(getClass(), " " + Thread.currentThread().getName() + " " + what + " " + length);
                 }else{

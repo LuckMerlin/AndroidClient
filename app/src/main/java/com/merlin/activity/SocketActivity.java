@@ -62,7 +62,7 @@ public class SocketActivity <V extends ViewDataBinding, VM extends BaseModel> ex
             return client.sendMessage(body,msgTo,msgType,callbacks);
         }
         Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
-        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,"MsgTo is None.",callbacks);
         return false;
     }
 

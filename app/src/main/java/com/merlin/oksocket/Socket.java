@@ -8,6 +8,7 @@ import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.server.Frame;
 import com.merlin.server.Json;
+import com.merlin.server.Response;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 import com.xuhao.didi.core.iocore.interfaces.ISendable;
 import com.xuhao.didi.core.pojo.OriginalData;
@@ -45,7 +46,7 @@ public class Socket implements Tag {
    }
 
    public interface OnRequestFinish extends Callback{
-        void onRequestFinish(boolean succeed,int what,Frame frame);
+        void onRequestFinish(boolean succeed,int what,String note,Frame frame);
    }
 
    public Socket(String ip, int port){
@@ -212,7 +213,7 @@ public class Socket implements Tag {
     public final boolean sendMessage(String body,String msgTo,String msgType,int timeout,Callback...callbacks) {
         byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
         if (null==bodyBytes||bodyBytes.length<=0){
-            notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
+            notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,"Body invalid.",callbacks);
             return false;
         }
         return sendBytes(bodyBytes,null!=msgType?msgType:TAG_FRAME_TEXT_MESSAGE,msgTo,null,timeout,callbacks);
@@ -221,7 +222,7 @@ public class Socket implements Tag {
    public final boolean sendText(String body,Callback...callbacks) {
         byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
         if (null==bodyBytes||bodyBytes.length<=0){
-            notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
+            notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,"Body invalid.",callbacks);
             return false;
         }
         return sendBytes(bodyBytes,TAG_FRAME_TEXT_DATA,null,null,mTimeout,callbacks);
@@ -238,7 +239,7 @@ public class Socket implements Tag {
     public final boolean sendBytes(byte[] body, String type, String msgTo, String uniqueValue,int timeout, Callback...callbacks){
         if (null==type||type.length()<=0){
             Debug.E(getClass(),"Can't send bytes,NONE type defined.");
-            notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,callbacks);
+            notifyResponse(false,Callback.REQUEST_FAILED_ARG_INVALID,null,"Type invalid.",callbacks);
             return false;
         }
         long timestamp=System.currentTimeMillis();
@@ -256,13 +257,18 @@ public class Socket implements Tag {
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
             @Override
             public void run() {
-                notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,callbacks);
+                notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,"Request timeout.",callbacks);
                 removeResponseWaiting(unique,"While request timeout."+mTimeout);
             }
 
             @Override
             void onResponse(Frame frame) {
-                notifyResponse(true,Callback.REQUEST_SUCCEED,frame,callbacks);
+                Response response=null!=frame?frame.getResponse():null;
+                if (null!=response){
+                    notifyResponse(response.isSucceed(), response.getWhat(), frame,response.getNote(), callbacks);
+                }else {
+                    notifyResponse(true, Callback.REQUEST_SUCCEED, frame,null, callbacks);
+                }
             }
         };
         mRequesting.put(unique,runnable);
@@ -271,7 +277,7 @@ public class Socket implements Tag {
             return true;
         }
         removeResponseWaiting(unique,"While request send failed.");
-        notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,callbacks);
+        notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,"Request send failed",callbacks);
        return false;
     }
 
@@ -304,19 +310,16 @@ public class Socket implements Tag {
        return false;
     }
 
-   public static final void notifyResponse(boolean succeed,int what,Frame frame,Callback[] callbacks){
+   public static final void notifyResponse(boolean succeed,int what,Frame frame,String note,Callback[] callbacks){
         if (null!=callbacks&&callbacks.length>0){
             for (Callback callback:callbacks) {
                  if (null==callback){
                      continue;
                  }
                  if (callback instanceof OnRequestFinish){
-                     ((OnRequestFinish)callback).onRequestFinish(succeed,what,frame);
+                     ((OnRequestFinish)callback).onRequestFinish(succeed,what,note,frame);
                  }
             }
-//            if (null!=frame&&frame.isLastFrame()){
-//                Debug.D(Socket.class,"最后一针 ");
-//            }
         }
     }
 

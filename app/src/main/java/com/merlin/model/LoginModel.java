@@ -34,7 +34,7 @@ public class LoginModel extends BaseModel implements OnFrameReceive, OnClientSta
             Debug.D(getClass(),"有人上线了  "+" "+frame.getBodyText());
             client.sendBytesTo(Frame.encodeString("获取李彪"), "linqiang", new Socket.OnRequestFinish() {
                 @Override
-                public void onRequestFinish(boolean succeed, int what, Frame frame) {
+                public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
                     Debug.D(getClass(),"获取收到结果了 "+frame);
                 }
             });

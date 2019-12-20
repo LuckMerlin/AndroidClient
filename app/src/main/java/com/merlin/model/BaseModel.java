@@ -109,7 +109,7 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
             return getClientMeta(jsonObject,callbacks);
         }
         Debug.D(getClass(),"Can't get account client meta.account="+account);
-        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,"Account is NONE.",callbacks);
         return false;
     }
 
@@ -119,7 +119,7 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
             return client.getClientMeta(jsonObject,callbacks);
         }
         Debug.D(getClass(),"Can't get client meta.client="+client);
-        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,"Client is None.",callbacks);
         return false;
     }
 
@@ -142,7 +142,7 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
             return client.sendMessage(body,msgTo,msgType,timeout,callbacks);
         }
         Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
-        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,callbacks);
+        Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,"MsgTo is None.",callbacks);
         return false;
     }
 
