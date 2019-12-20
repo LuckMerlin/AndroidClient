@@ -54,8 +54,14 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         FileMeta test=new FileMeta();
 //        test.setFile("/volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/S01E17 Fetching.avi");
         test.setFile("C:\\Users\\admin\\Desktop\\Genymotio_18525.zip");
-        test.setName("linqiang.zip");
-        DownloadService.postDownload(getContext(),test,null);
+        test.setName("linqiang.mp4");
+        post(new Runnable() {
+            @Override
+            public void run() {
+                Debug.D(getClass(),"########################");
+                DownloadService.postDownload(getContext(),test,null);
+            }
+        },4000);
     }
 
     @Override

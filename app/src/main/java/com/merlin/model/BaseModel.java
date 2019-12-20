@@ -171,12 +171,19 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
     }
 
     protected final boolean runOnUiThread(Runnable runnable){
-        return null!=runnable&&postDelayed(runnable,0);
+        return null!=runnable&&post(runnable,0);
     }
 
-    protected final boolean postDelayed(Runnable runnable,int delay){
-        View root=getRoot();
-        if (null!=root&&null!=runnable){
+    protected final boolean post(Runnable runnable){
+        return post(runnable,0);
+    }
+
+    protected final boolean post(Runnable runnable,int delay){
+        if (null!=runnable){
+            View root=getRoot();
+            if (null==root){
+                return new Handler(Looper.getMainLooper()).postDelayed(runnable,delay);
+            }
             return root.postDelayed(runnable,delay);
         }
         return false;

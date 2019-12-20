@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -18,6 +17,7 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class DownloadService extends Service {
             return false;
         }
         String targetFolderPath=download.getTarget();
-        targetFolderPath=null==targetFolderPath||targetFolderPath.length()<=0? "/sdcard":targetFolderPath;
+        targetFolderPath=null==targetFolderPath||targetFolderPath.length()<=0? "/sdcard/a":targetFolderPath;
         if (null==targetFolderPath||targetFolderPath.length()<=0){
             Debug.D(getClass(),"Can't download,Target folder invalid."+targetFolderPath);
             return false;
@@ -108,44 +108,60 @@ public class DownloadService extends Service {
         }// /volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/
         Debug.D(getClass(),"Downloading file."+"\n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
+        boolean running=false;
         try {
-            os=new FileOutputStream(targetFile);
+            final FileOutputStream fos=os=new FileOutputStream(targetFile);
             from="linqiang";
-            srcPath="/volumes/pythonCodes/linqiang.mp3";
-            return client.download(from, srcPath,(succeed,what,note,frame)->{
+//            srcPath="/volumes/pythonCodes/linqiang.mp3";
+            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
+//            srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
+            return running=client.download(from, srcPath,(succeed,what,note,frame)->{
                 if (succeed) {
                     byte[] body = null != frame ? frame.getBodyBytes() : null;
                     int length = null != body ? body.length : 0;
-                    if (null!=frame&&frame.isLastFrame()){
-//                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                Intent intent=new Intent();
-//                                intent.setAction(Intent.ACTION_VIEW);
-//                                String type = "video/*";
-//                                Uri uri = Uri.parse(targetFile.getAbsolutePath());
-//                                intent.setDataAndType(uri,type);
-//                                DownloadService.this.startActivity(intent);
-//                            }
-//                        });
-                        Debug.D(getClass(),"下载完成了 "+note);
+                    if (length>0){
+                        try {
+                            fos.write(body,0,length);
+                            if (null!=frame&&frame.isLastFrame()){
+                                Debug.D(getClass(),"下载完成了 "+note);
+                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Intent intent=new Intent();
+                                            intent.setAction(Intent.ACTION_VIEW);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            String type = "video/*";
+                                            Uri uri = Uri.parse(targetFile.getAbsolutePath());
+                                            Debug.D(getClass(),"下载 结束 "+targetFile);
+                                            intent.setDataAndType(uri,type);
+                                            try {
+                                                DownloadService.this.startActivity(intent);
+                                            }catch (Exception e){
+                                                Debug.D(getClass(),"eee "+e);
+                                            }
+                                        }
+                                    });
+                            }
+                        }catch (Exception e){
+                            Debug.E(getClass(),"Failed download file.e="+e+" \n"+targetFile,e);
+                            closeStream(fos);
+                            targetFile.delete();
+                        }
                     }
                     Debug.D(getClass(), " " + Thread.currentThread().getName() + " " + what + " " + length);
                 }else{
                     Debug.W(getClass(),"Failed download file."+succeed+" "+what+" "+targetFile);
                     targetFile.delete();
+                    closeStream(fos);
                 }
             });
         } catch (Exception e) {
             Debug.E(getClass(),"Failed download file.e="+e,e);
             targetFile.delete();
         }finally {
-            if (null!=os){
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    //Do nothing
-                }
+            if (!running&&null!=os){
+                Debug.E(getClass(),"Close file OutputStream."+running+" "+targetFile);
+                closeStream(os);
             }
         }
         //                new Socket.OnRequestFinish() {
@@ -165,6 +181,16 @@ public class DownloadService extends Service {
 //            }
 //        }
         return false;
+    }
+
+    private void closeStream(Closeable closeable){
+        if (null!=closeable){
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                //Do nothing
+            }
+        }
     }
 
     private boolean isDownloading(Download download){

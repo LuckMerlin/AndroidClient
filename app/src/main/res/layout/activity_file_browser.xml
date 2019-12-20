@@ -14,7 +14,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.3"
+        android:alpha="1.3"
+        android:background="@drawable/background"
         android:paddingBottom="1dp"
         android:paddingTop="10dp"
         android:paddingLeft="5dp"
