@@ -124,7 +124,7 @@ public class Socket implements Tag {
                    String unique=null!=frame?frame.getUnique():null;
                    Map<String,RequestingRunnable> requesting=null!=unique&&unique.length()>0?mRequesting:null;
                    RequestingRunnable runnable=null!=requesting?requesting.get(unique):null;
-                    boolean isLaseFrame=frame.isLastFrame();
+                   boolean isLaseFrame=frame.isLastFrame();
                    if (null!=runnable){
                        if (isLaseFrame){
                            removeResponseWaiting(unique,"While request last frame responsed.");
@@ -206,17 +206,17 @@ public class Socket implements Tag {
        return false;
    }
 
-    public final boolean sendMessage(String body,String msgTo,String msgType,Callback...callbacks) {
-       return sendMessage(body,msgTo,msgType,mTimeout,callbacks);
+    public final boolean sendMessage(String body,String msgTo,String msgType,String uniqueValue,Callback...callbacks) {
+       return sendMessage(body,msgTo,msgType,uniqueValue,mTimeout,callbacks);
     }
 
-    public final boolean sendMessage(String body,String msgTo,String msgType,int timeout,Callback...callbacks) {
+    public final boolean sendMessage(String body,String msgTo,String msgType,String uniqueValue,int timeout,Callback...callbacks) {
         byte[] bodyBytes=null!=body&&body.length()>0?Frame.encodeString(body,Protocol.ENCODING):null;
         if (null==bodyBytes||bodyBytes.length<=0){
             notifyResponse(false,Callback.REQUEST_FAILED_SEND_FAIL,null,"Body invalid.",callbacks);
             return false;
         }
-        return sendBytes(bodyBytes,null!=msgType?msgType:TAG_FRAME_TEXT_MESSAGE,msgTo,null,timeout,callbacks);
+        return sendBytes(bodyBytes,null!=msgType?msgType:TAG_FRAME_TEXT_MESSAGE,msgTo,uniqueValue,timeout,callbacks);
     }
 
    public final boolean sendText(String body,Callback...callbacks) {
@@ -254,11 +254,12 @@ public class Socket implements Tag {
         byte[] headBytes= null!=string?Frame.encodeString(string,Protocol.ENCODING):null;
         byte[] bytes=Protocol.generateFrame(msgTo,headBytes,body);
         timeout=timeout<=0?mTimeout:timeout;
+
         final RequestingRunnable runnable=new RequestingRunnable(unique,timeout,callbacks){
             @Override
             public void run() {
                 notifyResponse(false,Callback.REQUEST_FAILED_TIMEOUT,null,"Request timeout.",callbacks);
-                removeResponseWaiting(unique,"While request timeout."+mTimeout);
+                removeResponseWaiting(unique,"While request timeout."+getTimeout());
             }
 
             @Override
@@ -271,6 +272,10 @@ public class Socket implements Tag {
                 }
             }
         };
+        Runnable exist=mRequesting.get(unique);
+        if (null!=exist){
+            mHandler.removeCallbacks(exist);
+        }
         mRequesting.put(unique,runnable);
         mHandler.postDelayed(runnable,timeout<=0?5000:timeout);
         if (null!=bytes&&bytes.length>0&&sendBytes(bytes)){
@@ -341,7 +346,11 @@ public class Socket implements Tag {
             mTimeout=timeout;
         }
 
-        abstract void onResponse(Frame frame);
+       public int getTimeout() {
+           return mTimeout;
+       }
+
+       abstract void onResponse(Frame frame);
 
     }
 

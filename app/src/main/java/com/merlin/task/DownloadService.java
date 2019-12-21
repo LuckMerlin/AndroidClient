@@ -60,19 +60,19 @@ public class DownloadService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private boolean download(Download download){
+    private Client.Canceler download(Download download){
         String from=null!=download?download.getFrom():null;
         String name=null!=download?download.getName():null;
         String srcPath=null!=download?download.getSrc():null;
         if (null==name||name.length()<=0||null==srcPath||srcPath.length()<=0){
             Debug.W(getClass(),"Can't download file,Args invalid."+from+" "+srcPath+" "+name);
-            return false;
+            return null;
         }
         String targetFolderPath=download.getTarget();
         targetFolderPath=null==targetFolderPath||targetFolderPath.length()<=0? "/sdcard/a":targetFolderPath;
         if (null==targetFolderPath||targetFolderPath.length()<=0){
             Debug.D(getClass(),"Can't download,Target folder invalid."+targetFolderPath);
-            return false;
+            return null;
         }
         File targetFolder=new File(targetFolderPath);
         if (!targetFolder.exists()){
@@ -80,13 +80,13 @@ public class DownloadService extends Service {
         }
         if (!targetFolder.exists()||targetFolder.isFile()){
             Debug.W(getClass(),"Can't download.Target folder create fail or is file."+targetFolder);
-            return false;
+            return null;
         }
         File targetFile=new File(targetFolder,name);
         boolean exist=targetFile.exists();
         if (exist&&download.getType()!=Download.TYPE_REPLACE){
             Debug.W(getClass(),"Can't download file.File already existed."+targetFile);
-            return false;
+            return null;
         }
         if (!exist){
             try {
@@ -97,25 +97,25 @@ public class DownloadService extends Service {
             }finally {
                 if (!targetFile.exists()){//Check if create succeed.
                     Debug.W(getClass(),"Can't download file.Create file fail."+targetFile);
-                    return false;
+                    return null;
                 }
             }
         }
         Client client=mClient;
         if (null==client||!client.isLogined()){
             Debug.W(getClass(),"Can't download file.Not login."+client);
-            return false;
+            return null;
         }// /volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/
         Debug.D(getClass(),"Downloading file."+"\n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
-        boolean running=false;
+        Client.Canceler canceler=null;
         try {
             final FileOutputStream fos=os=new FileOutputStream(targetFile);
             from="linqiang";
 //            srcPath="/volumes/pythonCodes/linqiang.mp3";
             srcPath="/volumes/pythonCodes/1576846797997566.mp4";
 //            srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
-            return running=client.download(from, srcPath,(succeed,what,note,frame)->{
+            return canceler=client.download(from, srcPath,0,(succeed,what,note,frame)->{
                 if (succeed) {
                     byte[] body = null != frame ? frame.getBodyBytes() : null;
                     int length = null != body ? body.length : 0;
@@ -159,8 +159,8 @@ public class DownloadService extends Service {
             Debug.E(getClass(),"Failed download file.e="+e,e);
             targetFile.delete();
         }finally {
-            if (!running&&null!=os){
-                Debug.E(getClass(),"Close file OutputStream."+running+" "+targetFile);
+            if (null==canceler&&null!=os){
+                Debug.E(getClass(),"Close file OutputStream While download fail. "+targetFile);
                 closeStream(os);
             }
         }
@@ -180,7 +180,7 @@ public class DownloadService extends Service {
 //                });
 //            }
 //        }
-        return false;
+        return null;
     }
 
     private void closeStream(Closeable closeable){

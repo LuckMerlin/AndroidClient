@@ -139,7 +139,7 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
     public final boolean sendMessage(String body, String msgTo,String msgType,int timeout, Callback...callbacks) {
         Client client=getClient();
         if (null!=client){
-            return client.sendMessage(body,msgTo,msgType,timeout,callbacks);
+            return client.sendMessage(body,msgTo,msgType,null,timeout,callbacks);
         }
         Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
         Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,"MsgTo is None.",callbacks);

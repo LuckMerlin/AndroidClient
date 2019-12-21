@@ -1,8 +1,5 @@
 package com.merlin.client;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.Callback;
 import com.merlin.oksocket.Socket;
@@ -12,12 +9,27 @@ import com.merlin.server.Json;
 
 import org.json.JSONObject;
 
-import java.util.Map;
 
 import static com.merlin.server.Json.putIfNotNull;
 
 public final class Client extends Socket {
     private String mAccount=null;
+
+    public static final class Canceler{
+        private boolean mCanceled=false;
+
+        public boolean cancel(boolean cancel){
+            if (cancel!=mCanceled){
+                mCanceled=cancel;
+                return true;
+            }
+            return false;
+        }
+
+        public boolean isCanceled() {
+            return mCanceled;
+        }
+    }
 
     public Client(String ip, int port){
         super(ip,port);
@@ -62,16 +74,30 @@ public final class Client extends Socket {
         return mAccount;
     }
 
-    public boolean download(String from,String path,OnRequestFinish callback){
+    public Canceler download(String from,String path,float seek,OnRequestFinish callback){
         if (null==path||null==callback||null==from){
             Debug.W(getClass(),"Can't download file with client."+from+" "+path+" "+callback);
-            return false;
+            return null;
         }
         JSONObject object=new JSONObject();
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
+        Json.putIfNotNull(object,TAG_POSITION,seek);
         Json.putIfNotNull(object,TAG_FILE,path);
-        return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY,30*1000,(OnRequestFinish)(succeed,what,note,frame)->
-                callback.onRequestFinish(succeed,what,note,frame));
+        final int timeout=30*1000;
+        final Canceler cancel=new Canceler();
+        return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY, null, timeout, new OnRequestFinish() {
+                    @Override
+                    public void onRequestFinish(boolean succeed, int what, String note, Frame frame) {
+                        callback.onRequestFinish(succeed,what,note,frame);
+                        if (succeed&&null!=frame&&!frame.isLastFrame()) { //Trigger next frame
+                            String msgFrom= frame.getMsgFrom();
+                            String unique=frame.getUnique();
+                            sendMessage(cancel.mCanceled?TAG_CANCEL:TAG_MESSAGE_NEXT_FRAME,msgFrom,TAG_MESSAGE_NEXT_FRAME,unique,timeout,this);
+                        }
+                    }
+                }
+
+        )?cancel:null;
     }
 
 }

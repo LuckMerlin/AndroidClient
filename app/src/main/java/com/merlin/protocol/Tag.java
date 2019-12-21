@@ -27,12 +27,15 @@ public interface Tag {
     String TAG_VERSION = "version";
     String TAG_SECRET_KEY = "secretKey";
     String TAG_FRAME_TYPE="frameType";
+    String TAG_POSITION="position";
     String TAG_DATA="data";
+    String TAG_CANCEL = "cancel";
     String TAG_FRAME_TEXT_MESSAGE="textMessageFrame";
     String TAG_FRAME_TEXT_MESSAGE_SYSTEM = "textSystemMessageFrame";
     String TAG_FRAME_TEXT_DATA="textDataFrame";
     String TAG_FRAME_BYTE_DATA="byteDataFrame";
     String TAG_MESSAGE_QUERY = "textQueryMessageFrame";
+    String TAG_MESSAGE_NEXT_FRAME="nextFrame";
 
     String TAG_ACCOUNT = "account";
     String TAG_PASSWORD = "password";

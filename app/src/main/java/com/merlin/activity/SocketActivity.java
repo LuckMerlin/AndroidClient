@@ -59,7 +59,7 @@ public class SocketActivity <V extends ViewDataBinding, VM extends BaseModel> ex
     protected final boolean sendMessage(String body, String msgTo,String msgType, Callback...callbacks) {
         Client client=getClient();
         if (null!=client){
-            return client.sendMessage(body,msgTo,msgType,callbacks);
+            return client.sendMessage(body,msgTo,msgType,null,callbacks);
         }
         Debug.D(getClass(),"Can't send message while client is NULL."+msgTo);
         Socket.notifyResponse(false, What.WHAT_UNKNOWN,null,"MsgTo is None.",callbacks);
