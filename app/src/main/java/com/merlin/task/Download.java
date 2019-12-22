@@ -3,6 +3,8 @@ package com.merlin.task;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 public final class Download  implements Parcelable {
     public final static int TYPE_REPLACE=123;
     public final static int TYPE_NORMAL=124;
@@ -94,5 +96,22 @@ public final class Download  implements Parcelable {
                 ", mTarget='" + mTarget + '\'' +
                 ", mUnique='" + mUnique + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (null!=obj&&obj instanceof Download){
+            Download d=(Download)obj;
+            return equal(mFrom,d.mFrom)&&equal(mName,d.mName)&&equal(mSrc,d.mSrc)
+                    &&equal(mTarget,d.mTarget);
+        }
+        return super.equals(obj);
+    }
+
+    private boolean equal(String val,String val2){
+        if (null==val&&null==val2){
+            return true;
+        }
+        return null!=val&&null!=val2&&val.equals(val2);
     }
 }

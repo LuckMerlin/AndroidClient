@@ -167,6 +167,20 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
   }
 
+  protected  boolean replace(T data,int index){
+        List<T> list=null!=data?mData:null;
+        int size=null!=list?list.size():-1;
+        if (null!=data&&index>=0&&index<=size){
+            if (index<size){
+                list.remove(index);
+            }
+            list.add(index,data);
+            notifyItemChanged(index);
+            return true;
+        }
+        return false;
+  }
+
     protected final int index(T data){
         List<T> list=null!=data?mData:null;
         return null!=list?list.indexOf(data):-1;

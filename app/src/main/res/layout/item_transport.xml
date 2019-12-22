@@ -2,18 +2,18 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
-            name="transport"
-            type="com.merlin.transport.Transport" />
+            name="task"
+            type="com.merlin.task.DownloadTask" />
     </data>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:background="#55ffffff"
+        android:background="@drawable/round_corner_small"
         android:layout_marginBottom="2dp"
-        android:padding="3dp"
-        android:layout_height="50dp">
+        android:padding="5dp"
+        android:layout_height="60dp">
         <ProgressBar
             android:id="@+id/item_transporting_progressPB"
-            android:progress="30"
+            android:progress="@{task.progress}"
             android:layout_alignParentBottom="true"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:text="@{transport.name}"
+                    android:text="@{task.download.name}"
                     android:textStyle="bold"
                     android:layout_alignParentLeft="true"
                     android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:text="/sdcard 12.4MB"
+                    android:text="@{task.downloadSizeText}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <TextView
@@ -52,7 +52,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <TextView
-                    android:text="15.45MB"
+                    android:text="@{task.totalSizeText}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>

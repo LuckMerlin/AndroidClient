@@ -60,6 +60,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             public void run() {
                 Debug.D(getClass(),"########################");
                 DownloadService.postDownload(getContext(),test,null);
+                startActivity(TransportActivity.class);
             }
         },4000);
     }

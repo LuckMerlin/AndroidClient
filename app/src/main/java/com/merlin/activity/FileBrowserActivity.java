@@ -64,7 +64,8 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 //            findViewById(R.id.fileBrowser_transmitIV).performClick();
 //            Download download=new Download("/src","/sdcard/linqiang.mp3","rrrrrr");
 //            DownloadService.post(this,download);
-        },1000);
+
+        },6000);
         checkPermission();
         Intent intent=getIntent();
         String path="li";
