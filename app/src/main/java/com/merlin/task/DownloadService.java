@@ -31,8 +31,10 @@ public class DownloadService extends Service {
     private static final String LABEL_DOWNLOAD ="download";
     private final List<DownloadTask> mRunningList=new ArrayList<>();
     private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private final List<Download> mWaiting=new ArrayList<>();
     private final Map<DownloadTask, Client.Canceler> mDownloading=new HashMap<>();
     private WeakReference<Callback> mCallback;
+    private int mMaxDownloading;
     private Client mClient;
     private final Binder mBinder=new Binder();
 
