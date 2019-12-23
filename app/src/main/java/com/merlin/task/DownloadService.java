@@ -12,6 +12,9 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 
 import com.merlin.bean.FileMeta;
+import com.merlin.breakpoint.BreakPoint;
+import com.merlin.breakpoint.BreakPointer;
+import com.merlin.breakpoint.ShBreakPointer;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
@@ -32,9 +35,10 @@ public class DownloadService extends Service {
     private static final String LABEL_DOWNLOAD ="download";
     private final List<DownloadTask> mRunningList=new ArrayList<>();
     private final Handler mHandler=new Handler(Looper.getMainLooper());
-    private final List<Download> mWaiting=new ArrayList<>();
+    private final List<DownloadTask> mWaiting=new ArrayList<>();
     private final Map<DownloadTask, Client.Canceler> mDownloading=new HashMap<>();
     private WeakReference<Callback> mCallback;
+    private BreakPointer mBreakPointer;
     private int mMaxDownloading=1;
     private Client mClient;
     private final Binder mBinder=new Binder();
@@ -157,6 +161,16 @@ public class DownloadService extends Service {
         super.onCreate();
         Debug.D(getClass(),"Download service onCreate.");
         android.app.Application app=getApplication();
+        BreakPointer pointer=mBreakPointer=new ShBreakPointer(app);
+        List<BreakPoint> list=pointer.getBreakpoints();//Init break list
+        if (null!=list&&list.size()>0){
+            for (BreakPoint point:list){
+                DownloadTask task=null!=point?point.getTask():null;
+                if (null!=task){ //Add task into queue
+                    mWaiting.add(task);
+                }
+            }
+        }
         Application application=null!=app&&app instanceof Application?(Application)app:null;
         mClient=null!=application?application.getClient():null;
     }
@@ -246,20 +260,21 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download file.Exist downloading."+download);
             return null;
         }
-        final List<Download> waiting=mWaiting;
+        final List<DownloadTask> waiting=mWaiting;
         if (null!=waiting&&waiting.contains(download)){
             Debug.W(getClass(),"Not need download file.Already int wait queue."+download);
             return null;
         }
         final DownloadTask task=new DownloadTask(download);
+        task.setTargetPath(targetFile.getAbsolutePath());
         task.setStatus(Status.UNKNOWN);
         int downloadingSize=binder.getDownloaingSize();
         if (downloadingSize>0){//Check if need waiting
             int maxDownloading=mMaxDownloading;
             if (downloadingSize>(maxDownloading<=0?1:maxDownloading)){
                 Debug.W(getClass(),"Add download into wait queue."+downloadingSize+" "+maxDownloading);
-                waiting.add(download);
                 task.setStatus(Status.WAITING);
+                waiting.add(task);
                 onFileDownloadUpdate(Callback.WAITING,true,task,System.currentTimeMillis());
                 return null;
             }
@@ -311,6 +326,7 @@ public class DownloadService extends Service {
                                 downloading.remove(task);
                                 closeStream(fos);
                                 task.setStatus(Status.FINISH_SUCCEED);
+                                mBreakPointer.removeBreakpoint(task);
                                 onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,task,System.currentTimeMillis());
                                 Debug.D(getClass(),"下载完成了 "+note);
                             }
@@ -322,6 +338,8 @@ public class DownloadService extends Service {
                             downloading.remove(task);
                             if (task.isDeleteIncomplete()){
                                 targetFile.delete();
+                            }else{
+                                mBreakPointer.addBreakpoint(new BreakPoint(task));
                             }
                             task.setStatus(Status.FINISH_WRITE_EXCEPTION);
                             onFileDownloadUpdate(Callback.FINISH_WRITE_EXCEPTION,true,task,e);
@@ -336,6 +354,9 @@ public class DownloadService extends Service {
                     runningList.remove(task);
                     if (task.isDeleteIncomplete()){
                         targetFile.delete();
+                        mBreakPointer.removeBreakpoint(task);
+                    }else{
+                        mBreakPointer.addBreakpoint(new BreakPoint(task));
                     }
                     task.setStatus(Status.FINISH_SERVICE_FAIL);
                     onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL,true,task,null);
@@ -359,6 +380,7 @@ public class DownloadService extends Service {
                 runningList.remove(task);
                 if (task.isDeleteIncomplete()){
                     targetFile.delete();
+                    mBreakPointer.removeBreakpoint(task);
                 }
                 onFileDownloadUpdate(Callback.FINISH_START_FAIL,true,task,null);
             }
