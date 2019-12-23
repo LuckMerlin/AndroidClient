@@ -4,13 +4,14 @@ import com.merlin.util.FileSize;
 
 import java.nio.file.Files;
 
-public class DownloadTask {
+public final class DownloadTask implements Status {
     private final Download mDownload;
     private long mStartTime;
     private long mTotal;
     private long mRemain;
     private boolean mDownloading;
     private boolean mDeleteIncomplete;
+    private int mStatus=UNKNOWN;
     private String mMD5;
 
     public DownloadTask(Download download){
@@ -45,6 +46,13 @@ public class DownloadTask {
         this.mDeleteIncomplete = deleteIncomplete;
     }
 
+    protected void setStatus(int status){
+        mStatus=status;
+    }
+
+    public int getStatus() {
+        return mStatus;
+    }
 
     public boolean isDeleteIncomplete() {
         return mDeleteIncomplete;

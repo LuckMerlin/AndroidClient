@@ -34,22 +34,11 @@ public class DownloadService extends Service {
     private final List<Download> mWaiting=new ArrayList<>();
     private final Map<DownloadTask, Client.Canceler> mDownloading=new HashMap<>();
     private WeakReference<Callback> mCallback;
-    private int mMaxDownloading;
+    private int mMaxDownloading=1;
     private Client mClient;
     private final Binder mBinder=new Binder();
 
-    public interface Callback{
-        int FINISH_SERVICE_FAIL=999;
-        int FINISH_START_FAIL=1000;
-        int FINISH_EXCEPTION=1001;
-        int FINISH_WRITE_EXCEPTION=1002;
-        int FINISH_SUCCEED=1003;
-        int FINISH_CANCEL=1004;
-        int START=1005;
-        int PROGRESS=1006;
-        int PAUSE=1007;
-        int RESTART=1008;
-
+    public interface Callback extends Status{
         void onFileDownloadUpdate(int what,boolean finish,DownloadTask task,Object data);
     }
 
@@ -60,6 +49,16 @@ public class DownloadService extends Service {
                    list.addAll(mRunningList);
                    return list;
                }
+        }
+
+        public int getDownloaingSize(){
+            Map<DownloadTask, Client.Canceler> downloading=mDownloading;
+            if (null!=downloading){
+                synchronized (downloading){
+                    return downloading.size();
+                }
+            }
+           return -1;
         }
 
         public Client.Canceler download(Download download){
@@ -208,24 +207,18 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download.Target folder create fail or is file."+targetFolder);
             return null;
         }
+        from="linqiang";
+        name="我们都一样.mp3";
+        srcPath="./WMDYY.mp3";
+//            srcPath="/volumes/pythonCodes/linqiang.mp3";
+//            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
+//            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
+//            srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
         File targetFile=new File(targetFolder,name);
         boolean exist=targetFile.exists();
         if (exist&&download.getType()!=Download.TYPE_REPLACE){
             Debug.W(getClass(),"Can't download file.File already existed."+targetFile);
             return null;
-        }
-        if (!exist){
-            try {
-                targetFile.createNewFile();
-            } catch (IOException e) {
-                Debug.E(getClass(),"Can't download file.Create file fail.e="+e+" "+targetFile,e);
-                e.printStackTrace();
-            }finally {
-                if (!targetFile.exists()){//Check if create succeed.
-                    Debug.W(getClass(),"Can't download file.Create file fail."+targetFile);
-                    return null;
-                }
-            }
         }
         Client client=mClient;
         if (null==client||!client.isLogined()){
@@ -238,27 +231,55 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download file.runningList="+runningList+" "+download);
             return null;
         }
-        if (mBinder.isRunning(download)){
+        final Binder binder=mBinder;
+        if (binder.isRunning(download)){
             Debug.W(getClass(),"Can't download file.Exist downloading."+download);
             return null;
+        }
+        final List<Download> waiting=mWaiting;
+        if (null!=waiting&&waiting.contains(download)){
+            Debug.W(getClass(),"Not need download file.Already int wait queue."+download);
+            return null;
+        }
+        final DownloadTask task=new DownloadTask(download);
+        task.setStatus(Status.UNKNOWN);
+        int downloadingSize=binder.getDownloaingSize();
+        if (downloadingSize>0){//Check if need waiting
+            int maxDownloading=mMaxDownloading;
+            if (downloadingSize>(maxDownloading<=0?1:maxDownloading)){
+                Debug.W(getClass(),"Add download into wait queue."+downloadingSize+" "+maxDownloading);
+                waiting.add(download);
+                task.setStatus(Status.WAITING);
+                onFileDownloadUpdate(Callback.WAITING,true,task,System.currentTimeMillis());
+                return null;
+            }
+        }
+        if (!exist){
+            try {
+                targetFile.createNewFile();
+            } catch (IOException e) {
+                Debug.E(getClass(),"Can't download file.Create file fail.e="+e+" "+targetFile,e);
+                e.printStackTrace();
+            }finally {
+                if (!targetFile.exists()){//Check if create succeed.
+                    Debug.W(getClass(),"Can't download file.Create file fail."+targetFile);
+                    task.setStatus(Status.FINISH_WRITE_EXCEPTION);
+                    return null;
+                }
+            }
         }
         // /volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/
         Debug.D(getClass(),"Downloading file."+"\n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
         Client.Canceler canceler=null;
-        final DownloadTask task=new DownloadTask(download);
         try {
             final FileOutputStream fos=os=new FileOutputStream(targetFile);
-            from="linqiang";
-//            srcPath="/volumes/pythonCodes/linqiang.mp3";
-            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
-//            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
-//            srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
             long startTime=System.currentTimeMillis();
             task.setStartTime(startTime);
             runningList.add(task);
             onFileDownloadUpdate(Callback.START,false,task,startTime);
             final long[] total=new long[1];
+            task.setStatus(Status.DOWNLOADING);
             canceler=client.download(from, srcPath,0,(succeed,what,note,frame)->{
                 if (succeed) {
                     byte[] body = null != frame ? frame.getBodyBytes() : null;
@@ -274,12 +295,13 @@ public class DownloadService extends Service {
                                     }
                                 }
                                 task.setRemain(remain);
-                                onFileDownloadUpdate(Callback.PROGRESS,false,task,remain);
+                                onFileDownloadUpdate(Callback.DOWNLOADING,false,task,remain);
                             }
                             if (null!=frame&&frame.isLastFrame()){
                                 runningList.remove(task);
                                 downloading.remove(task);
                                 closeStream(fos);
+                                task.setStatus(Status.FINISH_SUCCEED);
                                 onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,task,System.currentTimeMillis());
                                 Debug.D(getClass(),"下载完成了 "+note);
 //                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -309,6 +331,7 @@ public class DownloadService extends Service {
                             if (task.isDeleteIncomplete()){
                                 targetFile.delete();
                             }
+                            task.setStatus(Status.FINISH_WRITE_EXCEPTION);
                             onFileDownloadUpdate(Callback.FINISH_WRITE_EXCEPTION,true,task,e);
                         }
                     }
@@ -322,11 +345,14 @@ public class DownloadService extends Service {
                     if (task.isDeleteIncomplete()){
                         targetFile.delete();
                     }
+                    task.setStatus(Status.FINISH_SERVICE_FAIL);
                     onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL,true,task,null);
                 }
             });
             if (null!=canceler){
                 downloading.put(task,canceler);
+            }else{
+                task.setStatus(Status.FINISH_START_FAIL);
             }
             return canceler;
         } catch (Exception e) {
@@ -336,6 +362,7 @@ public class DownloadService extends Service {
             if (null==canceler&&null!=os){
                 Debug.E(getClass(),"Close file OutputStream While download fail. "+targetFile);
                 closeStream(os);
+                task.setStatus(Status.FINISH_START_FAIL);
                 downloading.remove(task);
                 runningList.remove(task);
                 if (task.isDeleteIncomplete()){

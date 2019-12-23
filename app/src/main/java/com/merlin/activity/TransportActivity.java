@@ -47,7 +47,6 @@ public class TransportActivity extends  SocketActivity<ActivityTransportBinding,
         }
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
