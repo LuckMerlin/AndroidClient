@@ -94,9 +94,6 @@ public final class Client extends Socket {
                             String unique=frame.getUnique();
                             sendMessage(cancel.mCanceled?TAG_CANCEL:TAG_MESSAGE_NEXT_FRAME,msgFrom,TAG_MESSAGE_NEXT_FRAME,unique,timeout,this);
                         }
-                        if (cancel.mCanceled){
-                            callback.onRequestFinish(true,OnRequestFinish.REQUEST_CANCELED,note,frame);
-                        }
                     }
                 }
 

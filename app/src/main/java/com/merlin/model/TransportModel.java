@@ -58,7 +58,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
             case START:
                 updateList();
                 break;
-            case PROGRESS:
+            case DOWNLOADING:
                 mAdapter.update(task);
                 break;
         }

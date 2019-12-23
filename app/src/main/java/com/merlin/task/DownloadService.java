@@ -15,6 +15,7 @@ import com.merlin.bean.FileMeta;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
+import com.merlin.protocol.What;
 
 import java.io.Closeable;
 import java.io.File;
@@ -170,7 +171,16 @@ public class DownloadService extends Service {
                     Debug.W(getClass(),"Skip download task,Invalid."+parcelable);
                     continue;
                 }
-                download((Download)parcelable);
+                Client.Canceler canceler=download((Download)parcelable);
+                if (null!=canceler){
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Debug.D(getClass(),"开始取消 ");
+                            canceler.cancel(true);
+                        }
+                    },5000);
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -208,7 +218,7 @@ public class DownloadService extends Service {
             return null;
         }
         from="linqiang";
-        name="我们都一样.mp3";
+        name="womendouyiyang.mp3";
         srcPath="./WMDYY.mp3";
 //            srcPath="/volumes/pythonCodes/linqiang.mp3";
 //            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
@@ -268,7 +278,6 @@ public class DownloadService extends Service {
                 }
             }
         }
-        // /volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/
         Debug.D(getClass(),"Downloading file."+"\n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
         Client.Canceler canceler=null;
@@ -286,6 +295,7 @@ public class DownloadService extends Service {
                     int length = null != body ? body.length : 0;
                     if (length>0){
                         try {
+                            Debug.D(getClass(),"$$$$$$$$$$$$$$$ "+length);
                             fos.write(body,0,length);
                             long remain=frame.getRemain();
                             if (remain>=0) {
@@ -297,6 +307,7 @@ public class DownloadService extends Service {
                                 task.setRemain(remain);
                                 onFileDownloadUpdate(Callback.DOWNLOADING,false,task,remain);
                             }
+                            Debug.D(getClass(),"@@@@@@@@@ Remain DDDD "+frame.getRemain());
                             if (null!=frame&&frame.isLastFrame()){
                                 runningList.remove(task);
                                 downloading.remove(task);
@@ -304,23 +315,6 @@ public class DownloadService extends Service {
                                 task.setStatus(Status.FINISH_SUCCEED);
                                 onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,task,System.currentTimeMillis());
                                 Debug.D(getClass(),"下载完成了 "+note);
-//                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            Intent intent=new Intent();
-//                                            intent.setAction(Intent.ACTION_VIEW);
-//                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                            String type = "video/*";
-//                                            Uri uri = Uri.parse(targetFile.getAbsolutePath());
-//                                            Debug.D(getClass(),"下载 结束 "+targetFile);
-//                                            intent.setDataAndType(uri,type);
-//                                            try {
-//                                                DownloadService.this.startActivity(intent);
-//                                            }catch (Exception e){
-//                                                Debug.D(getClass(),"eee "+e);
-//                                            }
-//                                        }
-//                                    });
                             }
                         }catch (Exception e){
                             Debug.E(getClass(),"Failed download file.e="+e+" \n"+targetFile,e);
@@ -337,8 +331,8 @@ public class DownloadService extends Service {
                     }
                     Debug.D(getClass(), " " + Thread.currentThread().getName() + " " + what + " " + length);
                 }else{
-                    Debug.W(getClass(),"Failed download file."+succeed+" "+what+" "+targetFile);
-                    targetFile.delete();
+                    boolean canceled=What.WHAT_CANCEL==what;
+                    Debug.W(getClass(),(canceled?"Canceled":"Failed")+" download file. "+what+" "+targetFile);
                     closeStream(fos);
                     downloading.remove(task);
                     runningList.remove(task);
