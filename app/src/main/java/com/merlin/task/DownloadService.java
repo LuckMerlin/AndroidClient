@@ -295,7 +295,6 @@ public class DownloadService extends Service {
                     int length = null != body ? body.length : 0;
                     if (length>0){
                         try {
-                            Debug.D(getClass(),"$$$$$$$$$$$$$$$ "+length);
                             fos.write(body,0,length);
                             long remain=frame.getRemain();
                             if (remain>=0) {
@@ -307,7 +306,6 @@ public class DownloadService extends Service {
                                 task.setRemain(remain);
                                 onFileDownloadUpdate(Callback.DOWNLOADING,false,task,remain);
                             }
-                            Debug.D(getClass(),"@@@@@@@@@ Remain DDDD "+frame.getRemain());
                             if (null!=frame&&frame.isLastFrame()){
                                 runningList.remove(task);
                                 downloading.remove(task);
