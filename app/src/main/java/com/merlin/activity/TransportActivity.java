@@ -9,6 +9,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.bean.FileMeta;
 import com.merlin.client.databinding.ActivityTransportBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.TransportModel;

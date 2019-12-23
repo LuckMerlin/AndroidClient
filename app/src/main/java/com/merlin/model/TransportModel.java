@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.DownloadAdapter;
+import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.task.DownloadService;
@@ -24,12 +25,22 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         super(context);
     }
 
+
+    private void test(){
+        FileMeta test=new FileMeta();
+//        test.setFile("/volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/S01E17 Fetching.avi");
+        test.setFile("C:\\Users\\admin\\Desktop\\Genymotio_18525.zip");
+        test.setName("linqiang_two.mp4");
+        mDownloader.download(test);
+    }
+
     public void setDownloader(Downloader downloader){
         Downloader curr=mDownloader;
         mDownloader=downloader;
         if (null!=downloader){
             downloader.setCallback(this);
             updateList();
+            test();
         }else if(null!=curr){
             curr.setCallback(null);
         }

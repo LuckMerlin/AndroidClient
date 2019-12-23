@@ -66,8 +66,15 @@ public class DownloadService extends Service {
            return -1;
         }
 
-        public Client.Canceler download(Download download){
-           return DownloadService.this.download(download);
+        public Client.Canceler download(Object download){
+           if (null!=download) {
+               if (download instanceof Download) {
+                   return DownloadService.this.download((Download) download);
+               }else if (download instanceof FileMeta){
+                   return DownloadService.postDownload(this,(FileMeta)download,null);
+               }
+           }
+           return null;
         }
 
         public boolean isRunning(Download download){
@@ -188,16 +195,6 @@ public class DownloadService extends Service {
                 if (null==parcelable||!(parcelable instanceof Download)){
                     Debug.W(getClass(),"Skip download task,Invalid."+parcelable);
                     continue;
-                }
-                Client.Canceler canceler=download((Download)parcelable);
-                if (null!=canceler){
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Debug.D(getClass(),"开始取消 ");
-                            canceler.cancel(true);
-                        }
-                    },5000);
                 }
             }
         }

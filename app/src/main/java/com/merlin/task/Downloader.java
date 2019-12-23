@@ -11,7 +11,7 @@ public interface Downloader {
 
     public List<DownloadTask> getDownloadList();
 
-    public Client.Canceler download(Download download);
+    public Client.Canceler download(Object download);
 
     public boolean isRunning(Download download);
 
