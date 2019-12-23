@@ -3,7 +3,7 @@ package com.merlin.breakpoint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
 import com.merlin.debug.Debug;
 import com.merlin.task.DownloadTask;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ShBreakPointer implements BreakPointer {
-    private final static String LABEL_BREAKPOINT="breakpoint";
+    private final static String LABEL_BREAKPOINT="breakpoint3";
     private final Context mContext;
 
     public ShBreakPointer(Context context){
@@ -29,7 +29,7 @@ public class ShBreakPointer implements BreakPointer {
         long length=total>0&&null!=path?new File(path).length():0;
         long progress=null!=task?task.getProgress():-1;
         if (progress<length){
-            String text=JSON.toJSONString(breakpoint);
+            String text=new Gson().toJson(breakpoint);
             if (null==text||text.length()<=0){
                 Debug.W(getClass(),"Can't add download breakpoint.text="+text+" "+path);
                 return false;
@@ -52,7 +52,7 @@ public class ShBreakPointer implements BreakPointer {
             List<BreakPoint> list=new ArrayList<>();
             for (String path:set) {
                 String value=null!=path?sh.getString(path,null):null;
-                BreakPoint point=null!=value&&value.length()>0?JSON.parseObject(value,BreakPoint.class):null;
+                BreakPoint point=null!=value&&value.length()>0?new Gson().fromJson(value,BreakPoint.class):null;
                 if (null!=point){
                     list.add(point);
                 }

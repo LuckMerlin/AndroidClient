@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-public final class Download  implements Parcelable {
+public class Download  implements Parcelable {
     public final static int TYPE_REPLACE=123;
     public final static int TYPE_NORMAL=124;
     private String mFrom;
@@ -100,10 +100,14 @@ public final class Download  implements Parcelable {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (null!=obj&&obj instanceof Download){
-            Download d=(Download)obj;
-            return equal(mFrom,d.mFrom)&&equal(mName,d.mName)&&equal(mSrc,d.mSrc)
-                    &&equal(mTarget,d.mTarget);
+        if (null!=obj) {
+            if (obj instanceof Download) {
+                Download d = (Download) obj;
+                return equal(mFrom, d.mFrom) && equal(mName, d.mName) && equal(mSrc, d.mSrc)
+                        && equal(mTarget, d.mTarget);
+            }else if (obj instanceof DownloadTask){
+                return equals(((DownloadTask)obj).getDownload());
+            }
         }
         return super.equals(obj);
     }

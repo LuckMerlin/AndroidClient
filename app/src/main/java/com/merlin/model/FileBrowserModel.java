@@ -31,6 +31,7 @@ import com.merlin.server.Json;
 import com.merlin.server.Response;
 import com.merlin.task.DownloadService;
 
+
 import org.json.JSONObject;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             @Override
             public void run() {
                 Debug.D(getClass(),"########################");
-                DownloadService.postDownload(getContext(),test,null);
+//                DownloadService.postDownload(getContext(),test,null);
                 startActivity(TransportActivity.class);
             }
         },4000);
@@ -292,7 +293,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=account){
             return getAccountClientMeta(account,(Socket.OnRequestFinish)(succeed, what,note, frame)->{
                 if (succeed&&null!=frame){
-                    List<Meta> list=JSON.parseArray(frame.getBodyText(),Meta.class);
+                    List<Meta> list= JSON.parseArray(frame.getBodyText(), Meta.class);
                     Meta newMeta=null!=list&&list.size()>0?list.get(0):null;
                     mClientMeta.set(newMeta);
                     String root=null!=newMeta?newMeta.getRoot():null;

@@ -4,7 +4,7 @@ import androidx.annotation.Nullable;
 
 import com.merlin.util.FileSize;
 
-import java.nio.file.Files;
+import java.io.File;
 
 public final class DownloadTask implements Status {
     private final Download mDownload;
@@ -31,6 +31,15 @@ public final class DownloadTask implements Status {
 
     protected void setTotal(long total) {
         this.mTotal = total;
+    }
+
+    protected boolean buildRemainFromFile(){
+        String targetPath=mTargetPath;
+        if (null!=targetPath&&targetPath.length()>0&&mTotal>0) {
+            mRemain = mTotal-new File(targetPath).length();
+            return true;
+        }
+        return false;
     }
 
     protected void setRemain(long remain) {
@@ -114,8 +123,25 @@ public final class DownloadTask implements Status {
             if (obj instanceof Download){
                 Download download=mDownload;
                 return null!=download&&obj.equals(download);
+            }else if (obj instanceof DownloadTask){
+                return equals(((DownloadTask)obj).getDownload());
             }
         }
         return super.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return "DownloadTask{" +
+                "mDownload=" + mDownload +
+                ", mTargetPath='" + mTargetPath + '\'' +
+                ", mStartTime=" + mStartTime +
+                ", mTotal=" + mTotal +
+                ", mRemain=" + mRemain +
+                ", mDownloading=" + mDownloading +
+                ", mDeleteIncomplete=" + mDeleteIncomplete +
+                ", mStatus=" + mStatus +
+                ", mMD5='" + mMD5 + '\'' +
+                '}';
     }
 }

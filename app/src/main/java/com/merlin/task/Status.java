@@ -1,6 +1,7 @@
 package com.merlin.task;
 
 public interface Status {
+    int INVALID=997;
     int UNKNOWN=998;
     int FINISH_SERVICE_FAIL=999;
     int FINISH_START_FAIL=1000;

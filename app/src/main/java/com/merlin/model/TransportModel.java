@@ -55,7 +55,8 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
             updateList();
         }
         switch (what){
-            case START:
+            case START://Get through
+            case WAITING:
                 updateList();
                 break;
             case DOWNLOADING:

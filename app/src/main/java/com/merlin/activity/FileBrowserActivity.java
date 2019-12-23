@@ -75,7 +75,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
         path="/sdcard/Musics/西单女孩 - 原点.mp3";
 //        path="/sdcard/Musics/Lenka - Like A Song.mp3";
 //        path="/mnt/sdcard/linqiang.mp3";
-        Debug.D(getClass(),"@@ "+new File(path).exists());
+//        Debug.D(getClass(),"@@ "+new File(path).exists());
         MediaPlayer dd=new MediaPlayer();
 //        mPlayer.setOnDecodeFinishListener(new OnDecodeFinish() {
 //            @Override
