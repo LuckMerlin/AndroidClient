@@ -50,7 +50,8 @@ public class ShBreakPointer implements BreakPointer {
         Set<String> set=null!=map?map.keySet():null;
         if (null!=set){
             List<BreakPoint> list=new ArrayList<>();
-            for (String value:set) {
+            for (String path:set) {
+                String value=null!=path?sh.getString(path,null):null;
                 BreakPoint point=null!=value&&value.length()>0?JSON.parseObject(value,BreakPoint.class):null;
                 if (null!=point){
                     list.add(point);

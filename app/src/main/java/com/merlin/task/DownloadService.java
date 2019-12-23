@@ -56,7 +56,7 @@ public class DownloadService extends Service {
                }
         }
 
-        public int getDownloaingSize(){
+        public int getDownloadingSize(){
             Map<DownloadTask, Client.Canceler> downloading=mDownloading;
             if (null!=downloading){
                 synchronized (downloading){
@@ -233,8 +233,8 @@ public class DownloadService extends Service {
         }
         from="linqiang";
         name="womendouyiyang.mp3";
-        srcPath="./WMDYY.mp3";
-//            srcPath="/volumes/pythonCodes/linqiang.mp3";
+//        srcPath="./WMDYY.mp3";
+            srcPath="/volumes/pythonCodes/linqiang.mp3";
 //            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
 //            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
 //            srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
@@ -268,7 +268,7 @@ public class DownloadService extends Service {
         final DownloadTask task=new DownloadTask(download);
         task.setTargetPath(targetFile.getAbsolutePath());
         task.setStatus(Status.UNKNOWN);
-        int downloadingSize=binder.getDownloaingSize();
+        int downloadingSize=binder.getDownloadingSize();
         if (downloadingSize>0){//Check if need waiting
             int maxDownloading=mMaxDownloading;
             if (downloadingSize>(maxDownloading<=0?1:maxDownloading)){
