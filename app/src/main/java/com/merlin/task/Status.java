@@ -14,4 +14,5 @@ public interface Status {
     int PAUSE=1007;
     int RESTART=1008;
     int WAITING=1009;
+    int ADD=1010;
 }

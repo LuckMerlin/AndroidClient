@@ -11,7 +11,6 @@ import java.util.List;
 
 public class DownloadAdapter extends BaseAdapter<DownloadTask, ItemTransportBinding> {
 
-
     @Override
     protected int onResolveNormalTypeLayoutId() {
         return R.layout.item_transport;

@@ -171,10 +171,10 @@ public class DownloadService extends Service {
             for (BreakPoint point:list){
                 DownloadTask task=null!=point?point.getTask():null;
                 if (null!=task){ //Add task into queue
-                    task.setStatus(Status.WAITING);
+                    task.setStatus(Status.PAUSE); //Reset status to pause
                     task.buildRemainFromFile();
                     mRunningList.add(task);
-                    onFileDownloadUpdate(Status.WAITING,false,task,null);
+                    onFileDownloadUpdate(Status.ADD,false,task,null);
                 }
             }
             checkDownloadNextPossible();//Check
@@ -252,7 +252,8 @@ public class DownloadService extends Service {
         synchronized (runningList) {
             existTask = index >= 0 ? runningList.get(index) : null;
         }
-        if (null!=existTask&&existTask.getStatus()!=Status.WAITING){
+        int status=null!=existTask?existTask.getStatus():Status.INVALID;
+        if (status==Status.DOWNLOADING){
             Debug.W(getClass(),"Can't download file.Exist downloading."+download);
             return null;
         }
@@ -291,6 +292,7 @@ public class DownloadService extends Service {
             final FileOutputStream fos=os=new FileOutputStream(targetFile,seek<=0?false:true);
             long startTime=System.currentTimeMillis();
             task.setStartTime(startTime);
+            runningList.remove(task);
             runningList.add(task);
             onFileDownloadUpdate(Callback.START,false,task,startTime);
             final long[] total=new long[1];
@@ -313,7 +315,7 @@ public class DownloadService extends Service {
                                 onFileDownloadUpdate(Callback.DOWNLOADING,false,task,remain);
                             }
                             if (null!=frame&&frame.isLastFrame()){
-                                removeTask(task);
+                                removeAllTask(task);
                                 closeStream(fos);
                                 task.setStatus(Status.FINISH_SUCCEED);
                                 mBreakPointer.removeBreakpoint(task);
@@ -325,7 +327,7 @@ public class DownloadService extends Service {
                             Debug.E(getClass(),"Failed download file.e="+e+" \n"+targetFile,e);
                             closeStream(fos);
                             targetFile.delete();
-                            removeTask(task);
+                            removeAllTask(task);
                             if (download.isDeleteIncomplete()){
                                 targetFile.delete();
                             }else{
@@ -345,7 +347,12 @@ public class DownloadService extends Service {
                         Debug.W(getClass(), (canceled ? "Canceled" : "Failed") + " download file. " + what + " " + targetFile);
                     }
                     closeStream(fos);
-                    removeTask(task);
+                    if (canceled){
+                        task.setStatus(Status.PAUSE);
+                        removeDownloadingTask(task);
+                    }else {
+                        removeAllTask(task);
+                    }
                     if (alreadyDownloaded){
                         task.setStatus(Status.FINISH_SUCCEED);
                         onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,task,null);
@@ -356,8 +363,13 @@ public class DownloadService extends Service {
                         }else{
                             mBreakPointer.addBreakpoint(new BreakPoint(task));
                         }
-                        task.setStatus(Status.FINISH_SERVICE_FAIL);
-                        onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL,true,task,null);
+                        if (canceled) {
+                            task.setStatus(Status.FINISH_CANCEL);
+                            onFileDownloadUpdate(Callback.FINISH_CANCEL, true, task, null);
+                        }else {
+                            task.setStatus(Status.FINISH_SERVICE_FAIL);
+                            onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL, true, task, null);
+                        }
                     }
                 }
             });
@@ -375,7 +387,7 @@ public class DownloadService extends Service {
                 Debug.E(getClass(),"Close file OutputStream While download fail. "+targetFile);
                 closeStream(os);
                 task.setStatus(Status.FINISH_START_FAIL);
-                removeTask(task);
+                removeAllTask(task);
                 if (download.isDeleteIncomplete()){
                     targetFile.delete();
                     mBreakPointer.removeBreakpoint(task);
@@ -386,23 +398,34 @@ public class DownloadService extends Service {
         return null;
     }
 
-    private boolean removeTask(DownloadTask task){
-        Map<DownloadTask, Client.Canceler> downloading=mDownloading;
-        if (null!=downloading){
-            Set<DownloadTask> set=null;
-            synchronized (downloading){
-               set=downloading.keySet();
-            }
-            if (null!=set){
-                removeTask(set,task);
-            }
-        }
+    private boolean removeAllTask(DownloadTask task){
+        removeRunningTask(task);
+        removeDownloadingTask(task);
+        return true;
+    }
+
+    private boolean removeRunningTask(DownloadTask task){
         List<DownloadTask> running=mRunningList;
         if (null!=running){
             removeTask(running,task);
         }
         return true;
     }
+
+    private boolean removeDownloadingTask(DownloadTask task){
+        Map<DownloadTask, Client.Canceler> downloading=mDownloading;
+        if (null!=downloading){
+            Set<DownloadTask> set;
+            synchronized (downloading){
+                set=downloading.keySet();
+            }
+            if (null!=set){
+                removeTask(set,task);
+            }
+        }
+        return true;
+    }
+
 
     private boolean removeTask(Collection<DownloadTask> collection,DownloadTask task){
         if (null!=collection&&null!=task){
