@@ -13,7 +13,6 @@ public final class DownloadTask implements Status {
     private long mTotal;
     private long mRemain;
     private boolean mDownloading;
-    private boolean mDeleteIncomplete;
     private int mStatus=UNKNOWN;
     private String mMD5;
 
@@ -62,9 +61,6 @@ public final class DownloadTask implements Status {
         return mTargetPath;
     }
 
-    public void setDeleteIncomplete(boolean deleteIncomplete) {
-        this.mDeleteIncomplete = deleteIncomplete;
-    }
 
     protected void setStatus(int status){
         mStatus=status;
@@ -74,9 +70,6 @@ public final class DownloadTask implements Status {
         return mStatus;
     }
 
-    public boolean isDeleteIncomplete() {
-        return mDeleteIncomplete;
-    }
 
     public long getRemain() {
         return mRemain;
@@ -139,7 +132,6 @@ public final class DownloadTask implements Status {
                 ", mTotal=" + mTotal +
                 ", mRemain=" + mRemain +
                 ", mDownloading=" + mDownloading +
-                ", mDeleteIncomplete=" + mDeleteIncomplete +
                 ", mStatus=" + mStatus +
                 ", mMD5='" + mMD5 + '\'' +
                 '}';

@@ -65,7 +65,7 @@ public class ShBreakPointer implements BreakPointer {
     @Override
     public boolean removeBreakpoint(Object obj) {
         if (null!=obj){
-            obj=null!=obj&&obj instanceof BreakPoint?((BreakPoint)obj).getTask():null;
+            obj=obj instanceof BreakPoint?((BreakPoint)obj).getTask():obj;
             String path=null!=obj&&obj instanceof DownloadTask?((DownloadTask)obj).getTargetPath():null;
             if (null!=path) {
                 SharedPreferences sh = mContext.getSharedPreferences(LABEL_BREAKPOINT, Context.MODE_PRIVATE);

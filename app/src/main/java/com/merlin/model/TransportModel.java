@@ -11,6 +11,7 @@ import com.merlin.adapter.DownloadAdapter;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.task.Download;
 import com.merlin.task.DownloadService;
 import com.merlin.task.DownloadTask;
 import com.merlin.task.Downloader;
@@ -26,12 +27,31 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
     }
 
 
-    private void test(){
-        FileMeta test=new FileMeta();
-//        test.setFile("/volume1/Upload/Videos/Cartoon/Shaun the sheep/Season 1/S01E17 Fetching.avi");
-        test.setFile("C:\\Users\\admin\\Desktop\\Genymotio_18525.zip");
-        test.setName("linqiang_two.mp4");
-        mDownloader.download(test);
+    private void test(Downloader downloader){
+        String srcPath=null,name,from,target;
+        srcPath="./WMDYY.mp3";
+//        srcPath="/volumes/pythonCodes/linqiang.mp3";
+//            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
+//            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
+//        srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
+        from="linqiang";
+        name="linqiang_two.mp3";
+        target="/sdcard/a";
+        Download download=new Download(from,srcPath,name,target,null);
+        download.setType(Download.TYPE_REPLACE);
+        downloader.download(download);
+        post(()->{
+            Debug.D(getClass(),"开始取消");
+            download.setDeleteIncomplete(false);
+//            downloader.pause(download);
+        },10000);
+        post(()->{
+            Debug.D(getClass(),"重新开始下载");
+            download.setDeleteIncomplete(false);
+            download.setType(Download.TYPE_NORMAL);
+//            downloader.download(download);
+        },15000);
+//        mDownloader.download(test);
     }
 
     public void setDownloader(Downloader downloader){
@@ -40,7 +60,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         if (null!=downloader){
             downloader.setCallback(this);
             updateList();
-            test();
+            test(downloader);
         }else if(null!=curr){
             curr.setCallback(null);
         }

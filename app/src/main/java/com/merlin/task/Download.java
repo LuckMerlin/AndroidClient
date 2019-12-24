@@ -5,31 +5,42 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-public class Download  implements Parcelable {
+public final class Download  implements Parcelable {
     public final static int TYPE_REPLACE=123;
     public final static int TYPE_NORMAL=124;
-    private String mFrom;
+    private String mFromAccount;
     private String mSrc;
-    private String mTarget;
+    private String mTargetFolder;
     private String mUnique;
     private String mName;
-    private int mType=TYPE_REPLACE;
+    private int mType=TYPE_NORMAL;
+    private boolean mDeleteIncomplete;
 
     private Download(Parcel in){
         mSrc= in.readString();
-        mTarget = in.readString();
+        mTargetFolder = in.readString();
         mUnique=in.readString();
         mName=in.readString();
         mType=in.readInt();
-        mFrom=in.readString();
+        mFromAccount=in.readString();
+        mDeleteIncomplete=in.readBoolean();
     }
 
-    public Download(String from,String src,String name,String target,String unique){
-        mFrom=from;
+    public Download(String fromAccount,String src,String name,String targetFolder,String unique){
+        mFromAccount=fromAccount;
         mSrc=src;
         mName=name;
-        mTarget=target;
+        mTargetFolder=targetFolder;
         mUnique=unique;
+    }
+
+
+    public void setDeleteIncomplete(boolean deleteIncomplete) {
+        this.mDeleteIncomplete = deleteIncomplete;
+    }
+
+    public boolean isDeleteIncomplete() {
+        return mDeleteIncomplete;
     }
 
     public String getName() {
@@ -44,20 +55,26 @@ public class Download  implements Parcelable {
         return mSrc;
     }
 
-    public String getTarget() {
-        return mTarget;
+    public String getTargetFolder() {
+        return mTargetFolder;
     }
 
     public String getUnique() {
         return mUnique;
     }
 
-    public String getFrom() {
-        return mFrom;
+    public String getFromAccount() {
+        return mFromAccount;
     }
 
     public int getType() {
         return mType;
+    }
+
+
+
+    public void setType(int type) {
+        this.mType = type;
     }
 
     @Override
@@ -68,11 +85,12 @@ public class Download  implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mSrc);
-        dest.writeString(mTarget);
+        dest.writeString(mTargetFolder);
         dest.writeString(mUnique);
         dest.writeString(mName);
         dest.writeInt(mType);
-        dest.writeString(mFrom);
+        dest.writeString(mFromAccount);
+        dest.writeBoolean(mDeleteIncomplete);
     }
 
     public static final Parcelable.Creator<Download> CREATOR = new Parcelable.Creator<Download>(){
@@ -93,7 +111,7 @@ public class Download  implements Parcelable {
     public String toString() {
         return "Download{" +
                 "mSrc='" + mSrc + '\'' +
-                ", mTarget='" + mTarget + '\'' +
+                ", mTarget='" + mTargetFolder + '\'' +
                 ", mUnique='" + mUnique + '\'' +
                 '}';
     }
@@ -103,8 +121,8 @@ public class Download  implements Parcelable {
         if (null!=obj) {
             if (obj instanceof Download) {
                 Download d = (Download) obj;
-                return equal(mFrom, d.mFrom) && equal(mName, d.mName) && equal(mSrc, d.mSrc)
-                        && equal(mTarget, d.mTarget);
+                return equal(mFromAccount, d.mFromAccount) && equal(mName, d.mName) && equal(mSrc, d.mSrc)
+                        && equal(mTargetFolder, d.mTargetFolder);
             }else if (obj instanceof DownloadTask){
                 return equals(((DownloadTask)obj).getDownload());
             }

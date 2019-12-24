@@ -22,6 +22,7 @@ import com.merlin.protocol.What;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -66,15 +67,8 @@ public class DownloadService extends Service {
            return -1;
         }
 
-        public Client.Canceler download(Object download){
-           if (null!=download) {
-               if (download instanceof Download) {
-                   return DownloadService.this.download((Download) download);
-               }else if (download instanceof FileMeta){
-                   return DownloadService.postDownload(this,(FileMeta)download,null);
-               }
-           }
-           return null;
+        public Client.Canceler download(Download download){
+           return null!=download?DownloadService.this.download(download):null;
         }
 
         public boolean isRunning(Download download){
@@ -138,7 +132,10 @@ public class DownloadService extends Service {
 
         public boolean cancel(DownloadTask task){
             if (null!=task){
-                task.setDeleteIncomplete(true);
+                Download download=null!=task?task.getDownload():null;
+                if (null!=download){
+                    download.setDeleteIncomplete(true);
+                }
                 return pause(task);
             }
            return false;
@@ -210,15 +207,15 @@ public class DownloadService extends Service {
         }
     }
 
-    private Client.Canceler download(Download download){
-        String from=null!=download?download.getFrom():null;
+    private Client.Canceler download(final Download download){
+        String fromAccount=null!=download?download.getFromAccount():null;
         String name=null!=download?download.getName():null;
         String srcPath=null!=download?download.getSrc():null;
         if (null==name||name.length()<=0||null==srcPath||srcPath.length()<=0){
-            Debug.W(getClass(),"Can't download file,Args invalid."+from+" "+srcPath+" "+name);
+            Debug.W(getClass(),"Can't download file,Args invalid."+fromAccount+" "+srcPath+" "+name);
             return null;
         }
-        String targetFolderPath=download.getTarget();
+        String targetFolderPath=download.getTargetFolder();
         targetFolderPath=null==targetFolderPath||targetFolderPath.length()<=0? "/sdcard/a":targetFolderPath;
         if (null==targetFolderPath||targetFolderPath.length()<=0){
             Debug.D(getClass(),"Can't download,Target folder invalid."+targetFolderPath);
@@ -232,16 +229,9 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download.Target folder create fail or is file."+targetFolder);
             return null;
         }
-        from="linqiang";
-        name="womendouyiyang.mp3";
-//        srcPath="./WMDYY.mp3";
-            srcPath="/volumes/pythonCodes/linqiang.mp3";
-//            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
-//            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
-//            srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
         File targetFile=new File(targetFolder,name);
         boolean exist=targetFile.exists();
-        if (exist&&download.getType()!=Download.TYPE_REPLACE){
+        if (exist&&targetFile.isDirectory()){
             Debug.W(getClass(),"Can't download file.File already existed."+targetFile);
             return null;
         }
@@ -293,19 +283,19 @@ public class DownloadService extends Service {
                 }
             }
         }
-        final long seek=targetFile.length();
-        Debug.D(getClass(),"Downloading file."+"\n from:"+srcPath+"\n to:"+targetFile);
+        final long seek=download.getType()==Download.TYPE_REPLACE?0:targetFile.length();
+        Debug.D(getClass(),"Downloading file."+download.getType()+" "+seek+" \n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
         Client.Canceler canceler=null;
         try {
-            final FileOutputStream fos=os=new FileOutputStream(targetFile);
+            final FileOutputStream fos=os=new FileOutputStream(targetFile,seek<=0?false:true);
             long startTime=System.currentTimeMillis();
             task.setStartTime(startTime);
             runningList.add(task);
             onFileDownloadUpdate(Callback.START,false,task,startTime);
             final long[] total=new long[1];
             task.setStatus(Status.DOWNLOADING);
-            canceler=client.download(from, srcPath,seek<=0?0:seek,(succeed,what,note,frame)->{
+            canceler=client.download(fromAccount, srcPath,seek<=0?0:seek,(succeed,what,note,frame)->{
                 if (succeed) {
                     byte[] body = null != frame ? frame.getBodyBytes() : null;
                     int length = null != body ? body.length : 0;
@@ -324,7 +314,6 @@ public class DownloadService extends Service {
                             }
                             if (null!=frame&&frame.isLastFrame()){
                                 removeTask(task);
-                                Debug.D(getClass(),"@@@@@@@@@ "+runningList.size());
                                 closeStream(fos);
                                 task.setStatus(Status.FINISH_SUCCEED);
                                 mBreakPointer.removeBreakpoint(task);
@@ -337,7 +326,7 @@ public class DownloadService extends Service {
                             closeStream(fos);
                             targetFile.delete();
                             removeTask(task);
-                            if (task.isDeleteIncomplete()){
+                            if (download.isDeleteIncomplete()){
                                 targetFile.delete();
                             }else{
                                 mBreakPointer.addBreakpoint(new BreakPoint(task));
@@ -348,18 +337,28 @@ public class DownloadService extends Service {
                     }
                     Debug.D(getClass(), " " + Thread.currentThread().getName() + " " + what + " " + length);
                 }else{
+                    boolean alreadyDownloaded=What.WHAT_OUT_OF_BOUNDS == what;
                     boolean canceled=What.WHAT_CANCEL==what;
-                    Debug.W(getClass(),(canceled?"Canceled":"Failed")+" download file. "+what+" "+targetFile);
+                    if (alreadyDownloaded){
+                        Debug.W(getClass(),"Already downloaded."+targetFile);
+                    }else {
+                        Debug.W(getClass(), (canceled ? "Canceled" : "Failed") + " download file. " + what + " " + targetFile);
+                    }
                     closeStream(fos);
                     removeTask(task);
-                    if (task.isDeleteIncomplete()){
-                        targetFile.delete();
-                        mBreakPointer.removeBreakpoint(task);
+                    if (alreadyDownloaded){
+                        task.setStatus(Status.FINISH_SUCCEED);
+                        onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,task,null);
                     }else{
-                        mBreakPointer.addBreakpoint(new BreakPoint(task));
+                        if (download.isDeleteIncomplete()){
+                            targetFile.delete();
+                            mBreakPointer.removeBreakpoint(task);
+                        }else{
+                            mBreakPointer.addBreakpoint(new BreakPoint(task));
+                        }
+                        task.setStatus(Status.FINISH_SERVICE_FAIL);
+                        onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL,true,task,null);
                     }
-                    task.setStatus(Status.FINISH_SERVICE_FAIL);
-                    onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL,true,task,null);
                 }
             });
             if (null!=canceler){
@@ -377,7 +376,7 @@ public class DownloadService extends Service {
                 closeStream(os);
                 task.setStatus(Status.FINISH_START_FAIL);
                 removeTask(task);
-                if (task.isDeleteIncomplete()){
+                if (download.isDeleteIncomplete()){
                     targetFile.delete();
                     mBreakPointer.removeBreakpoint(task);
                 }
@@ -450,8 +449,13 @@ public class DownloadService extends Service {
         return false;
     }
 
-    private void closeStream(Closeable closeable){
+    private void closeStream(FileOutputStream closeable){
         if (null!=closeable){
+            try {
+                closeable.flush();
+            }catch (Exception e){
+                //Do nothing
+            }
             try {
                 closeable.close();
             } catch (IOException e) {
@@ -460,16 +464,16 @@ public class DownloadService extends Service {
         }
     }
 
-    public static boolean postDownload(Context context, FileMeta meta,String folder) {
+    public static boolean postDownload(Context context,String fromAccount,String folder, FileMeta meta) {
         if (null!=context&&null!=meta){
             List<FileMeta> list=new ArrayList<>(1);
             list.add(meta);
-            return postDownload(context,list,folder);
+            return postDownload(context,fromAccount,folder,list);
         }
         return false;
     }
 
-    public static boolean postDownload(Context context, List<FileMeta> download,String folder) {
+    public static boolean postDownload(Context context,String fromAccount,String folder, List<FileMeta> download) {
         int size=null!=download?download.size():0;
         if (size>0){
             if (null!=folder&&new File(folder).isFile()){
@@ -480,8 +484,7 @@ public class DownloadService extends Service {
             List<Download> downloads=new ArrayList<>(size);
             for (FileMeta meta:download){
                 if (null!=meta){
-                    String from="nas";//test
-                    downloads.add(new Download(from,meta.getFile(),meta.getName(),folder,unique));
+                    downloads.add(new Download(fromAccount,meta.getFile(),meta.getName(),folder,unique));
                 }
             }
             return null!=downloads&&downloads.size()>0&&postDownload(context,downloads);

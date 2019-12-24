@@ -14,4 +14,5 @@ public interface What {
     int WHAT_NONE_PERMISSION=-1994;
     int WHAT_CLIENT_ONLINE=-1995;
     int WHAT_CANCEL = -1996;
+    int WHAT_OUT_OF_BOUNDS = -1997;
 }

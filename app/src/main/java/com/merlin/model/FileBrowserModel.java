@@ -85,7 +85,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                }else{
                    toast("点击了文件"+file.getName());
                    Debug.D(getClass(),"点击了文件 "+file.getFile());
-                   DownloadService.postDownload(getContext(),file,null);
+                   DownloadService.postDownload(getContext(),getClientAccount(),null,file);
                }
            }
        }
@@ -139,7 +139,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 startActivity(TransportActivity.class);
                 break;
             case R.id.fileBrowser_downloadTV:
-                runChoose((list)->DownloadService.postDownload(v.getContext(),list,null),true);
+                runChoose((list)->DownloadService.postDownload(v.getContext(),getClientAccount(),null,list),true);
                 break;
         }
     }
@@ -270,6 +270,12 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         }
         Debug.W(getClass(),"Can't browser path which is invalid."+path);
         return false;
+    }
+
+
+    private String getClientAccount(){
+        Meta meta=mClientMeta.get();
+        return null!=meta?meta.getAccount():null;
     }
 
     public boolean setClientMeta(Meta meta){
