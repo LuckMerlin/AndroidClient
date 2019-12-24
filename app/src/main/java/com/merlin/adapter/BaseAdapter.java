@@ -1,10 +1,8 @@
 package com.merlin.adapter;
 
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -18,12 +16,14 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_TAIL = 2;
     public static final int TYPE_EMPTY = 3;
+    private WeakReference<View.OnClickListener> mViewClickeListener;
     private WeakReference<OnItemClickListener> mClickListener;
     private WeakReference<OnItemLongClickListener> mLongClickListener;
     private WeakReference<OnItemDobuleClickListener> mDoubleClickListener;
@@ -60,6 +60,10 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
 
     public void setOnItemClickListener(OnItemClickListener listener){
         mClickListener=null!=listener?new WeakReference<>(listener):null;
+    }
+
+    public void setViewClickListener(View.OnClickListener listener){
+        mViewClickeListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener listener){
@@ -102,6 +106,20 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
                 OnItemLongClickListener longClickListener=null!=longReference?longReference.get():null;
                 if (null!=listener){
                     root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),data));
+                }
+                Class cls=binding.getClass();
+                if (null!=cls){
+                    try {
+                        Method method=cls.getDeclaredMethod("setClickListener", View.OnClickListener.class);
+                        if (null!=method){
+                            method.setAccessible(true);
+                            WeakReference<View.OnClickListener> viewClickReference=mViewClickeListener;
+                            View.OnClickListener viewClickListener=null!=viewClickReference?viewClickReference.get():null;
+                            method.invoke(binding,viewClickListener);
+                        }
+                    } catch (Exception e) {
+                        //Do nothing
+                    }
                 }
         }
     }

@@ -24,8 +24,8 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
 
     public TransportModel(Context context){
         super(context);
-    }
 
+    }
 
     private void test(Downloader downloader){
         String srcPath=null,name,from,target;

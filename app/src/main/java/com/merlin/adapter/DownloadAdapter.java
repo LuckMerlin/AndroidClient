@@ -26,8 +26,8 @@ public class DownloadAdapter extends BaseAdapter<DownloadTask, ItemTransportBind
 
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemTransportBinding binding, int position, DownloadTask data, @NonNull List<Object> payloads) {
-            if (null!=data&&null!=binding){
-                binding.setTask(data);
-            }
+        if (null!=data&&null!=binding){
+            binding.setTask(data);
+        }
     }
 }
