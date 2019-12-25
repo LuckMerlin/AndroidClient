@@ -348,6 +348,8 @@ public class DownloadService extends Service {
                     }
                     closeStream(fos);
                     if (canceled){
+                        download.setDeleteIncomplete(false);
+                        download.setType(Download.TYPE_NORMAL);
                         task.setStatus(Status.PAUSE);
                         removeDownloadingTask(task);
                     }else {

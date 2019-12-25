@@ -24,7 +24,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
 
     public TransportModel(Context context){
         super(context);
-
+        mAdapter.setViewClickListener(this);
     }
 
     private void test(Downloader downloader){
@@ -77,6 +77,18 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         switch (id){
             case R.id.activity_transport_root:
                 finishAllActivity(TransportActivity.class);
+                break;
+            case R.id.item_transport_pauseIV://Get through
+            case R.id.item_transport_downloadIV:
+                Downloader downloader=mDownloader;
+                Object tag=null!=v?v.getTag():null;
+                if (null!=tag&&tag instanceof DownloadTask&&null!=downloader){
+                    if (id==R.id.item_transport_pauseIV){
+                        downloader.pause(((DownloadTask)tag).getDownload());
+                    }else{
+                        downloader.download(((DownloadTask)tag).getDownload());
+                    }
+                }
                 break;
         }
     }
