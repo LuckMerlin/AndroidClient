@@ -18,10 +18,7 @@ public class DownloadAdapter extends BaseAdapter<Download, ItemTransportBinding>
 
     public boolean update(Download task){
         int index=null!=task?index(task):-1;
-        if (index>=0){
-            return replace(task,index);
-        }
-        return false;
+        return index>=0? replace(task,index):add(task);
     }
 
     @Override

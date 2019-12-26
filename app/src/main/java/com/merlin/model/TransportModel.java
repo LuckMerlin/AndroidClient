@@ -80,11 +80,11 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
 
     private void setList(List<Download> list){
         DownloadAdapter adapter=mAdapter;
-//        if (null!=list){
-//            for (Download download:list){
-//                Debug.D(getClass(),"@@@@@@ get1Status @@@@@@@@@@ "+download.getStatus());
-//            }
-//        }
+        if (null!=list){
+            for (Download download:list){
+                Debug.D(getClass(),"@@@@@@ get1Status @@@@@@@@@@ "+download.getStatus());
+            }
+        }
         if (null!=adapter){
             adapter.setData(list,true);
         }
