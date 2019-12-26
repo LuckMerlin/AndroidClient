@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.View;
 
 import androidx.databinding.ObservableBoolean;
@@ -24,6 +25,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
+import com.merlin.view.ContextMenuWindow;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Frame;
@@ -59,7 +61,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (bound){
             setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
             setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
-            multiMode(true);
+//            multiMode(true);
         }
     }
 
@@ -70,15 +72,22 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
            if (isMultiMode().get()){
                multiChoose(file);
            }else{
-               if (!file.isRead()){
-                   toast("文件不可读");
-               }else if (file.isDirectory()){
-                   browser(file.getFile(),"After directory click.");
-               }else{
-                   toast("点击了文件"+file.getName());
-                   Debug.D(getClass(),"点击了文件 "+file.getFile());
-                   DownloadService.postDownload(getContext(),getClientAccount(),null,file);
-               }
+               ContextMenuWindow popupWindow=new ContextMenuWindow();
+               popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
+               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
+               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
+               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
+               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
+//               if (!file.isRead()){
+//                   toast("文件不可读");
+//               }else if (file.isDirectory()){
+//                   browser(file.getFile(),"After directory click.");
+//               }else{
+//                   toast("点击了文件"+file.getName());
+//                   Debug.D(getClass(),"点击了文件 "+file.getFile());
+//                   DownloadService.postDownload(getContext(),getClientAccount(),null,file);
+//               }
            }
        }
     }
