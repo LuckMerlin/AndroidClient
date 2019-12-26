@@ -52,13 +52,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
-        post(new Runnable() {
-            @Override
-            public void run() {
-//                DownloadService.postDownload(getContext(),test,null);
-//                startActivity(TransportActivity.class);
-            }
-        },4000);
     }
 
     @Override
@@ -235,6 +228,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             JSONObject object=new JSONObject();
             putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
             putIfNotNull(object,TAG_FILE,path);
+            putIfNotNull(object,TAG_THUMBNAIL,"");
             setRefreshing(true);
             mLoadingPath=path;
             Meta meta=mClientMeta.get();
@@ -272,7 +266,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         Debug.W(getClass(),"Can't browser path which is invalid."+path);
         return false;
     }
-
 
     private String getClientAccount(){
         Meta meta=mClientMeta.get();

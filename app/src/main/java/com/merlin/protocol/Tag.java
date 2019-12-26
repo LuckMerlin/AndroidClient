@@ -49,5 +49,6 @@ public interface Tag {
     String TAG_REMAIN = "remain";
     String TAG_FORMAT = "format";
     String TAG_MD5 = "md5";
+    String TAG_THUMBNAIL = "thumbnail";
 
 }

@@ -1,6 +1,14 @@
 package com.merlin.bean;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import androidx.annotation.Nullable;
+
+import com.merlin.debug.Debug;
+
+import java.io.UnsupportedEncodingException;
+import android.util.Base64;
 
 public class FileMeta {
     /**
@@ -23,6 +31,7 @@ public class FileMeta {
     private boolean write;
     private String extension;
     private int length;
+    private Object thumbnail;
 
     public String getFile() {
         return file;
@@ -58,6 +67,12 @@ public class FileMeta {
 
     public boolean isDirectory() {
         return directory;
+    }
+
+    public void setThumbnail(Object thumbnail) {
+        if (null==thumbnail||thumbnail instanceof String || thumbnail instanceof Bitmap) {
+            this.thumbnail = thumbnail;
+        }
     }
 
     public void setDirectory(boolean directory) {
@@ -99,6 +114,28 @@ public class FileMeta {
     public final  boolean isPathEquals(String path){
         String filePath=file;
         return null!=path&&null!=filePath&&filePath.equals(path);
+    }
+
+    public Bitmap getThumbnail(){
+        Object data=thumbnail;
+        if (null!=data){
+            if(data instanceof Bitmap){
+                return (Bitmap)data;
+            }else if (data instanceof String){
+                try {
+                    byte[] bytes=((String)data).getBytes("utf-8");
+                    bytes=null!=bytes&&bytes.length>0?Base64.decode(bytes,0):null;
+                    if (null!=bytes&&bytes.length>0){
+                        Bitmap bitmap=BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                        thumbnail=bitmap;
+                        return bitmap;
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    //DO nothing
+                }
+            }
+        }
+        return null;
     }
 
     @Override

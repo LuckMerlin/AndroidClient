@@ -8,6 +8,9 @@
         <variable
             name="isChoose"
             type="Boolean" />
+        <variable
+            name="meta"
+            type="com.merlin.bean.FileMeta" />
         <import type="android.view.View"/>
 
     </data>
@@ -28,10 +31,10 @@
             android:padding="5dp"
             android:layout_height="wrap_content">
             <TextView
-                android:id="@+id/itemListFile_title"
                 android:layout_width="match_parent"
                 android:textSize="@dimen/textTitle"
                 android:singleLine="true"
+                android:text="@{meta.name}"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
             <TextView

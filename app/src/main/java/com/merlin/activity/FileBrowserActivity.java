@@ -160,9 +160,9 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
                     "我们都一样.mp3",null,null);
             download2.setType(Download.TYPE_REPLACE);
             list2.add(download2);
-            DownloadService.postDownload(this,list2);
+//            DownloadService.postDownload(this,list2);
             new Handler().postDelayed(()->{
-                DownloadService.postDownload(this,list);
+//                DownloadService.postDownload(this,list);
             },3000);
         },5000);
     }
