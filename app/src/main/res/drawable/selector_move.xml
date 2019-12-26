@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:state_enabled = "false"
-        android:drawable = "@drawable/downloading_disable"/>
+        android:drawable = "@drawable/move_disable"/>
     <item
         android:state_pressed = "true"
-        android:drawable = "@drawable/downloading_pressed"/>
-    <item android:drawable = "@drawable/downloading_normal" />
+        android:drawable = "@drawable/move_pressed"/>
+    <item android:drawable = "@drawable/move_normal" />
 </selector>

@@ -59,7 +59,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (bound){
             setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
             setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
-//            multiMode(true);
+            multiMode(true);
         }
     }
 
