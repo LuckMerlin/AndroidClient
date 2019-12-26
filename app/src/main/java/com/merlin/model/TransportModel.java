@@ -64,15 +64,14 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
 
     @Override
     public void onFileDownloadUpdate(int what, boolean finish, Download task, Object data) {
+        final DownloadAdapter adapter=mAdapter;
         if (finish){
-            updateList();
+            adapter.remove(task);
         }
         switch (what){
             case START://Get through
             case WAITING://Get through
-            case ADD:
-                updateList();
-                break;
+            case ADD://Get through
             case DOWNLOADING:
                 mAdapter.update(task);
                 break;
@@ -81,6 +80,11 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
 
     private void setList(List<Download> list){
         DownloadAdapter adapter=mAdapter;
+//        if (null!=list){
+//            for (Download download:list){
+//                Debug.D(getClass(),"@@@@@@ get1Status @@@@@@@@@@ "+download.getStatus());
+//            }
+//        }
         if (null!=adapter){
             adapter.setData(list,true);
         }

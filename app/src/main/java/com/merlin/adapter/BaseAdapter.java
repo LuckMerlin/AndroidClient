@@ -184,7 +184,16 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
   }
 
-  protected  boolean replace(T data,int index){
+    public final boolean add(T data){
+      List<T> list=null!=data?mData:null;
+      if (null!=list&&!list.contains(data)&&list.add(data)){
+          notifyItemChanged(list.indexOf(data));
+          return true;
+      }
+      return false;
+  }
+
+  protected final boolean replace(T data,int index){
         List<T> list=null!=data?mData:null;
         int size=null!=list?list.size():-1;
         if (null!=data&&index>=0&&index<=size){
@@ -198,12 +207,35 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         return false;
   }
 
-    protected final int index(T data){
+  public final boolean remove(T data){
+        List<T> list=mData;
+        int index=null!=list&&null!=data?list.indexOf(data):-1;
+        if (index>=0&&list.remove(data)){
+            notifyItemRemoved(index);
+            return true;
+        }
+        return false;
+    }
+
+  public final T remove(int index){
+        List<T> list=mData;
+        int size=null!=list?list.size():-1;
+        if (index>=0&&index<=size){
+            T removed=index<size?list.remove(index):null;
+            if (null!=removed){
+                notifyItemChanged(index);
+            }
+            return removed;
+        }
+        return null;
+    }
+
+  protected final int index(T data){
         List<T> list=null!=data?mData:null;
         return null!=list?list.indexOf(data):-1;
     }
 
-    private static abstract class DoubleClick implements Runnable{
+  private static abstract class DoubleClick implements Runnable{
             private long mTime;
 
     }

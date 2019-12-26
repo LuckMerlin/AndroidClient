@@ -143,7 +143,7 @@ public class Socket implements Tag {
 
                @Override
                public void onSocketWriteResponse(ConnectionInfo info, String action, ISendable data) {
-                   Debug.D(getClass(), "onSocketWriteResponse");
+//                   Debug.D(getClass(), "onSocketWriteResponse");
                }
 
                @Override

@@ -153,6 +153,17 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             List<Download> list=new ArrayList<>();
             list.add(download);
 //            DownloadService.postDownload(this,list);
+
+            List<Download> list2=new ArrayList<>();
+            Download download2=new Download("linqiang",
+                    "F:\\LuckMerlin\\SLManager\\WMDYY.mp3",
+                    "我们都一样.mp3",null,null);
+            download2.setType(Download.TYPE_REPLACE);
+            list2.add(download2);
+            DownloadService.postDownload(this,list2);
+            new Handler().postDelayed(()->{
+                DownloadService.postDownload(this,list);
+            },3000);
         },5000);
     }
 

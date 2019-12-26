@@ -146,13 +146,16 @@ public class DownloadService extends Service {
         mClient=null!=application?application.getClient():null;
         BreakPointer pointer=mBreakPointer=new ShBreakPointer(app);
         List<BreakPoint> list=pointer.getBreakpoints();//Init break list
-        if (null!=list&&list.size()>0){
+        List<Download> runningList=mRunningList;
+        if (null!=list&&list.size()>0&&null!=runningList){
             for (BreakPoint point:list){
                 Download download=null!=point?point.getTask():null;
                 if (null!=download){ //Add task into queue
                     download.setStatus(Status.PAUSE); //Reset status to pause
                     download.buildRemainFromFile();
-                    mRunningList.add(download);
+                    if (!runningList.contains(download)){
+                        runningList.add(download);
+                    }
                     Debug.D(getClass(),"Add breakpoint file."+download);
                     onFileDownloadUpdate(Status.ADD,false,download,null);
                 }
@@ -236,14 +239,18 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download file.Exist downloading."+download);
             return null;
         }
+        if (null!=existTask){
+            runningList.remove(existTask);
+        }
+        runningList.add(download);
         download.setStatus(Status.UNKNOWN);
         int downloadingSize=binder.getDownloadingSize();
         if (downloadingSize>0){//Check if need waiting
             int maxDownloading=mMaxDownloading;
-            if (downloadingSize>(maxDownloading<=0?1:maxDownloading)){
+            if (downloadingSize>=(maxDownloading<=0?1:maxDownloading)){
                 Debug.W(getClass(),"Add download into wait queue."+downloadingSize+" "+maxDownloading);
                 download.setStatus(Status.WAITING);
-                onFileDownloadUpdate(Callback.WAITING,true,download,System.currentTimeMillis());
+                onFileDownloadUpdate(Callback.WAITING,false,download,System.currentTimeMillis());
                 return null;
             }
         }
@@ -329,7 +336,7 @@ public class DownloadService extends Service {
                     if (alreadyDownloaded){
                         Debug.W(getClass(),"Already downloaded."+targetFile);
                     }else {
-                        Debug.W(getClass(), (canceled ? "Canceled" : "Failed") + " download file. " + what + " " + targetFile);
+                        Debug.W(getClass(), (canceled ? "Canceled" : "Failed") + " download file. " + what+" "+note + " " + targetFile);
                     }
                     closeStream(fos);
                     if (canceled){
@@ -411,7 +418,6 @@ public class DownloadService extends Service {
         }
         return true;
     }
-
 
     private boolean removeTask(Collection<Download> collection,Download task){
         if (null!=collection&&null!=task){

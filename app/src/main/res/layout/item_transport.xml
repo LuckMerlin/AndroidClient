@@ -82,7 +82,17 @@
                   android:clickable="true"
                   android:tag="@{task}"
                   android:onClick="@{clickListener}"
-                  android:visibility="@{task.status!=Status.DOWNLOADING?View.VISIBLE:View.GONE }"
+                  android:visibility="@{task.status!=Status.DOWNLOADING&amp;&amp;task.status!=Status.WAITING?View.VISIBLE:View.GONE }"
+                  android:layout_height="30dp"/>
+              <ImageView
+                  android:src="@drawable/selector_wait"
+                  android:layout_gravity="right"
+                  android:layout_alignParentRight="true"
+                  android:layout_width="30dp"
+                  android:clickable="true"
+                  android:tag="@{task}"
+                  android:onClick="@{clickListener}"
+                  android:visibility="@{task.status==Status.WAITING?View.VISIBLE:View.GONE }"
                   android:layout_height="30dp"/>
           </RelativeLayout>
         </LinearLayout>
