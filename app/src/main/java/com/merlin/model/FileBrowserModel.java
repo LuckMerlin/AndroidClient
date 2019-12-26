@@ -55,9 +55,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         post(new Runnable() {
             @Override
             public void run() {
-                Debug.D(getClass(),"########################");
 //                DownloadService.postDownload(getContext(),test,null);
-                startActivity(TransportActivity.class);
+//                startActivity(TransportActivity.class);
             }
         },4000);
     }
@@ -238,8 +237,10 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             putIfNotNull(object,TAG_FILE,path);
             setRefreshing(true);
             mLoadingPath=path;
-            Debug.D(getClass(),"Browsing "+path+" "+(null!=debug?debug:"."));
-            return sendMessage(object.toString(), "nas", TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
+            Meta meta=mClientMeta.get();
+            String account=null!=meta?meta.getAccount():null;
+            Debug.D(getClass(),"Browsing "+path+" on "+account+" "+(null!=debug?debug:"."));
+            return sendMessage(object.toString(), account, TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
                 @Override
                 public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
                     if (null!=mLoadingPath){
@@ -258,7 +259,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                                 mCurrPath.set(meta.getFile());
                                 mParentPath=meta.getParent();
                                 List<FileMeta> list=null!=meta?meta.getData():null;
-//                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
+                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
                                 setData(list,true);
                             }else{
                                 Debug.D(getClass(),"这是一个文件啊 ");

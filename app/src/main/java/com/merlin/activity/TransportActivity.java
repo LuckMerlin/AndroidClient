@@ -9,12 +9,10 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.FileMeta;
 import com.merlin.client.databinding.ActivityTransportBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.TransportModel;
 import com.merlin.task.DownloadService;
-import com.merlin.task.DownloadTask;
 import com.merlin.task.Downloader;
 
 public class TransportActivity extends  SocketActivity<ActivityTransportBinding, TransportModel>  {

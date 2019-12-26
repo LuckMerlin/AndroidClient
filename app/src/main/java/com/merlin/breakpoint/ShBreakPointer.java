@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 import com.merlin.debug.Debug;
-import com.merlin.task.DownloadTask;
+import com.merlin.task.Download;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,11 +23,11 @@ public class ShBreakPointer implements BreakPointer {
 
     @Override
     public boolean addBreakpoint(BreakPoint breakpoint) {
-        DownloadTask task=null!=breakpoint?breakpoint.getTask():null;
+        Download task=null!=breakpoint?breakpoint.getTask():null;
         long total=null!=task?task.getTotal():0;
         String path=null!=task?task.getTargetPath():null;
         long length=total>0&&null!=path?new File(path).length():0;
-        long progress=null!=task?task.getProgress():-1;
+        long progress=null!=task?task.getDownloadedSize():-1;
         if (progress<length){
             String text=new Gson().toJson(breakpoint);
             if (null==text||text.length()<=0){
@@ -66,7 +66,7 @@ public class ShBreakPointer implements BreakPointer {
     public boolean removeBreakpoint(Object obj) {
         if (null!=obj){
             obj=obj instanceof BreakPoint?((BreakPoint)obj).getTask():obj;
-            String path=null!=obj&&obj instanceof DownloadTask?((DownloadTask)obj).getTargetPath():null;
+            String path=null!=obj&&obj instanceof Download?((Download)obj).getTargetPath():null;
             if (null!=path) {
                 SharedPreferences sh = mContext.getSharedPreferences(LABEL_BREAKPOINT, Context.MODE_PRIVATE);
                 sh.edit().remove(path).commit();

@@ -8,12 +8,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.DownloadAdapter;
-import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.task.Download;
 import com.merlin.task.DownloadService;
-import com.merlin.task.DownloadTask;
 import com.merlin.task.Downloader;
 
 import java.util.List;
@@ -39,15 +37,16 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         name="linqiang_two.mp4";
         target="/sdcard/a";
         Download download=new Download(from,srcPath,name,target,null);
-        download.setType(Download.TYPE_REPLACE);
-//        downloader.download(download);
+        download.setType(Download.TYPE_NORMAL);
+        Debug.D(getClass(),"#####ddddd###### "+name+" "+srcPath);
+        downloader.download(download);
         post(()->{
-            Debug.D(getClass(),"开始取消");
+//            Debug.D(getClass(),"开始取消");
 //            download.setDeleteIncomplete(false);
 //            downloader.pause(download);
         },10000);
         post(()->{
-            Debug.D(getClass(),"重新开始下载");
+//            Debug.D(getClass(),"重新开始下载");
 //            download.setDeleteIncomplete(false);
 //            download.setType(Download.TYPE_NORMAL);
 //            downloader.download(download);
@@ -82,11 +81,11 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
             case R.id.item_transport_downloadIV:
                 Downloader downloader=mDownloader;
                 Object tag=null!=v?v.getTag():null;
-                if (null!=tag&&tag instanceof DownloadTask&&null!=downloader){
+                if (null!=tag&&tag instanceof Download&&null!=downloader){
                     if (id==R.id.item_transport_pauseIV){
-                        downloader.pause(((DownloadTask)tag).getDownload());
+                        downloader.pause(((Download)tag));
                     }else{
-                        downloader.download(((DownloadTask)tag).getDownload());
+                        downloader.download(((Download)tag));
                     }
                 }
                 break;
@@ -94,7 +93,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
     }
 
     @Override
-    public void onFileDownloadUpdate(int what, boolean finish, DownloadTask task, Object data) {
+    public void onFileDownloadUpdate(int what, boolean finish, Download task, Object data) {
         if (finish){
             updateList();
         }
@@ -110,7 +109,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         }
     }
 
-    private void setList(List<DownloadTask> list){
+    private void setList(List<Download> list){
         DownloadAdapter adapter=mAdapter;
         if (null!=adapter){
             adapter.setData(list,true);

@@ -25,7 +25,7 @@ public class MainActivity extends Activity implements Tag {
         Intent intent=new Intent(this,FileBrowserActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Meta meta=new Meta();
-        meta.setAccount("nas");
+        meta.setAccount("linqiang");
         meta.setDeviceType(TAG_NAS_DEVICE);
         intent.putExtra(Tag.TAG_META,meta);
         startActivity(intent);

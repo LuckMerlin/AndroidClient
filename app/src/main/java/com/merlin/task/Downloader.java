@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface Downloader {
 
-    public List<DownloadTask> getDownloadList();
+    public List<Download> getDownloadList();
 
     public Client.Canceler download(Download download);
 
@@ -20,10 +20,6 @@ public interface Downloader {
     public boolean pause(Download download);
 
     public boolean cancel(Download download);
-
-    public boolean pause(DownloadTask task);
-
-    public boolean cancel(DownloadTask task);
 
     public void setCallback(DownloadService.Callback callback);
 

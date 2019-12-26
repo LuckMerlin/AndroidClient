@@ -47,5 +47,7 @@ public interface Tag {
     String TAG_COMMAND_READ_FILE = "commandReadFile";
     String TAG_FILE = "file";
     String TAG_REMAIN = "remain";
+    String TAG_FORMAT = "format";
+    String TAG_MD5 = "md5";
 
 }

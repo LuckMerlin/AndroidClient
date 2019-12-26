@@ -1,6 +1,7 @@
 package com.merlin.activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -12,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
+import com.merlin.bean.FileMeta;
 import com.merlin.bean.Meta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.debug.Debug;
@@ -103,6 +105,13 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             return ;
         }
         getViewModel().setClientMeta(meta);
+        new Handler().postDelayed(()->{
+//            Context context,String fromAccount,String folder, FileMeta meta
+            FileMeta fileMeta=new FileMeta();
+            fileMeta.setFile("F:\\LuckMerlin\\SLManager\\NSWXADGN.mp4");
+            fileMeta.setName("你是我心爱的姑娘.mp4");
+            DownloadService.postDownload(this,"linqiang",null,fileMeta);
+        },5000);
     }
 
     @Override
