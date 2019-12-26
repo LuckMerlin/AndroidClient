@@ -153,6 +153,7 @@ public class DownloadService extends Service {
                     download.setStatus(Status.PAUSE); //Reset status to pause
                     download.buildRemainFromFile();
                     mRunningList.add(download);
+                    Debug.D(getClass(),"Add breakpoint file."+download);
                     onFileDownloadUpdate(Status.ADD,false,download,null);
                 }
             }
@@ -271,6 +272,8 @@ public class DownloadService extends Service {
             runningList.add(download);
             onFileDownloadUpdate(Callback.START,false,download,startTime);
             download.setStatus(Status.DOWNLOADING);
+            final BreakPoint breakPoint=new BreakPoint(download);
+            mBreakPointer.addBreakpoint(breakPoint);
             canceler=client.download(fromAccount, srcPath,seek<=0?0:seek,(succeed,what,note,frame)->{
                 if (succeed) {
                     if (null==frame){
@@ -287,8 +290,6 @@ public class DownloadService extends Service {
                             download.setMD5(json.getString(Tag.TAG_MD5));
                             download.setFormat(json.getString(Tag.TAG_FORMAT));
                         }
-                        Debug.D(getClass(),"$$$$$$$$$$$ "+download.getMD5()+" "
-                        +" "+download.getTotal()+" "+download.getRemain());
                         onFileDownloadUpdate(Callback.DOWNLOADING, false, download, remain);
                         return;
                     }
@@ -297,7 +298,7 @@ public class DownloadService extends Service {
                     if (length>0){
                         try {
                             fos.write(body,0,length);
-                            if (null!=frame&&frame.isLastFrame()){
+                            if (frame.isLastFrame()){
                                 removeAllTask(download);
                                 closeStream(fos);
                                 download.setStatus(Status.FINISH_SUCCEED);
@@ -305,6 +306,8 @@ public class DownloadService extends Service {
                                 onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,download,System.currentTimeMillis());
                                 Debug.D(getClass(),"下载完成了 "+note);
                                 checkDownloadNextPossible();
+                            }else{
+                                onFileDownloadUpdate(Callback.DOWNLOADING, false, download, remain);
                             }
                         }catch (Exception e){
                             Debug.E(getClass(),"Failed download file.e="+e+" \n"+targetFile,e);
@@ -312,9 +315,8 @@ public class DownloadService extends Service {
                             targetFile.delete();
                             removeAllTask(download);
                             if (download.isDeleteIncomplete()){
+                                mBreakPointer.removeBreakpoint(breakPoint);
                                 targetFile.delete();
-                            }else{
-                                mBreakPointer.addBreakpoint(new BreakPoint(download));
                             }
                             download.setStatus(Status.FINISH_WRITE_EXCEPTION);
                             onFileDownloadUpdate(Callback.FINISH_WRITE_EXCEPTION,true,download,e);
@@ -339,14 +341,13 @@ public class DownloadService extends Service {
                         removeAllTask(download);
                     }
                     if (alreadyDownloaded){
+                        mBreakPointer.removeBreakpoint(download);
                         download.setStatus(Status.FINISH_SUCCEED);
                         onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,download,null);
                     }else{
                         if (download.isDeleteIncomplete()){
                             targetFile.delete();
                             mBreakPointer.removeBreakpoint(download);
-                        }else{
-                            mBreakPointer.addBreakpoint(new BreakPoint(download));
                         }
                         if (canceled) {
                             download.setStatus(Status.FINISH_CANCEL);

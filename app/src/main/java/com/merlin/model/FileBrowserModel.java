@@ -301,7 +301,9 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                     mClientMeta.set(newMeta);
                     String root=null!=newMeta?newMeta.getRoot():null;
                     String curr=mCurrPath.get();
-                    if (null!=curr&&null!=root&&!curr.contains(root)){//Check current if within root
+                    String loading=mLoadingPath;
+                    if (null!=curr&&null!=root&&!curr.contains(root)&&(null==loading||(!loading.isEmpty()
+                            &&!loading.equals(root)))){//Check current if within root
                        browser(root,"After root changed while meta updated.");
                     }
                  }

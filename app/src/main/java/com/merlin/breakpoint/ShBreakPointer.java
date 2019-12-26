@@ -24,11 +24,8 @@ public class ShBreakPointer implements BreakPointer {
     @Override
     public boolean addBreakpoint(BreakPoint breakpoint) {
         Download task=null!=breakpoint?breakpoint.getTask():null;
-        long total=null!=task?task.getTotal():0;
         String path=null!=task?task.getTargetPath():null;
-        long length=total>0&&null!=path?new File(path).length():0;
-        long progress=null!=task?task.getDownloadedSize():-1;
-        if (progress<length){
+        if (null!=path&&path.length()>0){
             String text=new Gson().toJson(breakpoint);
             if (null==text||text.length()<=0){
                 Debug.W(getClass(),"Can't add download breakpoint.text="+text+" "+path);
@@ -36,10 +33,10 @@ public class ShBreakPointer implements BreakPointer {
             }
             SharedPreferences sh=mContext.getSharedPreferences(LABEL_BREAKPOINT,Context.MODE_PRIVATE);
             boolean succeed=sh.edit().putString(path,text).commit();
-            Debug.D(getClass(),"Add download breakpoint."+succeed+" "+progress+" "+length+" "+path);
+            Debug.D(getClass(),"Add download breakpoint."+succeed+" "+task.getProgress()+" "+path);
             return true;
         }
-        Debug.W(getClass(),"Can't add download breakpoint.length="+length+" progress="+progress+" "+path);
+        Debug.W(getClass(),"Can't add download breakpoint. "+path);
         return false;
     }
 

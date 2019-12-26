@@ -22,9 +22,14 @@ import com.merlin.player1.MediaPlayer;
 import com.merlin.protocol.Tag;
 import com.merlin.task.Download;
 import com.merlin.task.DownloadService;
+import com.merlin.task.Downloader;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
@@ -105,12 +110,49 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
             return ;
         }
         getViewModel().setClientMeta(meta);
+//
+//        private void test(Downloader downloader){
+//            String srcPath=null,name,from,target;
+//            srcPath="./WMDYY.mp3";
+//            srcPath="./NSWXADGN.mp4";
+////        srcPath="/volumes/pythonCodes/linqiang.mp3";
+////            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
+////            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
+////        srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
+//            from="linqiang";
+//            name="linqiang_two.mp4";
+//            target="/sdcard/a";
+//            Download download=new Download(from,srcPath,name,target,null);
+////        download.setType(Download.TYPE_REPLACE);
+////        Debug.D(getClass(),"#####ddddd###### "+name+" "+srcPath);
+////        downloader.download(download);
+//            post(()->{
+////            Debug.D(getClass(),"开始取消");
+////            download.setDeleteIncomplete(false);
+////            downloader.pause(download);
+//            },10000);
+//            post(()->{
+////            Debug.D(getClass(),"重新开始下载");
+////            download.setDeleteIncomplete(false);
+////            download.setType(Download.TYPE_NORMAL);
+////            downloader.download(download);
+//            },15000);
+////        mDownloader.download(test);
+//        }
         new Handler().postDelayed(()->{
 //            Context context,String fromAccount,String folder, FileMeta meta
-            FileMeta fileMeta=new FileMeta();
-            fileMeta.setFile("F:\\LuckMerlin\\SLManager\\NSWXADGN.mp4");
-            fileMeta.setName("你是我心爱的姑娘.mp4");
-            DownloadService.postDownload(this,"linqiang",null,fileMeta);
+//            FileMeta fileMeta=new FileMeta();
+//            fileMeta.setFile("F:\\LuckMerlin\\SLManager\\NSWXADGN.mp4");
+//            fileMeta.setName("你是我心爱的姑娘.mp4");
+//            DownloadService.postDownload(this,"linqiang",null,fileMeta);
+            //
+//            String fromAccount,String src,String name,String targetFolder,String unique
+            Download download=new Download("linqiang","F:\\LuckMerlin\\SLManager\\NSWXADGN.mp4",
+                    "你是我心爱的姑娘.mp4",null,null);
+            download.setType(Download.TYPE_REPLACE);
+            List<Download> list=new ArrayList<>();
+            list.add(download);
+//            DownloadService.postDownload(this,list);
         },5000);
     }
 

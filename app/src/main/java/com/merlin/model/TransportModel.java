@@ -25,42 +25,12 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         mAdapter.setViewClickListener(this);
     }
 
-    private void test(Downloader downloader){
-        String srcPath=null,name,from,target;
-        srcPath="./WMDYY.mp3";
-        srcPath="./NSWXADGN.mp4";
-//        srcPath="/volumes/pythonCodes/linqiang.mp3";
-//            srcPath="/volumes/pythonCodes/1576847957749986.mp4";
-//            srcPath="/volumes/pythonCodes/1576846797997566.mp4";
-//        srcPath="/volumes/pythonCodes/iPartment.S04E01.HDTV.720p.x264.AAC-sherry.mp4";
-        from="linqiang";
-        name="linqiang_two.mp4";
-        target="/sdcard/a";
-        Download download=new Download(from,srcPath,name,target,null);
-        download.setType(Download.TYPE_NORMAL);
-        Debug.D(getClass(),"#####ddddd###### "+name+" "+srcPath);
-        downloader.download(download);
-        post(()->{
-//            Debug.D(getClass(),"开始取消");
-//            download.setDeleteIncomplete(false);
-//            downloader.pause(download);
-        },10000);
-        post(()->{
-//            Debug.D(getClass(),"重新开始下载");
-//            download.setDeleteIncomplete(false);
-//            download.setType(Download.TYPE_NORMAL);
-//            downloader.download(download);
-        },15000);
-//        mDownloader.download(test);
-    }
-
     public void setDownloader(Downloader downloader){
         Downloader curr=mDownloader;
         mDownloader=downloader;
         if (null!=downloader){
             downloader.setCallback(this);
             updateList();
-            test(downloader);
         }else if(null!=curr){
             curr.setCallback(null);
         }

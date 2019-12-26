@@ -148,7 +148,7 @@ public final class Download  implements Parcelable ,Status {
     public float getProgress(){
         long remain=mRemain;
         long total=mTotal;
-        return remain>=0&&remain<=total&&total>0?(remain*100/(float)total):0;
+        return remain>=0&&remain<=total&&total>0?((total-remain)*100/(float)total):0;
     }
 
     public boolean buildRemainFromFile(){
