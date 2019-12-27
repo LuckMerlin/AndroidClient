@@ -22,6 +22,8 @@ import com.merlin.server.Json;
 
 import org.json.JSONObject;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -68,11 +70,21 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
         }
     }
 
+    public final void toast(int textResId){
+        View root=getRoot();
+        Context context=null!=root?root.getContext():null;
+        toast(null!=context?context.getResources().getString(textResId):null);
+    }
+
     public final void toast(String msg){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;
         if (null!=context&&null!=msg){
-            Toast.makeText(context,msg,Toast.LENGTH_LONG).show();
+            if (Looper.getMainLooper()==Looper.myLooper()) {
+                Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+            }else{
+                root.post(()->Toast.makeText(context, msg, Toast.LENGTH_LONG).show());
+            }
         }
     }
 
@@ -146,6 +158,15 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
         return false;
     }
 
+    public final Client.Canceler download(String from, String path, float seek, Socket.OnRequestFinish callback) {
+        Client client=getClient();
+        if (null!=client){
+            return client.download(from,path,seek,callback);
+        }
+        Debug.W(getClass(),"Can't download file.Client not connected."+path);
+        return null;
+    }
+
     protected final Client getClient(){
         Application application=getApplication();
         return null!=application?application.getClient():null;
@@ -212,4 +233,15 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
         return false;
     }
 
+    protected final boolean closeIO(Closeable closeable){
+        if (null!=closeable){
+            try {
+                closeable.close();
+                return true;
+            } catch (IOException e) {
+                //Do nothing
+            }
+        }
+        return false;
+    }
 }

@@ -2,4 +2,7 @@
     <string name="rename">重命名</string>
     <string name="addToFavorite">收藏</string>
     <string name="detail">详情</string>
+    <string name="notOnline">设备未在线</string>
+    <string name="fileNotExist">文件不存在</string>
+    <string name="nonePermission">没有访问权限</string>
 </resources>
