@@ -13,32 +13,34 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_TAIL = 2;
     public static final int TYPE_EMPTY = 3;
-    private WeakReference<View.OnClickListener> mViewClickeListener;
+    private WeakReference<View.OnClickListener> mViewClickListener;
     private WeakReference<OnItemClickListener> mClickListener;
     private WeakReference<OnItemLongClickListener> mLongClickListener;
-    private WeakReference<OnItemDobuleClickListener> mDoubleClickListener;
+    private WeakReference<OnItemMultiClickListener> mMultiClickListener;
     private Handler mHandler;
     private List<T> mData;
 
     public interface OnItemClickListener<T>{
-        void onItemClick(View view,int sourceId, T data);
+        void onItemClick(View view,int sourceId,int position, T data);
     }
 
-    public interface OnItemDobuleClickListener<T>{
-        void onItemDoubleClick(View view,int sourceId, T data);
+    public interface OnItemMultiClickListener<T>{
+        boolean onItemMultiClick(View view,int clickCount,int sourceId,int position, T data);
     }
 
     public interface OnItemLongClickListener<T>{
-        boolean onItemLongClick(View view,int sourceId, T data);
+        boolean onItemLongClick(View view,int sourceId,int position, T data);
     }
 
     public final void setData(List<T> data){
@@ -57,12 +59,16 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
     }
 
+    public void setOnItemMultiClickListener(OnItemMultiClickListener listener){
+        mMultiClickListener=null!=listener?new WeakReference<>(listener):null;
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener){
         mClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     public void setViewClickListener(View.OnClickListener listener){
-        mViewClickeListener=null!=listener?new WeakReference<>(listener):null;
+        mViewClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener listener){
@@ -96,15 +102,43 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         if (null!=root){
                 WeakReference<OnItemClickListener> reference=mClickListener;
                 OnItemClickListener listener=null!=reference?reference.get():null;
-                WeakReference<OnItemDobuleClickListener> doubleReference=mDoubleClickListener;
-                OnItemDobuleClickListener doubleListener=null!=doubleReference?doubleReference.get():null;
-                if (null!=listener||null!=doubleListener){
-                    root.setOnClickListener((view)->listener.onItemClick(view, view.getId(), data));
+                WeakReference<OnItemMultiClickListener> doubleReference=mMultiClickListener;
+                final OnItemMultiClickListener multiListener=
+                        null!=doubleReference?doubleReference.get():null;
+                if (null!=listener||null!=multiListener){
+                    final int maxInterval=400;
+                    final MultiClickRunnable multiRunnable=new MultiClickRunnable(){
+                        @Override
+                        public void run() {
+                            int count=mClickCount;
+                            mClickCount=0;//Reset
+                            if (null==multiListener||!multiListener.
+                                    onItemMultiClick(mView,count, getViewId(),position,data)){
+                                if (count==1&&null!=listener){
+                                    Debug.D(getClass(),"########### "+(System.currentTimeMillis()-mFirstTime));
+                                    listener.onItemClick(mView, mView.getId(),position, data);
+                                }
+                            }
+                        }
+                    };
+                    root.setOnClickListener((view)->{
+                        if (null==multiListener&&null!=listener){
+                            listener.onItemClick(view, view.getId(),position, data);
+                        }else if(null!=multiListener){
+                            view.removeCallbacks(multiRunnable);
+                            multiRunnable.mView=view;
+                            if (multiRunnable.mClickCount==0){
+                                multiRunnable.mFirstTime=System.currentTimeMillis();
+                            }
+                            multiRunnable.mClickCount+=1;
+                            view.postDelayed(multiRunnable,maxInterval);
+                        }
+                    });
                 }
                 WeakReference<OnItemLongClickListener> longReference=mLongClickListener;
                 OnItemLongClickListener longClickListener=null!=longReference?longReference.get():null;
                 if (null!=listener){
-                    root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),data));
+                    root.setOnLongClickListener((view)->null!=longClickListener&& longClickListener.onItemLongClick(view, view.getId(),position,data));
                 }
                 Class cls=binding.getClass();
                 if (null!=cls){
@@ -112,7 +146,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
                         Method method=cls.getDeclaredMethod("setClickListener", View.OnClickListener.class);
                         if (null!=method){
                             method.setAccessible(true);
-                            WeakReference<View.OnClickListener> viewClickReference=mViewClickeListener;
+                            WeakReference<View.OnClickListener> viewClickReference=mViewClickListener;
                             View.OnClickListener viewClickListener=null!=viewClickReference?viewClickReference.get():null;
                             method.invoke(binding,viewClickListener);
                         }
@@ -158,14 +192,14 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         return mData;
     }
 
-    protected final static class BaseViewHolder extends RecyclerView.ViewHolder{
+  protected final static class BaseViewHolder extends RecyclerView.ViewHolder{
         protected BaseViewHolder(View root){
             super(root);
 
         }
    }
 
-    protected final static class ViewHolder<V extends ViewDataBinding> extends RecyclerView.ViewHolder{
+  protected final static class ViewHolder<V extends ViewDataBinding> extends RecyclerView.ViewHolder{
     private V mBinding;
 
     protected ViewHolder(V binding){
@@ -178,18 +212,23 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     }
 }
 
-    protected final void setText(TextView tv,String value,String ifNull){
+  protected final void setText(TextView tv,String value,String ifNull){
         if (null!=tv){
             tv.setText(null!=value?value:(null==ifNull?"":ifNull));
         }
   }
 
-    public final boolean add(T data){
-      List<T> list=null!=data?mData:null;
-      if (null!=list&&!list.contains(data)&&list.add(data)){
-          notifyItemChanged(list.indexOf(data));
-          return true;
-      }
+  public final boolean add(T data){
+        if (null!=data){
+            List<T> list=mData;
+            if (null==list){
+                mData=list=new ArrayList<>();
+            }
+            if (!list.contains(data)&&list.add(data)){
+                notifyItemInserted(list.indexOf(data));
+                return true;
+            }
+        }
       return false;
   }
 
@@ -235,9 +274,15 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         return null!=list?list.indexOf(data):-1;
     }
 
-  private static abstract class DoubleClick implements Runnable{
-            private long mTime;
+  private static abstract class MultiClickRunnable implements Runnable{
+         View mView;
+         long mFirstTime;
+         int mClickCount;
 
+      int getViewId(){
+          View view=mView;
+          return null!=view?view.getId():-1;
+      }
     }
 
 }

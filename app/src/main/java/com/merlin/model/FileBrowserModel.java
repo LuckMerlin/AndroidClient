@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.databinding.ObservableBoolean;
@@ -25,6 +26,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
+import com.merlin.view.ContextMenu;
 import com.merlin.view.ContextMenuWindow;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
@@ -40,7 +42,7 @@ import java.util.List;
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
         BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive,
-        BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, Tag {
+        BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, BaseAdapter.OnItemMultiClickListener, Tag {
     private String mLoadingPath=null,mParentPath;
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
@@ -66,34 +68,51 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     @Override
-    public void onItemClick(View view, int sourceId, Object data) {
-       if (null!=data&&data instanceof FileMeta){
+    public void onItemClick(View view, int sourceId,int position, Object data) {
+        if (null==data){
+            return;
+        }
+       if (data instanceof FileMeta){
            FileMeta file=(FileMeta)data;
            if (isMultiMode().get()){
                multiChoose(file);
            }else{
-               ContextMenuWindow popupWindow=new ContextMenuWindow();
-               popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
-               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
-               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
-               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
-               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
-               popupWindow.add(new ContextMenuWindow.ContextMenu(00));
-//               if (!file.isRead()){
-//                   toast("文件不可读");
-//               }else if (file.isDirectory()){
-//                   browser(file.getFile(),"After directory click.");
-//               }else{
-//                   toast("点击了文件"+file.getName());
-//                   Debug.D(getClass(),"点击了文件 "+file.getFile());
-//                   DownloadService.postDownload(getContext(),getClientAccount(),null,file);
-//               }
+               if (!file.isRead()){
+                   toast("文件不可读");
+               }else if (file.isDirectory()){
+                   browser(file.getFile(),"After directory click.");
+               }else{
+                   toast("点击了文件"+file.getName());
+                   Debug.D(getClass(),"点击了文件 "+file.getFile());
+                   DownloadService.postDownload(getContext(),getClientAccount(),null,file);
+               }
            }
+       }else if (data instanceof ContextMenu){
+           ContextMenu item=(ContextMenu)data;
+            toast("点击了 "+item.getTextId());
        }
     }
 
     @Override
-    public boolean onItemLongClick(View view, int sourceId, Object data) {
+    public boolean onItemMultiClick(View view, int clickCount, int sourceId, int position, Object data) {
+        if (null!=data){
+            if (data instanceof FileMeta){
+                if(clickCount==2){
+                   ContextMenuWindow popupWindow=new ContextMenuWindow(true);
+                   popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+                   popupWindow.setOnItemClickListener(this);
+                   popupWindow.add(new ContextMenu(R.string.rename));
+                   popupWindow.add(new ContextMenu(R.string.addToFavorite));
+                   popupWindow.add(new ContextMenu(R.string.detail));
+                   return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onItemLongClick(View view, int sourceId,int position, Object data) {
         if (null!=data&&data instanceof FileMeta){
             return !isMultiMode().get()&&multiMode(true);
         }

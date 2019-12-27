@@ -28,6 +28,9 @@ public class DataListModel extends BaseModel {
             if (this instanceof BaseAdapter.OnItemLongClickListener){
                 adapter.setOnItemLongClickListener((BaseAdapter.OnItemLongClickListener)this);
             }
+            if (this instanceof BaseAdapter.OnItemMultiClickListener){
+                adapter.setOnItemMultiClickListener((BaseAdapter.OnItemMultiClickListener)this);
+            }
         }
     }
 

@@ -1,2 +1,5 @@
 <resources>
+    <string name="rename">重命名</string>
+    <string name="addToFavorite">收藏</string>
+    <string name="detail">详情</string>
 </resources>
