@@ -38,6 +38,7 @@ import com.merlin.task.DownloadService;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.List;
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
@@ -49,6 +50,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
+    private final ContextMenuWindow mPopupWindow=new ContextMenuWindow(true);
 
     private interface OnChooseExist{
         void onChooseExist(List<FileMeta> list);
@@ -69,28 +71,39 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public void onItemClick(View view, int sourceId,int position, Object data) {
-        if (null==data){
-            return;
+        if (null!=data){
+            if (data instanceof FileMeta){
+                if (!mPopupWindow.isShowing()) {
+                    onFileMetaClick(view, sourceId, position, (FileMeta) data);
+                }
+            }else if (data instanceof ContextMenu){
+                onContextMenuClick(view,sourceId,position,(ContextMenu)data);
+            }
         }
-       if (data instanceof FileMeta){
-           FileMeta file=(FileMeta)data;
-           if (isMultiMode().get()){
-               multiChoose(file);
-           }else{
-               if (!file.isRead()){
-                   toast("文件不可读");
-               }else if (file.isDirectory()){
-                   browser(file.getFile(),"After directory click.");
-               }else{
-                   toast("点击了文件"+file.getName());
-                   Debug.D(getClass(),"点击了文件 "+file.getFile());
-                   DownloadService.postDownload(getContext(),getClientAccount(),null,file);
-               }
-           }
-       }else if (data instanceof ContextMenu){
-           ContextMenu item=(ContextMenu)data;
-            toast("点击了 "+item.getTextId());
-       }
+    }
+
+    private void onFileMetaClick(View view, int sourceId,int position, FileMeta file){
+        if (null!=file) {
+            if (isMultiMode().get()) {
+                multiChoose(file);
+            } else {
+                if (!file.isRead()) {
+                    toast("文件不可读");
+                } else if (file.isDirectory()) {
+                    browser(file.getFile(), "After directory click.");
+                } else {
+                    toast("点击了文件" + file.getName());
+                    Debug.D(getClass(), "点击了文件 " + file.getFile());
+                    DownloadService.postDownload(getContext(), getClientAccount(), null, file);
+                }
+            }
+        }
+    }
+
+    private void onContextMenuClick(View view, int sourceId,int position, ContextMenu menu){
+        if (null!=menu){
+            toast("点击了 "+menu.getTextId());
+        }
     }
 
     @Override
@@ -98,12 +111,9 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         if (null!=data){
             if (data instanceof FileMeta){
                 if(clickCount==2){
-                   ContextMenuWindow popupWindow=new ContextMenuWindow(true);
-                   popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
-                   popupWindow.setOnItemClickListener(this);
-                   popupWindow.add(new ContextMenu(R.string.rename));
-                   popupWindow.add(new ContextMenu(R.string.addToFavorite));
-                   popupWindow.add(new ContextMenu(R.string.detail));
+                    mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+                    mPopupWindow.setOnItemClickListener(this);
+                    mPopupWindow.reset(R.string.rename,R.string.addToFavorite,R.string.detail);
                    return true;
                 }
             }
@@ -133,6 +143,9 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public void onViewClick(View v, int id) {
+        if (mPopupWindow.isShowing()){
+            return;
+        }
         Debug.D(getClass()," onViewClick "+v);
         switch (id){
             case R.id.fileBrowser_cancelIV:

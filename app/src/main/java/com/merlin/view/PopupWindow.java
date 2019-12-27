@@ -77,12 +77,16 @@ public class PopupWindow {
         return null!=window?window.getContentView():null;
     }
 
-    public boolean dismiss(){
+    public final boolean dismiss(){
         android.widget.PopupWindow window=mWindow;
         if (null!=window){
             window.dismiss();
             return true;
         }
         return false;
+    }
+
+    public final boolean isShowing(){
+        return null!=getContentView();
     }
 }

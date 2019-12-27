@@ -218,16 +218,44 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
   }
 
-  public final boolean add(T data){
-        if (null!=data){
+  public void reset(T ...datas){
+        List<T> list=mData;
+        if (null==list){
+            mData=list=new ArrayList<>();
+        }else{
+            list.clear();
+            notifyDataSetChanged();
+        }
+        if (null!=datas&&datas.length>0){
+           add(datas);
+        }
+    }
+
+    public void reset(List<T> datas){
+        List<T> list=mData;
+        if (null==list){
+            mData=list=new ArrayList<>();
+        }else{
+            list.clear();
+        }
+        if (null!=datas&&datas.size()>0) {
+            list.addAll(datas);
+        }
+        notifyDataSetChanged();
+    }
+
+  public final boolean add(T ...datas){
+        if (null!=datas&&datas.length>0){
             List<T> list=mData;
             if (null==list){
                 mData=list=new ArrayList<>();
             }
-            if (!list.contains(data)&&list.add(data)){
-                notifyItemInserted(list.indexOf(data));
-                return true;
+            for (T data:datas){
+                if (!list.contains(data)&&list.add(data)){
+                    notifyItemInserted(list.indexOf(data));
+                }
             }
+            return true;
         }
       return false;
   }

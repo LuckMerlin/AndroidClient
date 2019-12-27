@@ -11,6 +11,7 @@ import com.merlin.adapter.BaseAdapter;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemContextMenuBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContextMenuWindow extends PopupWindow{
@@ -35,20 +36,32 @@ public class ContextMenuWindow extends PopupWindow{
         }
     }
 
-    public void add(int ...textResIds){
+    public final void add(int ...textResIds){
         if (null!=textResIds&&textResIds.length>0){
+            List<ContextMenu> list=new ArrayList<>();
             for (int id:textResIds){
-                add(new ContextMenu(id));
+                list.add(new ContextMenu(id));
+            }
+            if (null!=list&&list.size()>0) {
+                add(list.toArray(new ContextMenu[list.size()]));
             }
         }
     }
 
-    public boolean add(ContextMenu menu){
-        ContextAdapter adapter=getAdapter();
-        if (null!=adapter&&null!=menu){
-            return adapter.add(menu);
+    public final void reset(int ...textResIds){
+        if (null!=textResIds&&textResIds.length>0){
+            List<ContextMenu> list=new ArrayList<>();
+            for (int id:textResIds){
+                list.add(new ContextMenu(id));
+            }
+            ContextAdapter adapter=getAdapter();
+            adapter.reset(list);
         }
-        return false;
+    }
+
+    public final boolean add(ContextMenu ...menus){
+        ContextAdapter adapter=getAdapter();
+        return null!=adapter&&null!=menus&&menus.length>0&&adapter.add(menus);
     }
 
     private ContextAdapter getAdapter(){
