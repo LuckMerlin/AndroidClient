@@ -73,9 +73,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     public void onItemClick(View view, int sourceId,int position, Object data) {
         if (null!=data){
             if (data instanceof FileMeta){
-                if (!mPopupWindow.isShowing()) {
-                    onFileMetaClick(view, sourceId, position, (FileMeta) data);
-                }
+                onFileMetaClick(view, sourceId, position, (FileMeta) data);
             }else if (data instanceof ContextMenu){
                 onContextMenuClick(view,sourceId,position,(ContextMenu)data);
             }
@@ -143,9 +141,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public void onViewClick(View v, int id) {
-        if (mPopupWindow.isShowing()){
-            return;
-        }
         Debug.D(getClass()," onViewClick "+v);
         switch (id){
             case R.id.fileBrowser_cancelIV:

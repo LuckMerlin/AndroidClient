@@ -15,10 +15,6 @@ import com.merlin.protocol.Tag;
 
 public class MainActivity extends Activity implements Tag {
 
-    public void ddd(View view){
-        System.exit(1);
-    }
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +23,10 @@ public class MainActivity extends Activity implements Tag {
         Meta meta=new Meta();
         meta.setAccount("linqiang");
         meta.setDeviceType(TAG_NAS_DEVICE);
+        intent.putExtra(Tag.TAG_META,meta);
+//        startActivity(intent);
+        intent=new Intent(this,MediaPlayActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Tag.TAG_META,meta);
         startActivity(intent);
 //        finish();

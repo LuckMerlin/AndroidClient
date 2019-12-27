@@ -32,8 +32,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
-//    private Player mPlayer=new Player();
+public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
 
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
@@ -102,9 +101,8 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 //            e.printStackTrace();
 //        }
 //        Toast.makeText(this,""+mPlayer.play(path,0),Toast.LENGTH_LONG).show();
-        Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
-        Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
-        if (null==meta||null==meta.getAccount() || !meta.isDeviceType(TAG_NAS_DEVICE)){
+        Meta meta=getNasMetaFromIntent(getIntent());
+        if (null==meta){
             toast("不能浏览非指定文件系统的终端");
             finish();
             return ;
@@ -165,6 +163,7 @@ public final class FileBrowserActivity extends  SocketActivity<ActivityFileBrows
 //                DownloadService.postDownload(this,list);
             },3000);
         },5000);
+
     }
 
     @Override
