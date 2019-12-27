@@ -15,6 +15,7 @@ import com.merlin.util.FileMaker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener {
     private final MediaListAdapter mPlayingAdapter;
@@ -41,7 +42,11 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         }
     }
 
-    private boolean play(Media media,int seek){
+    private void onMediaBytesReceived(byte[] bytes){
+
+    }
+
+    private boolean play(Media media,long seek){
         final String url=null!=media?media.getUrl():null;
         if (null==url||url.isEmpty()){
             Debug.W(getClass(),"Can't play media.Which url is NONE."+url);
@@ -62,7 +67,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         }
         FileOutputStream os=null;
         try {
-            os=new FileOutputStream(cacheFile);
+            os=new FileOutputStream(cacheFile,false);
         } catch (FileNotFoundException e) {
             Debug.E(getClass(),"Can't play media which cache file stream open fail.e="+e+" "+cacheFile,e);
             closeIO(os);
@@ -71,16 +76,27 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         final long currPosition=cacheFile.length();
         final FileOutputStream fos=os;
         final String account=media.getAccount();
+        seek=seek<currPosition?currPosition:seek; //If seek position less than current length
         Debug.D(getClass(),"Play media on "+account+" "+seek+" "+url);
         final Client.Canceler canceler=download(account, url,seek<=0?0:seek,(succeed, what, note, frame)->{
             Debug.D(getClass(),"@@@ "+succeed+" "+note+" "+what+" "+frame);
             if (succeed){
                 if (what==What.WHAT_HEAD_DATA){
                     Debug.D(getClass(),"收到歌曲 信息 "+frame);
-                }else{
-                    fos.write();
+                }else if(null!=frame){
+                    byte[] body =  frame.getBodyBytes() ;
+                    int length = null != body ? body.length : 0;
+                    if (length>0){
+                        try {
+                            fos.write(body,0,length);
+                            onMediaBytesReceived(body);
+                        } catch (IOException e) {
+                            Debug.E(getClass(),"Cache media file exception.e="+e+" "+cacheFile ,e);
+                        }
+                    }
                 }
             }else{
+                closeIO(fos);
                 switch (what){
                     case What.WHAT_NOT_ONLINE:
                          toast(R.string.notOnline);
