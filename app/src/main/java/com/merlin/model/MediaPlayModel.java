@@ -78,7 +78,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
                 if (what==What.WHAT_HEAD_DATA){
                     Debug.D(getClass(),"收到歌曲 信息 "+frame);
                 }else{
-//                    fos.write();
+                    fos.write();
                 }
             }else{
                 switch (what){
@@ -96,10 +96,6 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         });
         return null!=canceler;
     }
-
-
-
-
 
     public MediaListAdapter getPlayingAdapter() {
         return mPlayingAdapter;
