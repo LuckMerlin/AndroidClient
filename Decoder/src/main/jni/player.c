@@ -154,11 +154,24 @@ jint JNI_OnLoad(JavaVM* vm,void* resolved){
 //}
 
 
+static inline void onFrameDecode(struct FileHandle * handle){
+    mad_fixed_t const *left_ch, *right_ch;
+    /* pcm->samplerate contains the sampling frequency */
+    struct mad_header header=handle->frame.header;
+    struct mad_pcm pcm=handle->synth.pcm;
+    unsigned int layer=header.layer;
+    unsigned int mode=header.mode;
+    unsigned long bitrate=header.bitrate;
+    unsigned int sampleRate=pcm.samplerate;
+    unsigned int channels = pcm.channels;
+    LOGD("QQQQQQQQQQ %d %ld %d %d", layer,bitrate,sampleRate,channels);
+}
+
 
 static inline int readNextFrame(struct FileHandle* handle){
     do{
         if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
-            LOGD("DDDDDDDDDDd jinlai ");
+//            LOGD("DDDDDDDDDDd jinlai ");
             int inputBufferSize = 0;
             if(handle->stream.next_frame != 0){
                 int leftOver = handle->stream.bufend - handle->stream.next_frame;
@@ -184,9 +197,9 @@ static inline int readNextFrame(struct FileHandle* handle){
             }
             mad_stream_buffer(&handle->stream,&handle->inputBuffer,inputBufferSize);
             handle->stream.error = MAD_ERROR_NONE;
-            LOGD("####### %d",inputBufferSize);
+//            LOGD("####### %d",inputBufferSize);
         }
-        LOGD("QQQQQQ %d",handle->frame.header.samplerate);
+//        LOGD("QQQQQQ %d",handle->frame.header.samplerate);
         int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
         if(decodeResult){
             LOGD("Fail decode %d",decodeResult);
@@ -198,8 +211,9 @@ static inline int readNextFrame(struct FileHandle* handle){
             break;
         }
     }while (1);
-    mad_timer_add(&handle->timer, handle->frame.header.duration);
+//    mad_timer_add(&handle->timer, handle->frame.header.duration);
     mad_synth_frame(&handle->synth,&handle->frame);
+    onFrameDecode(handle);
 //    handle.leftSamples = mp3->synth.pcm.length;
 //    mp3->offset = 0;
     return 0;
@@ -263,13 +277,11 @@ Java_com_merlin_player_Player_play(JNIEnv *env,jobject type,jstring path,jfloat 
     mad_stream_init(&(handle->stream));
     mad_frame_init(&handle->frame);
     mad_synth_init(&handle->synth);
-    mad_timer_reset(&handle->timer);
+//    mad_timer_reset(&handle->timer);
     readNextFrame(handle);
     unsigned int samplerate = handle->frame.header.samplerate;
     enum mad_layer layer = handle->frame.header.layer;
-    LOGD("@@@@@@@@@@@@@ %d %d",samplerate,layer);
-
-
+//    LOGD("@@@@@@@@@@@@@ %d %d",samplerate,layer);
 //    FileHandler* handle = malloc(sizeof(FileHandler));
 //    FileHandler* mp3Handle = (FileHandler*)malloc(sizeof(FileHandler));
 //    memset(mp3Handle,0,sizeof(MP3FileHandle));
