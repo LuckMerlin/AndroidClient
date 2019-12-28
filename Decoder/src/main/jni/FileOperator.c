@@ -24,7 +24,12 @@ int fileWrite(int fd, unsigned char *buf, int size){
 }
 
 int64_t fileSeek(int fd, int64_t pos, int whence){
-    return lseek(fd, pos, whence);    
+	if (whence == 0x10000) {
+		struct stat st;
+		int ret = fstat(fd, &st);
+		return ret < 0 ? -1 : st.st_size;
+	}
+	return lseek(fd, pos, whence);
 }
 
 int fileClose(int fd){
