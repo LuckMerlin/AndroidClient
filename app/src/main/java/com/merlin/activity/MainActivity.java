@@ -24,11 +24,11 @@ public class MainActivity extends Activity implements Tag {
         meta.setAccount("linqiang");
         meta.setDeviceType(TAG_NAS_DEVICE);
         intent.putExtra(Tag.TAG_META,meta);
-//        startActivity(intent);
+        startActivity(intent);
         intent=new Intent(this,MediaPlayActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Tag.TAG_META,meta);
-        startActivity(intent);
+//        startActivity(intent);
 //        finish();
 //        String ddd="/storage/sdcard0/storage/emulated/0/linqiang.mp3";
 //        MediaPlayer player=new MediaPlayer();
