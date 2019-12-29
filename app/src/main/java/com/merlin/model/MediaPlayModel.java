@@ -29,10 +29,10 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         super(context);
         mPlayingAdapter=new MediaListAdapter(context);
         mPlayingAdapter.setOnItemClickListener(this);
-        mPlayingAdapter.add(new Media("linqiang","操蛋","./WMDYY.mp3"));
-        mPlayingAdapter.add(new Media("linqiang","操蛋",""));
-        mPlayingAdapter.add(new Media("linqiang","操蛋",""));
-        mPlayingAdapter.add(new Media("linqiang","操蛋",""));
+        mPlayingAdapter.add(new Media("linqiang","3","./WMDYY.mp3"));
+        mPlayingAdapter.add(new Media("linqiang","345",""));
+        mPlayingAdapter.add(new Media("linqiang","55",""));
+        mPlayingAdapter.add(new Media("linqiang","3453",""));
 //        new Thread(()->{
 //            try {
 //                FileInputStream file=new FileInputStream("/sdcard/Musics/西单女孩 - 原点.mp3");
@@ -49,7 +49,8 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        }).start();
 //        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
         new Thread(()->{
-            mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
+//            mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
 //            Debug.D(getClass(),"的说法安抚 ");
 //            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
         }).start();
