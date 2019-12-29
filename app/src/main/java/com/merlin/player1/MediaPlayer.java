@@ -19,12 +19,11 @@ public class MediaPlayer {
         int bufferSize = AudioTrack.getMinBufferSize(samplerate,
                 AudioFormat.CHANNEL_IN_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT);
-////        int streamType, int sampleRateInHz, int channelConfig, int audioFormat,
-////        int bufferSizeInBytes, int mode
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                 samplerate, AudioFormat.CHANNEL_IN_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize,
                 AudioTrack.MODE_STREAM);
+//        audioTrack.setPlaybackRate()
 //        audioTrack.play();
 //        audioTrack.setVolume(0.12f);
     }

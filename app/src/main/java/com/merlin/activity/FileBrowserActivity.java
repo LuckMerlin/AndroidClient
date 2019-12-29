@@ -83,7 +83,7 @@ public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserB
 //        path="/mnt/sdcard/linqiang.mp3";
 //        Debug.D(getClass(),"@@ "+new File(path).exists());
         MediaPlayer dd=new MediaPlayer();
-//        mPlayer.setOnDecodeFinishListener(new OnDecodeFinish() {
+//        mPlayer.setOnDecodeFinishListener(new OnMediaFrameDecodeFinish() {
 //            @Override
 //            public void onDecodeFinish(byte[] bytes, int channels, int sampleRate) {
 //                dd.play(bytes,0,bytes.length);

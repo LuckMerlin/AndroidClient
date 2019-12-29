@@ -9,11 +9,12 @@ import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.media.Media;
-import com.merlin.player.Player;
+import com.merlin.player1.MPlayer;
 import com.merlin.protocol.What;
 import com.merlin.util.FileMaker;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.io.RandomAccessFile;
 
 public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener {
     private final MediaListAdapter mPlayingAdapter;
-    private final Player mPlayer=new Player();
+    private final MPlayer mPlayer=new MPlayer();
     private String mCacheFolder;
 
     public MediaPlayModel(Context context){
@@ -32,17 +33,27 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         mPlayingAdapter.add(new Media("linqiang","操蛋",""));
         mPlayingAdapter.add(new Media("linqiang","操蛋",""));
         mPlayingAdapter.add(new Media("linqiang","操蛋",""));
-//        try {
-//            RandomAccessFile file=new RandomAccessFile("/sdcard/Musics/西单女孩 - 原点.mp3","r");
-//            byte[] bytes=new byte[2*1024*1024];
-//            int count=file.read(bytes);
-//            if (count>0){
-//                mPlayer.playBytes(bytes,0,count,false);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
+        new Thread(()->{
+            try {
+                FileInputStream file=new FileInputStream("/sdcard/Musics/西单女孩 - 原点.mp3");
+                byte[] bytes=new byte[100*1024];
+                int length=0;
+                while ((length=file.read(bytes))>0){
+                    Debug.D(getClass(),"##JAVA ### "+length);
+                    mPlayer.playBytes(bytes,0,length);
+                    break;
+                }
+                Debug.D(getClass(),"流播放结束了 ");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
+        new Thread(()->{
+//            mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
+//            Debug.D(getClass(),"的说法安抚 ");
+//            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
+        }).start();
 //        play(new Media("linqiang","操蛋","./WMDYY.mp3"),0);
     }
 

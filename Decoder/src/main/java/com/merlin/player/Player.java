@@ -3,14 +3,14 @@ package com.merlin.player;
 import java.lang.ref.WeakReference;
 
 public class Player {
-    private static WeakReference<OnDecodeFinish> mLintener;
+    private static WeakReference<OnMediaFrameDecodeFinish> mLintener;
 
     static {
         System.loadLibrary("linqiang");
     }
 
-    public void setOnDecodeFinishListener(OnDecodeFinish listener){
-        WeakReference<OnDecodeFinish> reference=mLintener;
+    public void setOnDecodeFinishListener(OnMediaFrameDecodeFinish listener){
+        WeakReference<OnMediaFrameDecodeFinish> reference=mLintener;
         mLintener=null;
         if (null!=reference){
             reference.clear();
@@ -20,17 +20,21 @@ public class Player {
         }
     }
 
-    public static void onDecodeFinish(byte[] bytes,int offset,int length){
-        WeakReference<OnDecodeFinish> reference=mLintener;
-        OnDecodeFinish listener=null!=reference?reference.get():null;
+    /**
+     *
+     *Call by native C
+     */
+    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int offset,int length,int speed){
+        WeakReference<OnMediaFrameDecodeFinish> reference=mLintener;
+        OnMediaFrameDecodeFinish listener=null!=reference?reference.get():null;
         if (null!=listener){
-            listener.onDecodeFinish(bytes,offset,length);
+            listener.onMediaFrameDecodeFinish(mediaType,bytes,offset,length);
         }
     }
 
     public native boolean play(String path,float seek);
 
-    public native boolean playBytes(byte[] data,int offset,int length,boolean reset);
+    public native boolean playBytes(byte[] data,int offset,int length);
 
 //    public native boolean seek(float seek);
 
