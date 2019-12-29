@@ -9,13 +9,10 @@
 
 int MEDIA_TYPE_AUDIO =1;
 int MEDIA_TYPE_AUDIO_STREAM=2;
-#define MEDIA_TYPE_VIDEO int 3;
 
 struct StreamHandle {
-    int offset;
     int length;
     int seek;
-//    unsigned char * address;
     struct mad_stream stream;
     struct mad_frame frame;
     struct mad_synth synth;
@@ -99,7 +96,6 @@ static inline void onFrameDecode(int mediaType,struct mad_header header,struct m
 
 static inline int readStreamNextFrame(struct StreamHandle * handle){
     int inputBufferSize = 0;
-    unsigned char inputBuffer[INPUT_BUFFER_SIZE];
     do{
         if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
             if(handle->stream.next_frame != 0){
@@ -107,20 +103,24 @@ static inline int readStreamNextFrame(struct StreamHandle * handle){
                 int i;
                 LOGD("deeee %d",leftOver);
                 for(i= 0;i<leftOver;i++){
-                    inputBuffer[i] = handle->stream.next_frame[i];
+                    handle->inputBuffer[i] = handle->stream.next_frame[i];
                 }
-                strlcpy(inputBuffer+leftOver,handle->input+handle->seek,INPUT_BUFFER_SIZE-leftOver);
-                inputBufferSize=sizeof(inputBuffer);
+                for (int i = 0; i < INPUT_BUFFER_SIZE-leftOver; ++i) {
+                    handle->inputBuffer[leftOver+i]=handle->input[handle->seek+i];
+                }
+                inputBufferSize=sizeof(handle->inputBuffer);
             }else{
-                 strlcpy(inputBuffer,handle->input+handle->seek,INPUT_BUFFER_SIZE);
-                 inputBufferSize=sizeof(inputBuffer);
-                 LOGD("dddee是的发生 %d", inputBufferSize);
+                for (int i = 0; i < INPUT_BUFFER_SIZE; ++i) {
+                    handle->inputBuffer[i]=handle->input[handle->seek+i];
+                }
+                 inputBufferSize=sizeof(handle->inputBuffer);
+                 LOGD("dddee是的发生 %d  %d",handle->seek, inputBufferSize);
             }
-            mad_stream_buffer(&handle->stream,inputBuffer,inputBufferSize);
+            handle->seek+=inputBufferSize;
+            mad_stream_buffer(&handle->stream,handle->inputBuffer,inputBufferSize);
             handle->stream.error = MAD_ERROR_NONE;
         }
         int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
-        LOGD("@@@@@@@  %d %d",decodeResult,inputBufferSize);
         if(decodeResult){
             if(handle->stream.error == MAD_ERROR_BUFLEN ||(MAD_RECOVERABLE(handle->stream.error))){
                 continue;
@@ -156,19 +156,16 @@ Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray da
     size_t handleSize=sizeof(struct StreamHandle);
     struct StreamHandle* handle = (struct StreamHandle*)malloc(handleSize);
     memset(handle,0,handleSize);
-    handle->offset=offset;
     handle->input=(unsigned char *)bytesStart;
     handle->seek=0;
     handle->length=targetLength;
-//    handle->input=(unsigned char *)bytesStart;
     mad_stream_init(&(handle->stream));
     mad_frame_init(&handle->frame);
     mad_synth_init(&handle->synth);
     //
     int readLength=0;
     while (readLength<byteLength){
-        handle->seek+=readStreamNextFrame(handle);
-        LOGD("送 %d %d ",handle->seek,byteLength);
+        readStreamNextFrame(handle);
         if(handle->seek>=byteLength){
             LOGD("End play media stream. %d",handle->length);
             break;

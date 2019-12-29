@@ -3,8 +3,6 @@ package com.merlin.player1;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.os.Handler;
-import android.os.Looper;
 
 import com.merlin.debug.Debug;
 import com.merlin.player.OnMediaFrameDecodeFinish;

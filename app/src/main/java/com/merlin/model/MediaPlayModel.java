@@ -33,24 +33,23 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         mPlayingAdapter.add(new Media("linqiang","操蛋",""));
         mPlayingAdapter.add(new Media("linqiang","操蛋",""));
         mPlayingAdapter.add(new Media("linqiang","操蛋",""));
-        new Thread(()->{
-            try {
-                FileInputStream file=new FileInputStream("/sdcard/Musics/西单女孩 - 原点.mp3");
-                byte[] bytes=new byte[100*1024];
-                int length=0;
-                while ((length=file.read(bytes))>0){
-                    Debug.D(getClass(),"##JAVA ### "+length);
-                    mPlayer.playBytes(bytes,0,length);
-                    break;
-                }
-                Debug.D(getClass(),"流播放结束了 ");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
+//        new Thread(()->{
+//            try {
+//                FileInputStream file=new FileInputStream("/sdcard/Musics/西单女孩 - 原点.mp3");
+//                byte[] bytes=new byte[1024*1024];
+//                int length=0;
+//                while ((length=file.read(bytes))>0){
+//                    Debug.D(getClass(),"##JAVA ### "+length);
+//                    mPlayer.playBytes(bytes,0,length);
+//                }
+//                Debug.D(getClass(),"流播放结束了 ");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
 //        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
         new Thread(()->{
-//            mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
+            mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
 //            Debug.D(getClass(),"的说法安抚 ");
 //            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
         }).start();
