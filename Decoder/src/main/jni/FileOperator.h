@@ -13,6 +13,7 @@
 #define _RDONLY 1
 #define _WRONLY 2
 #define _RDWR   3
+#define _ACRDRW  4
 
 int fileOpen(const char* filename,int access);
 int fileRead(int fd,unsigned char* buf,int size);

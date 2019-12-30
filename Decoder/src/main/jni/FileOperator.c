@@ -11,6 +11,8 @@ int fileOpen(const char *filename, int access){
 		fd = open(filename,O_RDONLY,0666);
 	}else if(access == _RDWR){
 		fd = open(filename,O_RDWR);
+	}else if (access==_ACRDRW){
+		fd=open(filename,O_RDWR|O_CREAT,0666);
 	}
 	return fd;
 }

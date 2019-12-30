@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 public class Player {
     private static WeakReference<OnMediaFrameDecodeFinish> mListener;
-    private final ExecutorService mPool = Executors.newFixedThreadPool(1);
+    private final ExecutorService mPool = Executors.newFixedThreadPool(2);
     static {
         System.loadLibrary("linqiang");
     }
@@ -22,17 +22,16 @@ public class Player {
         }
     }
 
-    public boolean playFile(final String path,final float seek){
+    public boolean play(final String path,final float seek){
         ExecutorService pool=mPool;
         return null!=path&&path.length()>0&&null!=pool&&null!=pool.submit(new Runnable() {
             @Override
             public void run() {
-                play(path,seek);
+                playFile(path,seek);
             }
         });
     }
 
-//    public native
     public native int getPlayerState();
 
     public native long getPosition();
@@ -57,11 +56,11 @@ public class Player {
         }
     }
 
-    public native boolean playByte(String path,byte[] data,int length,long totalLength);
+//    public native boolean playByte(String path,byte[] data,int length,long totalLength);
 
-    private native boolean play(String path,float seek);
+    private native boolean playFile(String path,float seek);
 
-    private native boolean playBytes(byte[] data,int offset,int length);
+//    private native boolean playBytes(byte[] data,int offset,int length);
 
 //    public native String getPlayingPath();
 

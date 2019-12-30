@@ -25,6 +25,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     private final MediaListAdapter mPlayingAdapter;
     private final MPlayer mPlayer=new MPlayer();
     private String mCacheFolder;
+    boolean test=false;
 
     public MediaPlayModel(Context context){
         super(context);
@@ -34,25 +35,45 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        mPlayingAdapter.add(new Media("linqiang","345",""));
 //        mPlayingAdapter.add(new Media("linqiang","55",""));
 //        mPlayingAdapter.add(new Media("linqiang","3453",""));
-        new Thread(()->{
-            try {
-                File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
-                final long fileLength=fileData.length();
-                FileInputStream file=new FileInputStream(fileData);
-                byte[] bytes=new byte[1024];
-                int length=0;
-                while ((length=file.read(bytes))>0){
-                    Debug.D(getClass(),"##JAVA ### "+length);
-//                    String path,byte[] data,int length,int totalLength
-                    mPlayer.playByte("/sdcard/a/林强.mp3",bytes,length,fileLength);
-                    Thread.sleep(4000000);
-                }
-                Debug.D(getClass(),"流播放结束了 ");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
+//        File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
+//        final long fileLength=fileData.length();
+//        byte[] bytes=new byte[1024*13];
+//        int[] readed=new int[2];
+//        FileInputStream file= null;
+//        try {
+//            file = new FileInputStream(fileData);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        final FileInputStream fis=file;
+//        new Thread(()->{
+//            try {
+//                readed[0]=fis.read(bytes);
+//                if (readed[0]>0) {
+//                    mPlayer.playByte("/sdcard/a/林强.mp3", bytes, readed[0], fileLength);
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
+//        test=true;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    while (test||(readed[1]=fis.read(bytes))>0){
+//                        if (readed[1]>0) {
+//                            test=true;
+//                            mPlayer.playByte("/sdcard/a/林强.mp3", bytes, readed[1], fileLength);
+//                            readed[1]=0;
+//                        }
+//                    }
+//                }catch (Exception e){
+//
+//                }
+//            }
+//        }).start();
+//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.0f);
 //        mPlayer.playFile("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
 //        Handler handler=new Handler();
 //        handler.postDelayed(new Runnable() {
@@ -72,7 +93,8 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //            }
 //        },13000);
 //        new Thread(()->{
-//            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
+            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
+
 //            Debug.D(getClass(),"的说法安抚 ");
 //            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
 //        }).start();
@@ -80,7 +102,20 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     }
 
     @Override
+    protected void onViewAttached(View root) {
+        super.onViewAttached(root);
+        getRoot().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toast("dddd "+v);
+                test=false;
+            }
+        });
+    }
+
+    @Override
     public void onItemClick(View view, int sourceId, int position, Object data) {
+        toast("点  ");
         if (null==data){
             return;
         }
