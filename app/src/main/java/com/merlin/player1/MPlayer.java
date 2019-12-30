@@ -62,13 +62,9 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish {
         return audioTrack;
     }
 
-    public boolean play(String path,byte[] bytes,int offset,int len,long contentLength){
+    public boolean play(String path,byte[] bytes,int len,long contentLength){
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't play media bytes with invalid path.path="+path);
-            return false;
-        }
-        if (offset<=0){
-
             return false;
         }
         int length=null!=bytes?bytes.length:-1;
@@ -84,7 +80,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish {
         FileOutputStream fos=null;
         try {
             fos=new FileOutputStream(file,true);
-            fos.write(bytes,offset,len);
+            fos.write(bytes,0,len);
         } catch (Exception e) {
             Debug.E(getClass(),"Can't play media bytes,Cache file write exception.e="+e+" "+file,e);
         }finally {

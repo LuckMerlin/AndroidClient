@@ -1,40 +1,69 @@
 package com.merlin.player;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Player {
-    private static WeakReference<OnMediaFrameDecodeFinish> mLintener;
-
+    private static WeakReference<OnMediaFrameDecodeFinish> mListener;
+    private final ExecutorService mPool = Executors.newFixedThreadPool(1);
     static {
         System.loadLibrary("linqiang");
     }
 
     public void setOnDecodeFinishListener(OnMediaFrameDecodeFinish listener){
-        WeakReference<OnMediaFrameDecodeFinish> reference=mLintener;
-        mLintener=null;
+        WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
+        mListener=null;
         if (null!=reference){
             reference.clear();
         }
         if (null!=listener){
-            mLintener=new WeakReference<>(listener);
+            mListener=new WeakReference<>(listener);
         }
     }
+
+    public boolean playFile(final String path,final float seek){
+        ExecutorService pool=mPool;
+        return null!=path&&path.length()>0&&null!=pool&&null!=pool.submit(new Runnable() {
+            @Override
+            public void run() {
+                play(path,seek);
+            }
+        });
+    }
+
+//    public native
+    public native int getPlayerState();
+
+    public native long getPosition();
+
+    public native long getDuration();
+
+    public native long seek(float seek);
+
+    public native boolean start(float seek);
+
+    public native boolean pause(boolean stop);
 
     /**
      *
      *Call by native C
      */
     private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int offset,int length,int speed){
-        WeakReference<OnMediaFrameDecodeFinish> reference=mLintener;
+        WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
         OnMediaFrameDecodeFinish listener=null!=reference?reference.get():null;
         if (null!=listener){
             listener.onMediaFrameDecodeFinish(mediaType,bytes,offset,length);
         }
     }
 
-    public native boolean play(String path,float seek);
+    public native boolean playByte(String path,byte[] data,int offset,int length,int totalLength);
 
-    public native boolean playBytes(byte[] data,int offset,int length);
+    private native boolean play(String path,float seek);
+
+    private native boolean playBytes(byte[] data,int offset,int length);
+
+//    public native String getPlayingPath();
 
 //    public native boolean seek(float seek);
 

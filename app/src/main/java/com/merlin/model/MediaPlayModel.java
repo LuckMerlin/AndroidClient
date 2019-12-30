@@ -1,6 +1,7 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.View;
 
 import com.merlin.adapter.BaseAdapter;
@@ -29,10 +30,12 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         super(context);
         mPlayingAdapter=new MediaListAdapter(context);
         mPlayingAdapter.setOnItemClickListener(this);
-        mPlayingAdapter.add(new Media("linqiang","3","./WMDYY.mp3"));
-        mPlayingAdapter.add(new Media("linqiang","345",""));
-        mPlayingAdapter.add(new Media("linqiang","55",""));
-        mPlayingAdapter.add(new Media("linqiang","3453",""));
+//        mPlayingAdapter.add(new Media("linqiang","3","./WMDYY.mp3"));
+//        mPlayingAdapter.add(new Media("linqiang","345",""));
+//        mPlayingAdapter.add(new Media("linqiang","55",""));
+//        mPlayingAdapter.add(new Media("linqiang","3453",""));
+        new Thread(()->{
+        }).start();
 //        new Thread(()->{
 //            try {
 //                FileInputStream file=new FileInputStream("/sdcard/Musics/西单女孩 - 原点.mp3");
@@ -48,12 +51,29 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //            }
 //        }).start();
 //        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.5f);
-        new Thread(()->{
-//            mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+//        mPlayer.playFile("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+//        Handler handler=new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//               mPlayer.getPlayerState();
+//               mPlayer.getPosition();
+//               mPlayer.pause(false);
+//               Debug.D(getClass(),"################ 撒打发  "+mPlayer.getPlayerState());
+//                handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mPlayer.start(-1);
+//                    }
+//                },5000);
+////               mPlayer.seek(0.97f);
+//            }
+//        },13000);
+//        new Thread(()->{
 //            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
 //            Debug.D(getClass(),"的说法安抚 ");
 //            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
-        }).start();
+//        }).start();
 //        play(new Media("linqiang","操蛋","./WMDYY.mp3"),0);
     }
 
