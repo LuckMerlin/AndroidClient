@@ -57,7 +57,7 @@ public class Player {
         }
     }
 
-    public native boolean playByte(String path,byte[] data,int offset,int length,int totalLength);
+    public native boolean playByte(String path,byte[] data,int length,long totalLength);
 
     private native boolean play(String path,float seek);
 

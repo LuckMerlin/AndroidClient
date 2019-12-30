@@ -62,7 +62,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish {
         return audioTrack;
     }
 
-    public boolean play(String path,byte[] bytes,int len,long contentLength){
+    private boolean play(String path,byte[] bytes,int len,long contentLength){
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't play media bytes with invalid path.path="+path);
             return false;
