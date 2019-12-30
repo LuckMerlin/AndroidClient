@@ -18,6 +18,6 @@ public class NasActivity<V extends ViewDataBinding, VM extends BaseModel> extend
     protected final Meta getNasMetaFromIntent(Intent intent){
         Serializable serializable=null!=intent?intent.getSerializableExtra(TAG_META):null;
         Meta meta=null!=serializable&&serializable instanceof Meta?(Meta)serializable:null;
-        return null==meta||null==meta.getAccount() || !meta.isDeviceType(TAG_NAS_DEVICE)?meta:null;
+        return null==meta||null==meta.getAccount() || !meta.isDeviceType(TAG_NAS_DEVICE)?null:meta;
     }
 }
