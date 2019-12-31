@@ -11,19 +11,32 @@
           type="com.merlin.model.MediaPlayModel" />
   </data>
   <RelativeLayout
+      android:background="@drawable/background"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
       <RelativeLayout
+          android:layout_alignParentTop="true"
           android:layout_width="match_parent"
+          android:background="#000"
           android:layout_height="wrap_content">
         <ImageView
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/box_add_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+         <TextView
+             android:textColor="@color/textTitle"
+             android:textSize="@dimen/textTitle"
+             android:text="@{vm.playing.title+` `+vm.playing.artist}"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"/>
       </RelativeLayout>
 
       <androidx.recyclerview.widget.RecyclerView
           binding:adapter="@{vm.playingAdapter}"
           binding:layoutManager="@{vm.playingAdapter.layoutManager}"
+          android:layout_marginTop="150dp"
+          android:layout_marginBottom="150dp"
           android:layout_alignParentRight="true"
           android:layout_centerVertical="true"
           android:layout_width="wrap_content"

@@ -29,6 +29,7 @@ public class MediaListAdapter  extends BaseAdapter<Media, ItemPlayingMediaBindin
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemPlayingMediaBinding binding, int position, Media data, @NonNull List<Object> payloads) {
         if (null!=binding){
             binding.setMedia(data);
+            binding.setPosition(position);
         }
     }
 

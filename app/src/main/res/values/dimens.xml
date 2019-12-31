@@ -1,7 +1,10 @@
 <resources>
     <dimen name="textSmall">13sp</dimen>
+    <dimen name="textMedium">15sp</dimen>
     <dimen name="textTitle">18sp</dimen>
     <dimen name="listItemNormal">55dp</dimen>
     <dimen name="listIconNormal">38dp</dimen>
     <dimen name="titleIconSize">28dp</dimen>
+    <dimen name="listItemSizeSmall">40dp</dimen>
+    <dimen name="listItemSizeMedium">60dp</dimen>
 </resources>

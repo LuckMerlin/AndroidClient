@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 
+import androidx.databinding.ObservableField;
+
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
 import com.merlin.client.Client;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener, OnStateUpdate {
+    private ObservableField<Media> mPlaying=new ObservableField<>();
     private final MediaListAdapter mPlayingAdapter;
     private final MPlayer mPlayer=new MPlayer();
     private String mCacheFolder;
@@ -32,12 +35,20 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         super(context);
         mPlayingAdapter=new MediaListAdapter(context);
         mPlayingAdapter.setOnItemClickListener(this);
-        mPlayingAdapter.add(new Media("linqiang","3","./WMDYY.mp3"));
-        mPlayingAdapter.add(new Media("linqiang","345",""));
-        mPlayingAdapter.add(new Media("linqiang","55",""));
-        mPlayingAdapter.add(new Media("linqiang","3453",""));
+        mPlayingAdapter.add(new Media("linqiang","我们都是好孩子","./WMDYY.mp3"));
+        mPlayingAdapter.add(new Media("linqiang","我们都一样",""));
+        mPlayingAdapter.add(new Media("linqiang","我们不一样",""));
+        mPlayingAdapter.add(new Media("linqiang","原点",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
         mPlayer.setOnStateUpdateListener(this);
-        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.07f);
+        mPlaying.set(mPlayingAdapter.getItem(0));//test
+        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
 //        File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
 //        final long fileLength=fileData.length();
@@ -121,7 +132,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
             @Override
             public void run() {
 //                mPlayer.start(0.1f);
-            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
+//            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
             }
         },100);
     }
@@ -235,4 +246,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         return mPlayingAdapter;
     }
 
+    public ObservableField<Media> getPlaying() {
+        return mPlaying;
+    }
 }
