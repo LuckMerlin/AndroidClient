@@ -2,11 +2,11 @@ package com.merlin.player;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Player {
     private static WeakReference<OnMediaFrameDecodeFinish> mListener;
-    private final ExecutorService mPool = Executors.newFixedThreadPool(2);
+    private Runnable mPlayRunnable;
+
     static {
         System.loadLibrary("linqiang");
     }
@@ -56,7 +56,7 @@ public class Player {
         }
     }
 
-//    public native boolean playByte(String path,byte[] data,int length,long totalLength);
+    private native boolean playBytes(String path,byte[] data,int length,long totalLength);
 
     private native boolean playFile(String path,float seek);
 

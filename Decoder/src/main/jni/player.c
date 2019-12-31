@@ -26,13 +26,11 @@ struct StreamHandle {
     unsigned char inputBuffer[INPUT_BUFFER_SIZE];
 };
 
-
 struct FileHandle {
     int file;
     int playState;
     unsigned char const *start;
     int64_t length;
-    int64_t totalLength;
     struct mad_stream stream;
     struct mad_frame frame;
     struct mad_synth synth;
@@ -142,52 +140,52 @@ static inline int readStreamNextFrame(struct StreamHandle * handle){
     return inputBufferSize;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray data, jint offset,
-                                        jint length) {
-    int byteLength = data ==NULL?-1:(*env)->GetArrayLength(env,data);
-    if(byteLength <= 0){
-        LOGW("Can'T play bytes which is NULL.%d",byteLength);
-        return JNI_FALSE;
-    }
-    if(offset<0||offset>=byteLength){
-        LOGW("Can'T play bytes which offset out of bounds.%d %d",offset,byteLength);
-        return JNI_FALSE;
-    }
-    int targetLength=offset+length;
-    if (targetLength<=0||targetLength>byteLength){
-        LOGW("Can'T play bytes which target end out of bounds.%d %d %d",targetLength,offset,byteLength);
-        return JNI_FALSE;
-    }
-    jbyte* bytesStart =(*env)->GetByteArrayElements(env,data, 0);
-    LOGW("长度 %d",byteLength);
-    size_t handleSize=sizeof(struct StreamHandle);
-    struct StreamHandle* handle = (struct StreamHandle*)malloc(handleSize);
-    memset(handle,0,handleSize);
-    handle->input=(unsigned char *)bytesStart;
-    handle->seek=0;
-    handle->length=targetLength;
-    mad_stream_init(&(handle->stream));
-    mad_frame_init(&handle->frame);
-    mad_synth_init(&handle->synth);
-    //
-    int readLength=0;
-    while (readLength<byteLength){
-        readStreamNextFrame(handle);
-        if(handle->seek>=byteLength){
-            LOGD("End play media stream. %d",handle->length);
-            break;
-        }
-    }
-    LOGD("技术了 %d %d",readLength, byteLength);
+//JNIEXPORT jboolean JNICALL
+//Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jbyteArray data, jint offset,
+//                                        jint length) {
+//    int byteLength = data ==NULL?-1:(*env)->GetArrayLength(env,data);
+//    if(byteLength <= 0){
+//        LOGW("Can'T play bytes which is NULL.%d",byteLength);
+//        return JNI_FALSE;
+//    }
+//    if(offset<0||offset>=byteLength){
+//        LOGW("Can'T play bytes which offset out of bounds.%d %d",offset,byteLength);
+//        return JNI_FALSE;
+//    }
+//    int targetLength=offset+length;
+//    if (targetLength<=0||targetLength>byteLength){
+//        LOGW("Can'T play bytes which target end out of bounds.%d %d %d",targetLength,offset,byteLength);
+//        return JNI_FALSE;
+//    }
+//    jbyte* bytesStart =(*env)->GetByteArrayElements(env,data, 0);
+//    LOGW("长度 %d",byteLength);
+//    size_t handleSize=sizeof(struct StreamHandle);
+//    struct StreamHandle* handle = (struct StreamHandle*)malloc(handleSize);
+//    memset(handle,0,handleSize);
+//    handle->input=(unsigned char *)bytesStart;
+//    handle->seek=0;
+//    handle->length=targetLength;
+//    mad_stream_init(&(handle->stream));
+//    mad_frame_init(&handle->frame);
+//    mad_synth_init(&handle->synth);
+//    //
+//    int readLength=0;
+//    while (readLength<byteLength){
+//        readStreamNextFrame(handle);
+//        if(handle->seek>=byteLength){
+//            LOGD("End play media stream. %d",handle->length);
+//            break;
+//        }
+//    }
+//    LOGD("技术了 %d %d",readLength, byteLength);
 //    (*env)->ReleaseByteArrayElements(env, szLics, szStr, 0);
 //    mad_synth_finish(&handle->synth);
 //    mad_frame_finish(&handle->frame);
 //    mad_stream_finish(&handle->stream);
 //    free(handle);
 //    (*env)->ReleaseByteArrayElements(env,data,bytesStart,0);
-    return JNI_TRUE;
-}
+//    return JNI_TRUE;
+//}
 
 //////////////////Play media file ////////////////////
 struct FileHandle* handle;
@@ -262,7 +260,7 @@ static inline int readFileNextFrame(struct FileHandle* handle){
     return inputBufferSize;
 }
 
-int playFile(const char* filePath,jfloat seek){
+int play(const char* filePath,jfloat seek){
     int fd = fileOpen(filePath,_RDONLY);
     struct stat fileStat;
     int statResult=fstat(fd, &fileStat);
@@ -319,12 +317,12 @@ int playFile(const char* filePath,jfloat seek){
 
 JNIEXPORT jboolean
 Java_com_merlin_player_Player_playFile(JNIEnv *env,jobject type,jstring path,jfloat seek){
-    const  char* filePath=(*env)->GetStringUTFChars(env,path,0);
+    const char* filePath=(*env)->GetStringUTFChars(env,path,0);
     if(filePath == NULL){
         LOGW("Can't play media,Media path is Empty.");
         return JNI_FALSE;
     }
-    playFile(filePath,seek);
+    play(filePath,seek);
     (*env)->ReleaseStringChars(env,path,filePath);
 }
 
@@ -374,7 +372,6 @@ Java_com_merlin_player_Player_getDuration(JNIEnv *env, jobject thiz) {
     return handle!=NULL?handle->length:-1;
 }
 
-
 JNIEXPORT jboolean JNICALL
 Java_com_merlin_player_Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
     return pauseMedia(stop);
@@ -382,55 +379,61 @@ Java_com_merlin_player_Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
 
 ////////////////////Play bytes ////////////////////////////////////
 JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_playByte(JNIEnv *env, jobject thiz, jstring path, jbyteArray data,
+Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jstring path, jbyteArray data,
                                        jint length,jlong totalLength) {
-//    const  char* filePath=path == NULL?NULL:(*env)->GetStringUTFChars(env,path,0);
-//    if(filePath == NULL){
-//        LOGW("Can't play bytes,Media path is Empty.");
-//        return JNI_FALSE;
-//    }
-//    int byteLength = data ==NULL?-1:(*env)->GetArrayLength(env,data);
-//    if (byteLength<=0){
-//        LOGW("Can't play bytes,Bytes is EMPTY.%d",byteLength);
-//        return JNI_FALSE;
-//    }
-//    if (totalLength<=0||length<=0||(length>byteLength)||(totalLength<length)){
-//        LOGW("Can't play bytes,Args invalid.%d %d %d",totalLength,length,byteLength);
-//        return JNI_FALSE;
-//    }
-//    int fd=fileOpen(filePath,_ACRDRW);
-//    struct stat fileStat;
-//    int statResult=fstat(fd, &fileStat);
-//    if(fd == -1|| fd == -2||statResult<0){
-//        LOGW("Can't play bytes,File open failed.%d %d %s",fd,statResult,filePath);
-//        (*env)->ReleaseStringChars(env,path,filePath);
-//        fileClose(fd);
-//        return JNI_FALSE;
-//    }
-//    int64_t fileLength= fileStat.st_size;
-//    if(fileLength>totalLength){
-//        LOGW("Can't play bytes,File bytes full.%d %d %s",fileLength,totalLength,filePath);
-//        return JNI_FALSE;
-//    }
-//    const char * playingPath=NULL==handle?NULL:handle->filePath;
-//    if(NULL!=playingPath&&strcmp(playingPath, filePath) != 0){
-//        LOGD("Stop playing media before play new media file.%s",filePath);
-//        pauseMedia(JNI_TRUE);
-//    }
-//    LOGW("Play bytes.%d %s",length,filePath);
-//    jbyte* bytesData =(*env)->GetByteArrayElements(env,data, 0);
-//    unsigned char * bytes=(unsigned char *)bytesData;
-//    int wroteLength=fileWrite(fd,bytes,length);
-//    (*env)->ReleaseByteArrayElements(env,data,bytesData,0);
-//    fileClose(fd);
-//    if (wroteLength>0){
-//        if(NULL==handle){
-//            playFile(filePath,0,totalLength);
-//        }else if (handle->playState==STATE_WAITING){
-//            mutexToggle(JNI_TRUE,"After bytes wrote.");
-//        }
-//    }
-//    LOGW("%%%%%%%% 炒蛋 %d",wroteLength);
-//    (*env)->ReleaseStringChars(env,path,filePath);
-//    LOGD("Finish play bytes.%s",filePath);
+    const  char* filePath=path == NULL?NULL:(*env)->GetStringUTFChars(env,path,0);
+    if(filePath == NULL){
+        LOGW("Can't play bytes,Media path is Empty.");
+        return JNI_FALSE;
+    }
+    int byteLength = data ==NULL?-1:(*env)->GetArrayLength(env,data);
+    if (byteLength<=0){
+        LOGW("Can't play bytes,Bytes is EMPTY.%d",byteLength);
+        return JNI_FALSE;
+    }
+    if (totalLength<=0||length<=0||(length>byteLength)||(totalLength<length)){
+        LOGW("Can't play bytes,Args invalid.%d %d %d",totalLength,length,byteLength);
+        return JNI_FALSE;
+    }
+    int fd=fileOpen(filePath,_ACRDRW);
+    struct stat fileStat;
+    int statResult=fstat(fd, &fileStat);
+    if(fd == -1|| fd == -2||statResult<0){
+        LOGW("Can't play bytes,File open failed.%d %d %s",fd,statResult,filePath);
+        (*env)->ReleaseStringChars(env,path,filePath);
+        fileClose(fd);
+        return JNI_FALSE;
+    }
+    int64_t fileLength= fileStat.st_size;
+    if(fileLength>totalLength){
+        LOGW("Can't play bytes,File bytes full.%d %d %s",fileLength,totalLength,filePath);
+        return JNI_FALSE;
+    }
+    LOGD("Play bytes.%d %s",length,filePath);
+    jbyte* bytesData =(*env)->GetByteArrayElements(env,data, 0);
+    unsigned char * bytes=(unsigned char *)bytesData;
+    int wroteLength=fileWrite(fd,bytes,length);
+    (*env)->ReleaseByteArrayElements(env,data,bytesData,0);
+    fileClose(fd);
+    if (wroteLength>0){
+        if(NULL==handle){
+            size_t handleSize=sizeof(struct StreamHandle);
+            handle = (struct StreamHandle*)malloc(handleSize);
+            memset(handle,0,handleSize);
+            handle->playState=STATE_PLAYING;
+            handle->filePath=filePath;
+            handle->start=0;
+            handle->file=fd;
+            handle->length=length;
+            mad_stream_init(&(handle->stream));
+            mad_frame_init(&handle->frame);
+            mad_synth_init(&handle->synth);
+
+
+        }else if (handle->playState==STATE_WAITING){
+            mutexToggle(JNI_TRUE,"After bytes wrote.");
+        }
+    }
+    (*env)->ReleaseStringChars(env,path,filePath);
+    LOGD("Finish play bytes.%s",filePath);
 }

@@ -35,16 +35,23 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        mPlayingAdapter.add(new Media("linqiang","345",""));
 //        mPlayingAdapter.add(new Media("linqiang","55",""));
 //        mPlayingAdapter.add(new Media("linqiang","3453",""));
+        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.05f);
+        Debug.D(getClass(),"%%%%%%%% 牛 ");
 //        File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
 //        final long fileLength=fileData.length();
 //        byte[] bytes=new byte[1024*13];
 //        int[] readed=new int[2];
-//        FileInputStream file= null;
+//        FileInputStream fis= null;
 //        try {
-//            file = new FileInputStream(fileData);
-//        } catch (FileNotFoundException e) {
+//            fis = new FileInputStream(fileData);
+//            readed[0]=fis.read(bytes);
+//            if (readed[0]>0) {
+//                mPlayer.playBytes("/sdcard/a/林强.mp3", bytes, readed[0], fileLength);
+//            }
+//        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+
 //        final FileInputStream fis=file;
 //        new Thread(()->{
 //            try {
@@ -93,7 +100,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //            }
 //        },13000);
 //        new Thread(()->{
-            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
+//            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
 
 //            Debug.D(getClass(),"的说法安抚 ");
 //            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
