@@ -12,6 +12,12 @@
 #define STATE_IDLE 2003
 #define STATE_WAITING 2004
 #define STATE_STOP 2005
+#define STATE_PROGRESS 2006
+#define STATE_FINISH 2007
+#define STATE_FINISH_ERROR 2008
+#define STATE_SEEK 2009
+#define STATE_IDLE 2010
+#define STATE_RESTART 2011
 
 int MEDIA_TYPE_AUDIO =1;
 int MEDIA_TYPE_AUDIO_STREAM=2;
@@ -43,6 +49,18 @@ static JavaVM  *VM=NULL;
 jint JNI_OnLoad(JavaVM* vm,void* resolved){
     VM=vm;
     return JNI_VERSION_1_6;
+}
+
+void notifyStateChanged(int state, const char* path){
+    JNIEnv *jniEnv;
+    int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
+    if(res==JNI_OK){
+        jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
+        jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onStateChanged","(I)V");
+        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,state);
+//        (*jniEnv)->DeleteLocalRef(jniEnv,callbackMethod);
+        (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
+    }
 }
 
 static inline signed int scale(mad_fixed_t sample){
@@ -97,6 +115,7 @@ static inline void onFrameDecode(int mediaType,struct mad_header header,struct m
 //        (*jniEnv)->DeleteLocalRef(jniEnv,callbackMethod);
         (*jniEnv)->DeleteLocalRef(jniEnv, data);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
+        notifyStateChanged(STATE_PROGRESS,NULL);
     }
 }
 
@@ -193,14 +212,9 @@ struct FileHandle* handle;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond  = PTHREAD_COND_INITIALIZER;
 
-void mutexToggle(jboolean off, char* debug){
+void releaseMutex( char* debug){
     pthread_mutex_lock(&mutex);
-    LOGD("Toggle mutex %s %s",off==JNI_TRUE?"On":"Off",debug);
-    if (off==JNI_TRUE){
-        pthread_cond_signal(&cond);
-    }else{
-        pthread_cond_wait(&cond, &mutex);
-    }
+    pthread_cond_signal(&cond);
     pthread_mutex_unlock(&mutex);
 }
 
@@ -212,7 +226,7 @@ int pauseMedia(jboolean stop){
         }else if (stop&&(handle->playState==STATE_PLAYING||handle->playState==STATE_WAITING
                          ||handle->playState==STATE_PAUSE)){
             handle->playState=STATE_STOP;
-//            mutexToggle(JNI_TRUE,"While play stop.");
+            releaseMutex("While stop play.");
             return JNI_TRUE;
         }
     }
@@ -255,8 +269,8 @@ static inline int readFileNextFrame(struct FileHandle* handle){
             break;
         }
     }while (1);
-    mad_synth_frame(&handle->synth,&handle->frame);
-    onFrameDecode(MEDIA_TYPE_AUDIO,handle->frame.header,handle->synth.pcm);
+     mad_synth_frame(&handle->synth, &handle->frame);
+     onFrameDecode(MEDIA_TYPE_AUDIO, handle->frame.header, handle->synth.pcm);
     return inputBufferSize;
 }
 
@@ -267,6 +281,7 @@ int play(const char* filePath,jfloat seek){
     if(fd == -1|| fd == -2||statResult<0){
         LOGW(" Can't play media,File open failed.%d %d %s",fd,statResult,filePath);
         fileClose(fd);
+        notifyStateChanged(STATE_FINISH_ERROR,filePath);
         return JNI_FALSE;
     }
     if (NULL!=handle){
@@ -278,12 +293,15 @@ int play(const char* filePath,jfloat seek){
     seekPosition=seekPosition>=0&&seekPosition<=length?seekPosition:0;
     LOGW("Playing media %f %d %d %s", seek,seekPosition,length, filePath);
     fileSeek (fd,seekPosition, SEEK_SET);
+    if (seekPosition>0){
+        notifyStateChanged(STATE_SEEK,filePath);
+    }
     size_t handleSize=sizeof(struct FileHandle);
     handle = (struct FileHandle*)malloc(handleSize);
     memset(handle,0,handleSize);
     handle->playState=STATE_PLAYING;
     handle->filePath=filePath;
-    handle->start=0;
+    handle->start=seekPosition;
     handle->file=fd;
     handle->length=length;
     mad_stream_init(&(handle->stream));
@@ -293,16 +311,21 @@ int play(const char* filePath,jfloat seek){
     while (handle->start<=length){
         if (handle->playState==STATE_STOP){
             LOGD("Stop play media file.%d %d %s",handle->start,handle->length,handle->filePath);
+            notifyStateChanged(STATE_STOP,filePath);
             break;
         }
         if (handle->playState==STATE_PAUSE){
             LOGD("Pause play media file.%d %d %s",handle->start,handle->length,handle->filePath);
-            mutexToggle(JNI_FALSE,"While play pause.");
+            notifyStateChanged(STATE_PAUSE,filePath);
+            pthread_mutex_lock(&mutex);
+            pthread_cond_wait(&cond, &mutex);
+            pthread_mutex_unlock(&mutex);
             continue;
         }
         readFileNextFrame(handle);
         if (handle->start>=length){
             LOGD("End play media file.%d %d %s",handle->start,handle->length,handle->filePath);
+            notifyStateChanged(STATE_FINISH,filePath);
             break;
         }
     }
@@ -312,6 +335,8 @@ int play(const char* filePath,jfloat seek){
     handle->playState=STATE_IDLE;
     fileClose(fd);
     free(handle);
+    handle=NULL;
+    notifyStateChanged(STATE_IDLE,filePath);
     LOGD("Finish play media file.%s",filePath);
 }
 
@@ -341,6 +366,7 @@ Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jfloat seek) {
         }
         fileSeek (handle->file,seekPosition, SEEK_SET);
         handle->start=seekPosition;
+        notifyStateChanged(STATE_SEEK,handle->filePath);
         return seekPosition>=0?seekPosition:-2;
     }
     return -1;
@@ -350,12 +376,13 @@ JNIEXPORT jboolean JNICALL
 Java_com_merlin_player_Player_start(JNIEnv *env, jobject thiz, jfloat seek) {
     if (NULL!=handle){
         if (handle->playState==STATE_PAUSE){
+            LOGD("Restart play media file.%s",handle->filePath);
+            handle->playState=STATE_PLAYING;
+            notifyStateChanged(STATE_RESTART,handle->filePath);
+            releaseMutex("While start play.");
             if (seek>=0){
                 Java_com_merlin_player_Player_seek(env,thiz,seek);
             }
-            LOGD("Restart play media file.%s",handle->filePath);
-            handle->playState=STATE_PLAYING;
-            mutexToggle(JNI_TRUE,"While play start.");
             return JNI_TRUE;
         }
     }
@@ -431,7 +458,7 @@ Java_com_merlin_player_Player_playBytes(JNIEnv *env, jobject thiz, jstring path,
 
 
         }else if (handle->playState==STATE_WAITING){
-            mutexToggle(JNI_TRUE,"After bytes wrote.");
+//            mutexToggle(JNI_TRUE,"After bytes wrote.");
         }
     }
     (*env)->ReleaseStringChars(env,path,filePath);

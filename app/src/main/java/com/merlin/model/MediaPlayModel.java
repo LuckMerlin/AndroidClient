@@ -10,6 +10,7 @@ import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.media.Media;
+import com.merlin.player.OnStateUpdate;
 import com.merlin.player1.MPlayer;
 import com.merlin.protocol.What;
 import com.merlin.util.FileMaker;
@@ -21,7 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener {
+public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener, OnStateUpdate {
     private final MediaListAdapter mPlayingAdapter;
     private final MPlayer mPlayer=new MPlayer();
     private String mCacheFolder;
@@ -31,11 +32,12 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         super(context);
         mPlayingAdapter=new MediaListAdapter(context);
         mPlayingAdapter.setOnItemClickListener(this);
-//        mPlayingAdapter.add(new Media("linqiang","3","./WMDYY.mp3"));
-//        mPlayingAdapter.add(new Media("linqiang","345",""));
-//        mPlayingAdapter.add(new Media("linqiang","55",""));
-//        mPlayingAdapter.add(new Media("linqiang","3453",""));
-        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.05f);
+        mPlayingAdapter.add(new Media("linqiang","3","./WMDYY.mp3"));
+        mPlayingAdapter.add(new Media("linqiang","345",""));
+        mPlayingAdapter.add(new Media("linqiang","55",""));
+        mPlayingAdapter.add(new Media("linqiang","3453",""));
+        mPlayer.setOnStateUpdateListener(this);
+        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0.07f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
 //        File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
 //        final long fileLength=fileData.length();
@@ -106,6 +108,28 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
 //        }).start();
 //        play(new Media("linqiang","操蛋","./WMDYY.mp3"),0);
+
+//        mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0.5f);
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                mPlayer.pause();
+            }
+        },5000);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                mPlayer.start(0.1f);
+            mPlayer.play("/sdcard/Musics/西单女孩 - 原点.mp3",0);
+            }
+        },100);
+    }
+
+
+    @Override
+    public void onPlayerStateUpdated(int state, String path) {
+//        Debug.D(getClass(),"$$$$$$$$$ "+state);
     }
 
     @Override
@@ -114,8 +138,13 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         getRoot().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toast("dddd "+v);
-                test=false;
+                toast("dddd "+mPlayer.getDuration()+" "+mPlayer.getPosition());
+                if (mPlayer.isPlaying()){
+                    mPlayer.pause();
+                }else{
+                    mPlayer.start(-1);
+                }
+//            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
             }
         });
     }
