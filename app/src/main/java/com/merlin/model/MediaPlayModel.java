@@ -3,6 +3,7 @@ package com.merlin.model;
 import android.content.Context;
 import android.os.Handler;
 import android.view.View;
+import android.widget.SeekBar;
 
 import androidx.databinding.ObservableField;
 
@@ -14,9 +15,12 @@ import com.merlin.database.DaoMaster;
 import com.merlin.debug.Debug;
 import com.merlin.media.Media;
 import com.merlin.player.OnStateUpdate;
+import com.merlin.player.Player;
 import com.merlin.player1.MPlayer;
 import com.merlin.protocol.What;
 import com.merlin.util.FileMaker;
+
+import org.greenrobot.greendao.annotation.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,26 +30,38 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
-public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener, OnStateUpdate {
+import static com.merlin.player.Player.STATE_PROGRESS;
+
+public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener, BaseModel.OnModelViewClick,OnStateUpdate {
     private ObservableField<Media> mPlaying=new ObservableField<>();
+    private ObservableField<Integer> mPlayState=new ObservableField<>();
     private final MediaListAdapter mPlayingAdapter;
+    private SeekBar mSeekBar;
     private final MPlayer mPlayer=new MPlayer();
     private String mCacheFolder;
-    boolean test=false;
 
     public MediaPlayModel(Context context){
         super(context);
         mPlayingAdapter=new MediaListAdapter(context);
         mPlayingAdapter.setOnItemClickListener(this);
+        Player player=mPlayer;
         Media media=new Media();
         media.setPath("/sdcard/Musics/朴树 - 平凡之路.mp3");
         media.setTitle("平凡之路");
         media.setArtist("朴树");
-//        medi
+//      medi
         List<Media> medias=getDatabaseSession(false).getMediaDao().queryBuilder().list();
         mPlayingAdapter.setData(medias);
 //        getDatabaseSession(true).getMediaDao().insert(media);
-//        mPlayingAdapter.add(new Media("linqiang","我们都是好孩子","./WMDYY.mp3"));
+//        long id, @NotNull String title, @NotNull String path, String md5,
+//                String cloudUrl, String account, String album, String artist,
+//        long duration
+        mPlayingAdapter.add(new Media(0,"平凡之路","/sdcard/Musics/朴树 - 平凡之路.mp3",
+                "md5","","linqiang","album","朴树",123131));
+        mPlayingAdapter.add(new Media(0,"原点","/sdcard/Musics/西单女孩 - 原点.mp3",
+                "md5","","linqiang","album","西单女孩",123131));
+        mPlayingAdapter.add(new Media(0,"如果你还在就好了","/sdcard/Musics/如果你还在就好了.mp3",
+                "md5","","linqiang","album","信",123131));
 //        mPlayingAdapter.add(new Media("linqiang","我们都一样",""));
 //        mPlayingAdapter.add(new Media("linqiang","我们不一样",""));
 //        mPlayingAdapter.add(new Media("linqiang","原点",""));
@@ -58,7 +74,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
         mPlayer.setOnStateUpdateListener(this);
         mPlaying.set(mPlayingAdapter.getItem(0));//test
-        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
 //        DaoMaster.DevOpenHelper a = new DaoMaster.DevOpenHelper(this,"database_name",null);
 
@@ -151,40 +167,86 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 
 
     @Override
+    public void onViewClick(View v, int id) {
+        switch (id){
+            case R.id.activityMediaPlay_preIV:
+                break;
+            case R.id.activityMediaPlay_playModeIV:
+                break;
+            case R.id.activityMediaPlay_playPauseIV:
+                Player player=mPlayer;
+                if (null!=player){
+                    player.togglePausePlay();
+                }
+                break;
+            case R.id.activityMediaPlay_nextIV:
+                break;
+        }
+    }
+
+    @Override
     public void onPlayerStateUpdated(int state, String path) {
-//        Debug.D(getClass(),"$$$$$$$$$ "+state);
+//        post(()->{
+//            switch (state){
+//                case STATE_PROGRESS:
+//                    updateProgress(mPlayer.getDuration(),mPlayer.getPosition());
+//                    break;
+//            }
+//        });
+    }
+
+    private void updateProgress(long duration,long position){
+        SeekBar seekBar=mSeekBar;
+        if (null!=seekBar){
+            seekBar.setProgress((int)(position*100.f/duration));
+        }
     }
 
     @Override
     protected void onViewAttached(View root) {
         super.onViewAttached(root);
-        getRoot().setOnClickListener(new View.OnClickListener() {
+        mSeekBar=findViewById(R.id.mediaPlayBottomProgressSB, SeekBar.class);
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onClick(View v) {
-                toast("dddd "+mPlayer.getDuration()+" "+mPlayer.getPosition());
-                if (mPlayer.isPlaying()){
-                    mPlayer.pause();
-                }else{
-                    mPlayer.start(-1);
-                }
-//            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (fromUser){
+                        mPlayer.seek(progress/100.f);
+                    }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
+        updateProgress(mPlayer.getDuration(),mPlayer.getPosition());
+//        getRoot().setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                toast("dddd "+mPlayer.getDuration()+" "+mPlayer.getPosition());
+//                if (mPlayer.isPlaying()){
+//                    mPlayer.pause();
+//                }else{
+//                    mPlayer.start(-1);
+//                }
+////            mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
+//            }
+//        });
     }
 
     @Override
     public void onItemClick(View view, int sourceId, int position, Object data) {
-        toast("点  ");
         if (null==data){
             return;
         }
         if (data instanceof Media){
             play((Media)data,0);
         }
-    }
-
-    private void onMediaBytesReceived(byte[] bytes){
-
     }
 
     private boolean play(Media media,long seek){
@@ -258,6 +320,10 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        });
 //        return null!=canceler;
         return false;
+    }
+
+    public ObservableField<Integer> getPlayState() {
+        return mPlayState;
     }
 
     public MediaListAdapter getPlayingAdapter() {

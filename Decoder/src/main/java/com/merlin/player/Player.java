@@ -11,6 +11,7 @@ public class Player {
     public final static int STATE_IDLE=2003;
     public final static int STATE_WAITING=2004;
     public final static int STATE_STOP=2005;
+    public final static int STATE_PROGRESS=2006;
 
     private static WeakReference<OnMediaFrameDecodeFinish> mListener;
     private static WeakReference<OnStateUpdate> mUpdate;
@@ -41,6 +42,13 @@ public class Player {
         if (null!=listener){
             mUpdate=new WeakReference<>(listener);
         }
+    }
+
+    public boolean togglePausePlay(){
+        if (!isIdle()){
+            return isPlaying()?pause(false):start(-1);
+        }
+        return false;
     }
 
     public synchronized boolean play(final String path,final float seek){

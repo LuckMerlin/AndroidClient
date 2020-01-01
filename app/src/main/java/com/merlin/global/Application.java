@@ -23,7 +23,7 @@ public class Application extends android.app.Application implements ActivityLife
     @Override
     public void onCreate() {
         super.onCreate();
-        mDatabase = new DaoMaster.DevOpenHelper(this, "linqiang");
+        mDatabase = new DaoMaster.DevOpenHelper(this, "linqiang1");
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mClient.setOnFrameReceive(mOnFrameReceiveListener);
         mClient.setOnClientStatusChange(mStatusChange);

@@ -27,7 +27,7 @@ android {
         enabled = true
     }
     greendao{
-        schemaVersion 1 // 数据库版本号
+        schemaVersion 2 // 数据库版本号
         daoPackage 'com.merlin.database'//自动生成的dao的包名，包名默认是entity所在的包；
         targetGenDir 'src/main/java'//生成数据库文件的目录
     }
