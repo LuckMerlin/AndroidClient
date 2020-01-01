@@ -10,7 +10,7 @@
 
     <application
         android:name="com.merlin.global.Application"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
         android:allowBackup="false">
         <activity
             android:name="com.merlin.activity.MainActivity">
