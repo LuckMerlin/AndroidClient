@@ -10,6 +10,7 @@ import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
 import com.merlin.client.Client;
 import com.merlin.client.R;
+import com.merlin.database.DaoMaster;
 import com.merlin.debug.Debug;
 import com.merlin.media.Media;
 import com.merlin.player.OnStateUpdate;
@@ -23,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
 public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener, OnStateUpdate {
     private ObservableField<Media> mPlaying=new ObservableField<>();
@@ -35,21 +37,31 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
         super(context);
         mPlayingAdapter=new MediaListAdapter(context);
         mPlayingAdapter.setOnItemClickListener(this);
-        mPlayingAdapter.add(new Media("linqiang","我们都是好孩子","./WMDYY.mp3"));
-        mPlayingAdapter.add(new Media("linqiang","我们都一样",""));
-        mPlayingAdapter.add(new Media("linqiang","我们不一样",""));
-        mPlayingAdapter.add(new Media("linqiang","原点",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
-        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+        Media media=new Media();
+        media.setPath("/sdcard/Musics/朴树 - 平凡之路.mp3");
+        media.setTitle("平凡之路");
+        media.setArtist("朴树");
+//        medi
+        List<Media> medias=getDatabaseSession(false).getMediaDao().queryBuilder().list();
+        mPlayingAdapter.setData(medias);
+//        getDatabaseSession(true).getMediaDao().insert(media);
+//        mPlayingAdapter.add(new Media("linqiang","我们都是好孩子","./WMDYY.mp3"));
+//        mPlayingAdapter.add(new Media("linqiang","我们都一样",""));
+//        mPlayingAdapter.add(new Media("linqiang","我们不一样",""));
+//        mPlayingAdapter.add(new Media("linqiang","原点",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
+//        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
         mPlayer.setOnStateUpdateListener(this);
         mPlaying.set(mPlayingAdapter.getItem(0));//test
         mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
+//        DaoMaster.DevOpenHelper a = new DaoMaster.DevOpenHelper(this,"database_name",null);
+
 //        File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
 //        final long fileLength=fileData.length();
 //        byte[] bytes=new byte[1024*13];
@@ -176,70 +188,76 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     }
 
     private boolean play(Media media,long seek){
-        final String url=null!=media?media.getUrl():null;
-        if (null==url||url.isEmpty()){
-            Debug.W(getClass(),"Can't play media.Which url is NONE."+url);
+        final String path=null!=media?media.getPath():null;
+        final MPlayer player=mPlayer;
+        if (null==path||path.isEmpty()||null==player){
+            Debug.W(getClass(),"Can't play media.Which url is NONE."+path+player);
             return false;
+        }
+        if (media.isLocalExist()){
+            Debug.D(getClass(),"Play media for local file."+path);
+            return  player.play(path,seek);
         }
         final String title=media.getTitle();
         if (null==title||title.isEmpty()){
             Debug.W(getClass(),"Can't play media.Which title is NONE."+title);
             return false;
         }
-        String cacheFolder=mCacheFolder;
-        final String cachePostfix=".cache";
-        cacheFolder=null!=cacheFolder&&cacheFolder.length()>0?cacheFolder:"/sdcard/a/cache";
-        final File cacheFile=new FileMaker().makeFile(cacheFolder,title+cachePostfix);
-        if (null==cacheFile||!cacheFile.exists()){
-            Debug.W(getClass(),"Can't play media which cache file create failed."+cacheFile+" "+url);
-            return false;
-        }
-        FileOutputStream os=null;
-        try {
-            os=new FileOutputStream(cacheFile,false);
-        } catch (FileNotFoundException e) {
-            Debug.E(getClass(),"Can't play media which cache file stream open fail.e="+e+" "+cacheFile,e);
-            closeIO(os);
-            return false;
-        }
-        final long currPosition=cacheFile.length();
-        final FileOutputStream fos=os;
-        final String account=media.getAccount();
-        seek=seek<currPosition?currPosition:seek; //If seek position less than current length
-        Debug.D(getClass(),"Play media on "+account+" "+seek+" "+url);
-        final Client.Canceler canceler=download(account, url,seek<=0?0:seek,(succeed, what, note, frame)->{
-            Debug.D(getClass(),"@@@ "+succeed+" "+note+" "+what+" "+frame);
-            if (succeed){
-                if (what==What.WHAT_HEAD_DATA){
-                    Debug.D(getClass(),"收到歌曲 信息 "+frame);
-                }else if(null!=frame){
-                    byte[] body =  frame.getBodyBytes() ;
-                    int length = null != body ? body.length : 0;
-                    if (length>0){
-                        try {
-                            fos.write(body,0,length);
-                            onMediaBytesReceived(body);
-                        } catch (IOException e) {
-                            Debug.E(getClass(),"Cache media file exception.e="+e+" "+cacheFile ,e);
-                        }
-                    }
-                }
-            }else{
-                closeIO(fos);
-                switch (what){
-                    case What.WHAT_NOT_ONLINE:
-                         toast(R.string.notOnline);
-                        break;
-                    case What.WHAT_NOT_EXIST:
-                        toast(R.string.fileNotExist);
-                        break;
-                    case What.WHAT_NONE_PERMISSION:
-                        toast(R.string.nonePermission);
-                        break;
-                }
-            }
-        });
-        return null!=canceler;
+//        String cacheFolder=mCacheFolder;
+//        final String cachePostfix=".cache";
+//        cacheFolder=null!=cacheFolder&&cacheFolder.length()>0?cacheFolder:"/sdcard/a/cache";
+//        final File cacheFile=new FileMaker().makeFile(cacheFolder,title+cachePostfix);
+//        if (null==cacheFile||!cacheFile.exists()){
+//            Debug.W(getClass(),"Can't play media which cache file create failed."+cacheFile+" "+url);
+//            return false;
+//        }
+//        FileOutputStream os=null;
+//        try {
+//            os=new FileOutputStream(cacheFile,false);
+//        } catch (FileNotFoundException e) {
+//            Debug.E(getClass(),"Can't play media which cache file stream open fail.e="+e+" "+cacheFile,e);
+//            closeIO(os);
+//            return false;
+//        }
+//        final long currPosition=cacheFile.length();
+//        final FileOutputStream fos=os;
+//        final String account=media.getAccount();
+//        seek=seek<currPosition?currPosition:seek; //If seek position less than current length
+//        Debug.D(getClass(),"Play media on "+account+" "+seek+" "+url);
+//        final Client.Canceler canceler=download(account, url,seek<=0?0:seek,(succeed, what, note, frame)->{
+//            Debug.D(getClass(),"@@@ "+succeed+" "+note+" "+what+" "+frame);
+//            if (succeed){
+//                if (what==What.WHAT_HEAD_DATA){
+//                    Debug.D(getClass(),"收到歌曲 信息 "+frame);
+//                }else if(null!=frame){
+//                    byte[] body =  frame.getBodyBytes() ;
+//                    int length = null != body ? body.length : 0;
+//                    if (length>0){
+//                        try {
+//                            fos.write(body,0,length);
+//                            onMediaBytesReceived(body);
+//                        } catch (IOException e) {
+//                            Debug.E(getClass(),"Cache media file exception.e="+e+" "+cacheFile ,e);
+//                        }
+//                    }
+//                }
+//            }else{
+//                closeIO(fos);
+//                switch (what){
+//                    case What.WHAT_NOT_ONLINE:
+//                         toast(R.string.notOnline);
+//                        break;
+//                    case What.WHAT_NOT_EXIST:
+//                        toast(R.string.fileNotExist);
+//                        break;
+//                    case What.WHAT_NONE_PERMISSION:
+//                        toast(R.string.nonePermission);
+//                        break;
+//                }
+//            }
+//        });
+//        return null!=canceler;
+        return false;
     }
 
     public MediaListAdapter getPlayingAdapter() {

@@ -3,6 +3,7 @@ package com.merlin.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,6 +13,8 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.merlin.bean.FileBrowserMeta;
 import com.merlin.client.Client;
+import com.merlin.database.DaoMaster;
+import com.merlin.database.DaoSession;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.oksocket.Callback;
@@ -20,6 +23,8 @@ import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Json;
 
+import org.greenrobot.greendao.database.Database;
+import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.json.JSONObject;
 
 import java.io.Closeable;
@@ -165,6 +170,17 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
         }
         Debug.W(getClass(),"Can't download file.Client not connected."+path);
         return null;
+    }
+
+    protected final DaoSession getDatabaseSession(boolean write){
+        DaoMaster.DevOpenHelper helper= getDatabase();
+        SQLiteDatabase database= null!=helper?write?helper.getReadableDatabase():helper.getReadableDatabase():null;
+        return null!=database?new DaoMaster(database).newSession(IdentityScopeType.Session):null;
+    }
+
+    protected final DaoMaster.DevOpenHelper getDatabase(){
+        Application application=getApplication();
+        return null!=application?application.getDatabase():null;
     }
 
     protected final Client getClient(){
