@@ -37,14 +37,18 @@ public interface Tag {
     String TAG_MESSAGE_QUERY = "textQueryMessageFrame";
     String TAG_MESSAGE_NEXT_FRAME="nextFrame";
 
+    String TAG_LIMIT="limit";
+    String TAG_PAGE="page";
     String TAG_ACCOUNT = "account";
     String TAG_PASSWORD = "password";
     String TAG_LOGIN = "login";
     String TAG_META = "meta";
+    String TAG_URL="url";
     //Nas
     String TAG_COMMAND_TYPE = "command";
     String TAG_COMMAND_LIST_DIR = "commandListDir";
     String TAG_COMMAND_READ_FILE = "commandReadFile";
+    String TAG_COMMAND_REQUEST = "commandRequest";
     String TAG_FILE = "file";
     String TAG_REMAIN = "remain";
     String TAG_FORMAT = "format";

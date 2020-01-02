@@ -7,8 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.databinding.DataBindingComponent;
 
 import com.alibaba.fastjson.JSON;
 import com.merlin.bean.FileBrowserMeta;
@@ -33,7 +36,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 
-public class BaseModel implements View.OnClickListener, View.OnLongClickListener, Tag {
+public class BaseModel implements androidx.databinding.DataBindingComponent,View.OnClickListener, View.OnLongClickListener, Tag {
     private WeakReference<View> mRootView=null;
     private final WeakReference<Context> mContext;
 
@@ -96,6 +99,11 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
     public final View getRoot(){
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
+    }
+
+
+    public final View findViewById(int id){
+        return findViewById(id,View.class);
     }
 
     public final <T> T findViewById(int id,Class<T> cls){
@@ -249,6 +257,11 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
         return false;
     }
 
+    protected final LayoutInflater getLayoutInflater(){
+        Context context=getContext();
+        return null!=context?LayoutInflater.from(context):null;
+    }
+
     protected final boolean closeIO(Closeable closeable){
         if (null!=closeable){
             try {
@@ -259,5 +272,20 @@ public class BaseModel implements View.OnClickListener, View.OnLongClickListener
             }
         }
         return false;
+    }
+
+    public <T> Client.Canceler request(String from, String url,Client.OnObjectRequestFinish callback){
+        return request(from,url,-1,-1,callback);
+    }
+
+    public <T> Client.Canceler request(String from, String url,int page, int limit, Client.OnObjectRequestFinish callback){
+        Client client=getClient();
+        if (null!=client){
+            return client.request(from,url,page,limit,callback);
+        }else if (null!=callback){
+            callback.onObjectRequested(false,What.WHAT_NONE_LOGIN,"None client",null,null);
+        }
+
+        return null;
     }
 }

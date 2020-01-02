@@ -15,6 +15,10 @@ import static com.merlin.server.Json.putIfNotNull;
 public final class Client extends Socket {
     private String mAccount=null;
 
+    public interface OnObjectRequestFinish<T>{
+        void onObjectRequested(boolean succeed, int what, String note, Frame frame,T data);
+    }
+
     public static final class Canceler{
         private boolean mCanceled=false;
 
@@ -99,5 +103,44 @@ public final class Client extends Socket {
 
         )?cancel:null;
     }
+
+    public <T> Canceler request(String from,String url,OnObjectRequestFinish callback){
+            return request(from,url,-1,-1,callback);
+    }
+
+    public <T> Canceler request(String from,String url,int page,int limit,OnObjectRequestFinish callback){
+        if (null==url||null==callback||null==from){
+            Debug.W(getClass(),"Can't request object with client."+from+" "+url+" "+callback);
+            return null;
+        }
+        JSONObject object=new JSONObject();
+        if (page>=0||limit>=0){
+            Json.putIfNotNull(object,TAG_PAGE,page);
+            Json.putIfNotNull(object,TAG_LIMIT,limit);
+        }
+        Json.putIfNotNull(object,TAG_ACCOUNT,getLoginedAccount());
+        Json.putIfNotNull(object,TAG_URL,url);
+        Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_REQUEST);
+        final Canceler cancel=new Canceler();
+        return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY, null, -1, new OnRequestFinish() {
+                    @Override
+                    public void onRequestFinish(boolean succeed, int what, String note, Frame frame) {
+                        Debug.D(getClass(),"%%%%%%%%%% "+succeed+" "+what+" "+note+" "+frame);
+                        if (succeed){
+                        }else{
+                            callback.onObjectRequested(false,what,note,frame,null);
+                        }
+//                        callback.onRequestFinish(succeed,what,note,frame);
+//                        if (succeed&&null!=frame&&!frame.isLastFrame()) { //Trigger next frame
+//                            String msgFrom= frame.getMsgFrom();
+//                            String unique=frame.getUnique();
+//                            sendMessage(cancel.mCanceled?TAG_CANCEL:TAG_MESSAGE_NEXT_FRAME,msgFrom,TAG_MESSAGE_NEXT_FRAME,unique,timeout,this);
+//                        }
+                    }
+                }
+
+        )?cancel:null;
+    }
+
 
 }

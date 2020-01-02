@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<data>
+    <variable
+        name="sheet"
+        type="com.merlin.media.Sheet" />
+
+</data>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:background="@drawable/round_corner_small"
+            android:id="@+id/itemMediaSheet_RL"
+            android:layout_width="120dp"
+            android:layout_height="120dp">
+
+            <TextView
+                android:text="@{Long.toString(sheet.length)}"
+                android:textColor="@color/textTitleSub"
+                android:layout_margin="5dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:textSize="@dimen/textSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <TextView
+            android:layout_below="@id/itemMediaSheet_RL"
+            android:text="@{sheet.title}"
+            android:textColor="@color/textTitle"
+            android:layout_margin="5dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:textSize="@dimen/textTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </RelativeLayout>
+</layout>

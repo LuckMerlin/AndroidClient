@@ -193,6 +193,17 @@
 
       </RelativeLayout>
 
+
+    <include android:id="@+id/test"
+      android:layout_marginTop="150dp"
+      android:layout_marginBottom="150dp"
+      android:layout_alignParentRight="true"
+      android:layout_centerVertical="true"
+      layout="@layout/media_sheet_layout"
+      android:layout_width="230dp"
+      android:layout_height="450dp"/>
+
+
 <!--      <include-->
 <!--        android:layout_marginTop="150dp"-->
 <!--        android:layout_marginBottom="150dp"-->
@@ -202,14 +213,14 @@
 <!--        android:layout_width="150dp"-->
 <!--        android:layout_height="200dp"/>-->
 
-      <androidx.recyclerview.widget.RecyclerView
-          binding:adapter="@{vm.playingAdapter}"
-          binding:layoutManager="@{vm.playingAdapter.layoutManager}"
-          android:layout_marginTop="150dp"
-          android:layout_marginBottom="150dp"
-          android:layout_alignParentRight="true"
-          android:layout_centerVertical="true"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"/>
+<!--      <androidx.recyclerview.widget.RecyclerView-->
+<!--          binding:adapter="@{vm.playingAdapter}"-->
+<!--          binding:layoutManager="@{vm.playingAdapter.layoutManager}"-->
+<!--          android:layout_marginTop="150dp"-->
+<!--          android:layout_marginBottom="150dp"-->
+<!--          android:layout_alignParentRight="true"-->
+<!--          android:layout_centerVertical="true"-->
+<!--          android:layout_width="wrap_content"-->
+<!--          android:layout_height="wrap_content"/>-->
   </RelativeLayout>
 </layout>

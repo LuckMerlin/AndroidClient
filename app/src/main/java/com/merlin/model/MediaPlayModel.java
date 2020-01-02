@@ -1,16 +1,21 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.database.DatabaseUtils;
 import android.os.Handler;
 import android.view.View;
 import android.widget.SeekBar;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
 import com.merlin.client.Client;
 import com.merlin.client.R;
+import com.merlin.client.databinding.MediaSheetLayoutBinding;
+import com.merlin.client.databinding.MediaSheetLayoutBindingImpl;
 import com.merlin.database.DaoMaster;
 import com.merlin.debug.Debug;
 import com.merlin.media.Media;
@@ -38,7 +43,6 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     private final MediaListAdapter mPlayingAdapter;
     private SeekBar mSeekBar;
     private final MPlayer mPlayer=new MPlayer();
-    private String mCacheFolder;
 
     public MediaPlayModel(Context context){
         super(context);
@@ -74,8 +78,12 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
         mPlayer.setOnStateUpdateListener(this);
         mPlaying.set(mPlayingAdapter.getItem(0));//test
-//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
+//        ViewDataBinding binding=DataBindingUtil.getBinding(findViewById(R.id.test,View.class));
+//        DataBindingUtil.bind(findViewById(R.id.test,View.class),new MediaSheetModel(getContext()));
+//        Debug.D(getClass(),"444444444 "+binding);
+//        DataBindingUtil.inflate(getLayoutInflater(),R.layout.media_sheet_layout,null,false);
 //        DaoMaster.DevOpenHelper a = new DaoMaster.DevOpenHelper(this,"database_name",null);
 
 //        File fileData=new File("/sdcard/Musics/西单女孩 - 原点.mp3");
@@ -136,7 +144,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //                    public void run() {
 //                        mPlayer.start(-1);
 //                    }
-//                },5000);
+//                },5000);https://files.pythonhosted.org/packages/5b/bb/cdc8086db1f15d0664dd22a62c69613cdc00f1dd430b5b19df1bea83f2a3/Pillow-6.2.1.tar.gz
 ////               mPlayer.seek(0.97f);
 //            }
 //        },13000);
@@ -148,7 +156,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        }).start();
 //        play(new Media("linqiang","操蛋","./WMDYY.mp3"),0);
 
-//        mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0.5f);
+        mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
         Handler handler=new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -172,6 +180,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
             case R.id.activityMediaPlay_preIV:
                 break;
             case R.id.activityMediaPlay_playModeIV:
+
                 break;
             case R.id.activityMediaPlay_playPauseIV:
                 Player player=mPlayer;
@@ -205,6 +214,11 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     @Override
     protected void onViewAttached(View root) {
         super.onViewAttached(root);
+        MediaSheetLayoutBinding binding=DataBindingUtil.getBinding(findViewById(R.id.test,View.class));
+        Debug.D(getClass(),"ddd "+binding);
+        binding.setVm(new MediaSheetModel(getContext()));
+//        DataBindingUtil.
+//        DataBindingUtil.bind(findViewById(R.gid.test,View.class),new MediaSheetModel(getContext()));
         mSeekBar=findViewById(R.id.mediaPlayBottomProgressSB, SeekBar.class);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

@@ -1,5 +1,6 @@
 package com.merlin.adapter;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import com.merlin.debug.Debug;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -30,6 +32,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     private WeakReference<OnItemMultiClickListener> mMultiClickListener;
     private Handler mHandler;
     private List<T> mData;
+
 
     public interface OnItemClickListener<T>{
         void onItemClick(View view,int sourceId,int position, T data);
@@ -115,7 +118,6 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
                             if (null==multiListener||!multiListener.
                                     onItemMultiClick(mView,count, getViewId(),position,data)){
                                 if (count==1&&null!=listener){
-                                    Debug.D(getClass(),"########### "+(System.currentTimeMillis()-mFirstTime));
                                     listener.onItemClick(mView, mView.getId(),position, data);
                                 }
                             }
@@ -251,6 +253,14 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
                 mData=list=new ArrayList<>();
             }
             for (T data:datas){
+                if (data instanceof Collection){
+                    for (Object child:(Collection)data){
+                        if (null!=child){
+                            add((T)child);
+                        }
+                    }
+                    continue;
+                }
                 if (!list.contains(data)&&list.add(data)){
                     notifyItemInserted(list.indexOf(data));
                 }

@@ -3,6 +3,7 @@ package com.merlin.model;
 import android.content.Context;
 
 import androidx.annotation.ColorInt;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,8 +13,8 @@ import com.merlin.view.DataListLayout;
 import java.util.List;
 
 
-public class DataListModel extends BaseModel {
-    private final BaseAdapter mAdapter;
+public class DataListModel<T> extends BaseModel {
+    private final BaseAdapter<T, ViewDataBinding> mAdapter;
     private final RecyclerView.LayoutManager mLayoutManager;
     private DataListLayout.Bridge mBridge;
 
@@ -32,6 +33,15 @@ public class DataListModel extends BaseModel {
                 adapter.setOnItemMultiClickListener((BaseAdapter.OnItemMultiClickListener)this);
             }
         }
+    }
+
+    public final boolean addData(List<T> data){
+        BaseAdapter adapter=mAdapter;
+        if (null!=adapter&&null!=data&&data.size()>0){
+            adapter.add(data);
+            return true;
+        }
+        return false;
     }
 
     public final boolean setData(List data, boolean notify){
