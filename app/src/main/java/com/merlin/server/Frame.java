@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.merlin.protocol.Protocol;
 import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
-import com.merlin.oksocket.Head;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -63,12 +62,17 @@ public final class Frame implements Tag {
 
     public <T> T getBody(Class<T> cls,T def){
         String text=getBodyText();
-        return null!=text?(T)JSON.parseObject(text):def;
+        return null!=text&&text.length()>0&&!text.startsWith("[")?JSON.parseObject(text,cls):def;
+    }
+
+    public boolean isExistBody(){
+        byte[] bytes=mBodySrc;
+        return null!=bytes&&bytes.length>0;
     }
 
     public <T> List<T> getBodyArray(Class<T> cls, List<T> def){
         String text=getBodyText();
-        return null!=text?(List<T>) JSON.parseArray(text):def;
+        return null!=text&&text.length()>0&&text.startsWith("[")?JSON.parseArray(text,cls):def;
     }
 
     public String getBodyText(){

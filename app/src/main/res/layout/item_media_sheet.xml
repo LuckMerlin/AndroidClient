@@ -17,7 +17,7 @@
             android:layout_height="120dp">
 
             <TextView
-                android:text="@{Long.toString(sheet.length)}"
+                android:text="@{Long.toString(sheet.size)}"
                 android:textColor="@color/textTitleSub"
                 android:layout_margin="5dp"
                 android:layout_alignParentLeft="true"
@@ -29,7 +29,7 @@
 
         <TextView
             android:layout_below="@id/itemMediaSheet_RL"
-            android:text="@{sheet.title}"
+            android:text="@{sheet.name}"
             android:textColor="@color/textTitle"
             android:layout_margin="5dp"
             android:layout_centerHorizontal="true"

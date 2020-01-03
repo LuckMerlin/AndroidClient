@@ -88,7 +88,7 @@ public class DataListModel<T> extends BaseModel {
         return false;
     }
 
-    public final BaseAdapter getAdapter() {
+    public final BaseAdapter<T,ViewDataBinding> getAdapter() {
         return mAdapter;
     }
 

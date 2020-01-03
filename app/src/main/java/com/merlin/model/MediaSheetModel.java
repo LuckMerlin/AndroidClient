@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.client.Client;
+import com.merlin.debug.Debug;
 import com.merlin.media.Sheet;
 import com.merlin.server.Frame;
 
@@ -26,9 +27,15 @@ public class MediaSheetModel extends DataListModel<Sheet>{
         request("linqiang","/sheets/a",0,10,new Client.OnObjectRequestFinish<List<Sheet>>(){
             @Override
             public void onObjectRequested(boolean succeed, int what, String note, Frame frame, List<Sheet> data) {
-
+                getAdapter().setData(data);
             }
         });
+//        request("linqiang","/sheets/a",0,10,new Client.OnObjectRequestFinish<Sheet>(){
+//            @Override
+//            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, Sheet data) {
+//                Debug.D(getClass(),"的说法 2 "+data);
+//            }
+//        });
     }
 
 

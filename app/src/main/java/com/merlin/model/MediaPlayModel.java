@@ -15,8 +15,6 @@ import com.merlin.adapter.MediaListAdapter;
 import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaSheetLayoutBinding;
-import com.merlin.client.databinding.MediaSheetLayoutBindingImpl;
-import com.merlin.database.DaoMaster;
 import com.merlin.debug.Debug;
 import com.merlin.media.Media;
 import com.merlin.player.OnStateUpdate;
@@ -78,7 +76,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
         mPlayer.setOnStateUpdateListener(this);
         mPlaying.set(mPlayingAdapter.getItem(0));//test
-        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
 //        ViewDataBinding binding=DataBindingUtil.getBinding(findViewById(R.id.test,View.class));
 //        DataBindingUtil.bind(findViewById(R.id.test,View.class),new MediaSheetModel(getContext()));
@@ -156,7 +154,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        }).start();
 //        play(new Media("linqiang","操蛋","./WMDYY.mp3"),0);
 
-        mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
+//        mPlayer.play("/sdcard/Musics/如果你还在就好了.mp3",0f);
         Handler handler=new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -214,11 +212,9 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     @Override
     protected void onViewAttached(View root) {
         super.onViewAttached(root);
-        MediaSheetLayoutBinding binding=DataBindingUtil.getBinding(findViewById(R.id.test,View.class));
-        Debug.D(getClass(),"ddd "+binding);
+        View view=findViewById(R.id.test,View.class);
+        MediaSheetLayoutBinding binding=DataBindingUtil.getBinding(view);
         binding.setVm(new MediaSheetModel(getContext()));
-//        DataBindingUtil.
-//        DataBindingUtil.bind(findViewById(R.gid.test,View.class),new MediaSheetModel(getContext()));
         mSeekBar=findViewById(R.id.mediaPlayBottomProgressSB, SeekBar.class);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
