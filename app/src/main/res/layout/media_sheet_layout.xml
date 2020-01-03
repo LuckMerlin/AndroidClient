@@ -7,9 +7,11 @@
             type="com.merlin.model.MediaSheetModel" />
     </data>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.merlin.view.DataBindingRecyclerView
         binding:adapter="@{vm.adapter}"
         binding:layoutManager="@{vm.layoutManager}"
+        binding:binding="@{`操蛋`}"
+        android:background="@{vm.adapter??@drawable/add_normal}"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </layout>
