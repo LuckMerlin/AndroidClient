@@ -16,12 +16,18 @@ import java.util.List;
 public class DataListModel<T> extends BaseModel {
     private final BaseAdapter<T, ViewDataBinding> mAdapter;
     private final RecyclerView.LayoutManager mLayoutManager;
+    private final RecyclerView.ItemDecoration mItemDecoration;
     private DataListLayout.Bridge mBridge;
 
-    public DataListModel(Context context,BaseAdapter adapter, LinearLayoutManager manager){
+    public DataListModel(Context context, BaseAdapter adapter, LinearLayoutManager manager) {
+        this(context,adapter,manager,null);
+    }
+
+    public DataListModel(Context context, BaseAdapter adapter, LinearLayoutManager manager, RecyclerView.ItemDecoration decoration){
         super(context);
         mAdapter=adapter;
         mLayoutManager=manager;
+        mItemDecoration=decoration;
         if (null!=adapter){
             if (this instanceof BaseAdapter.OnItemClickListener) {
                 adapter.setOnItemClickListener((BaseAdapter.OnItemClickListener) this);
@@ -86,6 +92,10 @@ public class DataListModel<T> extends BaseModel {
             return true;
         }
         return false;
+    }
+
+    public RecyclerView.ItemDecoration getItemDecoration() {
+        return mItemDecoration;
     }
 
     public final BaseAdapter<T,ViewDataBinding> getAdapter() {

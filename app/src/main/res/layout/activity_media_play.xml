@@ -194,15 +194,14 @@
 
       </RelativeLayout>
 
-
     <include android:id="@+id/test"
-      android:layout_marginTop="150dp"
-      android:layout_marginBottom="150dp"
+      android:layout_marginTop="100dp"
+      android:layout_marginBottom="100dp"
       android:layout_alignParentRight="true"
       android:layout_centerVertical="true"
       layout="@layout/media_sheet_layout"
-      android:layout_width="230dp"
-      android:layout_height="450dp"/>
+      android:layout_width="match_parent"
+      android:layout_height="400dp"/>
 
 
 <!--      <include-->

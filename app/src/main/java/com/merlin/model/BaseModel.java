@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alibaba.fastjson.JSON;
 import com.merlin.bean.FileBrowserMeta;
 import com.merlin.client.Client;
+import com.merlin.client.OnObjectRequestFinish;
 import com.merlin.database.DaoMaster;
 import com.merlin.database.DaoSession;
 import com.merlin.debug.Debug;
@@ -279,14 +280,10 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return false;
     }
 
-    public <T> Client.Canceler request(String from, String url,Client.OnObjectRequestFinish callback){
-        return request(from,url,-1,-1,callback);
-    }
-
-    public <T> Client.Canceler request(String from, String url,int page, int limit, Client.OnObjectRequestFinish callback){
+    public <T> Client.Canceler request(String from, String url,JSONObject args, OnObjectRequestFinish callback){
         Client client=getClient();
         if (null!=client){
-            return client.request(from,url,page,limit,callback);
+            return client.request(from,url,args,callback);
         }else if (null!=callback){
             callback.onObjectRequested(false,What.WHAT_NONE_LOGIN,"None client",null,null);
         }

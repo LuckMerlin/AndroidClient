@@ -44,6 +44,7 @@ public interface Tag {
     String TAG_LOGIN = "login";
     String TAG_META = "meta";
     String TAG_URL="url";
+    String TAG_ID="id";
     //Nas
     String TAG_COMMAND_TYPE = "command";
     String TAG_COMMAND_LIST_DIR = "commandListDir";

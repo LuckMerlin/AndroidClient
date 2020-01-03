@@ -20,10 +20,6 @@ import static com.merlin.server.Json.putIfNotNull;
 public final class Client extends Socket {
     private String mAccount=null;
 
-    public interface OnObjectRequestFinish<T>{
-        void onObjectRequested(boolean succeed, int what, String note, Frame frame,T data);
-    }
-
     public static final class Canceler{
         private boolean mCanceled=false;
 
@@ -109,20 +105,12 @@ public final class Client extends Socket {
         )?cancel:null;
     }
 
-    public <T> Canceler request(String from,String url,OnObjectRequestFinish callback){
-            return request(from,url,-1,-1,callback);
-    }
-
-    public <T> Canceler request(String from,String url,int page,int limit,OnObjectRequestFinish callback){
+    public <T> Canceler request(String from,String url,JSONObject args,OnObjectRequestFinish callback){
         if (null==url||null==callback||null==from){
             Debug.W(getClass(),"Can't request object with client."+from+" "+url+" "+callback);
             return null;
         }
-        JSONObject object=new JSONObject();
-        if (page>=0||limit>=0){
-            Json.putIfNotNull(object,TAG_PAGE,page);
-            Json.putIfNotNull(object,TAG_LIMIT,limit);
-        }
+        JSONObject object=null!=args?args:new JSONObject();
         Json.putIfNotNull(object,TAG_ACCOUNT,getLoginedAccount());
         Json.putIfNotNull(object,TAG_URL,url);
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_REQUEST);

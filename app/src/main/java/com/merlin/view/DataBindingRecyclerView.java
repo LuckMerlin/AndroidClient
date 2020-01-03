@@ -1,11 +1,13 @@
 package com.merlin.view;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.BindingAdapter;
+import androidx.databinding.BindingConversion;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.debug.Debug;
@@ -24,10 +26,10 @@ public class DataBindingRecyclerView extends RecyclerView {
     public DataBindingRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
-
-    @BindingAdapter(value = { "imageUrl" }, requireAll = true)
-    public static void binding(RecyclerView view, String url) {
-        Debug.D(BaseModel.class,"你不  "+view+" "+url);
-    }
+//
+//    @BindingConversion
+//    public static ColorDrawable convertColorToDrawable(int color) {
+//        return new ColorDrawable(color);
+//    }
 
 }

@@ -41,6 +41,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     private final MediaListAdapter mPlayingAdapter;
     private SeekBar mSeekBar;
     private final MPlayer mPlayer=new MPlayer();
+    public boolean dd=true;
 
     public MediaPlayModel(Context context){
         super(context);

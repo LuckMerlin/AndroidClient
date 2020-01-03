@@ -1,6 +1,5 @@
 package com.merlin.adapter;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;

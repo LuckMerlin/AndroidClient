@@ -10,9 +10,9 @@ public class Sheet {
      */
 
     private String name;
-    private int size;
+    private long size;
     private String cover;
-    private int id;
+    private String id;
     private int create;
 
     public Sheet(){
@@ -31,7 +31,7 @@ public class Sheet {
         this.name = name;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
@@ -47,11 +47,11 @@ public class Sheet {
         this.cover = cover;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
