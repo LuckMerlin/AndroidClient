@@ -6,6 +6,7 @@
     <dimen name="listIconNormal">38dp</dimen>
     <dimen name="titleIconSize">28dp</dimen>
     <dimen name="listItemSizeSmall">40dp</dimen>
+    <dimen name="listItemSizeLessMedium">50dp</dimen>
     <dimen name="listItemSizeMedium">60dp</dimen>
     <dimen name="iconSizeLittle">25dp</dimen>
     <dimen name="iconSizeSmall">30dp</dimen>

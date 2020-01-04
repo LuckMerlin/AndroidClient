@@ -1,18 +1,23 @@
 package com.merlin.activity;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import com.merlin.client.databinding.ActivityMediaPlayBinding;
+import com.merlin.media.MediaPlayService;
+import com.merlin.media.MediaPlayer;
 import com.merlin.model.MediaPlayModel;
 
-public class MediaPlayActivity extends NasActivity<ActivityMediaPlayBinding, MediaPlayModel>{
-
+public class MediaPlayActivity extends NasActivity<ActivityMediaPlayBinding, MediaPlayModel>
+implements ServiceConnection{
 
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
@@ -42,10 +47,37 @@ public class MediaPlayActivity extends NasActivity<ActivityMediaPlayBinding, Med
         }
     }
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MediaPlayService.bind(this);
         checkPermission();
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        if (null!=service&&service instanceof MediaPlayer){
+            setMediaPlayer((MediaPlayer)service);
+        }
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        setMediaPlayer(null);
+    }
+
+    private boolean setMediaPlayer(MediaPlayer player){
+        MediaPlayModel model=getViewModel();
+        if (null!=model){
+            return model.setMediaPlayer(player);
+        }
+        return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        setMediaPlayer(null);
+        MediaPlayService.unbind(this);
     }
 }

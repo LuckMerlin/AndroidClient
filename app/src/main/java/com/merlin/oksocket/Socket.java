@@ -7,7 +7,6 @@ import com.merlin.protocol.Protocol;
 import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
 import com.merlin.server.Frame;
-import com.merlin.server.Json;
 import com.merlin.server.Response;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 import com.xuhao.didi.core.iocore.interfaces.ISendable;
@@ -22,6 +21,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import static com.merlin.server.Json.putIfNotNull;
 
@@ -29,7 +30,7 @@ public class Socket implements Tag {
    private final Handler mHandler=new Handler();
    private final Map<String,RequestingRunnable> mRequesting=new HashMap<>();
    private OnFrameReceive mReceiveListener;
-   private OnClientStatusChange mStatusChange;
+   private final WeakHashMap<OnClientStatusChange,String> mStatusChanges=new WeakHashMap<>();
    private IConnectionManager mManager;
    private int mHeartbeat = 0;
    private final String mIp;
@@ -54,8 +55,22 @@ public class Socket implements Tag {
        mPort=port;
    }
 
-   public void setOnClientStatusChange(OnClientStatusChange change){
-        mStatusChange=change;
+   public boolean putListener(OnClientStatusChange change){
+       WeakHashMap<OnClientStatusChange,String> reference=mStatusChanges;
+       if (null!=reference&&null!=change){
+           reference.put(change,Long.toString(System.currentTimeMillis()));
+           return true;
+       }
+       return false;
+   }
+
+   public boolean removeListener(OnClientStatusChange change){
+       WeakHashMap<OnClientStatusChange,String> reference=mStatusChanges;
+       if (null!=reference&&null!=change){
+           reference.remove(change);
+           return true;
+       }
+       return false;
    }
 
    public void setOnFrameReceive(OnFrameReceive listener){
@@ -125,7 +140,6 @@ public class Socket implements Tag {
                    Map<String,RequestingRunnable> requesting=null!=unique&&unique.length()>0?mRequesting:null;
                    RequestingRunnable runnable=null!=requesting?requesting.get(unique):null;
                    boolean isLaseFrame=frame.isLastFrame();
-                   Debug.D(getClass(),"$$$$$$$$$$$你傻  "+frame.getRemain());
                    if (null!=runnable){
                        if (isLaseFrame){
                            removeResponseWaiting(unique,"While request last frame responsed.");
@@ -280,7 +294,6 @@ public class Socket implements Tag {
         mRequesting.put(unique,runnable);
         mHandler.postDelayed(runnable,timeout<=0?5000:timeout);
         if (null!=bytes&&bytes.length>0&&sendBytes(bytes)){
-            Debug.D(getClass(),"########### "+bytes);
             return true;
         }
         removeResponseWaiting(unique,"While request send failed.");
@@ -331,6 +344,12 @@ public class Socket implements Tag {
     }
 
     protected final void notifyStatusChanged(boolean autoNotify,int what,Object data){
+       WeakHashMap<OnClientStatusChange,String> reference=mStatusChanges;
+       if (null!=reference){
+           synchronized (reference){
+               Set<OnClientStatusChange> set=reference.keySet();
+           }
+       }
        OnClientStatusChange change=mStatusChange;
        if (null!=change){
            change.onClientStatusChanged(autoNotify,what,data,(Client)this);

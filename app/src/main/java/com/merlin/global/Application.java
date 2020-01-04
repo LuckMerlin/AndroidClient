@@ -1,6 +1,7 @@
 package com.merlin.global;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 
 import com.merlin.classes.ActivityLifecycle;
@@ -26,7 +27,7 @@ public class Application extends android.app.Application implements ActivityLife
         mDatabase = new DaoMaster.DevOpenHelper(this, "linqiang1");
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mClient.setOnFrameReceive(mOnFrameReceiveListener);
-        mClient.setOnClientStatusChange(mStatusChange);
+        mClient.putListener(mStatusChange);
         mClient.connect((connected,what)->{
              if (connected){
                  mClient.login("wuyue","123456");
@@ -55,6 +56,11 @@ public class Application extends android.app.Application implements ActivityLife
         }
     };
 
+    public static Application get(Context context){
+        context=null!=context?context instanceof Application?context:context.getApplicationContext():context;
+        return null!=context&&context instanceof Application?(Application)context:null;
+    }
+
     public Client getClient() {
         return mClient;
     }
@@ -67,4 +73,7 @@ public class Application extends android.app.Application implements ActivityLife
         ActivityLifecycle lifecycle=mActivityLifecycle;
         return null!=lifecycle&&null!=activities&&activities.length>0?lifecycle.finishAllActivity(activities):null;
     }
+
+
+
 }

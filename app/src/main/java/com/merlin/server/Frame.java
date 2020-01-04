@@ -71,9 +71,7 @@ public final class Frame implements Tag {
     }
 
     public <T> List<T> getBodyArray(Class<T> cls, List<T> def){
-        Debug.D(getClass(),"$##ddddddd###   "+cls);
         String text=getBodyText();
-        Debug.D(getClass(),"$##dddd###  "+text+" "+cls);
         return null!=text&&text.length()>0&&text.startsWith("[")?JSON.parseArray(text,cls):def;
     }
 

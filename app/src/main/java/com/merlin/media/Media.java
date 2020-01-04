@@ -1,5 +1,8 @@
 package com.merlin.media;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
@@ -10,21 +13,24 @@ import org.greenrobot.greendao.annotation.Generated;
 import java.io.File;
 
 @Entity
-public class Media {
+public class Media implements Parcelable {
     @Id(autoincrement = true)
     @Property(nameInDb = "id")
     private long id;
     @NotNull
-    @Property(nameInDb = "title")
-    private String title;
+    @Property(nameInDb = "mediaId")
+    private long mediaId;
+    @NotNull
+    @Property(nameInDb = "name")
+    private String name;
     @NotNull
     @Property(nameInDb = "path")
     @Index(unique = true)
     private String path;
     @Property(nameInDb = "md5")
     private String md5=null;
-    @Property(nameInDb = "cloudUrl")
-    private String cloudUrl;
+    @Property(nameInDb = "url")
+    private String url;
     @Property(nameInDb = "account")
     private String account;
     @Property(nameInDb = "album")
@@ -34,15 +40,16 @@ public class Media {
     @Property(nameInDb = "duration")
     private long duration=12131;
 
-    @Generated(hash = 580707197)
-    public Media(long id, @NotNull String title, @NotNull String path, String md5,
-            String cloudUrl, String account, String album, String artist,
+    @Generated(hash = 22325041)
+    public Media(long id, long mediaId, @NotNull String name, @NotNull String path,
+            String md5, String url, String account, String album, String artist,
             long duration) {
         this.id = id;
-        this.title = title;
+        this.mediaId = mediaId;
+        this.name = name;
         this.path = path;
         this.md5 = md5;
-        this.cloudUrl = cloudUrl;
+        this.url = url;
         this.account = account;
         this.album = album;
         this.artist = artist;
@@ -58,11 +65,11 @@ public class Media {
     public void setId(long id) {
         this.id = id;
     }
-    public String getTitle() {
-        return this.title;
+    public String getName() {
+        return this.name;
     }
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
     public String getPath() {
         return this.path;
@@ -104,12 +111,12 @@ public class Media {
     public String getDurationText(){
         return "00:03:12";
     }
-    public String getCloudUrl() {
-        return this.cloudUrl;
+    public String getUrl() {
+        return this.url;
     }
 
-    public void setCloudUrl(String cloudUrl) {
-        this.cloudUrl = cloudUrl;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public boolean isLocalExist(){
@@ -117,4 +124,58 @@ public class Media {
         return null!=path&&path.length()>0&&new File(path).length()>0;
     }
 
+    public long getMediaId() {
+        return this.mediaId;
+    }
+    public void setMediaId(long mediaId) {
+        this.mediaId = mediaId;
+    }
+
+    private Media(Parcel in){
+        if (null!=in){
+            duration=in.readLong();
+            artist=in.readString();
+            album=in.readString();
+            account=in.readString();
+            url=in.readString();
+            md5=in.readString();
+            path=in.readString();
+            name=in.readString();
+            mediaId=in.readLong();
+            id=in.readLong();
+        }
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(duration);
+        dest.writeString(artist);
+        dest.writeString(album);
+        dest.writeString(account);
+        dest.writeString(url);
+        dest.writeString(md5);
+        dest.writeString(path);
+        dest.writeString(name);
+        dest.writeLong(mediaId);
+        dest.writeLong(id);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<Media> CREATOR = new Parcelable.Creator<Media>(){
+
+        @Override
+        public Media createFromParcel(Parcel source) {
+            return new Media(source);
+        }
+
+        @Override
+        public Media[] newArray(int size) {
+            return new Media[size];
+        }
+
+    };
 }

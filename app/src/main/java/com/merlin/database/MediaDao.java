@@ -25,14 +25,15 @@ public class MediaDao extends AbstractDao<Media, Long> {
      */
     public static class Properties {
         public final static Property Id = new Property(0, long.class, "id", true, "id");
-        public final static Property Title = new Property(1, String.class, "title", false, "title");
-        public final static Property Path = new Property(2, String.class, "path", false, "path");
-        public final static Property Md5 = new Property(3, String.class, "md5", false, "md5");
-        public final static Property CloudUrl = new Property(4, String.class, "cloudUrl", false, "cloudUrl");
-        public final static Property Account = new Property(5, String.class, "account", false, "account");
-        public final static Property Album = new Property(6, String.class, "album", false, "album");
-        public final static Property Artist = new Property(7, String.class, "artist", false, "artist");
-        public final static Property Duration = new Property(8, long.class, "duration", false, "duration");
+        public final static Property MediaId = new Property(1, long.class, "mediaId", false, "mediaId");
+        public final static Property Name = new Property(2, String.class, "name", false, "name");
+        public final static Property Path = new Property(3, String.class, "path", false, "path");
+        public final static Property Md5 = new Property(4, String.class, "md5", false, "md5");
+        public final static Property Url = new Property(5, String.class, "url", false, "url");
+        public final static Property Account = new Property(6, String.class, "account", false, "account");
+        public final static Property Album = new Property(7, String.class, "album", false, "album");
+        public final static Property Artist = new Property(8, String.class, "artist", false, "artist");
+        public final static Property Duration = new Property(9, long.class, "duration", false, "duration");
     }
 
 
@@ -49,14 +50,15 @@ public class MediaDao extends AbstractDao<Media, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"MEDIA\" (" + //
                 "\"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ," + // 0: id
-                "\"title\" TEXT NOT NULL ," + // 1: title
-                "\"path\" TEXT NOT NULL ," + // 2: path
-                "\"md5\" TEXT," + // 3: md5
-                "\"cloudUrl\" TEXT," + // 4: cloudUrl
-                "\"account\" TEXT," + // 5: account
-                "\"album\" TEXT," + // 6: album
-                "\"artist\" TEXT," + // 7: artist
-                "\"duration\" INTEGER NOT NULL );"); // 8: duration
+                "\"mediaId\" INTEGER NOT NULL ," + // 1: mediaId
+                "\"name\" TEXT NOT NULL ," + // 2: name
+                "\"path\" TEXT NOT NULL ," + // 3: path
+                "\"md5\" TEXT," + // 4: md5
+                "\"url\" TEXT," + // 5: url
+                "\"account\" TEXT," + // 6: account
+                "\"album\" TEXT," + // 7: album
+                "\"artist\" TEXT," + // 8: artist
+                "\"duration\" INTEGER NOT NULL );"); // 9: duration
         // Add Indexes
         db.execSQL("CREATE UNIQUE INDEX " + constraint + "IDX_MEDIA_path ON \"MEDIA\"" +
                 " (\"path\" ASC);");
@@ -72,68 +74,70 @@ public class MediaDao extends AbstractDao<Media, Long> {
     protected final void bindValues(DatabaseStatement stmt, Media entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getId());
-        stmt.bindString(2, entity.getTitle());
-        stmt.bindString(3, entity.getPath());
+        stmt.bindLong(2, entity.getMediaId());
+        stmt.bindString(3, entity.getName());
+        stmt.bindString(4, entity.getPath());
  
         String md5 = entity.getMd5();
         if (md5 != null) {
-            stmt.bindString(4, md5);
+            stmt.bindString(5, md5);
         }
  
-        String cloudUrl = entity.getCloudUrl();
-        if (cloudUrl != null) {
-            stmt.bindString(5, cloudUrl);
+        String url = entity.getUrl();
+        if (url != null) {
+            stmt.bindString(6, url);
         }
  
         String account = entity.getAccount();
         if (account != null) {
-            stmt.bindString(6, account);
+            stmt.bindString(7, account);
         }
  
         String album = entity.getAlbum();
         if (album != null) {
-            stmt.bindString(7, album);
+            stmt.bindString(8, album);
         }
  
         String artist = entity.getArtist();
         if (artist != null) {
-            stmt.bindString(8, artist);
+            stmt.bindString(9, artist);
         }
-        stmt.bindLong(9, entity.getDuration());
+        stmt.bindLong(10, entity.getDuration());
     }
 
     @Override
     protected final void bindValues(SQLiteStatement stmt, Media entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getId());
-        stmt.bindString(2, entity.getTitle());
-        stmt.bindString(3, entity.getPath());
+        stmt.bindLong(2, entity.getMediaId());
+        stmt.bindString(3, entity.getName());
+        stmt.bindString(4, entity.getPath());
  
         String md5 = entity.getMd5();
         if (md5 != null) {
-            stmt.bindString(4, md5);
+            stmt.bindString(5, md5);
         }
  
-        String cloudUrl = entity.getCloudUrl();
-        if (cloudUrl != null) {
-            stmt.bindString(5, cloudUrl);
+        String url = entity.getUrl();
+        if (url != null) {
+            stmt.bindString(6, url);
         }
  
         String account = entity.getAccount();
         if (account != null) {
-            stmt.bindString(6, account);
+            stmt.bindString(7, account);
         }
  
         String album = entity.getAlbum();
         if (album != null) {
-            stmt.bindString(7, album);
+            stmt.bindString(8, album);
         }
  
         String artist = entity.getArtist();
         if (artist != null) {
-            stmt.bindString(8, artist);
+            stmt.bindString(9, artist);
         }
-        stmt.bindLong(9, entity.getDuration());
+        stmt.bindLong(10, entity.getDuration());
     }
 
     @Override
@@ -145,14 +149,15 @@ public class MediaDao extends AbstractDao<Media, Long> {
     public Media readEntity(Cursor cursor, int offset) {
         Media entity = new Media( //
             cursor.getLong(offset + 0), // id
-            cursor.getString(offset + 1), // title
-            cursor.getString(offset + 2), // path
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // md5
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // cloudUrl
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // account
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // album
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // artist
-            cursor.getLong(offset + 8) // duration
+            cursor.getLong(offset + 1), // mediaId
+            cursor.getString(offset + 2), // name
+            cursor.getString(offset + 3), // path
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // md5
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // url
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // account
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // album
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // artist
+            cursor.getLong(offset + 9) // duration
         );
         return entity;
     }
@@ -160,14 +165,15 @@ public class MediaDao extends AbstractDao<Media, Long> {
     @Override
     public void readEntity(Cursor cursor, Media entity, int offset) {
         entity.setId(cursor.getLong(offset + 0));
-        entity.setTitle(cursor.getString(offset + 1));
-        entity.setPath(cursor.getString(offset + 2));
-        entity.setMd5(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setCloudUrl(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setAccount(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setAlbum(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
-        entity.setArtist(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setDuration(cursor.getLong(offset + 8));
+        entity.setMediaId(cursor.getLong(offset + 1));
+        entity.setName(cursor.getString(offset + 2));
+        entity.setPath(cursor.getString(offset + 3));
+        entity.setMd5(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setUrl(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setAccount(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setAlbum(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setArtist(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setDuration(cursor.getLong(offset + 9));
      }
     
     @Override

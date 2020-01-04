@@ -4,22 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
+import android.view.animation.Animation;
 import android.widget.Toast;
 
-import androidx.databinding.BindingAdapter;
-import androidx.databinding.BindingConversion;
-import androidx.databinding.DataBindingComponent;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.alibaba.fastjson.JSON;
-import com.merlin.bean.FileBrowserMeta;
 import com.merlin.client.Client;
 import com.merlin.client.OnObjectRequestFinish;
 import com.merlin.database.DaoMaster;
@@ -32,7 +26,6 @@ import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Json;
 
-import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.json.JSONObject;
 
@@ -45,6 +38,11 @@ import java.util.List;
 public class BaseModel implements androidx.databinding.DataBindingComponent,View.OnClickListener, View.OnLongClickListener, Tag {
     private WeakReference<View> mRootView=null;
     private final WeakReference<Context> mContext;
+    public final static String LABEL_ACTIVITY_DATA = "activityWithData";
+
+    public interface OnIntentChanged{
+        void onIntentChange(Intent intent);
+    }
 
     public  interface OnModelViewClick{
         void onViewClick(View v,int id);
@@ -106,7 +104,6 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
     }
-
 
     public final View findViewById(int id){
         return findViewById(id,View.class);
@@ -249,6 +246,15 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return startActivity(cls,null);
     }
 
+    protected final boolean startActivity(Class<? extends Activity> cls, Parcelable data){
+        if (null!=data){
+            Bundle bundle=new Bundle();
+            bundle.putParcelable(LABEL_ACTIVITY_DATA,data);
+            return startActivity(cls,bundle);
+        }
+        return startActivity(cls,null);
+    }
+
     protected final boolean startActivity(Class<? extends Activity> cls, Bundle bundle){
         Context context=getContext();
         if (null!=context&&null!=cls){
@@ -257,8 +263,13 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
                 intent.putExtras(bundle);
             }
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-            return true;
+            try {
+                context.startActivity(intent);
+                return true;
+            }catch (Exception e){
+                Debug.E(getClass(),"Fail start activity.e="+e+" "+cls,e);
+            }
+            return false;
         }
         return false;
     }
@@ -289,4 +300,10 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         }
         return null;
     }
+
+    protected final <T> T getDataFromIntent(Intent intent,Class<T> cls){
+          Parcelable parcelable=null!=intent?intent.getParcelableExtra(LABEL_ACTIVITY_DATA):null;
+          return null!=cls&&null!=parcelable&&parcelable.getClass().isAssignableFrom(cls)?(T)parcelable:null;
+    }
+
 }

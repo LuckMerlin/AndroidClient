@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Toast;
 
@@ -134,6 +135,20 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         createViewModel();
+        onIntentChanged(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        onIntentChanged(intent);
+    }
+
+    private void onIntentChanged(Intent intent){
+        VM vm=null!=intent?mViewModel:null;
+        if (null!=vm&&vm instanceof BaseModel.OnIntentChanged){
+            ((BaseModel.OnIntentChanged)vm).onIntentChange(intent);
+        }
     }
 
     protected final V getBinding() {
@@ -151,4 +166,13 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
             Toast.makeText(this,(String)value,Toast.LENGTH_LONG).show();
         }
     }
+
+//    protected final <T>T loadDataFromIntent(Intent intent,Class<T> cls){
+//        intent=null!=intent?intent:getIntent();
+//        Parcelable parcelable=null!=intent?intent.getParcelableExtra(BaseModel.LABEL_ACTIVITY_DATA):null;
+//        if (null!=parcelable&&parcelable.getClass().isAssignableFrom(cls)){
+//            return (T)parcelable;
+//        }
+//        return null;
+//    }
 }

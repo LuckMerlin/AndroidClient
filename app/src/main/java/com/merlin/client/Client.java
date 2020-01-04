@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import static com.merlin.server.Json.putIfNotNull;
 
@@ -115,11 +116,10 @@ public final class Client extends Socket {
             return null;
         }
         JSONObject object=null!=args?args:new JSONObject();
-        Json.putIfNotNull(object,TAG_ACCOUNT,getLoginedAccount());
+        Json.putIfNotNull(object,TAG_ACCOUNT,from);
         Json.putIfNotNull(object,TAG_URL,url);
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_REQUEST);
         final Canceler cancel=new Canceler();
-        Debug.D(getClass(),"$$$$$$$$$$ "+from+" " +url+" "+object);
         return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY, null, -1,(OnRequestFinish)(succeed,what,note,frame)->{
                     if (succeed){
                         T data=null;
@@ -129,7 +129,6 @@ public final class Client extends Socket {
                             ParameterizedType pt = null != type && type instanceof ParameterizedType ? (ParameterizedType) type : null;
                             types = null != pt ? pt.getActualTypeArguments() : null;
                             type = null != types && types.length >= 1 ? types[0] : null;
-                            Debug.D(getClass(),"%%%%%%%%%% "+types);
                             if (null != type) {
                                 if (type instanceof Class) {
                                     data = frame.getBody((Class<T>) type, null);

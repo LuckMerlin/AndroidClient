@@ -23,7 +23,10 @@
         <activity android:name="com.merlin.activity.FileBrowserActivity"/>
         <activity android:name="com.merlin.activity.TransportActivity"/>
         <activity android:name="com.merlin.activity.MediaPlayActivity"/>
+        <activity android:name="com.merlin.activity.MediaSheetActivity"/>
+        <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <service android:name="com.merlin.task.DownloadService"/>
+        <service android:name="com.merlin.media.MediaPlayService"/>
     </application>
 
 </manifest>

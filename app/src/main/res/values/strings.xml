@@ -5,4 +5,5 @@
     <string name="notOnline">设备未在线</string>
     <string name="fileNotExist">文件不存在</string>
     <string name="nonePermission">没有访问权限</string>
+    <string name="requestFail">请求失败</string>
 </resources>

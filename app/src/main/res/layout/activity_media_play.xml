@@ -12,8 +12,7 @@
   </data>
   <RelativeLayout
       android:padding="5dp"
-      android:alpha="1"
-      android:background="@drawable/background"
+      android:alpha="1.5"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
       <RelativeLayout
@@ -42,7 +41,7 @@
             <TextView
                 android:textColor="@color/textTitle"
                 android:textSize="@dimen/textTitle"
-                android:text="@{vm.playing.title}"
+                android:text="@{vm.playing.name}"
                 android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -160,6 +159,7 @@
               android:layout_centerHorizontal="true"
               android:layout_centerVertical="true"
               android:src="@drawable/album_default"
+              android:alpha="0.3"
               android:layout_marginBottom="20dp"
               android:layout_width="150dp"
               android:layout_height="150dp"/>
@@ -193,16 +193,6 @@
          </LinearLayout>
 
       </RelativeLayout>
-
-    <include android:id="@+id/test"
-      android:layout_marginTop="100dp"
-      android:layout_marginBottom="100dp"
-      android:layout_alignParentRight="true"
-      android:layout_centerVertical="true"
-      layout="@layout/media_sheet_layout"
-      android:layout_width="match_parent"
-      android:layout_height="400dp"/>
-
 
 <!--      <include-->
 <!--        android:layout_marginTop="150dp"-->

@@ -43,7 +43,7 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:text="@{media.title}"
+                    android:text="@{media.name}"
                     android:textSize="@dimen/textMedium"
                     android:textColor="@color/textTitle"
                     android:layout_alignParentLeft="true"

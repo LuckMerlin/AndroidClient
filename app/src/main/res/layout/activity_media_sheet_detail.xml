@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.merlin.model.ActivityMediaSheetDetailModel" />
+        <import type="android.view.View"/>
+    </data>
+
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <include
+            layout="@layout/title" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="15dp">
+                <ImageView
+                    android:id="@+id/activityMediaSheetDetail_coverIV"
+                    android:src="@drawable/test"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"/>
+                <LinearLayout
+                    android:layout_toRightOf="@id/activityMediaSheetDetail_coverIV"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:text="@{vm.sheet.name}"
+                        android:textColor="@color/textTitle"
+                        android:textStyle="bold"
+                        android:maxLines="2"
+                        android:textSize="@dimen/textTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:text="LuckMerlin"
+                        android:textColor="@color/textTitleSub"
+                        android:textSize="@dimen/textMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:text="@{vm.sheet.note}"
+                        android:textColor="@color/textTitleSub"
+                        android:textSize="@dimen/textMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </RelativeLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp">
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            binding:adapter="@{vm.adapter}"
+            binding:layoutManager="@{vm.layoutManager}"
+            binding:itemDecoration="@{vm.itemDecoration}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+</layout>
