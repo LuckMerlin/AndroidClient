@@ -5,6 +5,7 @@ import com.merlin.media.Sheet;
 import com.merlin.oksocket.Callback;
 import com.merlin.oksocket.Socket;
 import com.merlin.oksocket.OnClientStatusChange;
+import com.merlin.protocol.What;
 import com.merlin.server.Frame;
 import com.merlin.server.Json;
 
@@ -108,6 +109,9 @@ public final class Client extends Socket {
     public <T> Canceler request(String from,String url,JSONObject args,OnObjectRequestFinish callback){
         if (null==url||null==callback||null==from){
             Debug.W(getClass(),"Can't request object with client."+from+" "+url+" "+callback);
+            if (null!=callback){
+                callback.onObjectRequested(false, What.WHAT_ARGS_INVALID,"Args invalid.",null,null);
+            }
             return null;
         }
         JSONObject object=null!=args?args:new JSONObject();
@@ -115,6 +119,7 @@ public final class Client extends Socket {
         Json.putIfNotNull(object,TAG_URL,url);
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_REQUEST);
         final Canceler cancel=new Canceler();
+        Debug.D(getClass(),"$$$$$$$$$$ "+from+" " +url+" "+object);
         return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY, null, -1,(OnRequestFinish)(succeed,what,note,frame)->{
                     if (succeed){
                         T data=null;
@@ -124,6 +129,7 @@ public final class Client extends Socket {
                             ParameterizedType pt = null != type && type instanceof ParameterizedType ? (ParameterizedType) type : null;
                             types = null != pt ? pt.getActualTypeArguments() : null;
                             type = null != types && types.length >= 1 ? types[0] : null;
+                            Debug.D(getClass(),"%%%%%%%%%% "+types);
                             if (null != type) {
                                 if (type instanceof Class) {
                                     data = frame.getBody((Class<T>) type, null);

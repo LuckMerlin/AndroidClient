@@ -125,6 +125,7 @@ public class Socket implements Tag {
                    Map<String,RequestingRunnable> requesting=null!=unique&&unique.length()>0?mRequesting:null;
                    RequestingRunnable runnable=null!=requesting?requesting.get(unique):null;
                    boolean isLaseFrame=frame.isLastFrame();
+                   Debug.D(getClass(),"$$$$$$$$$$$你傻  "+frame.getRemain());
                    if (null!=runnable){
                        if (isLaseFrame){
                            removeResponseWaiting(unique,"While request last frame responsed.");
@@ -279,6 +280,7 @@ public class Socket implements Tag {
         mRequesting.put(unique,runnable);
         mHandler.postDelayed(runnable,timeout<=0?5000:timeout);
         if (null!=bytes&&bytes.length>0&&sendBytes(bytes)){
+            Debug.D(getClass(),"########### "+bytes);
             return true;
         }
         removeResponseWaiting(unique,"While request send failed.");

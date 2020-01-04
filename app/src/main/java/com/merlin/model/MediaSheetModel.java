@@ -11,6 +11,7 @@ import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.client.Client;
 import com.merlin.client.OnObjectRequestFinish;
 import com.merlin.debug.Debug;
+import com.merlin.media.Media;
 import com.merlin.media.Sheet;
 import com.merlin.server.Frame;
 import com.merlin.server.Json;
@@ -29,11 +30,11 @@ public class MediaSheetModel extends DataListModel<Sheet> implements BaseAdapter
         mCloudAccount="linqiang";
         getAdapter().setOnItemClickListener(this);
         List<Sheet> sheets=new ArrayList<>();
-        sheets.add(new Sheet("曹丹"));
-        sheets.add(new Sheet("曹丹"));
-        sheets.add(new Sheet("曹丹"));
-        sheets.add(new Sheet("曹丹"));
-        sheets.add(new Sheet("曹丹"));
+//        sheets.add(new Sheet("曹丹"));
+//        sheets.add(new Sheet("曹丹"));
+//        sheets.add(new Sheet("曹丹"));
+//        sheets.add(new Sheet("曹丹"));
+//        sheets.add(new Sheet("曹丹"));
         addData(sheets);
         JSONObject object=new JSONObject();
         putIfNotNull(object,TAG_PAGE,0);
@@ -41,6 +42,7 @@ public class MediaSheetModel extends DataListModel<Sheet> implements BaseAdapter
         request(mCloudAccount,"/sheet",object,new OnObjectRequestFinish<List<Sheet>>(){
             @Override
             public void onObjectRequested(boolean succeed, int what, String note, Frame frame, List<Sheet> data) {
+                Debug.D(getClass(),"WWWWWWWWWWWWWW "+succeed);
                 getAdapter().setData(data);
             }
         });
@@ -67,10 +69,10 @@ public class MediaSheetModel extends DataListModel<Sheet> implements BaseAdapter
         putIfNotNull(object,TAG_PAGE,0);
         putIfNotNull(object,TAG_LIMIT,10);
         putIfNotNull(object,TAG_ID,sheetId);
-        return null!=request(mCloudAccount,"/sheet/item/"+sheetId,object,new OnObjectRequestFinish(){
+        return null!=request(mCloudAccount,"/sheet/item/"+sheetId,object,new OnObjectRequestFinish<List<Media>>(){
             @Override
-            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, Object data) {
-
+            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, List<Media> data) {
+                Debug.D(getClass(),"@@@@@@@  "+succeed+" "+data);
             }
         });
     }

@@ -287,7 +287,6 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         }else if (null!=callback){
             callback.onObjectRequested(false,What.WHAT_NONE_LOGIN,"None client",null,null);
         }
-
         return null;
     }
 }
