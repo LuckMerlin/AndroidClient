@@ -77,7 +77,7 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
 //        mPlayingAdapter.add(new Media("linqiang","平凡之路",""));
         mPlayer.setOnStateUpdateListener(this);
         mPlaying.set(mPlayingAdapter.getItem(0));//test
-//        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
+        mPlayer.play("/sdcard/Musics/朴树 - 平凡之路.mp3",0f);
         Debug.D(getClass(),"%%%%%%%% 牛 ");
 //        ViewDataBinding binding=DataBindingUtil.getBinding(findViewById(R.id.test,View.class));
 //        DataBindingUtil.bind(findViewById(R.id.test,View.class),new MediaSheetModel(getContext()));
