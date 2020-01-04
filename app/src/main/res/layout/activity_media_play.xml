@@ -12,7 +12,7 @@
   </data>
   <RelativeLayout
       android:padding="5dp"
-      android:alpha="1.5"
+      android:background="@drawable/background"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
       <RelativeLayout

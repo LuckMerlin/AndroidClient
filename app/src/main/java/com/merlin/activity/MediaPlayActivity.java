@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import com.merlin.client.databinding.ActivityMediaPlayBinding;
+import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
 import com.merlin.model.MediaPlayModel;

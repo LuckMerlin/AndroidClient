@@ -348,11 +348,12 @@ public class Socket implements Tag {
        if (null!=reference){
            synchronized (reference){
                Set<OnClientStatusChange> set=reference.keySet();
+               for (OnClientStatusChange change:set) {
+                    if (null!=change){
+                        change.onClientStatusChanged(autoNotify,what,data,(Client)this);
+                    }
+               }
            }
-       }
-       OnClientStatusChange change=mStatusChange;
-       if (null!=change){
-           change.onClientStatusChanged(autoNotify,what,data,(Client)this);
        }
     }
 

@@ -15,4 +15,6 @@ public interface Status {
     int RESTART=1008;
     int WAITING=1009;
     int ADD=1010;
+    int CACHING=1011;
+    int FINISH_CACHE_FAILED=1012;
 }

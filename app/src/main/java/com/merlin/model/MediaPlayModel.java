@@ -10,6 +10,7 @@ import androidx.databinding.ObservableField;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.media.Media;
 import com.merlin.media.MediaPlayer;
 import com.merlin.player.OnStateUpdate;
@@ -17,6 +18,7 @@ import com.merlin.player.OnStateUpdate;
 public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClickListener, BaseModel.OnModelViewClick,OnStateUpdate {
     private ObservableField<Media> mPlaying=new ObservableField<>();
     private ObservableField<Integer> mPlayState=new ObservableField<>();
+    private MediaPlayer mMediaPlayer;
     private final MediaListAdapter mPlayingAdapter;
     private SeekBar mSeekBar;
 
@@ -149,10 +151,15 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
     }
 
     public boolean setMediaPlayer(MediaPlayer player){
+        mMediaPlayer=player;
         if (null!=player){
-
+            player.play(0,0.0f,null);
+//            Media media=new Media();
+//            player.start(0.5f,null);
+//            media.setPath("/sdcard/Musics/西单女孩 - 原点.mp3");
+//            player.play(media,0.5f,null);
         }
-        return false;
+        return true;
     }
 
     @Override
