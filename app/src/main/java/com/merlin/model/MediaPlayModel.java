@@ -207,7 +207,10 @@ public class MediaPlayModel extends BaseModel implements BaseAdapter.OnItemClick
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser){
-//                        mPlayer.seek(progress/100.f);
+                        MediaPlayer player=mMediaPlayer;
+                        if (null!=player){
+                            player.play(null,progress/100.f,null);
+                        }
                     }
             }
 

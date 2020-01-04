@@ -58,9 +58,13 @@ public class MediaPlayService extends Service {
                 }
                 Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
                 return false;
+            }else{//Play current paused media with seek
+                Object playing=mPlaying;
+                MPlayer player=mPlayer;
+                if (seek>=0){
+                    return player.seek(seek)>=0;
+                }
             }
-            //Play current paused media with seek
-
             return true;
         }
 
