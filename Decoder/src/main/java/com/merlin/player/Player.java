@@ -1,22 +1,22 @@
 package com.merlin.player;
 
+import android.os.Handler;
+import android.os.Looper;
 
 import com.merlin.debug.Debug;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Set;
+import java.util.WeakHashMap;
 
-public class Player {
-    public final static int STATE_PLAYING=2001;
-    public final static int STATE_PAUSE=2002;
-    public final static int STATE_IDLE=2003;
-    public final static int STATE_WAITING=2004;
-    public final static int STATE_STOP=2005;
-    public final static int STATE_PROGRESS=2006;
-
+public class Player implements Status{
     private static WeakReference<OnMediaFrameDecodeFinish> mListener;
-    private static WeakReference<OnStateUpdate> mUpdate;
+    private static WeakHashMap<OnPlayerStatusUpdate,Long> mUpdate;
+    private static OnPlayerStatusUpdate mInnerUpdate;
+    private Handler mHandler;
     private PlayPending mPlayRunnable;
-    private boolean mRunning=false;
+    private Buffer mPlaying=null;
 
     static {
         System.loadLibrary("linqiang");
@@ -33,41 +33,105 @@ public class Player {
         }
     }
 
-    public void setOnStateUpdateListener(OnStateUpdate listener){
-        WeakReference<OnStateUpdate> reference=mUpdate;
-        mUpdate=null;
-        if (null!=reference){
-            reference.clear();
+    public boolean addListener(OnPlayerStatusUpdate listener){
+        WeakHashMap<OnPlayerStatusUpdate,Long> reference=null!=listener?(mUpdate=null!=mUpdate?mUpdate:new WeakHashMap<OnPlayerStatusUpdate, Long>()):null;
+        if (null!=reference&&!reference.containsKey(listener)){
+            reference.put(listener,System.currentTimeMillis());
+            return true;
         }
-        if (null!=listener){
-            mUpdate=new WeakReference<>(listener);
-        }
+        return false;
     }
 
-    public boolean togglePausePlay(){
+    public boolean removeListener(OnPlayerStatusUpdate listener){
+        WeakHashMap<OnPlayerStatusUpdate,Long> reference=null!=listener?mUpdate:null;
+        return null!=reference&&null!=reference.remove(listener);
+    }
+
+    public boolean togglePausePlay(Object media){
         if (!isIdle()){
             return isPlaying()?pause(false):start(-1);
         }
         return false;
     }
 
-    public synchronized boolean play(final String path,final float seek){
+    public Object getPlaying(Object ...objects){
+        Object playing=mPlaying;
+        if (null!=objects&&objects.length>0&&null!=playing){
+            Object object=playing instanceof Playable?((Playable)playing).getPath():null;
+            String path=null!=object&&object instanceof String?(String)object:null;
+            for (Object obj:objects) {
+                if (null!=obj){
+                    if (obj instanceof String&&null!=path&&path.equals(obj)){
+                        return playing;
+                    }else if (obj instanceof Playable&&null!=playing&&playing instanceof Playable&&playing.equals(obj)){
+                         return (playing);
+                    }
+                }
+            }
+        }
+        return playing;
+    }
+
+    public synchronized boolean play(Playable media,float seek){
+        return play(media,seek,null);
+    }
+
+    public synchronized boolean play(final Playable playable,final float seek,OnPlayerStatusUpdate update){
+        final String path=null!=playable ?playable.getPath():null;
+        mInnerUpdate=null!=mInnerUpdate?mInnerUpdate:new OnPlayerStatusUpdate() {
+            @Override
+            public void onPlayerStatusUpdated(Player p,final int status,final String note,final Object media,final Object data) {
+                final WeakHashMap<OnPlayerStatusUpdate,Long> reference=mUpdate;
+                if (null!=reference){
+                    Handler handler=mHandler=null!=mHandler?mHandler:new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            synchronized (reference){
+                                Set<OnPlayerStatusUpdate> set=reference.keySet();
+                                if (null!=set){
+                                    for (OnPlayerStatusUpdate update:set) {
+                                        if (null!=update){
+                                            update.onPlayerStatusUpdated(Player.this,status,note,media,data);
+                                        }
+                                    }
+                                }
+                            }
+                            if (Player.this instanceof OnPlayerStatusUpdate){
+                                ((OnPlayerStatusUpdate)Player.this).onPlayerStatusUpdated(Player.this,status,note,media,data);
+                            }
+                        }
+                    });
+                }
+            }
+        };
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't play media.path="+path);
+            notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",playable,seek);
             return false;
         }
         final PlayPending runnable=mPlayRunnable;
         if (null==runnable){
-            mRunning=true;
-            new Thread(mPlayRunnable=new PlayPending(new Pending(path,seek)) {
+            new Thread(mPlayRunnable=new PlayPending(new Pending(playable,seek)) {
                 @Override
                 public void run() {
+                    mRunning=true;
                     while (mRunning){
-                       Pending task=pop();
-                       if (null!=task) {
-                           Player.this.playFile(task.mPath, task.mSeek);
+                       final Pending task=pop();
+                        Playable media=null!=task?task.mMedia:null;
+                        //Try play local file
+                        String path=null!=media?media.getPath():null;
+                        File file=null!=path&&path.length()>0?new File(path):null;
+                       if (null!=file&&file.length()>0) {
+                           mPlaying=new FileBuffer(media);
+                           play(mPlaying,seek);
+                           if (null!=path&&path.length()>0){
+
+                           }else{
+                               notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",playable,path);
+                           }
                        }
-                       Debug.D(Player.this.getClass(),"%%%%%%%%% ");
+                        mPlaying=null;
                     }
                     mPlayRunnable=null;
                     Debug.D(getClass(),"Recycling player resources.");
@@ -75,7 +139,7 @@ public class Player {
             }).start();
             return true;
         }else{
-            boolean putted=runnable.put(new Pending(path,seek));
+            boolean putted=runnable.put(new Pending(playable,seek));
             if (!isIdle()){
                 Debug.D(getClass(),"Stop playing media before start new media."+path);
                 pause(true);
@@ -85,25 +149,40 @@ public class Player {
     }
 
     public final boolean isIdle(){
-        return STATE_IDLE==getPlayerState();
+        return STATUS_IDLE==getPlayerStatus();
     }
 
-    public final boolean isPlaying(String ...paths){
-        if (STATE_PLAYING==getPlayerState()){
+    public final boolean isPlaying(Object ...paths){
+        if (STATUS_PLAYING==getPlayerStatus()){
             return true;
         }
         return false;
     }
 
-    public final boolean pause(){
-        return pause(false);
+    public final boolean pausePlay(boolean stop){
+        Object playing=mPlaying;
+        if (null!=playing){
+            Debug.D(getClass(),"$$$$$$$$$$ "+playing);
+//            if (playing instanceof CachingMedia){
+//                MediaBuffer.Canceler canceler=((CachingMedia)playing).mCanceler;
+//                Debug.D(getClass(),"$$$$$$$dd $$$ "+canceler);
+//                if (null!=canceler){
+//                    canceler.cancel(true);
+//                }
+//            }
+        }
+        return pause(stop);
     }
 
-    public final boolean stop(){
-        return pause(true);
+    public final Object getPlaying() {
+        return mPlaying;
     }
 
-    public native int getPlayerState();
+    public native int getPlayerStatus();
+
+    public native String getPlayingPath();
+
+    private native boolean play(Buffer buffer,double seek);
 
     public native long getPosition();
 
@@ -116,16 +195,25 @@ public class Player {
     private native boolean pause(boolean stop);
 
     public final boolean isRunning(){
-        return mRunning;
+        PlayPending pending=mPlayRunnable;
+        return null!=pending&&pending.mRunning;
     }
 
-    public boolean destory(){
-        if (mRunning){
-            mRunning=false;
+    public boolean destroy(){
+            PlayPending pending=mPlayRunnable;
+            if (null!=pending){
+                pending.mRunning=false;
+                mPlaying=null;
+            }
             Debug.D(getClass(),"Destroy player.");
-            return isIdle()||stop();
-        }
-        return false;
+            boolean succeed=isIdle()||pause(true);
+            WeakHashMap reference=mUpdate;
+            mUpdate=null;
+            if (null!=reference){
+                reference.clear();
+            }
+            mInnerUpdate=null;
+            return succeed;
     }
 
     /**
@@ -140,28 +228,30 @@ public class Player {
         }
     }
 
-    private final static void onStateChanged(int state){
-        WeakReference<OnStateUpdate> reference=mUpdate;
-        OnStateUpdate listener=null!=reference?reference.get():null;
-        if (null!=listener){
-            listener.onPlayerStateUpdated(state,null);
-        }
+    private final static void notifyStatusChanged(int status,String note,String path){
+            notifyPlayStatus(status,note,path,null);
     }
 
-    private native boolean playBytes(String path,byte[] data,int length,long totalLength);
+    protected final static void notifyPlayStatus(int status,String note,Object media,Object data){
+        OnPlayerStatusUpdate update=mInnerUpdate;
+        if (null!=update){
+            update.onPlayerStatusUpdated(null,status,note,media,data);
+        }
+    }
 
     private native boolean playFile(String path,float seek);
 
     private static class Pending{
-        private final String mPath;
+        private final Playable mMedia;
         private final float mSeek;
-        private Pending(String path,float seek){
-            mPath=path;
+        private Pending(Playable path,float seek){
+            mMedia=path;
             mSeek=seek;
         }
     }
 
     private static abstract class PlayPending implements Runnable{
+        boolean mRunning=false;
         private Pending mPending;
         private PlayPending(Pending pending){
             mPending=pending;
@@ -196,12 +286,24 @@ public class Player {
             return null;
         }
     }
-//    private native boolean playBytes(byte[] data,int offset,int length);
 
-//    public native String getPlayingPath();
+//    protected static class PendingMedia{
+//        private final Playable mMedia;
+//        private PendingMedia(Playable media){
+//            mMedia=media;
+//        }
+//    }
 
-//    public native boolean seek(float seek);
-
-//    public native long getDuration();
-
+//    protected static class CachePending{
+//        private final Playable mMedia;
+//
+//        public CachePending(Playable media, MediaBuffer.Canceler canceler){
+//            mMedia=media;
+////            mCanceler=canceler;
+//        }
+//
+//        public final Playable getMedia() {
+//            return mMedia;
+//        }
+//    }
 }

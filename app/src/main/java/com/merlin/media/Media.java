@@ -3,17 +3,20 @@ package com.merlin.media;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.merlin.player.Playable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.Property;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Transient;
 
 import java.io.File;
 
 @Entity
-public class Media implements Parcelable {
+public class Media implements Parcelable, Playable {
     @Id(autoincrement = true)
     @Property(nameInDb = "id")
     private long id;
@@ -39,6 +42,8 @@ public class Media implements Parcelable {
     private String artist;
     @Property(nameInDb = "duration")
     private long duration=12131;
+    @Transient
+    private String mTempPath;
 
     @Generated(hash = 22325041)
     public Media(long id, long mediaId, @NotNull String name, @NotNull String path,
@@ -106,6 +111,14 @@ public class Media implements Parcelable {
     }
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    public void setTempPath(String mTempPath) {
+        this.mTempPath = mTempPath;
+    }
+
+    public String getTempPath() {
+        return mTempPath;
     }
 
     public String getDurationText(){

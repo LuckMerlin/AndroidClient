@@ -3,16 +3,35 @@ package com.merlin.player1;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Looper;
 
+import com.merlin.client.Client;
 import com.merlin.debug.Debug;
+import com.merlin.media.Indexer;
+import com.merlin.media.Media;
+import com.merlin.media.MediaPlayService;
+import com.merlin.media.Mode;
+import com.merlin.player.MediaBuffer;
 import com.merlin.player.OnMediaFrameDecodeFinish;
+import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.Playable;
 import com.merlin.player.Player;
+import com.merlin.player.Status;
 
-public class MPlayer extends Player implements OnMediaFrameDecodeFinish {
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrameDecodeFinish {
+    private final List<Media> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
+    private final Indexer mIndexer=new Indexer();
+    private Mode mPlayMode;
+    private MediaBuffer mCloudBuffer;
 
     public MPlayer(){
         setOnDecodeFinishListener(this);
+        mPlayMode=Mode.QUEUE_SORT;
     }
 
     @Override
@@ -54,5 +73,259 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish {
                 AudioFormat.ENCODING_PCM_16BIT, AudioTrack.getMinBufferSize(sampleRateInHz,
                 channelConfig, AudioFormat.ENCODING_PCM_16BIT),AudioTrack.MODE_STREAM);
         return audioTrack;
+    }
+    /////////////////
+
+    public void setCloudBuffer(MediaBuffer cloudBuffer) {
+        this.mCloudBuffer = cloudBuffer;
+    }
+
+    public final MediaBuffer getCloudBuffer() {
+        return mCloudBuffer;
+    }
+
+    public final boolean isExist(Object ...objs){
+        return null!=index(objs);
+    }
+
+    public final int indexMediaPosition(Object ...objs){
+        Object[] res=null!=objs&&objs.length>0?index(objs):null;
+        Object object=null!=res&&res.length==2?res[0]:null;
+        return null!=object&&object instanceof Integer ?(Integer) object:null;
+    }
+
+    public final Media indexMedia(Object ...objs){
+        Object[] res=null!=objs&&objs.length>0?index(objs):null;
+        Object object=null!=res&&res.length==2?res[1]:null;
+        return null!=object&&object instanceof Media?(Media)object:null;
+    }
+
+    public final Object[] index(Object ...objs){
+        if (null!=objs&&objs.length>0){
+           for (Object obj:objs){
+               if (null!=obj){
+                   List<Media> queue=mQueue;
+                   if (null!=queue){
+                       synchronized (queue){
+                         int size=null!=queue?queue.size():-1;
+                          for (int i=0;i<size;i++){
+                              Media m=queue.get(i);
+                              if (null!=m){
+                                   if (obj instanceof Media&&obj.equals(m)){
+                                       return new Object[]{i,m};
+                                   }else if (obj instanceof String){
+                                        String path=m.getPath();
+                                        if (null!=path&&path.equals(obj)){
+                                            return new Object[]{i,m};
+                                        }
+                                   }
+                              }
+                          }
+                       }
+                   }
+               }
+           }
+        }
+        return null;
+    }
+
+    public final boolean append(Media media){
+        return null!=media&&add(media,-1);
+    }
+
+    public final boolean add(Media media,int index){
+        if (null!=media&&!isExist(media)){
+            List<Media> queue=mQueue;
+            if (null!=queue){
+                int size=null!=queue?queue.size():0;
+                synchronized (queue){
+                     queue.add(index<0||index>size?size:index,media);
+                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public final Mode playMode(Mode mode) {
+        if (null!=mode){
+            mPlayMode=mode;
+            //Save mode here
+            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",getPlaying(),mode);
+        }
+        return mPlayMode;
+    }
+
+    public final boolean play(Object object,float seek,OnPlayerStatusUpdate update){
+        if (null!=object){
+            if (object instanceof Integer){
+                int index=(Integer)object;
+                int size=0;
+                Media media;
+                List<Media> playing=mQueue;
+                if (null!=playing&&index>=0){
+                    synchronized (playing){
+                        size=playing.size();
+                        media=index<size?playing.get(index):null;
+                    }
+                    if (null!=media){
+                        return play(media,seek,update);
+                    }
+                }
+                return false;
+            }else if (object instanceof Media){
+                return super.play((Media)object,seek,update);
+            }
+            Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
+            return false;
+        }else{//Play current paused media with seek
+            if (seek>=0){
+                return seek(seek)>=0;
+            }
+        }
+        return false;
+    }
+
+    public final boolean playPre(){
+        List<Media> queue=mQueue;
+        Indexer indexer=mIndexer;
+        Mode mode=mPlayMode;
+        if (null!=queue&&null!=indexer){
+            int nextIndex;
+            synchronized (queue){
+                int current=indexFromQueue(queue,getPlaying());
+                int count=queue.size();
+                nextIndex=indexer.pre(mode,current,count);
+            }
+            return play(nextIndex,0,null);
+        }
+        return false;
+    }
+
+    public final boolean playNext(boolean user){
+        List<Media> queue=mQueue;
+        Indexer indexer=mIndexer;
+        Mode mode=mPlayMode;
+        if (null!=queue&&null!=indexer){
+            int nextIndex;
+            synchronized (queue){
+                int current=indexFromQueue(queue,getPlaying());
+                int count=queue.size();
+                nextIndex=indexer.next(mode,current,count,user);
+            }
+            return play(nextIndex,0,null);
+        }
+        return false;
+    }
+
+    public final boolean pause(boolean stop, Object... objs) {
+        Object playing=getPlaying();
+        objs=null!=playing&&null!=objs&&objs.length>0?objs:null;
+        if (null!=objs&&objs.length>0){
+            Object plyaingObj=playing instanceof Playable ?((Playable)playing).getPath():playing;
+            String playingPath=null!=plyaingObj&&plyaingObj instanceof String?((String)plyaingObj):null;
+            for (Object obj:objs){
+                if (null==obj){
+                    continue;
+                }
+                if (obj instanceof Playable&&obj.equals(playing)){
+                    return pausePlay(stop);
+                }else if (obj instanceof String&&null!=playingPath&&obj.equals(playingPath)){
+                    return pausePlay(stop);
+                }
+            }
+        }
+        return false;
+    }
+
+//    private boolean doPlay(Media media, float seek, OnPlayerStatusUpdate update){
+//        if (null!=media){
+//            String filePath=media.getTempPath();
+//            final String localPath=null!=filePath&&filePath.length()>0?filePath:media.getPath();
+//            final File localFile=null!=localPath&&localPath.length()>0?new File(localPath):null;
+//            final String url=media.getUrl();
+//            if (null!=localFile&&localFile.length()>0){//If play local file
+//                Debug.D(getClass(),"Play media with local file."+localPath);
+//                return play(localPath,seek);
+//            }else if(null!=url&&url.length()>0){
+//                return play();
+//                MediaBuffer buffer=mCloudBuffer;
+//                if (null!=buffer){
+//                    String account= media.getAccount();
+//                    String name=media.getName();
+//                    if (null!=url&&url.length()>0&&null!=name&&name.length()>0) {
+//                        pausePlay(true);
+//                        MediaBuffer.Canceler canceler=buffer.buffer(account, url, "/sdcard/a/temp.mp3", new MediaBuffer.OnMediaBufferFinish() {
+//                            @Override
+//                            public void onMediaBufferFinish(boolean succeed, int what, String account, String url, String target) {
+//                                File download=null!=target&&target.length()>0?new File(target):null;
+//                                if (null!=download&&download.length()>0){
+//                                    Object playingObj=getPlaying();//Check if current
+//                                    Playable playing=null!=playingObj&&playingObj instanceof CachingMedia ?((CachingMedia)playingObj).getMedia():null;
+//                                    if (null!=playing&&playing==media){//If not need play
+//                                        media.setTempPath(target);
+//                                        doPlay(media,seek,update);
+//                                    }
+//                                }
+//                            }
+//                        });
+//                        if (null!=canceler){
+//                            setPlaying(new CachingMedia(media, canceler));
+//                            return true;
+//                        }
+//                        notifyPlayFinish(update,media,false,STATUS_CACHE_FAIL,"Cache fail.name="+url);
+//                        return false;
+//                    }
+//                    notifyPlayFinish(update,media,false, STATUS_CACHE_FAIL,"Cloud url invalid.name="+url);
+//                    return false;
+//                }
+//                notifyPlayFinish(update,media,false,STATUS_CACHE_FAIL,"None cloud media buffer.name="+url);
+//                return false;
+//            }
+//            notifyPlayFinish(update,media,false,STATUS_FINISH_ERROR,"Url invalid."+localPath+" url="+url);
+//            return false;
+//        }
+//        notifyPlayFinish(update,media,false,STATUS_FINISH_ERROR,"Media invalid.");
+//        return false;
+//    }
+
+    private void notifyPlayFinish(OnPlayerStatusUpdate update, Media media, boolean succeed, int status, String note){
+        if (null!=update){
+            update.onPlayerStatusUpdated(this,status,note,media,succeed);
+        }
+    }
+
+    private int indexFromQueue(List<Media> queue,Object media){
+        int size=null!=media&&null!=queue&&null!=media?queue.size():-1;
+        if (size>0){
+            Media child=null;
+            for (int i=0;i<size;i++){
+                child=queue.get(i);
+                if (null!=child){
+                    if(media instanceof Media&&child.equals(media)) {
+                        return i;
+                    }else if (media instanceof String&&child.equals(media)){
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    public final List<Media> getQueue() {
+        List<Media> list=mQueue;
+        int size=null!=list?list.size():0;
+        if (size>0){
+            List<Media> result=new ArrayList<>(size);
+            result.addAll(list);
+            return result;
+        }
+        return null;
+    }
+
+    @Override
+    public void onPlayerStatusUpdated(Player player, int status, String note, Object media, Object data) {
+
     }
 }

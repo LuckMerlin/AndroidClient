@@ -1,5 +1,8 @@
 package com.merlin.binding;
 
+import android.widget.ImageView;
+
+import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,5 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 })
 
 public class MBinding {
-
+    @BindingAdapter("android:src")
+    public static void setSrc(ImageView view, int resId) {
+        view.setImageResource(resId);
+    }
 }

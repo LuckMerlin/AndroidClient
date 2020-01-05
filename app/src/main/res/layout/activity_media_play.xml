@@ -9,6 +9,9 @@
       <variable
           name="vm"
           type="com.merlin.model.MediaPlayModel" />
+      <import type="com.merlin.view.OnSeekBarChangeListener"/>
+      <import type="com.merlin.player.Status"/>
+      <import type="com.merlin.player.Time"/>
   </data>
   <RelativeLayout
       android:padding="5dp"
@@ -69,7 +72,7 @@
               android:layout_height="wrap_content">
              <TextView
                  android:id="@+id/mediaPlayBottomPositionTV"
-                 android:text="00:00:00"
+                 android:text="@{Time.formatTime(vm.position)}"
                  android:textColor="@color/textTitle"
                  android:layout_alignParentLeft="true"
                  android:layout_centerVertical="true"
@@ -79,7 +82,7 @@
 
               <TextView
                   android:id="@+id/mediaPlayBottomDurationTV"
-                  android:text="03:12:10"
+                  android:text="@{Time.formatTime(vm.duration)}"
                   android:textColor="@color/textTitle"
                   android:layout_alignParentRight="true"
                   android:textSize="@dimen/textSmall"
@@ -90,6 +93,8 @@
                   android:id="@+id/mediaPlayBottomProgressSB"
                   android:layout_toLeftOf="@id/mediaPlayBottomDurationTV"
                   android:layout_toRightOf="@id/mediaPlayBottomPositionTV"
+                  binding:OnSeekBarChangeListener="@{vm.seekListener}"
+                  android:progress="@{vm.progress}"
                   android:layout_centerVertical="true"
                   android:layout_marginLeft="3dp"
                   android:layout_marginRight="3dp"
@@ -128,7 +133,7 @@
               <ImageView
                   android:id="@+id/activityMediaPlay_playPauseIV"
                   android:onClick="@{vm::onClick}"
-                  android:src="@drawable/selector_media_pause"
+                  android:src="@{vm.playState==Status.STATUS_PLAYING||vm.playState==Status.STATUS_PROGRESS?@drawable/selector_media_pause:@drawable/selector_media_play}"
                   android:layout_margin="8dp"
                   android:layout_width="@dimen/iconSizeLarge"
                   android:layout_height="@dimen/iconSizeLarge"/>

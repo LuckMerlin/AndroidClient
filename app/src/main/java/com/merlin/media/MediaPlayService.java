@@ -13,92 +13,99 @@ import androidx.annotation.Nullable;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
-import com.merlin.player.OnStateUpdate;
-import com.merlin.player.Player;
+import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.Playable;
+import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
-import com.merlin.server.Frame;
-import com.merlin.task.Status;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaPlayService extends Service {
-    private final List<Media> mQueue=new ArrayList<>();
+public class MediaPlayService extends Service implements Status {
     private final MPlayer mPlayer=new MPlayer();
     private final static String LABEL_MEDIAS="medias";
     private final static String LABEL_POSITION="position";
     private final static String LABEL_INDEX="index";
-    private Object mPlaying;
     private final static List<ServiceConnection> mConnections=new ArrayList<>();
-    private Client mClient;
+
     private final MediaPlayer mPlayerBinder=new MediaPlayer(){
         @Override
-        public boolean play(Object object, float seek,OnStateUpdate update) {
-            if (null!=object){
-                if (object instanceof Integer){
-                    int index=(Integer)object;
-                    int size=0;
-                    Media media;
-                    List<Media> playing=mQueue;
-                    if (null!=playing&&index>=0){
-                        synchronized (playing){
-                            size=null!=playing?playing.size():-1;
-                            media=index>=0&&index<size?playing.get(index):null;
-                        }
-                        if (null!=media){
-                            return doPlay(media,seek,update);
-                        }
-                    }
-                    Debug.W(getClass(),"Can't play media,Index none.index="+index+" size="+size);
-                    return false;
-                }else if (object instanceof Media){
-                    return doPlay((Media)object,seek,update);
-                }
-                Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
-                return false;
-            }else{//Play current paused media with seek
-                Object playing=mPlaying;
-                MPlayer player=mPlayer;
-                if (seek>=0){
-                    return player.seek(seek)>=0;
-                }
-            }
-            return true;
+        public boolean play(Object object, float seek, OnPlayerStatusUpdate update) {
+            MPlayer player=mPlayer;
+            return null!=player&&player.play(object,seek,update);
+        }
+
+        @Override
+        public boolean pre() {
+            MPlayer player=mPlayer;
+            return null!=player&&player.playPre();
+        }
+
+        @Override
+        public boolean next() {
+            MPlayer player=mPlayer;
+            return null!=player&&player.playNext(true);
         }
 
         @Override
         public boolean pause(boolean stop, Object... obj) {
-            return false;
+            MPlayer player=mPlayer;
+            return null!=player&&player.pause(stop,obj);
+        }
+
+        @Override
+        public Mode playMode(Mode mode) {
+            MPlayer player=mPlayer;
+            return null!=player?player.playMode(mode):null;
+        }
+
+        @Override
+        public boolean togglePlayPause(Object media) {
+            MPlayer player=mPlayer;
+            return null!=player&& player.togglePausePlay(media);
         }
 
         @Override
         public int getPlayState() {
-            return 0;
+            MPlayer player=mPlayer;
+            return null!=player?player.getPlayerStatus(): STATUS_UNKNOW;
         }
 
         @Override
-        public Media getPlaying(Object... obj) {
-            return null;
+        public long getDuration() {
+            MPlayer player=mPlayer;
+            return null!=player?player.getDuration():0;
+        }
+
+        @Override
+        public long getPosition() {
+            MPlayer player=mPlayer;
+            return null!=player?player.getPosition():0;
+        }
+
+        @Override
+        public Object getPlaying(Object... obj) {
+            MPlayer player=mPlayer;
+            return null!=player?player.getPlaying(obj):null;
         }
 
         @Override
         public List<Media> getQueue() {
-            List<Media> list=mQueue;
-            int size=null!=list?list.size():0;
-            if (size>0){
-                List<Media> result=new ArrayList<>(size);
-                result.addAll(list);
-                return result;
-            }
-            return null;
+            MPlayer player=mPlayer;
+            return null!=player?player.getQueue():null;
         }
 
         @Override
-        public boolean putListener(OnStateUpdate update) {
-            mPlayer.setOnStateUpdateListener(update);
-            return true;
+        public boolean addListener(OnPlayerStatusUpdate update) {
+            MPlayer player=mPlayer;
+            return null!=player&&null!=update&&player.addListener(update);
+        }
+
+        @Override
+        public boolean removeListener(OnPlayerStatusUpdate update) {
+            MPlayer player=mPlayer;
+            return null!=player&&null!=update&&player.removeListener(update);
         }
     };
 
@@ -113,75 +120,14 @@ public class MediaPlayService extends Service {
         super.onCreate();
         Debug.D(getClass(),"Media play service onCreate.");
         Application application= Application.get(this);
-        mClient=null!=application?application.getClient():null;
+        Client client=null!=application?application.getClient():null;
+        mPlayer.setCloudBuffer(new ClientMediaBuffer(client));
         Media media=new Media();
         media.setName("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
-        media.setUrl("./WMDYY.mp3");
-        mQueue.add(media);
-    }
-
-    private boolean doPlay(Media media,float seek,OnStateUpdate update){
-            return doPlay(media,null,seek,update);
-    }
-
-    private boolean doPlay(Media media,String filePath,float seek,OnStateUpdate update){
-        MPlayer player=null!=media?mPlayer:null;
-        if (null!=media){
-            final String localPath=null!=filePath&&filePath.length()>0?filePath:media.getPath();
-            final File localFile=null!=localPath&&localPath.length()>0?new File(localPath):null;
-            if (null!=localFile&&localFile.length()>0){//If play local file
-                Debug.D(getClass(),"Play media with local file."+localPath);
-                return player.play(localPath,seek);
-            }else {
-                Client client=mClient;
-                String url=media.getUrl();
-                String account= media.getAccount();
-                String name=media.getName();
-                if (null!=url&&url.length()>0&&null!=name&&name.length()>0){
-                     if (!client.isLogined()){
-                         notifyPlayFinish(update,media,false,Status.FINISH_START_FAIL,"Client not login.");
-                        return false;
-                     }
-                     Debug.D(getClass(),"Caching media file from url "+account+" "+url);
-                     if (null!=update){
-                         update.onPlayerStateUpdated(Status.CACHING,url);
-                     }
-                    final Client.Canceler canceler=client.downloadFile(account,url,"/sdcard/a/temp.mp3",
-                            (finish,what, accountValue,urlValue,to,data)->{
-                            Debug.D(getClass(),"#### "+finish+" "+what);
-                            if (finish&&what== Client.OnFileDownloadUpdate.DOWNLOAD_SUCCEED){
-                                File download=null!=to&&to.length()>0?new File(to):null;
-                                if (null!=download&&download.length()>0){
-                                    String playPath=to;
-                                    if (null!=localFile){
-                                        download.renameTo(localFile);
-                                        playPath=localFile.getAbsolutePath();
-                                    }
-                                    Object playingObj=mPlaying;//Check if current
-                                    Media playing=null!=playingObj&&playingObj instanceof CachingMedia?((CachingMedia)playingObj).mMedia:null;
-                                    if (null==playing||playing!=media){//If need play
-
-                                    }else{
-                                        doPlay(media,playPath,seek,update);
-                                    }
-                                }
-                            }
-                    });
-                     if (null!=canceler){
-                         mPlaying=new CachingMedia(media,canceler);
-                         return true;
-                     }
-                    Debug.D(getClass(),"Fail cache media file from url "+account+" "+url);
-                    notifyPlayFinish(update,media,false,Status.FINISH_START_FAIL,"Cache failed.");
-                    return false;
-                }
-                notifyPlayFinish(update,media,false,Status.FINISH_START_FAIL,"Args invalid.name="+name +" url="+url);
-                return false;
-            }
-        }
-        notifyPlayFinish(update,media,false,Status.FINISH_START_FAIL,"Media invalid.");
-        return false;
+        media.setPath("/sdcard/Musics/赵雷 - 成都.mp3");
+//        media.setUrl("./WMDYY.mp3");
+        mPlayer.add(media,2);
     }
 
     public static boolean start(Context context, Intent intent){
@@ -266,32 +212,14 @@ public class MediaPlayService extends Service {
         return false;
     }
 
-    private void notifyPlayFinish(OnStateUpdate update,Media media,boolean succeed,int status,String note){
-        if (null!=update){
-            update.onPlayerStateUpdated(status,null!=media?media.getPath():null);
-        }
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         Debug.D(getClass(),"Media play service onDestroy.");
-    }
-
-
-    private static class PendingMedia{
-        private final Media mMedia;
-        private PendingMedia(Media media){
-            mMedia=media;
+        MPlayer player=mPlayer;
+        if (null!=player){
+            player.destroy();
         }
     }
 
-    private static class CachingMedia{
-        private final Media mMedia;
-        private final Client.Canceler mCanceler;
-        public CachingMedia(Media media, Client.Canceler canceler){
-            mMedia=media;
-            mCanceler=canceler;
-        }
-    }
 }
