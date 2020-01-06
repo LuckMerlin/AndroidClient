@@ -85,7 +85,7 @@ static inline signed int scale(mad_fixed_t sample){
     return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
-static inline void onFrameDecode(int mediaType,const char * path,struct mad_header header,struct mad_pcm pcm){
+static inline void onFrameDecode(int mediaType,jobject media,struct mad_header header,struct mad_pcm pcm){
     /* pcm->samplerate contains the sampling frequency */
     unsigned int layer=header.layer;
     unsigned int mode=header.mode;
@@ -414,8 +414,17 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
                 mad_stream_buffer(&handle->stream,&chars,readLength);
                 handle->stream.error = MAD_ERROR_NONE;
             }
+            int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
+            if(decodeResult){
+                if(handle->stream.error == MAD_ERROR_BUFLEN ||(MAD_RECOVERABLE(handle->stream.error))){
+                    continue;
+                }
+            }else{
+                break;
+            }
         }while (JNI_TRUE);
-
+        mad_synth_frame(&handle->synth, &handle->frame);
+        onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->frame.header, handle->synth.pcm);
 //        if (length==BUFFER_READ_FINISH_EOF){
 //            LOGD("End play media file.");
 //            notifyStatusChanged(STATUS_FINISH,media,"Finish media.");
