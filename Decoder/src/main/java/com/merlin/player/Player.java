@@ -124,12 +124,12 @@ public class Player implements Status{
                         File file=null!=path&&path.length()>0?new File(path):null;
                        if (null!=file&&file.length()>0) {
                            mPlaying=new FileBuffer(media);
-                           play(mPlaying,seek);
-                           if (null!=path&&path.length()>0){
-
-                           }else{
-                               notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",playable,path);
-                           }
+                           playMedia(mPlaying,seek);
+                           Debug.D(getClass(),"QAAAAAAAAAAADASRWER  ");
+//                           if (null!=path&&path.length()>0){
+//                           }else{
+//                               notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",playable,path);
+//                           }
                        }
                         mPlaying=null;
                     }
@@ -182,7 +182,7 @@ public class Player implements Status{
 
     public native String getPlayingPath();
 
-    private native boolean play(Buffer buffer,double seek);
+    private native boolean playMedia(Buffer buffer,double seek);
 
     public native long getPosition();
 

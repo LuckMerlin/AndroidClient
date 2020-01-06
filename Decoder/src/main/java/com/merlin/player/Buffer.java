@@ -17,6 +17,7 @@ public abstract class Buffer {
     public final static int READ_FINISH_ARG_INVALID = -1224;
     public final static int READ_FINISH_NOT_OPEN = -1225;
     public final static int READ_FINISH_EXCEPTION = -1226;
+    public final static int READ_FINISH_EOF = -1;
     private final Playable mplayable;
 
     protected Buffer(Playable playable){
@@ -24,51 +25,27 @@ public abstract class Buffer {
     }
 
     private long mLength=-1;
-    public interface OpenStep{
-        void onOpenStepFinish(boolean succeed,boolean fix,int what,long length);
-    }
-
-    public interface CloseStep{
-        void onCloseStepFinish(boolean succeed,int what);
-    }
-
-//    protected abstract boolean onOpen(OpenStep step,long seek,String debug);
 
     public abstract boolean open(String debug);
 
-    protected abstract boolean onClose(CloseStep step,String debug);
-
-    final boolean close(final CloseStep step,String debug){
-        return onClose(new CloseStep() {
-            @Override
-            public void onCloseStepFinish(boolean succeed, int what) {
-                if (succeed){
-                    mLength=-1;
-                }
-            }
-        },debug);
-    }
+    public abstract boolean close(String debug);
 
     public final long getLength(){
         return mLength;
     }
 
-    protected abstract int read(byte[] buffer,double seek);
+    protected abstract int read(byte[] buffer,int offset,int length);
 
     public boolean isOpened(){
         return mLength>=0;
     }
 
-    void finishOpenStep(boolean succeed,boolean fix,int what,long length,OpenStep step,String note){
-        if (null!=step){
-            step.onOpenStepFinish(succeed,fix,what,length);
-        }
+    void finishOpenStep(boolean succeed,boolean fix,int what,long length,Object step,String note){
+
     }
 
-    void finishCloseStep(boolean succeed,int what,CloseStep step,String note){
-        if (null!=step){
-            step.onCloseStepFinish(succeed,what);
-        }
+    void finishCloseStep(boolean succeed,int what,Object step,String note){
+
     }
 
     protected final boolean closeIO(Closeable closeable){

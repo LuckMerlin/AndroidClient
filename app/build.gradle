@@ -40,6 +40,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.readystatesoftware.systembartint:systembartint:1.0.4'
     implementation 'com.android.support:recyclerview-v7'
+    implementation 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
     implementation 'org.greenrobot:greendao:3.2.0'
     implementation project(path: ':Decoder')
 }

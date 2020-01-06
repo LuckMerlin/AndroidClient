@@ -3,81 +3,73 @@ package com.merlin.player;
 import com.merlin.debug.Debug;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import javax.crypto.spec.DESedeKeySpec;
+import java.io.FileInputStream;
 
 public final class FileBuffer extends Buffer {
-    private final String mFile;
-    private RandomAccessFile mAccess;
+    private final String mPath;
+    private FileInputStream mAccess;
 
      FileBuffer(Playable playable){
         super(playable);
-        mFile=null!=playable?playable.getPath():null;
+         mPath=null!=playable?playable.getPath():null;
     }
 
     @Override
     public boolean open(String debug) {
-        String path=mFile;
+        String path=mPath;
         File file=null!=path&&!path.isEmpty()?new File(path):null;
         final long length=null!=file?file.length():-1;
         if (length<=0){
-//            finishOpenStep(false,false,STEP_FINISH_OPEN_FAILED,length,step,"File invalid.length="+length+" "+file);
+            Debug.W(getClass(),"Can't open media file.length="+length+" "+path);
             return false;
         }
         try {
-            RandomAccessFile access=mAccess=null!=mAccess?mAccess:new RandomAccessFile(mFile,"r");
-//            finishOpenStep(true,true,STEP_FINISH_SUCCEED,length,step,"Open failed."+file);
+            FileInputStream access=mAccess;
+            if (null==mAccess){
+                Debug.D(getClass(),"Open media file "+(null!=debug?debug:".")+" "+path);
+                access=mAccess=new FileInputStream(path);
+            }
             return null!=access;
         } catch (Exception e) {
+            Debug.E(getClass(),"Exception open file.e="+e,e);
             closeIO(mAccess);
             mAccess=null;
-            Debug.E(getClass(),"Open file exception.e="+e,e);
 //            finishOpenStep(false,true,STEP_FINISH_OPEN_FAILED,length,step,"Open failed."+file);
             return false;
         }
     }
 
     @Override
-    protected int read(byte[] buffer, double seek) {
+    protected int read(byte[] buffer, int offset,int length) {
         if (null==buffer||buffer.length<=0){
             Debug.W(getClass(),"File read failed with invalid buffer content."+buffer);
             return READ_FINISH_ARG_INVALID;
         }
-        RandomAccessFile access=mAccess;
+        FileInputStream access=mAccess;
         if (null==access){
             return READ_FINISH_NOT_OPEN;
         }
-        if (seek>=0){
-            try {
-                long position=(long)(seek>0&seek<=1?(seek*access.length()):seek);
-                access.seek(position);
-            } catch (IOException e) {
-                Debug.E(getClass(),"File seek exception."+mFile+" e="+e,e);
-                return READ_FINISH_EXCEPTION;
-            }
-        }
         try {
-            int dd= access.read(buffer);
+            int dd= access.read(buffer,offset,length);
+            Debug.D(getClass(),"############## "+dd+" "+buffer.length+" "+offset+" "+length);
             return dd;
-        } catch (IOException e) {
-            Debug.E(getClass(),"File read exception."+mFile+ " e="+e,e);
+        } catch (Exception e) {
+            Debug.E(getClass(),"File read exception."+mPath+ " e="+e,e);
             return READ_FINISH_EXCEPTION;
         }
     }
 
     @Override
-    protected boolean onClose(CloseStep step, String debug) {
-        RandomAccessFile access=mAccess;
+    public boolean close(String debug) {
+        FileInputStream access=mAccess;
         if (null!=access){
-            Debug.D(getClass(),"Stop file buffer "+(null!=debug?debug:".")+" "+mFile);
+            Debug.D(getClass(),"Close file buffer "+(null!=debug?debug:".")+" "+mPath);
             mAccess=null;
             closeIO(access);
-            finishCloseStep(true,STEP_FINISH_SUCCEED,step,"Stop succeed.");
+            finishCloseStep(true,STEP_FINISH_SUCCEED,"","Close succeed.");
             return true;
         }
-        finishCloseStep(false,STEP_FINISH_ALREADY,step,"Already closed.");
+        finishCloseStep(false,STEP_FINISH_ALREADY,"","Already closed.");
         return false;
     }
 

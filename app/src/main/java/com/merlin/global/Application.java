@@ -24,7 +24,8 @@ public class Application extends android.app.Application implements ActivityLife
     @Override
     public void onCreate() {
         super.onCreate();
-        mDatabase = new DaoMaster.DevOpenHelper(this, "linqiang1");
+        mDatabase = new DaoMaster.DevOpenHelper(this, "linqiang2");
+//        Database database = helper.getEncryptedWritableDb("123");
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mClient.setOnFrameReceive(mOnFrameReceiveListener);
         mClient.putListener(mStatusChange);

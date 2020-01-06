@@ -5,64 +5,47 @@ import android.os.Parcelable;
 
 import com.merlin.player.Playable;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Index;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Property;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Transient;
-
 import java.io.File;
 
-@Entity
 public class Media implements Parcelable, Playable {
-    @Id(autoincrement = true)
-    @Property(nameInDb = "id")
     private long id;
-    @NotNull
-    @Property(nameInDb = "mediaId")
     private long mediaId;
-    @NotNull
-    @Property(nameInDb = "name")
     private String name;
-    @NotNull
-    @Property(nameInDb = "path")
-    @Index(unique = true)
     private String path;
-    @Property(nameInDb = "md5")
     private String md5=null;
-    @Property(nameInDb = "url")
     private String url;
-    @Property(nameInDb = "account")
     private String account;
-    @Property(nameInDb = "album")
     private String album;
-    @Property(nameInDb = "artist")
     private String artist;
-    @Property(nameInDb = "duration")
     private long duration=12131;
-    @Transient
     private String mTempPath;
-
-    @Generated(hash = 22325041)
-    public Media(long id, long mediaId, @NotNull String name, @NotNull String path,
-            String md5, String url, String account, String album, String artist,
-            long duration) {
-        this.id = id;
-        this.mediaId = mediaId;
-        this.name = name;
-        this.path = path;
-        this.md5 = md5;
-        this.url = url;
-        this.account = account;
-        this.album = album;
-        this.artist = artist;
-        this.duration = duration;
-    }
-    @Generated(hash = 551662551)
-    public Media() {
-    }
+//    @Id(autoincrement = true)
+//    @Property(nameInDb = "id")
+//    private long id;
+//    @NotNull
+//    @Property(nameInDb = "mediaId")
+//    private long mediaId;
+//    @NotNull
+//    @Property(nameInDb = "name")
+//    private String name;
+//    @NotNull
+//    @Property(nameInDb = "path")
+//    @Index(unique = true)
+//    private String path;
+//    @Property(nameInDb = "md5")
+//    private String md5=null;
+//    @Property(nameInDb = "url")
+//    private String url;
+//    @Property(nameInDb = "account")
+//    private String account;
+//    @Property(nameInDb = "album")
+//    private String album;
+//    @Property(nameInDb = "artist")
+//    private String artist;
+//    @Property(nameInDb = "duration")
+//    private long duration=12131;
+//    @Transient
+//    private String mTempPath;
     
     public long getId() {
         return this.id;
@@ -157,6 +140,22 @@ public class Media implements Parcelable, Playable {
             mediaId=in.readLong();
             id=in.readLong();
         }
+    }
+    public Media(long id, long mediaId, String name,  String path,
+            String md5, String url, String account, String album, String artist,
+            long duration) {
+        this.id = id;
+        this.mediaId = mediaId;
+        this.name = name;
+        this.path = path;
+        this.md5 = md5;
+        this.url = url;
+        this.account = account;
+        this.album = album;
+        this.artist = artist;
+        this.duration = duration;
+    }
+    public Media() {
     }
 
     @Override
