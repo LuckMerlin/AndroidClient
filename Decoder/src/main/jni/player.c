@@ -26,30 +26,6 @@ int MEDIA_TYPE_AUDIO_STREAM=2;
 #define BUFFER_READ_FINISH_EOF -1
 #define BUFFER_READ_FINISH_INNER_ERROR -5
 
-struct StreamHandle {
-    int length;
-    int seek;
-    struct mad_stream stream;
-    struct mad_frame frame;
-    struct mad_synth synth;
-    unsigned char* input;
-    unsigned char inputBuffer[INPUT_BUFFER_SIZE];
-};
-
-struct FileHandle {
-    int file;
-    int playStatus;
-    int duration;
-    unsigned char const *start;
-    int64_t length;
-    struct mad_stream stream;
-    struct mad_frame frame;
-    struct mad_synth synth;
-    const  char* filePath;
-    unsigned char inputBuffer[INPUT_BUFFER_SIZE];
-    int commandPending;
-};
-
 static JavaVM  *VM=NULL;
 
 jint JNI_OnLoad(JavaVM* vm,void* resolved){
@@ -101,20 +77,16 @@ static inline void onFrameDecode(int mediaType,jobject media,struct mad_header h
     JNIEnv *jniEnv;
     int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
     if(res==JNI_OK){
-//        jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
-//        jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onNativeDecodeFinish","(I[BIII)V");
-//        jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
-//        (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
-//        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,mediaType,data,channels,sampleRate,speed);
-////        (*jniEnv)->DeleteLocalRef(jniEnv,callbackMethod);
-//        (*jniEnv)->DeleteLocalRef(jniEnv, data);
-//        (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
+        jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
+        jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onNativeDecodeFinish","(I[BIII)V");
+        jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
+        (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
+        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,mediaType,data,channels,sampleRate,speed);
+        (*jniEnv)->DeleteLocalRef(jniEnv, data);
+        (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
 //        notifyStatusChanged(STATUS_PROGRESS,path,"Update progress.");
     }
 }
-
-//////////////////Play media file ////////////////////
-//struct FileHandle* handle;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond  = PTHREAD_COND_INITIALIZER;
@@ -138,7 +110,6 @@ struct BufferHandle{
     struct mad_stream stream;
     struct mad_frame frame;
     struct mad_synth synth;
-    int index;
     int playStatus;
     jbyteArray  buffer;
 };
@@ -157,6 +128,7 @@ int readMediaBytes(jobject media,jbyteArray buffer,int offset,int length){
             return opened;
         }
     }
+    LOGD("Can't read media bytes.");
     return BUFFER_READ_FINISH_INNER_ERROR;
 }
 
@@ -201,39 +173,31 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
             pthread_mutex_unlock(&mutex);
             continue;
         }
+        int readLength=0;
         do{
-            int readLength=0;
+            readLength=0;
             if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
                 if(handle->stream.next_frame != 0){
                     int leftOver = handle->stream.bufend - handle->stream.next_frame;
                     int i;
                     for(i= 0;i<leftOver;i++){
-//                        JNIEnv*, jbyteArray,
-//                                jsize, jsize, const jbyte*
-                        (*env)->SetByteArrayRegion(env,handle->buffer, 0,i, handle->stream.next_frame[i]);
-//                        handle->inputBuffer[i] = handle->stream.next_frame[i];
+                        (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
                     }
                     int readBytes = readMediaBytes(media,handle->buffer,leftOver,INPUT_BUFFER_SIZE-leftOver);
-//                  fileRead(handle->file, handle->inputBuffer+leftOver,INPUT_BUFFER_SIZE-leftOver);
-                    if(readBytes == 0){
-                        return 0;
+                    if(readBytes <= 0){
+                        break;
                     }
                     readLength = leftOver + readBytes;
                 }else{
-                    int readBytes = readMediaBytes(media,handle->buffer,0,INPUT_BUFFER_SIZE);
-                    if(readBytes == 0){
-                        return 0;
+                    readLength  = readMediaBytes(media,handle->buffer,0,INPUT_BUFFER_SIZE);
+                    if(readLength <= 0){
+                        break;
                     }
-                    readLength = readBytes;
                 }
-//                jbyte *bytes;
-//                bytes = (*env)->GetByteArrayElements(env,handle->buffer, 0);
-                int chars_len = (*env)->GetArrayLength(env,handle->buffer);
-                unsigned char * chars;
-                memset(chars,0,chars_len + 1);
-                memcpy(chars, handle->buffer, chars_len);
-                chars[chars_len] = 0;
-                mad_stream_buffer(&handle->stream,&chars,readLength);
+                jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
+                unsigned char* buf=(unsigned char*)bBuffer;
+                (*env)->DeleteLocalRef(env, bBuffer);
+                mad_stream_buffer(&handle->stream,buf,readLength);
                 handle->stream.error = MAD_ERROR_NONE;
             }
             int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
@@ -247,15 +211,12 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
         }while (JNI_TRUE);
         mad_synth_frame(&handle->synth, &handle->frame);
         onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->frame.header, handle->synth.pcm);
-//        if (length==BUFFER_READ_FINISH_EOF){
-//            LOGD("End play media file.");
-//            notifyStatusChanged(STATUS_FINISH,media,"Finish media.");
-//            break;
-//        }
-
-//        LOGD("读取到数 e 据 %d %d ",length,length);
+        if (readLength==BUFFER_READ_FINISH_EOF){
+            LOGD("End play media file.");
+            notifyStatusChange(STATUS_FINISH,media,"Finish media.");
+            break;
+        }
     }
-    (*env)->DeleteLocalRef(env,handle->buffer);
     mad_synth_finish(&handle->synth);
     mad_frame_finish(&handle->frame);
     mad_stream_finish(&handle->stream);
@@ -264,6 +225,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     methodId=(*env)->GetMethodID(env,bufferClass,"close","(Ljava/lang/String;)Z");
     noteJstring = (*env)->NewStringUTF(env,"While play finish.");
     jboolean closed=(*env)->CallBooleanMethod(env,media,methodId,noteJstring);
+    (*env)->DeleteLocalRef(env,handle->buffer);
     (*env)->DeleteLocalRef(env,noteJstring);
     (*env)->DeleteLocalRef(env, bufferClass);
     (*env)->DeleteLocalRef(env, methodId);

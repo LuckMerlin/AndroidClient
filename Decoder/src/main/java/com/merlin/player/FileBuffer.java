@@ -50,8 +50,8 @@ public final class FileBuffer extends Buffer {
             return READ_FINISH_NOT_OPEN;
         }
         try {
+//            access.skip((int)(access.available()*0.6));
             int dd= access.read(buffer,offset,length);
-            Debug.D(getClass(),"############## "+dd+" "+buffer.length+" "+offset+" "+length);
             return dd;
         } catch (Exception e) {
             Debug.E(getClass(),"File read exception."+mPath+ " e="+e,e);
