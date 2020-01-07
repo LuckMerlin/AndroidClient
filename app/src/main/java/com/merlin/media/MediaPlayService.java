@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
@@ -14,7 +15,6 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Playable;
 import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
@@ -120,13 +120,25 @@ public class MediaPlayService extends Service implements Status {
         Debug.D(getClass(),"Media play service onCreate.");
         Application application= Application.get(this);
         Client client=null!=application?application.getClient():null;
-        mPlayer.setCloudBuffer(new ClientMediaBuffer(client));
         Media media=new Media();
         media.setName("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
         media.setPath("/sdcard/Musics/赵雷 - 成都.mp3");
 //        media.setUrl("./WMDYY.mp3");
         mPlayer.add(media,2);
+         media=new Media();
+        media.setName("我不愿让你一个人.mp3");
+        media.setAccount("linqiang");
+        media.setPath("/sdcard/Musics/许巍 - 执着.mp3");
+//        media.setUrl("./WMDYY.mp3");
+        mPlayer.add(media,2);
+
+        mPlayer.play(0,0.96,null);
+        new Handler().postDelayed(()->{
+//            boolean sss=mPlayer.seek(0.7f);
+//            Debug.D(getClass(),"########## "+sss);
+        },5000);
+
     }
 
     public static boolean start(Context context, Intent intent){

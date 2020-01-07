@@ -55,7 +55,6 @@ public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnIt
             updateProgress();
             updateMode(null);
             player.addListener(this);
-            player.play(0,0.0f,null);
             return true;
         }else if (null!=curr){
             curr.removeListener(this);

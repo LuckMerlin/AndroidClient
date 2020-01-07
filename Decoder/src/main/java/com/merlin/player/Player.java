@@ -16,7 +16,6 @@ public class Player implements Status{
     private static OnPlayerStatusUpdate mInnerUpdate;
     private Handler mHandler;
     private PlayPending mPlayRunnable;
-    private Buffer mPlaying=null;
 
     static {
         System.loadLibrary("linqiang");
@@ -54,29 +53,31 @@ public class Player implements Status{
         return false;
     }
 
-    public Object getPlaying(Object ...objects){
-        Object playing=mPlaying;
-        if (null!=objects&&objects.length>0&&null!=playing){
-            Object object=playing instanceof Playable?((Playable)playing).getPath():null;
-            String path=null!=object&&object instanceof String?(String)object:null;
-            for (Object obj:objects) {
-                if (null!=obj){
-                    if (obj instanceof String&&null!=path&&path.equals(obj)){
-                        return playing;
-                    }else if (obj instanceof Playable&&null!=playing&&playing instanceof Playable&&playing.equals(obj)){
-                         return (playing);
-                    }
-                }
-            }
-        }
+
+    public Playable getPlaying(Object ...objects){
+        Playable playing=null;
+//        if (null!=objects&&objects.length>0&&null!=playing){
+//            Object object=playing instanceof Playable?((Playable)playing).getPath():null;
+//            String path=null!=object&&object instanceof String?(String)object:null;
+//            for (Object obj:objects) {
+//                if (null!=obj){
+//                    if (obj instanceof String&&null!=path&&path.equals(obj)){
+//                        return playing;
+//                    }else if (obj instanceof Playable&&null!=playing&&playing instanceof Playable&&playing.equals(obj)){
+//                         return (playing);
+//                    }
+//                }
+//            }
+//        }
         return playing;
     }
 
-    public synchronized boolean play(Playable media,float seek){
-        return play(media,seek,null);
+    protected Pending onResolveNext(){
+        //Do nothing
+        return null;
     }
 
-    public synchronized boolean play(final Playable playable,final float seek,OnPlayerStatusUpdate update){
+    public synchronized boolean playMedia(final Playable playable,final double seek,OnPlayerStatusUpdate update){
         final String path=null!=playable ?playable.getPath():null;
         mInnerUpdate=null!=mInnerUpdate?mInnerUpdate:new OnPlayerStatusUpdate() {
             @Override
@@ -118,22 +119,24 @@ public class Player implements Status{
                     mRunning=true;
                     while (mRunning){
                        final Pending task=pop();
-                        Playable media=null!=task?task.mMedia:null;
-                        //Try play local file
-                        String path=null!=media?media.getPath():null;
-                        File file=null!=path&&path.length()>0?new File(path):null;
-                       if (null!=file&&file.length()>0) {
-                           mPlaying=new FileBuffer(media);
-                           playMedia(mPlaying,seek);
-                           Debug.D(getClass(),"QAAAAAAAAAAADASRWER  ");
-//                           if (null!=path&&path.length()>0){
-//                           }else{
-//                               notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",playable,path);
-//                           }
+                       if (null!=task){
+                           Playable media=task.mMedia;
+                           double taskSeek=task.mSeek;
+                           if (null!=media){
+                               String path=media.getPath();
+                               File file=null!=path&&path.length()>0?new File(path):null;
+                               Buffer buffer=null;
+                               if (null!=file&&file.length()>0) {
+                                   buffer=new FileBuffer(media,taskSeek);
+                               }
+                               if (null!=buffer){
+                                   playMedia(buffer,taskSeek);
+                               }
+                           }
                        }
-                        mPlaying=null;
                     }
                     mPlayRunnable=null;
+                    mHandler=null;
                     Debug.D(getClass(),"Recycling player resources.");
                 }
             }).start();
@@ -148,6 +151,28 @@ public class Player implements Status{
         }
     }
 
+    public Playable getNext(){
+        PlayPending runnable=mPlayRunnable;
+        Pending pending=null!=runnable?runnable.mPending:null;
+        return null!=pending?pending.mMedia:null;
+    }
+
+    public final boolean setNext(Playable playable,double seek,String debug){
+        return null!=playable&&setNext(new Pending(playable,seek),debug);
+    }
+
+    public final boolean setNext(Pending pending,String debug){
+        if (null!=pending){
+            PlayPending runnable=mPlayRunnable;
+            if (null==runnable){
+                Debug.W(getClass(),"Can't set media next While player not running "+(null!=debug?debug:"."));
+                return false;
+            }
+            return runnable.put(pending);
+        }
+        return false;
+    }
+
     public final boolean isIdle(){
         return STATUS_IDLE==getPlayerStatus();
     }
@@ -159,8 +184,15 @@ public class Player implements Status{
         return false;
     }
 
+    public final boolean isPaused(Object ...paths){
+        if (STATUS_PAUSE==getPlayerStatus()){
+            return true;
+        }
+        return false;
+    }
+
     public final boolean pausePlay(boolean stop){
-        Object playing=mPlaying;
+        Playable playing=getPlaying();
         if (null!=playing){
             Debug.D(getClass(),"$$$$$$$$$$ "+playing);
 //            if (playing instanceof CachingMedia){
@@ -174,26 +206,6 @@ public class Player implements Status{
         return pause(stop);
     }
 
-    public final Object getPlaying() {
-        return mPlaying;
-    }
-
-    public native int getPlayerStatus();
-
-    public native String getPlayingPath();
-
-    private native boolean playMedia(Buffer buffer,double seek);
-
-    public native long getPosition();
-
-    public native long getDuration();
-
-    public native long seek(float seek);
-
-    public native boolean start(float seek);
-
-    private native boolean pause(boolean stop);
-
     public final boolean isRunning(){
         PlayPending pending=mPlayRunnable;
         return null!=pending&&pending.mRunning;
@@ -203,7 +215,6 @@ public class Player implements Status{
             PlayPending pending=mPlayRunnable;
             if (null!=pending){
                 pending.mRunning=false;
-                mPlaying=null;
             }
             Debug.D(getClass(),"Destroy player.");
             boolean succeed=isIdle()||pause(true);
@@ -216,22 +227,6 @@ public class Player implements Status{
             return succeed;
     }
 
-    /**
-     *
-     *Call by native C
-     */
-    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int offset,int length,int speed){
-        WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
-        OnMediaFrameDecodeFinish listener=null!=reference?reference.get():null;
-        if (null!=listener){
-            listener.onMediaFrameDecodeFinish(mediaType,bytes,offset,length);
-        }
-    }
-
-    private final static void notifyStatusChanged(int status,String note,String path){
-            notifyPlayStatus(status,note,path,null);
-    }
-
     protected final static void notifyPlayStatus(int status,String note,Object media,Object data){
         OnPlayerStatusUpdate update=mInnerUpdate;
         if (null!=update){
@@ -239,20 +234,19 @@ public class Player implements Status{
         }
     }
 
-    private native boolean playFile(String path,float seek);
-
-    private static class Pending{
+    public static class Pending{
         private final Playable mMedia;
-        private final float mSeek;
-        private Pending(Playable path,float seek){
+        private final double mSeek;
+        public Pending(Playable path,double seek){
             mMedia=path;
             mSeek=seek;
         }
     }
 
-    private static abstract class PlayPending implements Runnable{
+    private abstract class PlayPending implements Runnable{
         boolean mRunning=false;
         private Pending mPending;
+
         private PlayPending(Pending pending){
             mPending=pending;
         }
@@ -274,6 +268,10 @@ public class Player implements Status{
                 mPending=null;
                 return pending;
             }
+            Pending next=onResolveNext();
+            if (null!=next){
+                return next;
+            }
              synchronized (this){
                  try {
                      Debug.D(getClass(),"Wait play task input.");
@@ -287,23 +285,37 @@ public class Player implements Status{
         }
     }
 
-//    protected static class PendingMedia{
-//        private final Playable mMedia;
-//        private PendingMedia(Playable media){
-//            mMedia=media;
-//        }
-//    }
+    /**
+     *
+     *Call by native C
+     */
+    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int offset,int length,int speed){
+        WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
+        OnMediaFrameDecodeFinish listener=null!=reference?reference.get():null;
+        if (null!=listener){
+            listener.onMediaFrameDecodeFinish(mediaType,bytes,offset,length);
+        }
+    }
 
-//    protected static class CachePending{
-//        private final Playable mMedia;
-//
-//        public CachePending(Playable media, MediaBuffer.Canceler canceler){
-//            mMedia=media;
-////            mCanceler=canceler;
-//        }
-//
-//        public final Playable getMedia() {
-//            return mMedia;
-//        }
-//    }
+    private final static void notifyStatusChanged(int status,String note,String path){
+        notifyPlayStatus(status,note,path,null);
+    }
+
+    private native boolean playFile(String path,float seek);
+
+    public native int getPlayerStatus();
+
+    private native Buffer getPlayingBuffer();
+
+    private native boolean playMedia(Buffer buffer,double seek);
+
+    public native long getPosition();
+
+    public native long getDuration();
+
+    public native boolean seek(double seek);
+
+    public native boolean start(float seek);
+
+    private native boolean pause(boolean stop);
 }

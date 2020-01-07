@@ -27,7 +27,6 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
     private Mode mPlayMode;
-    private MediaBuffer mCloudBuffer;
 
     public MPlayer(){
         setOnDecodeFinishListener(this);
@@ -75,15 +74,6 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         return audioTrack;
     }
     /////////////////
-
-    public void setCloudBuffer(MediaBuffer cloudBuffer) {
-        this.mCloudBuffer = cloudBuffer;
-    }
-
-    public final MediaBuffer getCloudBuffer() {
-        return mCloudBuffer;
-    }
-
     public final boolean isExist(Object ...objs){
         return null!=index(objs);
     }
@@ -156,11 +146,17 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         return mPlayMode;
     }
 
-    public final boolean play(Object object,float seek,OnPlayerStatusUpdate update){
+    @Override
+    protected final Pending onResolveNext() {
+        Media media=indexQueueNext(false);
+        return null!=media?new Pending(media,0):null;
+    }
+
+    public final boolean play(Object object, double seek, OnPlayerStatusUpdate update){
         if (null!=object){
             if (object instanceof Integer){
                 int index=(Integer)object;
-                int size=0;
+                int size;
                 Media media;
                 List<Media> playing=mQueue;
                 if (null!=playing&&index>=0){
@@ -169,18 +165,18 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                         media=index<size?playing.get(index):null;
                     }
                     if (null!=media){
-                        return play(media,seek,update);
+                        return super.playMedia(media,seek,update);
                     }
                 }
                 return false;
             }else if (object instanceof Media){
-                return super.play((Media)object,seek,update);
+                return super.playMedia((Media)object,seek,update);
             }
             Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
             return false;
         }else{//Play current paused media with seek
             if (seek>=0){
-                return seek(seek)>=0;
+                return seek(seek);
             }
         }
         return false;
@@ -203,6 +199,11 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     }
 
     public final boolean playNext(boolean user){
+        Media next=indexQueueNext(user);
+        return null!=next&&play(next,0,null);
+    }
+
+    public final Media indexQueueNext(boolean user){
         List<Media> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
@@ -212,10 +213,10 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                 int current=indexFromQueue(queue,getPlaying());
                 int count=queue.size();
                 nextIndex=indexer.next(mode,current,count,user);
+                return nextIndex>=0&&nextIndex<count?queue.get(nextIndex):null;
             }
-            return play(nextIndex,0,null);
         }
-        return false;
+        return null;
     }
 
     public final boolean pause(boolean stop, Object... objs) {
@@ -237,57 +238,6 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         }
         return false;
     }
-
-//    private boolean doPlay(Media media, float seek, OnPlayerStatusUpdate update){
-//        if (null!=media){
-//            String filePath=media.getTempPath();
-//            final String localPath=null!=filePath&&filePath.length()>0?filePath:media.getPath();
-//            final File localFile=null!=localPath&&localPath.length()>0?new File(localPath):null;
-//            final String url=media.getUrl();
-//            if (null!=localFile&&localFile.length()>0){//If play local file
-//                Debug.D(getClass(),"Play media with local file."+localPath);
-//                return play(localPath,seek);
-//            }else if(null!=url&&url.length()>0){
-//                return play();
-//                MediaBuffer buffer=mCloudBuffer;
-//                if (null!=buffer){
-//                    String account= media.getAccount();
-//                    String name=media.getName();
-//                    if (null!=url&&url.length()>0&&null!=name&&name.length()>0) {
-//                        pausePlay(true);
-//                        MediaBuffer.Canceler canceler=buffer.buffer(account, url, "/sdcard/a/temp.mp3", new MediaBuffer.OnMediaBufferFinish() {
-//                            @Override
-//                            public void onMediaBufferFinish(boolean succeed, int what, String account, String url, String target) {
-//                                File download=null!=target&&target.length()>0?new File(target):null;
-//                                if (null!=download&&download.length()>0){
-//                                    Object playingObj=getPlaying();//Check if current
-//                                    Playable playing=null!=playingObj&&playingObj instanceof CachingMedia ?((CachingMedia)playingObj).getMedia():null;
-//                                    if (null!=playing&&playing==media){//If not need play
-//                                        media.setTempPath(target);
-//                                        doPlay(media,seek,update);
-//                                    }
-//                                }
-//                            }
-//                        });
-//                        if (null!=canceler){
-//                            setPlaying(new CachingMedia(media, canceler));
-//                            return true;
-//                        }
-//                        notifyPlayFinish(update,media,false,STATUS_CACHE_FAIL,"Cache fail.name="+url);
-//                        return false;
-//                    }
-//                    notifyPlayFinish(update,media,false, STATUS_CACHE_FAIL,"Cloud url invalid.name="+url);
-//                    return false;
-//                }
-//                notifyPlayFinish(update,media,false,STATUS_CACHE_FAIL,"None cloud media buffer.name="+url);
-//                return false;
-//            }
-//            notifyPlayFinish(update,media,false,STATUS_FINISH_ERROR,"Url invalid."+localPath+" url="+url);
-//            return false;
-//        }
-//        notifyPlayFinish(update,media,false,STATUS_FINISH_ERROR,"Media invalid.");
-//        return false;
-//    }
 
     private void notifyPlayFinish(OnPlayerStatusUpdate update, Media media, boolean succeed, int status, String note){
         if (null!=update){

@@ -19,12 +19,14 @@
 #define STATUS_RESTART 2011
 #define STATUS_CACHING 2012
 #define STATUS_CACHE_FINISH 2013
+#define STATUS_PREPARING 2014
 
 int MEDIA_TYPE_AUDIO =1;
 int MEDIA_TYPE_AUDIO_STREAM=2;
 
 #define BUFFER_READ_FINISH_EOF -1
 #define BUFFER_READ_FINISH_INNER_ERROR -5
+#define BUFFER_READ_FINISH_NORMAL -2
 
 static JavaVM  *VM=NULL;
 
@@ -140,10 +142,10 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
         return JNI_FALSE;
     }
     jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
-    jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"open","(Ljava/lang/String;)Z");
-    jstring noteJstring = (*env)->NewStringUTF(env,"While play.");
-    jboolean opened=(*env)->CallBooleanMethod(env,media,methodId,noteJstring);
-    (*env)->DeleteLocalRef(env,noteJstring);
+    jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"open","(DLjava/lang/String;)Z");
+    jstring noteString = (*env)->NewStringUTF(env,"While play.");
+    jboolean opened=(*env)->CallBooleanMethod(env,media,methodId,seek,noteString);
+    (*env)->DeleteLocalRef(env,noteString);
     (*env)->DeleteLocalRef(env, bufferClass);
     (*env)->DeleteLocalRef(env, methodId);
     if(!opened) {
@@ -152,13 +154,13 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     }
     size_t handleSize=sizeof(struct BufferHandle);
     handle = (struct BufferHandle*)malloc(handleSize);
+    handle->playStatus=STATUS_PREPARING;
     handle->media=media;
     handle->buffer=(*env)->NewByteArray(env, INPUT_BUFFER_SIZE);
     mad_stream_init(&(handle->stream));
     mad_frame_init(&handle->frame);
     mad_synth_init(&handle->synth);
     LOGD("Playing media.");
-    int readLength=0;
     while (JNI_TRUE){
         if (handle->playStatus==STATUS_STOP){
             LOGD("Stop play media file.");
@@ -173,9 +175,9 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
             pthread_mutex_unlock(&mutex);
             continue;
         }
-        int readLength=0;
+        int readState=BUFFER_READ_FINISH_NORMAL;
         do{
-            readLength=0;
+            int readLength=0;
             if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
                 if(handle->stream.next_frame != 0){
                     int leftOver = handle->stream.bufend - handle->stream.next_frame;
@@ -183,13 +185,15 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
                     for(i= 0;i<leftOver;i++){
                         (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
                     }
-                    int readBytes = readMediaBytes(media,handle->buffer,leftOver,INPUT_BUFFER_SIZE-leftOver);
+                    int readBytes =readMediaBytes(media,handle->buffer,leftOver,INPUT_BUFFER_SIZE-leftOver);
+                    readState=readBytes;
                     if(readBytes <= 0){
                         break;
                     }
                     readLength = leftOver + readBytes;
                 }else{
                     readLength  = readMediaBytes(media,handle->buffer,0,INPUT_BUFFER_SIZE);
+                    readState=readLength;
                     if(readLength <= 0){
                         break;
                     }
@@ -211,7 +215,8 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
         }while (JNI_TRUE);
         mad_synth_frame(&handle->synth, &handle->frame);
         onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->frame.header, handle->synth.pcm);
-        if (readLength==BUFFER_READ_FINISH_EOF){
+        if (readState==BUFFER_READ_FINISH_EOF){
+            handle->playStatus=STATUS_FINISH;
             LOGD("End play media file.");
             notifyStatusChange(STATUS_FINISH,media,"Finish media.");
             break;
@@ -223,84 +228,17 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     handle->playStatus=STATUS_IDLE;
     bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
     methodId=(*env)->GetMethodID(env,bufferClass,"close","(Ljava/lang/String;)Z");
-    noteJstring = (*env)->NewStringUTF(env,"While play finish.");
-    jboolean closed=(*env)->CallBooleanMethod(env,media,methodId,noteJstring);
-    (*env)->DeleteLocalRef(env,handle->buffer);
-    (*env)->DeleteLocalRef(env,noteJstring);
-    (*env)->DeleteLocalRef(env, bufferClass);
-    (*env)->DeleteLocalRef(env, methodId);
-    notifyStatusChange(STATUS_IDLE,media,"Player idle.");
-    LOGD("Finish play media file.");
+    noteString = (*env)->NewStringUTF(env,"While play finish.");
+    jboolean closed=(*env)->CallBooleanMethod(env,media,methodId,noteString);
+    (*env)->DeleteLocalRef(env,media);
+    (*env)->DeleteLocalRef(env,media);
+    (*env)->DeleteLocalRef(env,noteString);
+    (*env)->DeleteLocalRef(env,bufferClass);
+    (*env)->DeleteLocalRef(env,methodId);
+    handle=NULL;
+    notifyStatusChange(STATUS_IDLE,NULL,"Player idle.");
+    LOGD("Finish play media file.%d",closed);
     return JNI_FALSE;
-}
-
-
-int play(const char* filePath,jfloat seek){
-//    int fd = fileOpen(filePath,_RDONLY);
-//    struct stat fileStat;
-//    int statResult=fstat(fd, &fileStat);
-//    if(fd == -1|| fd == -2||statResult<0){
-//        LOGW(" Can't play media,File open failed.%d %d %s",fd,statResult,filePath);
-//        fileClose(fd);
-//        notifyStatusChanged(STATUS_FINISH_ERROR,filePath,"File open failed.");
-//        return JNI_FALSE;
-//    }
-//    if (NULL!=handle){
-//        LOGD("Stop media before play new media.%s",filePath,"Stop before new play.");
-//        pauseMedia(JNI_TRUE);
-//    }
-//    int64_t length= fileStat.st_size;
-//    int64_t seekPosition=seek>=0&&seek<=1?seek*(float)length:(seek<0?0:seek);
-//    seekPosition=seekPosition>=0&&seekPosition<=length?seekPosition:0;
-//    LOGW("Playing media %f %d %d %s", seek,seekPosition,length, filePath);
-//    fileSeek (fd,seekPosition, SEEK_SET);
-//    if (seekPosition>0){
-//        notifyStatusChanged(STATUS_SEEK,filePath,"Seek while start.");
-//    }
-//    size_t handleSize=sizeof(struct FileHandle);
-//    handle = (struct FileHandle*)malloc(handleSize);
-//    memset(handle,0,handleSize);
-//    handle->playStatus=STATUS_PLAYING;
-//    handle->filePath=filePath;
-//    handle->start=seekPosition;
-//    handle->file=fd;
-//    handle->length=length;
-//    handle->commandPending=JNI_FALSE;
-//    mad_stream_init(&(handle->stream));
-//    mad_frame_init(&handle->frame);
-//    mad_synth_init(&handle->synth);
-//    //
-//    while (handle->start<=length){
-//        if (handle->playStatus==STATUS_STOP){
-//            LOGD("Stop play media file.%d %d %s",handle->start,handle->length,handle->filePath);
-//            notifyStatusChanged(STATUS_STOP,filePath,"Stop media.");
-//            break;
-//        }
-//        if (handle->playStatus==STATUS_PAUSE){
-//            LOGD("Pause play media file.%d %d %s",handle->start,handle->length,handle->filePath);
-//            notifyStatusChanged(STATUS_PAUSE,filePath,"Pause media.");
-//            pthread_mutex_lock(&mutex);
-//            pthread_cond_wait(&cond, &mutex);
-//            pthread_mutex_unlock(&mutex);
-//            continue;
-//        }
-//        readFileNextFrame(handle);
-//        if (handle->start>=length){
-//            LOGD("End play media file.%d %d %s",handle->start,handle->length,handle->filePath);
-//            notifyStatusChanged(STATUS_FINISH,filePath,"Finish media.");
-//            break;
-//        }
-//    }
-//    mad_synth_finish(&handle->synth);
-//    mad_frame_finish(&handle->frame);
-//    mad_stream_finish(&handle->stream);
-//    handle->playStatus=STATUS_IDLE;
-//    fileClose(fd);
-//    free(handle);
-//    handle=NULL;
-//    notifyStatusChanged(STATUS_IDLE,filePath,"Player idle.");
-//    LOGD("Finish play media file.%s",filePath);
-    return 0;
 }
 
 JNIEXPORT jboolean
@@ -311,12 +249,25 @@ Java_com_merlin_player_Player_playFile(JNIEnv *env,jobject type,jstring path,jfl
 
 JNIEXPORT jint JNICALL
 Java_com_merlin_player_Player_getPlayerStatus(JNIEnv *env, jobject thiz) {
-    return -1;
+    struct BufferHandle * currentHandle =handle;
+    return NULL!=currentHandle?currentHandle->playStatus:STATUS_IDLE;
 }
 
-JNIEXPORT jlong JNICALL
-Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jfloat seek) {
-    return -1;
+JNIEXPORT jboolean JNICALL
+Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jdouble seek) {
+    struct BufferHandle * currentHandle =handle;
+    jobject media=NULL!=currentHandle?currentHandle->media:NULL;
+    if (NULL!=media){
+        jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
+        jmethodID methodId=(*env)->GetMethodID(env,bufferClass,"seek","(D)Z");
+        jboolean succeed=JNI_FALSE;
+        succeed=(*env)->CallBooleanMethod(env,media,methodId,(double)0);
+        LOGD("$$$$$$$$$$$$$$$ 4");
+        (*env)->DeleteLocalRef(env, bufferClass);
+        (*env)->DeleteLocalRef(env, methodId);
+        return succeed;
+    }
+    return JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -336,11 +287,20 @@ Java_com_merlin_player_Player_getDuration(JNIEnv *env, jobject thiz) {
 
 JNIEXPORT jboolean JNICALL
 Java_com_merlin_player_Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
+    struct BufferHandle * currentHandle =handle;
+    if(NULL!=currentHandle){
+        if (stop&&currentHandle->playStatus!=STATUS_STOP){
+            currentHandle->playStatus=STATUS_STOP;
+            return JNI_TRUE;
+        }else if (!stop&&currentHandle->playStatus!=STATUS_PAUSE){
+            currentHandle->playStatus=STATUS_PAUSE;
+            return JNI_TRUE;
+        }
+    }
     return JNI_FALSE;
 }
 
-JNIEXPORT jstring JNICALL
-Java_com_merlin_player_Player_getPlayingPath(JNIEnv *env, jobject thiz) {
-
-    return NULL;
+JNIEXPORT jobject JNICALL
+Java_com_merlin_player_Player_getPlayingBuffer(JNIEnv *env, jobject thiz) {
+    return
 }
