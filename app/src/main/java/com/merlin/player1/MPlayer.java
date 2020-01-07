@@ -3,20 +3,19 @@ package com.merlin.player1;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.os.Looper;
 
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
+import com.merlin.media.ClientMediaBuffer;
 import com.merlin.media.Indexer;
 import com.merlin.media.Media;
-import com.merlin.media.MediaPlayService;
 import com.merlin.media.Mode;
 import com.merlin.player.MediaBuffer;
+import com.merlin.player.FileBuffer;
 import com.merlin.player.OnMediaFrameDecodeFinish;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
-import com.merlin.player.Status;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     private final List<Media> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
+    private Client mClient;
     private Mode mPlayMode;
 
     public MPlayer(){
@@ -74,49 +74,13 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         return audioTrack;
     }
     /////////////////
-    public final boolean isExist(Object ...objs){
-        return null!=index(objs);
+    public final boolean setClient(Client client){
+        mClient=client;
+        return false;
     }
 
-    public final int indexMediaPosition(Object ...objs){
-        Object[] res=null!=objs&&objs.length>0?index(objs):null;
-        Object object=null!=res&&res.length==2?res[0]:null;
-        return null!=object&&object instanceof Integer ?(Integer) object:null;
-    }
-
-    public final Media indexMedia(Object ...objs){
-        Object[] res=null!=objs&&objs.length>0?index(objs):null;
-        Object object=null!=res&&res.length==2?res[1]:null;
-        return null!=object&&object instanceof Media?(Media)object:null;
-    }
-
-    public final Object[] index(Object ...objs){
-        if (null!=objs&&objs.length>0){
-           for (Object obj:objs){
-               if (null!=obj){
-                   List<Media> queue=mQueue;
-                   if (null!=queue){
-                       synchronized (queue){
-                         int size=null!=queue?queue.size():-1;
-                          for (int i=0;i<size;i++){
-                              Media m=queue.get(i);
-                              if (null!=m){
-                                   if (obj instanceof Media&&obj.equals(m)){
-                                       return new Object[]{i,m};
-                                   }else if (obj instanceof String){
-                                        String path=m.getPath();
-                                        if (null!=path&&path.equals(obj)){
-                                            return new Object[]{i,m};
-                                        }
-                                   }
-                              }
-                          }
-                       }
-                   }
-               }
-           }
-        }
-        return null;
+    public final Client getClient() {
+        return mClient;
     }
 
     public final boolean append(Media media){
@@ -147,9 +111,36 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     }
 
     @Override
-    protected final Pending onResolveNext() {
-        Media media=indexQueueNext(false);
-        return null!=media?new Pending(media,0):null;
+    protected final MediaBuffer onResolveNext(MediaBuffer buffer) {
+        Playable playable=null!=buffer?buffer.getPlayable():null;
+        Media media=indexQueueNext(playable,false);
+        return null!=media?createMediaBuffer(media,0):null;
+    }
+
+    private MediaBuffer createMediaBuffer(Media media, double seek){
+        if (null!=media){
+            String path=media.getPath();//Try local media file firstly
+            if (null!=path&&path.length()>0){
+                File localFile=new File(path);
+                if (localFile.exists()&&localFile.length()>0){
+                    return new FileBuffer(media,seek);
+                }
+            }
+            String url=media.getUrl();
+            Client client=mClient;
+            if (null!=url&&url.length()>0&&null!=client){
+                return new ClientMediaBuffer(client,media,seek);
+            }
+        }
+        return null;
+    }
+
+    public final boolean play(Media media,double seek,OnPlayerStatusUpdate update){
+        MediaBuffer buffer=null!=media?createMediaBuffer(media,seek):null;
+        if (null!=buffer){
+            return play(buffer,update);
+        }
+        return false;
     }
 
     public final boolean play(Object object, double seek, OnPlayerStatusUpdate update){
@@ -165,12 +156,12 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                         media=index<size?playing.get(index):null;
                     }
                     if (null!=media){
-                        return super.playMedia(media,seek,update);
+                        return play(media,seek,update);
                     }
                 }
                 return false;
             }else if (object instanceof Media){
-                return super.playMedia((Media)object,seek,update);
+                return play((Media)object,seek,update);
             }
             Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
             return false;
@@ -189,7 +180,7 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         if (null!=queue&&null!=indexer){
             int nextIndex;
             synchronized (queue){
-                int current=indexFromQueue(queue,getPlaying());
+                int current=index(getPlaying());
                 int count=queue.size();
                 nextIndex=indexer.pre(mode,current,count);
             }
@@ -199,18 +190,18 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     }
 
     public final boolean playNext(boolean user){
-        Media next=indexQueueNext(user);
+        Media next=indexQueueNext(getPlaying(),user);
         return null!=next&&play(next,0,null);
     }
 
-    public final Media indexQueueNext(boolean user){
+    public final Media indexQueueNext(Playable media,boolean user){
         List<Media> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
         if (null!=queue&&null!=indexer){
             int nextIndex;
+            int current=index(media);
             synchronized (queue){
-                int current=indexFromQueue(queue,getPlaying());
                 int count=queue.size();
                 nextIndex=indexer.next(mode,current,count,user);
                 return nextIndex>=0&&nextIndex<count?queue.get(nextIndex):null;
@@ -245,22 +236,61 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         }
     }
 
-    private int indexFromQueue(List<Media> queue,Object media){
-        int size=null!=media&&null!=queue&&null!=media?queue.size():-1;
-        if (size>0){
-            Media child=null;
-            for (int i=0;i<size;i++){
-                child=queue.get(i);
-                if (null!=child){
-                    if(media instanceof Media&&child.equals(media)) {
-                        return i;
-                    }else if (media instanceof String&&child.equals(media)){
-                        return i;
+    @Override
+    public void onPlayerStatusUpdated(Player player, int status, String note, Object media, Object data) {
+
+    }
+
+    public final boolean isExist(Object ...objs){
+        return null!=indexInQueue(objs);
+    }
+
+    public final int index(Object media){
+        Object[] objects= indexInQueue(media);
+        Object object=null!=objects&&objects.length==2?objects[1]:null;
+        return null!=object&&object instanceof Integer?(Integer) object:-1;
+    }
+
+    public final Media indexMedia(Object media){
+        Object[] objects= indexInQueue(media);
+        Object object=null!=objects&&objects.length==2?objects[0]:null;
+        return null!=object&&object instanceof Media?(Media)object:null;
+    }
+
+    private Object[] indexInQueue(Object ...objects){
+        List<Media> list=mQueue;
+        if (null!=objects&&objects.length>0&&null!=list){
+            Object[] result;
+            for (Object object:objects) {
+                if (null!=(result=null!=object?find(list,object):null)){
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Object[] find(List<Media> queue,Object media){
+        if (null!=media&&null!=queue){
+            synchronized (queue){
+                int size=null!=media&&null!=queue&&null!=media?queue.size():-1;
+                Media child;
+                for (int i=0;i<size;i++){
+                    child=queue.get(i);
+                    if (null!=child){
+                         if(media instanceof Media&&child.equals(media)) {
+                            return new Object[]{media,i};
+                        }else if (media instanceof String){
+                            String path=child.getPath();
+                            if (null!=path&&path.equals(media)) {
+                                return new Object[]{media,i};
+                            }
+                        }
                     }
                 }
             }
         }
-        return -1;
+        return null;
     }
 
     public final List<Media> getQueue() {
@@ -274,8 +304,4 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         return null;
     }
 
-    @Override
-    public void onPlayerStatusUpdated(Player player, int status, String note, Object media, Object data) {
-
-    }
 }

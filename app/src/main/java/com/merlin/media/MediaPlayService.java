@@ -15,6 +15,7 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.Playable;
 import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
@@ -120,6 +121,7 @@ public class MediaPlayService extends Service implements Status {
         Debug.D(getClass(),"Media play service onCreate.");
         Application application= Application.get(this);
         Client client=null!=application?application.getClient():null;
+        mPlayer.setClient(client);
         Media media=new Media();
         media.setName("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
@@ -133,10 +135,16 @@ public class MediaPlayService extends Service implements Status {
 //        media.setUrl("./WMDYY.mp3");
         mPlayer.add(media,2);
 
-        mPlayer.play(0,0.96,null);
+        media=new Media();
+        media.setName("我不愿让你一个人.mp3");
+        media.setAccount("linqiang");
+        media.setPath("");
+        media.setUrl("./WMDYY.mp3");
+        mPlayer.append(media);
         new Handler().postDelayed(()->{
-//            boolean sss=mPlayer.seek(0.7f);
-//            Debug.D(getClass(),"########## "+sss);
+
+            mPlayer.play(2,0,null);
+//            Playable sss=mPlayer.getPlaying();
         },5000);
 
     }
@@ -229,6 +237,7 @@ public class MediaPlayService extends Service implements Status {
         Debug.D(getClass(),"Media play service onDestroy.");
         MPlayer player=mPlayer;
         if (null!=player){
+            player.setClient(null);
             player.destroy();
         }
     }

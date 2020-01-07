@@ -4,34 +4,69 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.player.MediaBuffer;
 
-public class ClientMediaBuffer implements MediaBuffer {
-    private final Client mClient;
+import java.nio.Buffer;
 
-    public ClientMediaBuffer(Client client){
+public class ClientMediaBuffer extends MediaBuffer<Media> {
+    private final Client mClient;
+    private final Boolean mMutex=true;
+    private final byte[] mContent=new byte[1024];
+
+    public ClientMediaBuffer(Client client, Media media, double seek){
+        super(media,seek);
         mClient=client;
     }
 
     @Override
-    public Canceler buffer(String account, String url, String target,OnMediaBufferFinish callback) {
+    protected boolean open(double seek, String debug) {
         Client client=mClient;
-        if (null==client){
-            Debug.W(getClass(),"Can't buffer media.client="+client+" "+url);
-            return null;
+        boolean login=null!=client&&client.isLogined();
+        if (!login){
+            Debug.D(getClass(),"Can't play media while failed open client url,Not login "+(null!=debug?debug:".")+" client="+client);
+            return false;
         }
-        if (null==url||url.isEmpty()||null==target||target.isEmpty()){
-            Debug.W(getClass(),"Can't buffer media.target="+target+" url="+url);
-            return null;
+        final Media media=getPlayable();
+        String url=null!=media?media.getUrl():null;
+        if (null==url||url.length()<=0){
+            Debug.D(getClass(),"Can't play media,Url invalid "+(null!=debug?debug:".")+" url="+url+" "+media);
+            return false;
         }
-        if (!client.isLogined()){
-            Debug.W(getClass(),"Can't buffer media,Client not login.");
-            return null;
+        String account=media.getAccount();
+        Debug.D(getClass(),"Play media from "+account+" "+url);
+        client.downloadFile(account,url,"/sdcard/a/temp.mp3",(finish,what,fromAccount,urlAddress, toTarget,data)->{
+                Debug.D(getClass(),"%%%%%%%%%% "+finish+" "+what+" ");
+                synchronized (mMutex){
+                    mMutex.notify();
+                }
+        });
+        synchronized (mMutex){
+            try {
+                Debug.D(getClass(),"Wait for open response.");
+                mMutex.wait();
+                Debug.D(getClass(),"Wakeup for open response."+account+" "+url);
+            } catch (InterruptedException e) {
+                Debug.E(getClass(),"Can't wait for client media open response.e="+e+" "+account+" "+url,e);
+            }
         }
-        Client.Canceler canceler= client.downloadFile(account,url,target, (finish, what, accountValue, urlValue, to, data)->{
-                    Debug.D(getClass(),"#### "+finish+" "+what);
-                    if (finish&&what== Client.OnFileDownloadUpdate.DOWNLOAD_SUCCEED){
-                        callback.onMediaBufferFinish(true,OnMediaBufferFinish.BUFFER_SUCCEED,account,url,target);
-                    }
-                });
-        return null!=canceler?(interrupt)->canceler.cancel(interrupt):null;
+        return false;
+    }
+
+    @Override
+    protected int read(byte[] buffer, int offset, int length) {
+        return 0;
+    }
+
+    @Override
+    protected boolean close(String debug) {
+        return false;
+    }
+
+    @Override
+    protected boolean seek(double seek) {
+        return false;
+    }
+
+    @Override
+    public boolean isOpened() {
+        return false;
     }
 }

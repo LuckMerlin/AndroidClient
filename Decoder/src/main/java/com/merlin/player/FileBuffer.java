@@ -5,17 +5,17 @@ import com.merlin.debug.Debug;
 import java.io.File;
 import java.io.FileInputStream;
 
-public final class FileBuffer extends Buffer {
+public final class FileBuffer<T  extends Playable> extends MediaBuffer<T> {
     private final String mPath;
     private FileInputStream mAccess;
 
-     FileBuffer(Playable playable,double seek){
+     public FileBuffer(T playable,double seek){
         super(playable,seek);
          mPath=null!=playable?playable.getPath():null;
     }
 
     @Override
-    public boolean open(double seek,String debug) {
+    protected boolean open(double seek,String debug) {
         String path=mPath;
         File file=null!=path&&!path.isEmpty()?new File(path):null;
         final long length=null!=file?file.length():-1;
@@ -62,7 +62,7 @@ public final class FileBuffer extends Buffer {
     }
 
     @Override
-    public boolean close(String debug) {
+    protected boolean close(String debug) {
         FileInputStream access=mAccess;
         if (null!=access){
             Debug.D(getClass(),"Close file buffer "+(null!=debug?debug:".")+" "+mPath);

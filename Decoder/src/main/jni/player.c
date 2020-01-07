@@ -123,7 +123,7 @@ int readMediaBytes(jobject media,jbyteArray buffer,int offset,int length){
         JNIEnv *env;
         int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
         if(res==JNI_OK){
-            jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
+            jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
             jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"read","([BII)I");
             jint opened=(*env)->CallIntMethod(env,media,methodId,buffer,offset,length);
             (*env)->DeleteLocalRef(env, bufferClass);
@@ -137,11 +137,11 @@ int readMediaBytes(jobject media,jbyteArray buffer,int offset,int length){
 JNIEXPORT jboolean JNICALL
 Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media, jdouble seek) {
     if(NULL ==media){
-        LOGW(" Can't play media,Buffer is NULL.");
-        notifyStatusChange(STATUS_FINISH_ERROR,media,"Buffer id NULL.");
+        LOGW(" Can't play media,MediaBuffer is NULL.");
+        notifyStatusChange(STATUS_FINISH_ERROR,media,"MediaBuffer id NULL.");
         return JNI_FALSE;
     }
-    jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
+    jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
     jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"open","(DLjava/lang/String;)Z");
     jstring noteString = (*env)->NewStringUTF(env,"While play.");
     jboolean opened=(*env)->CallBooleanMethod(env,media,methodId,seek,noteString);
@@ -226,7 +226,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     mad_frame_finish(&handle->frame);
     mad_stream_finish(&handle->stream);
     handle->playStatus=STATUS_IDLE;
-    bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
+    bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
     methodId=(*env)->GetMethodID(env,bufferClass,"close","(Ljava/lang/String;)Z");
     noteString = (*env)->NewStringUTF(env,"While play finish.");
     jboolean closed=(*env)->CallBooleanMethod(env,media,methodId,noteString);
@@ -258,7 +258,7 @@ Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jdouble seek) {
     struct BufferHandle * currentHandle =handle;
     jobject media=NULL!=currentHandle?currentHandle->media:NULL;
     if (NULL!=media){
-        jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Buffer");
+        jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
         jmethodID methodId=(*env)->GetMethodID(env,bufferClass,"seek","(D)Z");
         jboolean succeed=JNI_FALSE;
         succeed=(*env)->CallBooleanMethod(env,media,methodId,(double)0);
@@ -298,9 +298,4 @@ Java_com_merlin_player_Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
         }
     }
     return JNI_FALSE;
-}
-
-JNIEXPORT jobject JNICALL
-Java_com_merlin_player_Player_getPlayingBuffer(JNIEnv *env, jobject thiz) {
-    return
 }

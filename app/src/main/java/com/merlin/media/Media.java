@@ -18,7 +18,6 @@ public class Media implements Parcelable, Playable {
     private String album;
     private String artist;
     private long duration=12131;
-    private String mTempPath;
 //    @Id(autoincrement = true)
 //    @Property(nameInDb = "id")
 //    private long id;
@@ -94,14 +93,6 @@ public class Media implements Parcelable, Playable {
     }
     public void setDuration(long duration) {
         this.duration = duration;
-    }
-
-    public void setTempPath(String mTempPath) {
-        this.mTempPath = mTempPath;
-    }
-
-    public String getTempPath() {
-        return mTempPath;
     }
 
     public String getDurationText(){
