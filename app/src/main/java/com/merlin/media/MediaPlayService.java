@@ -87,7 +87,7 @@ public class MediaPlayService extends Service implements Status {
         @Override
         public Object getPlaying(Object... obj) {
             MPlayer player=mPlayer;
-            return null!=player?player.getPlaying(obj):null;
+            return null!=player?player.getPlayingMedia(obj):null;
         }
 
         @Override
@@ -146,10 +146,13 @@ public class MediaPlayService extends Service implements Status {
         media.setPath("");
         media.setUrl("./WMDYY.mp3");
         mPlayer.append(media);
+        mPlayer.play(0,0,null);
         new Handler().postDelayed(()->{
-            mPlayer.play(0,0.95f,null);
+            mPlayer.play(0,0,null);
+//            mPlayer.pause(true);
+//            mPlayer.play(1,0.55f,null);
 //            Playable sss=mPlayer.getPlaying();
-        },5000);
+        },8000);
 
     }
 

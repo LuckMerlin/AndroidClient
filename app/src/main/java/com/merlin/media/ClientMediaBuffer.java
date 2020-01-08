@@ -49,7 +49,7 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
         }
         reader.mWriteComplete=false;
         reader.mState=Reader.STATE_OPENING;
-        final int timeout=60*1000;
+        final int timeout=30*1000;
         Client.Canceler canceler=client.download(account,url,seek,timeout,(succeed, what, note, frame)->{
 //            Debug.D(getClass(),"$$$$$$$$$ "+succeed+" "+what+" "+note);
             switch (what){
@@ -66,16 +66,20 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                     reader.wakeUp(What.WHAT_HEAD_DATA,"Client head response."+account+" "+url);
                     break;
                 case Callback.REQUEST_SUCCEED://Bytes received
-                    byte[] bytes=null!=frame?frame.getBodyBytes():null;
-                    if (null!=bytes&&bytes.length>0){
-                        if (reader.write(bytes,frame.isLastFrame())){
+                    if (reader.mState!=What.WHAT_CANCEL){
+                        byte[] bytes=null!=frame?frame.getBodyBytes():null;
+                        if (null!=bytes&&bytes.length>0){
+                            if (reader.write(bytes,frame.isLastFrame())){
 
+                            }
                         }
                     }
                     break;
                 default:
                     if (!succeed){//Not succeed
+                        reader.mState=what;
                         reader.mWriteComplete=true;
+                        reader.wakeUp(what," "+note+account+" "+url);
                     }
                     break;
             }
@@ -90,10 +94,7 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
         if (reader.mState==What.WHAT_HEAD_DATA){
             return true;//Response head,Now return true to prepare play
         }
-        if (reader.mState==What.WHAT_NOT_EXIST){//File not exist
-            reader.recycle("While client response file not existed.");
-            return false;
-        }
+        reader.recycle("While client response failed.state="+reader.mState);//
         return false;
     }
 
@@ -249,7 +250,7 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                 try {
                     Debug.D(getClass(),"Wait for "+(null!=debug?debug:"."));
                     mMutex.wait();
-                    Debug.D(getClass(),"Has been wakeup.");
+//                    Debug.D(getClass(),"Has been wakeup.");
                 } catch (InterruptedException e) {
                     Debug.E(getClass(),"Can't wait for "+(null!=debug?debug:".")+" e="+e,e);
                 }
@@ -263,15 +264,17 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
         private boolean recycle(String debug){
             Reader reader=mReader;
             if (null!=reader&&reader==this){
+                Client.Canceler canceler=mCanceler;
                 Debug.D(getClass(),"Recycle media reader "+(null!=debug?debug:"."));
                 mReader=null;
                 reader.mCanceler=null;
                 closeIO(mAccess);
                 mAccess=null;
-                Client.Canceler canceler=mCanceler;
-//                if (null!=canceler){
-//                    canceler.cancel(true);
-//                }
+                Debug.D(getClass(),"$$$$$$$$$$$$$ canceler @@@@@@@ "+canceler);
+                if (null!=canceler&&canceler.cancel(true)){
+                    waitHere(What.WHAT_CANCEL,"While need wait cancel.");
+                }
+
                 return true;
             }
             return false;

@@ -130,12 +130,12 @@ int readMediaBytes(jobject media,jbyteArray buffer,int offset,int length){
     return BUFFER_READ_FINISH_INNER_ERROR;
 }
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT jint JNICALL
 Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media, jdouble seek) {
     if(NULL ==media){
         LOGW(" Can't play media,MediaBuffer is NULL.");
         notifyStatusChange(STATUS_FINISH_ERROR,media,"MediaBuffer id NULL.");
-        return JNI_FALSE;
+        return STATUS_FINISH_ERROR;
     }
     jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
     jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"open","(DLjava/lang/String;)Z");
@@ -146,7 +146,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     (*env)->DeleteLocalRef(env, methodId);
     if(!opened) {
         LOGW("Failed play media,Failed open media buffer.");
-        return JNI_FALSE;
+        return STATUS_FINISH_ERROR;
     }
     size_t handleSize=sizeof(struct BufferHandle);
     handle = (struct BufferHandle*)malloc(handleSize);
@@ -221,6 +221,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     mad_synth_finish(&handle->synth);
     mad_frame_finish(&handle->frame);
     mad_stream_finish(&handle->stream);
+    int status=handle->playStatus;
     handle->playStatus=STATUS_IDLE;
     bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
     methodId=(*env)->GetMethodID(env,bufferClass,"close","(Ljava/lang/String;)Z");
@@ -234,14 +235,9 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     handle=NULL;
     notifyStatusChange(STATUS_IDLE,NULL,"Player idle.");
     LOGD("Finish play media file.%d",closed);
-    return JNI_FALSE;
+    return status;
 }
 
-JNIEXPORT jboolean
-Java_com_merlin_player_Player_playFile(JNIEnv *env,jobject type,jstring path,jfloat seek){
-//    const char* filePath=(*env)->GetStringUTFChars(env,path,0);
-    return JNI_FALSE;
-}
 
 JNIEXPORT jint JNICALL
 Java_com_merlin_player_Player_getPlayerStatus(JNIEnv *env, jobject thiz) {
@@ -267,7 +263,7 @@ Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jdouble seek) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_start(JNIEnv *env, jobject thiz, jfloat seek) {
+Java_com_merlin_player_Player_start(JNIEnv *env, jobject thiz, jdouble seek) {
     return JNI_FALSE;
 }
 

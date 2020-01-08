@@ -105,7 +105,7 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         if (null!=mode){
             mPlayMode=mode;
             //Save mode here
-            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",getPlaying(),mode);
+            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",super.getPlaying(),mode);
         }
         return mPlayMode;
     }
@@ -131,6 +131,23 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
             if (null!=url&&url.length()>0&&null!=client){
                 return new ClientMediaBuffer(client,media,seek);
             }
+        }
+        return null;
+    }
+
+    public final Playable getPlayingMedia(Object ...objects){
+        Playable playable=super.getPlaying();
+        if (null!=playable){
+            if (null!=objects&&objects.length>0){
+                Media media;
+                for (Object object:objects ) {
+                    if (null!=object&&null!=(media=indexMedia(object))){
+                        return media;
+                    }
+                }
+                return null;
+            }
+            return playable;
         }
         return null;
     }
@@ -180,7 +197,7 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         if (null!=queue&&null!=indexer){
             int nextIndex;
             synchronized (queue){
-                int current=index(getPlaying());
+                int current=index(super.getPlaying());
                 int count=queue.size();
                 nextIndex=indexer.pre(mode,current,count);
             }
@@ -190,7 +207,7 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     }
 
     public final boolean playNext(boolean user){
-        Media next=indexQueueNext(getPlaying(),user);
+        Media next=indexQueueNext(super.getPlaying(),user);
         return null!=next&&play(next,0,null);
     }
 
@@ -210,22 +227,18 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         return null;
     }
 
-    public final boolean pause(boolean stop, Object... objs) {
-        Object playing=getPlaying();
-        objs=null!=playing&&null!=objs&&objs.length>0?objs:null;
-        if (null!=objs&&objs.length>0){
-            Object plyaingObj=playing instanceof Playable ?((Playable)playing).getPath():playing;
-            String playingPath=null!=plyaingObj&&plyaingObj instanceof String?((String)plyaingObj):null;
-            for (Object obj:objs){
-                if (null==obj){
-                    continue;
+    public final boolean pause(boolean stop, Object... objects) {
+        Playable playing=super.getPlaying();
+        if (null!=playing){
+            if (null!=objects&&objects.length>0){
+                for (Object object:objects) {
+                    if (null!=find(mQueue,object)){
+                        return super.pause(stop);
+                    }
                 }
-                if (obj instanceof Playable&&obj.equals(playing)){
-                    return pausePlay(stop);
-                }else if (obj instanceof String&&null!=playingPath&&obj.equals(playingPath)){
-                    return pausePlay(stop);
-                }
+                return false;
             }
+            return super.pause(stop);
         }
         return false;
     }
@@ -252,7 +265,11 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     }
 
     public final Media indexMedia(Object media){
-        Object[] objects= indexInQueue(media);
+        return null!=media?findMedia(mQueue,media):null;
+    }
+
+    private final Media findMedia(List<Media> queue,Object media){
+        Object[] objects= find(queue,media);
         Object object=null!=objects&&objects.length==2?objects[0]:null;
         return null!=object&&object instanceof Media?(Media)object:null;
     }

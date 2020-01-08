@@ -104,18 +104,17 @@ public class Player implements Status{
                        if (null!=task){
                            lastPlay=mPlaying;
                            mPlaying=task;
-                           playMedia(task,task.getSeek());
+                           Debug.D(getClass(),"Play "+task);
+                           int status=playMedia(task,task.getSeek());
                            mPlaying=null;
+                           if (status==Status.STATUS_STOP){
+                               break;
+                           }
                        }
                     }
                     lastPlay=null;
                     mPlayRunnable=null;
                     mHandler=null;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                        Looper.myLooper().quitSafely();
-                    }else{
-                        Looper.myLooper().quit();
-                    }
                     Debug.D(getClass(),"Recycling player resources.");
                 }
             }).start();
@@ -152,35 +151,12 @@ public class Player implements Status{
         return STATUS_IDLE==getPlayerStatus();
     }
 
-
-    public Playable getPlaying(Object ...objects){
-        Playable playing=null;
-        return playing;
+    public final boolean isPlaying(){
+        return STATUS_PLAYING==getPlayerStatus();
     }
 
-    public final boolean isPlaying(Object ...media){
-        if (STATUS_PLAYING==getPlayerStatus()){
-            return true;
-        }
-        return false;
-    }
-
-    public final boolean isPaused(Object ...paths){
-        if (STATUS_PAUSE==getPlayerStatus()){
-            return true;
-        }
-        return false;
-    }
-
-    public final boolean pausePlay(boolean stop,Object ...objects){
-        if (null!=objects&&objects.length>0){
-            Playable playing=getPlaying();
-            if (null!=playing){
-                Debug.D(getClass(),"$$$$$$$$$$ "+playing);
-            }
-            return false;
-        }
-        return pause(stop);
+    public final boolean isPaused(){
+        return STATUS_PAUSE==getPlayerStatus();
     }
 
     public final boolean isRunning(){
@@ -192,7 +168,6 @@ public class Player implements Status{
         MediaBuffer buffer=getPlayingBuffer();
         return null!=buffer?buffer.getPlayable():null;
     }
-
 
     private MediaBuffer getPlayingBuffer(){
         return mPlaying;
@@ -279,11 +254,9 @@ public class Player implements Status{
         notifyPlayStatus(status,note,path,null);
     }
 
-    private native boolean playFile(String path,float seek);
-
     public native int getPlayerStatus();
 
-    private native boolean playMedia(MediaBuffer buffer, double seek);
+    private native int playMedia(MediaBuffer buffer, double seek);
 
     public native long getPosition();
 
@@ -291,7 +264,7 @@ public class Player implements Status{
 
     public native boolean seek(double seek);
 
-    public native boolean start(float seek);
+    public native boolean start(double seek);
 
-    private native boolean pause(boolean stop);
+    public native boolean pause(boolean stop);
 }
