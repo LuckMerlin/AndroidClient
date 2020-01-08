@@ -76,7 +76,6 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                 default:
                     if (!succeed){//Not succeed
                         reader.mWriteComplete=true;
-                        reader.mState=BUFFER_READ_FINISH_EOFE;
                     }
                     break;
             }
@@ -173,10 +172,11 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                              synchronized (access) {
                                  cacheFileLength = access.length();
                              }
-//                             Debug.D(getClass(), "%%%%% cacheFileLength %%%%%% " + cacheFileLength + " " + nextStart);
+//                             Debug.D(getClass(), "%%%%% cacheFileLength %%%%%% " +
+//                                     cacheFileLength + " " + nextStart);
                              if (nextStart >= cacheFileLength) {//Not enough cached bytes,Need wait here
                                  if (mWriteComplete){
-                                     return mState;
+                                     return BUFFER_READ_FINISH_EOF;
                                  }
                                  waitHere(STATE_WAITING_WRITE, "While cache not enough for read." + nextStart + " " + cacheFileLength);
                              }else {

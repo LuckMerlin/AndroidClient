@@ -126,14 +126,13 @@ public class MediaPlayService extends Service implements Status {
         media.setName("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
         media.setPath("/sdcard/Musics/赵雷 - 成都.mp3");
-//        media.setUrl("./WMDYY.mp3");
-        mPlayer.add(media,2);
+//        mPlayer.add(media,2);
          media=new Media();
         media.setName("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
         media.setPath("/sdcard/Musics/许巍 - 执着.mp3");
 //        media.setUrl("./WMDYY.mp3");
-        mPlayer.add(media,2);
+//        mPlayer.add(media,2);
 
         media=new Media();
         media.setName("我不愿让你一个人.mp3");
@@ -148,7 +147,7 @@ public class MediaPlayService extends Service implements Status {
         media.setUrl("./WMDYY.mp3");
         mPlayer.append(media);
         new Handler().postDelayed(()->{
-//            mPlayer.play(1,0.9f,null);
+            mPlayer.play(0,0.95f,null);
 //            Playable sss=mPlayer.getPlaying();
         },5000);
 

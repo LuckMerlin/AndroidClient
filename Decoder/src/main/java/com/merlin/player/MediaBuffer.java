@@ -20,7 +20,7 @@ public abstract class MediaBuffer<T extends Playable> {
     public final static int BUFFER_READ_FINISH_INNER_ERROR = -5;
     public final static int BUFFER_READ_FINISH_NORMAL = -2;
     public final static int BUFFER_READ_FINISH_EXCEPTION = -6;
-    public final static int BUFFER_READ_FINISH_EOFE = -7 ;
+//    public final static int BUFFER_READ_FINISH_EOFE = -7 ;
 
     private final T mPlayable;
     private final double mSeek;
