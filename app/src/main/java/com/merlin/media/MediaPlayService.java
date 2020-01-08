@@ -139,11 +139,16 @@ public class MediaPlayService extends Service implements Status {
         media.setName("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
         media.setPath("");
+        media.setUrl("./WBYRNYGR.mp3");
+        mPlayer.append(media);
+        media=new Media();
+        media.setName("我们不一样.mp3");
+        media.setAccount("linqiang");
+        media.setPath("");
         media.setUrl("./WMDYY.mp3");
         mPlayer.append(media);
         new Handler().postDelayed(()->{
-
-            mPlayer.play(2,0,null);
+            mPlayer.play(1,0.9f,null);
 //            Playable sss=mPlayer.getPlaying();
         },5000);
 

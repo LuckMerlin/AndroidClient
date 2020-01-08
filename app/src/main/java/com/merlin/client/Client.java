@@ -1,7 +1,6 @@
 package com.merlin.client;
 
 import com.merlin.debug.Debug;
-import com.merlin.media.Sheet;
 import com.merlin.oksocket.Callback;
 import com.merlin.oksocket.Socket;
 import com.merlin.oksocket.OnClientStatusChange;
@@ -17,11 +16,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.WeakHashMap;
 
 import static com.merlin.server.Json.putIfNotNull;
 
@@ -97,10 +94,9 @@ public final class Client extends Socket {
         return mAccount;
     }
 
-
     public Canceler downloadFile(String from,String path,String to,OnFileDownloadUpdate callback){
         if (null==to||null==path||to.length()<=0||path.length()<=0){
-            notifyFileDownloadFinish(true,OnFileDownloadUpdate.DOWNLOAD_ARGS_INVALID,from,path,to,null,callback);
+            notifyFileDownloadUpdate(true,OnFileDownloadUpdate.DOWNLOAD_ARGS_INVALID,from,path,to,null,callback);
             return null;
         }
         final File file=new FileMaker().makeFile(to);
@@ -119,27 +115,27 @@ public final class Client extends Socket {
                             int length=null!=bytes?bytes.length:-1;
                             try {
                                 os.write(bytes,0,length);
-                                notifyFileDownloadFinish(false,OnFileDownloadUpdate.DOWNLOAD_WRITE,from,path,to,bytes,callback);
+                                notifyFileDownloadUpdate(false,OnFileDownloadUpdate.DOWNLOAD_WRITE,from,path,to,bytes,callback);
                                 if (frame.isLastFrame()){
                                     Debug.D(getClass(),"最后一个 ");
                                     os.flush();
                                     closer.close(os);
-                                    notifyFileDownloadFinish(true,OnFileDownloadUpdate.DOWNLOAD_SUCCEED,from,path,to,bytes,callback);
+                                    notifyFileDownloadUpdate(true,OnFileDownloadUpdate.DOWNLOAD_SUCCEED,from,path,to,bytes,callback);
                                 }
                             }catch (Exception e){
                                 Debug.E(getClass(),"Failed download file.e="+e,e);
-                                notifyFileDownloadFinish(true,OnFileDownloadUpdate.DOWNLOAD_WRITE_EXCEPTION,from,path,to,bytes,callback);
                                 closer.close(os);
+                                notifyFileDownloadUpdate(true,OnFileDownloadUpdate.DOWNLOAD_WRITE_EXCEPTION,from,path,to,bytes,callback);
                             }
                         }
                     }else{
                         Debug.W(getClass(),"Failed download file."+what+" "+note);
-                        notifyFileDownloadFinish(true,what,from,path,to,null,callback);
+                        notifyFileDownloadUpdate(true,what,from,path,to,null,callback);
                     }
                 });
             } catch (FileNotFoundException e) {
                 Debug.E(getClass(),"Download file exception.e="+e+" "+to,e);
-                notifyFileDownloadFinish(true,OnFileDownloadUpdate.DOWNLOAD_EXCEPTION,from,path,to,null,callback);
+                notifyFileDownloadUpdate(true,OnFileDownloadUpdate.DOWNLOAD_EXCEPTION,from,path,to,null,callback);
                return null;
             }finally {
                 if (null==canceler){
@@ -147,11 +143,16 @@ public final class Client extends Socket {
                 }
             }
         }
-        notifyFileDownloadFinish(true,OnFileDownloadUpdate.DOWNLOAD_CREATE_FAIL,from,path,to,null,callback);
+        notifyFileDownloadUpdate(true,OnFileDownloadUpdate.DOWNLOAD_CREATE_FAIL,from,path,to,null,callback);
         return null;
     }
 
-    public Canceler download(String from,String path,float seek,OnRequestFinish callback){
+    public Canceler download(String from,String path,double seek,OnRequestFinish callback) {
+        final int timeout=30*1000;
+        return download(from,path,seek,timeout,callback);
+    }
+
+    public Canceler download(String from,String path,double seek,int timeout,OnRequestFinish callback){
         if (null==path||null==callback||null==from){
             Debug.W(getClass(),"Can't download file with client."+from+" "+path+" "+callback);
             return null;
@@ -160,7 +161,6 @@ public final class Client extends Socket {
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_READ_FILE);
         Json.putIfNotNull(object,TAG_POSITION,seek);
         Json.putIfNotNull(object,TAG_FILE,path);
-        final int timeout=30*1000;
         final Canceler cancel=new Canceler();
         return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY, null, timeout, new OnRequestFinish() {
                     @Override
@@ -219,9 +219,9 @@ public final class Client extends Socket {
                 })?cancel:null;
     }
 
-    private void notifyFileDownloadFinish(boolean succeed,int what,String account,String from,String to,byte[] data,OnFileDownloadUpdate callback){
+    private void notifyFileDownloadUpdate(boolean finish,int what,String account,String from,String to,byte[] data,OnFileDownloadUpdate callback){
             if (null!=callback){
-                callback.onFileDownloadUpdate(succeed,what,account,from,to,data);
+                callback.onFileDownloadUpdate(finish,what,account,from,to,data);
             }
     }
 

@@ -1,5 +1,6 @@
 package com.merlin.player;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -110,6 +111,11 @@ public class Player implements Status{
                     lastPlay=null;
                     mPlayRunnable=null;
                     mHandler=null;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                        Looper.myLooper().quitSafely();
+                    }else{
+                        Looper.myLooper().quit();
+                    }
                     Debug.D(getClass(),"Recycling player resources.");
                 }
             }).start();

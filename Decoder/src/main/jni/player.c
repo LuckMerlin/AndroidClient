@@ -27,6 +27,8 @@ int MEDIA_TYPE_AUDIO_STREAM=2;
 #define BUFFER_READ_FINISH_EOF -1
 #define BUFFER_READ_FINISH_INNER_ERROR -5
 #define BUFFER_READ_FINISH_NORMAL -2
+#define BUFFER_READ_FINISH_EXCEPTION -6
+#define BUFFER_READ_FINISH_EOFE -7
 
 static JavaVM  *VM=NULL;
 
@@ -149,7 +151,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     (*env)->DeleteLocalRef(env, bufferClass);
     (*env)->DeleteLocalRef(env, methodId);
     if(!opened) {
-        LOGW("Failed open media buffer.");
+        LOGW("Failed play media,Failed open media buffer.");
         return JNI_FALSE;
     }
     size_t handleSize=sizeof(struct BufferHandle);
