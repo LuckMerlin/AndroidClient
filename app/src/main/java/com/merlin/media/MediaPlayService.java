@@ -148,7 +148,7 @@ public class MediaPlayService extends Service implements Status {
         media.setUrl("./WMDYY.mp3");
         mPlayer.append(media);
         new Handler().postDelayed(()->{
-            mPlayer.play(1,0.9f,null);
+//            mPlayer.play(1,0.9f,null);
 //            Playable sss=mPlayer.getPlaying();
         },5000);
 

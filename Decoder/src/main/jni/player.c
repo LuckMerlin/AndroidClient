@@ -95,12 +95,6 @@ static inline void onFrameDecode(int mediaType,jobject media,struct mad_header h
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond  = PTHREAD_COND_INITIALIZER;
 
-void releaseMutex( char* debug){
-    pthread_mutex_lock(&mutex);
-    pthread_cond_signal(&cond);
-    pthread_mutex_unlock(&mutex);
-}
-
 int pauseMedia(jboolean stop){
     return JNI_FALSE;
 }
