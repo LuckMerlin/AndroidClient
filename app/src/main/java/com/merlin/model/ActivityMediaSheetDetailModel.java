@@ -33,13 +33,13 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
 
     public ActivityMediaSheetDetailModel(Context context){
         super(context,new SheetMediaAdapter(),new LinearLayoutManager(context), new LinearItemDecoration(8));
-//        Sheet sheet=new Sheet();
-//        sheet.setName("手动阀手动阀 ");
-//        sheet.setAccount("linqiang");
-//        sheet.setId("手动阀手动阀 ");
-//        sheet.setSize(12141);
-//        sheet.setCreate(12141);
-//        loadSheet(sheet);
+        Sheet sheet=new Sheet();
+        sheet.setName("手动阀手动阀 ");
+        sheet.setAccount("linqiang");
+        sheet.setId("手动阀手动阀 ");
+        sheet.setSize(12141);
+        sheet.setCreate(12141);
+        loadSheet(sheet);
     }
 
     @Override
@@ -49,8 +49,6 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         if (null!=sheetId&&!sheetId.isEmpty()){
             mSheet.set(sheet);
             loadSheet(sheet);
-        }else{
-            Debug.W(getClass(),"Media sheet id is None."+sheet);
         }
     }
 
@@ -73,11 +71,12 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         putIfNotNull(object,TAG_PAGE,0);
         putIfNotNull(object,TAG_LIMIT,10);
         putIfNotNull(object,TAG_ID,sheetId);
-        return null!=request(account, "/sheet/item/" + sheetId, object, new OnObjectRequestFinish<List<Media>>() {
+        return null!=request(account, "/sheet/item/" + sheetId, object, new OnObjectRequestFinish<Sheet>() {
             @Override
-            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, List<Media> data) {
+            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, Sheet data) {
+                List<Media> list=data.getData();
                 if (succeed){
-                    getAdapter().setData(data);
+                    getAdapter().setData(list);
                 }else{
                     toast(R.string.requestFail);
                 }

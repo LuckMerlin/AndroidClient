@@ -1,7 +1,13 @@
 package com.merlin.media;
 
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import androidx.annotation.RequiresApi;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public final class Sheet implements Parcelable {
@@ -19,6 +25,7 @@ public final class Sheet implements Parcelable {
     private String id;
     private String note;
     private long create;
+    private List<Media> data;
 
     public Sheet(){
         this(null);
@@ -80,6 +87,15 @@ public final class Sheet implements Parcelable {
         return note;
     }
 
+    public void setData(List<Media> data) {
+        this.data = data;
+    }
+
+    public List<Media> getData() {
+        return data;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private Sheet(Parcel in){
         if (null!=in){
             name=in.readString();
@@ -89,9 +105,11 @@ public final class Sheet implements Parcelable {
             create=in.readLong();
             account=in.readString();
             note=in.readString();
+            data=in.readParcelableList(new ArrayList<>(),Media.class.getClassLoader());
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
@@ -101,6 +119,7 @@ public final class Sheet implements Parcelable {
         dest.writeLong(create);
         dest.writeString(account);
         dest.writeString(note);
+        dest.writeParcelableList(data,flags);
     }
 
     @Override
