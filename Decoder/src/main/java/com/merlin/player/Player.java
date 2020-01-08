@@ -105,11 +105,8 @@ public class Player implements Status{
                            lastPlay=mPlaying;
                            mPlaying=task;
                            Debug.D(getClass(),"Play "+task);
-                           int status=playMedia(task,task.getSeek());
+                           playMedia(task,task.getSeek());
                            mPlaying=null;
-                           if (status==Status.STATUS_STOP){
-                               break;
-                           }
                        }
                     }
                     lastPlay=null;

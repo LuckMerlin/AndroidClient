@@ -139,7 +139,7 @@ public class MediaPlayService extends Service implements Status {
         media.setAccount("linqiang");
         media.setPath("");
         media.setUrl("./WBYRNYGR.mp3");
-        mPlayer.append(media);
+//        mPlayer.append(media);
         media=new Media();
         media.setName("我们不一样.mp3");
         media.setAccount("linqiang");
@@ -148,7 +148,7 @@ public class MediaPlayService extends Service implements Status {
         mPlayer.append(media);
         mPlayer.play(0,0,null);
         new Handler().postDelayed(()->{
-            mPlayer.play(0,0,null);
+//            mPlayer.play(0,0,null);
 //            mPlayer.pause(true);
 //            mPlayer.play(1,0.55f,null);
 //            Playable sss=mPlayer.getPlaying();

@@ -56,10 +56,12 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                 case What.WHAT_NOT_EXIST:
                     Debug.D(getClass(),"File not exist."+account+" "+url);
                     reader.wakeUp(What.WHAT_NOT_EXIST,"Url file not exist."+account+" "+url);
+                    reader.setCanceler(null);
                     break;
                 case What.WHAT_NOT_ONLINE:
                     Debug.D(getClass(),"Client not online."+account+" "+url);
                     reader.wakeUp(What.WHAT_NOT_ONLINE,"Client not online."+account+" "+url);
+                    reader.setCanceler(null);
                     break;
                 case What.WHAT_HEAD_DATA:
                     Debug.D(getClass(),"Media file head got."+account+" "+url);
@@ -79,6 +81,7 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                     if (!succeed){//Not succeed
                         reader.mState=what;
                         reader.mWriteComplete=true;
+                        reader.setCanceler(null);
                         reader.wakeUp(what," "+note+account+" "+url);
                     }
                     break;
@@ -270,11 +273,9 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
                 reader.mCanceler=null;
                 closeIO(mAccess);
                 mAccess=null;
-                Debug.D(getClass(),"$$$$$$$$$$$$$ canceler @@@@@@@ "+canceler);
                 if (null!=canceler&&canceler.cancel(true)){
                     waitHere(What.WHAT_CANCEL,"While need wait cancel.");
                 }
-
                 return true;
             }
             return false;
