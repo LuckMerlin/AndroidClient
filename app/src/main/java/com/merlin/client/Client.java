@@ -191,7 +191,7 @@ public final class Client extends Socket {
         Json.putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_REQUEST);
         final Canceler cancel=new Canceler();
         return sendMessage(object.toString(), from, TAG_MESSAGE_QUERY, null, -1,(OnRequestFinish)(succeed,what,note,frame)->{
-                    if (succeed){
+            if (succeed){
                         T data=null;
                         if (frame.isExistBody()) {
                             Type[] types = callback.getClass().getGenericInterfaces();

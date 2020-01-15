@@ -39,7 +39,8 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         sheet.setId("手动阀手动阀 ");
         sheet.setSize(12141);
         sheet.setCreate(12141);
-        loadSheet(sheet);
+        Debug.D(getClass(),"######## account ###### ");
+//        loadSheet(sheet);
     }
 
     @Override
@@ -48,7 +49,6 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         String sheetId=null!=sheet?sheet.getId():null;
         if (null!=sheetId&&!sheetId.isEmpty()){
             mSheet.set(sheet);
-            loadSheet(sheet);
         }
     }
 
@@ -59,14 +59,11 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         }
     }
 
-    private boolean loadSheet(Sheet sheet){
-        String sheetId=null!=sheet?sheet.getId():null;
+    private boolean loadSheet(String account,String sheetId){
         if (null==sheetId||sheetId.isEmpty()){
             Debug.W(getClass(),"Can't request media sheet by id."+sheetId);
             return false;
         }
-        mSheet.set(sheet);
-        String account=sheet.getAccount();
         JSONObject object=new JSONObject();
         putIfNotNull(object,TAG_PAGE,0);
         putIfNotNull(object,TAG_LIMIT,10);

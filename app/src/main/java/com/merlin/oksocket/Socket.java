@@ -127,6 +127,7 @@ public class Socket implements Tag {
 
                @Override
                public void onSocketReadResponse(ConnectionInfo info, String action, OriginalData data) {
+                   Debug.D(getClass(),"QQQQWQQEQWEQEWQ   ");
                    if (null==data){
                        return;
                    }

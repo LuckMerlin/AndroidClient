@@ -42,6 +42,7 @@ public class ActivityMediaSheetModel extends DataListModel<Sheet> implements Bas
         request(mCloudAccount,"/sheet",object,new OnObjectRequestFinish<List<Sheet>>(){
             @Override
             public void onObjectRequested(boolean succeed, int what, String note, Frame frame, List<Sheet> data) {
+                Debug.D(getClass(),"@@@@@@@@@@@ "+data);
                 getAdapter().setData(data);
             }
         });
