@@ -14,7 +14,6 @@
             android:id="@+id/mediaSheetLayout_sheetsRV"
             binding:adapter="@{vm.adapter}"
             binding:layoutManager="@{vm.layoutManager}"
-            binding:itemDecoration="@{vm.itemDecoration}"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </FrameLayout>

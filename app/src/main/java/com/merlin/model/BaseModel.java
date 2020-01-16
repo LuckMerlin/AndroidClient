@@ -25,6 +25,7 @@ import com.merlin.oksocket.Socket;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
 import com.merlin.server.Json;
+import com.trello.rxlifecycle2.LifecycleProvider;
 
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.json.JSONObject;
@@ -277,6 +278,15 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     protected final LayoutInflater getLayoutInflater(){
         Context context=getContext();
         return null!=context?LayoutInflater.from(context):null;
+    }
+
+    protected final LifecycleProvider getLifecycleProvider(){
+        View view=getRoot();
+        Context context=null!=view?view.getContext():null;
+        if (null!=context&&context instanceof LifecycleProvider){
+            return (LifecycleProvider)context;
+        }
+        return null;
     }
 
     protected final boolean closeIO(Closeable closeable){
