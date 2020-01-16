@@ -3,11 +3,12 @@ package com.merlin.retrofit;
 import android.app.Activity;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.merlin.debug.Debug;
 import com.trello.rxlifecycle2.LifecycleProvider;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -26,12 +27,17 @@ public final class Retrofit implements What{
         this(null);
     }
 
-    public interface Callback{
+    public interface ApiCallback{
 
     }
 
+    public interface OnApiFinish extends ApiCallback{
+        void onApiFinish(int what,String note,Object data);
+    }
+
     public Retrofit(String url){
-        mUrl=null!=url&&url.length()>=0?url:"http://172.16.20.215:2008";
+        mUrl=null!=url&&url.length()>=0?url:"http://192.168.0.3:2008";
+//        mUrl=null!=url&&url.length()>=0?url:"http://172.16.20.215:2008";
     }
 
     public final <T> T prepare(Class<T> cls){
@@ -39,7 +45,7 @@ public final class Retrofit implements What{
     }
 
     public final <T> T prepare(Class<T> cls,String url){
-        final String uri=url;
+        final String uri=null!=url&&url.length()>0?url:mUrl;
         final int timeout =mTimeout>=0?mTimeout:10;
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .readTimeout(timeout, TimeUnit.SECONDS)//设置读取超时时间
@@ -54,94 +60,107 @@ public final class Retrofit implements What{
         return retrofit.create(cls);
     }
 
-    public final <M> boolean subscribe(Observable observable,Callback ...callbacks){
+
+    public final <T> T call(Class<T> cls,ApiCallback ...callbacks){
+        if (null!=cls){
+            return (T)Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls},(proxy, method,args)->{
+                        T instance=prepare(cls);
+                        Object ret=null!=instance?method.invoke(instance,args):null;
+                        if (null!=ret&&ret instanceof Observable) {
+                            subscribe((Observable) ret, callbacks);
+                        }
+                        return ret;
+                    }
+            );
+        }
+        return null;
+    }
+
+    public final <M> boolean subscribe(Observable observable,ApiCallback ...callbacks){
         if (null==observable){
             onFinish(WHAT_ARGS_INVALID,"Observable is Null.",null,callbacks);
             return false;
         }
-        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        observable=observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
         WeakReference<LifecycleProvider> reference=mLifecycleProvider;
         LifecycleProvider provider=null!=reference?reference.get():null;
         if (null!=provider&&provider instanceof Activity){
             observable.compose(provider.bindUntilEvent(ActivityEvent.DESTROY));
         }
-        observable.subscribe(new ApiCallback<M>(){
-
-        });
-        return true;
+        if (null!=observable){
+            observable.subscribe(new Callback<M>(callbacks));
+        }
+        return null!=observable;
     }
 
 
-    private class ApiCallback<M> extends DisposableObserver<M> {
+    private class Callback<M> extends DisposableObserver<M> {
+        private final ApiCallback[] mCallbacks;
+        private String mMessage;
+        private int mWhat;
+        private M mData;
+
+        public Callback(ApiCallback ...callbacks){
+            mCallbacks=callbacks;
+        }
 
         @Override
         public void onError(Throwable e) {
             e.printStackTrace();
+            mWhat=WHAT_UNKNOWN_ERROR;
+            mMessage=e.toString();
             if (e instanceof HttpException) {
                 HttpException httpException = (HttpException) e;
                 //httpException.response().errorBody().string()
                 int code = httpException.code();
-                String msg = httpException.getMessage();
-                int what=-1;
+                mMessage = httpException.getMessage();
                 if (code == 504) {
-                    what=;
+                    mMessage=" 网速慢";
+                    mWhat=WHAT_NETWORK_POOR;
                 } else if (code == 502) {
-                    msg = "服务器异常，请稍后再试";
+                    mMessage = "服务器异常，请稍后再试";
+                    mWhat=WHAT_SERVER_EXCEPTION;
                 } else if (code == 408) {
-                    msg = "请求超时";
+                    mMessage = "请求超时";
+                    mWhat=WHAT_TIMEOUT;
                 } else if (code == 403) {
-                    msg = "没有权限访问";
+                    mMessage = "没有权限访问";
+                    mWhat=WHAT_NONE_PERMISSION;
                 } else if (code == 401) {
+                    mMessage="token失败";
+                    mWhat=WHAT_TOKEN_INVALID;
                 }
-                onFailure(msg);
-            } else {
-                onFailure(e.getMessage());
             }
-            onFinish();
+            onFinish(mWhat,mMessage,e,mCallbacks);
         }
 
         @Override
         public void onNext(M model) {
-            Class modelClass = model.getClass();
-            Field field = null;
-            try {
-                field = modelClass.getDeclaredField("resultHint");
-                field.setAccessible(true);
-                if (field.get(model) != null && "unLogin".equals(field.get(model).toString())) {
-//                Intent intent = MyApplication.getInstance().getPackageManager().getLaunchIntentForPackage("com.tgdz.gkpttj");
-//                MyApplication.getInstance().startActivity(intent);
-//                AppManager.getAppManager().finishAllActivity();
-//                SPUtil.clear("class com.tgdz.gkpttj.entity.SysUser");
-//                SPUtil.clear("hasloggedin");
-//                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/gkpttj");
-//                FileUtil.deleteAllFilesOfDir(file);
-                    return;
-                } else if (field.get(model) != null && "Token失效".equals(field.get(model).toString())) {
-//                Intent intent = MyApplication.getInstance().getPackageManager().getLaunchIntentForPackage("com.tgdz.gkpttj");
-//                MyApplication.getInstance().startActivity(intent);
-//                AppManager.getAppManager().finishAllActivity();
-//                SPUtil.clear("class com.tgdz.gkpttj.entity.SysUser");
-//                SPUtil.clear("hasloggedin");
-//                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/gkpttj");
-//                FileUtil.deleteAllFilesOfDir(file);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            onSuccess(model);
+            mWhat=WHAT_RESPONSED;
+            mData=null;
+            mMessage="收到数据了";
+            Debug.D(getClass(),"######### 收到数据 "+model);
 
         }
 
         @Override
         public void onComplete() {
-            onFinish();
+            onFinish(mWhat,mMessage="结束了",mData,mCallbacks);
         }
-
 
     }
 
-    private boolean onFinish(int what,String note,Object data,Callback ...callbacks){
 
+    private boolean onFinish(int what,String note,Object data,ApiCallback ...callbacks){
+        if (null!=callbacks&&callbacks.length>0){
+            for (ApiCallback callback:callbacks) {
+                if (null!=callback&&callback instanceof OnApiFinish){
+                    ((OnApiFinish)callback).onApiFinish(what,note,data);
+                }
+            }
+            return true;
+
+        }
         return false;
     }
 

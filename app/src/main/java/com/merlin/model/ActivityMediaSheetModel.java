@@ -11,7 +11,9 @@ import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.User;
+import com.merlin.debug.Debug;
 import com.merlin.media.Sheet;
+import com.merlin.retrofit.Retrofit;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import java.io.IOException;
@@ -24,7 +26,6 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 
@@ -32,41 +33,8 @@ public class ActivityMediaSheetModel extends DataListModel<Sheet> implements Bas
     private final String mCloudAccount;
 
     private interface ApiUrl{
-        //get请求
-        @GET(Address.PREFIX_USER+"login")
+        @GET(Address.PREFIX_MEDIA+"sheets")
         Observable<User> login();
-    }
-
-
-    public class LogInterceptor implements Interceptor {
-        private String TAG = "okhttp";
-
-        @Override
-        public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
-            Request request = chain.request()
-//                .newBuilder()
-//                .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-//                .addHeader("Accept-Encoding", "gzip, deflate")
-//                .addHeader("Connection", "keep-alive")
-//                .addHeader("Accept", "*/*")
-//                .addHeader("Cookie", "add cookies here")
-//                .build()
-                    ;
-
-            Log.e(TAG,"request:" + request.toString());
-            long t1 = System.nanoTime();
-            okhttp3.Response response = chain.proceed(chain.request());
-            long t2 = System.nanoTime();
-            Log.e(TAG,String.format(Locale.getDefault(), "Received response for %s in %.1fms%n%s",
-                    response.request().url(), (t2 - t1) / 1e6d, response.headers()));
-            okhttp3.MediaType mediaType = response.body().contentType();
-            String content = response.body().string();
-            Log.e(TAG, "response body:" + content);
-            return response.newBuilder()
-                    .body(okhttp3.ResponseBody.create(mediaType, content))
-//                .header("Authorization", Your.sToken)
-                    .build();
-        }
     }
 
 
@@ -82,41 +50,13 @@ public class ActivityMediaSheetModel extends DataListModel<Sheet> implements Bas
 
 
     private void test(){
-        String baseUrl="http://172.16.20.215:2008";
-        int DEFAULT_TIMEOUT =10;
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)//设置读取超时时间
-                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)//设置请求超时时间
-                .writeTimeout(DEFAULT_TIMEOUT,TimeUnit.SECONDS)//设置写入超时时间
-                .addInterceptor(new LogInterceptor())//添加打印拦截器
-                .retryOnConnectionFailure(true)//设置出现错误进行重新连接。
-                .build();
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(baseUrl).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        ApiUrl api = retrofit.create(ApiUrl.class);
-        api.login().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .compose(getLifecycleProvider().bindUntilEvent(ActivityEvent.DESTROY))
-                .subscribe(new ApiCallback() {
-                    @Override
-                    public void onSuccess(Object model) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        super.onComplete();
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        toast("结束  ");
-                    }
-                });
+        Debug.D(getClass(),"############# ");
+        call(ApiUrl.class,new Retrofit.OnApiFinish(){
+            @Override
+            public void onApiFinish(int what, String note, Object data) {
+                Debug.D(getClass(),"$$$$$$$$$ 结束  "+what+" "+note+" "+data);
+            }
+        }).login();
     }
 
     @Override

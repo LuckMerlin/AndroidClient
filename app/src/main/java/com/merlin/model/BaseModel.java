@@ -24,6 +24,7 @@ import com.merlin.oksocket.Callback;
 import com.merlin.oksocket.Socket;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
+import com.merlin.retrofit.Retrofit;
 import com.merlin.server.Json;
 import com.trello.rxlifecycle2.LifecycleProvider;
 
@@ -314,6 +315,16 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     protected final <T> T getDataFromIntent(Intent intent,Class<T> cls){
           Parcelable parcelable=null!=intent?intent.getParcelableExtra(LABEL_ACTIVITY_DATA):null;
           return null!=cls&&null!=parcelable&&parcelable.getClass().isAssignableFrom(cls)?(T)parcelable:null;
+    }
+
+    private final Retrofit mRetrofit=new Retrofit();
+
+    protected final <T> T call(Class<T> cls, Retrofit.ApiCallback...callbacks){
+        Retrofit retrofit=mRetrofit;
+        if (null!=cls){
+            return retrofit.call(cls,callbacks);
+        }
+        return null;
     }
 
 }
