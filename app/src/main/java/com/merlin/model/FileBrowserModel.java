@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 
 import androidx.databinding.ObservableBoolean;
@@ -17,8 +16,9 @@ import com.alibaba.fastjson.JSON;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
-import com.merlin.bean.FileBrowserMeta;
+import com.merlin.api.Address;
 import com.merlin.bean.FileMeta;
+import com.merlin.bean.FileMeta_BK;
 import com.merlin.bean.Meta;
 import com.merlin.client.Client;
 import com.merlin.client.R;
@@ -26,6 +26,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
+import com.merlin.retrofit.Retrofit;
 import com.merlin.view.ContextMenu;
 import com.merlin.view.ContextMenuWindow;
 import com.merlin.protocol.Tag;
@@ -38,27 +39,78 @@ import com.merlin.task.DownloadService;
 
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.List;
+
+import io.reactivex.Observable;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
         BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive,
         BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, BaseAdapter.OnItemMultiClickListener, Tag {
     private String mLoadingPath=null,mParentPath;
+    private final ObservableField<FileMeta> mCurrFolder=new ObservableField();
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
     private final ContextMenuWindow mPopupWindow=new ContextMenuWindow(true);
+    private String mBrowsingPath;
+
+    private interface BrowserApi{
+        @POST(Address.PREFIX_FILE_BROWSER)
+        @FormUrlEncoded
+        Observable<com.merlin.api.Response> queryFiles(@Field("path") String path, @Field("name") String name);
+    }
 
     private interface OnChooseExist{
-        void onChooseExist(List<FileMeta> list);
+        void onChooseExist(List<FileMeta_BK> list);
     }
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
+        post(new Runnable() {
+            @Override
+            public void run() {
+                browserPath("/");
+            }
+        },2000);
     }
+
+    private boolean browserPath(final String path){
+        if (null==path||path.length()<=0){
+            Debug.W(getClass(),"Can't browser invalid path "+path);
+            return false;
+        }
+        final String browsingPath=mBrowsingPath;
+        if (null!=browsingPath){
+            synchronized (browsingPath){
+                if (browsingPath.equals(path)){
+                    Debug.W(getClass(),"Not need browser path again "+path);
+                    return false;
+                }
+            }
+        }
+        setRefreshing(true);
+        mBrowsingPath=path;
+        return null!=call(BrowserApi.class,(Retrofit.OnApiFinish<com.merlin.api.Response<FileMeta>>)(what, note, data, arg)->{
+            setRefreshing(false);
+            if (null!=data&&data.isSuccess()){
+                String browsing=mBrowsingPath;
+                if (null!=browsing){
+                    synchronized (browsing){
+                        if (browsing.equals(path)){
+                            mCurrFolder.set(data.getData());
+                            mBrowsingPath=null;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 
     @Override
     public void onBridgeBoundChange(boolean bound) {
@@ -72,15 +124,15 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     @Override
     public void onItemClick(View view, int sourceId,int position, Object data) {
         if (null!=data){
-            if (data instanceof FileMeta){
-                onFileMetaClick(view, sourceId, position, (FileMeta) data);
+            if (data instanceof FileMeta_BK){
+                onFileMetaClick(view, sourceId, position, (FileMeta_BK) data);
             }else if (data instanceof ContextMenu){
                 onContextMenuClick(view,sourceId,position,(ContextMenu)data);
             }
         }
     }
 
-    private void onFileMetaClick(View view, int sourceId,int position, FileMeta file){
+    private void onFileMetaClick(View view, int sourceId,int position, FileMeta_BK file){
         if (null!=file) {
             if (isMultiMode().get()) {
                 multiChoose(file);
@@ -107,7 +159,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     @Override
     public boolean onItemMultiClick(View view, int clickCount, int sourceId, int position, Object data) {
         if (null!=data){
-            if (data instanceof FileMeta){
+            if (data instanceof FileMeta_BK){
                 if(clickCount==2){
                     mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
                     mPopupWindow.setOnItemClickListener(this);
@@ -121,7 +173,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public boolean onItemLongClick(View view, int sourceId,int position, Object data) {
-        if (null!=data&&data instanceof FileMeta){
+        if (null!=data&&data instanceof FileMeta_BK){
             return !isMultiMode().get()&&multiMode(true);
         }
         return false;
@@ -261,43 +313,46 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     private boolean browser(String path,String debug){
         if (null!=path){
-            JSONObject object=new JSONObject();
-            putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
-            putIfNotNull(object,TAG_FILE,path);
-            putIfNotNull(object,TAG_THUMBNAIL,"");
-            setRefreshing(true);
-            mLoadingPath=path;
-            Meta meta=mClientMeta.get();
-            String account=null!=meta?meta.getAccount():null;
-            Debug.D(getClass(),"Browsing "+path+" on "+account+" "+(null!=debug?debug:"."));
-            return sendMessage(object.toString(), account, TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
-                @Override
-                public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
-                    if (null!=mLoadingPath){
-                        synchronized (mLoadingPath){
-                            if (mLoadingPath.equals(path)){
-                                mLoadingPath=null;
-                                setRefreshing(false);
-                            }
-                        }
-                    }
-                    if (succeed){
-                        String data=null!=frame?frame.getBodyText():null;
-                        FileBrowserMeta meta=null!=data&&data.length()>0? parseObject(data, FileBrowserMeta.class):null;
-                        if (null!=meta){
-                            if (meta.isDirectory()){
-                                mCurrPath.set(meta.getFile());
-                                mParentPath=meta.getParent();
-                                List<FileMeta> list=null!=meta?meta.getData():null;
-                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
-                                setData(list,true);
-                            }else{
-                                Debug.D(getClass(),"这是一个文件啊 ");
-                            }
-                        }
-                    }
-                }
-            });
+
+
+
+//            JSONObject object=new JSONObject();
+//            putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
+//            putIfNotNull(object,TAG_FILE,path);
+//            putIfNotNull(object,TAG_THUMBNAIL,"");
+//            setRefreshing(true);
+//            mLoadingPath=path;
+//            Meta meta=mClientMeta.get();
+//            String account=null!=meta?meta.getAccount():null;
+//            Debug.D(getClass(),"Browsing "+path+" on "+account+" "+(null!=debug?debug:"."));
+//            return sendMessage(object.toString(), account, TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
+//                @Override
+//                public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
+//                    if (null!=mLoadingPath){
+//                        synchronized (mLoadingPath){
+//                            if (mLoadingPath.equals(path)){
+//                                mLoadingPath=null;
+//                                setRefreshing(false);
+//                            }
+//                        }
+//                    }
+//                    if (succeed){
+//                        String data=null!=frame?frame.getBodyText():null;
+//                        FileBrowserMeta meta=null!=data&&data.length()>0? parseObject(data, FileBrowserMeta.class):null;
+//                        if (null!=meta){
+//                            if (meta.isDirectory()){
+//                                mCurrPath.set(meta.getFile());
+//                                mParentPath=meta.getParent();
+//                                List<FileMeta_BK> list=null!=meta?meta.getData():null;
+//                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
+//                                setData(list,true);
+//                            }else{
+//                                Debug.D(getClass(),"这是一个文件啊 ");
+//                            }
+//                        }
+//                    }
+//                }
+//            });
         }
         Debug.W(getClass(),"Can't browser path which is invalid."+path);
         return false;
@@ -361,7 +416,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         return false;
     }
 
-    private boolean multiChoose(FileMeta meta){
+    private boolean multiChoose(FileMeta_BK meta){
         FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
         if (null!=meta&&mMultiMode.get()&&adapter.multiChoose(meta)){
             multiChooseCount();
@@ -379,7 +434,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         mMultiCount.set(count<=0?"None selected":"Selected("+count+")");
         BaseAdapter adapter=getAdapter();
         if (null!=adapter){
-            List<FileMeta> data=adapter.getData();
+            List<FileMeta_BK> data=adapter.getData();
             int size=null!=data?data.size():0;
             mAllChoose.set(size==count&&size>0);
         }
@@ -391,7 +446,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     private void runChoose(OnChooseExist exit,boolean emptyToast){
         FileBrowserAdapter adapter=((FileBrowserAdapter)getAdapter());
-        List<FileMeta> list=null!=adapter?adapter.getChoose():null;
+        List<FileMeta_BK> list=null!=adapter?adapter.getChoose():null;
         if (null==list||list.size()<=0){
             if (emptyToast){
                 toast("Choose nothing.");

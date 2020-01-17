@@ -8,12 +8,13 @@
         <import type="android.view.View"/>
     </data>
     <LinearLayout
+        android:layout_margin="10dp"
         android:orientation="vertical"
+        binding:enableBarPadding="@{0}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <include layout="@layout/title"/>
         <LinearLayout
-            android:padding="10dp"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -37,8 +38,6 @@
                 style="@style/titleNormalTextView"/>
         </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
             android:id="@+id/mediaSheetLayout_sheetsRV"
             binding:adapter="@{vm.adapter}"
             binding:layoutManager="@{vm.layoutManager}"

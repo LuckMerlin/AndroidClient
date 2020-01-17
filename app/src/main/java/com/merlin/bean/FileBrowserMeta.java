@@ -8,7 +8,7 @@ public class FileBrowserMeta {
     private boolean directory;
     private int size;
     private double duration;
-    private List<FileMeta> data;
+    private List<FileMeta_BK> data;
 
     public String getFile() {
         return file;
@@ -50,11 +50,11 @@ public class FileBrowserMeta {
         this.duration = duration;
     }
 
-    public List<FileMeta> getData() {
+    public List<FileMeta_BK> getData() {
         return data;
     }
 
-    public void setData(List<FileMeta> data) {
+    public void setData(List<FileMeta_BK> data) {
         this.data = data;
     }
 

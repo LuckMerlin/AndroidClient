@@ -37,13 +37,11 @@
         <TextView
             android:layout_below="@id/itemMediaSheet_RL"
             android:text="@{sheet.title}"
-            android:textColor="@color/textTitle"
-            android:layout_margin="5dp"
+            style="@style/titleNormalTextView"
+            android:layout_marginBottom="2dp"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:textSize="@dimen/textSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:paddingBottom="2dp"/>
 
     </RelativeLayout>
 </layout>

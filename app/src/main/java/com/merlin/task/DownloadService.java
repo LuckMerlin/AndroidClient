@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.FileMeta_BK;
 import com.merlin.breakpoint.BreakPoint;
 import com.merlin.breakpoint.BreakPointer;
 import com.merlin.breakpoint.ShBreakPointer;
@@ -22,11 +22,8 @@ import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.protocol.Tag;
 import com.merlin.protocol.What;
-import com.merlin.server.Response;
 
-import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -479,16 +476,16 @@ public class DownloadService extends Service {
         }
     }
 
-    public static boolean postDownload(Context context,String fromAccount,String folder, FileMeta meta) {
+    public static boolean postDownload(Context context,String fromAccount,String folder, FileMeta_BK meta) {
         if (null!=context&&null!=meta){
-            List<FileMeta> list=new ArrayList<>(1);
+            List<FileMeta_BK> list=new ArrayList<>(1);
             list.add(meta);
             return postDownload(context,fromAccount,folder,list);
         }
         return false;
     }
 
-    public static boolean postDownload(Context context,String fromAccount,String folder, List<FileMeta> download) {
+    public static boolean postDownload(Context context,String fromAccount,String folder, List<FileMeta_BK> download) {
         int size=null!=download?download.size():0;
         if (size>0){
             if (null!=folder&&new File(folder).isFile()){
@@ -497,7 +494,7 @@ public class DownloadService extends Service {
             }
             String unique=Long.toString(System.currentTimeMillis());
             List<Download> downloads=new ArrayList<>(size);
-            for (FileMeta meta:download){
+            for (FileMeta_BK meta:download){
                 if (null!=meta){
                     downloads.add(new Download(fromAccount,meta.getFile(),meta.getName(),folder,unique));
                 }

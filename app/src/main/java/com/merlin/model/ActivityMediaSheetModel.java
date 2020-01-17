@@ -80,7 +80,6 @@ public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implement
     public void onItemClick(View view, int sourceId, int position, MediaSheet data) {
         if (null!=data){
             startActivity(MediaSheetDetailActivity.class,data);
-            finishAllActivity(MediaSheetActivity.class);
         }
     }
 

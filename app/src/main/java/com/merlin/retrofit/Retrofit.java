@@ -34,7 +34,7 @@ public final class Retrofit implements What{
     }
 
     public interface OnApiFinish<T> extends ApiCallback<T>{
-        void onApiFinish(int what,String note,T data);
+        void onApiFinish(int what,String note,T data,Object arg);
     }
 
     public Retrofit(String url){
@@ -151,7 +151,7 @@ public final class Retrofit implements What{
         if (null!=callbacks&&callbacks.length>0){
             for (ApiCallback callback:callbacks) {
                 if (null!=callback&&callback instanceof OnApiFinish){
-                    ((OnApiFinish)callback).onApiFinish(what,note,data);
+                    ((OnApiFinish)callback).onApiFinish(what,note,data,null);
                 }
             }
             return true;

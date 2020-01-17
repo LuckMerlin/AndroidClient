@@ -1,14 +1,13 @@
 package com.merlin.adapter;
 
 
-import android.media.Image;
 import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.FileMeta_BK;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.util.FileSize;
@@ -19,8 +18,8 @@ import java.util.Date;
 import java.util.List;
 
 
-public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBinding>  {
-    private List<FileMeta> mMultiChoose;
+public class FileBrowserAdapter extends BaseAdapter<FileMeta_BK, ItemListFileBinding>  {
+    private List<FileMeta_BK> mMultiChoose;
 
     @Override
     protected int onResolveNormalTypeLayoutId() {
@@ -28,7 +27,7 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta_BK data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data){
             View view=holder.itemView.findViewById(R.id.itemListFile_icon);
             if (null!=view&&view instanceof ImageView){
@@ -46,8 +45,8 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
         }
     }
 
-    public boolean isChoose(FileMeta meta){
-        List<FileMeta> choose=mMultiChoose;
+    public boolean isChoose(FileMeta_BK meta){
+        List<FileMeta_BK> choose=mMultiChoose;
         return null!=meta&&null!=choose&&choose.contains(meta);
     }
 
@@ -60,8 +59,8 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     }
 
     public final boolean chooseAll(boolean choose){
-        List<FileMeta> list = mMultiChoose;
-        List<FileMeta> data = getData();
+        List<FileMeta_BK> list = mMultiChoose;
+        List<FileMeta_BK> data = getData();
         int size = null != data ? data.size() : 0;
         if (choose && (size > 0 &&(null==list||size != list.size()))) {
             if (null==list){
@@ -80,8 +79,8 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
         return false;
     }
 
-    public boolean multiChoose(FileMeta meta){
-        List<FileMeta> list=mMultiChoose;
+    public boolean multiChoose(FileMeta_BK meta){
+        List<FileMeta_BK> list=mMultiChoose;
         if (null!=meta){
             if (null==list?(list=new ArrayList<>()).add(meta):
                     (list.contains(meta)?list.remove(meta):list.add(meta))){
@@ -94,12 +93,12 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     }
 
     public int getChooseCount(){
-        List<FileMeta> list=mMultiChoose;
+        List<FileMeta_BK> list=mMultiChoose;
         return null!=list?list.size():0;
     }
 
-    public List<FileMeta> getChoose(){
-        List<FileMeta> list=mMultiChoose;
+    public List<FileMeta_BK> getChoose(){
+        List<FileMeta_BK> list=mMultiChoose;
         return list;
     }
 }
