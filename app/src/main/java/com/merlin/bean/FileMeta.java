@@ -1,5 +1,7 @@
 package com.merlin.bean;
 
+import java.util.List;
+
 public class FileMeta {
     private String file;
     private double lastModifyTime;
@@ -10,5 +12,6 @@ public class FileMeta {
     private String extension;
     private int length;
     private int childCount;
+    private List<FileMeta> childs;
 
 }

@@ -17,13 +17,17 @@ import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.ApiList;
+import com.merlin.api.Label;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FileMeta_BK;
+import com.merlin.bean.MediaSheet;
 import com.merlin.bean.Meta;
 import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
+import com.merlin.media.Media;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.oksocket.Socket;
 import com.merlin.retrofit.Retrofit;
@@ -48,7 +52,7 @@ import retrofit2.http.POST;
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
         BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive,
-        BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, BaseAdapter.OnItemMultiClickListener, Tag {
+        BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, BaseAdapter.OnItemMultiClickListener, Label, Tag {
     private String mLoadingPath=null,mParentPath;
     private final ObservableField<FileMeta> mCurrFolder=new ObservableField();
     private final ObservableField<String> mCurrPath=new ObservableField<>("");
@@ -62,7 +66,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private interface BrowserApi{
         @POST(Address.PREFIX_FILE_BROWSER)
         @FormUrlEncoded
-        Observable<com.merlin.api.Response<FileMeta>> queryFiles(@Field("path") String path, @Field("name") String name);
+        Observable<com.merlin.api.Response<FileMeta>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FILTER) String name);
     }
 
     private interface OnChooseExist{
@@ -102,7 +106,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 if (null!=browsing){
                     synchronized (browsing){
                         if (browsing.equals(path)){
-                            mCurrFolder.set(data.getData());
+//                            ApiList<FileMeta> list=null!=data?data.getData():null;
+//                          mCurrFolder.set(list);
                             mBrowsingPath=null;
                         }
                     }
