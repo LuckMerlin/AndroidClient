@@ -3,7 +3,8 @@
 <data>
     <variable
         name="sheet"
-        type="com.merlin.media.Sheet" />
+        type="com.merlin.bean.MediaSheet" />
+    <import type="com.merlin.util.Counter"/>
 
 </data>
     <RelativeLayout
@@ -15,9 +16,13 @@
             android:id="@+id/itemMediaSheet_RL"
             android:layout_width="160dp"
             android:layout_height="120dp">
-
+            <ImageView
+                android:src="@{sheet.imageUrl}"
+                android:padding="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
             <TextView
-                android:text="@{Long.toString(sheet.size)}"
+                android:text="@{Integer.toString(sheet.size)}"
                 android:textColor="@color/textTitleSub"
                 android:layout_margin="5dp"
                 android:layout_alignParentLeft="true"
@@ -29,7 +34,7 @@
 
         <TextView
             android:layout_below="@id/itemMediaSheet_RL"
-            android:text="@{sheet.name}"
+            android:text="@{sheet.title}"
             android:textColor="@color/textTitle"
             android:layout_margin="5dp"
             android:layout_centerHorizontal="true"

@@ -2,8 +2,10 @@ package com.merlin.model;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.view.View;
 
+import androidx.annotation.RequiresApi;
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +33,7 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         BaseAdapter.OnItemClickListener<Media>, BaseModel.OnIntentChanged {
     private final ObservableField<Sheet> mSheet=new ObservableField<>();
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     public ActivityMediaSheetDetailModel(Context context){
         super(context,new SheetMediaAdapter(),new LinearLayoutManager(context), new LinearItemDecoration(8));
         Sheet sheet=new Sheet();

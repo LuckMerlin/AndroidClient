@@ -1,10 +1,12 @@
 package com.merlin.adapter;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.merlin.client.R;
 
 import java.lang.ref.WeakReference;
@@ -320,5 +323,4 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
           return null!=view?view.getId():-1;
       }
     }
-
 }

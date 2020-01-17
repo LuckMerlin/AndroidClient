@@ -10,7 +10,7 @@ import okhttp3.Request;
 
 public class LogInterceptor implements Interceptor {
 
-    private String TAG = "okhttp";
+    private String TAG = "LM";
 
     @Override
     public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {

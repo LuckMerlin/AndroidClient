@@ -27,10 +27,6 @@ public final class Sheet implements Parcelable {
     private long create;
     private List<Media> data;
 
-    public Sheet(){
-        this(null);
-    }
-
     public String getName() {
         return name;
     }
@@ -96,6 +92,11 @@ public final class Sheet implements Parcelable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
+    public Sheet(){
+        this(null);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private Sheet(Parcel in){
         if (null!=in){
             name=in.readString();
@@ -129,6 +130,7 @@ public final class Sheet implements Parcelable {
 
     public static final Parcelable.Creator<Sheet> CREATOR = new Parcelable.Creator<Sheet>(){
 
+        @RequiresApi(api = Build.VERSION_CODES.Q)
         @Override
         public Sheet createFromParcel(Parcel source) {
             return new Sheet(source);

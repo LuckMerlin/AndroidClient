@@ -9,5 +9,5 @@ public interface What {
     int WHAT_TIMEOUT = 40009;
     int WHAT_NONE_PERMISSION = 40010;
     int WHAT_TOKEN_INVALID = 40011;
-    int WHAT_RESPONSED = 40012;
+    int WHAT_RESPONSE = 40012;
 }

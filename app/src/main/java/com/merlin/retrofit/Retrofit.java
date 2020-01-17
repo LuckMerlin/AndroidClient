@@ -3,6 +3,8 @@ package com.merlin.retrofit;
 import android.app.Activity;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.merlin.api.Address;
+import com.merlin.api.Response;
 import com.merlin.debug.Debug;
 import com.trello.rxlifecycle2.LifecycleProvider;
 import com.trello.rxlifecycle2.android.ActivityEvent;
@@ -27,17 +29,16 @@ public final class Retrofit implements What{
         this(null);
     }
 
-    public interface ApiCallback{
+    public interface ApiCallback<T>{
 
     }
 
-    public interface OnApiFinish extends ApiCallback{
-        void onApiFinish(int what,String note,Object data);
+    public interface OnApiFinish<T> extends ApiCallback<T>{
+        void onApiFinish(int what,String note,T data);
     }
 
     public Retrofit(String url){
-        mUrl=null!=url&&url.length()>=0?url:"http://192.168.0.3:2008";
-//        mUrl=null!=url&&url.length()>=0?url:"http://172.16.20.215:2008";
+        mUrl=null!=url&&url.length()>0?url: Address.URL;
     }
 
     public final <T> T prepare(Class<T> cls){
@@ -59,7 +60,6 @@ public final class Retrofit implements What{
                 .addConverterFactory(GsonConverterFactory.create()).build();
         return retrofit.create(cls);
     }
-
 
     public final <T> T call(Class<T> cls,ApiCallback ...callbacks){
         if (null!=cls){
@@ -92,7 +92,6 @@ public final class Retrofit implements What{
         }
         return null!=observable;
     }
-
 
     private class Callback<M> extends DisposableObserver<M> {
         private final ApiCallback[] mCallbacks;
@@ -136,11 +135,9 @@ public final class Retrofit implements What{
 
         @Override
         public void onNext(M model) {
-            mWhat=WHAT_RESPONSED;
-            mData=null;
+            mWhat=WHAT_RESPONSE;
+            mData=model;
             mMessage="收到数据了";
-            Debug.D(getClass(),"######### 收到数据 "+model);
-
         }
 
         @Override
@@ -149,7 +146,6 @@ public final class Retrofit implements What{
         }
 
     }
-
 
     private boolean onFinish(int what,String note,Object data,ApiCallback ...callbacks){
         if (null!=callbacks&&callbacks.length>0){
