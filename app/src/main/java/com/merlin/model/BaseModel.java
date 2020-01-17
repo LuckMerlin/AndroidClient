@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -245,19 +246,28 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     }
 
     protected final boolean startActivity(Class<? extends Activity> cls){
-        return startActivity(cls,null);
+        return startActivityWithBundle(cls,null);
+    }
+
+    protected final boolean startActivity(Class<? extends Activity> cls, Serializable data){
+        if (null!=data){
+            Bundle bundle=new Bundle();
+            bundle.putSerializable(LABEL_ACTIVITY_DATA,data);
+            return startActivityWithBundle(cls,bundle);
+        }
+        return startActivityWithBundle(cls,null);
     }
 
     protected final boolean startActivity(Class<? extends Activity> cls, Parcelable data){
         if (null!=data){
             Bundle bundle=new Bundle();
             bundle.putParcelable(LABEL_ACTIVITY_DATA,data);
-            return startActivity(cls,bundle);
+            return startActivityWithBundle(cls,bundle);
         }
-        return startActivity(cls,null);
+        return startActivityWithBundle(cls,null);
     }
 
-    protected final boolean startActivity(Class<? extends Activity> cls, Bundle bundle){
+    protected final boolean startActivityWithBundle(Class<? extends Activity> cls, Bundle bundle){
         Context context=getContext();
         if (null!=context&&null!=cls){
             Intent intent=new Intent(context,cls);
@@ -313,8 +323,9 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     }
 
     protected final <T> T getDataFromIntent(Intent intent,Class<T> cls){
-          Parcelable parcelable=null!=intent?intent.getParcelableExtra(LABEL_ACTIVITY_DATA):null;
-          return null!=cls&&null!=parcelable&&parcelable.getClass().isAssignableFrom(cls)?(T)parcelable:null;
+            Bundle bundle=null!=intent?intent.getExtras():null;
+            Object data=null!=bundle?bundle.get(LABEL_ACTIVITY_DATA):null;
+          return null!=cls&&null!=data&&data.getClass().isAssignableFrom(cls)?(T)data:null;
     }
 
     private final Retrofit mRetrofit=new Retrofit();

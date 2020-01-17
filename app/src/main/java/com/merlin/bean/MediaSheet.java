@@ -1,9 +1,12 @@
 package com.merlin.bean;
 
-public class MediaSheet {
+import java.io.Serializable;
+
+public class MediaSheet implements Serializable {
     private int size;
+    private User createUser;
     private String commentId;
-    private Object createTime;
+    private String createTime;
     private String createUserId;
     private int id;
     private String imageUrl;
@@ -27,15 +30,23 @@ public class MediaSheet {
         this.commentId = commentId;
     }
 
-    public Object getCreateTime() {
+    public void setCreateUser(User createUser) {
+        this.createUser = createUser;
+    }
+
+    public User getCreateUser() {
+        return createUser;
+    }
+
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Object createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
-    public Object getCreateUserId() {
+    public String getCreateUserId() {
         return createUserId;
     }
 
@@ -51,7 +62,7 @@ public class MediaSheet {
         this.id = id;
     }
 
-    public Object getImageUrl() {
+    public String getImageUrl() {
         return imageUrl;
     }
 
@@ -59,7 +70,7 @@ public class MediaSheet {
         this.imageUrl = image;
     }
 
-    public Object getNote() {
+    public String getNote() {
         return note;
     }
 
@@ -82,4 +93,7 @@ public class MediaSheet {
     public void setTitle(String title) {
         this.title = title;
     }
+
+
+
 }

@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_marginBottom="5dp"
-    android:layout_height="50dp">
+    android:layout_height="80dp">
 
+    <ImageView
+        android:src="@drawable/selector_back"
+        android:layout_alignParentLeft="true"
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+
+    <TextView
+        android:text="More"
+        android:layout_alignParentRight="true"
+        style="@style/titleNormalTextView"/>
+
+    <TextView
+        android:text="沙发上"
+        android:layout_centerHorizontal="true"
+        style="@style/titleNormalTextView"/>
 </RelativeLayout>

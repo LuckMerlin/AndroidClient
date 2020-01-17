@@ -7,15 +7,43 @@
             type="com.merlin.model.ActivityMediaSheetModel" />
         <import type="android.view.View"/>
     </data>
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <include layout="@layout/title"/>
+        <LinearLayout
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="推荐"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="精选"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="关注"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="古风"
+                style="@style/titleNormalTextView"/>
+            <TextView
+                android:text="ACG"
+                style="@style/titleNormalTextView"/>
+        </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:id="@+id/mediaSheetLayout_sheetsRV"
             binding:adapter="@{vm.adapter}"
             binding:layoutManager="@{vm.layoutManager}"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
+    </LinearLayout>
 
 </layout>

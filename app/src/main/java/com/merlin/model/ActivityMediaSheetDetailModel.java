@@ -16,6 +16,8 @@ import com.merlin.adapter.GridSpacingItemDecoration;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.adapter.SheetMediaAdapter;
+import com.merlin.bean.MediaSheet;
+import com.merlin.bean.User;
 import com.merlin.client.OnObjectRequestFinish;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -31,27 +33,36 @@ import java.util.List;
 
 public class ActivityMediaSheetDetailModel extends DataListModel<Media> implements
         BaseAdapter.OnItemClickListener<Media>, BaseModel.OnIntentChanged {
-    private final ObservableField<Sheet> mSheet=new ObservableField<>();
+    private final ObservableField<MediaSheet> mSheet=new ObservableField<>();
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public ActivityMediaSheetDetailModel(Context context){
         super(context,new SheetMediaAdapter(),new LinearLayoutManager(context), new LinearItemDecoration(8));
-        Sheet sheet=new Sheet();
-        sheet.setName("手动阀手动阀 ");
-        sheet.setAccount("linqiang");
-        sheet.setId("手动阀手动阀 ");
-        sheet.setSize(12141);
-        sheet.setCreate(12141);
-        Debug.D(getClass(),"######## account ###### ");
-//        loadSheet(sheet);
+        MediaSheet sheet=new MediaSheet();
+        sheet.setTitle("流行音乐 ");
+        sheet.setImageUrl("https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=490485645,758785298&fm=26&gp=0.jpg");
+        sheet.setNote("这是我们撒旦发射点噶是噶是噶 ");
+        User user=new User();
+        user.setName("LuckMerlin");
+        sheet.setCreateUser(user);
+        mSheet.set(sheet);
+        //
+        List<Media> list=new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            Media media=new Media();
+            media.setName("我们");
+            list.add(media);
+        }
+        getAdapter().setData(list);
     }
 
     @Override
     public void onIntentChange(Intent intent) {
-        Sheet sheet=null!=intent?getDataFromIntent(intent,Sheet.class):null;
-        String sheetId=null!=sheet?sheet.getId():null;
+        MediaSheet sheet=null!=intent?getDataFromIntent(intent, MediaSheet.class):null;
+        String sheetId=null!=sheet?sheet.getSheetId():null;
+//        toast("嘻哈十大 "+sheetId);
         if (null!=sheetId&&!sheetId.isEmpty()){
-            mSheet.set(sheet);
+//            mSheet.set(sheet);
         }
     }
 
@@ -62,29 +73,7 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         }
     }
 
-    private boolean loadSheet(String account,String sheetId){
-        if (null==sheetId||sheetId.isEmpty()){
-            Debug.W(getClass(),"Can't request media sheet by id."+sheetId);
-            return false;
-        }
-        JSONObject object=new JSONObject();
-        putIfNotNull(object,TAG_PAGE,0);
-        putIfNotNull(object,TAG_LIMIT,10);
-        putIfNotNull(object,TAG_ID,sheetId);
-        return null!=request(account, "/sheet/item/" + sheetId, object, new OnObjectRequestFinish<Sheet>() {
-            @Override
-            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, Sheet data) {
-                List<Media> list=data.getData();
-                if (succeed){
-                    getAdapter().setData(list);
-                }else{
-                    toast(R.string.requestFail);
-                }
-            }
-        });
-    }
-
-    public ObservableField<Sheet> getSheet() {
+    public ObservableField<MediaSheet> getSheet() {
         return mSheet;
     }
 }

@@ -1,13 +1,17 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.merlin.activity.MediaSheetActivity;
+import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.BaseAdapter;
+import com.merlin.adapter.GridSpacingItemDecoration;
 import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
@@ -20,6 +24,7 @@ import com.merlin.retrofit.Retrofit;
 import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +42,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
-public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implements BaseAdapter.OnItemClickListener<Sheet> {
+public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implements BaseAdapter.OnItemClickListener<MediaSheet> {
 
     private interface SheetApi{
         @POST(Address.PREFIX_MEDIA+"sheets")
@@ -47,48 +52,36 @@ public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implement
 
     public ActivityMediaSheetModel(Context context){
         super(context,new MediaSheetAdapter(),new GridLayoutManager(context,3,
-//                GridLayoutManager.VERTICAL,false),new GridSpacingItemDecoration(3,10,true));
-                GridLayoutManager.VERTICAL,false));
-        post(()->{
-            test();
-        },2000);
+                GridLayoutManager.VERTICAL,false),new GridSpacingItemDecoration(3,10,true));
+//                GridLayoutManager.VERTICAL,false));
+        List<MediaSheet> list=new ArrayList<>();
+        MediaSheet sheet=null;
+        for (int i = 0; i < 20; i++) {
+            sheet=new MediaSheet();
+            sheet.setImageUrl("https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=4038297574,3426702532&fm=26&gp=0.jpg");
+            sheet.setTitle("流行 "+i);
+            sheet.setSheetId("Id "+i);
+            sheet.setSize(400);
+            list.add(sheet);
+        }
+        getAdapter().setData(list);
     }
 
-    private void test(){
-        setRefreshing(true);
-        call(SheetApi.class,(Retrofit.OnApiFinish<Response<ApiList<MediaSheet>>>)(what, note, response)->{
-            setRefreshing(false);
-            List<MediaSheet> list=null!=response?response.getData():null;
-            getAdapter().setData(list);
-        }).querySheets("牛大幅 ",0,10);
-    }
+//    private void test(){
+//        setRefreshing(true);
+//        call(SheetApi.class,(Retrofit.OnApiFinish<Response<ApiList<MediaSheet>>>)(what, note, response)->{
+//            setRefreshing(false);
+//            List<MediaSheet> list=null!=response?response.getData():null;
+//            getAdapter().setData(list);
+//        }).querySheets("牛大幅 ",0,10);
+//    }
 
     @Override
-    public void onItemClick(View view, int sourceId, int position, Sheet data) {
-
+    public void onItemClick(View view, int sourceId, int position, MediaSheet data) {
+        if (null!=data){
+            startActivity(MediaSheetDetailActivity.class,data);
+            finishAllActivity(MediaSheetActivity.class);
+        }
     }
-    //    @Override
-//    protected void onViewAttached(View root) {
-//        super.onViewAttached(root);
-//        JSONObject object=new JSONObject();
-//        putIfNotNull(object,TAG_PAGE,0);
-//        putIfNotNull(object,TAG_LIMIT,10);
-//        request(mCloudAccount,"/sheet",object,new OnObjectRequestFinish<List<Sheet>>(){
-//            @Override
-//            public void onObjectRequested(boolean succeed, int what, String note, Frame frame, List<Sheet> data) {
-//                Debug.D(getClass(),"@@@@@@@@@@@ "+data);
-//                getAdapter().setData(data);
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public void onItemClick(View view, int sourceId, int position, Sheet data) {
-//        if (null!=data){
-//            data.setAccount(mCloudAccount);
-//            startActivity(MediaSheetDetailActivity.class,data);
-//            finishAllActivity(MediaSheetActivity.class);
-//        }
-//    }
 
 }
