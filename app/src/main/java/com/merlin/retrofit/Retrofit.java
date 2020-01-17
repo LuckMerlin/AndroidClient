@@ -11,6 +11,7 @@ import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -151,7 +152,9 @@ public final class Retrofit implements What{
         if (null!=callbacks&&callbacks.length>0){
             for (ApiCallback callback:callbacks) {
                 if (null!=callback&&callback instanceof OnApiFinish){
-                    ((OnApiFinish)callback).onApiFinish(what,note,data,null);
+                    Type ddd=callback.getClass().getGenericSuperclass();
+                    Debug.D(getClass(),"QQQQQQQQQQQQQQ "+ddd+" "+data);
+                    ((OnApiFinish)callback).onApiFinish(what,note,null,null);
                 }
             }
             return true;

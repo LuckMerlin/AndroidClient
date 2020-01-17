@@ -62,7 +62,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private interface BrowserApi{
         @POST(Address.PREFIX_FILE_BROWSER)
         @FormUrlEncoded
-        Observable<com.merlin.api.Response> queryFiles(@Field("path") String path, @Field("name") String name);
+        Observable<com.merlin.api.Response<FileMeta>> queryFiles(@Field("path") String path, @Field("name") String name);
     }
 
     private interface OnChooseExist{
@@ -108,7 +108,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                     }
                 }
             }
-        });
+        }).queryFiles(path,null);
     }
 
 
@@ -354,7 +354,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 //                }
 //            });
         }
-        Debug.W(getClass(),"Can't browser path which is invalid."+path);
+//        Debug.W(getClass(),"Can't browser path which is invalid."+path);
         return false;
     }
 
