@@ -141,15 +141,18 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             if (isMultiMode().get()) {
                 multiChoose(file);
             } else {
-                if (!file.isRead()) {
-                    toast("文件不可读");
-                } else if (file.isDirectory()) {
-                    browser(file.getPath(), "After directory click.");
-                } else {
-                    toast("点击了文件" + file.getTitle());
-                    Debug.D(getClass(), "点击了文件 " + file.getPath());
-//                    DownloadService.postDownload(getContext(), getClientAccount(), null, file);
+                if (file.isDirectory()){
+                    if (file.isRead()) {
+                        browser(file.getPath(), "After directory click.");
+                    }
                 }
+//                if (!file.isRead()) {
+//                    toast("文件不可读");
+//                }else {
+//                    toast("点击了文件" + file.getTitle());
+//                    Debug.D(getClass(), "点击了文件 " + file.getPath());
+////                    DownloadService.postDownload(getContext(), getClientAccount(), null, file);
+//                }
             }
         }
     }
