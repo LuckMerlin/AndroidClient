@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
-import com.merlin.debug.Debug;
 import com.merlin.util.FileSize;
 
 import java.text.SimpleDateFormat;

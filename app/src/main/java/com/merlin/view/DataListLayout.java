@@ -13,7 +13,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.merlin.model.DataListModel;
 
 
-public class DataListLayout extends SwipeRefreshLayout{
+public class DataListLayout extends SwipeRefreshLayout {
     private final RecyclerView mRecyclerView;
 
     public interface Bridge{
