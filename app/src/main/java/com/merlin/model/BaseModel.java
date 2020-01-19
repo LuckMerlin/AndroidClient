@@ -330,7 +330,7 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
 
     private final Retrofit mRetrofit=new Retrofit();
 
-    protected final <T> T call(Class<T> cls, Retrofit.ApiCallback...callbacks){
+    protected final <T> T call(Class<T> cls, com.merlin.api.Callback...callbacks){
         Retrofit retrofit=mRetrofit;
         if (null!=cls){
             return retrofit.call(cls,callbacks);

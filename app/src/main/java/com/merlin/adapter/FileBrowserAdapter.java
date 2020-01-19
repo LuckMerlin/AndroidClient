@@ -1,15 +1,13 @@
 package com.merlin.adapter;
 
 
-import android.view.View;
-import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.FileMeta_BK;
+import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
+import com.merlin.debug.Debug;
 import com.merlin.util.FileSize;
 
 import java.text.SimpleDateFormat;
@@ -18,8 +16,8 @@ import java.util.Date;
 import java.util.List;
 
 
-public class FileBrowserAdapter extends BaseAdapter<FileMeta_BK, ItemListFileBinding>  {
-    private List<FileMeta_BK> mMultiChoose;
+public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBinding>  {
+    private List<FileMeta> mMultiChoose;
 
     @Override
     protected int onResolveNormalTypeLayoutId() {
@@ -27,26 +25,26 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta_BK, ItemListFileBin
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta_BK data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data){
-            View view=holder.itemView.findViewById(R.id.itemListFile_icon);
-            if (null!=view&&view instanceof ImageView){
-                ((ImageView)view).setImageBitmap(data.getThumbnail());
-            }
+//            View view=holder.itemView.findViewById(R.id.itemListFile_icon);
+//            if (null!=view&&view instanceof ImageView){
+//                ((ImageView)view).setImageBitmap(data.getThumbnail());
+//            }
             boolean multiChoose=null!=mMultiChoose;
             binding.setIsChoose(isChoose(data));
             binding.setIsMultiChoose(multiChoose);
             binding.setMeta(data);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String sub=data.isDirectory()?"("+data.getLength()+")":" "+data.getExtension();
+            String sub=data.isDirectory()?"("+data.getChildCount()+")":" "+data.getExtension();
             sub+=" "+ FileSize.formatSizeText(data.getSize());
-            sub+=" "+sdf.format(new Date((long)data.getLastModifyTime()));
+            sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
             setText(binding.itemListFileSub,sub,null);
         }
     }
 
-    public boolean isChoose(FileMeta_BK meta){
-        List<FileMeta_BK> choose=mMultiChoose;
+    public boolean isChoose(FileMeta meta){
+        List<FileMeta> choose=mMultiChoose;
         return null!=meta&&null!=choose&&choose.contains(meta);
     }
 
@@ -59,8 +57,8 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta_BK, ItemListFileBin
     }
 
     public final boolean chooseAll(boolean choose){
-        List<FileMeta_BK> list = mMultiChoose;
-        List<FileMeta_BK> data = getData();
+        List<FileMeta> list = mMultiChoose;
+        List<FileMeta> data = getData();
         int size = null != data ? data.size() : 0;
         if (choose && (size > 0 &&(null==list||size != list.size()))) {
             if (null==list){
@@ -79,8 +77,8 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta_BK, ItemListFileBin
         return false;
     }
 
-    public boolean multiChoose(FileMeta_BK meta){
-        List<FileMeta_BK> list=mMultiChoose;
+    public boolean multiChoose(FileMeta meta){
+        List<FileMeta> list=mMultiChoose;
         if (null!=meta){
             if (null==list?(list=new ArrayList<>()).add(meta):
                     (list.contains(meta)?list.remove(meta):list.add(meta))){
@@ -93,12 +91,12 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta_BK, ItemListFileBin
     }
 
     public int getChooseCount(){
-        List<FileMeta_BK> list=mMultiChoose;
+        List<FileMeta> list=mMultiChoose;
         return null!=list?list.size():0;
     }
 
-    public List<FileMeta_BK> getChoose(){
-        List<FileMeta_BK> list=mMultiChoose;
+    public List<FileMeta> getChoose(){
+        List<FileMeta> list=mMultiChoose;
         return list;
     }
 }

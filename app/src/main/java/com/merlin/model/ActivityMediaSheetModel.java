@@ -1,53 +1,33 @@
 package com.merlin.model;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import com.merlin.activity.MediaSheetActivity;
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.GridSpacingItemDecoration;
 import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
-import com.merlin.api.Response;
+import com.merlin.api.Reply;
 import com.merlin.bean.MediaSheet;
-import com.merlin.bean.User;
-import com.merlin.debug.Debug;
-import com.merlin.media.Sheet;
-import com.merlin.retrofit.Retrofit;
-import com.trello.rxlifecycle2.android.ActivityEvent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
 
 public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implements BaseAdapter.OnItemClickListener<MediaSheet> {
 
     private interface SheetApi{
         @POST(Address.PREFIX_MEDIA+"sheets")
         @FormUrlEncoded
-        Observable<Response<ApiList<MediaSheet>>> querySheets(@Field("name") String name,@Field("page") int page,@Field("limit") int limit);
+        Observable<Reply<ApiList<MediaSheet>>> querySheets(@Field("name") String name, @Field("page") int page, @Field("limit") int limit);
     }
 
     public ActivityMediaSheetModel(Context context){
@@ -69,7 +49,7 @@ public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implement
 
 //    private void test(){
 //        setRefreshing(true);
-//        call(SheetApi.class,(Retrofit.OnApiFinish<Response<ApiList<MediaSheet>>>)(what, note, response)->{
+//        call(SheetApi.class,(Retrofit.OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, response)->{
 //            setRefreshing(false);
 //            List<MediaSheet> list=null!=response?response.getData():null;
 //            getAdapter().setData(list);

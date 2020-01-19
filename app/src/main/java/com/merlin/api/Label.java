@@ -12,4 +12,5 @@ public interface Label{
    String  LABEL_SORT = "sort";
    String  LABEL_ENABLE_META = "enableMeta";
    String  LABEL_FILTER = "filter";
+   String  LABEL_TITLE = "title";
 }

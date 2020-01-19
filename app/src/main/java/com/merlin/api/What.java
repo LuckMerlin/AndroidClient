@@ -13,5 +13,9 @@ public interface What {
     int WHAT_NOT_DIRECTORY = -10009;
     int WHAT_NONE_PERMISSION = -1010;
     int WHAT_FILE_NOT_EXIST = -1011;
+    int WHAT_NETWORK_POOR = -1012;
+    int WHAT_SERVER_EXCEPTION = - 1013;
+    int WHAT_TIMEOUT = - 1014;
+    int WHAT_TOKEN_INVALID = - 1015;
 }
 

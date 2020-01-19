@@ -95,7 +95,7 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
         reader.setCanceler(canceler);
         reader.waitHere(Reader.STATE_OPENING,"For client open response "+account+" "+url);
         if (reader.mState==What.WHAT_HEAD_DATA){
-            return true;//Response head,Now return true to prepare play
+            return true;//Reply head,Now return true to prepare play
         }
         reader.recycle("While client response failed.state="+reader.mState);//
         return false;

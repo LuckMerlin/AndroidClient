@@ -1,6 +1,6 @@
 package com.merlin.api;
 
-public class Response<T> {
+public class Reply<T> {
     private String note;
     private boolean success;
     private int what;

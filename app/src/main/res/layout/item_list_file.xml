@@ -10,14 +10,14 @@
             type="Boolean" />
         <variable
             name="meta"
-            type="com.merlin.bean.FileMeta_BK" />
+            type="com.merlin.bean.FileMeta" />
         <import type="android.view.View"/>
 
     </data>
     <RelativeLayout
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
-        android:background="#45000000"
+        android:background="#23000000"
         android:layout_height="@dimen/listItemNormal">
         <ImageView
             android:id="@+id/itemListFile_icon"
@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:textSize="@dimen/textTitle"
                 android:singleLine="true"
-                android:text="@{meta.name}"
+                android:text="@{meta.title}"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
             <TextView
