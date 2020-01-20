@@ -1,17 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/dlg_titleTV"
-        android:visibility="gone"
-        android:textColor="@color/textNormal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <FrameLayout
-        android:id="@+id/dlg_contentFL"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+
+    </data>
+    <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:background="@drawable/round_corner_small"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/dlg_titleTV"
+                android:visibility="gone"
+                style="@style/titleNormalTextView"/>
+            <FrameLayout
+                android:id="@+id/dlg_contentFL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/dlg_sureTV"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:background="@drawable/round_corner_small"
+                    style="@style/titleNormalTextView"
+                    android:text="@string/sure"/>
+                <TextView
+                    android:id="@+id/dlg_cancelTV"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:background="@drawable/round_corner_small"
+                    android:text="@string/cancel"
+                    style="@style/titleNormalTextView"/>
+            </LinearLayout>
+        </LinearLayout>
+</layout>

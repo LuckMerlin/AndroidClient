@@ -6,6 +6,14 @@
         <item name="android:textColor">@color/textTitle</item>
         <item name="android:textSize">@dimen/textTitle</item>
         <item name="android:layout_margin">5dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="editTextNormal" parent="titleNormalTextView">
+         <item name="android:paddingLeft">10dp</item>
+         <item name="android:paddingRight">10dp</item>
+         <item name="android:layout_width">match_parent</item>
+         <item name="android:layout_height">wrap_content</item>
+         <item name="android:background">@android:color/transparent</item>
     </style>
 
     <style name="checkboxStyle" parent="@android:style/Widget.CompoundButton.CheckBox">
