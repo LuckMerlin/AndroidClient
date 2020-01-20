@@ -12,17 +12,6 @@ public class Permissions {
     private static final int FILE_PERMISSION_USER_EXECUTABLE= 0100 ;//用户可执行
     private static final int FILE_PERMISSION_USER_WRITEABLE= 0200 ;//用户可写
     private static final int FILE_PERMISSION_USER_READABLE= 0400 ;//用户可读
-//    S_IXOTH = 0001      （其他-执行）
-//    S_IWOTH = 0002      （其他-可写）
-//    S_IROTH = 0004      （其他-可读）
-//
-//    S_IXGRP = 0010      （组-执行）
-//    S_IWGRP = 0020      （组-可写）
-//    S_IRGRP = 0040      （组-可读）
-//
-//    S_IXUSR = 0100      （用户-执行）
-//    S_IWUSR = 0200      （用户-可写）
-//    S_IRUSR = 0400      （用户-可读）
 
     public final boolean isDirectory(int permissions){
         return (permissions&FILE_TYPE_MASK) ==FILE_TYPE_IS_DIRECTORY;

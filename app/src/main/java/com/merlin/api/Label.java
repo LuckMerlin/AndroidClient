@@ -14,4 +14,5 @@ public interface Label{
    String  LABEL_FILTER = "filter";
    String  LABEL_TITLE = "title";
    String LABEL_PERMISSIONS = "permissions";
+   String LABEL_PARENT = "parent";
 }

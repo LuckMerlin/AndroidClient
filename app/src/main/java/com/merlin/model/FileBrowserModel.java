@@ -38,7 +38,6 @@ import com.merlin.protocol.Tag;
 import com.merlin.server.Frame;
 import com.merlin.server.Json;
 import com.merlin.server.Response;
-import com.merlin.task.DownloadService;
 
 
 import org.json.JSONObject;
@@ -55,9 +54,7 @@ import static com.merlin.api.What.WHAT_SUCCEED;
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
         BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive,
         BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, BaseAdapter.OnItemMultiClickListener, Label, Tag {
-    private String mLoadingPath=null,mParentPath;
     private final ObservableField<FolderMeta> mCurrent=new ObservableField();
-    private final ObservableField<String> mCurrPath=new ObservableField<>("");
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
@@ -77,10 +74,10 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
-        browserPath(".");
+        browserPath(".","While model create.");
     }
 
-    private boolean browserPath(final String path){
+    private boolean browserPath(final String path,String debug){
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't browser invalid path "+path);
             return false;
@@ -112,6 +109,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                         }
                     }
                 }
+            }else{
+                toast(R.string.requestFail);
             }
         }).queryFiles(path,null);
     }
@@ -142,10 +141,11 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 multiChoose(file);
             } else {
                 if (file.isDirectory()){
-                    if (file.isReadable(file.getPermissions())) {
-                        browser(file.getPath(), "After directory click.");
-                    }
-                }
+//                    if (file.isReadable(file.getPermissions())) {
+                    browserPath(file.getPath(), "After directory click.");
+//                    }
+                }else{
+                    toast("点击了文件" + file.getTitle());
 //                if (!file.isRead()) {
 //                    toast("文件不可读");
 //                }else {
@@ -153,6 +153,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 //                    Debug.D(getClass(), "点击了文件 " + file.getPath());
 ////                    DownloadService.postDownload(getContext(), getClientAccount(), null, file);
 //                }
+                }
             }
         }
     }
@@ -239,22 +240,18 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     private boolean browserParent(String debug){
-        String currPath=mCurrPath.get();
-        Meta meta=mClientMeta.get();
-        String root=null!=meta?meta.getRoot():null;
-        if (null!=currPath&&null!=root&&root.contains(currPath)){
+        FolderMeta current=mCurrent.get();
+        String parent=null!=current?current.getParent():null;
+        if (null==parent||parent.length()<=0){
             return false;
         }
-        return null!=mParentPath&&browser(mParentPath,debug);
+        return browserPath(parent,debug);
     }
 
     @Override
     public void onRefresh() {
-        browser(mCurrPath.get(),"While list refresh trigger.");//Browser current path again
-    }
-
-    public ObservableField<String> getCurrentPath() {
-        return mCurrPath;
+        Debug.D(getClass(),"书信  ");
+//        browser(mCurrPath.get(),"While list refresh trigger.");//Browser current path again
     }
 
     @Override
@@ -305,8 +302,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     public final boolean refreshCurrentPath(String debug){
-        browser(mCurrPath.get(),debug);
-        return false;
+        FolderMeta meta=mCurrent.get();
+        return browserPath(null!=meta?meta.getPath():null,debug);
     }
 
     public final boolean chooseAll(boolean choose){
@@ -316,58 +313,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             return true;
         }
         return false;
-    }
-
-    private boolean browser(String path,String debug){
-        if (null!=path){
-
-
-
-//            JSONObject object=new JSONObject();
-//            putIfNotNull(object,TAG_COMMAND_TYPE,TAG_COMMAND_LIST_DIR);
-//            putIfNotNull(object,TAG_FILE,path);
-//            putIfNotNull(object,TAG_THUMBNAIL,"");
-//            setRefreshing(true);
-//            mLoadingPath=path;
-//            Meta meta=mClientMeta.get();
-//            String account=null!=meta?meta.getAccount():null;
-//            Debug.D(getClass(),"Browsing "+path+" on "+account+" "+(null!=debug?debug:"."));
-//            return sendMessage(object.toString(), account, TAG_MESSAGE_QUERY, new Socket.OnRequestFinish() {
-//                @Override
-//                public void onRequestFinish(boolean succeed, int what,String note, Frame frame) {
-//                    if (null!=mLoadingPath){
-//                        synchronized (mLoadingPath){
-//                            if (mLoadingPath.equals(path)){
-//                                mLoadingPath=null;
-//                                setRefreshing(false);
-//                            }
-//                        }
-//                    }
-//                    if (succeed){
-//                        String data=null!=frame?frame.getBodyText():null;
-//                        FileBrowserMeta meta=null!=data&&data.length()>0? parseObject(data, FileBrowserMeta.class):null;
-//                        if (null!=meta){
-//                            if (meta.isDirectory()){
-//                                mCurrPath.set(meta.getFile());
-//                                mParentPath=meta.getParent();
-//                                List<FileMeta_BK> list=null!=meta?meta.getData():null;
-//                                Debug.D(getClass(),"大小 "+(null!=list?list.size():-1));
-//                                setData(list,true);
-//                            }else{
-//                                Debug.D(getClass(),"这是一个文件啊 ");
-//                            }
-//                        }
-//                    }
-//                }
-//            });
-        }
-//        Debug.W(getClass(),"Can't browser path which is invalid."+path);
-        return false;
-    }
-
-    private String getClientAccount(){
-        Meta meta=mClientMeta.get();
-        return null!=meta?meta.getAccount():null;
     }
 
     public boolean setClientMeta(Meta meta){
@@ -391,12 +336,12 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                     Meta newMeta=null!=list&&list.size()>0?list.get(0):null;
                     mClientMeta.set(newMeta);
                     String root=null!=newMeta?newMeta.getRoot():null;
-                    String curr=mCurrPath.get();
-                    String loading=mLoadingPath;
-                    if (null!=curr&&null!=root&&!curr.contains(root)&&(null==loading||(!loading.isEmpty()
-                            &&!loading.equals(root)))){//Check current if within root
-                       browser(root,"After root changed while meta updated.");
-                    }
+//                    String curr=mCurrPath.get();
+//                    String loading=mLoadingPath;
+//                    if (null!=curr&&null!=root&&!curr.contains(root)&&(null==loading||(!loading.isEmpty()
+//                            &&!loading.equals(root)))){//Check current if within root
+//                       browser(root,"After root changed while meta updated.");
+//                    }
                  }
             });
         }
