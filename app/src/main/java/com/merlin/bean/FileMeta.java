@@ -1,6 +1,8 @@
 package com.merlin.bean;
 
-public final class FileMeta {
+import com.merlin.file.Permissions;
+
+public final class FileMeta extends Permissions {
     private String id;
     private String path;
     private String md5;
@@ -8,7 +10,7 @@ public final class FileMeta {
     private String extension;
     private double createTime;
     private double modifyTime;
-    private String permission;
+    private int permissions;
     private long size;
     private double insertTime;
     private int childCount;
@@ -32,10 +34,6 @@ public final class FileMeta {
         return modifyTime*1000;
     }
 
-    public boolean isRead(){
-        return false;
-    }
-
     public String getPath() {
         return path;
     }
@@ -46,5 +44,13 @@ public final class FileMeta {
 
     public String getTitle() {
         return title;
+    }
+
+    public void setPermissions(int permissions) {
+        this.permissions = permissions;
+    }
+
+    public int getPermissions() {
+        return permissions;
     }
 }

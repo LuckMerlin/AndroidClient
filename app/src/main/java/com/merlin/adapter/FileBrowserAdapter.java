@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
+import com.merlin.debug.Debug;
 import com.merlin.util.FileSize;
 
 import java.text.SimpleDateFormat;
@@ -30,6 +31,9 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
 //            if (null!=view&&view instanceof ImageView){
 //                ((ImageView)view).setImageBitmap(data.getThumbnail());
 //            }
+//            Debug.D(getClass(),"!!!! "+data.getPermissions());
+            Debug.D(getClass(),""+data.getTitle()+" "+data.isReadable(data.getPermissions())+" "+
+                    data.isWriteable(data.getPermissions())+" "+data.isExecutable(data.getPermissions()));
             boolean multiChoose=null!=mMultiChoose;
             binding.setIsChoose(isChoose(data));
             binding.setIsMultiChoose(multiChoose);

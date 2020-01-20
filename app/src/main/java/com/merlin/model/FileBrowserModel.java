@@ -142,7 +142,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                 multiChoose(file);
             } else {
                 if (file.isDirectory()){
-                    if (file.isRead()) {
+                    if (file.isReadable(file.getPermissions())) {
                         browser(file.getPath(), "After directory click.");
                     }
                 }
