@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <import type="android.view.View"/>
+    </data>
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="推荐"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="精选"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="关注"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="古风"
+                style="@style/titleNormalTextView"/>
+            <TextView
+                android:text="ACG"
+                style="@style/titleNormalTextView"/>
+        </LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mediaSheetLayout_sheetsRV"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</layout>
