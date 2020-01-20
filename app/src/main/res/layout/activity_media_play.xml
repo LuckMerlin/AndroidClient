@@ -9,7 +9,6 @@
       <variable
           name="vm"
           type="com.merlin.model.MediaPlayModel" />
-      <import type="com.merlin.view.OnSeekBarChangeListener"/>
   </data>
   <RelativeLayout
       android:padding="10dp"
@@ -60,6 +59,7 @@
       <com.merlin.view.MediaPlayDisplayLayout
           binding:enableBarPadding="@{0}"
           android:layout_marginTop="5dp"
+          binding:viewModel="@{vm}"
           android:id="@+id/activityMediaPlay_displayRV"
           android:layout_width="match_parent"
           android:layout_height="match_parent"/>

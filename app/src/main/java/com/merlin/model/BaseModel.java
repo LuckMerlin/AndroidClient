@@ -207,6 +207,12 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return null!=reference?reference.get():null;
     }
 
+    public final Context getViewContext(){
+        WeakReference<View> reference=mRootView;
+        View view=null!=reference?reference.get():null;
+        return null!=view?view.getContext():null;
+    }
+
     protected final BaseModel putIfNotNull(JSONObject json, String key, Object value){
          Json.putIfNotNull(json,key,value);
          return this;

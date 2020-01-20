@@ -10,6 +10,7 @@ import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.Media;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
@@ -81,7 +82,14 @@ public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnIt
             case R.id.activityMediaPlay_nextIV:
                 player.next();
                 break;
+            case R.id.mediaDisplaySheet_createTV:
+                createSheet();
+                break;
         }
+    }
+
+    private void createSheet(){
+        new SingleInputDialog(getViewContext()).show(R.string.createSheet);
     }
 
     private void updateMode(Mode mode){

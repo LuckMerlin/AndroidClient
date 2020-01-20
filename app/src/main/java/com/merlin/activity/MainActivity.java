@@ -1,8 +1,12 @@
 package com.merlin.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Toast;
 
@@ -51,6 +55,25 @@ public class MainActivity extends Activity implements Tag {
 //            e.printStackTrace();
 //        }
 //        player.play();
+        requestOverlayPermission(this);
+    }
+
+    public void requestOverlayPermission(Activity context) {
+        if (null!=context){
+//            final AlertDialog dialog = new AlertDialog.Builder(context)
+//                    .setTitle("权限申请")
+//                    .setMessage("哈哈权限")
+//                    .setPositiveButton("确认", (dlg,which)->{
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+//                            context.startActivity(intent);
+//                        }
+//                        dlg.dismiss();
+//                    }).setNegativeButton("取消", (dlg,which)->dlg.dismiss())
+//                    .setCancelable(false)
+//                    .create();
+//            dialog.show();
+        }
     }
 
 

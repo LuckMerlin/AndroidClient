@@ -3,6 +3,9 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.view.View"/>
+        <variable
+            name="vm"
+            type="com.merlin.model.MediaPlayModel" />
     </data>
     <LinearLayout
         android:layout_margin="10dp"
@@ -30,6 +33,11 @@
                 style="@style/titleNormalTextView"/>
             <TextView
                 android:text="ACG"
+                style="@style/titleNormalTextView"/>
+            <TextView
+                android:id="@+id/mediaDisplaySheet_createTV"
+                android:onClick="@{vm::onClick}"
+                android:text="Create"
                 style="@style/titleNormalTextView"/>
         </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView

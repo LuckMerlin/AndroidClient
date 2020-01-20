@@ -16,7 +16,7 @@ public class Dialog {
         android.app.Dialog dialog=mDialog=new android.app.Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window=dialog.getWindow();
-        window.setType((WindowManager.LayoutParams.TYPE_SYSTEM_ALERT));
+//        window.setType((WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG));
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams params = window.getAttributes();
         params.dimAmount = 0f;
@@ -57,6 +57,11 @@ public class Dialog {
             dialog.setCancelable(flag);
         }
         return this;
+    }
+
+    public final boolean isShowing(){
+        android.app.Dialog dialog=mDialog;
+        return null!=dialog&&dialog.isShowing();
     }
 
     public final<T extends View> T findViewById(int id,Class<T> cls){
