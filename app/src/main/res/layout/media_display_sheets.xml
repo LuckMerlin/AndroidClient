@@ -6,6 +6,7 @@
         <variable
             name="vm"
             type="com.merlin.model.MediaDisplaySheetsModel" />
+        <import type="com.merlin.util.Layout"/>
     </data>
     <LinearLayout
         android:layout_margin="10dp"
@@ -40,8 +41,11 @@
                 android:text="Create"
                 style="@style/titleNormalTextView"/>
         </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mediaSheetLayout_sheetsRV"
+            binding:adapter="@{vm.sheetAdapter}"
+            binding:layoutManager="@{Layout.layout(Layout.LINEAR_LAYOUT,false)}"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>

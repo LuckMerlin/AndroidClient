@@ -3,6 +3,7 @@ package com.merlin.model;
 import android.content.Context;
 import android.view.View;
 
+import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Label;
@@ -18,7 +19,8 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaDisplaySheetsModel extends BaseModel implements BaseModel.OnModelViewClick,Label {
+public class MediaDisplaySheetsModel extends BaseModel implements What,BaseModel.OnModelViewClick,Label {
+    private final MediaSheetAdapter mSheetAdapter=new MediaSheetAdapter();
 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/create")
@@ -50,8 +52,11 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseModel.OnMo
     }
 
     private void queryAllSheets(){
-        call(Api.class, (OnApiFinish)(what, note, data, arg)->{
-            
+        call(Api.class, (OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, data, arg)->{
+            if (what==WHAT_SUCCEED){
+                ApiList<MediaSheet> list=null!=data?data.getData():null;
+                mSheetAdapter.setData(list);
+            }
         }).queryAllSheets(null,0,10);
     }
 
@@ -70,4 +75,7 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseModel.OnMo
         });
     }
 
+    public MediaSheetAdapter getSheetAdapter() {
+        return mSheetAdapter;
+    }
 }
