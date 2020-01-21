@@ -73,7 +73,7 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     /**
      * Just for kernel call
      */
-    private final void setRootView(View root){
+    public final void setRootView(View root){
         WeakReference<View> reference=mRootView;
         if (null!=reference){
             reference.clear();

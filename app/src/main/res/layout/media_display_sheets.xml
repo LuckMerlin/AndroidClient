@@ -5,7 +5,7 @@
         <import type="android.view.View"/>
         <variable
             name="vm"
-            type="com.merlin.model.MediaPlayModel" />
+            type="com.merlin.model.MediaDisplaySheetsModel" />
     </data>
     <LinearLayout
         android:layout_margin="10dp"

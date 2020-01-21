@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
+        <variable
+            name="dialog"
+            type="com.merlin.dialog.Dialog" />
 
     </data>
     <LinearLayout
@@ -34,6 +37,7 @@
                     android:id="@+id/dlg_sureTV"
                     android:layout_weight="1"
                     android:padding="8dp"
+                    android:onClick="@{dialog::onClick}"
                     android:background="@drawable/round_corner_small"
                     style="@style/titleNormalTextView"
                     android:text="@string/sure"/>
@@ -42,6 +46,7 @@
                     android:layout_weight="1"
                     android:padding="8dp"
                     android:background="@drawable/round_corner_small"
+                    android:onClick="@{dialog::onClick}"
                     android:text="@string/cancel"
                     style="@style/titleNormalTextView"/>
             </LinearLayout>

@@ -2,12 +2,19 @@ package com.merlin.model;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.SeekBar;
 
 import androidx.databinding.ObservableField;
 
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
+import com.merlin.api.Address;
+import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
+import com.merlin.api.Reply;
+import com.merlin.api.What;
+import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SingleInputDialog;
@@ -19,6 +26,11 @@ import com.merlin.player.Player;
 import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 import com.merlin.view.OnSeekBarChangeListener;
+
+import io.reactivex.Observable;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
 
 public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
     private final ObservableField<Media> mPlaying=new ObservableField<>();
@@ -82,14 +94,7 @@ public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnIt
             case R.id.activityMediaPlay_nextIV:
                 player.next();
                 break;
-            case R.id.mediaDisplaySheet_createTV:
-                createSheet();
-                break;
         }
-    }
-
-    private void createSheet(){
-        new SingleInputDialog(getViewContext()).show(R.string.createSheet);
     }
 
     private void updateMode(Mode mode){

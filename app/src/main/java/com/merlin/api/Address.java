@@ -9,4 +9,5 @@ public interface Address {
     String PREFIX_MEDIA="/media";
     String PREFIX_FILE="/file";
     String PREFIX_FILE_BROWSER=PREFIX_FILE+"/directory/browser";
+    String PREFIX_MEDIA_PLAY=PREFIX_MEDIA+"/play";
 }

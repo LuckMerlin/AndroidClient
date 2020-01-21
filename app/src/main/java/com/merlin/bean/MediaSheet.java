@@ -1,9 +1,6 @@
 package com.merlin.bean;
 
-import com.merlin.media.Media;
-
 import java.io.Serializable;
-import java.util.List;
 
 public class MediaSheet implements Serializable {
     private int size;
@@ -16,7 +13,6 @@ public class MediaSheet implements Serializable {
     private String note;
     private String sheetId;
     private String title;
-//    private List<Media> medias;
 
     public void setSize(int size) {
         this.size = size;

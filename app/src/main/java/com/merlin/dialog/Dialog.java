@@ -9,8 +9,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class Dialog {
+public class Dialog implements View.OnClickListener{
     private final android.app.Dialog mDialog;
+
+    public interface Callback{
+
+    }
 
     public Dialog(Context context){
         android.app.Dialog dialog=mDialog=new android.app.Dialog(context);
@@ -101,4 +105,8 @@ public class Dialog {
         return null!=dialog?dialog.getContext():null;
     }
 
+    @Override
+    public void onClick(View v) {
+        //DO nothing
+    }
 }

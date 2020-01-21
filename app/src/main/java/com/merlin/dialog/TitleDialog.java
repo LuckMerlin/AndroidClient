@@ -6,12 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
+
 import com.merlin.client.R;
 import com.merlin.client.databinding.DlgLayoutBinding;
-import com.merlin.model.BaseModel;
 import com.merlin.util.Text;
 
-public class TitleDialog extends Dialog implements BaseModel.OnModelViewClick {
+public class TitleDialog extends Dialog {
 
     protected Integer onResolveContentLayout(){
         //Do nothing
@@ -20,20 +22,19 @@ public class TitleDialog extends Dialog implements BaseModel.OnModelViewClick {
 
     public TitleDialog(Context context){
         super(context);
-        setContentView(R.layout.dlg_layout);
-        ViewGroup vg=findViewById(R.id.dlg_contentFL,ViewGroup.class);
-        Integer layoutId=null!=vg?onResolveContentLayout():null;
-        if (null!=layoutId){
-            LayoutInflater.from(context).inflate(layoutId,vg);
-        }
-        final View.OnClickListener listener=new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onViewClick(v,v.getId());
+        LayoutInflater inflater=LayoutInflater.from(context);
+        DlgLayoutBinding binding=DataBindingUtil.inflate(inflater,R.layout.dlg_layout,null,false);
+        View root=null!=binding?binding.getRoot():null;
+        if (null!=root){
+            binding.setDialog(this);
+            setContentView(root);
+            ViewGroup vg=findViewById(R.id.dlg_contentFL,ViewGroup.class);
+            Integer layoutId=null!=vg?onResolveContentLayout():null;
+            ViewDataBinding childBinding=null!=layoutId?DataBindingUtil.inflate(inflater,layoutId,vg,true):null;
+            if (null!=childBinding){
+                childBinding.setVariable(com.merlin.client.BR.dialog,this);
             }
-        };
-        findViewById(R.id.dlg_sureTV,View.class).setOnClickListener(listener);
-        findViewById(R.id.dlg_cancelTV,View.class).setOnClickListener(listener);
+        }
     }
 
     public void setTitle(Integer titleId){
@@ -58,7 +59,15 @@ public class TitleDialog extends Dialog implements BaseModel.OnModelViewClick {
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onClick(View v) {
+        super.onClick(v);
+        switch (v.getId()){
+            case R.id.dlg_sureTV:
 
+                break;
+            case R.id.dlg_cancelTV:
+                dismiss();
+                break;
+        }
     }
 }
