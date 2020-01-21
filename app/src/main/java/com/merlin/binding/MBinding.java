@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.util.Layout;
@@ -46,8 +48,9 @@ public class MBinding {
         RoundedCorners roundedCorners= new RoundedCorners(70);
         RequestOptions options=RequestOptions.bitmapTransform(roundedCorners)
                 .override(view.getWidth(), view.getHeight());
+        Debug.D(MBinding.class,"AAAAAAAAAa "+path);
         Glide.with(view.getContext())
-                .load(path)
+                .load(Address.URL+"/"+path)
 //                .centerCrop()
                 .apply(options)
 //                .thumbnail(1f)
@@ -59,18 +62,26 @@ public class MBinding {
     @BindingAdapter("layoutManager")
     public static void linear(RecyclerView view, Layout layout) {
         if (null!=layout){
+            Context context=view.getContext();
             int spanCount=layout.getSpanCount();
             int orientation=layout.getOrientation();
             boolean isReverseLayout=layout.isReverseLayout();
-            if (layout.getSpanCount()>0){
-                StaggeredGridLayoutManager sgm=new StaggeredGridLayoutManager(spanCount,orientation);
-                sgm.setReverseLayout(isReverseLayout);
-                view.setLayoutManager(sgm);
-            }else{
-                LinearLayoutManager manager=new LinearLayoutManager(view.getContext(),
-                        LinearLayoutManager.HORIZONTAL,layout.isReverseLayout());
-                manager.setSmoothScrollbarEnabled(true);
-                view.setLayoutManager(manager);
+            switch (layout.getLayout()){
+                case Layout.STAGGERED_GRID_LAYOUT:
+                    StaggeredGridLayoutManager sgm=new StaggeredGridLayoutManager(spanCount,orientation);
+                    sgm.setReverseLayout(isReverseLayout);
+                    view.setLayoutManager(sgm);
+                    break;
+                case Layout.LINEAR_LAYOUT:
+                    LinearLayoutManager llm=new LinearLayoutManager(context, orientation,isReverseLayout);
+                    llm.setSmoothScrollbarEnabled(true);
+                    view.setLayoutManager(llm);
+                    break;
+                case Layout.GRID_LAYOUT:
+                    GridLayoutManager glm=new GridLayoutManager(context, spanCount,orientation,isReverseLayout);
+                    glm.setSmoothScrollbarEnabled(true);
+                    view.setLayoutManager(glm);
+                    break;
             }
         }
 

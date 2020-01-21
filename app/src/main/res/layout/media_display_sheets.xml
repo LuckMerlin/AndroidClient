@@ -45,7 +45,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mediaSheetLayout_sheetsRV"
             binding:adapter="@{vm.sheetAdapter}"
-            binding:layoutManager="@{Layout.layout(Layout.LINEAR_LAYOUT,false)}"
+            binding:layoutManager="@{Layout.layout(Layout.GRID_LAYOUT,Layout.VERTICAL,false,3)}"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
