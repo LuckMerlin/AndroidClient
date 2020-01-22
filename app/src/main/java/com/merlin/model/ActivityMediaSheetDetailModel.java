@@ -50,7 +50,7 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         List<Media> list=new ArrayList<>();
         for (int i = 0; i < 50; i++) {
             Media media=new Media();
-            media.setName("我们");
+            media.setTitle("我们");
             list.add(media);
         }
         getAdapter().setData(list);

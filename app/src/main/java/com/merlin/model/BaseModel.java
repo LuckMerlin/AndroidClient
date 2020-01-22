@@ -10,14 +10,11 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.merlin.client.Client;
 import com.merlin.client.OnObjectRequestFinish;
-import com.merlin.database.DaoMaster;
-import com.merlin.database.DaoSession;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.oksocket.Callback;
@@ -86,9 +83,14 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     }
 
     public final void toast(int textResId){
+        toast(textResId,null);
+    }
+
+    public final void toast(int textResId,String note){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;
-        toast(null!=context?context.getResources().getString(textResId):null);
+        String text=null!=context?context.getResources().getString(textResId):null;
+        toast((null!=text?text:"")+(null!=note?note:""));
     }
 
     public final void toast(String msg){
@@ -186,16 +188,6 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return null;
     }
 
-    protected final DaoSession getDatabaseSession(boolean write){
-        DaoMaster.DevOpenHelper helper= getDatabase();
-        SQLiteDatabase database= null!=helper?write?helper.getReadableDatabase():helper.getReadableDatabase():null;
-        return null!=database?new DaoMaster(database).newSession(IdentityScopeType.Session):null;
-    }
-
-    protected final DaoMaster.DevOpenHelper getDatabase(){
-        Application application=getApplication();
-        return null!=application?application.getDatabase():null;
-    }
 
     protected final Client getClient(){
         Application application=getApplication();

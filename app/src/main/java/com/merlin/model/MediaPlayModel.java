@@ -7,6 +7,8 @@ import android.widget.SeekBar;
 
 import androidx.databinding.ObservableField;
 
+import com.merlin.activity.MediaPlayActivity;
+import com.merlin.activity.OnBackPressed;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
 import com.merlin.api.Address;
@@ -32,7 +34,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
+public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
     private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mPlayState=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
@@ -94,6 +96,9 @@ public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnIt
             case R.id.activityMediaPlay_nextIV:
                 player.next();
                 break;
+            case R.id.title_backIV:
+                finishAllActivity(MediaPlayActivity.class);
+                break;
         }
     }
 
@@ -107,6 +112,12 @@ public class MediaPlayModel extends BaseModel implements Status,BaseAdapter.OnIt
         MediaPlayer player=mMediaPlayer;
         mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOW);
 //        mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOW);
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        
+        return false;
     }
 
     @Override

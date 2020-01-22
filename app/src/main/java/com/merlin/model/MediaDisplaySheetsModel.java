@@ -7,6 +7,7 @@ import androidx.databinding.ObservableField;
 
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaSheetAdapter;
+import com.merlin.adapter.SheetMediaAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Label;
@@ -17,6 +18,9 @@ import com.merlin.bean.MediaSheet;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SingleInputDialog;
+import com.merlin.media.Media;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -25,6 +29,7 @@ import retrofit2.http.POST;
 
 public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.OnItemClickListener<MediaSheet>,What,BaseModel.OnModelViewClick,Label {
     private final MediaSheetAdapter mSheetAdapter=new MediaSheetAdapter();
+    private final SheetMediaAdapter mSheetMediaAdapter=new SheetMediaAdapter();
     private final ObservableField<Boolean> mShowingSheets=new ObservableField<>(true);
     private Long mQueryDetailId;
     private interface Api{
@@ -34,7 +39,7 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/detail")
         @FormUrlEncoded
-        Observable<Reply<MediaSheet>> querySheetById(@Field(LABEL_ID) long id,@Field(LABEL_PAGE) int page,@Field(LABEL_LIMIT) int limit);
+        Observable<Reply<ApiList<Media>>> querySheetById(@Field(LABEL_ID) long id,@Field(LABEL_PAGE) int page,@Field(LABEL_LIMIT) int limit);
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/all")
         @FormUrlEncoded
@@ -79,15 +84,19 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
            return false;
        }
        mQueryDetailId=sheetId;
-       return null!=call(Api.class,(OnApiFinish<Reply<MediaSheet>>)(what, note, data, arg)->{
+       return null!=call(Api.class,(OnApiFinish<Reply<ApiList<Media>>>)(what, note, data, arg)->{
            Long queryId=mQueryDetailId;
            if (null!=queryId&&queryId.equals(sheetId)){
                mQueryDetailId=null;
                if (what==WHAT_SUCCEED){
-                   MediaSheet sheet=null!=data?data.getData():null;
-
-//               mSheetAdapter.replace();
-//               mSheetAdapter.setData(list);
+                   ApiList<Media> list=null!=data?data.getData():null;
+                   if (page>0){
+                       mSheetMediaAdapter.setData(list,true);
+                   }else{
+                       mSheetMediaAdapter.addAll(list,true);
+                   }
+               }else{
+                   toast(R.string.requestFail,note);
                }
            }
        }).querySheetById(sheetId,page,50);
@@ -114,5 +123,9 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
     public ObservableField<Boolean> isShowingSheets() {
         return mShowingSheets;
+    }
+
+    public SheetMediaAdapter getSheetMediaAdapter() {
+        return mSheetMediaAdapter;
     }
 }

@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import com.merlin.classes.ActivityLifecycle;
 import com.merlin.client.Client;
-import com.merlin.database.DaoMaster;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
 
@@ -19,12 +18,10 @@ public class Application extends android.app.Application implements ActivityLife
            "www.luckmerlin.com", 5005);
    private final ActivityLifecycle mActivityLifecycle=new ActivityLifecycle(this);
    private final Invoker mInvoker=new Invoker();
-   private DaoMaster.DevOpenHelper mDatabase;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mDatabase = new DaoMaster.DevOpenHelper(this, "linqiang2");
 //        Database database = helper.getEncryptedWritableDb("123");
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mClient.setOnFrameReceive(mOnFrameReceiveListener);
@@ -66,9 +63,6 @@ public class Application extends android.app.Application implements ActivityLife
         return mClient;
     }
 
-    public DaoMaster.DevOpenHelper getDatabase() {
-        return mDatabase;
-    }
 
     public List<Activity> finishAllActivity(Object ...activities){
         ActivityLifecycle lifecycle=mActivityLifecycle;

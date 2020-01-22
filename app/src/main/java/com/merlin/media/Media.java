@@ -10,7 +10,7 @@ import java.io.File;
 public class Media implements Parcelable, Playable {
     private long id;
     private long mediaId;
-    private String name;
+    private String title;
     private String path;
     private String md5=null;
     private String url;
@@ -18,33 +18,6 @@ public class Media implements Parcelable, Playable {
     private String album;
     private String artist;
     private long duration=12131;
-//    @Id(autoincrement = true)
-//    @Property(nameInDb = "id")
-//    private long id;
-//    @NotNull
-//    @Property(nameInDb = "mediaId")
-//    private long mediaId;
-//    @NotNull
-//    @Property(nameInDb = "name")
-//    private String name;
-//    @NotNull
-//    @Property(nameInDb = "path")
-//    @Index(unique = true)
-//    private String path;
-//    @Property(nameInDb = "md5")
-//    private String md5=null;
-//    @Property(nameInDb = "url")
-//    private String url;
-//    @Property(nameInDb = "account")
-//    private String account;
-//    @Property(nameInDb = "album")
-//    private String album;
-//    @Property(nameInDb = "artist")
-//    private String artist;
-//    @Property(nameInDb = "duration")
-//    private long duration=12131;
-//    @Transient
-//    private String mTempPath;
     
     public long getId() {
         return this.id;
@@ -52,11 +25,11 @@ public class Media implements Parcelable, Playable {
     public void setId(long id) {
         this.id = id;
     }
-    public String getName() {
-        return this.name;
+    public String getTitle() {
+        return this.title;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
     public String getPath() {
         return this.path;
@@ -127,17 +100,17 @@ public class Media implements Parcelable, Playable {
             url=in.readString();
             md5=in.readString();
             path=in.readString();
-            name=in.readString();
+            title=in.readString();
             mediaId=in.readLong();
             id=in.readLong();
         }
     }
-    public Media(long id, long mediaId, String name,  String path,
+    public Media(long id, long mediaId, String title,  String path,
             String md5, String url, String account, String album, String artist,
             long duration) {
         this.id = id;
         this.mediaId = mediaId;
-        this.name = name;
+        this.title = title;
         this.path = path;
         this.md5 = md5;
         this.url = url;
@@ -158,7 +131,7 @@ public class Media implements Parcelable, Playable {
         dest.writeString(url);
         dest.writeString(md5);
         dest.writeString(path);
-        dest.writeString(name);
+        dest.writeString(title);
         dest.writeLong(mediaId);
         dest.writeLong(id);
     }

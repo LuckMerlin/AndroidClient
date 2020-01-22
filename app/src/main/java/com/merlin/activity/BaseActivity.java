@@ -137,6 +137,16 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
         onIntentChanged(getIntent());
     }
 
+
+    @Override
+    public void onBackPressed() {
+        VM viewModel=mViewModel;
+        if (null==viewModel||!(viewModel instanceof OnBackPressed)
+        ||!(((OnBackPressed)viewModel).onBackPressed())){
+            super.onBackPressed();
+        }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);

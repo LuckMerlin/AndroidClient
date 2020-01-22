@@ -4,6 +4,7 @@
     android:layout_height="80dp">
 
     <ImageView
+        android:id="@+id/title_backIV"
         android:src="@drawable/selector_back"
         android:layout_alignParentLeft="true"
         android:layout_width="30dp"

@@ -10,6 +10,8 @@
     </data>
     <FrameLayout
         android:layout_margin="10dp"
+        binding:enableBarPadding="@{0}"
+        android:layout_marginTop="25dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
@@ -20,7 +22,6 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_marginBottom="10dp"
-                android:layout_marginTop="25dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
@@ -55,8 +56,85 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>
-        <include
-            layout="@layout/media_sheet_detail"
-            android:visibility="@{vm.isShowingSheets()?View.GONE:View.VISIBLE}"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:visibility="@{vm.isShowingSheets()?View.GONE:View.VISIBLE}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:id="@+id/activityMediaSheetDetail_coverIV"
+                        android:src="@drawable/test"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:scaleType="centerCrop"
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"/>
+                    <LinearLayout
+                        android:layout_toRightOf="@id/activityMediaSheetDetail_coverIV"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_centerVertical="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:textStyle="bold"
+                            android:singleLine="true"
+                            style="@style/titleNormalTextView"/>
+                        <TextView
+                            android:textColor="@color/textTitleSub"
+                            android:textSize="@dimen/textMedium"
+                            android:singleLine="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                        <TextView
+                            android:textColor="@color/textTitleSub"
+                            android:textSize="@dimen/textMedium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </RelativeLayout>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:layout_height="50dp">
+                    <ImageView
+                        android:src="@drawable/selector_back"
+                        android:layout_weight="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:src="@drawable/selector_back"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:src="@drawable/selector_back"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:src="@drawable/selector_back"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                binding:layoutManager="@{Layout.layout(Layout.LINEAR_LAYOUT, Layout.VERTICAL, false)}"
+                binding:adapter="@{vm.sheetMediaAdapter}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
     </FrameLayout>
 </layout>
