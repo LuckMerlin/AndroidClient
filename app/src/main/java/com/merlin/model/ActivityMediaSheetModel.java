@@ -40,7 +40,7 @@ public class ActivityMediaSheetModel extends DataListModel<MediaSheet> implement
             sheet=new MediaSheet();
             sheet.setImageUrl("https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=4038297574,3426702532&fm=26&gp=0.jpg");
             sheet.setTitle("流行 "+i);
-            sheet.setSheetId("Id "+i);
+//            sheet.setSheetId("Id "+i);
             sheet.setSize(400);
             list.add(sheet);
         }

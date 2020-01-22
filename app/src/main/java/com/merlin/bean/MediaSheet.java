@@ -1,6 +1,9 @@
 package com.merlin.bean;
 
+import com.merlin.media.Media;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class MediaSheet implements Serializable {
     private int size;
@@ -8,11 +11,11 @@ public class MediaSheet implements Serializable {
     private String commentId;
     private String createTime;
     private String createUserId;
-    private int id;
+    private long id;
     private String imageUrl;
     private String note;
-    private String sheetId;
     private String title;
+    private List<Media> data;
 
     public void setSize(int size) {
         this.size = size;
@@ -54,7 +57,7 @@ public class MediaSheet implements Serializable {
         this.createUserId = createUserId;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -78,14 +81,6 @@ public class MediaSheet implements Serializable {
         this.note = note;
     }
 
-    public String getSheetId() {
-        return sheetId;
-    }
-
-    public void setSheetId(String sheetId) {
-        this.sheetId = sheetId;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -94,6 +89,11 @@ public class MediaSheet implements Serializable {
         this.title = title;
     }
 
+    public List<Media> getData() {
+        return data;
+    }
 
-
+    public void setData(List<Media> data) {
+        this.data = data;
+    }
 }

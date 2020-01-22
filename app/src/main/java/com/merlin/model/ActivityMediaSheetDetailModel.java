@@ -59,11 +59,11 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
     @Override
     public void onIntentChange(Intent intent) {
         MediaSheet sheet=null!=intent?getDataFromIntent(intent, MediaSheet.class):null;
-        String sheetId=null!=sheet?sheet.getSheetId():null;
+//        String sheetId=null!=sheet?sheet.getSheetId():null;
 //        toast("嘻哈十大 "+sheetId);
-        if (null!=sheetId&&!sheetId.isEmpty()){
+//        if (null!=sheetId&&!sheetId.isEmpty()){
 //            mSheet.set(sheet);
-        }
+//        }
     }
 
     @Override

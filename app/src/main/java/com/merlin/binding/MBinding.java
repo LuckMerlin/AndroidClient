@@ -48,12 +48,12 @@ public class MBinding {
         RoundedCorners roundedCorners= new RoundedCorners(70);
         RequestOptions options=RequestOptions.bitmapTransform(roundedCorners)
                 .override(view.getWidth(), view.getHeight());
-        Debug.D(MBinding.class,"AAAAAAAAAa "+path);
+//        Debug.D(MBinding.class,"AAAAAAAAAa "+Address.URL+path);
         Glide.with(view.getContext())
-                .load(Address.URL+"/"+path)
-//                .centerCrop()
+                .load("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg")
+                .centerCrop()
                 .apply(options)
-//                .thumbnail(1f)
+                .thumbnail(1f)
                 .placeholder(R.drawable.ic_picture_default)
 //                .error(R.drawable.ic_default_pic)
                 .into(view);

@@ -16,4 +16,5 @@ public interface Label{
    String  LABEL_PERMISSIONS = "permissions";
    String  LABEL_PARENT = "parent";
    String  LABEL_NAME = "name";
+   String  LABEL_ID = "id";
 }
