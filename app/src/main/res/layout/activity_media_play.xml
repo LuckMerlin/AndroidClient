@@ -15,10 +15,15 @@
       android:background="@drawable/background"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
+
+      <include
+          layout="@layout/title" />
+
       <RelativeLayout
           android:id="@+id/mediaPlayTopRL"
           android:layout_alignParentTop="true"
           android:layout_width="match_parent"
+          android:visibility="gone"
           android:layout_marginTop="10dp"
           android:padding="5dp"
           android:layout_height="wrap_content">
@@ -57,8 +62,7 @@
         </LinearLayout>
       </RelativeLayout>
       <com.merlin.view.MediaPlayDisplayLayout
-          binding:enableBarPadding="@{0}"
-          android:layout_marginTop="5dp"
+          android:layout_below="@id/mediaPlayTopRL"
           android:id="@+id/activityMediaPlay_displayRV"
           android:layout_width="match_parent"
           android:layout_height="match_parent"/>

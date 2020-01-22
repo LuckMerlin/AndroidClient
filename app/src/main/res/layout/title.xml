@@ -1,22 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="80dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="listener"
+            type="android.view.View.OnClickListener" />
+    </data>
 
-    <ImageView
-        android:id="@+id/title_backIV"
-        android:src="@drawable/selector_back"
-        android:layout_alignParentLeft="true"
-        android:layout_width="30dp"
-        android:layout_height="30dp"/>
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp">
+        <ImageView
+            android:id="@+id/title_backIV"
+            android:onClickListener="@{listener}"
+            android:src="@drawable/selector_back"
+            android:layout_alignParentLeft="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
 
-    <TextView
-        android:text="More"
-        android:layout_alignParentRight="true"
-        style="@style/titleNormalTextView"/>
+        <TextView
+            android:text="More"
+            android:layout_alignParentRight="true"
+            style="@style/titleNormalTextView"/>
 
-    <TextView
-        android:text="沙发上"
-        android:layout_centerHorizontal="true"
-        style="@style/titleNormalTextView"/>
-</RelativeLayout>
+        <TextView
+            android:text="沙发上"
+            android:layout_centerHorizontal="true"
+            style="@style/titleNormalTextView"/>
+    </RelativeLayout>
+</layout>
