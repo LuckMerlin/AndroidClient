@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
-            android:visibility="@{vm.isShowingSheets()?View.VISIBLE:View.GONE}"
+            android:visibility="@{vm.isEnableSheets()?View.VISIBLE:View.GONE}"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -59,7 +59,7 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:visibility="@{vm.isShowingSheets()?View.GONE:View.VISIBLE}"
+            android:visibility="@{vm.isEnableSheets()?View.GONE:View.VISIBLE}"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <LinearLayout
@@ -87,11 +87,13 @@
                         <TextView
                             android:textStyle="bold"
                             android:singleLine="true"
+                            android:text="@{vm.showingSheet.title}"
                             style="@style/titleNormalTextView"/>
                         <TextView
                             android:textColor="@color/textTitleSub"
                             android:textSize="@dimen/textMedium"
                             android:singleLine="true"
+                            android:text="@{vm.showingSheet.note}"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"/>
                         <TextView

@@ -19,6 +19,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.Media;
+import com.merlin.media.Sheet;
 
 import java.util.List;
 
@@ -30,7 +31,8 @@ import retrofit2.http.POST;
 public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.OnItemClickListener<MediaSheet>,What,BaseModel.OnModelViewClick,Label {
     private final MediaSheetAdapter mSheetAdapter=new MediaSheetAdapter();
     private final SheetMediaAdapter mSheetMediaAdapter=new SheetMediaAdapter();
-    private final ObservableField<Boolean> mShowingSheets=new ObservableField<>(true);
+    private final ObservableField<Boolean> mEnableSheets=new ObservableField<>(true);
+    private final ObservableField<MediaSheet> mShowingSheet=new ObservableField<>();
     private Long mQueryDetailId;
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/create")
@@ -64,8 +66,8 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
     @Override
     public void onItemClick(View view, int sourceId, int position, MediaSheet data) {
-        mShowingSheets.set(false);
-        querySheet(null!=data?data.getId():null,0);
+        mEnableSheets.set(false);
+        querySheet(data,0);
     }
 
     private void queryAllSheets(){
@@ -77,12 +79,13 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
         }).queryAllSheets(null,0,10);
     }
 
-    private boolean querySheet(long sheetId,int page){
+    private boolean querySheet(MediaSheet sheet,int page){
        if (page<0){
-           Debug.D(getClass(),"Can't query sheet with invalid args.sheetId="+sheetId+" "+page);
+           Debug.D(getClass(),"Can't query sheet with invalid args.sheetId="+sheet+" "+page);
            toast(R.string.requestFail);
            return false;
        }
+       final long sheetId=sheet.getId();
        mQueryDetailId=sheetId;
        return null!=call(Api.class,(OnApiFinish<Reply<ApiList<Media>>>)(what, note, data, arg)->{
            Long queryId=mQueryDetailId;
@@ -90,7 +93,8 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
                mQueryDetailId=null;
                if (what==WHAT_SUCCEED){
                    ApiList<Media> list=null!=data?data.getData():null;
-                   if (page>0){
+                   if (page<=0){
+                       mShowingSheet.set(sheet);
                        mSheetMediaAdapter.setData(list,true);
                    }else{
                        mSheetMediaAdapter.addAll(list,true);
@@ -121,11 +125,15 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
         return mSheetAdapter;
     }
 
-    public ObservableField<Boolean> isShowingSheets() {
-        return mShowingSheets;
+    public ObservableField<Boolean> isEnableSheets() {
+        return mEnableSheets;
     }
 
     public SheetMediaAdapter getSheetMediaAdapter() {
         return mSheetMediaAdapter;
+    }
+
+    public ObservableField<MediaSheet> getShowingSheet() {
+        return mShowingSheet;
     }
 }

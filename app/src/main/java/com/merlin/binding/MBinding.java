@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -73,6 +74,7 @@ public class MBinding {
                     view.setLayoutManager(sgm);
                     break;
                 case Layout.LINEAR_LAYOUT:
+                    view.addItemDecoration(new LinearItemDecoration(3));
                     LinearLayoutManager llm=new LinearLayoutManager(context, orientation,isReverseLayout);
                     llm.setSmoothScrollbarEnabled(true);
                     view.setLayoutManager(llm);
