@@ -1,6 +1,5 @@
 package com.merlin.util;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public final class Layout {

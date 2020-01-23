@@ -2,11 +2,15 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
+import android.widget.Space;
 
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,11 +20,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.merlin.adapter.LinearItemDecoration;
-import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.util.Layout;
-import com.merlin.util.StatusBar;
 
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
@@ -59,6 +61,15 @@ public class MBinding {
 //                .error(R.drawable.ic_default_pic)
                 .into(view);
     }
+
+
+    @BindingAdapter(value = {"statusBar"})
+    public static void statusBar(View view, StatusBar statusBar) {
+        if (null!=view &&null!=statusBar){
+            statusBar.inflate(view);
+        }
+    }
+
 
     @BindingAdapter("layoutManager")
     public static void linear(RecyclerView view, Layout layout) {

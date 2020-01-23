@@ -15,7 +15,7 @@
         binding:enableBarPadding="@{0}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <include layout="@layout/title" />
+        <include layout="@layout/status" />
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"

@@ -3,7 +3,6 @@ package com.merlin.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,8 +12,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.merlin.view.StatusBarLayout;
+import com.merlin.binding.StatusBar;
 import com.merlin.client.Client;
 import com.merlin.client.OnObjectRequestFinish;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.oksocket.Callback;
@@ -25,7 +27,6 @@ import com.merlin.retrofit.Retrofit;
 import com.merlin.server.Json;
 import com.trello.rxlifecycle2.LifecycleProvider;
 
-import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.json.JSONObject;
 
 import java.io.Closeable;
@@ -334,6 +335,14 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
             return retrofit.call(cls,callbacks);
         }
         return null;
+    }
+
+    protected final boolean setStatusBar(Integer id,int position){
+        if (position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT){
+            View view=findViewById(R.id.status_root_RL);
+            return null!=view&&view instanceof StatusBarLayout&&((StatusBarLayout)view).set(id,position);
+        }
+        return false;
     }
 
 }
