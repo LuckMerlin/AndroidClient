@@ -14,7 +14,7 @@
   </data>
   <RelativeLayout
       binding:enableBarPadding="@{0}"
-      binding:statusBar="@{StatusBar.statusBar(null)}"
+      binding:statusBar="@{StatusBar.statusBar(null,R.string.mediaSheet,null)}"
       android:background="@drawable/background"
       android:layout_width="match_parent"
       android:layout_height="match_parent">

@@ -17,10 +17,8 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
-import com.merlin.client.databinding.StatusBinding;
 import com.merlin.client.databinding.StatusIconBinding;
 import com.merlin.client.databinding.StatusTextBinding;
-import com.merlin.debug.Debug;
 import com.merlin.util.Resource;
 
 public final class StatusBarLayout extends RelativeLayout {
@@ -42,13 +40,9 @@ public final class StatusBarLayout extends RelativeLayout {
         if (count>0){
             View child;
             for (int i = 0; i < count; i++) {
-                ViewGroup.LayoutParams params=null!=(child=getChildAt(i))?child.getLayoutParams():null;
-                int[] rules=null!=params&&params instanceof RelativeLayout.LayoutParams?((RelativeLayout.LayoutParams)params).getRules():null;
-                int length=null!=rules?rules.length:-1;
-                for (int j = 0; j < length; j++) {
-                    if (rules[j]==position){
-                        return child;
-                    }
+                Object object=null!=(child=getChildAt(i))?child.getTag(R.id.resourceId):null;
+                if (null!=object&&object instanceof StatusBar.IDs&&((StatusBar.IDs)object).getPosition()==position){
+                    return child;
                 }
             }
         }
@@ -64,6 +58,7 @@ public final class StatusBarLayout extends RelativeLayout {
                 removeView(last);
             }
             if (null!=root){
+                root.setTag(R.id.resourceId,new StatusBar.IDs(id,position));
                 RelativeLayout.LayoutParams rlp=null;
                 if (position== StatusBar.LEFT||position==StatusBar.CENTER||position==StatusBar.RIGHT){
                     ViewGroup.LayoutParams params=root.getLayoutParams();
@@ -74,7 +69,6 @@ public final class StatusBarLayout extends RelativeLayout {
                     rlp.addRule(RelativeLayout.CENTER_VERTICAL);
                 }
                 root.setLayoutParams(rlp);
-//                addView(root,rlp);
             }
         return true;
     }
@@ -88,7 +82,6 @@ public final class StatusBarLayout extends RelativeLayout {
                 StatusIconBinding iconBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_icon,this,true);
                 View view= null!=iconBinding?iconBinding.getRoot():null;//LayoutInflater.from(context).inflate(R.layout.status_icon,null);
                 if (null!=view&&view instanceof ImageView){
-                    view.setTag(R.id.resourceId,id);
                     ((ImageView)view).setImageDrawable(drawable);
                 }
                 return iconBinding;
@@ -98,17 +91,11 @@ public final class StatusBarLayout extends RelativeLayout {
                 StatusTextBinding textBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_text,this,true);
                 View view=null!=textBinding?textBinding.getRoot():null;
                 if (null!=view&&view instanceof TextView){
-                    view.setTag(R.id.resourceId,id);
                     ((TextView)view).setText(text);
                 }
                 return textBinding;
             }
-            ViewDataBinding binding= Resource.isExistResource(R.layout.class,id)? DataBindingUtil.inflate(LayoutInflater.from(context),id,this,true):null;
-            View root=null!=binding?binding.getRoot():null;
-            if (null!=root){
-                root.setTag(R.id.resourceId,id);
-            }
-            return binding;
+            return Resource.isExistResource(R.layout.class,id)? DataBindingUtil.inflate(LayoutInflater.from(context),id,this,true):null;
         }
         return null;
     }

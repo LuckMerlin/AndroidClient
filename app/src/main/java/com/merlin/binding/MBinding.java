@@ -92,8 +92,8 @@ public class MBinding {
                           BaseModel bm=null!=reference?reference.get():null;
                           if (null!=bm&&bm instanceof BaseModel.OnModelViewClick){
                               Object object=v.getTag(R.id.resourceId);
-                              ((BaseModel.OnModelViewClick)bm).onViewClick(v,
-                                      null!=object&&object instanceof Integer?((Integer)object):v.getId());
+                              StatusBar.IDs iDs=null!=object&&object instanceof StatusBar.IDs?((StatusBar.IDs)object):null;
+                              ((BaseModel.OnModelViewClick)bm).onViewClick(v, null!=iDs?iDs.getResourceId():v.getId());
                           }
                       });
                   }
