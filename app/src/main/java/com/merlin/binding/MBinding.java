@@ -110,6 +110,10 @@ public class MBinding {
         }
     }
 
+    @BindingAdapter("adapter")
+    public static void adapter(RecyclerView view, Adapter object) {
+
+    }
 
     @BindingAdapter("layoutManager")
     public static void linear(RecyclerView view, Layout layout) {
