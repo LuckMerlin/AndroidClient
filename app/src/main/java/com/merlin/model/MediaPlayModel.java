@@ -83,6 +83,9 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
             case R.id.activityMediaPlay_nextIV:
                 player.next();
                 break;
+            case R.drawable.ic_back:
+                finishActivity();
+                break;
             case R.string.cancel:
                 toast("取消");
                 break;

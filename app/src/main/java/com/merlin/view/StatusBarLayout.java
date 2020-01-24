@@ -19,6 +19,7 @@ import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.client.databinding.StatusIconBinding;
 import com.merlin.client.databinding.StatusTextBinding;
+import com.merlin.debug.Debug;
 import com.merlin.util.Resource;
 
 public final class StatusBarLayout extends RelativeLayout {
@@ -51,6 +52,9 @@ public final class StatusBarLayout extends RelativeLayout {
 
     public boolean set( @IdRes Integer id, int position){
             Context context=getContext();
+            if (null!=id&&id==StatusBar.ICON_BACK){
+                id=R.drawable.ic_back;
+            }
             ViewDataBinding binding=createView(context,id);
             View root=null!=binding?binding.getRoot():null;
             View last= findPosition(position);

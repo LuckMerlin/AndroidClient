@@ -6,7 +6,6 @@
 
     <com.merlin.view.StatusBarLayout
         android:id="@+id/status_root_RL"
-        android:background="#4f00"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_width="match_parent"

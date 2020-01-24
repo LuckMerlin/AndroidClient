@@ -16,14 +16,12 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.StatusBinding;
 import com.merlin.view.StatusBarLayout;
 
-
-
 public final class StatusBar {
     private final @IdRes Integer mLeft,mCenter,mRight;
     public final static int LEFT =RelativeLayout.ALIGN_PARENT_LEFT;
     public final static int CENTER =RelativeLayout.CENTER_IN_PARENT;
     public final static int RIGHT =RelativeLayout.ALIGN_PARENT_RIGHT;
-
+    public final static int ICON_BACK = -2000;
 
     public static class IDs{
         private final int mResourceId;

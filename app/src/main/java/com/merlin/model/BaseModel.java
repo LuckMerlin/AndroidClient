@@ -299,6 +299,23 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return null;
     }
 
+    public final boolean finishActivity(){
+        Activity activity=getActivity(null);
+        if (null!=activity){
+            activity.finish();
+        }
+        return false;
+    }
+
+    public final <T extends Activity> Activity getActivity(Class<T> cls){
+        View root=getRoot();
+        Context context=null!=root?root.getContext():null;
+        if (null!=context&&context instanceof Activity){
+            return (Activity)context;
+        }
+        return null;
+    }
+
     protected final boolean closeIO(Closeable closeable){
         if (null!=closeable){
             try {
