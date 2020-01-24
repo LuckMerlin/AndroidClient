@@ -164,7 +164,7 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
         return mBinding;
     }
 
-    protected final VM getViewModel() {
+    public final VM getViewModel() {
         return mViewModel;
     }
 

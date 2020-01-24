@@ -84,29 +84,29 @@ public final class StatusBar {
         if (null!=view&&view instanceof ViewGroup){
             StatusBinding statusBinding=createContent((ViewGroup)view);
             View statusView=null!=statusBinding?statusBinding.getRoot():null;
-            if (null==statusView){
-                return false;
-            }
-            ViewDataBinding binding=null!=statusBinding?DataBindingUtil.getBinding(view):null;
-            if (null!=binding){
-               Class<?> superClass= binding.getClass().getSuperclass();
-               Field[] fields= null!=superClass?superClass.getDeclaredFields():null;
-               Field field=null;
-                for (int i = 0; i < fields.length; i++) {
-                    if (null!=(field=fields[i])&&field.getType().equals(View.OnClickListener.class)){
-                        field.setAccessible(true);
-                        try {
-                            Object object=field.get(binding);
-                            if (null!=object&&object instanceof View.OnClickListener){
-                                statusBinding.setClickListener((View.OnClickListener)object);
-                                break;
-                            }
-                        } catch (IllegalAccessException e) {
-                            //Do nothing
-                        }
-                    }
-                }
-            }
+//            if (null==statusView){
+//                return false;
+//            }
+//            ViewDataBinding binding=null!=statusBinding?DataBindingUtil.getBinding(view):null;
+//            if (null!=binding){
+//               Class<?> superClass= binding.getClass().getSuperclass();
+//               Field[] fields= null!=superClass?superClass.getDeclaredFields():null;
+//               Field field=null;
+//                for (int i = 0; i < fields.length; i++) {
+//                    if (null!=(field=fields[i])&&field.getType().equals(View.OnClickListener.class)){
+//                        field.setAccessible(true);
+//                        try {
+//                            Object object=field.get(binding);
+//                            if (null!=object&&object instanceof View.OnClickListener){
+//                                statusBinding.setClickListener((View.OnClickListener)object);
+//                                break;
+//                            }
+//                        } catch (IllegalAccessException e) {
+//                            //Do nothing
+//                        }
+//                    }
+//                }
+//            }
             if (statusView instanceof StatusBarLayout){
                 StatusBarLayout content=(StatusBarLayout)statusView;
                 content.set(mLeft,LEFT);

@@ -10,6 +10,8 @@ import android.widget.Space;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
+import androidx.databinding.DataBinderMapper;
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,10 +21,15 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.merlin.activity.BaseActivity;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.model.BaseModel;
+import com.merlin.task.Status;
 import com.merlin.util.Layout;
+
+import java.lang.ref.WeakReference;
 
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
@@ -48,8 +55,8 @@ public class MBinding {
 
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, String path) {
-        RoundedCorners roundedCorners= new RoundedCorners(70);
-        RequestOptions options=RequestOptions.bitmapTransform(roundedCorners)
+        RoundedCorners roundedCorners = new RoundedCorners(70);
+        RequestOptions options = RequestOptions.bitmapTransform(roundedCorners)
                 .override(view.getWidth(), view.getHeight());
 //        Debug.D(MBinding.class,"AAAAAAAAAa "+Address.URL+path);
         Glide.with(view.getContext())
@@ -62,6 +69,39 @@ public class MBinding {
                 .into(view);
     }
 
+    @BindingAdapter(value = {"enableModelClick"})
+    public static void enableModelClick(View view, boolean enable) {
+        if (null!=view ){
+              if (enable){
+                  Object obj=view;
+                  ViewDataBinding binding,topBinding=null;
+                  do {
+                      if (null!=obj&&obj instanceof View){
+                          binding=DataBindingUtil.getBinding((View) obj);
+                          if (null!=binding){
+                              topBinding=binding;
+                          }
+                      }
+                  }while (null!=obj&&obj instanceof View&&null!=(obj=((View)obj).getParent()));
+                  View root=null!=topBinding?topBinding.getRoot():null;
+                  Context context=null!=root?root.getContext():null;
+                  BaseModel model=null!=context&&context instanceof BaseActivity?((BaseActivity)context).getViewModel():null;
+                  WeakReference<BaseModel> reference=new WeakReference<>(model);
+                  if (null!=model&&model instanceof BaseModel.OnModelViewClick){
+                      view.setOnClickListener((v)->{
+                          BaseModel bm=null!=reference?reference.get():null;
+                          if (null!=bm&&bm instanceof BaseModel.OnModelViewClick){
+                              Object object=v.getTag(R.id.resourceId);
+                              ((BaseModel.OnModelViewClick)bm).onViewClick(v,
+                                      null!=object&&object instanceof Integer?((Integer)object):v.getId());
+                          }
+                      });
+                  }
+              }else{
+                  view.setOnClickListener(null);
+              }
+        }
+    }
 
     @BindingAdapter(value = {"statusBar"})
     public static void statusBar(View view, StatusBar statusBar) {

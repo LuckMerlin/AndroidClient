@@ -20,6 +20,7 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.StatusBinding;
 import com.merlin.client.databinding.StatusIconBinding;
 import com.merlin.client.databinding.StatusTextBinding;
+import com.merlin.debug.Debug;
 import com.merlin.util.Resource;
 
 public final class StatusBarLayout extends RelativeLayout {
@@ -72,7 +73,8 @@ public final class StatusBarLayout extends RelativeLayout {
                     rlp.addRule(position);
                     rlp.addRule(RelativeLayout.CENTER_VERTICAL);
                 }
-                addView(root,rlp);
+                root.setLayoutParams(rlp);
+//                addView(root,rlp);
             }
         return true;
     }
@@ -80,35 +82,33 @@ public final class StatusBarLayout extends RelativeLayout {
     private final ViewDataBinding createView(Context context,  Integer id){
         Resources res=null!=context&&null!=id?context.getResources():null;
         if (null!=res){
-            ViewDataBinding binding=DataBindingUtil.getBinding(this);
-            StatusBinding statusBinding=null!=binding&&binding instanceof StatusBinding?(StatusBinding)binding:null;
-            OnClickListener listener=null!=statusBinding?statusBinding.getClickListener():null;
             Drawable drawable=Resource.isExistResource(R.drawable.class,id)? android.os.Build.VERSION.SDK_INT >=
                     android.os.Build.VERSION_CODES.LOLLIPOP?res.getDrawable(id, context.getTheme()):res.getDrawable(id):null;
             if (null!=drawable){
-                StatusIconBinding iconBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_icon,null,false);
+                StatusIconBinding iconBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_icon,this,true);
                 View view= null!=iconBinding?iconBinding.getRoot():null;//LayoutInflater.from(context).inflate(R.layout.status_icon,null);
-                if (null!=iconBinding){
-                    iconBinding.setListener(listener);
-                }
                 if (null!=view&&view instanceof ImageView){
+                    view.setTag(R.id.resourceId,id);
                     ((ImageView)view).setImageDrawable(drawable);
                 }
                 return iconBinding;
             }
             String text=Resource.isExistResource(R.string.class,id)?res.getString(id):null;
             if (null!=text){
-                StatusTextBinding textBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_text,null,false);
+                StatusTextBinding textBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_text,this,true);
                 View view=null!=textBinding?textBinding.getRoot():null;
-                if (null!=textBinding){
-                    textBinding.setListener(listener);
-                }
                 if (null!=view&&view instanceof TextView){
+                    view.setTag(R.id.resourceId,id);
                     ((TextView)view).setText(text);
                 }
                 return textBinding;
             }
-            return Resource.isExistResource(R.layout.class,id)? DataBindingUtil.inflate(LayoutInflater.from(context),id,null,false):null;
+            ViewDataBinding binding= Resource.isExistResource(R.layout.class,id)? DataBindingUtil.inflate(LayoutInflater.from(context),id,this,true):null;
+            View root=null!=binding?binding.getRoot():null;
+            if (null!=root){
+                root.setTag(R.id.resourceId,id);
+            }
+            return binding;
         }
         return null;
     }
