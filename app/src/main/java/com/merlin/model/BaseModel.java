@@ -121,6 +121,12 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return null!=child&&null!=cls?(T)child:null;
     }
 
+//    public final <T extends View> T findViewByClass(Class<T> cls){
+//        View root=getRoot();
+//
+//        return null;
+//    }
+
     @Override
     public final void onClick(View v) {
         if (null!=v&&this instanceof  OnModelViewClick) {

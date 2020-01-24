@@ -11,11 +11,13 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <include layout="@layout/medias_all"/>
         <LinearLayout
             android:id="@+id/mediaPlayBottomRL"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="16dp"
             android:orientation="vertical"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <RelativeLayout
@@ -111,6 +113,7 @@
         <RelativeLayout
             android:layout_above="@id/mediaPlayBottomRL"
             android:layout_width="match_parent"
+            android:visibility="gone"
             android:layout_height="match_parent">
             <ImageView
                 android:layout_centerHorizontal="true"

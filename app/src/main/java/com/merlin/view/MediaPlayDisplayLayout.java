@@ -34,7 +34,7 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
         LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,true);
         setLayoutManager(manager);
         setAdapter(new Adapter());
-        scrollToPosition(2);
+        scrollToPosition(1);
     }
 
     @Override
