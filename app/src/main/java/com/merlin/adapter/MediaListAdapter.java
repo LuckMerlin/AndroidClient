@@ -21,7 +21,7 @@ public class MediaListAdapter  extends BaseAdapter<Media, ItemPlayingMediaBindin
     }
 
     @Override
-    protected int onResolveNormalTypeLayoutId() {
+    protected Integer onResolveNormalTypeLayoutId() {
         return R.layout.item_playing_media;
     }
 

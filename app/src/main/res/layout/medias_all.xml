@@ -6,6 +6,7 @@
             name="vm"
             type="com.merlin.model.MediasAllModel" />
         <import type="com.merlin.binding.Adapter"/>
+        <import type="com.merlin.adapter.MediaAdapter"/>
     </data>
     <LinearLayout
         android:orientation="vertical"
@@ -24,7 +25,7 @@
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
         <androidx.recyclerview.widget.RecyclerView
-            binding:adapter="@{Adapter.adapter()}"
+            binding:adapter="@{Adapter.adapter(`com.merlin.adapter.MediaAdapter`)}"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
     </LinearLayout>

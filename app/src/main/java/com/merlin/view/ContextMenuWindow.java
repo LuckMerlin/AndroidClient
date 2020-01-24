@@ -94,7 +94,7 @@ public class ContextMenuWindow extends PopupWindow{
     private class ContextAdapter extends BaseAdapter<ContextMenu, ItemContextMenuBinding> {
 
         @Override
-        protected int onResolveNormalTypeLayoutId() {
+        protected Integer onResolveNormalTypeLayoutId() {
             return R.layout.item_context_menu;
         }
 

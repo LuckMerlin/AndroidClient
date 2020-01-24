@@ -20,7 +20,7 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     private List<FileMeta> mMultiChoose;
 
     @Override
-    protected int onResolveNormalTypeLayoutId() {
+    protected Integer onResolveNormalTypeLayoutId() {
         return R.layout.item_list_file;
     }
 

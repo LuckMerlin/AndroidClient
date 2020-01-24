@@ -12,7 +12,7 @@ import java.util.List;
 public class MediaSheetAdapter extends BaseAdapter<MediaSheet, ItemMediaSheetBinding> {
 
     @Override
-    protected int onResolveNormalTypeLayoutId() {
+    protected Integer onResolveNormalTypeLayoutId() {
         return R.layout.item_media_sheet;
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 public class DownloadAdapter extends BaseAdapter<Download, ItemTransportBinding> {
 
     @Override
-    protected int onResolveNormalTypeLayoutId() {
+    protected Integer onResolveNormalTypeLayoutId() {
         return R.layout.item_transport;
     }
 

@@ -13,6 +13,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -31,6 +32,13 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     private Handler mHandler;
     private List<T> mData;
 
+    public interface OnLayoutManagerResolve{
+        RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv);
+    }
+
+    public interface OnAdapterBind{
+        void onAdapterBind(RecyclerView rv);
+    }
 
     public interface OnItemClickListener<T>{
         void onItemClick(View view,int sourceId,int position, T data);
@@ -91,7 +99,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         mLongClickListener=null!=listener?new WeakReference<>(listener):null;
     }
 
-    protected abstract int onResolveNormalTypeLayoutId();
+    protected abstract Integer onResolveNormalTypeLayoutId();
 
     @NonNull
     @Override
@@ -106,7 +114,9 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
        return new BaseViewHolder(in.inflate(R.layout.list_empty, parent, false));
     }
 
-    protected abstract void onBindViewHolder(RecyclerView.ViewHolder holder,V binding,int position,T data, @NonNull List<Object> payloads);
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder,V binding,int position,T data, @NonNull List<Object> payloads){
+        //Do nothing
+    }
 
     @Override
     public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {

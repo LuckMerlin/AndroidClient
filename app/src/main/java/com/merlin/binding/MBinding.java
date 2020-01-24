@@ -112,7 +112,9 @@ public class MBinding {
 
     @BindingAdapter("adapter")
     public static void adapter(RecyclerView view, Adapter object) {
-
+        if (null!=object&&null!=view){
+            object.inflate(view);
+        }
     }
 
     @BindingAdapter("layoutManager")
