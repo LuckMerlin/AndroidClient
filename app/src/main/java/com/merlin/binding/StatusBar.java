@@ -21,6 +21,7 @@ public final class StatusBar {
     public final static int LEFT =RelativeLayout.ALIGN_PARENT_LEFT;
     public final static int CENTER =RelativeLayout.CENTER_IN_PARENT;
     public final static int RIGHT =RelativeLayout.ALIGN_PARENT_RIGHT;
+    public final static int IDLE =-19991;
     public final static int ICON_BACK = -2000;
 
     public static class IDs{

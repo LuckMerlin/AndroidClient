@@ -25,31 +25,37 @@
 
                 <TextView
                     android:text="全部"
-                    style="@style/titleNormalTextView"/>
+                    binding:enableModelClick="@{true}"
+                    style="@style/sheetCategoryTitleStyle"/>
 
                 <TextView
                     android:text="推荐"
-                    style="@style/titleNormalTextView"/>
+                    binding:enableModelClick="@{true}"
+                    style="@style/sheetCategoryTitleStyle"/>
 
                 <TextView
                     android:text="精选"
-                    style="@style/titleNormalTextView"/>
+                    binding:enableModelClick="@{true}"
+                    style="@style/sheetCategoryTitleStyle"/>
 
                 <TextView
                     android:text="关注"
-                    style="@style/titleNormalTextView"/>
+                    binding:enableModelClick="@{true}"
+                    style="@style/sheetCategoryTitleStyle"/>
 
                 <TextView
                     android:text="古风"
-                    style="@style/titleNormalTextView"/>
+                    binding:enableModelClick="@{true}"
+                    style="@style/sheetCategoryTitleStyle"/>
                 <TextView
                     android:text="ACG"
-                    style="@style/titleNormalTextView"/>
+                    binding:enableModelClick="@{true}"
+                    style="@style/sheetCategoryTitleStyle"/>
                 <TextView
                     android:id="@+id/mediaDisplaySheet_createTV"
-                    android:onClick="@{vm::onClick}"
+                    binding:enableModelClick="@{true}"
                     android:text="Create"
-                    style="@style/titleNormalTextView"/>
+                    style="@style/sheetCategoryTitleStyle"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

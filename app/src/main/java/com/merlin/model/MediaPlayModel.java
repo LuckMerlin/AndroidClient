@@ -45,7 +45,7 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
         updateStatus();
         updateProgress();
         updateMode(null);
-        
+
         post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
     }
 
@@ -65,7 +65,7 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onViewClick(View v, int id,Object obj) {
         MediaPlayer player=mMediaPlayer;
         if (null==player){
             return;
@@ -89,6 +89,9 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
             case R.string.cancel:
                 toast("取消");
                 break;
+            case R.drawable.selector_heart:
+                toast(""+obj);
+                break;
             default:
                 toast(""+v);
                 break;
@@ -96,6 +99,7 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
 //                finishAllActivity(MediaPlayActivity.class);
 //                break;
         }
+
     }
 
     private void updateMode(Mode mode){

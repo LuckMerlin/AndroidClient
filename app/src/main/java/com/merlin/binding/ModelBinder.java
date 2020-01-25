@@ -15,7 +15,7 @@ public class ModelBinder {
 
     public boolean bind(View view,String  modeClassName){
         if (null!=view){
-            ViewDataBinding binding=DataBindingUtil.bind(view);
+            ViewDataBinding binding=DataBindingUtil.getBinding(view);
             Class cls=null!=binding?binding.getClass().getSuperclass():null;
             Field field=null!=cls?findClassField(cls,modeClassName):null;
             Class type=null!=field?field.getType():null;

@@ -1,15 +1,15 @@
 package com.merlin.model;
 
 import android.content.Context;
-
 import com.merlin.adapter.MediaAdapter;
 import com.merlin.media.Media;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediasAllModel extends BaseModel {
-    private MediaAdapter mAdapter=new MediaAdapter();
+
+public final class MediasAllModel extends BaseModel {
+    private final MediaAdapter mAdapter=new MediaAdapter();
 
     public MediasAllModel(Context context){
         super(context);
@@ -21,5 +21,7 @@ public class MediasAllModel extends BaseModel {
         mAdapter.setData(list);
     }
 
-
+    public MediaAdapter getAdapter() {
+        return mAdapter;
+    }
 }

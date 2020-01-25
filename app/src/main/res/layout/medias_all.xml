@@ -2,14 +2,14 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
-        <import type="com.merlin.binding.Adapter"/>
         <variable
             name="vm"
             type="com.merlin.model.MediasAllModel" />
+        <import type="com.merlin.util.Layout"/>
     </data>
-    <LinearLayout
+    <com.merlin.view.MediasAllLayout
         android:orientation="vertical"
-        binding:createModel="@{null}"
+        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <RelativeLayout
@@ -25,9 +25,18 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            binding:adapter="@{Adapter.adapter(`com.merlin.adapter.MediaAdapter`)}"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"/>
-    </LinearLayout>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/medias_all_SRL"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/medias_all_RV"
+                binding:layoutManager="@{Layout.layout(Layout.LINEAR_LAYOUT,Layout.VERTICAL, false)}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </com.merlin.view.MediasAllLayout>
 </layout>

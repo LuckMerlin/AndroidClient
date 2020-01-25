@@ -5,9 +5,25 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/textTitle</item>
         <item name="android:textSize">@dimen/textTitle</item>
-        <item name="android:layout_margin">5dp</item>
         <item name="android:gravity">center</item>
     </style>
+
+    <style name="titleSubNormalTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textTitleSub</item>
+        <item name="android:textSize">@dimen/textTitleSub</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="smallNormalTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textNormal</item>
+        <item name="android:textSize">@dimen/textSmall</item>
+        <item name="android:gravity">center</item>
+    </style>
+
     <style name="editTextNormal" parent="titleNormalTextView">
          <item name="android:layout_width">match_parent</item>
          <item name="android:layout_height">wrap_content</item>
@@ -20,11 +36,15 @@
     <style name="checkboxStyle" parent="@android:style/Widget.CompoundButton.CheckBox">
         <item name="android:button">@drawable/checkbox</item>
     </style>
+    
     <style name="buttonStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/textTitle</item>
         <item name="android:padding">6dp</item>
         <item name="android:background">@drawable/round_corner_small</item>
+    </style>
+    <style name="sheetCategoryTitleStyle" parent="titleNormalTextView">
+            <item name="android:layout_margin">3dp</item>
     </style>
 </resources>

@@ -126,7 +126,7 @@ public class MediaPlayService extends Service implements Status {
         media.setTitle("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
         media.setPath("/sdcard/Musics/赵雷 - 成都.mp3");
-//        mPlayer.add(media,2);
+        mPlayer.add(media,0);
          media=new Media();
         media.setTitle("我不愿让你一个人.mp3");
         media.setAccount("linqiang");
@@ -146,7 +146,7 @@ public class MediaPlayService extends Service implements Status {
         media.setPath("");
         media.setUrl("./WMDYY.mp3");
         mPlayer.append(media);
-//        mPlayer.play(0,0,null);
+        mPlayer.play(0,0,null);
         new Handler().postDelayed(()->{
 //            mPlayer.play(0,0,null);
 //            mPlayer.pause(true);

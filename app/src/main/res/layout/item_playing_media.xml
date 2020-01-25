@@ -13,7 +13,7 @@
         <import type="android.view.View"/>
     </data>
     <RelativeLayout
-        android:background="@drawable/round_dark_corner_small"
+        android:background="@drawable/round_dark_corner_small_normal"
         android:padding="1dp"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"

@@ -42,7 +42,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onViewClick(View v, int id,Object obj) {
         switch (id){
             case R.id.activity_transport_root:
                 finishAllActivity(TransportActivity.class);

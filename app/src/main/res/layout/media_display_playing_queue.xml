@@ -9,13 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:text="Playing"
-            android:layout_gravity="center"
-            style="@style/titleNormalTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mediaSheetLayout_sheetsRV"
             android:layout_width="match_parent"

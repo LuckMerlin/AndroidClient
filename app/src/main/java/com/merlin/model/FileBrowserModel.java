@@ -212,7 +212,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onViewClick(View v, int id,Object obj) {
         Debug.D(getClass()," onViewClick "+v);
         switch (id){
             case R.id.fileBrowser_cancelIV:

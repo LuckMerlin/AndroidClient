@@ -10,7 +10,7 @@
             type="long" />
     </data>
     <RelativeLayout
-        android:background="@drawable/round_dark_corner_small"
+        android:background="@drawable/round_dark_corner_small_normal"
         android:padding="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

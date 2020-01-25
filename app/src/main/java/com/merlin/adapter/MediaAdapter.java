@@ -19,6 +19,11 @@ public class MediaAdapter extends BaseAdapter<Media, ItemMediaBinding> implement
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemMediaBinding binding, int position, Media data, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, binding, position, data, payloads);
+        if (null!=data&&null!=binding){
+            binding.setMedia(data);
+            binding.setPosition(position);
+            binding.setPlaying(false);
+        }
     }
 
     @Override

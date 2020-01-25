@@ -19,7 +19,7 @@ public class LoginModel extends BaseModel implements OnFrameReceive, OnClientSta
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onViewClick(View v, int id,Object obj) {
         Toast.makeText(v.getContext(),"dianjie "+v,Toast.LENGTH_LONG).show();
         System.exit(1);
     }

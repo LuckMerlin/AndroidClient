@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="media"
@@ -11,70 +12,64 @@
             name="playing"
             type="boolean" />
         <import type="android.view.View"/>
+        <import type="com.merlin.binding.ClickBinding"/>
     </data>
-    <RelativeLayout
-        android:background="@drawable/round_dark_corner_small"
-        android:padding="1dp"
-        android:paddingLeft="3dp"
-        android:paddingRight="3dp"
-        android:layout_width="200dp"
-        android:gravity="center_vertical"
-        android:layout_margin="1dp"
-        android:layout_height="@dimen/listItemSizeSmall">
+    <FrameLayout
+        android:background="@drawable/selector_round_dark_corner_small"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/listItemSizeLessMedium">
 
-        <TextView
-            android:id="@+id/itemPlayingMediaIndexTV"
-            android:text="@{Integer.toString(position+1)}"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:padding="2dp"
-            android:textSize="@dimen/textTitle"
-            android:textColor="@color/textTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+     <LinearLayout
+         android:orientation="horizontal"
+         android:paddingLeft="10dp"
+         android:paddingRight="10dp"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent">
+         <TextView
+             android:text="@{Integer.toString(position+1)}"
+             android:layout_gravity="center_vertical"
+             style="@style/titleSubNormalTextView"/>
 
-        <RelativeLayout
-            android:layout_toRightOf="@id/itemPlayingMediaIndexTV"
-            android:layout_marginLeft="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:text="@{media.title}"
-                    android:textSize="@dimen/textMedium"
-                    android:textColor="@color/textTitle"
-                    android:layout_alignParentLeft="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:text="@{media.durationText}"
-                        android:textSize="@dimen/textSmall"
-                        android:textColor="@color/textTitleSub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <TextView
-                        android:text="@{' '+media.artist??`Unknow`}"
-                        android:textSize="@dimen/textSmall"
-                        android:textColor="@color/textTitleSub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <TextView
-                        android:text="@{` - `+media.album??`Unknow`}"
-                        android:textSize="@dimen/textSmall"
-                        android:textColor="@color/textTitleSub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-            </LinearLayout>
-
-
-        </RelativeLayout>
-    </RelativeLayout>
+             <LinearLayout
+                 android:layout_width="wrap_content"
+                 android:orientation="vertical"
+                 android:layout_weight="0.8"
+                 android:gravity="center_vertical"
+                 android:paddingLeft="10dp"
+                 android:paddingRight="10dp"
+                 android:layout_height="match_parent">
+                 <TextView
+                     android:text="@{media.title??``}"
+                     style="@style/titleNormalTextView"/>
+                 <LinearLayout
+                     android:layout_width="wrap_content"
+                     android:orientation="horizontal"
+                     android:layout_marginLeft="10dp"
+                     android:layout_height="wrap_content">
+                     <TextView
+                         android:text="@{media.durationText}"
+                         style="@style/smallNormalTextView" />
+                     <TextView
+                         android:text="@{` `+media.artist??``}"
+                         style="@style/smallNormalTextView" />
+                     <TextView
+                         android:text="@{` `+media.album??``}"
+                         style="@style/smallNormalTextView" />
+                 </LinearLayout>
+             </LinearLayout>
+         <LinearLayout
+             android:layout_weight="2"
+             android:orientation="horizontal"
+             android:gravity="center_vertical"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent">
+             <ImageView
+                 android:src="@drawable/selector_heart"
+                 binding:enableModelClick="@{ClickBinding.bind(true,media)}"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"/>
+         </LinearLayout>
+     </LinearLayout>
+    </FrameLayout>
 </layout>

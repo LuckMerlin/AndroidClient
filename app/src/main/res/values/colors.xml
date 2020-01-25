@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="textNormal">#666666</color>
+    <color name="textNormal">#ffffff</color>
+    <color name="text">#666666</color>
     <color name="textFocus">#999999</color>
     <color name="textTitle">#ffffff</color>
     <color name="textTitleSub">#ffffff</color>

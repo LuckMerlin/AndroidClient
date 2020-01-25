@@ -52,6 +52,7 @@ public class MBinding {
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, int resId) {
         view.setImageResource(resId);
+        view.setTag(R.id.resourceId,new StatusBar.IDs(resId, ));
         Debug.D(MBinding.class,"$$$$$$$$$$$$ resId "+resId );
     }
 
@@ -83,36 +84,17 @@ public class MBinding {
     }
 
     @BindingAdapter(value = {"enableModelClick"})
-    public static void enableModelClick(View view, boolean enable) {
-        if (null!=view ){
-              if (enable){
-                  Object obj=view;
-                  ViewDataBinding binding,topBinding=null;
-                  do {
-                      if (null!=obj&&obj instanceof View){
-                          binding=DataBindingUtil.getBinding((View) obj);
-                          if (null!=binding){
-                              topBinding=binding;
-                          }
-                      }
-                  }while (null!=obj&&obj instanceof View&&null!=(obj=((View)obj).getParent()));
-                  View root=null!=topBinding?topBinding.getRoot():null;
-                  Context context=null!=root?root.getContext():null;
-                  BaseModel model=null!=context&&context instanceof BaseActivity?((BaseActivity)context).getViewModel():null;
-                  WeakReference<BaseModel> reference=new WeakReference<>(model);
-                  if (null!=model&&model instanceof BaseModel.OnModelViewClick){
-                      view.setOnClickListener((v)->{
-                          BaseModel bm=null!=reference?reference.get():null;
-                          if (null!=bm&&bm instanceof BaseModel.OnModelViewClick){
-                              Object object=v.getTag(R.id.resourceId);
-                              StatusBar.IDs iDs=null!=object&&object instanceof StatusBar.IDs?((StatusBar.IDs)object):null;
-                              ((BaseModel.OnModelViewClick)bm).onViewClick(v, null!=iDs?iDs.getResourceId():v.getId());
-                          }
-                      });
-                  }
-              }else{
-                  view.setOnClickListener(null);
-              }
+    public static void enableModelClick(View view, Object object) {
+        if (null!=object){
+            ClickBinding binding = null;
+            if (object instanceof Boolean){
+                binding=new ClickBinding((Boolean)object,null);
+            }else if (object instanceof ClickBinding){
+                binding=(ClickBinding)object;
+            }
+            if (null!=binding){
+                binding.bind(view);
+            }
         }
     }
 
@@ -120,6 +102,14 @@ public class MBinding {
     public static void statusBar(View view, StatusBar statusBar) {
         if (null!=view &&null!=statusBar){
             statusBar.inflate(view);
+        }
+    }
+
+
+    @BindingAdapter("adapter")
+    public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
+        if (null!=view){
+            view.setAdapter(adapter);
         }
     }
 

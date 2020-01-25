@@ -53,7 +53,7 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onViewClick(View v, int id,Object obj) {
         switch (id){
             case R.id.mediaDisplaySheet_createTV:
                 createSheet();

@@ -46,7 +46,7 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     }
 
     public  interface OnModelViewClick{
-        void onViewClick(View v,int id);
+        void onViewClick(View v,int id,Object object);
     }
 
     public  interface OnModelViewLongClick{
@@ -130,7 +130,7 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
     @Override
     public final void onClick(View v) {
         if (null!=v&&this instanceof  OnModelViewClick) {
-            ((OnModelViewClick)this).onViewClick(v,v.getId());
+            ((OnModelViewClick)this).onViewClick(v,v.getId(),null);
         }
     }
 

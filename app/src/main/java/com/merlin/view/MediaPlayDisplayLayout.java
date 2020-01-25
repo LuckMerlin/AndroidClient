@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaDisplayPlayingQueueBinding;
 import com.merlin.client.databinding.MediaDisplaySheetsBinding;
+import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.merlin.model.MediaDisplaySheetsModel;
 
@@ -41,7 +42,7 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
     }
 
     @Override
-    public void onViewClick(View v, int id) {
+    public void onViewClick(View v, int id,Object obj) {
 
     }
 
@@ -81,10 +82,6 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
         @Override
         public int getItemViewType(int position) {
             int[] data=mLayoutIds;
-//            int size=null!=data?data.length:0;
-//            if (size>0&&position>=0) {
-//                return position == size?TYPE_TAIL:TYPE_NORMAL;
-//            }
             return data[position];
         }
 
