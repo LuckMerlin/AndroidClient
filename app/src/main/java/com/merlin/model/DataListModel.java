@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.BaseAdapter;
+import com.merlin.debug.Debug;
 import com.merlin.view.DataListLayout;
 
 import java.util.List;
@@ -67,6 +68,7 @@ public class DataListModel<T> extends BaseModel {
         DataListLayout.Bridge bridge=mBridge;
         if (null!=bridge){
             bridge.setRefreshing(refreshing);
+            return true;
         }
         return false;
     }

@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
@@ -32,6 +33,8 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
     public MediaPlayDisplayLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,true);
+        PagerSnapHelper helper=new PagerSnapHelper();
+        helper.attachToRecyclerView(this);
         setLayoutManager(manager);
         setAdapter(new Adapter());
         scrollToPosition(1);

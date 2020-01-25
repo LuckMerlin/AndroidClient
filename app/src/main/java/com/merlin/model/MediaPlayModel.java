@@ -45,7 +45,7 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
         updateStatus();
         updateProgress();
         updateMode(null);
-
+        
         post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
     }
 

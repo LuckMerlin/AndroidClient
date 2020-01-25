@@ -4,7 +4,7 @@ import com.merlin.debug.Debug;
 
 import java.lang.reflect.Field;
 
-public class ClassFinder extends Classes{
+public class ClassFinder {
     public final static int TYPE_FIELD=1001;
     public final static int TYPE_INTERFACE=1002;
     public final static int TYPE_DDD=10003;

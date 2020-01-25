@@ -53,4 +53,8 @@ public final class FileMeta extends Permissions {
     public int getPermissions() {
         return permissions;
     }
+
+    public String getImage() {
+        return image;
+    }
 }

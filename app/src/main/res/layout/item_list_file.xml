@@ -22,6 +22,9 @@
         <ImageView
             android:id="@+id/itemListFile_icon"
             android:layout_alignParentLeft="true"
+            android:src="@{meta.image}"
+            android:padding="1dp"
+            android:layout_margin="1dp"
             android:layout_width="@dimen/listItemNormal"
             android:layout_height="@dimen/listItemNormal"/>
         <LinearLayout
@@ -29,6 +32,7 @@
             android:layout_width="match_parent"
             android:orientation="vertical"
             android:padding="5dp"
+            android:layout_marginLeft="2dp"
             android:layout_height="wrap_content">
             <TextView
                 android:layout_width="match_parent"

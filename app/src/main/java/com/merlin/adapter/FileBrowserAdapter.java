@@ -27,10 +27,6 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data){
-//          View view=holder.itemView.findViewById(R.id.itemListFile_icon);
-//          if (null!=view&&view instanceof ImageView){
-//             ((ImageView)view).setImageBitmap(data.getThumbnail());
-//          }
             boolean multiChoose=null!=mMultiChoose;
             binding.setIsChoose(isChoose(data));
             binding.setIsMultiChoose(multiChoose);

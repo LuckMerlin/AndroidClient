@@ -19,7 +19,6 @@ import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.client.databinding.StatusIconBinding;
 import com.merlin.client.databinding.StatusTextBinding;
-import com.merlin.debug.Debug;
 import com.merlin.util.Resource;
 
 public final class StatusBarLayout extends RelativeLayout {

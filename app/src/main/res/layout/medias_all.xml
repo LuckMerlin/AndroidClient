@@ -2,14 +2,14 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
+        <import type="com.merlin.binding.Adapter"/>
         <variable
             name="vm"
             type="com.merlin.model.MediasAllModel" />
-        <import type="com.merlin.binding.Adapter"/>
-        <import type="com.merlin.adapter.MediaAdapter"/>
     </data>
     <LinearLayout
         android:orientation="vertical"
+        binding:createModel="@{null}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <RelativeLayout
@@ -19,6 +19,7 @@
                 style="@style/editTextNormal"/>
             <Button
                 android:text="@string/search"
+                binding:enableModelClick="@{true}"
                 style="@style/buttonStyle"
                 android:layout_marginRight="15dp"
                 android:layout_alignParentRight="true"
