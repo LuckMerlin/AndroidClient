@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.View;
 import com.merlin.api.What;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -52,7 +53,7 @@ import retrofit2.http.POST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class FileBrowserModel extends DataListModel implements SwipeRefreshLayout.OnRefreshListener,
-        BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive,
+        BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener,OnFrameReceive, BaseAdapter.OnLoadMore,
         BaseModel.OnModelViewClick, BaseModel.OnModelViewLongClick, BaseAdapter.OnItemMultiClickListener, Label, Tag {
     private final ObservableField<FolderMeta> mCurrent=new ObservableField();
     private final ObservableField<Meta> mClientMeta=new ObservableField<>();
@@ -60,7 +61,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
     private final ContextMenuWindow mPopupWindow=new ContextMenuWindow(true);
-    private String mBrowsingPath;
+    private Browsing mBrowsing;
 
     private interface BrowserApi{
         @POST(Address.PREFIX_FILE_BROWSER)
@@ -75,9 +76,20 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public FileBrowserModel(Context context){
         super(context,new FileBrowserAdapter(),new LinearLayoutManager(context));
+        getAdapter().setOnLoadMore(this);
     }
 
-    private boolean browserPath(String pathValue,String debug){
+    @Override
+    public boolean onLoadMore() {
+        FolderMeta current=mCurrent.get();
+        if (null==current){
+            refreshCurrentPath("After load more call without folder set.");
+            return false;
+        }
+        return browserPath(current.getPath(),current.getPage()+1,"After load more call.");
+    }
+
+    private boolean browserPath(String pathValue, String debug){
         return browserPath(pathValue,0,debug);
     }
 
@@ -93,10 +105,11 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             toast(R.string.pathInvalid);
             return false;
         }
-        final String browsingPath=mBrowsingPath;
-        if (null!=browsingPath){
-            synchronized (browsingPath){
-                if (browsingPath.equals(path)){
+        final Browsing newBrowsing=new Browsing(path,page);
+        Browsing browsing=mBrowsing;
+        if (null!=browsing){
+            synchronized (browsing){
+                if (browsing.equals(newBrowsing)){
                     Debug.W(getClass(),"Not need browser path again "+path+" "+(null!=debug?debug:"."));
                     toast(R.string.operating);
                     return false;
@@ -104,25 +117,32 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             }
         }
         setRefreshing(true);
-        mBrowsingPath=path;
+        mBrowsing=newBrowsing;
         Debug.D(getClass(),"Browsing path "+path +" "+(null!=debug?debug:"."));
         return null!=call(BrowserApi.class,(OnApiFinish<Reply<FolderMeta>>)(what, note, data, arg)->{
             setRefreshing(false);
-            String browsing=mBrowsingPath;
-            if (null!=browsing){
-                synchronized (browsing){
-                    if (browsing.equals(path)){
-                        FolderMeta meta=data.getData();
-                        mCurrent.set(meta);
-                        mBrowsingPath=null;
+            Browsing current=mBrowsing;
+            if (null!=current){
+                synchronized (current){
+                    if (current.equals(newBrowsing)){
+                        FolderMeta meta=null!=data?data.getData():null;
+                        Debug.D(getClass()," dd "+meta.getPage() );
+                        mBrowsing=null;
                         if (what== WHAT_SUCCEED){
-                            getAdapter().setData(null!=meta?meta.getData():null,true);
+                            mCurrent.set(meta);
+                            BaseAdapter adapter=getAdapter();
+                            List  list=null!=meta?meta.getData():null;
+                            if (newBrowsing.mPage>0){
+                                adapter.add(list);
+                            }else{
+                                adapter.setData(list,true);
+                            }
                         }
                     }
                 }
             }
-            if (!data.isSuccess()){
-                toast(R.string.requestFail);
+            if (what!=WHAT_SUCCEED){
+                toast(R.string.requestFail, note);
             }
         }).queryFiles(path,page,12);
     }
@@ -422,5 +442,26 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public ObservableField<FolderMeta> getCurrent() {
         return mCurrent;
+    }
+
+    private static class Browsing{
+        private final String mPath;
+        private final int mPage;
+        private Browsing(String path,int page){
+            mPath=path;
+            mPage=page;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (null!=obj&&obj instanceof Browsing){
+                String path=((Browsing)obj).mPath;
+               if (mPage==((Browsing)obj).mPage&&((null==path&&null==mPath)
+                       ||(null!=path&&null!=mPath&&path.equals(mPath)))){
+                   return true;
+               }
+            }
+            return super.equals(obj);
+        }
     }
 }

@@ -2,9 +2,12 @@ package com.merlin.bean;
 
 import com.merlin.file.Permissions;
 
+import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
+
 public final class FileMeta extends Permissions {
     private String id;
     private String path;
+    private String name;
     private String md5;
     private String mime;
     private String extension;
@@ -15,11 +18,16 @@ public final class FileMeta extends Permissions {
     private double insertTime;
     private int childCount;
     private String extra;
-    private String image;
+    private String thumbImageUrl;
     private String title;
+    private MediaMeta meta;
+
+    public String getName() {
+        return name;
+    }
 
     public boolean isDirectory(){
-        return childCount>=0;
+        return childCount!=WHAT_NOT_DIRECTORY;
     }
 
     public long getSize() {
@@ -54,7 +62,12 @@ public final class FileMeta extends Permissions {
         return permissions;
     }
 
-    public String getImage() {
-        return image;
+    public String getThumbImageUrl() {
+        return thumbImageUrl;
     }
+
+    public MediaMeta getMeta() {
+        return meta;
+    }
+
 }

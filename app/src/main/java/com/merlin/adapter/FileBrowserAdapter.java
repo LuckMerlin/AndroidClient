@@ -25,16 +25,19 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads)
+    {
         if (null!=binding&&null!=data){
             boolean multiChoose=null!=mMultiChoose;
             binding.setIsChoose(isChoose(data));
             binding.setIsMultiChoose(multiChoose);
             binding.setMeta(data);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String sub=data.isDirectory()?"("+data.getChildCount()+")":" "+data.getExtension();
+            int count=data.getChildCount();
+            String sub=data.isDirectory()?"("+(count<=0?0:count)+")":" "+data.getExtension();
             sub+=" "+ FileSize.formatSizeText(data.getSize());
             sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
+            sub+=" "+data.getPermissions();
             setText(binding.itemListFileSub,sub,null);
         }
     }

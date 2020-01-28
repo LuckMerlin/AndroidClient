@@ -48,7 +48,7 @@ public final class ClickBinding {
                         BaseModel bm=null!=reference?reference.get():null;
                         if (null!=bm&&bm instanceof BaseModel.OnModelViewClick){
                             Object object=v.getTag(R.id.resourceId);
-                            StatusBar.IDs iDs=null!=object&&object instanceof StatusBar.IDs?((StatusBar.IDs)object):null;
+                            IDs iDs=null!=object&&object instanceof IDs?((IDs)object):null;
                             ((BaseModel.OnModelViewClick)bm).onViewClick(v, null!=iDs?iDs.getResourceId():v.getId(),tag);
                         }
                     });

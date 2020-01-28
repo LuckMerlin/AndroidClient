@@ -7,9 +7,11 @@ import android.view.ViewGroup;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.merlin.adapter.BaseAdapter;
 import com.merlin.debug.Debug;
 import com.merlin.model.DataListModel;
 
@@ -30,19 +32,54 @@ public class DataListLayout extends SwipeRefreshLayout {
     public DataListLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         addView(mRecyclerView=new RecyclerView(context),new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
-        //        setOnChildScrollUpCallback(new OnChildScrollUpCallback() {
-//            @Override
-//            public boolean canChildScrollUp(@NonNull SwipeRefreshLayout parent, @Nullable View child) {
-//                return false;
-//            }
-//        });
-//        setProgressViewEndTarget(false,0);
-//        setDistanceToTriggerSync(1);
-//        setDistanceToTriggerSync(1);
-//        setSlingshotDistance(23);
-//        setProgressViewEndTarget(true,50);
-//        dd.setNestedScrollingEnabled();
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
+            private boolean mScrolling=false;
+
+            private boolean isNeedLoadMore(RecyclerView recyclerView){
+                RecyclerView.LayoutManager manager=null!=recyclerView?recyclerView.getLayoutManager():null;
+                if (null==manager){
+                    return false;
+                }
+                int currentCount=0;
+                int tailPosition=0;
+                if (manager instanceof LinearLayoutManager){
+                    currentCount=manager.getItemCount();
+                    tailPosition=((LinearLayoutManager) manager).findLastCompletelyVisibleItemPosition();
+                }
+                if ((currentCount<=0|| tailPosition == currentCount - 1)) {
+                    return true;
+                }
+                return false;
+            }
+
+            private void loadMore(RecyclerView recyclerView,String debug){
+                RecyclerView.Adapter adapter= null!=recyclerView?recyclerView.getAdapter():null;
+                BaseAdapter.OnLoadMore loadMore=null!=adapter&&adapter instanceof BaseAdapter?((BaseAdapter)adapter).getOnLoadMore():null;
+                if (null!=loadMore&&loadMore.onLoadMore()){
+
+                }
+                Debug.D(getClass(),"需要加载更多啦  "+debug);
+            }
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                mScrolling=newState==RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING;
+                if (newState==RecyclerView.SCROLL_STATE_IDLE&&isNeedLoadMore(recyclerView)){
+                    loadMore(recyclerView,"After scroll idle.");
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (mScrolling&&isNeedLoadMore(recyclerView)) {
+                    loadMore(recyclerView, "After scroll arrived tail.");
+                }
+        }
+        });
     }
+
 
 
     public final void setViewModel(DataListModel model){

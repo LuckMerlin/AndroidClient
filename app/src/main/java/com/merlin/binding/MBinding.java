@@ -51,9 +51,10 @@ public class MBinding {
 
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, int resId) {
-        view.setImageResource(resId);
-        view.setTag(R.id.resourceId,new StatusBar.IDs(resId, ));
-        Debug.D(MBinding.class,"$$$$$$$$$$$$ resId "+resId );
+        if (null!=view){
+            view.setImageResource(resId);
+            view.setTag(R.id.resourceId,new IDs(resId,null ));
+        }
     }
 
     @BindingAdapter("android:src")
@@ -61,13 +62,13 @@ public class MBinding {
         RoundedCorners roundedCorners = new RoundedCorners(70);
         RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
 //        Debug.D(MBinding.class,"AAAAAAAAAa "+Address.URL+path);
-         String ddd="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg";
+//         String ddd="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg";
         if (null!=path){
             if (path.startsWith("/")){
                 path= Address.URL+path;
             }
         }
-        Debug.D(MBinding.class," "+path);
+//        Debug.D(MBinding.class," "+path);
         Glide.with(view.getContext())
                 .load(path)
                 .centerCrop()

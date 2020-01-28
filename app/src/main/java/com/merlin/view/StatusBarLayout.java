@@ -15,6 +15,7 @@ import androidx.annotation.IdRes;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.binding.IDs;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.client.databinding.StatusIconBinding;
@@ -41,7 +42,8 @@ public final class StatusBarLayout extends RelativeLayout {
             View child;
             for (int i = 0; i < count; i++) {
                 Object object=null!=(child=getChildAt(i))?child.getTag(R.id.resourceId):null;
-                if (null!=object&&object instanceof StatusBar.IDs&&((StatusBar.IDs)object).getPosition()==position){
+                Object arg=null!=object&&object instanceof IDs?((IDs)object).getArg():null;
+                if (null!=arg&&object instanceof Integer&&(Integer)arg==position){
                     return child;
                 }
             }
@@ -61,7 +63,7 @@ public final class StatusBarLayout extends RelativeLayout {
                 removeView(last);
             }
             if (null!=root){
-                root.setTag(R.id.resourceId,new StatusBar.IDs(id,position));
+                root.setTag(R.id.resourceId,new IDs(id,position));
                 RelativeLayout.LayoutParams rlp=null;
                 if (position== StatusBar.LEFT||position==StatusBar.CENTER||position==StatusBar.RIGHT){
                     ViewGroup.LayoutParams params=root.getLayoutParams();

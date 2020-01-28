@@ -22,7 +22,7 @@
         <ImageView
             android:id="@+id/itemListFile_icon"
             android:layout_alignParentLeft="true"
-            android:src="@{meta.image}"
+            android:src="@{meta.meta.thumbImageUrl??meta.thumbImageUrl}"
             android:padding="1dp"
             android:layout_margin="1dp"
             android:layout_width="@dimen/listItemNormal"
@@ -38,9 +38,10 @@
                 android:layout_width="match_parent"
                 android:textSize="@dimen/textTitle"
                 android:singleLine="true"
-                android:text="@{meta.title}"
+                android:text="@{meta.title??meta.name}"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
+
             <TextView
                 android:id="@+id/itemListFile_sub"
                 android:textSize="@dimen/textSmall"

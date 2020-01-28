@@ -24,24 +24,6 @@ public final class StatusBar {
     public final static int IDLE =-19991;
     public final static int ICON_BACK = -2000;
 
-    public static class IDs{
-        private final int mResourceId;
-        private final int mPosition;
-
-        public IDs(int resourceId,int position){
-            mResourceId=resourceId;
-            mPosition=position;
-        }
-
-        public int getPosition() {
-            return mPosition;
-        }
-
-        public int getResourceId() {
-            return mResourceId;
-        }
-    }
-
     private boolean applyRelativeRule(View view,int verb, Integer subject){
         if (null!=view){
             ViewGroup.LayoutParams lp=view.getLayoutParams();

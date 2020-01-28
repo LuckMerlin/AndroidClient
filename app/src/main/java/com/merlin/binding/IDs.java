@@ -9,7 +9,7 @@ public class IDs {
         mArg=arg;
     }
 
-    public int getArg() {
+    public Object getArg() {
         return mArg;
     }
 

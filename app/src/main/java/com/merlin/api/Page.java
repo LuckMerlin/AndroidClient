@@ -7,11 +7,6 @@ public class Page<T> {
     private int limit;
     private List<T> data;
 
-//    public Page(int page,int limit){
-//        this.page=page;
-//        this.limit=limit;
-//    }
-
     public final void setLimit(int limit) {
         this.limit = limit;
     }

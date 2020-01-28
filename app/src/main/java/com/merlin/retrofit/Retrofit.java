@@ -132,12 +132,12 @@ public final class Retrofit implements What {
         @Override
         public void onNext(M model) {
             mData=model;
-            mMessage="收到数据了";
+            mMessage=null;
         }
 
         @Override
         public void onComplete() {
-            finish(mWhat,mMessage="结束了",mData,null,mCallbacks);
+            finish(mWhat,mMessage=null,mData,null,mCallbacks);
         }
 
     }
@@ -149,6 +149,7 @@ public final class Retrofit implements What {
                     data=data!=null&&checkDataGeneric(data,callback)?data:null;
                     if (null!=data&&data instanceof Reply){
                         what=null!=what?what:((Reply)data).getWhat();
+                        note=((Reply)data).getNote();
                     }else{
                         data=null;
                     }

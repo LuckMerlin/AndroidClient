@@ -29,11 +29,16 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     private WeakReference<OnItemClickListener> mClickListener;
     private WeakReference<OnItemLongClickListener> mLongClickListener;
     private WeakReference<OnItemMultiClickListener> mMultiClickListener;
+    private WeakReference<OnLoadMore> mOnLoadMore;
     private Handler mHandler;
     private List<T> mData;
 
     public interface OnLayoutManagerResolve{
         RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv);
+    }
+
+    public interface OnLoadMore{
+        boolean onLoadMore();
     }
 
     public interface OnAdapterBind{
@@ -50,6 +55,17 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
 
     public interface OnItemLongClickListener<T>{
         boolean onItemLongClick(View view,int sourceId,int position, T data);
+    }
+
+    public void setOnLoadMore(OnLoadMore more){
+        WeakReference<OnLoadMore> reference=mOnLoadMore;
+        if (null!=reference){
+            reference.clear();
+            reference=null;
+        }
+        if (null!=more){
+            mOnLoadMore=new WeakReference<>(more);
+        }
     }
 
     public final void setData(List<T> data){
@@ -100,6 +116,12 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     }
 
     protected abstract Integer onResolveNormalTypeLayoutId();
+
+
+    public OnLoadMore getOnLoadMore(){
+        WeakReference<OnLoadMore> reference=mOnLoadMore;
+        return null!=reference?reference.get():null;
+    }
 
     @NonNull
     @Override
