@@ -9,7 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
-import com.merlin.bean.Meta;
+import com.merlin.bean.ClientMeta;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.protocol.Tag;
@@ -55,24 +55,28 @@ public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserB
 //            DownloadService.post(this,download);
 
         },6000);
-        Meta meta=getNasMetaFromIntent(getIntent());
+        ClientMeta meta=getNasMetaFromIntent(getIntent());
         if (null==meta){
-            toast("不能浏览非指定文件系统的终端");
+            toast("不能浏览非指定文件系" +
+                    "统的终端");
             finish();
             return ;
         }
-        getViewModel().setClientMeta(meta);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        getViewModel().refreshCurrentPath("After activity onResume.");
+        FileBrowserModel model=getViewModel();
+        if (null!=model) {
+            model.refreshCurrentPath("After activity onResume.");
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if (!getViewModel().onBackPressed()){
+        FileBrowserModel model=getViewModel();
+        if (null==model||!model.onBackPressed()){
             super.onBackPressed();
         }
     }

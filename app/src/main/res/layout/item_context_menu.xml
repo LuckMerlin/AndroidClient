@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="menu"
@@ -13,9 +14,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:padding="13dp"
+            android:padding="10dp"
+            binding:enableModelClick="@{true}"
             android:minWidth="150dp"
-            android:minHeight="30dp"
+            android:minHeight="20dp"
             android:text="@{menu.textId}"
             android:textSize="@dimen/textTitle"
             android:textColor="@color/textTitle"

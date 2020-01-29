@@ -1,20 +1,12 @@
 package com.merlin.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.Meta;
-import com.merlin.client.databinding.ActivityFileBrowserBinding;
-import com.merlin.model.FileBrowserModel;
+import com.merlin.bean.ClientMeta;
 import com.merlin.protocol.Tag;
 
 public class MainActivity extends Activity implements Tag {
@@ -24,7 +16,7 @@ public class MainActivity extends Activity implements Tag {
         super.onCreate(savedInstanceState);
         Intent intent=new Intent(this,FileBrowserActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Meta meta=new Meta();
+        ClientMeta meta=new ClientMeta();
         meta.setAccount("linqiang");
         meta.setDeviceType(TAG_NAS_DEVICE);
         intent.putExtra(Tag.TAG_META,meta);

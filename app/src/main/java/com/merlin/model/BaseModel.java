@@ -99,7 +99,7 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         Context context=null!=root?root.getContext():null;
         if (null!=context&&null!=msg){
             if (Looper.getMainLooper()==Looper.myLooper()) {
-                Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
             }else{
                 root.post(()->Toast.makeText(context, msg, Toast.LENGTH_LONG).show());
             }

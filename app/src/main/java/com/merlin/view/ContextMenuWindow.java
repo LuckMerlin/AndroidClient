@@ -1,9 +1,12 @@
 package com.merlin.view;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -81,12 +84,17 @@ public class ContextMenuWindow extends PopupWindow{
     @Override
     public final boolean showAtLocation(View parent, int gravity, int x, int y) {
         View view=getContentView();
-        if (null==view||!(view instanceof RecyclerView)){
+        if (null==view){
             Context context=parent.getContext();
-            RecyclerView recyclerView=new RecyclerView(context);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new ContextAdapter());
-            setContentView(recyclerView);
+            ViewDataBinding binding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.context_menu,null,false);
+            View root=null!=binding?binding.getRoot():null;
+            root=null!=root?root.findViewById(R.id.context_menuRV):null;
+            if (null!=root&&root instanceof RecyclerView){
+                RecyclerView recyclerView=(RecyclerView)root;
+                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                recyclerView.setAdapter(new ContextAdapter());
+                setContentView(recyclerView);
+            }
         }
         return super.showAtLocation(parent, gravity, x, y);
     }

@@ -47,22 +47,21 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
 
     private Object createInstance(Class cls){
         if (null!=cls) {
-            try {
-                Constructor constructor = cls.getConstructor(Context.class);
-                if (null != constructor) {
+            Constructor[] constructors=null!=cls?cls.getDeclaredConstructors():null;
+            int length=null!=constructors?constructors.length:-1;
+            for (int i=0;i<length;i++){
+                Constructor constructor=constructors[i];
+                Class[] parms=null!=constructor?constructor.getParameterTypes():null;
+                try {
+                if (null==parms||parms.length==0){
+                    constructor.setAccessible(true);
+                        return constructor.newInstance();
+                }else if (parms.length==1&&null!=parms[0]&&parms[0].equals(Context.class)){
                     constructor.setAccessible(true);
                     return constructor.newInstance(this);
                 }
-            } catch (NoSuchMethodException | IllegalArgumentException |
-                    InstantiationException | InvocationTargetException | IllegalAccessException e) {
-                try {
-                    Constructor constructor = cls.getConstructor();
-                    if (null != constructor) {
-                        constructor.setAccessible(true);
-                        return constructor.newInstance();
-                    }
-                } catch (Exception e1) {
-                    Debug.E(getClass(), "" + cls, e1);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -120,7 +119,7 @@ public abstract class BaseActivity<V extends ViewDataBinding, VM extends BaseMod
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
            Window window = getWindow();

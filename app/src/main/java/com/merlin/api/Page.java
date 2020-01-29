@@ -3,6 +3,7 @@ package com.merlin.api;
 import java.util.List;
 
 public class Page<T> {
+    private int length;
     private int page;
     private int limit;
     private List<T> data;
@@ -33,5 +34,9 @@ public class Page<T> {
 
     public final int size(){
         return null!=data?data.size():0;
+    }
+
+    public int getLength() {
+        return length;
     }
 }

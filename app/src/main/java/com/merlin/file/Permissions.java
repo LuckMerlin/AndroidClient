@@ -1,6 +1,6 @@
 package com.merlin.file;
 
-public class Permissions {
+public final class Permissions {
     private static final int FILE_TYPE_MASK = 0170000 ;//文件类型屏蔽字
     private static final int FILE_TYPE_IS_DIRECTORY = 0040000 ;//目录文件
     private static final int FILE_TYPE_IS_NORMAL_FILE = 0100000 ;//普通文件
@@ -12,6 +12,10 @@ public class Permissions {
     private static final int FILE_PERMISSION_USER_EXECUTABLE= 0100 ;//用户可执行
     private static final int FILE_PERMISSION_USER_WRITEABLE= 0200 ;//用户可写
     private static final int FILE_PERMISSION_USER_READABLE= 0400 ;//用户可读
+    private static final int FILE_PERMISSION_OTHER_EXECUTABLE= 00001 ;//其他用户可执行
+    private static final int FILE_PERMISSION_OTHER_WRITEABLE= 00002 ;//其他用户可写
+    private static final int FILE_PERMISSION_OTHER_READABLE= 00004 ;//其他用户可读
+
 
     public final boolean isDirectory(int permissions){
         return (permissions&FILE_TYPE_MASK) ==FILE_TYPE_IS_DIRECTORY;
@@ -41,16 +45,20 @@ public class Permissions {
         return (permissions&FILE_TYPE_MASK) ==FILE_TYPE_SOCKET;
     }
 
-    public final boolean isExecutable(int permissions){
-        return (permissions & FILE_PERMISSION_USER_EXECUTABLE) >0;
+    public final boolean isOtherExecutable(int permissions){
+        return (permissions & FILE_PERMISSION_OTHER_EXECUTABLE) >0;
     }
 
-    public final boolean isReadable(int permissions){
-        return (permissions & FILE_PERMISSION_USER_READABLE) >0;
+    public final boolean isOtherReadable(int permissions){
+//        String oct=Integer.toOctalString(permi);
+//        int length=null!=oct?oct.length():-1;
+//        oct=length>=3?oct.substring(length-3,length):null;
+
+        return (permissions & FILE_PERMISSION_OTHER_READABLE) >0;
     }
 
-    public final boolean isWriteable(int permissions){
-        return (permissions & FILE_PERMISSION_USER_WRITEABLE) >0;
+    public final boolean isOtherWriteable(int permissions){
+        return (permissions & FILE_PERMISSION_OTHER_WRITEABLE) >0;
     }
 
 }

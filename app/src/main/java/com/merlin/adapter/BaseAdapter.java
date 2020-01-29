@@ -68,6 +68,14 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
     }
 
+//    private boolean isDataChanged(List<T> newData){
+//        List<T> current=mData;
+//        if ((null==current&&null==newData)||(null!=newData)){
+//            return true;
+//        }
+//        return false;
+//    }
+
     public final void setData(List<T> data){
          setData(data,true);
     }
@@ -88,7 +96,11 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     }
 
     public final void setData(List<T> data,boolean notify){
-        mData= data;
+        List<T> datas=mData=null!=mData?mData:new ArrayList<>();
+        datas.clear();
+        if (null!=data&&data.size()>0){
+            datas.addAll(data);
+        }
         if (notify){
             if (Looper.getMainLooper() == Looper.myLooper()){
                 notifyDataSetChanged();
@@ -306,7 +318,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
                     }
                     continue;
                 }
-                if (!list.contains(data)&&list.add(data)){
+                if (null!=data&&!list.contains(data)&&list.add(data)){
                     notifyItemInserted(list.indexOf(data));
                 }
             }

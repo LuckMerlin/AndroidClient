@@ -4,7 +4,7 @@ import com.merlin.file.Permissions;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public final class FileMeta extends Permissions {
+public final class FileMeta {
     private String id;
     private String path;
     private String name;
@@ -56,6 +56,12 @@ public final class FileMeta extends Permissions {
 
     public void setPermissions(int permissions) {
         this.permissions = permissions;
+    }
+
+    public  boolean isAccessible(){
+        int permission=permissions;
+        Permissions permissions=new Permissions();
+        return permissions.isOtherReadable(permission)&&(!isDirectory()||permissions.isOtherExecutable(permission));
     }
 
     public int getPermissions() {

@@ -7,7 +7,7 @@
             type="com.merlin.model.FileBrowserModel" />
         <variable
             name="meta"
-            type="com.merlin.bean.Meta" />
+            type="com.merlin.bean.ClientMeta" />
         <import type="com.merlin.util.FileSize"/>
         <import type="android.view.View"/>
     </data>
@@ -49,10 +49,17 @@
                         android:onClick="@{vm::onClick}"
                         android:src="@drawable/cancel_selector"/>
                     <TextView
-                        android:text="@{vm.getCurrentMeta().name}"
+                        android:text="@{vm.clientMeta.name}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
                         android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:text="@{` (`+vm.current.length+')'}"
+                        android:textSize="@dimen/textTitle"
+                        android:textStyle="bold"
+                        android:visibility="@{(vm.isMultiMode()||(null==vm.clientMeta&amp;&amp;vm.current.size()&lt;1))?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -126,18 +133,20 @@
             <ImageView
                 android:src="@drawable/switch_thumb_activated"
                 android:layout_gravity="center_vertical"
-                android:layout_marginRight="3dp"
+                android:layout_marginRight="5dp"
                 android:layout_width="10dp"
                 android:layout_height="10dp"/>
             <TextView
-                android:text='@{"Free:"+FileSize.formatSizeText(vm.getCurrentMeta().freeSpace)+" "+"Total:"+FileSize.formatSizeText(vm.getCurrentMeta().totalSpace)}'
+                android:text='@{""+FileSize.formatSizeText(vm.clientMeta.free)+"/"+FileSize.formatSizeText(vm.clientMeta.total)}'
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:textSize="@dimen/textSmall"
+                android:visibility="@{null==vm.clientMeta?View.GONE:View.VISIBLE}"
                 android:singleLine="true"
                 android:layout_height="wrap_content"/>
             <HorizontalScrollView
                 android:layout_marginLeft="5dp"
+                android:visibility="@{null==vm.clientMeta?View.GONE:View.VISIBLE}"
                 android:layout_weight="1"
                 android:scrollbars="none"
                 android:layout_width="0dp"

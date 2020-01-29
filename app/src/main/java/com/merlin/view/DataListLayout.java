@@ -58,7 +58,6 @@ public class DataListLayout extends SwipeRefreshLayout {
                 if (null!=loadMore&&loadMore.onLoadMore()){
 
                 }
-                Debug.D(getClass(),"需要加载更多啦  "+debug);
             }
 
             @Override
