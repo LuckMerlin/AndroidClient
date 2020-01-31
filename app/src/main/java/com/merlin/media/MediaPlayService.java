@@ -130,6 +130,7 @@ public class MediaPlayService extends Service implements Status {
 
     private void handStartIntent(Bundle bundle){
         Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
+//        Debug.D(getClass(),"播ddd放  "+object);
         if (null!=object){
             if (object instanceof Media){
                 if (bundle.getBoolean(LABEL_PLAY,false)){
@@ -138,6 +139,7 @@ public class MediaPlayService extends Service implements Status {
                     Debug.D(getClass(),"播放  "+object);
                     mPlayerBinder.play(object,seek,null);
                 }
+
             }
         }
     }

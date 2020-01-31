@@ -26,6 +26,7 @@ import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SearchDialog;
+import com.merlin.media.MediaPlayService;
 import com.merlin.oksocket.OnFrameReceive;
 import com.merlin.view.ContextMenu;
 import com.merlin.view.ContextMenuWindow;
@@ -180,7 +181,12 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                     browserPath(file.getPath(), "After directory click.");
 //                    }
                 }else{
-                    toast("点击了文件" + file.getTitle());
+                    //test
+                   String extension= file.getExtension();
+                   if (extension.equals("mp3")){
+                       MediaPlayService.play(getContext(),file.getMeta(),0,false);
+                   }
+//                    toast("点击了文件 "+extension+" " +file.getMeta());
 //                if (!file.isRead()) {
 //                    toast("文件不可读");
 //                }else {

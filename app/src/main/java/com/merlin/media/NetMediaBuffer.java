@@ -67,37 +67,35 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
         }
         reader.mWriteComplete=false;
         reader.mState= Reader.STATE_OPENING;
-        retrofit.call(Api.class).downloadFile(Address.URL+url).enqueue(
+        Debug.D(getClass(),"下载 "+Address.URL+url);
+        retrofit.call(Api.class).downloadFile(url).enqueue(
                 new Callback<ResponseBody>() {
+
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        try {
-                            InputStream is = response.body().byteStream();
-//                            File file = new File(Environment.getExternalStorageDirectory(), "文件路径");
-//                            FileOutputStream fos = new FileOutputStream(file);
-                            BufferedInputStream bis = new BufferedInputStream(is);
-                            byte[] buffer = new byte[1024];
-                            int len;
-//                            while ((len = bis.read(buffer)) != -1) {
-//                                fos.write(buffer, 0, len);
-//                                fos.flush();
-//                            }
-//                            fos.close();
-//                            bis.close();
-//                            is.close();
-                            if (reader.mState!=What.WHAT_CANCEL){
-                                while ((len = bis.read(buffer)) != -1) {
-                                    reader.write(buffer,0,len,false);
-//                            }
-//                                 if (null!=bytes&&bytes.length>0){
-//                                     if (reader.write(bytes,frame.isLastFrame())){
-//
-//                                    }
-//                                }
-//                          }
-                                }}
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (response.isSuccessful()){
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        InputStream is = response.body().byteStream();
+                                        BufferedInputStream bis = new BufferedInputStream(is);
+                                        byte[] buffer = new byte[1024];
+                                        int len;
+                                        if (reader.mState!=What.WHAT_CANCEL){
+                                            while ((len = bis.read(buffer)) != -1) {
+                                                reader.write(buffer,0,len,false);
+                                            }
+                                            Debug.D(getClass(),"SSSSSSSs "+len);
+                                        }
+
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();
+                        }else{
+                            Debug.D(getClass(),"没成功");
                         }
                     }
 

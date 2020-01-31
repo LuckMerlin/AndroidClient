@@ -78,7 +78,7 @@ public class MBinding {
                 path= Address.URL+path;
             }
         }
-        Debug.D(MBinding.class," "+path);
+//        Debug.D(MBinding.class," "+path);
         Glide.with(view.getContext())
                 .load(path)
                 .centerCrop()
