@@ -91,7 +91,6 @@ public class ContextMenuWindow extends PopupWindow{
             root=null!=root?root.findViewById(R.id.context_menuRV):null;
             if (null!=root&&root instanceof RecyclerView){
                 RecyclerView recyclerView=(RecyclerView)root;
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
                 recyclerView.setAdapter(new ContextAdapter());
                 setContentView(recyclerView);
             }
@@ -111,6 +110,11 @@ public class ContextMenuWindow extends PopupWindow{
             if (null!=binding){
                 binding.setMenu(data);
             }
+        }
+
+        @Override
+        public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+            return null!=rv?new LinearLayoutManager(rv.getContext()):null;
         }
     }
 }

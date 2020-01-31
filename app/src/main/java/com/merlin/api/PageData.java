@@ -2,15 +2,11 @@ package com.merlin.api;
 
 import java.util.List;
 
-public class Page<T> {
+public class PageData<T> {
     private int length;
     private int page;
     private int limit;
     private List<T> data;
-
-    public final void setLimit(int limit) {
-        this.limit = limit;
-    }
 
     public final int getLimit() {
         return limit;
@@ -18,10 +14,6 @@ public class Page<T> {
 
     public final int getPage() {
         return page;
-    }
-
-    public final void setPage(int page) {
-        this.page = page;
     }
 
     public final void setData(List<T> data) {

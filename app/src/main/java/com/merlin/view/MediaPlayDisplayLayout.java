@@ -14,11 +14,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
-import com.merlin.client.databinding.MediaDisplayPlayingQueueBinding;
+import com.merlin.client.databinding.MediaDisplayAllMediasBinding;
 import com.merlin.client.databinding.MediaDisplaySheetsBinding;
+import com.merlin.client.databinding.MediasAllBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
+import com.merlin.model.MediaDisplayAllMediasModel;
 import com.merlin.model.MediaDisplaySheetsModel;
 
 public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.OnModelViewClick {
@@ -33,21 +36,31 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
 
     public MediaPlayDisplayLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,true);
+        LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
         PagerSnapHelper helper=new PagerSnapHelper();
         helper.attachToRecyclerView(this);
         setLayoutManager(manager);
         setAdapter(new Adapter());
-        scrollToPosition(1);
+        scrollToPosition(0);
     }
 
     @Override
     public void onViewClick(View v, int id,Object obj) {
-
+          int count=getChildCount();
+          for (int i=0;i< count;i++){
+              View child=getChildAt(i);
+              ViewDataBinding binding=null!=child?DataBindingUtil.getBinding(child):null;
+              if (null!=binding){
+                 MediaDisplayAllMediasModel model= binding instanceof MediaDisplayAllMediasBinding?((MediaDisplayAllMediasBinding)binding).getVm():null;
+                  if (null!=model&&model instanceof BaseModel.OnModelViewClick){
+                      ((BaseModel.OnModelViewClick)model).onViewClick(v,id,obj);
+                  }
+              }
+          }
     }
 
     private final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-        private final int[] mLayoutIds=new int[]{R.layout.media_display_playing_queue,R.layout.media_display_play,
+        private final int[] mLayoutIds=new int[]{R.layout.media_display_all_medias,R.layout.media_display_play,
         R.layout.media_display_sheets};
 
         @NonNull
@@ -61,7 +74,11 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
                      MediaDisplaySheetsModel model=new MediaDisplaySheetsModel(context);
                      model.setRootView(binding.getRoot());
                      ((MediaDisplaySheetsBinding)binding).setVm(model);
-                 }else if (binding instanceof MediaDisplayPlayingQueueBinding){
+                 }else if (binding instanceof MediaDisplayAllMediasBinding){
+                     MediaDisplayAllMediasModel model=new MediaDisplayAllMediasModel(context);
+                     model.setRootView(binding.getRoot());
+                     ((MediaDisplayAllMediasBinding)binding).setVm(model);
+                 }else if (binding instanceof MediasAllBinding){
 
                  }
 //                binding.setVariable(com.merlin.client.BR.vm,mModel);
@@ -84,7 +101,6 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
             int[] data=mLayoutIds;
             return data[position];
         }
-
 
     }
 

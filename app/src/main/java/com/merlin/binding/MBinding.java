@@ -1,11 +1,16 @@
 package com.merlin.binding;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Space;
+import android.widget.TextView;
 
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
@@ -22,7 +27,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.merlin.activity.BaseActivity;
+import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.LinearItemDecoration;
+import com.merlin.adapter.LoadMoreInterceptor;
+import com.merlin.adapter.OnMoreLoadable;
+import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediasAllBinding;
@@ -30,6 +39,7 @@ import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 import com.merlin.task.Status;
 import com.merlin.util.Layout;
+import com.merlin.view.OnTextChanged;
 
 import java.lang.ref.WeakReference;
 
@@ -68,7 +78,7 @@ public class MBinding {
                 path= Address.URL+path;
             }
         }
-//        Debug.D(MBinding.class," "+path);
+        Debug.D(MBinding.class," "+path);
         Glide.with(view.getContext())
                 .load(path)
                 .centerCrop()
@@ -106,10 +116,67 @@ public class MBinding {
         }
     }
 
+    @BindingAdapter("onEditorActionChange")
+    public static void onEditorActionChange(EditText view, TextView.OnEditorActionListener listener) {
+        if (null != view && null != listener) {
+            view.setOnEditorActionListener(listener);
+        }
+    }
+
+    @BindingAdapter("onTextChange")
+    public static void onTextChange(EditText view, OnTextChanged listener) {
+        if (null!=view&&null!=listener){
+            view.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    listener.onTextChanged(view,OnTextChanged.TEXT_BEFORE,s);
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    listener.onTextChanged(view,OnTextChanged.TEXT_CHANGED,s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    listener.onTextChanged(view,OnTextChanged.TEXT_CHANGING,s);
+                }
+            });
+        }
+    }
+
+    @BindingAdapter("onFocusChange")
+    public static void onFocusChange(View view, View.OnFocusChangeListener listener) {
+        if (null!=view){
+            view.setOnFocusChangeListener(listener);
+        }
+    }
+
+
+    @BindingAdapter("selected")
+    public static void selected(View view, boolean selected) {
+        if (null!=view){
+            view.setSelected(selected);
+        }
+    }
 
     @BindingAdapter("adapter")
     public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
         if (null!=view){
+            if (null!=adapter&&adapter instanceof BaseAdapter){
+                RecyclerView.LayoutManager manager=((BaseAdapter)adapter).onResolveLayoutManager(view);
+                if (null!=manager){
+                    view.setLayoutManager(manager);
+                }
+                if (adapter instanceof OnMoreLoadable){
+                    view.addOnScrollListener(new LoadMoreInterceptor(){
+                        @Override
+                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
+                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
+                        }
+                    });
+                }
+            }
             view.setAdapter(adapter);
         }
     }

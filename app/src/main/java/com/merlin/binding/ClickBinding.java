@@ -8,6 +8,7 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.BaseActivity;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 
 import java.lang.ref.WeakReference;

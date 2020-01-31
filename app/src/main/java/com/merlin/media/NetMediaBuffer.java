@@ -1,34 +1,51 @@
 package com.merlin.media;
 
+import com.merlin.api.Address;
+import com.merlin.api.Label;
 import com.merlin.bean.Media;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
-import com.merlin.oksocket.Callback;
 import com.merlin.player.MediaBuffer;
 import com.merlin.protocol.What;
+import com.merlin.retrofit.Retrofit;
 import com.merlin.util.FileMaker;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-public final class ClientMediaBuffer extends MediaBuffer<Media> {
-    private final Client mClient;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.http.Field;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+import retrofit2.http.Url;
+
+public final class NetMediaBuffer extends MediaBuffer<Media> {
     private final String mCachePath;
     private Reader mReader;
+    private final Retrofit mRetrofit=new Retrofit();
 
-    public ClientMediaBuffer(Client client, Media media, double seek){
+    private interface Api{
+        @GET(Address.PREFIX_FILE+"/download")
+        Call<ResponseBody> downloadFile(@Query(Label.LABEL_PATH) String path);
+    }
+
+    public NetMediaBuffer(Media media, double seek){
         super(media,seek);
         mCachePath="/sdcard/a/temp.mp3";
-        mClient=client;
     }
 
     @Override
     protected boolean open(double seek, String debug) {
-        Client client=mClient;
-        boolean login=null!=client&&client.isLogined();
-        if (!login){
-            Debug.D(getClass(),"Can't play media while failed open client url,Not login "+(null!=debug?debug:".")+" client="+client);
+        final Retrofit retrofit=mRetrofit;
+        if (null==retrofit){
+            Debug.D(getClass(),"Can't play media "+(null!=debug?debug:".")+" retrofit="+retrofit);
             return false;
         }
         final Media media=getPlayable();
@@ -49,51 +66,89 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
             return false;
         }
         reader.mWriteComplete=false;
-        reader.mState=Reader.STATE_OPENING;
-        final int timeout=30*1000;
-        Client.Canceler canceler=client.download(account,url,seek,timeout,(succeed, what, note, frame)->{
-//            Debug.D(getClass(),"$$$$$$$$$ "+succeed+" "+what+" "+note);
-            switch (what){
-                case What.WHAT_NOT_EXIST:
-                    Debug.D(getClass(),"File not exist."+account+" "+url);
-                    reader.wakeUp(What.WHAT_NOT_EXIST,"Url file not exist."+account+" "+url);
-                    reader.setCanceler(null);
-                    break;
-                case What.WHAT_NOT_ONLINE:
-                    Debug.D(getClass(),"Client not online."+account+" "+url);
-                    reader.wakeUp(What.WHAT_NOT_ONLINE,"Client not online."+account+" "+url);
-                    reader.setCanceler(null);
-                    break;
-                case What.WHAT_HEAD_DATA:
-                    Debug.D(getClass(),"Media file head got."+account+" "+url);
-                    reader.wakeUp(What.WHAT_HEAD_DATA,"Client head response."+account+" "+url);
-                    break;
-                case Callback.REQUEST_SUCCEED://Bytes received
-                    if (reader.mState!=What.WHAT_CANCEL){
-                        byte[] bytes=null!=frame?frame.getBodyBytes():null;
-                        if (null!=bytes&&bytes.length>0){
-                            if (reader.write(bytes,frame.isLastFrame())){
-
-                            }
+        reader.mState= Reader.STATE_OPENING;
+        retrofit.call(Api.class).downloadFile(Address.URL+url).enqueue(
+                new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            InputStream is = response.body().byteStream();
+//                            File file = new File(Environment.getExternalStorageDirectory(), "文件路径");
+//                            FileOutputStream fos = new FileOutputStream(file);
+                            BufferedInputStream bis = new BufferedInputStream(is);
+                            byte[] buffer = new byte[1024];
+                            int len;
+//                            while ((len = bis.read(buffer)) != -1) {
+//                                fos.write(buffer, 0, len);
+//                                fos.flush();
+//                            }
+//                            fos.close();
+//                            bis.close();
+//                            is.close();
+                            if (reader.mState!=What.WHAT_CANCEL){
+                                while ((len = bis.read(buffer)) != -1) {
+                                    reader.write(buffer,0,len,false);
+//                            }
+//                                 if (null!=bytes&&bytes.length>0){
+//                                     if (reader.write(bytes,frame.isLastFrame())){
+//
+//                                    }
+//                                }
+//                          }
+                                }}
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
-                    break;
-                default:
-                    if (!succeed){//Not succeed
-                        reader.mState=what;
-                        reader.mWriteComplete=true;
-                        reader.setCanceler(null);
-                        reader.wakeUp(what," "+note+account+" "+url);
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+
                     }
-                    break;
-            }
-        });
-        if (null==canceler){
-            reader.recycle("While client request failed.");
-            Debug.D(getClass(),"Failed play media while client request failed.canceler="+canceler);
-            return false;
-        }
-        reader.setCanceler(canceler);
+                });
+//        Client.Canceler canceler=client.download(account,url,seek,timeout,(succeed, what, note, frame)->{
+////            Debug.D(getClass(),"$$$$$$$$$ "+succeed+" "+what+" "+note);
+//            switch (what){
+//                case What.WHAT_NOT_EXIST:
+//                    Debug.D(getClass(),"File not exist."+account+" "+url);
+//                    reader.wakeUp(What.WHAT_NOT_EXIST,"Url file not exist."+account+" "+url);
+//                    reader.setCanceler(null);
+//                    break;
+//                case What.WHAT_NOT_ONLINE:
+//                    Debug.D(getClass(),"Client not online."+account+" "+url);
+//                    reader.wakeUp(What.WHAT_NOT_ONLINE,"Client not online."+account+" "+url);
+//                    reader.setCanceler(null);
+//                    break;
+//                case What.WHAT_HEAD_DATA:
+//                    Debug.D(getClass(),"Media file head got."+account+" "+url);
+//                    reader.wakeUp(What.WHAT_HEAD_DATA,"Client head response."+account+" "+url);
+//                    break;
+//                case Callback.REQUEST_SUCCEED://Bytes received
+//                    if (reader.mState!=What.WHAT_CANCEL){
+//                        byte[] bytes=null!=frame?frame.getBodyBytes():null;
+//                        if (null!=bytes&&bytes.length>0){
+//                            if (reader.write(bytes,frame.isLastFrame())){
+//
+//                            }
+//                        }
+//                    }
+//                    break;
+//                default:
+//                    if (!succeed){//Not succeed
+//                        reader.mState=what;
+//                        reader.mWriteComplete=true;
+//                        reader.setCanceler(null);
+//                        reader.wakeUp(what," "+note+account+" "+url);
+//                    }
+//                    break;
+//            }
+//        });
+//        if (null==canceler){
+//            reader.recycle("While client request failed.");
+//            Debug.D(getClass(),"Failed play media while client request failed.canceler="+canceler);
+//            return false;
+//        }
+//        reader.setCanceler(canceler);
         reader.waitHere(Reader.STATE_OPENING,"For client open response "+account+" "+url);
         if (reader.mState==What.WHAT_HEAD_DATA){
             return true;//Reply head,Now return true to prepare play
@@ -206,7 +261,7 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
             return READ_FINISH_ARG_INVALID;
         }
 
-        boolean write(byte[] bytes,boolean complete){
+        boolean write(byte[] bytes,int offset,int length,boolean complete){
             RandomAccessFile fis=mAccess;
             if (null==bytes||bytes.length<=0){
                 return false;
@@ -218,9 +273,9 @@ public final class ClientMediaBuffer extends MediaBuffer<Media> {
             try {
                 boolean needWakeup=false;
                 synchronized (fis) {
-                    long length = fis.length();
+//                    long length = fis.length();
                     fis.seek(length);//Make append
-                    fis.write(bytes);
+                    fis.write(bytes,offset,length);
                     long railPointer = fis.getFilePointer();
                     mWriteComplete = complete;
                     mState=complete?BUFFER_READ_FINISH_EOF:mState;

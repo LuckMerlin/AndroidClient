@@ -1,7 +1,5 @@
 package com.merlin.bean;
 
-import com.merlin.media.Media;
-
 import java.io.Serializable;
 import java.util.List;
 

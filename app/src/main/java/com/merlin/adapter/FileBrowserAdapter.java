@@ -98,4 +98,9 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
         List<FileMeta> list=mMultiChoose;
         return list;
     }
+
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        return null;
+    }
 }

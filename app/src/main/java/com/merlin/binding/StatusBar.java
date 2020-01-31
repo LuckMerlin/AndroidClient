@@ -14,6 +14,7 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.StatusBinding;
+import com.merlin.debug.Debug;
 import com.merlin.view.StatusBarLayout;
 
 public final class StatusBar {
@@ -39,7 +40,14 @@ public final class StatusBar {
         return false;
     }
 
-    private StatusBinding createContent(ViewGroup vg){
+    private StatusBinding createContent(View view){
+        view =null!=view?view.getRootView():null;
+        view=null!=view?view.findViewById(android.R.id.content):null;
+        if (null!=view&&view instanceof ViewGroup){
+            int count=((ViewGroup)view).getChildCount();
+            view=count>=0?((ViewGroup)view).getChildAt(0):null;
+        }
+        ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
         if (null!=vg){
             int count=vg.getChildCount();
             View child;
@@ -76,8 +84,8 @@ public final class StatusBar {
     }
 
     public boolean inflate(View view){
-        if (null!=view&&view instanceof ViewGroup){
-            StatusBinding statusBinding=createContent((ViewGroup)view);
+        if (null!=view){
+            StatusBinding statusBinding=createContent(view);
             View statusView=null!=statusBinding?statusBinding.getRoot():null;
             if (statusView instanceof StatusBarLayout){
                 StatusBarLayout content=(StatusBarLayout)statusView;

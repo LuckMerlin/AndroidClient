@@ -9,17 +9,30 @@ import androidx.databinding.ObservableField;
 import com.merlin.activity.OnBackPressed;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
-import com.merlin.binding.StatusBar;
+import com.merlin.api.Address;
+import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
+import com.merlin.api.Reply;
+import com.merlin.api.What;
+import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
-import com.merlin.media.Media;
+import com.merlin.bean.Media;
+import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Player;
 import com.merlin.player.Status;
+import com.merlin.view.MediaPlayDisplayLayout;
 import com.merlin.view.OnSeekBarChangeListener;
 
-public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
+import io.reactivex.Observable;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+
+public class MediaPlayModel extends BaseModel implements Label, What,OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
     private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mPlayState=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
@@ -28,6 +41,8 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
     private final ObservableField<Mode> mPlayMode=new ObservableField<>();
     private MediaPlayer mMediaPlayer;
     private final MediaListAdapter mPlayingAdapter;
+
+
     private final OnSeekBarChangeListener mSeekListener=new OnSeekBarChangeListener(){
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -40,48 +55,45 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
 
     public MediaPlayModel(Context context){
         super(context);
-        mPlayingAdapter=new MediaListAdapter(context);
+        mPlayingAdapter=new MediaListAdapter();
         mPlayingAdapter.setOnItemClickListener(this);
-        updateStatus();
-        updateProgress();
-        updateMode(null);
-
-        post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
+//        updateStatus();
+//        updateProgress();
+//        updateMode(null);
+//
+//        post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
     }
 
     public boolean setMediaPlayer(MediaPlayer player){
         MediaPlayer curr=mMediaPlayer;
         mMediaPlayer=player;
-        if (null!=player){
-            updateStatus();
-            updateProgress();
-            updateMode(null);
-            player.addListener(this);
-            return true;
-        }else if (null!=curr){
-            curr.removeListener(this);
-        }
+
+//        if (null!=player){
+//            updateStatus();
+//            updateProgress();
+//            updateMode(null);
+//            player.addListener(this);
+//            return true;
+//        }else if (null!=curr){
+//            curr.removeListener(this);
+//        }
         return true;
     }
 
     @Override
     public void onViewClick(View v, int id,Object obj) {
-        MediaPlayer player=mMediaPlayer;
-        if (null==player){
-            return;
-        }
         switch (id){
             case R.id.activityMediaPlay_preIV:
-                player.pre();
+//                player.pre();
                 break;
             case R.id.activityMediaPlay_playModeIV:
-                updateMode(player.playMode(Mode.CHANGE_MODE));
+//                updateMode(player.playMode(Mode.CHANGE_MODE));
                 break;
             case R.id.activityMediaPlay_playPauseIV:
-                player.togglePlayPause(null);
+//                player.togglePlayPause(null);
                 break;
             case R.id.activityMediaPlay_nextIV:
-                player.next();
+//                player.next();
                 break;
             case R.drawable.ic_back:
                 finishActivity();
@@ -89,18 +101,20 @@ public class MediaPlayModel extends BaseModel implements OnBackPressed,Status,Ba
             case R.string.cancel:
                 toast("取消");
                 break;
-            case R.drawable.selector_heart:
-                toast(""+obj);
-                break;
             default:
-                toast(""+v);
+                MediaPlayDisplayLayout layout=findViewById(R.id.activityMediaDisplay_layoutMPDL, MediaPlayDisplayLayout.class);
+                if (null!=layout){
+                    layout.onViewClick(v,id,obj);
+                }
                 break;
+
 //            case R.id.title_backIV:
 //                finishAllActivity(MediaPlayActivity.class);
 //                break;
         }
 
     }
+
 
     private void updateMode(Mode mode){
       MediaPlayer player=null==mode?mMediaPlayer:null;

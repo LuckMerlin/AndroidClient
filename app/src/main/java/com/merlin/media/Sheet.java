@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.RequiresApi;
 
+import com.merlin.bean.Media;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,7 +108,7 @@ public final class Sheet implements Parcelable {
             create=in.readLong();
             account=in.readString();
             note=in.readString();
-            data=in.readParcelableList(new ArrayList<>(),Media.class.getClassLoader());
+            data=in.readParcelableList(new ArrayList<>(), Media.class.getClassLoader());
         }
     }
 

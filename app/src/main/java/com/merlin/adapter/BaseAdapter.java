@@ -12,8 +12,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.PageData;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnLayoutManagerResolve {
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_TAIL = 2;
     public static final int TYPE_EMPTY = 3;
@@ -33,14 +33,15 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
     private Handler mHandler;
     private List<T> mData;
 
-    public interface OnLayoutManagerResolve{
-        RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv);
-    }
-
+    /**
+     * @deprecated
+     */
     public interface OnLoadMore{
         boolean onLoadMore();
     }
-
+    /**
+     * @deprecated
+     */
     public interface OnAdapterBind{
         void onAdapterBind(RecyclerView rv);
     }

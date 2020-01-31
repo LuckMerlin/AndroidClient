@@ -13,4 +13,5 @@
     <dimen name="iconSizeSmall">30dp</dimen>
     <dimen name="iconSizeMedium">40dp</dimen>
     <dimen name="iconSizeLarge">50dp</dimen>
+    <dimen name="contentGap">5dp</dimen>
 </resources>

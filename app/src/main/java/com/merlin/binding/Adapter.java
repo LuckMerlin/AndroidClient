@@ -1,13 +1,8 @@
 package com.merlin.binding;
-
-import android.content.Context;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.classes.Classes;
-
-import java.lang.reflect.Constructor;
 
 public final class Adapter {
     private final String mAdapterClass;
@@ -24,8 +19,7 @@ public final class Adapter {
         String cls=mAdapterClass;
         Object instance=null!=cls&&null!=rv?new Classes().instance(cls,rv.getContext()):null;
         if (null!=instance&&instance instanceof BaseAdapter){
-            RecyclerView.LayoutManager lm=instance instanceof BaseAdapter.OnLayoutManagerResolve ?
-                    ((BaseAdapter.OnLayoutManagerResolve)instance).onResolveLayoutManager(rv):null;
+            RecyclerView.LayoutManager lm=instance instanceof BaseAdapter ? ((BaseAdapter)instance).onResolveLayoutManager(rv):null;
             if (null!=lm){
                 rv.setLayoutManager(lm);
             }

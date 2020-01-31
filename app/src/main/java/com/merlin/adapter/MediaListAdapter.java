@@ -3,22 +3,17 @@ package com.merlin.adapter;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPlayingMediaBinding;
-import com.merlin.media.Media;
+import com.merlin.bean.Media;
 
 import java.util.List;
 
 public class MediaListAdapter  extends BaseAdapter<Media, ItemPlayingMediaBinding>{
-    private final RecyclerView.LayoutManager mLayoutManager;
-
-    public MediaListAdapter(Context context){
-        mLayoutManager=new LinearLayoutManager(context);
-    }
+    private  RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     protected Integer onResolveNormalTypeLayoutId() {
@@ -33,7 +28,11 @@ public class MediaListAdapter  extends BaseAdapter<Media, ItemPlayingMediaBindin
         }
     }
 
-    public final RecyclerView.LayoutManager getLayoutManager() {
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        if (null==mLayoutManager){
+            mLayoutManager=null!=rv?new LinearLayoutManager(rv.getContext()):null;
+        }
         return mLayoutManager;
     }
 }

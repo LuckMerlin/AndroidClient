@@ -2,8 +2,8 @@ package com.merlin.media;
 
 import android.os.Binder;
 
+import com.merlin.bean.Media;
 import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Playable;
 
 import java.util.List;
 

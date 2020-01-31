@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemSheetMediaBinding;
-import com.merlin.media.Media;
+import com.merlin.bean.Media;
 
 import java.util.List;
 
@@ -24,4 +24,8 @@ public class SheetMediaAdapter extends BaseAdapter<Media, ItemSheetMediaBinding>
         }
     }
 
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        return null;
+    }
 }

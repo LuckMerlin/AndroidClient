@@ -3,8 +3,8 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="media"
-            type="com.merlin.media.Media" />
+            name="mediaFile"
+            type="com.merlin.bean.FileMeta" />
         <variable
             name="position"
             type="int" />
@@ -20,56 +20,71 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/listItemSizeLessMedium">
 
-     <LinearLayout
+     <RelativeLayout
          android:orientation="horizontal"
          android:paddingLeft="10dp"
          android:paddingRight="10dp"
          android:layout_width="match_parent"
          android:layout_height="match_parent">
          <TextView
+             android:id="@+id/item_media_positionTV"
+             android:layout_centerVertical="true"
              android:text="@{Integer.toString(position+1)}"
+             android:layout_alignParentLeft="true"
+             android:layout_marginRight="5dp"
              android:layout_gravity="center_vertical"
              style="@style/titleSubNormalTextView"/>
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:orientation="vertical"
-                 android:layout_weight="0.8"
-                 android:gravity="center_vertical"
-                 android:paddingLeft="10dp"
-                 android:paddingRight="10dp"
-                 android:layout_height="match_parent">
-                 <TextView
-                     android:text="@{media.title??``}"
-                     style="@style/titleNormalTextView"/>
-                 <LinearLayout
-                     android:layout_width="wrap_content"
-                     android:orientation="horizontal"
-                     android:layout_marginLeft="10dp"
-                     android:layout_height="wrap_content">
-                     <TextView
-                         android:text="@{media.durationText}"
-                         style="@style/smallNormalTextView" />
-                     <TextView
-                         android:text="@{` `+media.artist??``}"
-                         style="@style/smallNormalTextView" />
-                     <TextView
-                         android:text="@{` `+media.album??``}"
-                         style="@style/smallNormalTextView" />
-                 </LinearLayout>
-             </LinearLayout>
          <LinearLayout
-             android:layout_weight="2"
+             android:id="@+id/item_media_rightLL"
+             android:layout_weight="1"
              android:orientation="horizontal"
-             android:gravity="center_vertical"
+             android:layout_alignParentRight="true"
+             android:gravity="center_vertical|right"
              android:layout_width="wrap_content"
+             android:paddingRight="10dp"
              android:layout_height="match_parent">
              <ImageView
+                 android:id="@+id/itemMedia_favoriteIV"
                  android:src="@drawable/selector_heart"
-                 binding:enableModelClick="@{ClickBinding.bind(true,media)}"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"/>
+                 binding:selected="@{mediaFile.favorite}"
+                 binding:enableModelClick="@{ClickBinding.bind(true,mediaFile)}"
+                 android:layout_width="25dp"
+                 android:layout_height="25dp"/>
          </LinearLayout>
-     </LinearLayout>
+
+         <LinearLayout
+             android:layout_toLeftOf="@id/item_media_rightLL"
+             android:layout_toRightOf="@id/item_media_positionTV"
+             android:layout_width="wrap_content"
+             android:orientation="vertical"
+             android:layout_weight="1"
+             android:layout_centerInParent="true"
+             android:gravity="center_vertical"
+             android:paddingLeft="5dp"
+             android:paddingRight="5dp"
+             android:layout_height="match_parent">
+             <TextView
+                 android:text="@{mediaFile.title??mediaFile.name??``}"
+                 android:singleLine="true"
+                 style="@style/titleNormalTextView"/>
+             <LinearLayout
+                 android:layout_width="wrap_content"
+                 android:orientation="horizontal"
+                 android:layout_marginLeft="10dp"
+                 android:layout_height="wrap_content">
+                 <TextView
+                     android:text="@{mediaFile.meta.durationText}"
+                     style="@style/smallNormalTextView" />
+                 <TextView
+                     android:text="@{` `+mediaFile.meta.artist??``}"
+                     style="@style/smallNormalTextView" />
+                 <TextView
+                     android:text="@{` `+mediaFile.meta.album??``}"
+                     style="@style/smallNormalTextView" />
+             </LinearLayout>
+         </LinearLayout>
+
+     </RelativeLayout>
     </FrameLayout>
 </layout>

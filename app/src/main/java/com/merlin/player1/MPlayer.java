@@ -8,8 +8,9 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.media.ClientMediaBuffer;
 import com.merlin.media.Indexer;
-import com.merlin.media.Media;
+import com.merlin.bean.Media;
 import com.merlin.media.Mode;
+import com.merlin.media.NetMediaBuffer;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.FileBuffer;
 import com.merlin.player.OnMediaFrameDecodeFinish;
@@ -25,7 +26,6 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
     private final List<Media> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
-    private Client mClient;
     private Mode mPlayMode;
 
     public MPlayer(){
@@ -73,15 +73,6 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                 channelConfig, AudioFormat.ENCODING_PCM_16BIT),AudioTrack.MODE_STREAM);
         return audioTrack;
     }
-    /////////////////
-    public final boolean setClient(Client client){
-        mClient=client;
-        return false;
-    }
-
-    public final Client getClient() {
-        return mClient;
-    }
 
     public final boolean append(Media media){
         return null!=media&&add(media,-1);
@@ -126,10 +117,9 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                     return new FileBuffer(media,seek);
                 }
             }
-            String url=media.getUrl();
-            Client client=mClient;
-            if (null!=url&&url.length()>0&&null!=client){
-                return new ClientMediaBuffer(client,media,seek);
+            String url=media.getPath();
+            if (null!=url&&url.length()>0){
+                return new NetMediaBuffer(media,seek);
             }
         }
         return null;

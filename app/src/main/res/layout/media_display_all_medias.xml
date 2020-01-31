@@ -2,41 +2,34 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
+        <import type="android.view.View"/>
         <variable
             name="vm"
             type="com.merlin.model.MediaDisplayAllMediasModel" />
-        <import type="com.merlin.util.Layout"/>
+
     </data>
-    <com.merlin.view.MediasAllLayout
+    <LinearLayout
+        android:padding="@dimen/contentGap"
         android:orientation="vertical"
-        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
+                android:id="@+id/mediaDisplayAllMedias_searchET"
                 style="@style/editTextNormal"/>
             <Button
-                android:text="@string/search"
+                android:text="@string/filter"
                 binding:enableModelClick="@{true}"
                 style="@style/buttonStyle"
                 android:layout_marginRight="15dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"/>
         </RelativeLayout>
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/medias_all_SRL"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
+        <androidx.recyclerview.widget.RecyclerView
+            binding:adapter="@{vm.adapter}"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/medias_all_RV"
-                binding:layoutManager="@{Layout.layout(Layout.LINEAR_LAYOUT,Layout.VERTICAL, false)}"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    </com.merlin.view.MediasAllLayout>
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </layout>

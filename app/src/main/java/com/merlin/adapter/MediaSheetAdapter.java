@@ -23,4 +23,8 @@ public class MediaSheetAdapter extends BaseAdapter<MediaSheet, ItemMediaSheetBin
         }
     }
 
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        return null;
+    }
 }

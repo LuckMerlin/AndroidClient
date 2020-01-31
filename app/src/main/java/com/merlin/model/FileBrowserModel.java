@@ -103,7 +103,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         }
         setRefreshing(true);
         mBrowsing=newBrowsing;
-        Debug.D(getClass(),"Browsing path "+path +" "+(null!=debug?debug:"."));
+        Debug.D(getClass(),"Browsing path "+page+" "+path +" "+(null!=debug?debug:"."));
         return null!=call(BrowserApi.class,(OnApiFinish<Reply<FolderMeta>>)(what, note, data, arg)->{
             setRefreshing(false);
             Browsing current=mBrowsing;
@@ -117,6 +117,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                             BaseAdapter adapter=getAdapter();
                             List  list=null!=meta?meta.getData():null;
                             if (newBrowsing.mPage>0){
+
                                 adapter.add(list);
                             }else{
                                 adapter.setData(list,true);

@@ -17,4 +17,6 @@ public interface Label{
    String  LABEL_PARENT = "parent";
    String  LABEL_NAME = "name";
    String  LABEL_ID = "id";
+   String  LABEL_FORMAT = "format";
+   String  LABEL_MD5 = "md5";
 }

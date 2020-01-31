@@ -6,16 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
-import android.os.Handler;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.client.Client;
+import com.merlin.bean.Media;
 import com.merlin.debug.Debug;
-import com.merlin.global.Application;
 import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Playable;
 import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
@@ -26,6 +24,8 @@ public class MediaPlayService extends Service implements Status {
     private final MPlayer mPlayer=new MPlayer();
     private final static String LABEL_MEDIAS="medias";
     private final static String LABEL_POSITION="position";
+    private final static String LABEL_ADD_INTO_QUEUE="addIntoQueue";
+    private final static String LABEL_PLAY="play";
     private final static String LABEL_INDEX="index";
     private final static List<ServiceConnection> mConnections=new ArrayList<>();
 
@@ -112,56 +112,53 @@ public class MediaPlayService extends Service implements Status {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return mPlayerBinder;
+        return null;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Debug.D(getClass(),"Media play service onCreate.");
-        Application application= Application.get(this);
-        Client client=null!=application?application.getClient():null;
-        mPlayer.setClient(client);
-        Media media=new Media();
-        media.setTitle("我不愿让你一个人.mp3");
-        media.setAccount("linqiang");
-        media.setPath("/sdcard/Musics/赵雷 - 成都.mp3");
-        mPlayer.add(media,0);
-         media=new Media();
-        media.setTitle("我不愿让你一个人.mp3");
-        media.setAccount("linqiang");
-        media.setPath("/sdcard/Musics/许巍 - 执着.mp3");
-//        media.setUrl("./WMDYY.mp3");
-//        mPlayer.add(media,2);
-
-        media=new Media();
-        media.setTitle("我不愿让你一个人.mp3");
-        media.setAccount("linqiang");
-        media.setPath("");
-        media.setUrl("./WBYRNYGR.mp3");
-//        mPlayer.append(media);
-        media=new Media();
-        media.setTitle("我们不一样.mp3");
-        media.setAccount("linqiang");
-        media.setPath("");
-        media.setUrl("./WMDYY.mp3");
-        mPlayer.append(media);
-        mPlayer.play(0,0,null);
-        new Handler().postDelayed(()->{
-//            mPlayer.play(0,0,null);
-//            mPlayer.pause(true);
-//            mPlayer.play(1,0.55f,null);
-//            Playable sss=mPlayer.getPlaying();
-        },8000);
-
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Bundle bundle=intent.getExtras();
+        handStartIntent(bundle);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void handStartIntent(Bundle bundle){
+        Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
+        if (null!=object){
+            if (object instanceof Media){
+                if (bundle.getBoolean(LABEL_PLAY,false)){
+                    Object pos=bundle.get(LABEL_POSITION);
+                    float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
+                    Debug.D(getClass(),"播放  "+object);
+                    mPlayerBinder.play(object,seek,null);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Debug.D(getClass(),"Media play service onDestroy.");
+        MPlayer player=mPlayer;
+        if (null!=player){
+            player.destroy();
+        }
+    }
+
 
     public static boolean start(Context context, Intent intent){
         if (null!=context){
             intent=null!=intent?intent:new Intent();
             intent.setClass(context,MediaPlayService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent);
+                context.startService(intent);
             }else{
                 context.startService(intent);
             }
@@ -170,7 +167,16 @@ public class MediaPlayService extends Service implements Status {
         return false;
     }
 
-    public static boolean add(Context context,Media media,int index){
+    public static boolean play(Context context, Media media,int position, boolean addIntoQueue){
+        Intent intent=new Intent();
+        intent.putExtra(LABEL_MEDIAS,media);
+        intent.putExtra(LABEL_POSITION,position);
+        intent.putExtra(LABEL_ADD_INTO_QUEUE,addIntoQueue);
+        intent.putExtra(LABEL_PLAY, true);
+        return start(context,intent);
+    }
+
+    public static boolean add(Context context, Media media, int index){
         if (null!=context&&null!=media){
             Intent intent=new Intent();
             intent.putExtra(LABEL_MEDIAS,media);
@@ -236,17 +242,6 @@ public class MediaPlayService extends Service implements Status {
 //            }
 //        }
         return false;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Debug.D(getClass(),"Media play service onDestroy.");
-        MPlayer player=mPlayer;
-        if (null!=player){
-            player.setClient(null);
-            player.destroy();
-        }
     }
 
 }

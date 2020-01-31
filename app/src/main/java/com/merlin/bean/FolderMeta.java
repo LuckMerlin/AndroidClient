@@ -1,8 +1,8 @@
 package com.merlin.bean;
 
-import com.merlin.api.Page;
+import com.merlin.api.PageData;
 
-public class FolderMeta extends Page<FileMeta> {
+public class FolderMeta extends PageData<FileMeta> {
     private String path;
     private String parent;
 

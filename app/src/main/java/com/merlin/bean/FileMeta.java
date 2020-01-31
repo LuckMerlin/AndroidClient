@@ -1,11 +1,15 @@
 package com.merlin.bean;
 
+import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.merlin.file.Permissions;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public final class FileMeta {
-    private String id;
+public final class FileMeta implements Parcelable {
+    private long id;
     private String path;
     private String name;
     private String md5;
@@ -17,10 +21,11 @@ public final class FileMeta {
     private long size;
     private double insertTime;
     private int childCount;
+    private boolean favorite;
     private String extra;
     private String thumbImageUrl;
     private String title;
-    private MediaMeta meta;
+    private Media meta;
 
     public String getName() {
         return name;
@@ -72,8 +77,85 @@ public final class FileMeta {
         return thumbImageUrl;
     }
 
-    public MediaMeta getMeta() {
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public Media getMeta() {
         return meta;
     }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public String getMd5() {
+        return md5;
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+
+    @SuppressLint("NewApi")
+    private FileMeta(Parcel in){
+        id=in.readLong();
+        size=in.readLong();
+        path=in.readString();
+        name=in.readString();
+        title=in.readString();
+        md5=in.readString();
+        mime=in.readString();
+        extension=in.readString();
+        extra=in.readString();
+        thumbImageUrl=in.readString();
+        createTime=in.readDouble();
+        modifyTime=in.readDouble();
+        insertTime=in.readDouble();
+        permissions=in.readInt();
+        childCount=in.readInt();
+        favorite=in.readBoolean();
+        Parcelable parcelable=in.readParcelable(FileMeta.class.getClassLoader());
+        meta=null!=parcelable&&parcelable instanceof Media?(Media)parcelable:null;
+    }
+
+    @SuppressLint("NewApi")
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeLong(size);
+        dest.writeString(path);
+        dest.writeString(name);
+        dest.writeString(title);
+        dest.writeString(md5);
+        dest.writeString(mime);
+        dest.writeString(extension);
+        dest.writeString(extra);
+        dest.writeString(thumbImageUrl);
+        dest.writeDouble(createTime);
+        dest.writeDouble(modifyTime);
+        dest.writeDouble(insertTime);
+        dest.writeInt(permissions);
+        dest.writeInt(childCount);
+        dest.writeBoolean(favorite);
+        dest.writeParcelable(meta,0);
+
+    }
+
+    public static final Creator<FileMeta> CREATOR = new Creator<FileMeta>() {
+        @Override
+        public FileMeta createFromParcel(Parcel in) {
+            return new FileMeta(in);
+        }
+
+        @Override
+        public FileMeta[] newArray(int size) {
+            return new FileMeta[size];
+        }
+    };
+
 
 }

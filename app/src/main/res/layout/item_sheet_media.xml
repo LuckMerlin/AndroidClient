@@ -3,7 +3,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.media.Media" />
+            type="com.merlin.bean.Media" />
         <import type="android.view.View"/>
         <variable
             name="position"

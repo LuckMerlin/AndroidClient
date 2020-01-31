@@ -7,26 +7,15 @@ import android.view.View;
 
 import androidx.annotation.RequiresApi;
 import androidx.databinding.ObservableField;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.BaseAdapter;
-import com.merlin.adapter.GridSpacingItemDecoration;
 import com.merlin.adapter.LinearItemDecoration;
-import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.adapter.SheetMediaAdapter;
 import com.merlin.bean.MediaSheet;
 import com.merlin.bean.User;
-import com.merlin.client.OnObjectRequestFinish;
-import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.media.Media;
+import com.merlin.bean.Media;
 import com.merlin.media.MediaPlayService;
-import com.merlin.media.Sheet;
-import com.merlin.server.Frame;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

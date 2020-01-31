@@ -27,4 +27,9 @@ public class DownloadAdapter extends BaseAdapter<Download, ItemTransportBinding>
             binding.setTask(data);
         }
     }
+
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        return null;
+    }
 }

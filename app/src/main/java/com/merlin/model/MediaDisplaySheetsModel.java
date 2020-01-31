@@ -18,7 +18,7 @@ import com.merlin.bean.MediaSheet;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SingleInputDialog;
-import com.merlin.media.Media;
+import com.merlin.bean.Media;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
