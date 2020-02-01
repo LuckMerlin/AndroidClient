@@ -17,5 +17,6 @@ public interface What {
     int WHAT_SERVER_EXCEPTION = - 1013;
     int WHAT_TIMEOUT = - 1014;
     int WHAT_TOKEN_INVALID = - 1015;
+    int WHAT_CANCEL = - 1016;
 }
 

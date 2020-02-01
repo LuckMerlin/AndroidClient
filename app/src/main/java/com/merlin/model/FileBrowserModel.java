@@ -130,7 +130,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             if (what!=WHAT_SUCCEED){
                 toast(R.string.requestFail, note);
             }
-        }).queryFiles(path,page,12);
+        }).queryFiles(path,page,50);
     }
 
     private boolean refreshClientMeta(String debug){
@@ -154,8 +154,8 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     @Override
     public void onBridgeBoundChange(boolean bound) {
         if (bound){
-            setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
-            setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
+//            setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
+//            setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
 //            multiMode(true);
         }
     }

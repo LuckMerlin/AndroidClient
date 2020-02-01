@@ -35,7 +35,7 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             int count=data.getChildCount();
             String sub=data.isDirectory()?"("+(count<=0?0:count)+")":" "+data.getExtension();
-            sub+=" "+ FileSize.formatSizeText(data.getSize());
+            sub+=" "+ FileSize.formatSizeText(data.getLength());
             sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
             sub+=" "+data.getPermissions();
             setText(binding.itemListFileSub,sub,null);

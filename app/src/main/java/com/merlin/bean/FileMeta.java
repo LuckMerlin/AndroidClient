@@ -18,7 +18,7 @@ public final class FileMeta implements Parcelable {
     private double createTime;
     private double modifyTime;
     private int permissions;
-    private long size;
+    private long length;
     private double insertTime;
     private int childCount;
     private boolean favorite;
@@ -35,8 +35,8 @@ public final class FileMeta implements Parcelable {
         return childCount!=WHAT_NOT_DIRECTORY;
     }
 
-    public long getSize() {
-        return size;
+    public long getLength() {
+        return length;
     }
 
     public String getExtension() {
@@ -103,7 +103,7 @@ public final class FileMeta implements Parcelable {
     @SuppressLint("NewApi")
     private FileMeta(Parcel in){
         id=in.readLong();
-        size=in.readLong();
+        length=in.readLong();
         path=in.readString();
         name=in.readString();
         title=in.readString();
@@ -126,7 +126,7 @@ public final class FileMeta implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
-        dest.writeLong(size);
+        dest.writeLong(length);
         dest.writeString(path);
         dest.writeString(name);
         dest.writeString(title);

@@ -21,6 +21,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import retrofit2.HttpException;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -37,30 +38,41 @@ public final class Retrofit implements What {
         mUrl=null!=url&&url.length()>0?url: Address.URL;
     }
 
-    public final <T> T prepare(Class<T> cls){
-        return prepare(cls,null);
+    public final <T> T prepare(Class<T> cls,Interceptor ...interceptors){
+        return prepare(cls,null,interceptors);
     }
 
-    public final <T> T prepare(Class<T> cls,String url){
+    public final <T> T prepare(Class<T> cls, String url, Interceptor ...interceptors){
         final String uri=null!=url&&url.length()>0?url:mUrl;
         final int timeout =mTimeout>=0?mTimeout:10;
-        OkHttpClient client = new OkHttpClient().newBuilder()
+        OkHttpClient.Builder builder=new OkHttpClient().newBuilder()
                 .readTimeout(timeout, TimeUnit.SECONDS)//设置读取超时时间
                 .connectTimeout(timeout, TimeUnit.SECONDS)//设置请求超时时间
                 .writeTimeout(timeout,TimeUnit.SECONDS)//设置写入超时时间
-                .addInterceptor(new LogInterceptor())//添加打印拦截器
-                .retryOnConnectionFailure(true)//设置出现错误进行重新连接。
-                .build();
+                .addInterceptor(new LogInterceptor());//添加打印拦截器
+        if (null!=interceptors&&interceptors.length>0){
+            for (Interceptor interceptor:interceptors) {
+                if (null!=interceptor){
+                    builder.addInterceptor(interceptor);
+                }
+            }
+        }
+        builder.retryOnConnectionFailure(true);//设置出现错误进行重新连接。
+        OkHttpClient client = builder.build();
         retrofit2.Retrofit retrofit = new retrofit2.Retrofit.Builder().client(client)
                 .baseUrl(uri).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create()).build();
         return retrofit.create(cls);
     }
 
-    public final <T> T call(Class<T> cls, Callback...callbacks){
+    public final <T> T call(Class<T> cls,Callback...callbacks){
+        return call(cls,null,callbacks);
+    }
+
+    public final <T> T call(Class<T> cls,Interceptor[] interceptors, Callback...callbacks){
         if (null!=cls){
             return (T)Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls},(proxy, method,args)->{
-                        T instance=prepare(cls);
+                        T instance=prepare(cls,interceptors);
                         Object ret=null!=instance?method.invoke(instance,args):null;
                         if (null!=ret&&ret instanceof Observable) {
                             subscribe((Observable) ret, callbacks);

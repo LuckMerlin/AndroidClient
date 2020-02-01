@@ -122,7 +122,8 @@ public class MediaPlayService extends Service implements Status {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
         Bundle bundle=intent.getExtras();
         handStartIntent(bundle);
         return super.onStartCommand(intent, flags, startId);
@@ -130,13 +131,11 @@ public class MediaPlayService extends Service implements Status {
 
     private void handStartIntent(Bundle bundle){
         Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
-//        Debug.D(getClass(),"播ddd放  "+object);
         if (null!=object){
             if (object instanceof Media){
                 if (bundle.getBoolean(LABEL_PLAY,false)){
                     Object pos=bundle.get(LABEL_POSITION);
                     float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
-                    Debug.D(getClass(),"播放  "+object);
                     mPlayerBinder.play(object,seek,null);
                 }
 
