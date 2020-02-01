@@ -27,11 +27,6 @@ import com.merlin.player.Status;
 import com.merlin.view.MediaPlayDisplayLayout;
 import com.merlin.view.OnSeekBarChangeListener;
 
-import io.reactivex.Observable;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
-
 public class MediaPlayModel extends BaseModel implements Label, What,OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
     private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mPlayState=new ObservableField<>();

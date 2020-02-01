@@ -14,6 +14,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="false">
         <activity
+            android:label="NAS"
             android:name="com.merlin.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,9 +22,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.merlin.activity.FileBrowserActivity"/>
+        <activity android:name="com.merlin.activity.FileBrowserActivity"
+            android:label="@string/fileBrowser">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.merlin.activity.TransportActivity"/>
-        <activity android:name="com.merlin.activity.MediaPlayActivity"/>
+        <activity android:name="com.merlin.activity.MediaPlayActivity"
+            android:label="@string/mediaPlayer">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <service android:name="com.merlin.task.DownloadService"/>

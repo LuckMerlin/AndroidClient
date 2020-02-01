@@ -48,6 +48,10 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
     }
 
     public void multiMode(boolean entry){
+        List current=mMultiChoose;
+        if (null!=current){
+            current.clear();
+        }
         mMultiChoose=null;
         if (entry){
             mMultiChoose=new ArrayList<>(1);

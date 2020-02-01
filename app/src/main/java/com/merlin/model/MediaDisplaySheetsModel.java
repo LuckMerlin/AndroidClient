@@ -1,9 +1,13 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaSheetAdapter;
@@ -15,7 +19,9 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.MediaSheet;
+import com.merlin.bean.SheetCategory;
 import com.merlin.client.R;
+import com.merlin.client.databinding.ItemSheetTitleBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.bean.Media;
@@ -44,27 +50,48 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
         @FormUrlEncoded
         Observable<Reply<ApiList<MediaSheet>>> queryAllSheets(@Field(LABEL_NAME) String name,@Field(LABEL_PAGE) int page,@Field(LABEL_LIMIT) int limit);
 
+        @POST(Address.PREFIX_MEDIA+"/sheet/category")
+        @FormUrlEncoded
+        Observable<Reply<ApiList<SheetCategory>>> queryCategories(@Field(LABEL_NAME) String name,@Field(LABEL_PAGE) int page,@Field(LABEL_LIMIT) int limit);
     }
 
     public MediaDisplaySheetsModel(Context context){
         super(context);
         mSheetAdapter.setOnItemClickListener(this);
-        queryAllSheets();
+        queryCategories();
     }
 
     @Override
     public void onViewClick(View v, int id,Object obj) {
-        switch (id){
-            case R.id.mediaDisplaySheet_createTV:
-                createSheet();
-                break;
-        }
+
     }
 
     @Override
     public void onItemClick(View view, int sourceId, int position, MediaSheet data) {
         mEnableSheets.set(false);
         querySheet(data,0);
+    }
+
+    private boolean queryCategories(){
+        return null!= call(Api.class, (OnApiFinish<Reply<ApiList<SheetCategory>>>)(what, note, data, arg)->{
+            if (what==WHAT_SUCCEED){
+                ApiList<SheetCategory> list=null!=data?data.getData():null;
+                ViewGroup content=findViewById(R.id.activityMediaSheetsList_contentLL, ViewGroup.class);
+                if (null!=content){
+                    content.removeAllViews();
+                    if (null!=list&&list.size()>0){
+                        LayoutInflater inflater=LayoutInflater.from(getContext());
+                        for (SheetCategory category:list) {
+                           ItemSheetTitleBinding binding= DataBindingUtil.inflate(inflater,R.layout.item_sheet_title,content,true);
+                           if (null!=binding){
+                               binding.setSheet(category);
+                           }
+                           Debug.D(getClass(),"%%%%%%%5 "+binding);
+                        }
+                    }
+                }
+            }
+        }).queryCategories(null,0,100);
     }
 
     private void queryAllSheets(){

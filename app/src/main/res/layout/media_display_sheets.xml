@@ -17,47 +17,17 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
             <LinearLayout
+                android:id="@+id/activityMediaSheetsList_contentLL"
                 android:orientation="horizontal"
                 android:layout_marginBottom="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"/>
 
-                <TextView
-                    android:text="全部"
-                    binding:enableModelClick="@{true}"
-                    style="@style/sheetCategoryTitleStyle"/>
-
-                <TextView
-                    android:text="推荐"
-                    binding:enableModelClick="@{true}"
-                    style="@style/sheetCategoryTitleStyle"/>
-
-                <TextView
-                    android:text="精选"
-                    binding:enableModelClick="@{true}"
-                    style="@style/sheetCategoryTitleStyle"/>
-
-                <TextView
-                    android:text="关注"
-                    binding:enableModelClick="@{true}"
-                    style="@style/sheetCategoryTitleStyle"/>
-
-                <TextView
-                    android:text="古风"
-                    binding:enableModelClick="@{true}"
-                    style="@style/sheetCategoryTitleStyle"/>
-                <TextView
-                    android:text="ACG"
-                    binding:enableModelClick="@{true}"
-                    style="@style/sheetCategoryTitleStyle"/>
-                <TextView
-                    android:id="@+id/mediaDisplaySheet_createTV"
-                    binding:enableModelClick="@{true}"
-                    android:text="Create"
-                    style="@style/sheetCategoryTitleStyle"/>
-            </LinearLayout>
-
+            </HorizontalScrollView>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/mediaSheetLayout_sheetsRV"
                 binding:adapter="@{vm.sheetAdapter}"

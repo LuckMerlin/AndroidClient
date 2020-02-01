@@ -80,7 +80,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
                             ResponseBody responseBody=response.body();
                             MediaType mediaType=null!=responseBody?responseBody.contentType():null;
                             String contentType=null!=mediaType?mediaType.subtype():null;
-                            Debug.D(getClass(),"contentType "+contentType);
+//                            Debug.D(getClass(),"contentType "+contentType);
                             if (null!=contentType&&contentType.equals("octet-stream")){
                                 InputStream is = null!=responseBody?responseBody.byteStream():null;
                                 try {

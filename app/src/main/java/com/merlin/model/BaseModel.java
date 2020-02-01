@@ -83,18 +83,18 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         }
     }
 
-    public final void toast(int textResId){
-        toast(textResId,null);
+    public final boolean toast(int textResId){
+        return toast(textResId,null);
     }
 
-    public final void toast(int textResId,String note){
+    public final boolean toast(int textResId,String note){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;
         String text=null!=context?context.getResources().getString(textResId):null;
-        toast((null!=text?text:"")+(null!=note?note:""));
+        return toast((null!=text?text:"")+(null!=note?note:""));
     }
 
-    public final void toast(String msg){
+    public final boolean toast(String msg){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;
         if (null!=context&&null!=msg){
@@ -103,7 +103,9 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
             }else{
                 root.post(()->Toast.makeText(context, msg, Toast.LENGTH_LONG).show());
             }
+            return true;
         }
+        return false;
     }
 
     public final View getRoot(){

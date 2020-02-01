@@ -10,7 +10,7 @@ public interface Address {
     String PREFIX_USER="/user";
     String PREFIX_MEDIA="/media";
     String PREFIX_FILE="/file";
-    String PREFIX_USER_ROOT=PREFIX_USER+"/reboot";
+    String PREFIX_USER_REBOOT=PREFIX_USER+"/reboot";
     String PREFIX_FILE_BROWSER=PREFIX_FILE+"/directory/browser";
     String PREFIX_FILE_CLIENT_META=PREFIX_FILE+"/client/meta";
     String PREFIX_MEDIA_PLAY=PREFIX_MEDIA+"/play";

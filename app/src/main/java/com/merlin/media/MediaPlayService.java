@@ -153,7 +153,6 @@ public class MediaPlayService extends Service implements Status {
         }
     }
 
-
     public static boolean start(Context context, Intent intent){
         if (null!=context){
             intent=null!=intent?intent:new Intent();

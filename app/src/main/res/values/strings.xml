@@ -18,5 +18,8 @@
     <string name="operating">操作正在进行中</string>
     <string name="alreadyArrivedRoot">已经是根目录了</string>
     <string name="rebooting">重启中……</string>
+    <string name="noneSupportOpenFileType">暂时不支持打开此类型文件</string>
+    <string name="fileBrowser">文件浏览器</string>
+    <string name="mediaPlayer">媒体播放器</string>
     <string name="all">全部</string>
 </resources>

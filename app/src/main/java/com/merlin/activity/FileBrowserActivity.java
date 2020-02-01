@@ -47,24 +47,6 @@ public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserB
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        new Handler().postDelayed(()->{
-//            findViewById(R.id.fileBrowser_transmitIV).performClick();
-//            Download download=new Download("/src","/sdcard/linqiang.mp3","rrrrrr");
-//            DownloadService.post(this,download);
-
-        },6000);
-        ClientMeta meta=getNasMetaFromIntent(getIntent());
-        if (null==meta){
-            toast("不能浏览非指定文件系" +
-                    "统的终端");
-            finish();
-            return ;
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         FileBrowserModel model=getViewModel();

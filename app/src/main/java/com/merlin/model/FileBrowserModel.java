@@ -14,13 +14,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.FileBrowserAdapter;
+import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.FileMeta_BK;
 import com.merlin.bean.FolderMeta;
 import com.merlin.client.Client;
 import com.merlin.client.R;
@@ -34,6 +34,7 @@ import com.merlin.protocol.Tag;
 import com.merlin.server.Frame;
 
 
+import java.io.File;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -62,7 +63,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         @POST(Address.PREFIX_FILE_CLIENT_META)
         Observable<Reply<ClientMeta>> queryClientMeta();
 
-        @POST(Address.PREFIX_USER_ROOT)
+        @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
     }
 
@@ -118,7 +119,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
                             BaseAdapter adapter=getAdapter();
                             List  list=null!=meta?meta.getData():null;
                             if (newBrowsing.mPage>0){
-
                                 adapter.add(list);
                             }else{
                                 adapter.setData(list,true);
@@ -152,15 +152,6 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     }
 
     @Override
-    public void onBridgeBoundChange(boolean bound) {
-        if (bound){
-//            setColorSchemeColors(Color.RED,Color.YELLOW,Color.BLUE);
-//            setProgressBackgroundColorSchemeColor(Color.TRANSPARENT);
-//            multiMode(true);
-        }
-    }
-
-    @Override
     public void onItemClick(View view, int sourceId,int position, Object data) {
         if (null!=data){
             if (data instanceof FileMeta){
@@ -171,32 +162,38 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         }
     }
 
-    private void onFileMetaClick(View view, int sourceId,int position, FileMeta file){
+    private boolean onFileMetaClick(View view, int sourceId,int position, FileMeta file){
         if (null!=file) {
             if (isMultiMode().get()) {
                 multiChoose(file);
             } else {
-                if (file.isDirectory()){
-//                    if (file.isReadable(file.getPermissions())) {
+                if (file.isDirectory()) {
                     browserPath(file.getPath(), "After directory click.");
-//                    }
-                }else{
-                    //test
-                   String extension= file.getExtension();
-                   if (extension.equals("mp3")){
-                       MediaPlayService.play(getContext(),file.getMeta(),0,false);
-                   }
-//                    toast("点击了文件 "+extension+" " +file.getMeta());
-//                if (!file.isRead()) {
-//                    toast("文件不可读");
-//                }else {
-//                    toast("点击了文件" + file.getTitle());
-//                    Debug.D(getClass(), "点击了文件 " + file.getPath());
-////                    DownloadService.postDownload(getContext(), getClientAccount(), null, file);
-//                }
+                } else {//Open file
+                    if (!file.isAccessible()) {
+                        return toast(R.string.nonePermission);
+                    }
+                    String extension = file.getExtension();
+                    if (extension.equals("mp3")) {
+                        return MediaPlayService.play(getContext(), file.getMeta(), 0, false);
+                    } else {
+                        return toast(R.string.noneSupportOpenFileType, extension);
+                    }
                 }
             }
         }
+        return false;
+    }
+
+    @Override
+    public boolean onItemLongClick(View view, int sourceId,int position, Object data) {
+        if(null!=data&&data instanceof FileMeta){
+            mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+            mPopupWindow.setOnItemClickListener(this);
+            mPopupWindow.reset(R.string.rename,R.string.addToFavorite,R.string.detail);
+            return true;
+        }
+        return false;
     }
 
     private void onContextMenuClick(View view, int sourceId,int position, ContextMenu menu){
@@ -207,23 +204,15 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     @Override
     public boolean onItemMultiClick(View view, int clickCount, int sourceId, int position, Object data) {
-        if (null!=data){
-            if (data instanceof FileMeta_BK){
-                if(clickCount==2){
-                    mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
-                    mPopupWindow.setOnItemClickListener(this);
-                    mPopupWindow.reset(R.string.rename,R.string.addToFavorite,R.string.detail);
-                   return true;
-                }
-            }
-        }
-        return false;
-    }
+        switch (clickCount){
+            case 2:
 
-    @Override
-    public boolean onItemLongClick(View view, int sourceId,int position, Object data) {
-        if (null!=data&&data instanceof FileMeta_BK){
-            return !isMultiMode().get()&&multiMode(true);
+                break;
+            case 3:
+                if (null!=data&&data instanceof FileMeta){
+                    return !isMultiMode().get()&&multiMode(true);
+                }
+                break;
         }
         return false;
     }
@@ -307,13 +296,13 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
 
     public final boolean refreshCurrentPath(String debug){
         FolderMeta meta=mCurrent.get();
-        return browserPath(null!=meta?meta.getPath():"/volume1",debug);
+        return browserPath(null!=meta?meta.getPath():null,debug);
     }
 
     public final boolean chooseAll(boolean choose){
         FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
         if (isMultiMode().get()&&null!=adapter&&adapter.chooseAll(choose)){
-            multiChooseCount();
+            refreshMultiChooseCount();
             return true;
         }
         return false;
@@ -333,6 +322,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
             FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
             adapter.multiMode(entry);
             mMultiMode.set(entry);
+            refreshMultiChooseCount();
             return true;
         }
         return false;
@@ -341,7 +331,7 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
     private boolean multiChoose(FileMeta meta){
         FileBrowserAdapter adapter=(FileBrowserAdapter)getAdapter();
         if (null!=meta&&mMultiMode.get()&&adapter.multiChoose(meta)){
-            multiChooseCount();
+            refreshMultiChooseCount();
             return true;
         }
         return false;
@@ -351,12 +341,14 @@ public class FileBrowserModel extends DataListModel implements SwipeRefreshLayou
         return mAllChoose;
     }
 
-    private void multiChooseCount() {
+    private void refreshMultiChooseCount() {
+        FolderMeta folderMeta=mCurrent.get();
+        int length=null!=folderMeta?folderMeta.getLength():0;
         int count=((FileBrowserAdapter)getAdapter()).getChooseCount();
-        mMultiCount.set(count<=0?"None selected":"Selected("+count+")");
+        mMultiCount.set(count<=0?"None selected(0/"+length+")":"Selected("+count+"/"+length+")");
         BaseAdapter adapter=getAdapter();
         if (null!=adapter){
-            List<FileMeta_BK> data=adapter.getData();
+            List<FileMeta> data=adapter.getData();
             int size=null!=data?data.size():0;
             mAllChoose.set(size==count&&size>0);
         }
