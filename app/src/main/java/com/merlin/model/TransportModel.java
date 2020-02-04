@@ -31,8 +31,8 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
             downloader.setCallback(this);
             updateList();
 //            String fromAccount,String src,String name,String targetFolder,String unique
-            Transport download=new Transport(null,"/volume1/");
-            downloader.download(download);
+//            Transport download=new Transport(null,"/volume1/");
+//            downloader.download(download);
         }else if(null!=curr){
             curr.setCallback(null);
         }

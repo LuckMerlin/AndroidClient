@@ -265,7 +265,7 @@ public class DownloadService extends Service {
                 }
             }
         }
-        final long seek=download.getType()== Transport.TYPE_REPLACE?0:targetFile.length();
+        final long seek=0;//download.getType()== Transport.TYPE_REPLACE?0:targetFile.length();
         Debug.D(getClass(),"Downloading file."+download.getType()+" "+fromAccount+" "+seek+" \n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
         Client.Canceler canceler=null;
@@ -338,7 +338,7 @@ public class DownloadService extends Service {
                     closeStream(fos);
                     if (canceled){
                         download.setDeleteIncomplete(false);
-                        download.setType(Transport.TYPE_NORMAL);
+//                        download.setType(Transport.TYPE_NORMAL);
                         download.setStatus(Status.PAUSE);
                         removeDownloadingTask(download);
                     }else {

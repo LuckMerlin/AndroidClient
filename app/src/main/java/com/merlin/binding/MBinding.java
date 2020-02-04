@@ -73,8 +73,7 @@ public class MBinding {
 //         String ddd="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg";
         if (null!=path){
             if (path.startsWith("/")){
-//                path= Address.URL+path;
-                path= Address.PREFIX_THUMB+"?path="+path;
+                path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
             }
         }
         Debug.D(MBinding.class," "+path);
