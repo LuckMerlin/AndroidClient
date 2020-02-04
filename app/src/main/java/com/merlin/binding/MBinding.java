@@ -1,6 +1,7 @@
 package com.merlin.binding;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -168,7 +169,6 @@ public class MBinding {
     @BindingAdapter("adapter")
     public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
         if (null!=view){
-            Debug.D(MBinding.class,"^^^^^^d^^^^^^^^^ "+adapter);
             if (null!=adapter&&adapter instanceof BaseAdapter){
                 RecyclerView.LayoutManager manager=((BaseAdapter)adapter).onResolveLayoutManager(view);
                 if (null!=manager){
@@ -187,14 +187,13 @@ public class MBinding {
                 if (null!=manager){
                     view.setLayoutManager(manager);
                 }
-                Debug.D(MBinding.class,"^^^^^^^^^^^^^^^ "+adapter);
                 if (adapter instanceof OnMoreLoadable){
-                    view.addOnScrollListener(new LoadMoreInterceptor(){
-                        @Override
-                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
-                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
-                        }
-                    });
+//                    view.addOnScrollListener(new LoadMoreInterceptor(){
+//                        @Override
+//                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
+//                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
+//                        }
+//                    });
                 }
             }
             view.setAdapter(adapter);

@@ -2,7 +2,6 @@ package com.merlin.model;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.SeekBar;
 
 import androidx.databinding.ObservableField;
@@ -10,11 +9,7 @@ import androidx.databinding.ObservableField;
 import com.merlin.activity.OnBackPressed;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaListAdapter;
-import com.merlin.api.Address;
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
-import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.bean.Media;
@@ -24,9 +19,6 @@ import com.merlin.media.Mode;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Player;
 import com.merlin.player.Status;
-import com.merlin.view.MediaPlayDisplayLayout;
-import com.merlin.view.MultiClicker;
-import com.merlin.view.OnMultiClickListener;
 import com.merlin.view.OnSeekBarChangeListener;
 
 public class MediaPlayModel extends BaseModel implements Label, What,OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
@@ -53,6 +45,7 @@ public class MediaPlayModel extends BaseModel implements Label, What,OnBackPress
         super(context);
         mPlayingAdapter=new MediaListAdapter();
         mPlayingAdapter.setOnItemClickListener(this);
+        Debug.D(getClass(),"$$$$$$$$$$$$$$44 "+this);
 //        updateStatus();
 //        updateProgress();
 //        updateMode(null);

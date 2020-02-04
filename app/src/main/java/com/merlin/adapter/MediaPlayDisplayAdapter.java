@@ -16,6 +16,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
 public class MediaPlayDisplayAdapter extends Adapter {
+    private final PagerSnapHelper mHelper=new PagerSnapHelper();
     private final int[] mLayoutIds=new int[]{
 //                R.layout.media_display_all_medias
 //                ,
@@ -29,8 +30,7 @@ public class MediaPlayDisplayAdapter extends Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context=parent.getContext();
         final LayoutInflater in=LayoutInflater.from(context);
-        Debug.D(getClass(),"#####onCreateViewHolder###### "+viewType);
-        ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, true);
+        ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
 //        if (null!=binding){
 //            if(binding instanceof MediaDisplaySheetsBinding){
 //                MediaDisplaySheetsModel model=new MediaDisplaySheetsModel(context);
@@ -68,8 +68,7 @@ public class MediaPlayDisplayAdapter extends Adapter {
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         if (null!=rv){
             LinearLayoutManager manager=new LinearLayoutManager(rv.getContext(),LinearLayoutManager.HORIZONTAL,false);
-            PagerSnapHelper helper=new PagerSnapHelper();
-            helper.attachToRecyclerView(rv);
+            mHelper.attachToRecyclerView(rv);
             rv.setLayoutManager(manager);
             return manager;
         }

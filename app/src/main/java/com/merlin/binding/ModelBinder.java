@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 
 import java.lang.reflect.Constructor;
@@ -54,7 +55,7 @@ public class ModelBinder {
                            Method method= Model.class.getDeclaredMethod("initial",View.class);
                            method.setAccessible(true);
                            method.invoke(object,view);
-                           break;
+                           return (Model) object;
                        }
                     }
                }catch (Exception e){
@@ -81,9 +82,10 @@ public class ModelBinder {
                         if (null!=model){
                             field.setAccessible(true);
                             try {
-                                field.set(binding,binding);
+                                field.set(binding,model);
                                 DataBindingUtil.bind(view);
                                 view.setTag(R.id.modelBind,model);
+                                binding.invalidateAll();
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
                             }
