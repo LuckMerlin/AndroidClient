@@ -3,24 +3,21 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
 
   <data>
-    <variable
-        name="clickListener"
-        type="android.view.View.OnClickListener" />
       <variable
           name="vm"
-          type="com.merlin.model.MediaPlayModel" />
+          type="com.merlin.model.ActivityMediaPlayModel" />
       <import type="com.merlin.binding.StatusBar"/>
-      <import type="com.merlin.client.R"/>
   </data>
   <RelativeLayout
+      binding:createModel="@{null}"
       binding:enableBarPadding="@{0}"
       binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,null,null)}"
       android:background="@drawable/background"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
 
-      <com.merlin.view.MediaPlayDisplayLayout
-          android:id="@+id/activityMediaDisplay_layoutMPDL"
+      <androidx.recyclerview.widget.RecyclerView
+          binding:adapter="@{vm.displayAdapter}"
           android:layout_width="match_parent"
           android:layout_height="match_parent"/>
   </RelativeLayout>

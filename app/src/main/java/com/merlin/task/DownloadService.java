@@ -36,9 +36,9 @@ import java.util.Set;
 
 public class DownloadService extends Service {
     private static final String LABEL_DOWNLOAD ="download";
-    private final List<Download> mRunningList=new ArrayList<>();
+    private final List<Transport> mRunningList=new ArrayList<>();
     private final Handler mHandler=new Handler(Looper.getMainLooper());
-    private final Map<Download, Client.Canceler> mDownloading=new HashMap<>();
+    private final Map<Transport, Client.Canceler> mDownloading=new HashMap<>();
     private WeakReference<Callback> mCallback;
     private BreakPointer mBreakPointer;
     private int mMaxDownloading=1;
@@ -46,20 +46,20 @@ public class DownloadService extends Service {
     private final Binder mBinder=new Binder();
 
     public interface Callback extends Status{
-        void onFileDownloadUpdate(int what,boolean finish,Download task,Object data);
+        void onFileDownloadUpdate(int what, boolean finish, Transport task, Object data);
     }
 
-    public class Binder extends android.os.Binder implements Downloader{
-       public  List<Download>  getDownloadList(){
+    public class Binder extends android.os.Binder implements Transporter {
+       public  List<Transport>  getDownloadList(){
                synchronized (mRunningList) {
-                   List<Download> list = new ArrayList<>(mRunningList.size());
+                   List<Transport> list = new ArrayList<>(mRunningList.size());
                    list.addAll(mRunningList);
                    return list;
                }
         }
 
         public int getDownloadingSize(){
-            Map<Download, Client.Canceler> downloading=mDownloading;
+            Map<Transport, Client.Canceler> downloading=mDownloading;
             if (null!=downloading){
                 synchronized (downloading){
                     return downloading.size();
@@ -68,13 +68,13 @@ public class DownloadService extends Service {
            return -1;
         }
 
-        public Client.Canceler download(Download download){
+        public Client.Canceler download(Transport download){
            return null!=download?DownloadService.this.download(download):null;
         }
 
-        public boolean isRunning(Download download){
+        public boolean isRunning(Transport download){
             synchronized (mRunningList) {
-                for (Download child:mRunningList){
+                for (Transport child:mRunningList){
                     if (null!=child&&child.equals(download)){
                         return true;
                     }
@@ -83,9 +83,9 @@ public class DownloadService extends Service {
            return false;
         }
 
-        public boolean isDownloading(Download download){
+        public boolean isDownloading(Transport download){
             synchronized (mRunningList) {
-                for (Download child:mRunningList){
+                for (Transport child:mRunningList){
                     if (null!=child&&child.equals(download)){
                         return child.getStatus()==Status.DOWNLOADING;
                     }
@@ -94,8 +94,8 @@ public class DownloadService extends Service {
            return false;
         }
 
-        public boolean pause(Download task){
-            Map<Download, Client.Canceler> downloading=mDownloading;
+        public boolean pause(Transport task){
+            Map<Transport, Client.Canceler> downloading=mDownloading;
             if (null!=task&&null!=downloading){
                 synchronized (downloading){
                     Client.Canceler canceler=downloading.get(task);
@@ -105,7 +105,7 @@ public class DownloadService extends Service {
             return false;
         }
 
-        public boolean cancel(Download download){
+        public boolean cancel(Transport download){
             if (null!=download){
                 if (null!=download){
                     download.setDeleteIncomplete(true);
@@ -137,16 +137,16 @@ public class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Debug.D(getClass(),"Download service onCreate.");
+        Debug.D(getClass(),"Transport service onCreate.");
         android.app.Application app=getApplication();
         Application application=null!=app&&app instanceof Application?(Application)app:null;
         mClient=null!=application?application.getClient():null;
         BreakPointer pointer=mBreakPointer=new ShBreakPointer(app);
         List<BreakPoint> list=pointer.getBreakpoints();//Init break list
-        List<Download> runningList=mRunningList;
+        List<Transport> runningList=mRunningList;
         if (null!=list&&list.size()>0&&null!=runningList){
             for (BreakPoint point:list){
-                Download download=null!=point?point.getTask():null;
+                Transport download=null!=point?point.getTask():null;
                 if (null!=download){ //Add task into queue
                     download.setStatus(Status.PAUSE); //Reset status to pause
                     download.buildRemainFromFile();
@@ -167,17 +167,17 @@ public class DownloadService extends Service {
         int size=null!=list?list.size():0;
         if (size>0){
             for (Parcelable parcelable:list){
-                if (null==parcelable||!(parcelable instanceof Download)){
+                if (null==parcelable||!(parcelable instanceof Transport)){
                     Debug.W(getClass(),"Skip download task,Invalid."+parcelable);
                     continue;
                 }
-                download((Download)parcelable);
+                download((Transport)parcelable);
             }
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
-    public void onFileDownloadUpdate(int what,boolean finish,Download download,Object data){
+    public void onFileDownloadUpdate(int what, boolean finish, Transport download, Object data){
         WeakReference<Callback> reference=mCallback;
         Callback callback=null!=reference?reference.get():null;
         Handler handler=mHandler;
@@ -186,7 +186,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private Client.Canceler download(final Download download){
+    private Client.Canceler download(final Transport download){
         String fromAccount=null!=download?download.getFromAccount():null;
         String name=null!=download?download.getTargetName():null;
         String srcPath=null!=download?download.getSrc():null;
@@ -219,15 +219,15 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download file.Not login."+client);
             return null;
         }
-        final List<Download> runningList=mRunningList;
-        final Map<Download, Client.Canceler> downloading=mDownloading;
+        final List<Transport> runningList=mRunningList;
+        final Map<Transport, Client.Canceler> downloading=mDownloading;
         if (null==runningList){
             Debug.W(getClass(),"Can't download file.runningList="+runningList+" "+download);
             return null;
         }
         final Binder binder=mBinder;
         int index=runningList.indexOf(download);
-        Download existTask;
+        Transport existTask;
         synchronized (runningList) {
             existTask = index >= 0 ? runningList.get(index) : null;
         }
@@ -265,7 +265,7 @@ public class DownloadService extends Service {
                 }
             }
         }
-        final long seek=download.getType()==Download.TYPE_REPLACE?0:targetFile.length();
+        final long seek=download.getType()== Transport.TYPE_REPLACE?0:targetFile.length();
         Debug.D(getClass(),"Downloading file."+download.getType()+" "+fromAccount+" "+seek+" \n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
         Client.Canceler canceler=null;
@@ -338,7 +338,7 @@ public class DownloadService extends Service {
                     closeStream(fos);
                     if (canceled){
                         download.setDeleteIncomplete(false);
-                        download.setType(Download.TYPE_NORMAL);
+                        download.setType(Transport.TYPE_NORMAL);
                         download.setStatus(Status.PAUSE);
                         removeDownloadingTask(download);
                     }else {
@@ -388,24 +388,24 @@ public class DownloadService extends Service {
         return null;
     }
 
-    private boolean removeAllTask(Download task){
+    private boolean removeAllTask(Transport task){
         removeRunningTask(task);
         removeDownloadingTask(task);
         return true;
     }
 
-    private boolean removeRunningTask(Download task){
-        List<Download> running=mRunningList;
+    private boolean removeRunningTask(Transport task){
+        List<Transport> running=mRunningList;
         if (null!=running){
             removeTask(running,task);
         }
         return true;
     }
 
-    private boolean removeDownloadingTask(Download task){
-        Map<Download, Client.Canceler> downloading=mDownloading;
+    private boolean removeDownloadingTask(Transport task){
+        Map<Transport, Client.Canceler> downloading=mDownloading;
         if (null!=downloading){
-            Set<Download> set;
+            Set<Transport> set;
             synchronized (downloading){
                 set=downloading.keySet();
             }
@@ -416,10 +416,10 @@ public class DownloadService extends Service {
         return true;
     }
 
-    private boolean removeTask(Collection<Download> collection,Download task){
+    private boolean removeTask(Collection<Transport> collection, Transport task){
         if (null!=collection&&null!=task){
             synchronized (collection){
-            for (Download dt:collection){
+            for (Transport dt:collection){
                 if (null!=dt&&dt.equals(task)){
                     collection.remove(dt);
                     break;
@@ -432,11 +432,11 @@ public class DownloadService extends Service {
 
     private boolean checkDownloadNextPossible(){
         mHandler.post(()->{
-          List<Download> running=mRunningList;
+          List<Transport> running=mRunningList;
           if (null!=running){
-              Download next = null;
+              Transport next = null;
               synchronized (running) {
-                  for (Download task : running) {
+                  for (Transport task : running) {
                       int status = null != task ? task.getStatus() : Status.INVALID;
                       if (status == Status.WAITING) {
                           next = task;
@@ -452,7 +452,7 @@ public class DownloadService extends Service {
                   }
                   int maxSize=mMaxDownloading;
                   if (size<(maxSize<=0?1:maxSize)){
-                      Debug.D(getClass(),"Now!Download next file."+next.getTargetPath());
+                      Debug.D(getClass(),"Now!Transport next file."+next.getTargetPath());
                       download(next);
                   }
               }
@@ -493,10 +493,10 @@ public class DownloadService extends Service {
                 return false;
             }
             String unique=Long.toString(System.currentTimeMillis());
-            List<Download> downloads=new ArrayList<>(size);
+            List<Transport> downloads=new ArrayList<>(size);
             for (FileMeta_BK meta:download){
                 if (null!=meta){
-                    downloads.add(new Download(fromAccount,meta.getFile(),meta.getName(),folder,unique));
+                    downloads.add(new Transport(fromAccount,meta.getFile(),meta.getName(),folder,unique));
                 }
             }
             return null!=downloads&&downloads.size()>0&&postDownload(context,downloads);
@@ -504,15 +504,15 @@ public class DownloadService extends Service {
         return false;
     }
 
-    public static boolean postDownload(Context context, Collection<Download> download){
+    public static boolean postDownload(Context context, Collection<Transport> download){
         if (null!=context&&null!=download){
             Intent intent=new Intent(context,DownloadService.class);
             if (!(download instanceof ArrayList)){
-                List<Download> list=new ArrayList<>();
+                List<Transport> list=new ArrayList<>();
                 list.addAll(download);
                 download=list;
             }
-            intent.putParcelableArrayListExtra(LABEL_DOWNLOAD,(ArrayList<Download>) download);
+            intent.putParcelableArrayListExtra(LABEL_DOWNLOAD,(ArrayList<Transport>) download);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 return null!=context.startForegroundService(intent);
             }else{
@@ -526,6 +526,6 @@ public class DownloadService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Debug.D(getClass(),"Download service onDestroy.");
+        Debug.D(getClass(),"Transport service onDestroy.");
     }
 }

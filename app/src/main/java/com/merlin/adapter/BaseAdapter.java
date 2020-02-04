@@ -50,6 +50,9 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         void onItemClick(View view,int sourceId,int position, T data);
     }
 
+    /**
+     * @deprecated
+     */
     public interface OnItemMultiClickListener<T>{
         boolean onItemMultiClick(View view,int clickCount,int sourceId,int position, T data);
     }

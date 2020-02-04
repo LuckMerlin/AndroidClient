@@ -1,6 +1,6 @@
 package com.merlin.bean;
 
-public class SheetCategory {
+public class SheetTitle {
     private String titel;
     private long size;
 

@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import com.merlin.api.What;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -24,6 +26,7 @@ import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
+import retrofit2.http.Streaming;
 
 public final class NetMediaBuffer extends MediaBuffer<Media> {
     private final String mCachePath;
@@ -31,6 +34,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
     private final Retrofit mRetrofit=new Retrofit();
 
     private interface Api{
+        @Streaming
         @POST(Address.PREFIX_FILE+"/download")
         @FormUrlEncoded
         Call<ResponseBody> downloadFile(@Field(Label.LABEL_PATH) String path);
@@ -67,15 +71,20 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
         reader.mWriteComplete=false;
         reader.mState= Reader.STATE_OPENING;
         Debug.D(getClass(),"下载 "+Address.URL+url);
-        retrofit.call(Api.class).downloadFile(url).enqueue(new Callback<ResponseBody>() {
+        retrofit.call(Api.class, Schedulers.newThread()).downloadFile(url).enqueue(new Callback<ResponseBody>() {
                     private void finishRequest(int what,String debug){
                         reader.mWriteComplete=true;
                         reader.setCanceler(null);
                         reader.mState= what;
                         reader.wakeUp(what,debug);
                     }
+
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+
                         if (null!=response&&response.isSuccessful()){
                             ResponseBody responseBody=response.body();
                             MediaType mediaType=null!=responseBody?responseBody.contentType():null;
@@ -84,27 +93,26 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
                             if (null!=contentType&&contentType.equals("octet-stream")){
                                 InputStream is = null!=responseBody?responseBody.byteStream():null;
                                 try {
-                                    long available=is.available();
-                                    if (available>0){
                                         reader.mState= What.WHAT_SUCCEED;
                                         byte[] buffer = new byte[1024*1024];
                                         if (reader.mState!=What.WHAT_CANCEL){
                                             int len;
                                             boolean canceled=false;
                                             while ((len=is.read(buffer))>0){
-                                                if (canceled=(reader.mState==What.WHAT_CANCEL)){
+                                                if (canceled=(reader.mState==What.WHAT_CANCEL)||
+                                                        !reader.write(buffer,0,len,false)){
+                                                    canceled=true;
                                                     break;
                                                 }
-                                                reader.write(buffer,0,len,false);
                                             }
                                             if (!canceled){
                                                 reader.write(buffer,0,0,true);
                                             }
-                                            Debug.D(getClass(),"Net media file cache finish."+canceled+" "+available+" "+url);
+                                            Debug.D(getClass(),"Net media file cache finish."+canceled+" "+len+" "+url);
                                             return;
                                         }
-                                    }
                                 }catch (Exception e){
+                                    Debug.E(getClass(),""+e);
                                     e.printStackTrace();
                                 }finally {
                                     new Closer().close(is);
@@ -113,6 +121,11 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
                             Debug.D(getClass(),"Invalid file stream length response. "+contentType+" "+url);
                             finishRequest(What.WHAT_ERROR_UNKNOWN,"Invalid file stream length response. "+url);
                         }
+
+
+                            }
+                        }).start();
+
                     }
 
                     @Override
@@ -255,25 +268,25 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
                         long railPointer = fis.getFilePointer();
                         mState=complete?BUFFER_READ_FINISH_EOF:mState;
                         long nextStart = mNextStart;
-                        if(nextStart>=length&&nextStart<railPointer){
+                        if(nextStart<railPointer){
                             needWakeup=true;
                         }
                     }
+
                     if(needWakeup){
                         wakeUp(STATE_WRITE_UPDATE,"While write bytes succeed.");
                     }
-
+                    return true;
             } catch (IOException e) {
                 Debug.E(getClass(),"Exception write bytes into cache file.e="+e+" "+mCacheFile,e);
                 return false;
             }
-          return false;
         }
 
         private boolean wakeUp(Integer state,String debug){
             mState=null!=state?state:mState;
             synchronized (mMutex){
-                Debug.D(getClass(),"Wakeup for "+(null!=debug?debug:"."));
+//                Debug.D(getClass(),"Wakeup for "+(null!=debug?debug:"."));
                 mMutex.notify();
             }
             return false;

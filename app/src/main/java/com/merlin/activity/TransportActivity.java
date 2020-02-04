@@ -13,12 +13,12 @@ import com.merlin.client.databinding.ActivityTransportBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.TransportModel;
 import com.merlin.task.DownloadService;
-import com.merlin.task.Downloader;
+import com.merlin.task.Transporter;
 
 public class TransportActivity extends  SocketActivity<ActivityTransportBinding, TransportModel>  {
 
     private static ServiceConnection mConnection;
-    private Downloader mDownloader;
+    private Transporter mDownloader;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,8 +30,8 @@ public class TransportActivity extends  SocketActivity<ActivityTransportBinding,
             bindService(intent, mConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
-                        if (null!=service&&service instanceof Downloader){
-                            Downloader downloader=(Downloader)service;
+                        if (null!=service&&service instanceof Transporter){
+                            Transporter downloader=(Transporter)service;
                             mDownloader=downloader;
                             getViewModel().setDownloader(downloader);
                         }
@@ -58,7 +58,7 @@ public class TransportActivity extends  SocketActivity<ActivityTransportBinding,
             mConnection=null;
             unbindService(connection);
         }
-        Downloader downloader=mDownloader;
+        Transporter downloader=mDownloader;
         mDownloader=null;
         if (null!=downloader){
             downloader.setCallback(null);

@@ -134,7 +134,7 @@ public final class Client extends Socket {
                     }
                 });
             } catch (FileNotFoundException e) {
-                Debug.E(getClass(),"Download file exception.e="+e+" "+to,e);
+                Debug.E(getClass(),"Transport file exception.e="+e+" "+to,e);
                 notifyFileDownloadUpdate(true,OnFileDownloadUpdate.DOWNLOAD_EXCEPTION,from,path,to,null,callback);
                return null;
             }finally {

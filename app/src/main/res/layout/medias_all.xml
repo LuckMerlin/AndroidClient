@@ -7,7 +7,7 @@
             type="com.merlin.model.MediaDisplayAllMediasModel" />
         <import type="com.merlin.util.Layout"/>
     </data>
-    <com.merlin.view.MediasAllLayout
+    <LinearLayout
         android:orientation="vertical"
         android:layout_margin="5dp"
         android:layout_width="match_parent"
@@ -38,5 +38,5 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    </com.merlin.view.MediasAllLayout>
+    </LinearLayout>
 </layout>

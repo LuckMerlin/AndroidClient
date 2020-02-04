@@ -87,10 +87,14 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
         return toast(textResId,null);
     }
 
-    public final boolean toast(int textResId,String note){
+    public final String getText(int textResId){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;
-        String text=null!=context?context.getResources().getString(textResId):null;
+        return null!=context?context.getResources().getString(textResId):null;
+    }
+
+    public final boolean toast(int textResId,String note){
+        String text=getText(textResId);
         return toast((null!=text?text:"")+(null!=note?note:""));
     }
 

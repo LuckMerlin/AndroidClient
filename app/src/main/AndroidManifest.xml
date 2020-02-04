@@ -15,6 +15,7 @@
         android:allowBackup="false">
         <activity
             android:label="NAS"
+            android:launchMode="singleInstance"
             android:name="com.merlin.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,6 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.FileBrowserActivity"
+            android:launchMode="singleInstance"
             android:label="@string/fileBrowser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,8 +32,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.merlin.activity.TransportActivity"/>
+        <activity android:name="com.merlin.activity.TransportActivity"
+            android:launchMode="singleInstance"
+            android:label="@string/fileTransport">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.merlin.activity.MediaPlayActivity"
+            android:launchMode="singleInstance"
             android:label="@string/mediaPlayer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

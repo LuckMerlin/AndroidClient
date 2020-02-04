@@ -3,21 +3,14 @@ package com.merlin.binding;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
-import androidx.databinding.DataBinderMapper;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,22 +19,16 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.merlin.activity.BaseActivity;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.LoadMoreInterceptor;
 import com.merlin.adapter.OnMoreLoadable;
-import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
 import com.merlin.client.R;
-import com.merlin.client.databinding.MediasAllBinding;
 import com.merlin.debug.Debug;
-import com.merlin.model.BaseModel;
-import com.merlin.task.Status;
 import com.merlin.util.Layout;
+import com.merlin.view.OnMultiClickListener;
 import com.merlin.view.OnTextChanged;
-
-import java.lang.ref.WeakReference;
 
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
@@ -67,6 +54,17 @@ public class MBinding {
         }
     }
 
+
+
+    @BindingAdapter("android:text")
+    public static void setSrc(TextView view, int resId) {
+        if (null!=view){
+            view.setText(resId);
+            view.setTag(R.id.resourceId,new IDs(resId,null ));
+        }
+    }
+
+
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, String path) {
         RoundedCorners roundedCorners = new RoundedCorners(10);
@@ -75,10 +73,11 @@ public class MBinding {
 //         String ddd="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg";
         if (null!=path){
             if (path.startsWith("/")){
-                path= Address.URL+path;
+//                path= Address.URL+path;
+                path= Address.PREFIX_THUMB+"?path="+path;
             }
         }
-//        Debug.D(MBinding.class," "+path);
+        Debug.D(MBinding.class," "+path);
         Glide.with(view.getContext())
                 .load(path)
                 .centerCrop()
@@ -90,8 +89,15 @@ public class MBinding {
     }
 
     @BindingAdapter(value = {"createModel"})
-    public static void createModel(View view, String modeClass) {
+    public static void createModel(View view, Object modeClass) {
         new ModelBinder().bind(view,modeClass);
+    }
+
+    @BindingAdapter(value = {"enableMultiClick"})
+    public static void enableMultiClick(View view, Object listener) {
+        if (null!=view&&null!=listener){
+
+        }
     }
 
     @BindingAdapter(value = {"enableModelClick"})
@@ -163,11 +169,26 @@ public class MBinding {
     @BindingAdapter("adapter")
     public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
         if (null!=view){
+            Debug.D(MBinding.class,"^^^^^^d^^^^^^^^^ "+adapter);
             if (null!=adapter&&adapter instanceof BaseAdapter){
                 RecyclerView.LayoutManager manager=((BaseAdapter)adapter).onResolveLayoutManager(view);
                 if (null!=manager){
                     view.setLayoutManager(manager);
                 }
+                if (adapter instanceof OnMoreLoadable){
+                    view.addOnScrollListener(new LoadMoreInterceptor(){
+                        @Override
+                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
+                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
+                        }
+                    });
+                }
+            }else if (null!=adapter&&adapter instanceof com.merlin.adapter.Adapter){
+                RecyclerView.LayoutManager manager=((com.merlin.adapter.Adapter)adapter).onResolveLayoutManager(view);
+                if (null!=manager){
+                    view.setLayoutManager(manager);
+                }
+                Debug.D(MBinding.class,"^^^^^^^^^^^^^^^ "+adapter);
                 if (adapter instanceof OnMoreLoadable){
                     view.addOnScrollListener(new LoadMoreInterceptor(){
                         @Override

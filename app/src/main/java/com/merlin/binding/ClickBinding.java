@@ -1,17 +1,20 @@
 package com.merlin.binding;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.BaseActivity;
+import com.merlin.classes.Classes;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 
 public final class ClickBinding {
     private final boolean mEnable;
@@ -29,6 +32,25 @@ public final class ClickBinding {
     protected boolean bind(View view){
         if (null!=view){
             if (mEnable){
+//                  Debug.D(getClass(),"DDDDDDDDDDD "+view);
+//                  Object last=null,child=view;
+//                  do {
+//                    if (null!=child&&child instanceof View){
+//                        view=(View)child;
+//                        ViewDataBinding binding=DataBindingUtil.getBinding(view);
+//                        if (null!=binding){
+//                            Class cls=binding.getClass().getSuperclass();
+//                            Field[] fields=null!=cls?cls.getDeclaredFields():null;
+//                            if (null!=fields&&fields.length>0) {
+//                                for (Field field:fields) {
+//                                    Debug.D(getClass(), "### " + child.getClass() + " " +field.getName()+" "+field.getType());
+//                                }
+//                            }
+//                            Debug.D(getClass(),"#######################");
+//                        }
+//                    }
+//                    last=child;
+//                  }while (null!=view&&null!=(child=view.getParent())&&(null==last||last!=child));
                 Object tag=mObject;
                 Object obj=view;
                 ViewDataBinding binding,topBinding=null;

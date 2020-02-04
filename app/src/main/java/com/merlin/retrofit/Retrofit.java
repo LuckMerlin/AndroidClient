@@ -18,6 +18,7 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -69,13 +70,17 @@ public final class Retrofit implements What {
         return call(cls,null,callbacks);
     }
 
-    public final <T> T call(Class<T> cls,Interceptor[] interceptors, Callback...callbacks){
+    public final <T> T call(Class<T> cls,Scheduler observeOn,Callback...callbacks){
+        return call(cls,null,observeOn,callbacks);
+    }
+
+    public final <T> T call(Class<T> cls,Interceptor[] interceptors,Scheduler observeOn, Callback...callbacks){
         if (null!=cls){
             return (T)Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls},(proxy, method,args)->{
                         T instance=prepare(cls,interceptors);
                         Object ret=null!=instance?method.invoke(instance,args):null;
                         if (null!=ret&&ret instanceof Observable) {
-                            subscribe((Observable) ret, callbacks);
+                            subscribe((Observable) ret,observeOn, callbacks);
                         }
                         return ret;
                     }
@@ -84,12 +89,12 @@ public final class Retrofit implements What {
         return null;
     }
 
-    public final <M> boolean subscribe(Observable observable,Callback ...callbacks){
+    public final <M> boolean subscribe(Observable observable, Scheduler observeOn, Callback ...callbacks){
         if (null==observable){
             finish(WHAT_ARGS_INVALID,"Observable is Null.",null,null,callbacks);
             return false;
         }
-        observable=observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        observable=observable.subscribeOn(Schedulers.newThread()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread());
         WeakReference<LifecycleProvider> reference=mLifecycleProvider;
         LifecycleProvider provider=null!=reference?reference.get():null;
         if (null!=provider&&provider instanceof Activity){

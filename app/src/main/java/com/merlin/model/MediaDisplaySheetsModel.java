@@ -7,19 +7,20 @@ import android.view.ViewGroup;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
-import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.MediaSheetAdapter;
 import com.merlin.adapter.SheetMediaAdapter;
+import com.merlin.adapter.SheetTitleAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.MediaSheet;
-import com.merlin.bean.SheetCategory;
+import com.merlin.bean.SheetTitle;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemSheetTitleBinding;
 import com.merlin.debug.Debug;
@@ -33,6 +34,7 @@ import retrofit2.http.POST;
 
 public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.OnItemClickListener<MediaSheet>,What,BaseModel.OnModelViewClick,Label {
     private final MediaSheetAdapter mSheetAdapter=new MediaSheetAdapter();
+    private final SheetTitleAdapter mTitleAdapter=new SheetTitleAdapter();
     private final SheetMediaAdapter mSheetMediaAdapter=new SheetMediaAdapter();
     private final ObservableField<Boolean> mEnableSheets=new ObservableField<>(true);
     private final ObservableField<MediaSheet> mShowingSheet=new ObservableField<>();
@@ -52,13 +54,13 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
         @POST(Address.PREFIX_MEDIA+"/sheet/category")
         @FormUrlEncoded
-        Observable<Reply<ApiList<SheetCategory>>> queryCategories(@Field(LABEL_NAME) String name,@Field(LABEL_PAGE) int page,@Field(LABEL_LIMIT) int limit);
+        Observable<Reply<PageData<SheetTitle>>> queryCategories(@Field(LABEL_NAME) String name, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
     }
 
     public MediaDisplaySheetsModel(Context context){
         super(context);
         mSheetAdapter.setOnItemClickListener(this);
-        queryCategories();
+        queryAllSheets("全部");
     }
 
     @Override
@@ -72,35 +74,26 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
         querySheet(data,0);
     }
 
+    private void selectCategory(int id){
+        View view=findViewById(R.id.test);
+        Debug.D(getClass(),"城东sad噶  "+view);
+    }
+
     private boolean queryCategories(){
-        return null!= call(Api.class, (OnApiFinish<Reply<ApiList<SheetCategory>>>)(what, note, data, arg)->{
+        return null!= call(Api.class, (OnApiFinish<Reply<PageData<SheetTitle>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
-                ApiList<SheetCategory> list=null!=data?data.getData():null;
-                ViewGroup content=findViewById(R.id.activityMediaSheetsList_contentLL, ViewGroup.class);
-                if (null!=content){
-                    content.removeAllViews();
-                    if (null!=list&&list.size()>0){
-                        LayoutInflater inflater=LayoutInflater.from(getContext());
-                        for (SheetCategory category:list) {
-                           ItemSheetTitleBinding binding= DataBindingUtil.inflate(inflater,R.layout.item_sheet_title,content,true);
-                           if (null!=binding){
-                               binding.setSheet(category);
-                           }
-                           Debug.D(getClass(),"%%%%%%%5 "+binding);
-                        }
-                    }
-                }
+                mTitleAdapter.fillPage(null!=data?data.getData():null);
             }
         }).queryCategories(null,0,100);
     }
 
-    private void queryAllSheets(){
+    private void queryAllSheets(String titleName){
         call(Api.class, (OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
                 ApiList<MediaSheet> list=null!=data?data.getData():null;
                 mSheetAdapter.setData(list);
             }
-        }).queryAllSheets(null,0,10);
+        }).queryAllSheets(titleName,0,10);
     }
 
     private boolean querySheet(MediaSheet sheet,int page){
@@ -159,5 +152,9 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
     public ObservableField<MediaSheet> getShowingSheet() {
         return mShowingSheet;
+    }
+
+    public SheetTitleAdapter getTitleAdapter() {
+        return mTitleAdapter;
     }
 }

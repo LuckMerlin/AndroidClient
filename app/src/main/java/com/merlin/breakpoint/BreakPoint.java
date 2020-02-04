@@ -1,19 +1,19 @@
 package com.merlin.breakpoint;
 
-import com.merlin.task.Download;
+import com.merlin.task.Transport;
 
 public class BreakPoint {
-    private final Download mTask;
+    private final Transport mTask;
 
     public BreakPoint(){
         this(null);
     }
 
-    public BreakPoint(Download task){
+    public BreakPoint(Transport task){
         mTask=task;
     }
 
-    public Download getTask() {
+    public Transport getTask() {
         return mTask;
     }
 }

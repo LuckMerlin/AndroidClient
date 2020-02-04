@@ -9,15 +9,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.DownloadAdapter;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.task.Download;
+import com.merlin.task.Transport;
 import com.merlin.task.DownloadService;
-import com.merlin.task.Downloader;
+import com.merlin.task.Transporter;
 
 import java.util.List;
 
 public class TransportModel extends BaseModel implements BaseModel.OnModelViewClick, DownloadService.Callback {
-    private Downloader mDownloader;
+    private Transporter mDownloader;
     private final DownloadAdapter mAdapter=new DownloadAdapter();
 
     public TransportModel(Context context){
@@ -25,19 +24,22 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         mAdapter.setViewClickListener(this);
     }
 
-    public void setDownloader(Downloader downloader){
-        Downloader curr=mDownloader;
+    public void setDownloader(Transporter downloader){
+        Transporter curr=mDownloader;
         mDownloader=downloader;
         if (null!=downloader){
             downloader.setCallback(this);
             updateList();
+//            String fromAccount,String src,String name,String targetFolder,String unique
+            Transport download=new Transport(null,"/volume1/");
+            downloader.download(download);
         }else if(null!=curr){
             curr.setCallback(null);
         }
     }
 
     private void updateList(){
-        Downloader downloader=mDownloader;
+        Transporter downloader=mDownloader;
         setList(null!=downloader?downloader.getDownloadList():null);
     }
 
@@ -49,13 +51,13 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
                 break;
             case R.id.item_transport_pauseIV://Get through
             case R.id.item_transport_downloadIV:
-                Downloader downloader=mDownloader;
+                Transporter downloader=mDownloader;
                 Object tag=null!=v?v.getTag():null;
-                if (null!=tag&&tag instanceof Download&&null!=downloader){
+                if (null!=tag&&tag instanceof Transport &&null!=downloader){
                     if (id==R.id.item_transport_pauseIV){
-                        downloader.pause(((Download)tag));
+                        downloader.pause(((Transport)tag));
                     }else{
-                        downloader.download(((Download)tag));
+                        downloader.download(((Transport)tag));
                     }
                 }
                 break;
@@ -63,7 +65,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
     }
 
     @Override
-    public void onFileDownloadUpdate(int what, boolean finish, Download task, Object data) {
+    public void onFileDownloadUpdate(int what, boolean finish, Transport task, Object data) {
         final DownloadAdapter adapter=mAdapter;
         if (finish){
             adapter.remove(task);
@@ -78,7 +80,7 @@ public class TransportModel extends BaseModel implements BaseModel.OnModelViewCl
         }
     }
 
-    private void setList(List<Download> list){
+    private void setList(List<Transport> list){
         DownloadAdapter adapter=mAdapter;
         if (null!=adapter){
             adapter.setData(list,true);

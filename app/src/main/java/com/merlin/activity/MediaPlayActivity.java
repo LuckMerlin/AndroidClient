@@ -7,20 +7,23 @@ import android.os.IBinder;
 
 
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 
-import com.merlin.client.databinding.ActivityMediaPlayBinding;
+import com.merlin.client.R;
 import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
+import com.merlin.model.BaseModel;
 import com.merlin.model.MediaPlayModel;
 
-public class MediaPlayActivity extends NasActivity<ActivityMediaPlayBinding, MediaPlayModel>
-implements ServiceConnection{
+public class MediaPlayActivity extends ModelActivity<MediaPlayModel> implements ServiceConnection{
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DataBindingUtil.setContentView(this,R.layout.activity_media_play);
         MediaPlayService.bind(this);
     }
+
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -35,9 +38,9 @@ implements ServiceConnection{
     }
 
     private boolean setMediaPlayer(MediaPlayer player){
-        MediaPlayModel model=getViewModel();
-        if (null!=model){
-            return model.setMediaPlayer(player);
+         BaseModel model=getModel();
+        if (null!=model&&model instanceof MediaPlayModel){
+            return ((MediaPlayModel)model).setMediaPlayer(player);
         }
         return false;
     }

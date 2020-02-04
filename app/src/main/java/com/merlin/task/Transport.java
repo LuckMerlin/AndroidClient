@@ -5,20 +5,22 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.debug.Debug;
 import com.merlin.util.FileSize;
 
 import java.io.File;
 
-public final class Download  implements Parcelable ,Status {
-    public final static int TYPE_REPLACE=123;
-    public final static int TYPE_NORMAL=124;
+public final class Transport implements Parcelable ,Status {
+    private final static int MASK_DOWNLOAD=0x01;//0000 0001
+    private final static int MASK_COVER_REPLACE=0x02;//0000 0010
+    private final static int MASK_COVER_KEEP_ALL=0x04;//0000 0100
+    private final static int MASK_COVER_SKIP=0x06;//0000 0110
+    private final static int MASK_BREAKPOINT=0x08;//0000 1000
     private String mFromAccount;
     private String mSrc;
     private String mTargetFolder;
     private String mUnique;
     private String mTargetName;
-    private int mType=TYPE_NORMAL;
+    private int mType;
     private boolean mDeleteIncomplete;
     private long mTotal;
     private long mRemain;
@@ -26,7 +28,7 @@ public final class Download  implements Parcelable ,Status {
     private String mMD5;
     private String mFormat;
 
-    private Download(Parcel in){
+    private Transport(Parcel in){
         mSrc= in.readString();
         mTargetFolder = in.readString();
         mUnique=in.readString();
@@ -40,7 +42,7 @@ public final class Download  implements Parcelable ,Status {
         mMD5=in.readString();
     }
 
-    public Download(String fromAccount,String src,String name,String targetFolder,String unique){
+    public Transport(String fromAccount, String src, String name, String targetFolder, String unique){
         mFromAccount=fromAccount;
         mSrc=src;
         mTargetName=name;
@@ -88,6 +90,10 @@ public final class Download  implements Parcelable ,Status {
 
     public String getFormat() {
         return mFormat;
+    }
+
+    public boolean isTypeMaskExist(int mask){
+        return (mask&mType)!=0;
     }
 
     public int getType() {
@@ -201,23 +207,23 @@ public final class Download  implements Parcelable ,Status {
         dest.writeString(mMD5);
     }
 
-    public static final Parcelable.Creator<Download> CREATOR = new Parcelable.Creator<Download>(){
+    public static final Parcelable.Creator<Transport> CREATOR = new Parcelable.Creator<Transport>(){
 
         @Override
-        public Download createFromParcel(Parcel source) {
-            return new Download(source);
+        public Transport createFromParcel(Parcel source) {
+            return new Transport(source);
         }
 
         @Override
-        public Download[] newArray(int size) {
-            return new Download[size];
+        public Transport[] newArray(int size) {
+            return new Transport[size];
         }
 
     };
 
     @Override
     public String toString() {
-        return "Download{" +
+        return "Transport{" +
                 "mSrc='" + mSrc + '\'' +
                 ", mTarget='" + mTargetFolder + '\'' +
                 ", mUnique='" + mUnique + '\'' +
@@ -227,8 +233,8 @@ public final class Download  implements Parcelable ,Status {
     @Override
     public boolean equals(@Nullable Object obj) {
         if (null!=obj) {
-            if (obj instanceof Download) {
-                Download d = (Download) obj;
+            if (obj instanceof Transport) {
+                Transport d = (Transport) obj;
                 return equal(mFromAccount, d.mFromAccount) && equal(mTargetName, d.mTargetName) && equal(mSrc, d.mSrc)
                         && equal(mTargetFolder, d.mTargetFolder);
             }

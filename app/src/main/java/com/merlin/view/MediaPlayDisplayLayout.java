@@ -46,22 +46,30 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
 
     @Override
     public void onViewClick(View v, int id,Object obj) {
-          int count=getChildCount();
-          for (int i=0;i< count;i++){
-              View child=getChildAt(i);
-              ViewDataBinding binding=null!=child?DataBindingUtil.getBinding(child):null;
-              if (null!=binding){
-                 MediaDisplayAllMediasModel model= binding instanceof MediaDisplayAllMediasBinding?((MediaDisplayAllMediasBinding)binding).getVm():null;
-                  if (null!=model&&model instanceof BaseModel.OnModelViewClick){
-                      ((BaseModel.OnModelViewClick)model).onViewClick(v,id,obj);
-                  }
-              }
-          }
+//          int count=getChildCount();
+//          for (int i=0;i< count;i++){
+//              View child=getChildAt(i);
+//              ViewDataBinding binding=null!=child?DataBindingUtil.getBinding(child):null;
+//              if (null!=binding){
+//                 MediaDisplayAllMediasModel model= binding instanceof MediaDisplayAllMediasBinding?((MediaDisplayAllMediasBinding)binding).getVm():null;
+//                  if (null!=model&&model instanceof BaseModel.OnModelViewClick){
+//                      ((BaseModel.OnModelViewClick)model).onViewClick(v,id,obj);
+//                  }
+//                  MediaDisplaySheetsModel sheetModel= binding instanceof MediaDisplaySheetsBinding?((MediaDisplaySheetsBinding)binding).getVm():null;
+//                  if (null!=sheetModel&&sheetModel instanceof BaseModel.OnModelViewClick){
+//                      ((BaseModel.OnModelViewClick)sheetModel).onViewClick(v,id,obj);
+//                  }
+//              }
+//          }
     }
 
     private final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-        private final int[] mLayoutIds=new int[]{R.layout.media_display_all_medias,R.layout.media_display_play,
-        R.layout.media_display_sheets};
+        private final int[] mLayoutIds=new int[]{
+//                R.layout.media_display_all_medias
+//                ,
+                R.layout.media_display_play
+//                , R.layout.media_display_sheets
+        };
 
         @NonNull
         @Override
