@@ -13,16 +13,20 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 
-public class MediaPlayDisplayAdapter extends Adapter {
+public class MediaPlayDisplayAdapter extends Adapter<Integer> {
     private final PagerSnapHelper mHelper=new PagerSnapHelper();
-    private final int[] mLayoutIds=new int[]{
-//                R.layout.media_display_all_medias
-//                ,
-            R.layout.media_display_play
-//                , R.layout.media_display_sheets
-    };
+
+    public MediaPlayDisplayAdapter(){
+        super( R.layout.media_display_sheet_category);
+    }
+//    private final int[] mLayoutIds=new int[]{
+////                R.layout.media_display_all_medias
+////                ,
+////            R.layout.media_display_play
+////                ,
+//            R.layout.media_display_sheet_category
+//    };
 
 
     @NonNull
@@ -54,31 +58,21 @@ public class MediaPlayDisplayAdapter extends Adapter {
     }
 
     @Override
-    public int getItemCount() {
-        return null!=mLayoutIds?mLayoutIds.length:0;
+    public int getItemViewType(int position) {
+        Integer data=getItem(position);
+        return null!=data?data:-1;
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        int[] data=mLayoutIds;
-        return data[position];
-    }
 
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         if (null!=rv){
             LinearLayoutManager manager=new LinearLayoutManager(rv.getContext(),LinearLayoutManager.HORIZONTAL,false);
-            mHelper.attachToRecyclerView(rv);
-            rv.setLayoutManager(manager);
+//            mHelper.attachToRecyclerView(rv);
             return manager;
         }
         return null;
     }
 
-    private final static class ViewHolder extends RecyclerView.ViewHolder{
-        protected ViewHolder(View root){
-            super(root);
-        }
-    }
 
 }

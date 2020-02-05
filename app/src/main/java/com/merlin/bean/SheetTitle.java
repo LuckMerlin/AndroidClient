@@ -1,14 +1,25 @@
 package com.merlin.bean;
 
 public class SheetTitle {
-    private String titel;
+    private String id;
+    private String title;
     private long size;
+
+    public SheetTitle(String id,String title,long size){
+        this.id=id;
+        this.title=title;
+        this.size=size;
+    }
 
     public long getSize() {
         return size;
     }
 
-    public String getTitel() {
-        return titel;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getId() {
+        return id;
     }
 }

@@ -3,45 +3,40 @@
 <data>
     <variable
         name="sheet"
-        type="com.merlin.bean.MediaSheet" />
-    <import type="com.merlin.util.Counter"/>
-
+        type="com.merlin.bean.Sheet" />
+    <import type="android.view.View"/>
 </data>
-    <RelativeLayout
+    <LinearLayout
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
+        android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <RelativeLayout
             android:background="@drawable/round_corner_small"
-            android:id="@+id/itemMediaSheet_RL"
-            android:layout_width="160dp"
+            android:layout_width="120dp"
             android:layout_height="120dp">
             <ImageView
                 android:src="@{sheet.imageUrl}"
-                android:scaleType="centerCrop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:scaleType="fitCenter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
             <TextView
-                android:text="@{Integer.toString(sheet.size)}"
+                android:text="@{``+sheet.size}"
+                android:visibility="@{sheet.size&lt;0?View.INVISIBLE:View.VISIBLE}"
                 android:textColor="@color/textTitleSub"
                 android:layout_margin="5dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentBottom="true"
-                android:textSize="@dimen/textSmall"
+                android:textSize="@dimen/textMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </RelativeLayout>
 
         <TextView
-            android:layout_below="@id/itemMediaSheet_RL"
             android:text="@{sheet.title}"
-            style="@style/titleNormalTextView"
-            android:layout_marginBottom="2dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            android:paddingBottom="2dp"/>
+            style="@style/titleNormalTextView"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 </layout>

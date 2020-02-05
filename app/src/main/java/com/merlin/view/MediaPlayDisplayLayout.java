@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaDisplayAllMediasBinding;
-import com.merlin.client.databinding.MediaDisplaySheetsBinding;
 import com.merlin.client.databinding.MediasAllBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
@@ -68,7 +67,7 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
 //                R.layout.media_display_all_medias
 //                ,
                 R.layout.media_display_play
-//                , R.layout.media_display_sheets
+//                , R.layout.media_display_sheet_detail
         };
 
         @NonNull
@@ -78,17 +77,17 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
             final LayoutInflater in=LayoutInflater.from(context);
             ViewDataBinding binding=DataBindingUtil.inflate(in,viewType, parent, false);
             if (null!=binding){
-                 if(binding instanceof MediaDisplaySheetsBinding){
-                     MediaDisplaySheetsModel model=new MediaDisplaySheetsModel(context);
-                     model.setRootView(binding.getRoot());
-                     ((MediaDisplaySheetsBinding)binding).setVm(model);
-                 }else if (binding instanceof MediaDisplayAllMediasBinding){
-                     MediaDisplayAllMediasModel model=new MediaDisplayAllMediasModel(context);
-                     model.setRootView(binding.getRoot());
-                     ((MediaDisplayAllMediasBinding)binding).setVm(model);
-                 }else if (binding instanceof MediasAllBinding){
-
-                 }
+//                 if(binding instanceof MediaDisplaySheetsBinding){
+//                     MediaDisplaySheetsModel model=new MediaDisplaySheetsModel(context);
+//                     model.setRootView(binding.getRoot());
+//                     ((MediaDisplaySheetsBinding)binding).setVm(model);
+//                 }else if (binding instanceof MediaDisplayAllMediasBinding){
+//                     MediaDisplayAllMediasModel model=new MediaDisplayAllMediasModel(context);
+//                     model.setRootView(binding.getRoot());
+//                     ((MediaDisplayAllMediasBinding)binding).setVm(model);
+//                 }else if (binding instanceof MediasAllBinding){
+//
+//                 }
 //                binding.setVariable(com.merlin.client.BR.vm,mModel);
             }
             return new BaseViewHolder(null!=binding?binding.getRoot():null);

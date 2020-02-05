@@ -186,10 +186,14 @@ public class Model {
 
     private final Retrofit mRetrofit=new Retrofit();
 
-    protected final <T> T call(Class<T> cls, com.merlin.api.Callback...callbacks){
+    protected final <T> T call(Class<T> cls,  com.merlin.api.Callback...callbacks){
+        return call(cls,null,callbacks);
+    }
+
+    protected final <T> T call(Class<T> cls, Object dither, com.merlin.api.Callback...callbacks){
         Retrofit retrofit=mRetrofit;
         if (null!=cls){
-            return retrofit.call(cls,callbacks);
+            return retrofit.call(cls,dither,callbacks);
         }
         return null;
     }

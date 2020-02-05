@@ -1,12 +1,10 @@
-package com.merlin.media;
+package com.merlin.bean;
 
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.RequiresApi;
-
-import com.merlin.bean.Media;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,32 +19,34 @@ public final class Sheet implements Parcelable {
      * create : 2342
      */
     private String account;
-    private String name;
+    private String title;
     private long size;
-    private String cover;
+    private String imageUrl;
     private String id;
     private String note;
     private long create;
     private List<Media> data;
 
-    public String getName() {
-        return name;
+    public Sheet(String id,String title,long size){
+        setId(id);
+        setTitle(title);
+        setSize(size);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public long getSize() {
         return size;
     }
 
-    public String getCover() {
-        return cover;
-    }
-
-    public void setCover(String cover) {
-        this.cover = cover;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public String getId() {
@@ -101,9 +101,9 @@ public final class Sheet implements Parcelable {
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private Sheet(Parcel in){
         if (null!=in){
-            name=in.readString();
+            title=in.readString();
             size=in.readLong();
-            cover=in.readString();
+            imageUrl=in.readString();
             id=in.readString();
             create=in.readLong();
             account=in.readString();
@@ -115,9 +115,9 @@ public final class Sheet implements Parcelable {
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
+        dest.writeString(title);
         dest.writeLong(size);
-        dest.writeString(cover);
+        dest.writeString(imageUrl);
         dest.writeString(id);
         dest.writeLong(create);
         dest.writeString(account);

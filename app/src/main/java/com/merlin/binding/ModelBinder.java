@@ -7,7 +7,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 
 import java.lang.reflect.Constructor;
@@ -70,7 +69,7 @@ public class ModelBinder {
     public boolean bind(View view,Object  modeClassName){
         if (null!=view){
             Class perferClass=findModelClass(view,modeClassName);
-            ViewDataBinding binding=null!=view?DataBindingUtil.getBinding(view):null;
+            ViewDataBinding binding=null!=view?DataBindingUtil.bind(view):null;
             Class cls=null!=binding?binding.getClass().getSuperclass():null;
             Field[] fields=null!=cls?cls.getDeclaredFields():null;
             if (null!=fields&&fields.length>0){
@@ -80,17 +79,28 @@ public class ModelBinder {
                             perferClass.equals(type))){
                         Model model=createModel(view,type);
                         if (null!=model){
-                            field.setAccessible(true);
                             try {
-                                field.set(binding,model);
-                                DataBindingUtil.bind(view);
+                            field.setAccessible(true);
+                            String fieldName=field.getName();
+                            fieldName=null!=fieldName&&fieldName.startsWith("m")?fieldName.replaceFirst("m",""):fieldName;
+                            fieldName="set"+fieldName;
+                            Method[] methods=null!=fieldName?cls.getDeclaredMethods():null;
+                            if (null!=methods&&methods.length>0){
+                                String methodName;
+                                for (Method method:methods) {
+                                    methodName=null!=method?method.getName():null;
+                                    if (null!=methodName&&methodName.equals(fieldName)){
+                                        method.setAccessible(true);
+                                        method.invoke(binding,model);
+                                    }
+                                }
+                            }
                                 view.setTag(R.id.modelBind,model);
-                                binding.invalidateAll();
-                            } catch (IllegalAccessException e) {
+                                break;
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
-                        break;
                     }
                 }
             }

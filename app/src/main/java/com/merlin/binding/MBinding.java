@@ -166,44 +166,58 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("adapter")
-    public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
-        if (null!=view){
-            if (null!=adapter&&adapter instanceof BaseAdapter){
-                RecyclerView.LayoutManager manager=((BaseAdapter)adapter).onResolveLayoutManager(view);
-                if (null!=manager){
-                    view.setLayoutManager(manager);
-                }
-                if (adapter instanceof OnMoreLoadable){
-                    view.addOnScrollListener(new LoadMoreInterceptor(){
-                        @Override
-                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
-                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
-                        }
-                    });
-                }
-            }else if (null!=adapter&&adapter instanceof com.merlin.adapter.Adapter){
-                RecyclerView.LayoutManager manager=((com.merlin.adapter.Adapter)adapter).onResolveLayoutManager(view);
-                if (null!=manager){
-                    view.setLayoutManager(manager);
-                }
-                if (adapter instanceof OnMoreLoadable){
+//    @BindingAdapter("adapter")
+//    public static void adapter(RecyclerView view, Object adapter) {
+//        if (null!=view){
+//            Debug.D(MBinding.class,"######## "+adapter);
+//            if (null!=adapter&&adapter instanceof BaseAdapter){
+//                RecyclerView.LayoutManager manager=((BaseAdapter)adapter).onResolveLayoutManager(view);
+//                if (null!=manager){
+//                    view.setLayoutManager(manager);
+//                }
+//                if (adapter instanceof OnMoreLoadable){
 //                    view.addOnScrollListener(new LoadMoreInterceptor(){
 //                        @Override
 //                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
 //                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
 //                        }
 //                    });
-                }
-            }
-            view.setAdapter(adapter);
-        }
-    }
+//                }
+//            }else if (null!=adapter&&adapter instanceof com.merlin.adapter.Adapter){
+//                Debug.D(MBinding.class,"############ "+adapter);
+//                RecyclerView.LayoutManager manager=((com.merlin.adapter.Adapter)adapter).onResolveLayoutManager(view);
+//                if (null!=manager){
+//                    view.setLayoutManager(manager);
+//                }
+//                if (adapter instanceof OnMoreLoadable){
+//                    view.addOnScrollListener(new LoadMoreInterceptor(){
+//                        @Override
+//                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
+//                            ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
+//                        }
+//                    });
+//                }
+//            }
+//            view.setAdapter(adapter);
+//        }
+//    }
 
     @BindingAdapter("adapter")
-    public static void adapter(RecyclerView view, Adapter object) {
-        if (null!=object&&null!=view){
-            object.inflate(view);
+    public static void adapter(RecyclerView view, com.merlin.adapter.Adapter adapter) {
+        if (null!=view&&null!=adapter){
+            RecyclerView.LayoutManager manager=adapter.onResolveLayoutManager(view);
+            if (null!=manager){
+                view.setLayoutManager(manager);
+            }
+            if (adapter instanceof OnMoreLoadable){
+                view.addOnScrollListener(new LoadMoreInterceptor(){
+                    @Override
+                    protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
+                        ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
+                    }
+                });
+            }
+            view.setAdapter(adapter);
         }
     }
 

@@ -7,7 +7,6 @@
             type="com.merlin.bean.SheetTitle" />
     </data>
     <TextView
-        android:text="@{sheet.titel}"
         android:background="#f00"
         binding:enableModelClick="@{true}"
         style="@style/sheetCategoryTitleStyle"/>

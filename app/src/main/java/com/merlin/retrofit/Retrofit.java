@@ -1,7 +1,6 @@
 package com.merlin.retrofit;
 
 import android.app.Activity;
-import android.graphics.drawable.Drawable;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.merlin.api.Address;
@@ -15,6 +14,8 @@ import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -31,6 +32,8 @@ public final class Retrofit implements What {
     private WeakReference<LifecycleProvider> mLifecycleProvider;
     private final String mUrl;
     private final int mTimeout=10;
+    private List<Object> mDitherList;
+
     public Retrofit(){
         this(null);
     }
@@ -66,32 +69,42 @@ public final class Retrofit implements What {
         return retrofit.create(cls);
     }
 
-    public final <T> T call(Class<T> cls,Callback...callbacks){
-        return call(cls,null,callbacks);
+    public final <T> T call(Class<T> cls,Object dither, Callback...callbacks){
+        return call(cls,null,dither,callbacks);
     }
 
-    public final <T> T call(Class<T> cls,Scheduler observeOn,Callback...callbacks){
-        return call(cls,null,observeOn,callbacks);
+    public final <T> T call(Class<T> cls,Scheduler observeOn,Object dither, Callback...callbacks){
+        return call(cls,null,observeOn,dither,callbacks);
     }
 
-    public final <T> T call(Class<T> cls,Interceptor[] interceptors,Scheduler observeOn, Callback...callbacks){
+    public final <T> T call(Class<T> cls, Interceptor[] interceptors, Scheduler observeOn, Object dither, Callback...callbacks){
         if (null!=cls){
             return (T)Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls},(proxy, method,args)->{
-                        T instance=prepare(cls,interceptors);
-                        Object ret=null!=instance?method.invoke(instance,args):null;
-                        if (null!=ret&&ret instanceof Observable) {
-                            subscribe((Observable) ret,observeOn, callbacks);
+                        if (null==dither||!isExistDither(dither)){
+                            T instance=prepare(cls,interceptors);
+                            Object ret=null!=instance?method.invoke(instance,args):null;
+                            if (null!=ret&&ret instanceof Observable) {
+                                final OnApiFinish finish=null!=dither?(what, note, data, arg)->{
+                                        removeDither(dither);
+                                }:null;
+                                if (null!=dither){
+                                    addDither(dither);
+                                }
+                                subscribe((Observable) ret,observeOn,finish, callbacks);
+                            }
+                            return ret;
                         }
-                        return ret;
+                        finish(WHAT_ALREADY_DONE,"Already exist equal query.",null,null,null,callbacks);
+                        return null;
                     }
             );
         }
         return null;
     }
 
-    public final <M> boolean subscribe(Observable observable, Scheduler observeOn, Callback ...callbacks){
+    public final <M> boolean subscribe(Observable observable, Scheduler observeOn,OnApiFinish innerFinish, Callback ...callbacks){
         if (null==observable){
-            finish(WHAT_ARGS_INVALID,"Observable is Null.",null,null,callbacks);
+            finish(WHAT_ARGS_INVALID,"Observable is Null.",null,null,innerFinish,callbacks);
             return false;
         }
         observable=observable.subscribeOn(Schedulers.newThread()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread());
@@ -101,19 +114,21 @@ public final class Retrofit implements What {
             observable.compose(provider.bindUntilEvent(ActivityEvent.DESTROY));
         }
         if (null!=observable){
-            observable.subscribe(new InnerCallback(callbacks));
+            observable.subscribe(new InnerCallback(innerFinish,callbacks));
         }
         return null!=observable;
     }
 
     private class InnerCallback<M> extends DisposableObserver<M> {
         private final Callback[] mCallbacks;
+        private final OnApiFinish mInnerFinish;
         private String mMessage;
         private Integer mWhat;
         private M mData;
 
-        public InnerCallback(Callback ...callbacks){
+        public InnerCallback(OnApiFinish innerFinish,Callback ...callbacks){
             mCallbacks=callbacks;
+            mInnerFinish=innerFinish;
         }
 
         @Override
@@ -143,7 +158,7 @@ public final class Retrofit implements What {
                     mWhat=WHAT_TOKEN_INVALID;
                 }
             }
-            finish(mWhat,mMessage,null,e,mCallbacks);
+            finish(mWhat,mMessage,null,e,mInnerFinish,mCallbacks);
         }
 
         @Override
@@ -154,13 +169,23 @@ public final class Retrofit implements What {
 
         @Override
         public void onComplete() {
-            finish(mWhat,mMessage=null,mData,null,mCallbacks);
+            finish(mWhat,mMessage=null,mData,null,mInnerFinish,mCallbacks);
         }
 
     }
 
-    private boolean finish(Integer what,String note,Object data,Object arg,Callback ...callbacks){
+    private boolean finish(Integer what,String note,Object data,Object arg,OnApiFinish finish,Callback ...callbacks){
         if (null!=callbacks&&callbacks.length>0){
+            if (null!=finish){
+                data=data!=null&&checkDataGeneric(data,finish)?data:null;
+                if (null!=data&&data instanceof Reply){
+                    what=null!=what?what:((Reply)data).getWhat();
+                    note=((Reply)data).getNote();
+                }else{
+                    data=null;
+                }
+                finish.onApiFinish(what,note,data,arg);
+            }
             for (Callback callback:callbacks) {
                 if (null!=callback&&callback instanceof OnApiFinish){
                     data=data!=null&&checkDataGeneric(data,callback)?data:null;
@@ -186,5 +211,50 @@ public final class Retrofit implements What {
         Debug.W(getClass(),"Can't  check data generic type if valid."+data+" "+callback);
         return false;
     }
+
+    private synchronized boolean addDither(Object dither){
+        List<Object> list=null!=dither?(null!=mDitherList?mDitherList:(mDitherList=new ArrayList<>())):null;
+        if (null!=list){
+            synchronized (list) {
+                if (!list.contains(dither) && list.add(dither)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private synchronized boolean removeDither(Object dither){
+        List<Object> list=null!=dither?mDitherList:null;
+        if (null!=list){
+            List<Object> needRemove=new ArrayList<>();
+            synchronized (list){
+                for (Object child:list){
+                    if (null!=child&&child.equals(dither)){
+                        needRemove.add(child);
+                    }
+                }
+                list.removeAll(needRemove);
+            }
+            return null!=list&&list.size()>0;
+        }
+        return false;
+    }
+
+    private synchronized boolean isExistDither(Object querying){
+        List<Object> list=null!=querying?mDitherList:null;
+        if (null!=list){
+            synchronized (list){
+                for (Object child:list){
+                    if (null!=child&&child.equals(querying)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
 
 }
