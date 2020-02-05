@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
+import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.util.FileSize;
@@ -17,8 +18,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class BrowserAdapter extends MultiPageAdapter<FileMeta>{
+public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, FolderMeta> implements OnMoreLoadable{
     private List<FileMeta> mMultiChoose;
+
+    public List<FileMeta> getMultiChoose() {
+        return mMultiChoose;
+    }
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

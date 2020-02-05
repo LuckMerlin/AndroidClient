@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
 <data>
     <variable
         name="sheet"
@@ -7,6 +8,7 @@
     <import type="android.view.View"/>
 </data>
     <LinearLayout
+        binding:enableMultiClick="@{true}"
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
         android:orientation="vertical"

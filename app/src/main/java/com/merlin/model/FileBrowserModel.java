@@ -5,10 +5,13 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
@@ -43,7 +46,19 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick 
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
     private final ContextMenuWindow mPopupWindow=new ContextMenuWindow(true);
-    private final BrowserAdapter mBrowserAdapter=new BrowserAdapter();
+    private final BrowserAdapter mBrowserAdapter=new BrowserAdapter(){
+        @Override
+        protected boolean onPageLoad(String path, int page, OnApiFinish<Reply<FolderMeta>> finish) {
+            return null!=path&&null!=call(Api.class,(OnApiFinish<Reply<FolderMeta>>)(what, note, data, arg)->{
+                if (what==WHAT_SUCCEED){
+                    mCurrent.set(null!=data?data.getData():null);
+                }
+                if (null!=finish){
+                  finish.onApiFinish(what,note,data,arg);
+              }
+            }).queryFiles(path, page,10);
+        }
+    };
 
     private interface Api{
         @POST(Address.PREFIX_FILE_BROWSER)
@@ -63,7 +78,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick 
 
     public FileBrowserModel(){
         refreshClientMeta("While model create.");
-        browserPath("","test");
+        browserPath("","While model create.");
     }
 
     @Override
@@ -79,70 +94,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick 
         return false;
     }
 
-    //    @Override
-//    public boolean onLoadMore() {
-//        FolderMeta current=mCurrent.get();
-//        if (null==current){
-//            refreshCurrentPath("After load more call without folder set.");
-//            return false;
-//        }
-//        return browserPath(current.getPath(),current.getPage()+1,"After load more call.");
-//    }
-
     private boolean browserPath(String pathValue, String debug){
-        return browserPath(pathValue,0,debug);
-    }
-
-    private boolean browserPath(String pathValue,int page,String debug){
-
-
-
-//        final String path=null!=pathValue?pathValue:"";
-//        final Browsing newBrowsing=new Browsing(path,page);
-//        Browsing browsing=mBrowsing;
-//        if (null!=browsing){
-//            synchronized (browsing){
-//                if (browsing.equals(newBrowsing)){
-//                    Debug.W(getClass(),"Not need browser path again "+path+" "+(null!=debug?debug:"."));
-//                    return false;
-//                }
-//            }
-//        }
-//        setRefreshing(true);
-//        mBrowsing=newBrowsing;
-//        Debug.D(getClass(),"Browsing path "+page+" "+path +" "+(null!=debug?debug:"."));
-//        return null!=call(BrowserApi.class,(OnApiFinish<Reply<FolderMeta>>)(what, note, data, arg)->{
-//            setRefreshing(false);
-//            Browsing current=mBrowsing;
-//            if (null!=current){
-//                synchronized (current){
-//                    if (current.equals(newBrowsing)){
-//                        FolderMeta meta=null!=data?data.getData():null;
-//                        mBrowsing=null;
-//                        if (what== WHAT_SUCCEED){
-//                            mCurrent.set(meta);
-//                            BaseAdapter adapter=getAdapter();
-//                            List  list=null!=meta?meta.getData():null;
-//                            if (newBrowsing.mPage>0){
-//                                adapter.add(list);
-//                            }else{
-//                                adapter.setData(list,true);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            if (what!=WHAT_SUCCEED){
-//                toast(R.string.requestFail, note);
-//            }
-//        }).queryFiles(path,page,50);
-        return null!=call(Api.class,"",(OnApiFinish<Reply<FolderMeta>>)(what, note, data, arg)->{
-            if (what== WHAT_SUCCEED){
-                FolderMeta meta=null!=data?data.getData():null;
-                mCurrent.set(meta);
-                mBrowserAdapter.fillPage(meta);
-            }
-        }).queryFiles(pathValue, page,50);
+        BrowserAdapter adapter=mBrowserAdapter;
+        return null!=adapter&&adapter.loadPage(pathValue,debug);
     }
 
     private boolean refreshClientMeta(String debug){

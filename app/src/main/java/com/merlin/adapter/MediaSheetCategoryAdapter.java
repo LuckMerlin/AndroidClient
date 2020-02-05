@@ -7,12 +7,13 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.PageData;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaSheetBinding;
 import com.merlin.bean.Sheet;
 import java.util.List;
 
-public class MediaSheetCategoryAdapter extends MultiPageAdapter<Sheet> {
+public abstract class MediaSheetCategoryAdapter extends MultiPageAdapter<String,Sheet, PageData<Sheet>> {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

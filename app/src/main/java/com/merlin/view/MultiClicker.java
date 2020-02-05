@@ -1,6 +1,5 @@
 package com.merlin.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
@@ -14,7 +13,6 @@ import androidx.databinding.ViewDataBinding;
 import com.merlin.binding.IDs;
 import com.merlin.classes.Classes;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 
 import java.lang.ref.WeakReference;

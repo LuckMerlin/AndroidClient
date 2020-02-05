@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,18 +16,21 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.LoadMoreInterceptor;
+import com.merlin.adapter.MultiPageAdapter;
 import com.merlin.adapter.OnMoreLoadable;
 import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.util.Layout;
 import com.merlin.view.MultiClicker;
+import com.merlin.view.MultiPageAdapterRefreshBridge;
 import com.merlin.view.OnTextChanged;
 
 @BindingMethods({
@@ -182,6 +186,33 @@ public class MBinding {
                         ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
                     }
                 });
+            }
+            final ViewParent parent=adapter instanceof MultiPageAdapter?view.getParent():null;
+            if (null!=parent&&parent instanceof SwipeRefreshLayout){
+                final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
+                final MultiPageAdapter multiPageAdapter=(MultiPageAdapter)adapter;
+                final MultiPageAdapterRefreshBridge refresh=new MultiPageAdapterRefreshBridge(){
+                    @Override
+                    public void onPageLoadUpdate(int state, boolean idle, MultiPageAdapter.Page page) {
+                        switch (state){
+                            case UPDATE_PAGE_START:
+                                refreshLayout.setRefreshing(true);
+                                break;
+                            case UPDATE_PAGE_END:
+                                if (idle){
+                                    refreshLayout.setRefreshing(false);
+                                }
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onRefresh() {
+                        multiPageAdapter.resetLoad();
+                    }
+                };
+                ((SwipeRefreshLayout)parent).setOnRefreshListener(refresh);
+                multiPageAdapter.add(refresh);
             }
             view.setAdapter(adapter);
         }

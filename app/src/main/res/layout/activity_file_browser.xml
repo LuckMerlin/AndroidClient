@@ -163,13 +163,15 @@
             android:paddingRight="5dp"
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fileBrowser_listDLV"
-            android:layout_width="match_parent"
-            binding:adapter="@{vm.browserAdapter}"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:layout_below="@id/fileBrowser_meta_dividerV"
-            android:layout_height="match_parent"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                binding:adapter="@{vm.browserAdapter}"
+                android:layout_height="match_parent"/>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         <LinearLayout
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
