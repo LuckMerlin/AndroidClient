@@ -6,6 +6,7 @@ import android.view.View;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.classes.Classes;
 import com.merlin.client.R;
 import com.merlin.model.Model;
 
@@ -14,18 +15,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class ModelBinder {
-
-    private boolean isAssignableFrom(Class from,Class to) {
-        if (null!=from&&null!=to){
-            Class cls=from;
-            do {
-                if (cls.equals(to)){
-                    return true;
-                }
-            }while(null!=(cls=(cls.getSuperclass()))&&(cls!=from));
-        }
-        return false;
-    }
 
     private Model createModel(View view,Class modelClass){
        if (null!=view&&null!=modelClass) {
@@ -75,7 +64,7 @@ public class ModelBinder {
             if (null!=fields&&fields.length>0){
                 for (Field field:fields) {
                     Class type=null!=field?field.getType():null;
-                    if (null!=type&&isAssignableFrom(type,Model.class)&&(null==perferClass||
+                    if (null!=type&& Classes.isAssignableFrom(type,Model.class)&&(null==perferClass||
                             perferClass.equals(type))){
                         Model model=createModel(view,type);
                         if (null!=model){

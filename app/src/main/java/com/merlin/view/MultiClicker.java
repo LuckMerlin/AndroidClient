@@ -1,23 +1,38 @@
 package com.merlin.view;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
+
 import com.merlin.binding.IDs;
+import com.merlin.classes.Classes;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.model.Model;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public final class MultiClicker {
     private Object mListener;
 
-    public MultiClicker(OnMultiClickListener  listener,boolean weakListener){
+    public MultiClicker(){
+        this(null,true);
+    }
+
+    public MultiClicker(OnMultiClick listener, boolean weakListener){
         setListener(listener,weakListener);
     }
 
-    public void setListener(OnMultiClickListener  listener,boolean weakListener){
+    public void setListener(OnMultiClick listener, boolean weakListener){
         Object object=mListener;
         if (null!=object){
             mListener=null;
@@ -40,22 +55,29 @@ public final class MultiClicker {
 
     public static class MultiClick{
         private Object mArg;
-        private boolean mCoverLister;
+        private boolean mCoverExisted;
 
-        public MultiClick(Object arg,boolean coverLister ){
+        public MultiClick(Object arg,boolean coverExisted ){
             mArg=arg;
-            mCoverLister=coverLister;
+            mCoverExisted=coverExisted;
         }
     }
 
-    public OnMultiClickListener getListener(){
+    public OnMultiClick getListener(){
         Object object=mListener;
         object=null!=object&&object instanceof WeakReference?((WeakReference)object).get():object;
-        return null!=object&&object instanceof OnMultiClickListener?(OnMultiClickListener)object:null;
+        return null!=object&&object instanceof OnMultiClick ?(OnMultiClick)object:null;
+    }
+
+    public boolean attach(View view,boolean enable){
+        if (null!=view&&enable){
+            return attach(view,new MultiClick(null,false));
+        }
+        return false;
     }
 
     public boolean attach(View root,MultiClick click){
-        return null!=root&&null!=click&&attach(root,new IDs(-1,click.mArg),click.mCoverLister);
+        return null!=root&&null!=click&&attach(root,new IDs(findViewResId(root,Resources.ID_NULL),click.mArg),click.mCoverExisted);
     }
 
     public boolean attach(View view,IDs arg){
@@ -70,31 +92,27 @@ public final class MultiClicker {
                 public void run() {
                     int count=mClickCount;
                     mClickCount=0;//Reset
-                    OnMultiClickListener listener=getListener();
-                    Debug.D(getClass(),"&&&&&&&listener& "+listener);
-                    if (null!=listener){
-                        Object object=root.getTag(R.id.resourceId);
-                        int resId;
-                        if (null!=object&&object instanceof IDs){
-                            resId=((IDs)object).getResourceId();
-                            object=((IDs)object).getArg();
-                        }else{
-                            resId=root.getId();
-                        }
-                        Debug.D(getClass(),"&&&&&&&& "+object);
-                        listener.onMultiClick(root,count,resId,object);
+                    Object object=root.getTag(R.id.resourceId);
+                    int resId;
+                    if (null!=object&&object instanceof IDs){
+                        resId=((IDs)object).getResourceId();
+                        object=((IDs)object).getArg();
+                    }else{
+                        resId=root.getId();
                     }
-//                if (null==multiListener||!multiListener.
-//                        onItemMultiClick(mView,count, getViewId(),position,data)){
-//                    if (count==1&&null!=listener){
-//                        listener.onItemClick(mView, mView.getId(),position, data);
-//                    }
-//                }
+                    OnMultiClick listener=getListener();
+                    if (null==listener||!listener.onMultiClick(root,count,resId,object)){ //Try dispatch to model
+                        if (!dispatchMultiClickToModel(root,root,count,resId,object)){
+                            Context context=root.getContext();
+                            if (null!=context&&context instanceof OnMultiClick){
+                                ((OnMultiClick)context).onMultiClick(root,count,resId,arg);
+                            }
+                        }
+                    }
                 }
             };
             root.setTag(R.id.resourceId,arg);
             root.setOnClickListener((view)->{
-                Debug.D(getClass(),"&&&&&&&setOnClickListener& "+multiRunnable);
                 view.removeCallbacks(multiRunnable);
                 multiRunnable.mView=view;
                 if (multiRunnable.mClickCount==0){
@@ -108,10 +126,69 @@ public final class MultiClicker {
         return false;
     }
 
+    private boolean dispatchMultiClickToModel(View view,View root,int count,int resId, Object arg){
+        if (null!=root){
+            ViewDataBinding binding=DataBindingUtil.getBinding(root);
+            Class cls=null!=binding?binding.getClass().getSuperclass():null;
+            Method[] methods=null!=cls?cls.getDeclaredMethods():null;
+            boolean interrupted=false;
+            if (null!=methods&&methods.length>0){
+                Class type;
+                for (Method method:methods) {
+                    if (null!=method&&null!=(type=method.getReturnType())){
+                        Class[] types=method.getParameterTypes();
+                        if ((null==types||types.length<=0)&&Classes.isAssignableFrom(type,Model.class)){
+                            method.setAccessible(true);
+                            try {
+                                Object data=method.invoke(binding);
+                                if (null!=data&&data instanceof Model&&data instanceof OnMultiClick&&
+                                        ((OnMultiClick)data).onMultiClick(view,count,resId,arg)){
+                                    interrupted=true;
+                                    break;
+                                }
+                            } catch (Exception e) {
+                               //Do nothing
+                            }
+                        }
+                    }
+                }
+            }
+            ViewParent parent=interrupted?null:root.getParent();
+            if (null!=parent&&parent instanceof View &&(parent!=root)){
+                return dispatchMultiClickToModel(view,(View)parent,count,resId,arg);
+            }
+            return interrupted;
+        }
+        return false;
+    }
+
     private static abstract class MultiClickRunnable implements Runnable{
         View mView;
         long mFirstTime;
         int mClickCount;
     }
 
+
+    private int findViewResId(View view,int def){
+        if (null!=view){
+            int resourceId= Resources.ID_NULL;
+            try {
+                if (view instanceof TextView&&null!=((TextView)view).getText()){
+                    Field field=TextView.class.getDeclaredField("mTextId");
+                    field.setAccessible(true);
+                    Object object=field.get(view);
+                    resourceId=null!=object&&object instanceof Integer?(Integer)resourceId:resourceId;
+                }else if (view instanceof ImageView){
+                    Field field=ImageView.class.getDeclaredField("mResource");
+                    field.setAccessible(true);
+                    Object object=field.get(view);
+                    resourceId=null!=object&&object instanceof Integer?(Integer)resourceId:resourceId;
+                }
+            }catch (Exception e){
+                //Do nothing
+            }
+            return resourceId!=Resources.ID_NULL?resourceId:def;
+        }
+        return def;
+    }
 }

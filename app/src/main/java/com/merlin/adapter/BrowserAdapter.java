@@ -1,14 +1,15 @@
 package com.merlin.adapter;
 
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
-import com.merlin.debug.Debug;
 import com.merlin.util.FileSize;
 
 import java.text.SimpleDateFormat;
@@ -16,48 +17,36 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
-public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBinding>  {
+public class BrowserAdapter extends MultiPageAdapter<FileMeta>{
     private List<FileMeta> mMultiChoose;
 
     @Override
-    protected Integer onResolveNormalTypeLayoutId() {
+    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
         return R.layout.item_list_file;
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
-        if (null!=binding&&null!=data){
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+        if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
+            ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             boolean multiChoose=null!=mMultiChoose;
-            binding.setIsChoose(isChoose(data));
-            binding.setIsMultiChoose(multiChoose);
-            binding.setMeta(data);
-            binding.setPosition(position);
+            itemBinding.setIsChoose(isChoose(data));
+            itemBinding.setIsMultiChoose(multiChoose);
+            itemBinding.setMeta(data);
+            itemBinding.setPosition(position);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             int count=data.getChildCount();
             String sub=data.isDirectory()?"("+(count<=0?0:count)+")":" "+data.getExtension();
             sub+=" "+ FileSize.formatSizeText(data.getLength());
             sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
             sub+=" "+data.getPermissions();
-            setText(binding.itemListFileSub,sub,null);
+//            setText(itemBinding.itemListFileSub,sub,null);
         }
     }
 
-    public boolean isChoose(FileMeta meta){
-        List<FileMeta> choose=mMultiChoose;
-        return null!=meta&&null!=choose&&choose.contains(meta);
-    }
-
-    public void multiMode(boolean entry){
-        List current=mMultiChoose;
-        if (null!=current){
-            current.clear();
-        }
-        mMultiChoose=null;
-        if (entry){
-            mMultiChoose=new ArrayList<>(1);
-        }
-        notifyDataSetChanged();
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        return new LinearLayoutManager(rv.getContext());
     }
 
     public final boolean chooseAll(boolean choose){
@@ -81,6 +70,29 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
         return false;
     }
 
+    public void multiMode(boolean entry){
+        List current=mMultiChoose;
+        if (null!=current){
+            current.clear();
+        }
+        mMultiChoose=null;
+        if (entry){
+            mMultiChoose=new ArrayList<>(1);
+        }
+        notifyDataSetChanged();
+    }
+
+    public int getChooseCount(){
+        List<FileMeta> list=mMultiChoose;
+        return null!=list?list.size():0;
+    }
+
+    public List<FileMeta> getChoose(){
+        List<FileMeta> list=mMultiChoose;
+        return list;
+    }
+
+
     public boolean multiChoose(FileMeta meta){
         List<FileMeta> list=mMultiChoose;
         if (null!=meta){
@@ -94,18 +106,10 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
         return false;
     }
 
-    public int getChooseCount(){
-        List<FileMeta> list=mMultiChoose;
-        return null!=list?list.size():0;
+
+    public boolean isChoose(FileMeta meta){
+        List<FileMeta> choose=mMultiChoose;
+        return null!=meta&&null!=choose&&choose.contains(meta);
     }
 
-    public List<FileMeta> getChoose(){
-        List<FileMeta> list=mMultiChoose;
-        return list;
-    }
-
-    @Override
-    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
-        return new LinearLayoutManager(rv.getContext());
-    }
 }

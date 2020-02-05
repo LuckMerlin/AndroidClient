@@ -77,6 +77,17 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         return null;
     }
 
+    public final List<T> getData() {
+        List<T> data=mData;
+        int size=null!=data?data.size():-1;
+        if (size>0){
+           List<T> result=new ArrayList<>(size);
+           result.addAll(data);
+           return result;
+        }
+        return null;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -12,6 +12,7 @@
         <import type="android.view.View"/>
     </data>
     <RelativeLayout
+        binding:createModel="@{null}"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="1dp"
@@ -37,7 +38,6 @@
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
                         android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
-                        android:onClick="@{vm::onClick}"
                         android:src="@drawable/ic_back"/>
                     <ImageView
                         android:id="@+id/fileBrowser_cancelIV"
@@ -46,7 +46,6 @@
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
                         android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
-                        android:onClick="@{vm::onClick}"
                         android:src="@drawable/cancel_selector"/>
                     <TextView
                         android:text="@{vm.clientMeta.name}"
@@ -76,7 +75,6 @@
                 android:orientation="horizontal"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:onClick="@{vm::onClick}"
                 android:visibility="@{vm.isMultiMode()&amp;&amp;!vm.isAllChoose()?View.VISIBLE:View.GONE}"
                 android:src="@drawable/choose_all_selector"
                 android:layout_width="@dimen/titleIconSize"
@@ -86,7 +84,6 @@
                 android:orientation="horizontal"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:onClick="@{vm::onClick}"
                 android:visibility="@{vm.isMultiMode()&amp;&amp;vm.isAllChoose()?View.VISIBLE:View.GONE}"
                 android:src="@drawable/ic_menu_alls"
                 android:layout_width="@dimen/titleIconSize"
@@ -102,21 +99,18 @@
                 <ImageView
                     android:id="@+id/fileBrowser_transmitIV"
                     android:src="@drawable/ic_searchgo_normal"
-                    android:onClick="@{vm::onClick}"
                     android:padding="10dp"
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
                 <ImageView
                     android:id="@+id/fileBrowser_topSearchIV"
                     android:src="@drawable/ic_searchgo_normal"
-                    android:onClick="@{vm::onClick}"
                     android:padding="10dp"
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
                 <ImageView
                     android:id="@+id/fileBrowser_menuIV"
                     android:src="@drawable/ic_menu_normal"
-                    android:onClick="@{vm::onClick}"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:padding="10dp"/>
@@ -170,10 +164,10 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
 
-        <com.merlin.view.DataListLayout
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/fileBrowser_listDLV"
             android:layout_width="match_parent"
-            binding:viewModel="@{vm}"
+            binding:adapter="@{vm.browserAdapter}"
             android:layout_below="@id/fileBrowser_meta_dividerV"
             android:layout_height="match_parent"/>
         <LinearLayout
@@ -186,8 +180,6 @@
             <com.merlin.view.MenuTextView
                 android:id="@+id/fileBrowser_downloadTV"
                 android:drawableTop="@drawable/ic_back"
-                android:onClick="@{vm::onClick}"
-                binding:OnLongClickListener="@{vm}"
                 android:text="Download"
                 android:textColor="#fff"
                 android:textStyle="bold"
@@ -201,7 +193,6 @@
                 android:text="Copy"
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:onClick="@{vm::onClick}"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
             <com.merlin.view.MenuTextView
@@ -210,7 +201,6 @@
                 android:text="Move"
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:onClick="@{vm::onClick}"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
             <com.merlin.view.MenuTextView
@@ -218,7 +208,6 @@
                 android:drawableTop="@drawable/selector_delete"
                 android:text="Delete"
                 android:layout_weight="1"
-                android:onClick="@{vm::onClick}"
                 android:gravity="center_horizontal"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
@@ -228,7 +217,6 @@
                 android:text="More"
                 android:gravity="center_horizontal"
                 android:layout_weight="1"
-                android:onClick="@{vm::onClick}"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
         </LinearLayout>

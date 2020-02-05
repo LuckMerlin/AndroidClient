@@ -15,7 +15,6 @@ import java.util.List;
 public class MediaSheetCategoryAdapter extends MultiPageAdapter<Sheet> {
 
     @Override
-
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
         return R.layout.item_media_sheet;
     }

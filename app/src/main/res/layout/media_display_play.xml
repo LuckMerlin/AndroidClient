@@ -10,7 +10,6 @@
     </data>
     <RelativeLayout
         android:id="@+id/media_display_play_rootRL"
-        android:onClick="@{vm::onClick}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <RelativeLayout
@@ -53,7 +52,6 @@
                         android:id="@+id/mediaPlayBottomProgressSB"
                         android:layout_toLeftOf="@id/mediaPlayBottomDurationTV"
                         android:layout_toRightOf="@id/mediaPlayBottomPositionTV"
-                        binding:OnSeekBarChangeListener="@{vm.seekListener}"
                         android:progress="@{vm.progress}"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="3dp"
@@ -76,7 +74,6 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_playModeIV"
-                        android:onClick="@{vm::onClick}"
                         android:src="@drawable/single_normal"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeSmall"
@@ -84,7 +81,6 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_preIV"
-                        android:onClick="@{vm::onClick}"
                         android:src="@drawable/selector_pre"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeMedium"
@@ -92,7 +88,6 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_playPauseIV"
-                        android:onClick="@{vm::onClick}"
                         android:src="@{vm.playState==Status.STATUS_PLAYING||vm.playState==Status.STATUS_PROGRESS?@drawable/selector_media_pause:@drawable/selector_media_play}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeLarge"
@@ -100,7 +95,6 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_nextIV"
-                        android:onClick="@{vm::onClick}"
                         android:src="@drawable/selector_next"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeMedium"

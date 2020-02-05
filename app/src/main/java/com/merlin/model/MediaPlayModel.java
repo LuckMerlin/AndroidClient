@@ -21,7 +21,7 @@ import com.merlin.player.Player;
 import com.merlin.player.Status;
 import com.merlin.view.OnSeekBarChangeListener;
 
-public class MediaPlayModel extends BaseModel implements Label, What,OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
+public class MediaPlayModel extends Model implements Label, What,OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
     private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mPlayState=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
@@ -41,8 +41,7 @@ public class MediaPlayModel extends BaseModel implements Label, What,OnBackPress
         }
     };
 
-    public MediaPlayModel(Context context){
-        super(context);
+    public MediaPlayModel(){
         mPlayingAdapter=new MediaListAdapter();
         mPlayingAdapter.setOnItemClickListener(this);
         Debug.D(getClass(),"$$$$$$$$$$$$$$44 "+this);

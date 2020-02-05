@@ -11,8 +11,9 @@ import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import com.merlin.model.BaseModel;
+import com.merlin.model.Model;
 
-public class ModelActivity <T extends BaseModel>extends Activity {
+public class ModelActivity <T extends Model>extends Activity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,11 +48,11 @@ public class ModelActivity <T extends BaseModel>extends Activity {
     }
 
     public final  T getModel(Class<T> cls){
-        BaseModel model=getModel();
+        Model model=getModel();
         return null!=model&&(null==cls||model.getClass().isAssignableFrom(cls))?(T)model:null;
     }
 
-    public final  BaseModel getModel(){
+    public final  Model getModel(){
 
         return null;
     }

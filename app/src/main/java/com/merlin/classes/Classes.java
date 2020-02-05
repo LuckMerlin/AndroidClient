@@ -7,22 +7,30 @@ import java.lang.reflect.Constructor;
 
 public final class Classes {
 
-    public static boolean isAssignableFrom(Class<?> cls,final String className){
-        return false;
-    }
-
-    public static boolean isAssignableFrom(Class<?> cls,final Class<?> cls2){
-        if (null!=cls&&null!=cls2){
-             while (null!=cls&&null!=cls2){
-                    if (cls.equals(cls2)){
-                        return true;
-                    }
-                    cls=cls.getSuperclass();
-             }
-            return false;
+    public static boolean isAssignableFrom(Class from,Class to) {
+        if (null!=from&&null!=to){
+            Class cls=from;
+            do {
+                if (cls.equals(to)){
+                    return true;
+                }
+            }while(null!=(cls=(cls.getSuperclass()))&&(cls!=from));
         }
         return false;
     }
+
+//    public static boolean isAssignableFrom(Class<?> cls,final Class<?> cls2){
+//        if (null!=cls&&null!=cls2){
+//             while (null!=cls&&null!=cls2){
+//                    if (cls.equals(cls2)){
+//                        return true;
+//                    }
+//                    cls=cls.getSuperclass();
+//             }
+//            return false;
+//        }
+//        return false;
+//    }
 
     public static Object instance(String classValue, Context context){
         try {

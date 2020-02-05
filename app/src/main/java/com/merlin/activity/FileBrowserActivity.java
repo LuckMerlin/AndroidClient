@@ -8,15 +8,22 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.databinding.DataBindingUtil;
 
 import com.merlin.bean.ClientMeta;
+import com.merlin.client.R;
 import com.merlin.client.databinding.ActivityFileBrowserBinding;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.protocol.Tag;
 
 
-public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserBinding, FileBrowserModel> implements Tag {
-    private String mBrowsingPath;
+public final class FileBrowserActivity extends  ModelActivity<FileBrowserModel> implements Tag {
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        DataBindingUtil.setContentView(this, R.layout.activity_file_browser);
+    }
 
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
@@ -49,7 +56,7 @@ public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserB
     @Override
     protected void onResume() {
         super.onResume();
-        FileBrowserModel model=getViewModel();
+        FileBrowserModel model=getModel(FileBrowserModel.class);
         if (null!=model) {
             model.refreshCurrentPath("After activity onResume.");
         }
@@ -57,7 +64,7 @@ public final class FileBrowserActivity extends  NasActivity<ActivityFileBrowserB
 
     @Override
     public void onBackPressed() {
-        FileBrowserModel model=getViewModel();
+        FileBrowserModel model=getModel(FileBrowserModel.class);
         if (null==model||!model.onBackPressed()){
             super.onBackPressed();
         }

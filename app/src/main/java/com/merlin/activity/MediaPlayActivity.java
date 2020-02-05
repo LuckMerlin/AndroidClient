@@ -38,7 +38,7 @@ public class MediaPlayActivity extends ModelActivity<MediaPlayModel> implements 
     }
 
     private boolean setMediaPlayer(MediaPlayer player){
-         BaseModel model=getModel();
+         MediaPlayModel model=getModel(MediaPlayModel.class);
         if (null!=model&&model instanceof MediaPlayModel){
             return ((MediaPlayModel)model).setMediaPlayer(player);
         }
