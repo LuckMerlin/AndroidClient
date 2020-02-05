@@ -162,10 +162,11 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                         size=playing.size();
                         media=index<size?playing.get(index):null;
                     }
-                    if (null!=media){
-                        return play(media,seek,update);
+                    if (null!=media) {
+                        return play(media, seek, update);
                     }
                 }
+                Debug.W(getClass(),"Can't play media.index="+index+" playing="+playing);
                 return false;
             }else if (object instanceof Media){
                 return play((Media)object,seek,update);
@@ -177,6 +178,7 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
                 return seek(seek);
             }
         }
+        Debug.W(getClass(),"Can't play media.object="+object+" seek="+seek);
         return false;
     }
 

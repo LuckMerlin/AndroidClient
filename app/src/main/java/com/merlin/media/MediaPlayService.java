@@ -122,9 +122,8 @@ public class MediaPlayService extends Service implements Status {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
-    {
-        Bundle bundle=intent.getExtras();
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Bundle bundle=null!=intent?intent.getExtras():null;
         handStartIntent(bundle);
         return super.onStartCommand(intent, flags, startId);
     }
@@ -164,16 +163,21 @@ public class MediaPlayService extends Service implements Status {
             }
             return true;
         }
+        Debug.W(MediaPlayService.class,"Can't start media play service. context="+context);
         return false;
     }
 
     public static boolean play(Context context, Media media,int position, boolean addIntoQueue){
-        Intent intent=new Intent();
-        intent.putExtra(LABEL_MEDIAS,media);
-        intent.putExtra(LABEL_POSITION,position);
-        intent.putExtra(LABEL_ADD_INTO_QUEUE,addIntoQueue);
-        intent.putExtra(LABEL_PLAY, true);
-        return start(context,intent);
+        if (null!=media&&null!=context) {
+            Intent intent = new Intent();
+            intent.putExtra(LABEL_MEDIAS, media);
+            intent.putExtra(LABEL_POSITION, position);
+            intent.putExtra(LABEL_ADD_INTO_QUEUE, addIntoQueue);
+            intent.putExtra(LABEL_PLAY, true);
+            return start(context, intent);
+        }
+        Debug.W(MediaPlayService.class,"Can't play media by start service.media="+media+" context="+context);
+        return false;
     }
 
     public static boolean add(Context context, Media media, int index){
@@ -183,6 +187,7 @@ public class MediaPlayService extends Service implements Status {
             intent.putExtra(LABEL_INDEX,index);
             return start(context,intent);
         }
+        Debug.W(MediaPlayService.class,"Can't add media by start service.media="+media+" context="+context);
         return false;
     }
 
