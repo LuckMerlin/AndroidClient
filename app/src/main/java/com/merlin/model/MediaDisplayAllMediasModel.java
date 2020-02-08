@@ -1,26 +1,18 @@
 package com.merlin.model;
-
-import android.content.Context;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
 
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.merlin.adapter.BaseAdapter;
-import com.merlin.adapter.MediaAdapter;
+import com.merlin.adapter.AllMediasAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
-import com.merlin.api.PageQuery;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.Media;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
+import com.merlin.view.OnMultiClick;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -28,15 +20,11 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 
-public final class MediaDisplayAllMediasModel extends BaseModel implements Label,What, BaseModel.OnModelViewClick, BaseAdapter.OnItemClickListener<FileMeta> {
-    private PageQuery<String> mQuerying;
-    private PageData<FileMeta> mLatestQueried=null;
-
-    private final MediaAdapter mAdapter=new MediaAdapter(){
+public final class MediaDisplayAllMediasModel extends Model implements OnMultiClick,Label,What {
+    private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        public boolean onLoadMore(RecyclerView recyclerView, int state, String debug) {
-            PageData<FileMeta> query=mLatestQueried;
-            return null!=query&&queryAllMedias(query.getPage()+1);
+        protected boolean onPageLoad(String filter, int page, OnApiFinish<Reply<PageData<FileMeta>>> finish) {
+            return null!=call(Api.class,finish).queryAllMedias(filter,page,10);
         }
     };
 
@@ -44,85 +32,71 @@ public final class MediaDisplayAllMediasModel extends BaseModel implements Label
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
         Observable<Reply<PageData<FileMeta>>> queryAllMedias(@Field(LABEL_FORMAT) String format,
-                                                          @Field(LABEL_PAGE)int page,
-                                                          @Field(LABEL_LIMIT)int limit);
+                                                             @Field(LABEL_PAGE) int page,
+                                                             @Field(LABEL_LIMIT) int limit);
         @POST(Address.PREFIX_FILE+"/favorite")
         @FormUrlEncoded
-        Observable<Reply<FileMeta>> makeFavorite(@Field(LABEL_MD5) String md5,@Field(LABEL_DATA) boolean favorite );
+        Observable<Reply<Media>> makeFavorite(@Field(LABEL_PATH) String path, @Field(LABEL_DATA) boolean favorite);
     }
 
-
-    public MediaDisplayAllMediasModel(Context context){
-        super(context);
-        mAdapter.setOnItemClickListener(this);
-        queryAllMedias(0);
+    public MediaDisplayAllMediasModel(){
+        queryAllMedias("While model create.");
     }
 
-    private boolean queryAllMedias(int page){
-        return queryAllMedias(null,page);
+    @Override
+    public boolean onMultiClick(View view, int clickCount, int resId, Object data) {
+        switch (resId){
+            case R.id.itemMediaAll_favoriteIV:
+                return null!=data&&null!=view&&data instanceof Media&&
+                        makeFavorite((Media)data,!view.isSelected());
+            case R.id.itemMediaAll_rootRL:
+                if (null!=view&&null!=data&&data instanceof Media&&(clickCount==1||clickCount==2)){
+                    return MediaPlayService.play(view.getContext(),(Media)data,0,clickCount==2);
+                }
+                return false;
+        }
+        return false;
     }
 
-    private boolean queryAllMedias(String format,int page){
-        return queryAllMedias(new PageQuery(format,page, 10));
-    }
-
-    private boolean makeFavorite(String md5,boolean favorite){
-        if (null==md5||md5.length()<=0){
+    private boolean makeFavorite(Media meta, boolean favorite){
+        final String path=null!=meta?meta.getPath():null;
+        if (null==path||path.length()<=0){
             return false;
         }
-        Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(Api.class,(OnApiFinish<Reply<FileMeta>>)(what, note, data, arg)->{
-            MediaAdapter adapter=mAdapter;
+        return null!=call(Api.class,(OnApiFinish<Reply<Media>>)(what, note, data, arg)->{
+            AllMediasAdapter adapter=mAdapter;
             if (what==WHAT_SUCCEED&&null!=data){
-                adapter.notifyFavoriteChange(md5, favorite);
+                adapter.notifyFavoriteChange(path, favorite);
             }
-        }).makeFavorite(md5,favorite);
+        }).makeFavorite(path,favorite);
     }
 
-    private boolean queryAllMedias(PageQuery<String> query){
-        if (null==query){
-            return false;
-        }
-        PageQuery<String> current=mQuerying;
-        if (null!=current&&current.equals(query)){
-            return false;
-        }
-        String filter="我";
-        mQuerying=query;
-        return null!= call(Api.class, (OnApiFinish<Reply<PageData<FileMeta>>>)(what, note, data, arg)->{
-            PageQuery<String> newCurrent=mQuerying;
-            if (null!=newCurrent&&newCurrent.equals(query)){
-                mQuerying=null;
-                if (what== What.WHAT_SUCCEED){
-                    PageData<FileMeta> pageData=null!=data?data.getData():null;
-                    mLatestQueried=pageData;
-                    mAdapter.fillPage(pageData);
-                }
-            }
-        }).queryAllMedias(filter, query.getPage(), query.getLimit());
+    private boolean queryAllMedias(String debug){
+        AllMediasAdapter adapter=mAdapter;
+       return  null!=adapter&&adapter.loadPage("",debug);
     }
 
-    @Override
-    public void onViewClick(View v, int id, Object object) {
-        switch (id){
-            case R.id.itemMedia_favoriteIV:
-                if (null!=v&&null!=object&&object instanceof FileMeta){
-                    makeFavorite(((FileMeta)object).getMd5(),!v.isSelected());
-                }
-                break;
+//    @Override
+//    public void onViewClick(View v, int id, Object object) {
+//        switch (id){
+//            case R.id.itemMedia_favoriteIV:
+//                if (null!=v&&null!=object&&object instanceof FileMeta){
+//                    makeFavorite(((FileMeta)object).getMd5(),!v.isSelected());
+//                }
+//                break;
+//
+//        }
+//    }
 
-        }
-    }
+//    @Override
+//    public void onItemClick(View view, int sourceId, int position, FileMeta data) {
+//        Media media=null!=data?data.getMeta():null;
+//        if (null!=media&&null!=data&&null!=view){
+//            MediaPlayService.play(view.getContext(),media,0,false);
+//        }
+//    }
 
-    @Override
-    public void onItemClick(View view, int sourceId, int position, FileMeta data) {
-        Media media=null!=data?data.getMeta():null;
-        if (null!=media&&null!=data&&null!=view){
-            MediaPlayService.play(view.getContext(),media,0,false);
-        }
-    }
-
-    public MediaAdapter getAdapter() {
+    public AllMediasAdapter getAdapter() {
         return mAdapter;
     }
 }

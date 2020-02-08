@@ -53,20 +53,5 @@ public final class FileBrowserActivity extends  ModelActivity<FileBrowserModel> 
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        FileBrowserModel model=getModel(FileBrowserModel.class);
-        if (null!=model) {
-            model.refreshCurrentPath("After activity onResume.");
-        }
-    }
 
-    @Override
-    public void onBackPressed() {
-        FileBrowserModel model=getModel(FileBrowserModel.class);
-        if (null==model||!model.onBackPressed()){
-            super.onBackPressed();
-        }
-    }
 }

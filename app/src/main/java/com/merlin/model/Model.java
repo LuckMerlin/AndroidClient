@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Toast;
 
@@ -24,10 +25,22 @@ import java.util.List;
 
 public class Model {
     private WeakReference<View> mRootView=null;
-
+    private final static String LABEL_ACTIVITY_DATA="activityData";
     public final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
+    }
+
+    public interface OnActivityIntentChange{
+        void onActivityIntentChanged(Activity activity,Intent intent);
+    }
+
+    public interface OnActivityResume{
+        void onActivityResume(Activity activity,Intent intent);
+    }
+
+    public interface OnActivityBackPress{
+        boolean onActivityBackPressed(Activity activity);
     }
 
     protected void onRootAttached(View root){
@@ -140,6 +153,24 @@ public class Model {
         return null;
     }
 
+
+    public final Object getActivityDataFromIntent(Intent intent){
+        Bundle bundle=null!=intent?intent.getExtras():null;
+        return null!=bundle?bundle.get(LABEL_ACTIVITY_DATA):null;
+    }
+
+    protected final boolean startActivity(Class<? extends Activity> cls, Parcelable parcelable){
+        if (null!=cls){
+            if (null!=parcelable) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(LABEL_ACTIVITY_DATA,parcelable);
+                return startActivityWithBundle(cls,bundle);
+            }
+            return startActivity(cls);
+        }
+        return false;
+    }
+
     protected final boolean startActivity(Class<? extends Activity> cls){
         return startActivityWithBundle(cls,null);
     }
@@ -198,7 +229,7 @@ public class Model {
         return null;
     }
 
-    protected final boolean setStatusBar(Integer id,int position){
+    protected final boolean setStatusBar(Object id,int position){
         if (position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT){
             View view=findViewById(R.id.status_root_RL);
             return null!=view&&view instanceof StatusBarLayout &&((StatusBarLayout)view).set(id,position);

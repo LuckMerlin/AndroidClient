@@ -2,6 +2,7 @@ package com.merlin.view;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.ImageView;
@@ -13,6 +14,7 @@ import androidx.databinding.ViewDataBinding;
 import com.merlin.binding.IDs;
 import com.merlin.classes.Classes;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 
 import java.lang.ref.WeakReference;
@@ -75,7 +77,7 @@ public final class MultiClicker {
     }
 
     public boolean attach(View root,MultiClick click){
-        return null!=root&&null!=click&&attach(root,new IDs(findViewResId(root,Resources.ID_NULL),click.mArg),click.mCoverExisted);
+        return null!=root&&null!=click&&attach(root,new IDs(findViewResId(root,root.getId()),click.mArg),click.mCoverExisted);
     }
 
     public boolean attach(View view,IDs arg){
@@ -175,12 +177,12 @@ public final class MultiClicker {
                     Field field=TextView.class.getDeclaredField("mTextId");
                     field.setAccessible(true);
                     Object object=field.get(view);
-                    resourceId=null!=object&&object instanceof Integer?(Integer)resourceId:resourceId;
+                    resourceId=null!=object&&object instanceof Integer?(Integer)object:resourceId;
                 }else if (view instanceof ImageView){
                     Field field=ImageView.class.getDeclaredField("mResource");
                     field.setAccessible(true);
                     Object object=field.get(view);
-                    resourceId=null!=object&&object instanceof Integer?(Integer)resourceId:resourceId;
+                    resourceId=null!=object&&object instanceof Integer?(Integer)object:def;
                 }
             }catch (Exception e){
                 //Do nothing

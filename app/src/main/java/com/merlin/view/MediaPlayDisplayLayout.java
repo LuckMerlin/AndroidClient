@@ -14,14 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
-import com.merlin.client.databinding.MediaDisplayAllMediasBinding;
-import com.merlin.client.databinding.MediasAllBinding;
-import com.merlin.debug.Debug;
 import com.merlin.model.BaseModel;
-import com.merlin.model.MediaDisplayAllMediasModel;
-import com.merlin.model.MediaDisplaySheetsModel;
 
 public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.OnModelViewClick {
 
@@ -50,7 +44,7 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
 //              View child=getChildAt(i);
 //              ViewDataBinding binding=null!=child?DataBindingUtil.getBinding(child):null;
 //              if (null!=binding){
-//                 MediaDisplayAllMediasModel model= binding instanceof MediaDisplayAllMediasBinding?((MediaDisplayAllMediasBinding)binding).getVm():null;
+//                 MediaDisplayAlModel model= binding instanceof MediaDisplayAllMediasBinding?((MediaDisplayAllMediasBinding)binding).getVm():null;
 //                  if (null!=model&&model instanceof BaseModel.OnModelViewClick){
 //                      ((BaseModel.OnModelViewClick)model).onViewClick(v,id,obj);
 //                  }
@@ -82,7 +76,7 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
 //                     model.setRootView(binding.getRoot());
 //                     ((MediaDisplaySheetsBinding)binding).setVm(model);
 //                 }else if (binding instanceof MediaDisplayAllMediasBinding){
-//                     MediaDisplayAllMediasModel model=new MediaDisplayAllMediasModel(context);
+//                     MediaDisplayAlModel model=new MediaDisplayAlModel(context);
 //                     model.setRootView(binding.getRoot());
 //                     ((MediaDisplayAllMediasBinding)binding).setVm(model);
 //                 }else if (binding instanceof MediasAllBinding){

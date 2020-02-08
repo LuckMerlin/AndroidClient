@@ -1,6 +1,8 @@
 package com.merlin.binding;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -25,6 +27,8 @@ import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.LoadMoreInterceptor;
 import com.merlin.adapter.MultiPageAdapter;
 import com.merlin.adapter.OnMoreLoadable;
+import com.merlin.adapter.OnRecyclerScroll;
+import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -49,21 +53,20 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("android:src")
-    public static void setSrc(ImageView view, int resId) {
+
+    @BindingAdapter("android:imageSrc")
+    public static void setImageId(ImageView view, int resId) {
         if (null!=view){
             view.setImageResource(resId);
-            view.setTag(R.id.resourceId,new IDs(resId,null ));
         }
     }
 
 
 
     @BindingAdapter("android:text")
-    public static void setSrc(TextView view, int resId) {
+    public static void setText(TextView view, int resId) {
         if (null!=view){
             view.setText(resId);
-            view.setTag(R.id.resourceId,new IDs(resId,null ));
         }
     }
 
@@ -179,11 +182,27 @@ public class MBinding {
             if (null!=manager){
                 view.setLayoutManager(manager);
             }
-            if (adapter instanceof OnMoreLoadable){
+            if (adapter instanceof OnMoreLoadable || adapter instanceof OnRecyclerScroll||adapter instanceof OnRecyclerScrollStateChange){
                 view.addOnScrollListener(new LoadMoreInterceptor(){
                     @Override
                     protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
-                        ((OnMoreLoadable)adapter).onLoadMore(recyclerView,state,debug);
+                        if (adapter instanceof OnMoreLoadable) {
+                            ((OnMoreLoadable) adapter).onLoadMore(recyclerView, state, debug);
+                        }
+                    }
+
+                    @Override
+                    protected void onRecyclerScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        if (adapter instanceof OnRecyclerScroll){
+                            ((OnRecyclerScroll)adapter).onRecyclerScrolled(recyclerView,dx,dy);
+                        }
+                    }
+
+                    @Override
+                    protected void onRecyclerScrollStateChanged(RecyclerView recyclerView, int newState) {
+                        if (adapter instanceof OnRecyclerScrollStateChange){
+                            ((OnRecyclerScrollStateChange)adapter).onRecyclerScrollStateChanged(recyclerView,newState);
+                        }
                     }
                 });
             }
@@ -208,7 +227,9 @@ public class MBinding {
 
                     @Override
                     public void onRefresh() {
-                        multiPageAdapter.resetLoad();
+                        if (!multiPageAdapter.resetLoad()&&!multiPageAdapter.isLoading()){
+                            refreshLayout.setRefreshing(false);
+                        }
                     }
                 };
                 ((SwipeRefreshLayout)parent).setOnRefreshListener(refresh);

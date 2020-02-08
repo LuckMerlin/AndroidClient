@@ -51,29 +51,39 @@ public final class StatusBarLayout extends RelativeLayout {
         return null;
     }
 
-    public boolean set( @IdRes Integer id, int position){
+    public boolean set(Object object, int position){
             Context context=getContext();
-            if (null!=id&&id==StatusBar.ICON_BACK){
-                id=R.drawable.ic_back;
-            }
-            ViewDataBinding binding=createView(context,id);
-            View root=null!=binding?binding.getRoot():null;
             View last= findPosition(position);
             if (null!=last){
                 removeView(last);
             }
-            if (null!=root){
-                root.setTag(R.id.resourceId,new IDs(id,position));
-                RelativeLayout.LayoutParams rlp=null;
-                if (position== StatusBar.LEFT||position==StatusBar.CENTER||position==StatusBar.RIGHT){
-                    ViewGroup.LayoutParams params=root.getLayoutParams();
-                    rlp=null!=params&&params instanceof RelativeLayout.LayoutParams?
-                            ((RelativeLayout.LayoutParams)params):new RelativeLayout.LayoutParams
-                            (RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    rlp.addRule(position);
-                    rlp.addRule(RelativeLayout.CENTER_VERTICAL);
+            if (null!=object){
+                ViewDataBinding binding=null;
+                int resourceId=Resources.ID_NULL;
+                if (object instanceof Integer){
+                    int id=(Integer)object;
+                    if (id==StatusBar.ICON_BACK){
+                        id=R.drawable.ic_back;
+                    }
+                    binding=createView(context,id);
+                    resourceId=id;
+                }else if (object instanceof String){
+                    binding=createStatusTextView(context,(String)object);
                 }
-                root.setLayoutParams(rlp);
+                View root=null!=binding?binding.getRoot():null;
+                if (null!=root){
+                    root.setTag(R.id.resourceId,new IDs(resourceId,position));
+                    RelativeLayout.LayoutParams rlp=null;
+                    if (position== StatusBar.LEFT||position==StatusBar.CENTER||position==StatusBar.RIGHT){
+                        ViewGroup.LayoutParams params=root.getLayoutParams();
+                        rlp=null!=params&&params instanceof RelativeLayout.LayoutParams?
+                                ((RelativeLayout.LayoutParams)params):new RelativeLayout.LayoutParams
+                                (RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        rlp.addRule(position);
+                        rlp.addRule(RelativeLayout.CENTER_VERTICAL);
+                    }
+                    root.setLayoutParams(rlp);
+                }
             }
         return true;
     }
@@ -93,14 +103,21 @@ public final class StatusBarLayout extends RelativeLayout {
             }
             String text=Resource.isExistResource(R.string.class,id)?res.getString(id):null;
             if (null!=text){
-                StatusTextBinding textBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_text,this,true);
-                View view=null!=textBinding?textBinding.getRoot():null;
-                if (null!=view&&view instanceof TextView){
-                    ((TextView)view).setText(text);
-                }
-                return textBinding;
+                return createStatusTextView(context,text);
             }
             return Resource.isExistResource(R.layout.class,id)? DataBindingUtil.inflate(LayoutInflater.from(context),id,this,true):null;
+        }
+        return null;
+    }
+
+    private final ViewDataBinding createStatusTextView(Context context,String text){
+        if (null!=context){
+            StatusTextBinding textBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_text,this,true);
+            View view=null!=textBinding?textBinding.getRoot():null;
+            if (null!=view&&view instanceof TextView){
+                ((TextView)view).setText(text);
+            }
+            return textBinding;
         }
         return null;
     }

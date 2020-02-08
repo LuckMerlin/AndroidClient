@@ -17,5 +17,6 @@ public interface Address {
     String PREFIX_FILE_CLIENT_META=PREFIX_FILE+"/client/meta";
     String PREFIX_MEDIA_PLAY=PREFIX_MEDIA+"/play";
     String PREFIX_MEDIA_SHEET_ALL=PREFIX_MEDIA_PLAY+"/sheet/all";
+    String PREFIX_MEDIA_SHEET_MEDIAS=PREFIX_MEDIA_PLAY+"/sheet/medias";
     String PREFIX_THUMB=PREFIX_IMAGE+"/thumbs";
 }

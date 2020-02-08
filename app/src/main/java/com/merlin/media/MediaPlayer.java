@@ -4,6 +4,7 @@ import android.os.Binder;
 
 import com.merlin.bean.Media;
 import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.Playable;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public abstract class MediaPlayer extends Binder {
     public abstract long getDuration();
     public abstract long getPosition();
     public abstract int getPlayState();
-    public abstract Object getPlaying(Object ...obj);
+    public abstract Playable getPlaying(Object ...obj);
     public abstract List<Media> getQueue();
     public abstract boolean addListener(OnPlayerStatusUpdate update);
     public abstract boolean removeListener(OnPlayerStatusUpdate update);

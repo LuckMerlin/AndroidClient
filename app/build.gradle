@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion= 29
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.merlin.client"
         minSdkVersion 15
-        targetSdkVersion 29
+        targetSdkVersion= 29
         versionCode 1
         versionName "1.0"
 
@@ -27,7 +27,7 @@ android {
         enabled = true
     }
     greendao{
-        schemaVersion 2 // 数据库版本号
+        schemaVersion= 2 // 数据库版本号
         daoPackage 'com.merlin.database'//自动生成的dao的包名，包名默认是entity所在的包；
         targetGenDir 'src/main/java'//生成数据库文件的目录
     }

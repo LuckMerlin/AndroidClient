@@ -22,7 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrameDecodeFinish {
+public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayerStatusUpdate {
     private final List<Media> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
@@ -96,9 +96,14 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
         if (null!=mode){
             mPlayMode=mode;
             //Save mode here
-            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",super.getPlaying(),mode);
+            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",super.getPlaying());
         }
         return mPlayMode;
+    }
+
+    @Override
+    public void onPlayerStatusUpdated(Player player, int status, String note, Playable media, Object data) {
+
     }
 
     @Override
@@ -233,17 +238,6 @@ public class MPlayer extends Player implements OnPlayerStatusUpdate,OnMediaFrame
             return super.pause(stop);
         }
         return false;
-    }
-
-    private void notifyPlayFinish(OnPlayerStatusUpdate update, Media media, boolean succeed, int status, String note){
-        if (null!=update){
-            update.onPlayerStatusUpdated(this,status,note,media,succeed);
-        }
-    }
-
-    @Override
-    public void onPlayerStatusUpdated(Player player, int status, String note, Object media, Object data) {
-
     }
 
     public final boolean isExist(Object ...objs){

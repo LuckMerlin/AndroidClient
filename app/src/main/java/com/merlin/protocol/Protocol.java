@@ -21,7 +21,7 @@ public final class Protocol {
        if (null!=bytes&&bytes.length>=HEAD_LENGTH) {
            byte code =bytes[0];
            byte encoding=bytes[1];
-           Long headLength = Protocol.bytes2Long(bytes, 0, bigOrder, 2, 7);
+           Long headLength = Protocol.bytes2Long(bytes, 0, bigOrder,2, 7);
            Long contentLength = Protocol.bytes2Long(bytes, 0, bigOrder, 7, 12);
            Long msgToLength = Protocol.bytes2Long(bytes,0,bigOrder,12,17);
            Long msgFromLength = Protocol.bytes2Long(bytes,0,bigOrder,17,22);

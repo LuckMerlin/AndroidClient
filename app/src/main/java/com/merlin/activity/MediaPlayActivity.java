@@ -10,12 +10,15 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
 import com.merlin.model.BaseModel;
 import com.merlin.model.MediaPlayModel;
+import com.merlin.model.Model;
+import com.merlin.model.OnPlayerBindChange;
 
-public class MediaPlayActivity extends ModelActivity<MediaPlayModel> implements ServiceConnection{
+public class MediaPlayActivity extends ModelActivity implements ServiceConnection{
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,12 +41,14 @@ public class MediaPlayActivity extends ModelActivity<MediaPlayModel> implements 
     }
 
     private boolean setMediaPlayer(MediaPlayer player){
-         MediaPlayModel model=getModel(MediaPlayModel.class);
-        if (null!=model&&model instanceof MediaPlayModel){
-            return ((MediaPlayModel)model).setMediaPlayer(player);
+         Model model=getModel();
+        if (null!=model&&model instanceof OnPlayerBindChange){
+            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
+            return true;
         }
         return false;
     }
+
 
     @Override
     protected void onDestroy() {

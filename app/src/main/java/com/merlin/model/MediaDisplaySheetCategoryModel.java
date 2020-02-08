@@ -1,7 +1,5 @@
 package com.merlin.model;
 
-import android.view.View;
-
 import com.merlin.adapter.MediaSheetCategoryAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
@@ -9,14 +7,13 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.Sheet;
-import com.merlin.view.OnMultiClick;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaDisplaySheetCategoryModel extends Model implements Label, OnMultiClick {
+public class MediaDisplaySheetCategoryModel extends Model implements Label {
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
         protected boolean onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<Sheet>>> finish) {
@@ -38,18 +35,6 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnMu
     private boolean queryPage(String debug){
         MediaSheetCategoryAdapter adapter=mCategoryAdapter;
         return null!=adapter&&adapter.loadPage(null,debug);
-    }
-
-    @Override
-    public boolean onMultiClick(View view, int clickCount, int resId, Object data) {
-        switch (clickCount){
-            case 0:
-                if (null!=data&&data instanceof Sheet){
-                    toast("点击了 "+((Sheet)data).getTitle());
-                }
-                break;
-        }
-        return false;
     }
 
     public MediaSheetCategoryAdapter getCategoryAdapter() {

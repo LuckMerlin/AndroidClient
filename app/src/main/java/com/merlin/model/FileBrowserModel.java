@@ -1,5 +1,7 @@
 package com.merlin.model;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -39,7 +41,7 @@ import retrofit2.http.POST;
 
 import static com.merlin.api.What.WHAT_SUCCEED;
 
-public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick {
+public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick, Model.OnActivityResume,Model.OnActivityBackPress {
     private final ObservableField<FolderMeta> mCurrent=new ObservableField();
     private final ObservableField<ClientMeta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
@@ -171,7 +173,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick 
 //    @Override
 //    public boolean onItemMultiClick(View view, int clickCount, int sourceId, int position, Object data) {
 //        switch (clickCount){
-//            case 2:
+//            case= 2:
 //
 //                break;
 //            case 3:
@@ -221,13 +223,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick 
 //        }
 //    }
 
-    public boolean onBackPressed(){
-        if (isMultiMode().get()){
-            return chooseAll(false)||multiMode(false);
-        }
-        return browserParent("After back pressed called.");
-    }
-
     private boolean browserParent(String debug){
         FolderMeta current=mCurrent.get();
         String parent=null!=current?current.getParent():null;
@@ -244,7 +239,21 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick 
 //        refreshCurrentPath("While list refresh trigger.");//Browser current path again
 //    }
 
-    public final boolean refreshCurrentPath(String debug){
+
+    @Override
+    public boolean onActivityBackPressed(Activity activity) {
+        if (isMultiMode().get()){
+            return chooseAll(false)||multiMode(false);
+        }
+        return browserParent("After back pressed called.");
+    }
+
+    @Override
+    public void onActivityResume(Activity activity, Intent intent) {
+        refreshCurrentPath("After activity onResume.");
+    }
+
+    private final boolean refreshCurrentPath(String debug){
         FolderMeta meta=mCurrent.get();
         return browserPath(null!=meta?meta.getPath():null,debug);
     }

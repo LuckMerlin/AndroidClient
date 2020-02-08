@@ -19,7 +19,7 @@ public class SheetMediaAdapter extends BaseAdapter<Media, ItemSheetMediaBinding>
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemSheetMediaBinding binding, int position, Media data, @NonNull List<Object> payloads) {
         if (null!=binding){
-            binding.setMedia(data);
+//            binding.setMedia(data);
             binding.setPosition(position);
         }
     }

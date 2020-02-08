@@ -6,9 +6,10 @@
         name="sheet"
         type="com.merlin.bean.Sheet" />
     <import type="android.view.View"/>
+    <import type="com.merlin.view.MultiClicker"/>
 </data>
     <LinearLayout
-        binding:enableMultiClick="@{true}"
+        binding:enableMultiClick="@{MultiClicker.multi(sheet,true)}"
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
         android:orientation="vertical"

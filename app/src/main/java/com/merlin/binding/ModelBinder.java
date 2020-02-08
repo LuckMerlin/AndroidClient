@@ -1,6 +1,8 @@
 package com.merlin.binding;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 
 import androidx.databinding.DataBindingUtil;
@@ -8,6 +10,7 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.classes.Classes;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 
 import java.lang.reflect.Constructor;
@@ -85,6 +88,11 @@ public class ModelBinder {
                                 }
                             }
                                 view.setTag(R.id.modelBind,model);
+                                Context context=model instanceof Model.OnActivityIntentChange?view.getContext():null;
+                                Intent intent=null!=context&&context instanceof Activity?((Activity)context).getIntent():null;
+                                if (null!=intent){
+                                    ((Model.OnActivityIntentChange)model).onActivityIntentChanged((Activity)context,intent);
+                                }
                                 break;
                             } catch (Exception e) {
                                 e.printStackTrace();

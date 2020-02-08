@@ -4,15 +4,17 @@
     <data>
         <variable
             name="vm"
-            type="com.merlin.model.ActivityMediaSheetDetailModel" />
+            type="com.merlin.model.MediaSheetDetailModel" />
         <import type="android.view.View"/>
-        <import type="com.merlin.util.StatusBar"/>
+        <import type="com.merlin.binding.StatusBar"/>
     </data>
 
     <LinearLayout
         android:layout_margin="10dp"
         android:orientation="vertical"
+        binding:createModel="@{null}"
         binding:enableBarPadding="@{0}"
+        binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,null,null)}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <include layout="@layout/status" />
@@ -25,7 +27,7 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:id="@+id/activityMediaSheetDetail_coverIV"
-                    android:src="@drawable/test"
+                    android:src="@{vm.sheet.imageUrl}"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:scaleType="centerCrop"
@@ -41,15 +43,13 @@
                     <TextView
                         android:text="@{vm.sheet.title}"
                         android:textStyle="bold"
-                        android:singleLine="true"
+                        android:maxLines="2"
                         style="@style/titleNormalTextView"/>
+
                     <TextView
-                        android:text="@{vm.sheet.createUser.name}"
-                        android:textColor="@color/textTitleSub"
-                        android:textSize="@dimen/textMedium"
-                        android:singleLine="true"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:text="@{`(`+vm.sheet.size+`)`}"
+                        style="@style/titleNormalTextView"/>
+
                     <TextView
                         android:text="@{vm.sheet.note}"
                         android:textColor="@color/textTitleSub"
@@ -86,13 +86,14 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
         </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            binding:adapter="@{vm.adapter}"
-            binding:layoutManager="@{vm.layoutManager}"
-            binding:itemDecoration="@{vm.itemDecoration}"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                binding:adapter="@{vm.adapter}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 
 </layout>

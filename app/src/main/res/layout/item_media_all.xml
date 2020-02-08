@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="mediaFile"
+            type="com.merlin.bean.FileMeta" />
+        <variable
+            name="position"
+            type="int" />
+        <variable
+            name="playing"
+            type="boolean" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.view.MultiClicker"/>
+    </data>
+
+     <RelativeLayout
+         android:id="@+id/itemMediaAll_rootRL"
+         android:background="@drawable/selector_round_dark_corner_small"
+         binding:enableMultiClick="@{MultiClicker.multi(mediaFile.meta,true)}"
+         android:orientation="horizontal"
+         android:paddingLeft="10dp"
+         android:paddingRight="10dp"
+         android:layout_width="match_parent"
+         android:layout_height="50dp">
+         <TextView
+             android:id="@+id/item_media_positionTV"
+             android:layout_centerVertical="true"
+             android:text="@{Integer.toString(position+1)}"
+             android:layout_alignParentLeft="true"
+             android:layout_marginRight="5dp"
+             android:layout_gravity="center_vertical"
+             style="@style/titleSubNormalTextView"/>
+
+         <LinearLayout
+             android:id="@+id/item_media_rightLL"
+             android:layout_weight="1"
+             android:orientation="horizontal"
+             android:layout_alignParentRight="true"
+             android:duplicateParentState="false"
+             android:gravity="center_vertical|right"
+             android:layout_width="wrap_content"
+             android:paddingRight="10dp"
+             android:layout_height="match_parent">
+             <ImageView
+                 android:id="@+id/itemMediaAll_favoriteIV"
+                 android:src="@drawable/selector_heart"
+                 binding:selected="@{mediaFile.favorite}"
+                 binding:enableMultiClick="@{MultiClicker.multi(mediaFile.meta,true)}"
+                 android:layout_width="25dp"
+                 android:layout_height="25dp"/>
+         </LinearLayout>
+
+         <LinearLayout
+             android:layout_toLeftOf="@id/item_media_rightLL"
+             android:layout_toRightOf="@id/item_media_positionTV"
+             android:layout_width="wrap_content"
+             android:orientation="vertical"
+             android:layout_weight="1"
+             android:layout_centerInParent="true"
+             android:gravity="center_vertical"
+             android:paddingLeft="5dp"
+             android:paddingRight="5dp"
+             android:layout_height="match_parent">
+             <TextView
+                 android:text="@{mediaFile.title??mediaFile.name??``}"
+                 android:singleLine="true"
+                 style="@style/titleNormalTextView"/>
+<!--             <LinearLayout-->
+<!--                 android:layout_width="wrap_content"-->
+<!--                 android:orientation="horizontal"-->
+<!--                 android:layout_marginLeft="10dp"-->
+<!--                 android:visibility="gone"-->
+<!--                 android:layout_height="wrap_content">-->
+<!--                 <TextView-->
+<!--                     android:text="@{mediaFile.meta.durationText}"-->
+<!--                     style="@style/smallNormalTextView" />-->
+<!--                 <TextView-->
+<!--                     android:text="@{` `+mediaFile.meta.artist??``}"-->
+<!--                     style="@style/smallNormalTextView" />-->
+<!--                 <TextView-->
+<!--                     android:text="@{` `+mediaFile.meta.album??``}"-->
+<!--                     style="@style/smallNormalTextView" />-->
+<!--             </LinearLayout>-->
+         </LinearLayout>
+
+     </RelativeLayout>
+</layout>

@@ -1,62 +1,20 @@
 package com.merlin.model;
-
-import android.content.Context;
-import android.view.View;
-import android.widget.SeekBar;
-
-import androidx.databinding.ObservableField;
-
 import com.merlin.activity.OnBackPressed;
-import com.merlin.adapter.BaseAdapter;
-import com.merlin.adapter.MediaListAdapter;
 import com.merlin.api.Label;
 import com.merlin.api.What;
-import com.merlin.client.R;
-import com.merlin.bean.Media;
-import com.merlin.debug.Debug;
-import com.merlin.media.MediaPlayer;
-import com.merlin.media.Mode;
-import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Player;
 import com.merlin.player.Status;
-import com.merlin.view.OnSeekBarChangeListener;
 
-public class MediaPlayModel extends Model implements Label, What,OnBackPressed,Status,BaseAdapter.OnItemClickListener<Media>, BaseModel.OnModelViewClick, OnPlayerStatusUpdate {
-    private final ObservableField<Media> mPlaying=new ObservableField<>();
-    private final ObservableField<Integer> mPlayState=new ObservableField<>();
-    private final ObservableField<Integer> mProgress=new ObservableField<>();
-    private final ObservableField<Long> mDuration=new ObservableField<>();
-    private final ObservableField<Long> mPosition=new ObservableField<>();
-    private final ObservableField<Mode> mPlayMode=new ObservableField<>();
-    private MediaPlayer mMediaPlayer;
-    private final MediaListAdapter mPlayingAdapter;
-
-    private final OnSeekBarChangeListener mSeekListener=new OnSeekBarChangeListener(){
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            MediaPlayer player=fromUser?mMediaPlayer:null;
-            if (null!=player){
-                player.play(null,progress/100.f,null);
-            }
-        }
-    };
+public class MediaPlayModel extends Model implements Label, What,Status {
 
     public MediaPlayModel(){
-        mPlayingAdapter=new MediaListAdapter();
-        mPlayingAdapter.setOnItemClickListener(this);
-        Debug.D(getClass(),"$$$$$$$$$$$$$$44 "+this);
-//        updateStatus();
-//        updateProgress();
-//        updateMode(null);
-//
+//        mPlayingAdapter=new MediaListAdapter();
+//        mPlayingAdapter.setOnItemClickListener(this);
 //        post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
     }
 
-
-    public boolean setMediaPlayer(MediaPlayer player){
-        MediaPlayer curr=mMediaPlayer;
-        mMediaPlayer=player;
-
+//    private boolean setMediaPlayer(MediaPlayer player){
+//        MediaPlayer curr=mMediaPlayer;
+//        mMediaPlayer=player;
 //        if (null!=player){
 //            updateStatus();
 //            updateProgress();
@@ -66,141 +24,79 @@ public class MediaPlayModel extends Model implements Label, What,OnBackPressed,S
 //        }else if (null!=curr){
 //            curr.removeListener(this);
 //        }
-        return true;
-    }
+//        return true;
+//    }
 
-    @Override
-    public void onViewClick(View v, int id,Object obj) {
-        switch (id){
-            case R.id.media_display_play_rootRL:
-//                ViewGroup vg=null!=v&&v instanceof ViewGroup?(ViewGroup)v:null;
-//                int count=null!=vg?vg.getChildCount():0;
-//                View next=null;
-//                for (int i = count-1; i >=0; i--) {
-//                    View child=vg.getChildAt(i);
-//                    if (child.getVisibility() == View.VISIBLE) {
-//                        i = -1;
-//                        next = vg.getChildAt(i >= 0 ? i : count - 1);
-//                        next.setVisibility(View.VISIBLE);
-//                        child.setVisibility(View.GONE);
-//                    }else if(null==next||child!=next){
-//                        child.setVisibility(View.GONE);
-//                    }
-//                }
-                break;
-            case R.id.activityMediaPlay_preIV:
-//                player.pre();
-                break;
-            case R.id.activityMediaPlay_playModeIV:
-//                updateMode(player.playMode(Mode.CHANGE_MODE));
-                break;
-            case R.id.activityMediaPlay_playPauseIV:
-//                player.togglePlayPause(null);
-                break;
-            case R.id.activityMediaPlay_nextIV:
-//                player.next();
-                break;
-            case R.drawable.selector_menu:
-                toast("菜单");
-                break;
-            case R.drawable.ic_back:
-                finishActivity();
-                break;
-            case R.string.cancel:
-                toast("取消");
-                break;
-            default:
-//                toast("哒哒哒哒哒哒多 "+id );
-//                MediaPlayDisplayLayout layout=findViewById(R.id.activityMediaDisplay_layoutMPDL, MediaPlayDisplayLayout.class);
-//                if (null!=layout){
-//                    layout.onViewClick(v,id,obj);
-//                }
-                break;
-
-//            case R.id.title_backIV:
-//                finishAllActivity(MediaPlayActivity.class);
+//    @Override
+//    public void onViewClick(View v, int id,Object obj) {
+//        switch (id){
+//            case R.id.media_display_play_rootRL:
+////                ViewGroup vg=null!=v&&v instanceof ViewGroup?(ViewGroup)v:null;
+////                int count=null!=vg?vg.getChildCount():0;
+////                View next=null;
+////                for (int i = count-1; i >=0; i--) {
+////                    View child=vg.getChildAt(i);
+////                    if (child.getVisibility() == View.VISIBLE) {
+////                        i = -1;
+////                        next = vg.getChildAt(i >= 0 ? i : count - 1);
+////                        next.setVisibility(View.VISIBLE);
+////                        child.setVisibility(View.GONE);
+////                    }else if(null==next||child!=next){
+////                        child.setVisibility(View.GONE);
+////                    }
+////                }
 //                break;
-        }
+//            case R.id.activityMediaPlay_preIV:
+////                player.pre();
+//                break;
+//            case R.id.activityMediaPlay_playModeIV:
+////                updateMode(player.playMode(Mode.CHANGE_MODE));
+//                break;
+//            case R.id.activityMediaPlay_playPauseIV:
+////                player.togglePlayPause(null);
+//                break;
+//            case R.id.activityMediaPlay_nextIV:
+////                player.next();
+//                break;
+//            case R.drawable.selector_menu:
+//                toast("菜单");
+//                break;
+//            case R.drawable.ic_back:
+//                finishActivity();
+//                break;
+//            case R.string.cancel:
+//                toast("取消");
+//                break;
+//            default:
+////                toast("哒哒哒哒哒哒多 "+id );
+////                MediaPlayDisplayLayout layout=findViewById(R.id.activityMediaDisplay_layoutMPDL, MediaPlayDisplayLayout.class);
+////                if (null!=layout){
+////                    layout.onViewClick(v,id,obj);
+////                }
+//                break;
+//
+////            case R.id.title_backIV:
+////                finishAllActivity(MediaPlayActivity.class);
+////                break;
+//        }
+//
+//    }
 
+//
+//    private void updateMode(Mode mode){
+//      MediaPlayer player=null==mode?mMediaPlayer:null;
+//      mode=null!=player?player.playMode(null):mode;
+//      mPlayMode.set(mode);
+//    }
+//
+//    private void  updateStatus(){
+//        MediaPlayer player=mMediaPlayer;
+//        mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOWN);
+////        mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOW);
+//    }
+
+    public ActivityMediaPlayModel getModel(){
+        return ActivityMediaPlayModel.getModelFromChild(this);
     }
 
-
-    private void updateMode(Mode mode){
-      MediaPlayer player=null==mode?mMediaPlayer:null;
-      mode=null!=player?player.playMode(null):mode;
-      mPlayMode.set(mode);
-    }
-
-    private void  updateStatus(){
-        MediaPlayer player=mMediaPlayer;
-        mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOW);
-//        mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOW);
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        
-        return false;
-    }
-
-    @Override
-    public void onPlayerStatusUpdated(Player p, int status, String note, Object media, Object data) {
-        mPlayState.set(status);
-        switch (status){
-            case STATUS_PROGRESS:
-                updateProgress();
-                break;
-            default:
-                updateStatus();
-                break;
-        }
-    }
-
-    private void updateProgress(){
-       MediaPlayer player=mMediaPlayer;
-       long duration=0;long position=0;
-       if (null!=player){
-           duration=player.getDuration();
-           position=player.getPosition();
-       }
-       mDuration.set(duration);
-       mPosition.set(position);
-       mProgress.set((int)(duration>0?position*100.f/duration:0));
-    }
-
-    @Override
-    public void onItemClick(View view, int sourceId, int position, Media data) {
-        MediaPlayer player=null!=data?mMediaPlayer:null;
-        if (null!=player){
-            player.play(data,0,this);
-        }
-    }
-
-    public ObservableField<Integer> getPlayState() {
-        return mPlayState;
-    }
-
-    public MediaListAdapter getPlayingAdapter() {
-        return mPlayingAdapter;
-    }
-
-    public ObservableField<Media> getPlaying() {
-        return mPlaying;
-    }
-
-    public OnSeekBarChangeListener getSeekListener() {
-        return mSeekListener;
-    }
-
-    public ObservableField<Integer> getProgress() {
-        return mProgress;
-    }
-
-    public ObservableField<Long> getDuration() {
-        return mDuration;
-    }
-
-    public ObservableField<Long> getPosition() {
-        return mPosition;
-    }
 }

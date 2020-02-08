@@ -4,7 +4,7 @@
     <data>
         <variable
             name="vm"
-            type="com.merlin.model.MediaDisplayAllMediasModel" />
+            type="com.merlin.model.MediaDisplayAlModel" />
         <import type="com.merlin.util.Layout"/>
     </data>
     <LinearLayout

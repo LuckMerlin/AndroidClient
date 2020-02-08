@@ -1,6 +1,5 @@
 package com.merlin.player;
 
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -22,7 +21,7 @@ public class Player implements Status{
         System.loadLibrary("linqiang");
     }
 
-    public void setOnDecodeFinishListener(OnMediaFrameDecodeFinish listener){
+    public final void setOnDecodeFinishListener(OnMediaFrameDecodeFinish listener){
         WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
         mListener=null;
         if (null!=reference){
@@ -33,7 +32,7 @@ public class Player implements Status{
         }
     }
 
-    public boolean addListener(OnPlayerStatusUpdate listener){
+    public final boolean addListener(OnPlayerStatusUpdate listener){
         WeakHashMap<OnPlayerStatusUpdate,Long> reference=null!=listener?(mUpdate=null!=mUpdate?mUpdate:new WeakHashMap<OnPlayerStatusUpdate, Long>()):null;
         if (null!=reference&&!reference.containsKey(listener)){
             reference.put(listener,System.currentTimeMillis());
@@ -42,7 +41,7 @@ public class Player implements Status{
         return false;
     }
 
-    public boolean removeListener(OnPlayerStatusUpdate listener){
+    public final boolean removeListener(OnPlayerStatusUpdate listener){
         WeakHashMap<OnPlayerStatusUpdate,Long> reference=null!=listener?mUpdate:null;
         return null!=reference&&null!=reference.remove(listener);
     }
@@ -59,19 +58,29 @@ public class Player implements Status{
         return null;
     }
 
-    public synchronized boolean play(final MediaBuffer buffer, OnPlayerStatusUpdate update){
+    public synchronized boolean play(final MediaBuffer buffer,final OnPlayerStatusUpdate update){
         if (null==buffer){
             Debug.W(getClass(),"Can't play media buffer.buffer="+buffer);
-            notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",buffer,null);
+            notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",null);
             return false;
         }
         mInnerUpdate=null!=mInnerUpdate?mInnerUpdate:new OnPlayerStatusUpdate() {
             @Override
-            public void onPlayerStatusUpdated(Player p,final int status,final String note,final Object media,final Object data) {
+            public void onPlayerStatusUpdated(Player p,final int status,final String note,final Playable media,final Object data) {
+                if (Player.this instanceof OnPlayerStatusUpdate){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((OnPlayerStatusUpdate)Player.this).onPlayerStatusUpdated(Player.this,status,note,media,data);
+                        }
+                    });
+                 }
+                if (null!=update){
+                    update.onPlayerStatusUpdated(Player.this,status,note,media,data);
+                }
                 final WeakHashMap<OnPlayerStatusUpdate,Long> reference=mUpdate;
                 if (null!=reference){
-                    Handler handler=mHandler=null!=mHandler?mHandler:new Handler(Looper.getMainLooper());
-                    handler.post(new Runnable() {
+                    runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             synchronized (reference){
@@ -83,9 +92,6 @@ public class Player implements Status{
                                         }
                                     }
                                 }
-                            }
-                            if (Player.this instanceof OnPlayerStatusUpdate){
-                                ((OnPlayerStatusUpdate)Player.this).onPlayerStatusUpdated(Player.this,status,note,media,data);
                             }
                         }
                     });
@@ -170,28 +176,39 @@ public class Player implements Status{
         return mPlaying;
     }
 
-    public boolean destroy(){
-            PlayPending pending=mPlayRunnable;
-            if (null!=pending){
-                pending.mRunning=false;
-            }
-            Debug.D(getClass(),"Destroy player.");
-            boolean succeed=isIdle()||pause(true);
-            WeakHashMap reference=mUpdate;
-            mUpdate=null;
-            if (null!=reference){
-                reference.clear();
-            }
-            mInnerUpdate=null;
-            return succeed;
-    }
-
-    protected final static void notifyPlayStatus(int status,String note,Object media,Object data){
+    protected final static void notifyPlayStatus(int status,String note,Playable media){
         OnPlayerStatusUpdate update=mInnerUpdate;
         if (null!=update){
-            update.onPlayerStatusUpdated(null,status,note,media,data);
+            update.onPlayerStatusUpdated(null,status,note,media,null);
         }
     }
+
+    protected final boolean runOnUiThread(Runnable runnable){
+        if (null!=runnable){
+            Handler handler=mHandler;
+            handler=null==handler?(mHandler=new Handler(Looper.getMainLooper())):handler;
+            return handler.post(runnable);
+        }
+        return false;
+    }
+
+    public boolean destroy(){
+        PlayPending pending=mPlayRunnable;
+        if (null!=pending){
+            pending.mRunning=false;
+        }
+        Debug.D(getClass(),"Destroy player.");
+        boolean succeed=isIdle()||pause(true);
+        WeakHashMap reference=mUpdate;
+        mUpdate=null;
+        mHandler=null;
+        if (null!=reference){
+            reference.clear();
+        }
+        mInnerUpdate=null;
+        return succeed;
+    }
+
 
     private abstract class PlayPending implements Runnable{
         boolean mRunning=false;
@@ -247,8 +264,8 @@ public class Player implements Status{
         }
     }
 
-    private final static void notifyStatusChanged(int status,String note,String path){
-        notifyPlayStatus(status,note,path,null);
+    private final static void onStatusChanged(int status,MediaBuffer buffer,String note){
+        notifyPlayStatus(status,note,null!=buffer?buffer.getPlayable():null);
     }
 
     public native int getPlayerStatus();

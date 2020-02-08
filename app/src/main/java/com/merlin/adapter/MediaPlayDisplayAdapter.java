@@ -13,43 +13,54 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
+import com.merlin.model.ActivityMediaPlayModel;
+import com.merlin.model.Model;
 
-public class MediaPlayDisplayAdapter extends Adapter<Integer> {
+import java.util.HashMap;
+import java.util.WeakHashMap;
+
+public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyclerScrollStateChange{
     private final PagerSnapHelper mHelper=new PagerSnapHelper();
+    private LinearLayoutManager mManager;
+    private final HashMap<Integer,ViewHolder> mPageMap=new HashMap<>();
+    private OnRecyclerScrollStateChange mChange;
 
-    public MediaPlayDisplayAdapter(){
-        super( R.layout.media_display_sheet_category);
+    public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
+        super(R.layout.media_display_play,R.layout.media_display_all_medias,R.layout.media_display_sheet_category);
+        mChange=change;
     }
-//    private final int[] mLayoutIds=new int[]{
-////                R.layout.media_display_all_medias
-////                ,
-////            R.layout.media_display_play
-////                ,
-//            R.layout.media_display_sheet_category
-//    };
 
+    public final ViewHolder getPage(int id) {
+        HashMap<Integer,ViewHolder> map=mPageMap;
+        return null!=map?map.get(id):null;
+    }
+
+    public final View getPageRoot(int id){
+        ViewHolder holder=getPage(id);
+        return null!=holder?holder.itemView:null;
+    }
+
+    public final View getCurrentView(){
+        LinearLayoutManager manager=mManager;
+        return null!=manager?mHelper.findSnapView(manager):null;
+    }
+
+    public final Model getCurrentModel(){
+        View root=getCurrentView();
+        Object object=null!=root?root.getTag(R.id.modelBind):null;
+        return null!=object&&object instanceof Model?((Model)object):null;
+    }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context=parent.getContext();
         final LayoutInflater in=LayoutInflater.from(context);
         ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
-//        if (null!=binding){
-//            if(binding instanceof MediaDisplaySheetsBinding){
-//                MediaDisplaySheetsModel model=new MediaDisplaySheetsModel(context);
-//                model.setRootView(binding.getRoot());
-//                ((MediaDisplaySheetsBinding)binding).setVm(model);
-//            }else if (binding instanceof MediaDisplayAllMediasBinding){
-//                MediaDisplayAllMediasModel model=new MediaDisplayAllMediasModel(context);
-//                model.setRootView(binding.getRoot());
-//                ((MediaDisplayAllMediasBinding)binding).setVm(model);
-//            }else if (binding instanceof MediasAllBinding){
-//
-//            }
-//                binding.setVariable(com.merlin.client.BR.vm,mModel);
-//        }
-        return new ViewHolder(null!=binding?binding.getRoot():null);
+        ViewHolder viewHolder=new ViewHolder(null!=binding?binding.getRoot():null);
+        mPageMap.put(viewType,viewHolder);
+        return viewHolder;
     }
 
     @Override
@@ -63,16 +74,21 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> {
         return null!=data?data:-1;
     }
 
-
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         if (null!=rv){
-            LinearLayoutManager manager=new LinearLayoutManager(rv.getContext(),LinearLayoutManager.HORIZONTAL,false);
-//            mHelper.attachToRecyclerView(rv);
-            return manager;
+            mManager=new LinearLayoutManager(rv.getContext(),LinearLayoutManager.HORIZONTAL,false);
+            mHelper.attachToRecyclerView(rv);
+            return mManager;
         }
         return null;
     }
 
-
+    @Override
+    public void onRecyclerScrollStateChanged(RecyclerView recyclerView, int newState) {
+        OnRecyclerScrollStateChange change=mChange;
+        if (null!=change){
+            change.onRecyclerScrollStateChanged(recyclerView,newState);
+        }
+    }
 }

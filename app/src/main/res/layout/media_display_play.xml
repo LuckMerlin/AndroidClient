@@ -31,7 +31,6 @@
                     android:layout_height="wrap_content">
                     <TextView
                         android:id="@+id/mediaPlayBottomPositionTV"
-                        android:text="@{Time.formatTime(vm.position)}"
                         android:textColor="@color/textTitle"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
@@ -41,7 +40,7 @@
 
                     <TextView
                         android:id="@+id/mediaPlayBottomDurationTV"
-                        android:text="@{Time.formatTime(vm.duration)}"
+                        android:text="@{Time.formatTime(vm.model.playing.duration)}"
                         android:textColor="@color/textTitle"
                         android:layout_alignParentRight="true"
                         android:textSize="@dimen/textSmall"
@@ -52,7 +51,7 @@
                         android:id="@+id/mediaPlayBottomProgressSB"
                         android:layout_toLeftOf="@id/mediaPlayBottomDurationTV"
                         android:layout_toRightOf="@id/mediaPlayBottomPositionTV"
-                        android:progress="@{vm.progress}"
+                        android:progress="@{vm.model.progress}"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="3dp"
                         android:layout_marginRight="3dp"
@@ -88,7 +87,7 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_playPauseIV"
-                        android:src="@{vm.playState==Status.STATUS_PLAYING||vm.playState==Status.STATUS_PROGRESS?@drawable/selector_media_pause:@drawable/selector_media_play}"
+                        android:src="@{vm.model.status==Status.STATUS_PLAYING||vm.model.status==Status.STATUS_PROGRESS?@drawable/selector_media_pause:@drawable/selector_media_play}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeLarge"
                         android:layout_height="@dimen/iconSizeLarge"/>

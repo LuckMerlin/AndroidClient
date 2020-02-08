@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.merlin.bean.Media;
 import com.merlin.debug.Debug;
 import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.Playable;
 import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
@@ -69,7 +70,7 @@ public class MediaPlayService extends Service implements Status {
         @Override
         public int getPlayState() {
             MPlayer player=mPlayer;
-            return null!=player?player.getPlayerStatus(): STATUS_UNKNOW;
+            return null!=player?player.getPlayerStatus(): STATUS_UNKNOWN;
         }
 
         @Override
@@ -85,7 +86,7 @@ public class MediaPlayService extends Service implements Status {
         }
 
         @Override
-        public Object getPlaying(Object... obj) {
+        public Playable getPlaying(Object... obj) {
             MPlayer player=mPlayer;
             return null!=player?player.getPlayingMedia(obj):null;
         }
@@ -112,7 +113,7 @@ public class MediaPlayService extends Service implements Status {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mPlayerBinder;
     }
 
     @Override
