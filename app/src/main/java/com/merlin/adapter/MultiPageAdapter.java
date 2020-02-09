@@ -31,7 +31,7 @@ public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapt
             return false;
         }
         List<T> list=page.getData();
-        return null!=list&&list.size()>0&&(page.getPage()<=0?setData(list):append(true,list));
+        return (page.getPage()<=0?setData(list):append(true,list));
     }
 
     public boolean resetLoad(){

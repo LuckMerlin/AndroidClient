@@ -20,8 +20,9 @@
     <string name="rebooting">重启中……</string>
     <string name="noneSupportOpenFileType">暂时不支持打开此类型文件</string>
     <string name="fileBrowser">文件浏览器</string>
-    <string name="mediaPlayer">媒体播放器</string>
+    <string name="mediaPlayer">播放器</string>
     <string name="fileTransport">文件传输</string>
     <string name="all">全部</string>
+    <string name="sheet">歌单</string>
     <string name="favorite">收藏</string>
 </resources>

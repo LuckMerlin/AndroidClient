@@ -53,6 +53,20 @@ public final class MultiClicker {
         return new MultiClick(arg,coverLister);
     }
 
+    public static class Click extends MultiClick{
+        public final static int SINGLE_TAP=1231;
+        public final static int SINGLE_LONG_CLICK=1232;
+        private final int mType=SINGLE_TAP;
+
+        public Click(Object arg,boolean coverExisted){
+            super(arg,coverExisted);
+        }
+
+    }
+
+    /**
+     * @deprecated
+     */
     public static class MultiClick{
         private Object mArg;
         private boolean mCoverExisted;

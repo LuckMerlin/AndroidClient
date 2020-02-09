@@ -29,6 +29,7 @@ import com.merlin.view.ContextMenuWindow;
 import com.merlin.protocol.Tag;
 import com.merlin.server.Frame;
 import com.merlin.view.OnMultiClick;
+import com.merlin.view.PopupWindow;
 
 
 import java.io.File;
@@ -47,7 +48,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
-    private final ContextMenuWindow mPopupWindow=new ContextMenuWindow(true);
     private final BrowserAdapter mBrowserAdapter=new BrowserAdapter(){
         @Override
         protected boolean onPageLoad(String path, int page, OnApiFinish<Reply<FolderMeta>> finish) {
@@ -58,9 +58,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
                 if (null!=finish){
                   finish.onApiFinish(what,note,data,arg);
               }
-            }).queryFiles(path, page,10);
+            }).queryFiles(path, page,50);
         }
     };
+    private final PopupWindow mPopupWindow=new PopupWindow(true);
 
     private interface Api{
         @POST(Address.PREFIX_FILE_BROWSER)
@@ -92,6 +93,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
                     return true;
                 }
                 break;
+            case 2:
+//                if (null!=data&&data instanceof FileMeta){
+//                    mContextMenu.showAtLocation();
+//                    showFileContextMenu((FileMeta)data);
+//                }
+                break;
         }
         return false;
     }
@@ -119,6 +126,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
         }).rebootClient();
     }
 
+    private void showFileContextMenu(FileMeta meta){
+//        mContextMenu.showAtLocation()
+    }
 //    @Override
 //    public void onItemClick(View view, int sourceId,int position, Object data) {
 //        if (null!=data){
@@ -163,13 +173,13 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
 //        }
 //        return false;
 //    }
-
-    private void onContextMenuClick(View view, int sourceId,int position, ContextMenu menu){
-        if (null!=menu){
-            toast("点击了 "+menu.getTextId());
-        }
-    }
-
+//
+//    private void onContextMenuClick(View view, int sourceId,int position, ContextMenu menu){
+//        if (null!=menu){
+//            toast("点击了 "+menu.getTextId());
+//        }
+//    }
+//
 //    @Override
 //    public boolean onItemMultiClick(View view, int clickCount, int sourceId, int position, Object data) {
 //        switch (clickCount){
@@ -332,28 +342,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
     public ObservableField<FolderMeta> getCurrent() {
         return mCurrent;
     }
-
-    private static class Browsing{
-        private final String mPath;
-        private final int mPage;
-        private Browsing(String path,int page){
-            mPath=path;
-            mPage=page;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (null!=obj&&obj instanceof Browsing){
-                String path=((Browsing)obj).mPath;
-               if (mPage==((Browsing)obj).mPage&&((null==path&&null==mPath)
-                       ||(null!=path&&null!=mPath&&path.equals(mPath)))){
-                   return true;
-               }
-            }
-            return super.equals(obj);
-        }
-    }
-
 
     public BrowserAdapter getBrowserAdapter() {
         return mBrowserAdapter;

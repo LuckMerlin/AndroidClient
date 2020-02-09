@@ -16,19 +16,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
+                binding:textWatcher="@{vm}"
                 android:id="@+id/mediaDisplayAllMedias_searchET"
                 style="@style/editTextNormal"/>
-            <Button
-                android:text="@string/filter"
-                binding:enableModelClick="@{true}"
-                style="@style/buttonStyle"
-                android:layout_marginRight="15dp"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"/>
         </RelativeLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            binding:adapter="@{vm.adapter}"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                binding:adapter="@{vm.adapter}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 </layout>

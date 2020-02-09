@@ -10,6 +10,7 @@
     </data>
     <RelativeLayout
         android:id="@+id/media_display_play_rootRL"
+        binding:createModel="@{true}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <RelativeLayout
@@ -73,6 +74,7 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_playModeIV"
+                        binding:enableMultiClick="@{true}"
                         android:src="@drawable/single_normal"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeSmall"
@@ -80,6 +82,7 @@
 
                     <ImageView
                         android:id="@+id/activityMediaPlay_preIV"
+                        binding:enableMultiClick="@{true}"
                         android:src="@drawable/selector_pre"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeMedium"
@@ -88,6 +91,7 @@
                     <ImageView
                         android:id="@+id/activityMediaPlay_playPauseIV"
                         android:src="@{vm.model.status==Status.STATUS_PLAYING||vm.model.status==Status.STATUS_PROGRESS?@drawable/selector_media_pause:@drawable/selector_media_play}"
+                        binding:enableMultiClick="@{true}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeLarge"
                         android:layout_height="@dimen/iconSizeLarge"/>
@@ -95,6 +99,7 @@
                     <ImageView
                         android:id="@+id/activityMediaPlay_nextIV"
                         android:src="@drawable/selector_next"
+                        binding:enableMultiClick="@{true}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeMedium"
                         android:layout_height="@dimen/iconSizeMedium"/>
@@ -135,7 +140,9 @@
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>
                     <ImageView
-                        android:src="@drawable/add_sort_normal"
+                        android:id="@+id/activityMediaPlay_addToSheetIV"
+                        android:src="@drawable/add_to_sheet_pressed"
+                        binding:enableMultiClick="@{true}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>

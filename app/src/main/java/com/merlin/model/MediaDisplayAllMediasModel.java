@@ -1,5 +1,6 @@
 package com.merlin.model;
 import android.view.View;
+import android.widget.EditText;
 
 import com.merlin.adapter.AllMediasAdapter;
 import com.merlin.api.Address;
@@ -20,18 +21,18 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 
-public final class MediaDisplayAllMediasModel extends Model implements OnMultiClick,Label,What {
+public final class MediaDisplayAllMediasModel extends Model implements OnMultiClick,Label,What,OnTextChange {
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
         protected boolean onPageLoad(String filter, int page, OnApiFinish<Reply<PageData<FileMeta>>> finish) {
-            return null!=call(Api.class,finish).queryAllMedias(filter,page,10);
+            return null!=call(Api.class,finish).queryAllMedias(filter,page,50);
         }
     };
 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<FileMeta>>> queryAllMedias(@Field(LABEL_FORMAT) String format,
+        Observable<Reply<PageData<FileMeta>>> queryAllMedias(@Field(LABEL_NAME) String name,
                                                              @Field(LABEL_PAGE) int page,
                                                              @Field(LABEL_LIMIT) int limit);
         @POST(Address.PREFIX_FILE+"/favorite")
@@ -40,7 +41,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnMultiCl
     }
 
     public MediaDisplayAllMediasModel(){
-        queryAllMedias("While model create.");
+        queryAllMedias("","While model create.");
     }
 
     @Override
@@ -71,30 +72,16 @@ public final class MediaDisplayAllMediasModel extends Model implements OnMultiCl
         }).makeFavorite(path,favorite);
     }
 
-    private boolean queryAllMedias(String debug){
+    private boolean queryAllMedias(String name,String debug){
         AllMediasAdapter adapter=mAdapter;
-       return  null!=adapter&&adapter.loadPage("",debug);
+       return  null!=adapter&&adapter.loadPage(name,debug);
     }
 
-//    @Override
-//    public void onViewClick(View v, int id, Object object) {
-//        switch (id){
-//            case R.id.itemMedia_favoriteIV:
-//                if (null!=v&&null!=object&&object instanceof FileMeta){
-//                    makeFavorite(((FileMeta)object).getMd5(),!v.isSelected());
-//                }
-//                break;
-//
-//        }
-//    }
+    @Override
+    public void onTextChanged(EditText et, CharSequence s, int start, int before, int count) {
+           queryAllMedias(null!=s&&s.length()>0?""+s:"","After text change.");
+    }
 
-//    @Override
-//    public void onItemClick(View view, int sourceId, int position, FileMeta data) {
-//        Media media=null!=data?data.getMeta():null;
-//        if (null!=media&&null!=data&&null!=view){
-//            MediaPlayService.play(view.getContext(),media,0,false);
-//        }
-//    }
 
     public AllMediasAdapter getAdapter() {
         return mAdapter;

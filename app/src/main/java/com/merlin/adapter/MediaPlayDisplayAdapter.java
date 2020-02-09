@@ -13,17 +13,11 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.model.ActivityMediaPlayModel;
 import com.merlin.model.Model;
-
-import java.util.HashMap;
-import java.util.WeakHashMap;
 
 public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyclerScrollStateChange{
     private final PagerSnapHelper mHelper=new PagerSnapHelper();
     private LinearLayoutManager mManager;
-    private final HashMap<Integer,ViewHolder> mPageMap=new HashMap<>();
     private OnRecyclerScrollStateChange mChange;
 
     public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
@@ -31,19 +25,10 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
         mChange=change;
     }
 
-    public final ViewHolder getPage(int id) {
-        HashMap<Integer,ViewHolder> map=mPageMap;
-        return null!=map?map.get(id):null;
-    }
-
-    public final View getPageRoot(int id){
-        ViewHolder holder=getPage(id);
-        return null!=holder?holder.itemView:null;
-    }
-
     public final View getCurrentView(){
         LinearLayoutManager manager=mManager;
-        return null!=manager?mHelper.findSnapView(manager):null;
+        PagerSnapHelper helper=mHelper;
+        return null!=manager&&null!=helper?helper.findSnapView(manager):null;
     }
 
     public final Model getCurrentModel(){
@@ -59,7 +44,6 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
         final LayoutInflater in=LayoutInflater.from(context);
         ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
         ViewHolder viewHolder=new ViewHolder(null!=binding?binding.getRoot():null);
-        mPageMap.put(viewType,viewHolder);
         return viewHolder;
     }
 

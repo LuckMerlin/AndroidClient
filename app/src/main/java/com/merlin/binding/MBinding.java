@@ -32,6 +32,10 @@ import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.model.Callback;
+import com.merlin.model.OnAfterTextChange;
+import com.merlin.model.OnBeforeTextChange;
+import com.merlin.model.OnTextChange;
 import com.merlin.util.Layout;
 import com.merlin.view.MultiClicker;
 import com.merlin.view.MultiPageAdapterRefreshBridge;
@@ -52,15 +56,6 @@ public class MBinding {
                     view.getPaddingRight(),view.getPaddingBottom());
         }
     }
-
-
-    @BindingAdapter("android:imageSrc")
-    public static void setImageId(ImageView view, int resId) {
-        if (null!=view){
-            view.setImageResource(resId);
-        }
-    }
-
 
 
     @BindingAdapter("android:text")
@@ -93,6 +88,35 @@ public class MBinding {
                 .into(view);
     }
 
+    @BindingAdapter(value = {"textWatcher"})
+    public static void setEditTextListener(EditText view, Callback callback) {
+        if (null!=view&&null!=callback){
+            view.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    if (callback instanceof OnBeforeTextChange){
+                        ((OnBeforeTextChange)callback).beforeTextChanged(view,s,start,count,after);
+                    }
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (callback instanceof OnTextChange){
+                            ((OnTextChange)callback).onTextChanged(view,s,start,before,count);
+                        }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (callback instanceof OnAfterTextChange){
+                        ((OnAfterTextChange)callback).onAfterChanged(view,s);
+                    }
+                }
+            });
+        }
+    }
+
+
     @BindingAdapter(value = {"createModel"})
     public static void createModel(View view, Object modeClass) {
         new ModelBinder().bind(view,modeClass);
@@ -105,6 +129,17 @@ public class MBinding {
                 new MultiClicker().attach(view,(Boolean)obj);
             }else if (obj instanceof MultiClicker.MultiClick){
                 new MultiClicker().attach(view,(MultiClicker.MultiClick)obj);
+            }
+        }
+    }
+
+    @BindingAdapter(value = {"enableModelLongClick"})
+    public static void enableModelLongClick(View view, Object object) {
+        if (null!=view&&null!=object){
+            if (object instanceof Boolean){
+                new MultiClicker().attach(view,(Boolean)object);
+            }else if (object instanceof MultiClicker.MultiClick){
+                new MultiClicker().attach(view,(MultiClicker.MultiClick)object);
             }
         }
     }

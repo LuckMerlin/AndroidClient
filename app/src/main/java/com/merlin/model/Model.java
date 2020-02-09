@@ -15,6 +15,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.retrofit.Retrofit;
+import com.merlin.view.PopupWindow;
 import com.merlin.view.StatusBarLayout;
 import com.trello.rxlifecycle2.LifecycleProvider;
 
@@ -26,6 +27,7 @@ import java.util.List;
 public class Model {
     private WeakReference<View> mRootView=null;
     private final static String LABEL_ACTIVITY_DATA="activityData";
+//    private PopupWindow mPopwindow;
     public final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
@@ -234,6 +236,14 @@ public class Model {
             View view=findViewById(R.id.status_root_RL);
             return null!=view&&view instanceof StatusBarLayout &&((StatusBarLayout)view).set(id,position);
         }
+        return false;
+    }
+
+    protected final boolean show(){
+//        mPopwindow=new PopupWindow(true);
+        //            mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+//            mPopupWindow.setOnItemClickListener(this);
+//            mPopupWindow.reset(R.string.rename,R.string.addToFavorite,R.string.detail);x
         return false;
     }
 

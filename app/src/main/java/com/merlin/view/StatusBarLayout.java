@@ -20,6 +20,7 @@ import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.client.databinding.StatusIconBinding;
 import com.merlin.client.databinding.StatusTextBinding;
+import com.merlin.debug.Debug;
 import com.merlin.util.Resource;
 
 public final class StatusBarLayout extends RelativeLayout {
@@ -43,7 +44,7 @@ public final class StatusBarLayout extends RelativeLayout {
             for (int i = 0; i < count; i++) {
                 Object object=null!=(child=getChildAt(i))?child.getTag(R.id.resourceId):null;
                 Object arg=null!=object&&object instanceof IDs?((IDs)object).getArg():null;
-                if (null!=arg&&object instanceof Integer&&(Integer)arg==position){
+                if (null!=arg&&arg instanceof Integer&&(Integer)arg==position){
                     return child;
                 }
             }
@@ -54,6 +55,7 @@ public final class StatusBarLayout extends RelativeLayout {
     public boolean set(Object object, int position){
             Context context=getContext();
             View last= findPosition(position);
+
             if (null!=last){
                 removeView(last);
             }
