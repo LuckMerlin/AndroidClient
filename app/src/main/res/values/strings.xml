@@ -25,4 +25,6 @@
     <string name="all">全部</string>
     <string name="sheet">歌单</string>
     <string name="favorite">收藏</string>
+    <string name="delete">删除</string>
+    <string name="move">移动</string>
 </resources>

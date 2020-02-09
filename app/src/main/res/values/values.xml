@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="resourceId" type="id"/>
+    <item name="viewResource" type="id"/>
     <item name="modelBind" type="id"/>
 </resources>

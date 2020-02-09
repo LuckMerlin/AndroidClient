@@ -5,23 +5,26 @@
         <variable
             name="menu"
             type="com.merlin.view.ContextMenu" />
+        <import type="com.merlin.view.Clicker"/>
     </data>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:gravity="center"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <TextView
-            android:layout_width="wrap_content"
+            android:background="@drawable/selector_round_dark_corner_small"
+            android:layout_marginBottom="1dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:padding="10dp"
-            binding:enableModelClick="@{true}"
+            binding:enableMultiClick="@{MultiClicker.multi(menu.arg)}"
             android:minWidth="150dp"
             android:minHeight="20dp"
             android:text="@{menu.textId}"
             android:textSize="@dimen/textTitle"
             android:textColor="@color/textTitle"
             android:textStyle="bold"/>
-    </RelativeLayout>
+    </LinearLayout>
 
 </layout>

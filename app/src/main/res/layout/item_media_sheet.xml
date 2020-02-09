@@ -6,7 +6,7 @@
         name="sheet"
         type="com.merlin.bean.Sheet" />
     <import type="android.view.View"/>
-    <import type="com.merlin.view.MultiClicker"/>
+    <import type="com.merlin.view.Clicker"/>
 </data>
     <LinearLayout
         binding:enableMultiClick="@{MultiClicker.multi(sheet,true)}"

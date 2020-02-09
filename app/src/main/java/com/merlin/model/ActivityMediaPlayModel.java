@@ -10,22 +10,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
-import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.bean.Media;
 import com.merlin.bean.Sheet;
-import com.merlin.binding.MBinding;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayer;
-import com.merlin.media.Mode;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 import com.merlin.view.ContextMenuWindow;
-import com.merlin.view.OnMultiClick;
+import com.merlin.view.OnTapClick;
 
-public class ActivityMediaPlayModel extends Model implements OnMultiClick,OnPlayerBindChange,OnPlayerStatusUpdate {
+public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayerBindChange,OnPlayerStatusUpdate {
     private MediaPlayer mPlayer;
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Media> mPlaying=new ObservableField<>();

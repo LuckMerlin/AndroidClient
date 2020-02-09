@@ -13,7 +13,7 @@ import com.merlin.bean.FileMeta;
 import com.merlin.bean.Media;
 import com.merlin.client.R;
 import com.merlin.media.MediaPlayService;
-import com.merlin.view.OnMultiClick;
+import com.merlin.view.OnTapClick;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -21,7 +21,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 
-public final class MediaDisplayAllMediasModel extends Model implements OnMultiClick,Label,What,OnTextChange {
+public final class MediaDisplayAllMediasModel extends Model implements OnTapClick,Label,What,OnTextChange {
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
         protected boolean onPageLoad(String filter, int page, OnApiFinish<Reply<PageData<FileMeta>>> finish) {

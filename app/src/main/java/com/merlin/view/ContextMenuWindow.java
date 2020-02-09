@@ -43,7 +43,7 @@ public class ContextMenuWindow extends PopupWindow{
         if (null!=textResIds&&textResIds.length>0){
             List<ContextMenu> list=new ArrayList<>();
             for (int id:textResIds){
-                list.add(new ContextMenu(id));
+                list.add(new ContextMenu(id,null));
             }
             if (null!=list&&list.size()>0) {
                 add(list.toArray(new ContextMenu[list.size()]));
@@ -55,7 +55,7 @@ public class ContextMenuWindow extends PopupWindow{
         if (null!=textResIds&&textResIds.length>0){
             List<ContextMenu> list=new ArrayList<>();
             for (int id:textResIds){
-                list.add(new ContextMenu(id));
+                list.add(new ContextMenu(id,null));
             }
             ContextAdapter adapter=getAdapter();
             adapter.reset(list);

@@ -1,8 +1,6 @@
 package com.merlin.binding;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -37,7 +35,7 @@ import com.merlin.model.OnAfterTextChange;
 import com.merlin.model.OnBeforeTextChange;
 import com.merlin.model.OnTextChange;
 import com.merlin.util.Layout;
-import com.merlin.view.MultiClicker;
+import com.merlin.view.Clicker;
 import com.merlin.view.MultiPageAdapterRefreshBridge;
 import com.merlin.view.OnTextChanged;
 
@@ -59,9 +57,15 @@ public class MBinding {
 
 
     @BindingAdapter("android:text")
-    public static void setText(TextView view, int resId) {
-        if (null!=view){
-            view.setText(resId);
+    public static void setText(TextView view, Object resId) {
+        if (null!=view) {
+            resId = null == resId ? "" : resId;
+            if (resId instanceof String) {
+                view.setText((String)resId);
+            } else if (resId instanceof Integer) {
+                view.setText((Integer)resId);
+                view.setTag(R.id.resourceId,new IDs((Integer)resId,null));
+            }
         }
     }
 
@@ -126,9 +130,9 @@ public class MBinding {
     public static void enableMultiClick(View view, Object obj) {
         if (null!=view&&null!=obj){
             if (obj instanceof Boolean){
-                new MultiClicker().attach(view,(Boolean)obj);
-            }else if (obj instanceof MultiClicker.MultiClick){
-                new MultiClicker().attach(view,(MultiClicker.MultiClick)obj);
+                new Clicker().attach(view,(Boolean)obj);
+            }else if (obj instanceof Clicker.MultiClick){
+                new Clicker().attach(view,(Clicker.MultiClick)obj);
             }
         }
     }
@@ -137,9 +141,9 @@ public class MBinding {
     public static void enableModelLongClick(View view, Object object) {
         if (null!=view&&null!=object){
             if (object instanceof Boolean){
-                new MultiClicker().attach(view,(Boolean)object);
-            }else if (object instanceof MultiClicker.MultiClick){
-                new MultiClicker().attach(view,(MultiClicker.MultiClick)object);
+                new Clicker().attach(view,(Boolean)object);
+            }else if (object instanceof Clicker.MultiClick){
+                new Clicker().attach(view,(Clicker.MultiClick)object);
             }
         }
     }

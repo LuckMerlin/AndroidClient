@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="file"
+            type="com.merlin.bean.FileMeta" />
+        <import type="com.merlin.view.ContextMenu"/>
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(@string/delete,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(@string/move,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(@string/detail,file)}"/>
+    </LinearLayout>
+</layout>

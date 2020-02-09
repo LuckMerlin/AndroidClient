@@ -39,12 +39,12 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
             itemBinding.setIsMultiChoose(multiChoose);
             itemBinding.setMeta(data);
             itemBinding.setPosition(position);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            int count=data.getChildCount();
-            String sub=data.isDirectory()?"("+(count<=0?0:count)+")":" "+data.getExtension();
-            sub+=" "+ FileSize.formatSizeText(data.getLength());
-            sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
-            sub+=" "+data.getPermissions();
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            int count=data.getChildCount();
+//            String sub=data.isDirectory()?"("+(count<=0?0:count)+")":" "+data.getExtension();
+//            sub+=" "+ FileSize.formatSizeText(data.getLength());
+//            sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
+//            sub+=" "+data.getPermissions();
 //            setText(itemBinding.itemListFileSub,sub,null);
         }
     }

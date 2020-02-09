@@ -1,14 +1,35 @@
 package com.merlin.view;
 
-public class ContextMenu {
-    private final int mTextId;
+public final class ContextMenu {
+    private final Object mText;
+    private final Object mArg;
 
-    public ContextMenu(int textId){
-        mTextId=textId;
+    public ContextMenu(Object text,Object arg){
+        mText=text;
+        mArg=arg;
     }
 
-    public int getTextId() {
-        return mTextId;
+    /**
+     * @deprecated
+     */
+    public Object getTextId() {
+        return getText();
+    }
+
+    public Object getText() {
+        return mText;
+    }
+
+    public Object getArg() {
+        return mArg;
+    }
+
+    public static ContextMenu create(Object text){
+        return create(text,null);
+    }
+
+    public static ContextMenu create(Object text,Object arg){
+        return new ContextMenu(text,arg);
     }
 
 }

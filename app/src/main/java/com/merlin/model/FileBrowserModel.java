@@ -2,37 +2,31 @@ package com.merlin.model;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderMeta;
-import com.merlin.client.Client;
 import com.merlin.client.R;
+import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
-import com.merlin.dialog.SearchDialog;
 import com.merlin.media.MediaPlayService;
-import com.merlin.oksocket.OnFrameReceive;
-import com.merlin.view.ContextMenu;
-import com.merlin.view.ContextMenuWindow;
 import com.merlin.protocol.Tag;
-import com.merlin.server.Frame;
-import com.merlin.view.OnMultiClick;
+import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
 
-import java.io.File;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -42,7 +36,7 @@ import retrofit2.http.POST;
 
 import static com.merlin.api.What.WHAT_SUCCEED;
 
-public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick, Model.OnActivityResume,Model.OnActivityBackPress {
+public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, Model.OnActivityResume,Model.OnActivityBackPress {
     private final ObservableField<FolderMeta> mCurrent=new ObservableField();
     private final ObservableField<ClientMeta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
@@ -61,6 +55,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
             }).queryFiles(path, page,50);
         }
     };
+
     private final PopupWindow mPopupWindow=new PopupWindow(true);
 
     private interface Api{
@@ -86,18 +81,24 @@ public class FileBrowserModel extends Model implements Label, Tag, OnMultiClick,
 
     @Override
     public boolean onMultiClick(View view, int clickCount, int resId, Object data) {
+       toast("ss "+resId+" "+data);
         switch (clickCount){
             case 1:
-                if (null!=data&&data instanceof FileMeta){
-                    onFileMetaClick((FileMeta)data);
-                    return true;
-                }
-                break;
-            case 2:
 //                if (null!=data&&data instanceof FileMeta){
-//                    mContextMenu.showAtLocation();
-//                    showFileContextMenu((FileMeta)data);
+//                    onFileMetaClick((FileMeta)data);
+//                    return true;
 //                }
+//                break;
+//            case 2:
+                PopupWindow popupWindow=mPopupWindow;
+                if (null!=popupWindow&&null!=data&&data instanceof FileMeta){
+                    FileContextMenuBinding binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
+                    if (null!=binding){
+                        binding.setFile((FileMeta)data);
+                        popupWindow.setContentView(binding.getRoot());
+                        popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+                    }
+                }
                 break;
         }
         return false;

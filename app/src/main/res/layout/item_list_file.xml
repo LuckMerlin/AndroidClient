@@ -15,7 +15,7 @@
             name="position"
             type="int" />
         <import type="android.view.View"/>
-        <import type="com.merlin.view.MultiClicker"/>
+        <import type="com.merlin.view.Clicker"/>
     </data>
     <RelativeLayout
         binding:enableMultiClick="@{MultiClicker.multi(meta,true)}"
