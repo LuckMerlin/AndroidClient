@@ -50,7 +50,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
     });
 
     @Override
-    public boolean onMultiClick(View view, int clickCount, int resId, Object data) {
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
             case 1:
                 if (null!=data&&data instanceof Sheet){

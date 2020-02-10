@@ -45,7 +45,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     }
 
     @Override
-    public boolean onMultiClick(View view, int clickCount, int resId, Object data) {
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             case R.id.itemMediaAll_favoriteIV:
                 return null!=data&&null!=view&&data instanceof Media&&

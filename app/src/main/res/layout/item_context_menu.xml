@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:padding="10dp"
-            binding:enableMultiClick="@{MultiClicker.multi(menu.arg)}"
+            binding:enableClick="@{Clicker.click(Clicker.SINGLE_TAP_MASK|Clicker.SINGLE_LONG_CLICK_MASK,menu.arg,true)}"
             android:minWidth="150dp"
             android:minHeight="20dp"
             android:text="@{menu.textId}"

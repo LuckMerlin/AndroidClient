@@ -18,7 +18,7 @@
      <RelativeLayout
          android:id="@+id/itemMediaAll_rootRL"
          android:background="@drawable/selector_round_dark_corner_small"
-         binding:enableMultiClick="@{MultiClicker.multi(mediaFile.meta,true)}"
+         binding:enableMultiClick="@{Clicker.click(mediaFile.meta,true)}"
          android:orientation="horizontal"
          android:paddingLeft="10dp"
          android:paddingRight="10dp"
@@ -47,7 +47,7 @@
                  android:id="@+id/itemMediaAll_favoriteIV"
                  android:src="@drawable/selector_heart"
                  binding:selected="@{mediaFile.favorite}"
-                 binding:enableMultiClick="@{MultiClicker.multi(mediaFile.meta,true)}"
+                 binding:enableMultiClick="@{Clicker.click(mediaFile.meta,true)}"
                  android:layout_width="25dp"
                  android:layout_height="25dp"/>
          </LinearLayout>

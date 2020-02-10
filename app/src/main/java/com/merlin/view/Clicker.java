@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
@@ -13,6 +14,7 @@ import androidx.databinding.ViewDataBinding;
 import com.merlin.binding.IDs;
 import com.merlin.classes.Classes;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.media.Mode;
 import com.merlin.model.Model;
 
@@ -22,6 +24,8 @@ import java.lang.reflect.Method;
 
 public final class Clicker {
     private Object mListener;
+    public final static int SINGLE_TAP_MASK=0x01;//0001
+    public final static int SINGLE_LONG_CLICK_MASK=0x02;//0010
 
     public Clicker(){
         this(null,true);
@@ -49,27 +53,59 @@ public final class Clicker {
     }
 
     public static Click click(Object arg,Integer resourceId){
-        return click(arg,resourceId,false);
+        return click(SINGLE_TAP_MASK,arg,resourceId,false);
     }
 
     public static Click click(Object arg,boolean coverLister){
-        return click(arg,null,coverLister);
+        return click(SINGLE_TAP_MASK,arg,coverLister);
     }
 
-    public static Click click(Object arg,Integer resourceId,boolean coverLister){
-        return new Click(arg,resourceId,coverLister);
+    public static Click click(int type,Object arg,boolean coverLister){
+        return click(type,arg,null,coverLister);
     }
+
+    public static Click click(int type,Object arg,Integer resourceId,boolean coverLister){
+        return new Click(type,arg,resourceId,coverLister);
+    }
+
+    public static Click longClick(Object arg){
+        return longClick(arg,false);
+    }
+
+    public static Click longClick(Object arg,Integer resourceId){
+        return longClick(arg,resourceId,false);
+    }
+
+    public static Click longClick(Object arg,boolean coverLister){
+        return longClick(arg,null,coverLister);
+    }
+
+    public static Click longClick(Object arg,Integer resourceId,boolean coverLister){
+        return new Click(SINGLE_LONG_CLICK_MASK,arg,resourceId,coverLister);
+    }
+
+    public static boolean setInterrupterTag(View view,Object object){
+        if (null!=view){
+            object=null!=object?new WeakReference<>(object):null;
+            view.setTag(R.id.interruptClick,object);
+            return true;
+        }
+        return false;
+    }
+
 
     public static class Click{
-        public final static int SINGLE_TAP=1231;
-        public final static int SINGLE_LONG_CLICK=1232;
-        private final int mType=SINGLE_TAP;
+        private final int mType;
         private Object mArg;
         private boolean mCoverExisted;
         private Integer mResourceId;
 
-
         public Click(Object arg,Integer resourceId,boolean coverExisted){
+            this(SINGLE_TAP_MASK,arg,resourceId,coverExisted);
+        }
+
+        public Click(int type,Object arg,Integer resourceId,boolean coverExisted){
+            mType=type;
             mArg=arg;
             mResourceId=resourceId;
             mCoverExisted=coverExisted;
@@ -98,117 +134,89 @@ public final class Clicker {
             resourceId=null!=resourceId?resourceId:findViewResourceId(root,null);
             final Res res=new Res(resourceId,click.mArg);
             boolean cover= click.mCoverExisted;
-            switch (click.mType){
-                case Click.SINGLE_LONG_CLICK:
+            if ((click.mType&SINGLE_LONG_CLICK_MASK)>0){
 //                    if (cover){
-                        root.setOnLongClickListener(((v)->{
-                            return dispatchClickToModel(root,root, ( r, v, model, binding)->{
-                                return null!=model&&model instanceof OnLO&&((OnTapClick)model).onTapClick(view,count,resId,arg);
-                            });
-                        });
+                root.setTag(R.id.viewResource,res);
+                root.setOnLongClickListener(((v)->{
+                    Object object=root.getTag(R.id.viewResource);
+                    Object arg=null;
+                    Integer resId;
+                    if (null!=object&&object instanceof Res){
+                        resId=((Res)object).getResourceId();
+                        arg=((Res)object).getArg();
+                    }else{
+                        resId=root.getId();
+                    }
+                    final int resIdFinal=null==resId?root.getId():resId;
+                    final Object argFinal=arg;
+                    final boolean interrupted=dispatchClickToModel(root,root, ( r, vi, model, binding)->{
+                        return null!=model&&model instanceof OnLongClick&&((OnLongClick)model)
+                                .onLongClick(root,1,resIdFinal,argFinal);
+                    });
+                    Context context=null!=root?root.getContext():null;
+                    if (null!=context&&context instanceof OnLongClick){
+                        return ((OnLongClick)context).onLongClick(root,1,resIdFinal,argFinal);
+                    }
+                    return interrupted;
+                }));
+
 //                    }
-                    break;
-                case Click.SINGLE_TAP:
-                    if (cover||!root.hasOnClickListeners()){
-                        final int maxInterval=200;
-                        final MultiClickRunnable multiRunnable=new MultiClickRunnable(){
-                            @Override
-                            public void run() {
-                                int count=mClickCount;
-                                mClickCount=0;//Reset
-                                Object object=root.getTag(R.id.viewResource);
-                                Object arg=null;
-                                Integer resId;
-                                if (null!=object&&object instanceof Res){
-                                    resId=((Res)object).getResourceId();
-                                    arg=((Res)object).getArg();
-                                }else{
-                                    resId=root.getId();
-                                }
-                                final int resourceId=resId=null==resId?root.getId():resId;
-                                OnTapClick listener=getListener();
-                                if (null==listener||!listener.onTapClick(root,count,resId,object)){ //Try dispatch to model
-                                    final boolean interrupted= dispatchClickToModel(root, root, ( view, root, model, binding)->{
-                                        return null!=model&&model instanceof OnTapClick&&((OnTapClick)model).onTapClick(view,count,resourceId,arg);
-                                    });
-                                    if (!interrupted){
-                                        Context context=root.getContext();
-                                        if (null!=context&&context instanceof OnTapClick){
-                                            ((OnTapClick)context).onTapClick(root,count,resId,arg);
-                                        }
+            }
+            if ((click.mType&SINGLE_TAP_MASK)>0){
+                if (cover||!root.hasOnClickListeners()){
+                    final int maxInterval=200;
+                    final MultiClickRunnable multiRunnable=new MultiClickRunnable(){
+                        @Override
+                        public void run() {
+                            final int count=mClickCount;
+                            mClickCount=0;//Reset
+                            Object object=root.getTag(R.id.viewResource);
+                            Object arg=null;
+                            Integer resId;
+                            if (null!=object&&object instanceof Res){
+                                resId=((Res)object).getResourceId();
+                                arg=((Res)object).getArg();
+                            }else{
+                                resId=root.getId();
+                            }
+                            final int resourceIdFinal=resId=null==resId?root.getId():resId;
+                            final Object argFinal=arg;
+                            OnTapClick listener=getListener();
+                            if (null==listener||!listener.onTapClick(root,count,resId,object)){ //Try dispatch to model
+                                final boolean interrupted= dispatchClickToModel(root, root, ( view, rt, model, binding)->{
+                                     return null!=model&&model instanceof OnTapClick&&((OnTapClick)model).
+                                            onTapClick(root,count,resourceIdFinal,argFinal);
+                                });
+                                if (!interrupted){
+                                    Context context=root.getContext();
+                                    if (null!=context&&context instanceof OnTapClick){
+                                        ((OnTapClick)context).onTapClick(root,count,resourceIdFinal,argFinal);
                                     }
                                 }
                             }
-                        };
-                        root.setTag(R.id.viewResource,res);
-                        root.setOnClickListener((view)->{
-                            view.removeCallbacks(multiRunnable);
-                            multiRunnable.mView=view;
-                            if (multiRunnable.mClickCount==0){
-                                multiRunnable.mFirstTime=System.currentTimeMillis();
-                            }
-                            multiRunnable.mClickCount+=1;
-                            view.postDelayed(multiRunnable,maxInterval);
-                        });
-                    }
-                    break;
+                        }
+                    };
+                    root.setTag(R.id.viewResource,res);
+                    root.setOnClickListener((view)->{
+                        view.removeCallbacks(multiRunnable);
+                        multiRunnable.mView=view;
+                        if (multiRunnable.mClickCount==0){
+                            multiRunnable.mFirstTime=System.currentTimeMillis();
+                        }
+                        multiRunnable.mClickCount+=1;
+                        view.postDelayed(multiRunnable,maxInterval);
+                    });
+                    return true;
+                }
             }
 //        return null!=root&&null!=click&&attach(root,new IDs(findViewResId(root,
 //                null==click.mResourceId?root.getId():click.mResourceId),click.mArg),click.mCoverExisted);
         return false;
     }
 
-    private boolean attach(View root, IDs arg, boolean cover){
-        if (null!=root){
-
-        }
-        if (null!=root&&(cover||!root.hasOnClickListeners())){
-            final int maxInterval=400;
-            final MultiClickRunnable multiRunnable=new MultiClickRunnable(){
-                @Override
-                public void run() {
-                    int count=mClickCount;
-                    mClickCount=0;//Reset
-                    Object object=root.getTag(R.id.resourceId);
-                    int resId;
-                    if (null!=object&&object instanceof IDs){
-                        resId=((IDs)object).getResourceId();
-                        object=((IDs)object).getArg();
-                    }else{
-                        resId=root.getId();
-                    }
-                    OnTapClick listener=getListener();
-                    if (null==listener||!listener.onTapClick(root,count,resId,object)){ //Try dispatch to model
-                       final boolean interrupted= dispatchClickToModel(root, root, ( view, root, model, binding)->{
-                           return null!=model&&model instanceof OnTapClick&&((OnTapClick)model).onTapClick(view,count,resId,arg);
-                       });
-                        if (!interrupted){
-                            Context context=root.getContext();
-                            if (null!=context&&context instanceof OnTapClick){
-                                ((OnTapClick)context).onTapClick(root,count,resId,arg);
-                            }
-                        }
-                    }
-                }
-            };
-            root.setTag(R.id.resourceId,arg);
-            root.setOnClickListener((view)->{
-                view.removeCallbacks(multiRunnable);
-                multiRunnable.mView=view;
-                if (multiRunnable.mClickCount==0){
-                    multiRunnable.mFirstTime=System.currentTimeMillis();
-                }
-                multiRunnable.mClickCount+=1;
-                view.postDelayed(multiRunnable,maxInterval);
-            });
-            return true;
-        }
-        return false;
-    }
-
     private boolean dispatchClickToModel(View view,View root,Dispatcher dispatcher){
-        if (null!=root&&null!=dispatcher){
-            ViewDataBinding binding=DataBindingUtil.getBinding(root);
+        if (null!=view&&null!=dispatcher){
+            ViewDataBinding binding=DataBindingUtil.getBinding(view);
             Class cls=null!=binding?binding.getClass().getSuperclass():null;
             Method[] methods=null!=cls?cls.getDeclaredMethods():null;
             boolean interrupted=false;
@@ -221,7 +229,7 @@ public final class Clicker {
                             method.setAccessible(true);
                             try {
                                 Object data=method.invoke(binding);
-                                if (null!=data&&data instanceof Mode&&dispatcher.onDispatch(view,root,(Model)data,binding)){
+                                if (null!=data&&data instanceof Model&&dispatcher.onDispatch(view,root,(Model)data,binding)){
                                     interrupted=true;
                                     break;
                                 }
@@ -232,9 +240,20 @@ public final class Clicker {
                     }
                 }
             }
-            ViewParent parent=interrupted?null:root.getParent();
-            if (null!=parent&&parent instanceof View &&(parent!=root)){
-                return dispatchClickToModel(view,(View)parent,dispatcher);
+            ViewParent parent=interrupted?null:view.getParent();
+            if (null!=parent&&parent instanceof View &&(parent!=view)){
+                Object interrupter=((View)parent).getTag(R.id.interruptClick);
+                if (null!=interrupter){
+                    interrupter=interrupter instanceof WeakReference?((WeakReference)interrupter).get():null;
+                    Debug.D(getClass(),"DDDDinterrupterDDDd "+interrupter);
+                    if (interrupter instanceof Model){
+                        return dispatcher.onDispatch(view,root,(Model)interrupter,binding);
+                    }else if (interrupter instanceof View){
+                        return dispatchClickToModel((View)interrupter,root,dispatcher);
+                    }
+                }
+                Debug.D(getClass(),"DDDparentDDDDd "+parent);
+                return dispatchClickToModel((View)parent,root,dispatcher);
             }
             return interrupted;
         }
@@ -251,10 +270,9 @@ public final class Clicker {
         int mClickCount;
     }
 
-
     private Integer findViewResourceId(View view,Integer def){
         if (null!=view){
-            int resourceId= Resources.ID_NULL;
+            Integer resourceId=null;
             try {
                 if (view instanceof TextView&&null!=((TextView)view).getText()){
                     Field field=TextView.class.getDeclaredField("mTextId");
@@ -265,12 +283,12 @@ public final class Clicker {
                     Field field=ImageView.class.getDeclaredField("mResource");
                     field.setAccessible(true);
                     Object object=field.get(view);
-                    resourceId=null!=object&&object instanceof Integer?(Integer)object:def;
+                    resourceId=null!=object&&object instanceof Integer?(Integer)object:resourceId;
                 }
             }catch (Exception e){
                 //Do nothing
             }
-            return resourceId!=Resources.ID_NULL?resourceId:def;
+            return null!=resourceId&&resourceId!=Resources.ID_NULL?resourceId:def;
         }
         return null;
     }

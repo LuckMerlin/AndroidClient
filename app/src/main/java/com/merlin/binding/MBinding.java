@@ -121,6 +121,7 @@ public class MBinding {
     }
 
 
+
     @BindingAdapter(value = {"createModel"})
     public static void createModel(View view, Object modeClass) {
         new ModelBinder().bind(view,modeClass);
@@ -128,22 +129,16 @@ public class MBinding {
 
     @BindingAdapter(value = {"enableMultiClick"})
     public static void enableMultiClick(View view, Object obj) {
+
+    }
+
+    @BindingAdapter(value = {"enableClick"})
+    public static void enableClick(View view, Object obj) {
         if (null!=view&&null!=obj){
             if (obj instanceof Boolean){
                 new Clicker().attach(view,(Boolean)obj);
-            }else if (obj instanceof Clicker.MultiClick){
-                new Clicker().attach(view,(Clicker.MultiClick)obj);
-            }
-        }
-    }
-
-    @BindingAdapter(value = {"enableModelLongClick"})
-    public static void enableModelLongClick(View view, Object object) {
-        if (null!=view&&null!=object){
-            if (object instanceof Boolean){
-                new Clicker().attach(view,(Boolean)object);
-            }else if (object instanceof Clicker.MultiClick){
-                new Clicker().attach(view,(Clicker.MultiClick)object);
+            }else if (obj instanceof Clicker.Click){
+                new Clicker().attach(view,(Clicker.Click)obj);
             }
         }
     }

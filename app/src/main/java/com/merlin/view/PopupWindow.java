@@ -46,6 +46,10 @@ public class PopupWindow {
     public boolean showAtLocation(View parent, int gravity, int x, int y){
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&null!=parent) {
+            View contentView=getContentView();
+            if (null!=contentView){
+                Clicker.setInterrupterTag(contentView,parent);
+            }
             window.showAtLocation(parent, gravity, x, y);
             return true;
         }

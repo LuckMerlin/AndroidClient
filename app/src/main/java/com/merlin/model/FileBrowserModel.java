@@ -23,6 +23,7 @@ import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.protocol.Tag;
+import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
@@ -36,7 +37,7 @@ import retrofit2.http.POST;
 
 import static com.merlin.api.What.WHAT_SUCCEED;
 
-public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, Model.OnActivityResume,Model.OnActivityBackPress {
+public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
     private final ObservableField<FolderMeta> mCurrent=new ObservableField();
     private final ObservableField<ClientMeta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
@@ -80,8 +81,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
     }
 
     @Override
-    public boolean onMultiClick(View view, int clickCount, int resId, Object data) {
-       toast("ss "+resId+" "+data);
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        Debug.D(getClass(),"AAAAAAA "+clickCount+" "+data);
         switch (clickCount){
             case 1:
 //                if (null!=data&&data instanceof FileMeta){
@@ -97,10 +98,17 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
                         binding.setFile((FileMeta)data);
                         popupWindow.setContentView(binding.getRoot());
                         popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
+                        return true;
                     }
                 }
                 break;
         }
+        return false;
+    }
+
+    @Override
+    public boolean onLongClick(View view, int clickCount, int resId, Object data) {
+        Debug.D(getClass(),"BBBBBBB "+clickCount+" "+data);
         return false;
     }
 

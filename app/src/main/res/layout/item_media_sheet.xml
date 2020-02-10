@@ -9,7 +9,7 @@
     <import type="com.merlin.view.Clicker"/>
 </data>
     <LinearLayout
-        binding:enableMultiClick="@{MultiClicker.multi(sheet,true)}"
+        binding:enableMultiClick="@{Clicker.click(sheet,true)}"
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
         android:orientation="vertical"

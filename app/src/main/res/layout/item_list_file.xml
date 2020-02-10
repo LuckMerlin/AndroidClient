@@ -18,7 +18,7 @@
         <import type="com.merlin.view.Clicker"/>
     </data>
     <RelativeLayout
-        binding:enableMultiClick="@{MultiClicker.multi(meta,true)}"
+        binding:enableClick="@{Clicker.click(meta,true)}"
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
         android:clickable="true"
