@@ -22,6 +22,7 @@ import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.MediaPlayService;
 import com.merlin.protocol.Tag;
 import com.merlin.view.OnLongClick;
@@ -71,6 +72,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         @POST(Address.PREFIX_FILE+"/delete")
         @FormUrlEncoded
         Observable<Reply<ApiList<String>>> deleteFile(@Field(LABEL_PATH) List<String> paths);
+
+        @POST(Address.PREFIX_FILE+"/rename")
+        @FormUrlEncoded
+        Observable<Reply<String>> renameFile(@Field(LABEL_PATH) String path,@Field(LABEL_NAME) String name);
+
 
         @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
@@ -154,8 +160,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         if (null!=file) {
             switch (resId) {
                 case R.string.delete:
-                    deleteFile(file);
-                    return true;
+                    return deleteFile(file);
+                case R.string.rename:
+                    return renameFile(file);
                 default:
                     if (isMultiMode().get()) {
                         multiChoose(file);
@@ -177,6 +184,31 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     break;
             }
         }
+        return false;
+    }
+
+    private boolean renameFile(FileMeta meta){
+        String path=null!=meta?meta.getPath():null;
+        if (null!=path&&path.length()>0){
+            new SingleInputDialog(getContext()).show(R.string.rename, new SingleInputDialog.OnSingleInputCommit() {
+                @Override
+
+                public void onSingleInputCommit(SingleInputDialog dlg, String text) {
+                    Debug.D(getClass(),"SSSSSSSSSS "+text);
+                }
+            });
+            Debug.D(getClass(),"SSSSSSSSSSsss ");
+            return null!=call(Api.class,(OnApiFinish<Reply<String>>)(what,note,data,arg)->{
+                boolean succeed=what==WHAT_SUCCEED;
+                toast(succeed?R.string.succeed : R.string.fail);
+                String newPath=null!=data?data.getData():null;
+                BrowserAdapter adapter=mBrowserAdapter;
+//                if (succeed&&null!=newPath&&newPath>0&&null!=adapter){
+//                    adapter.remove(deleted);
+//                }
+            }).renameFile(path,"");
+        }
+        Debug.W(getClass(),"Can't rename file.path="+path);
         return false;
     }
 
