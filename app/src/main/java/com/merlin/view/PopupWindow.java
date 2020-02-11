@@ -117,7 +117,7 @@ public class PopupWindow {
         if (null!=window&&null!=view&&null==view.getParent()){
             Drawable drawable=mBackground;
             drawable=null!=drawable?drawable:view.getContext().getResources()
-                    .getDrawable(R.drawable.round_corner_gray);
+                    .getDrawable(R.drawable.round_corner_black);
             window.setBackgroundDrawable(drawable);
             window.setContentView(view);
             applyDismissFlag(mDismissFlag);

@@ -12,6 +12,7 @@ import androidx.databinding.ObservableField;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -28,6 +29,8 @@ import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -65,6 +68,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         @POST(Address.PREFIX_FILE_CLIENT_META)
         Observable<Reply<ClientMeta>> queryClientMeta();
 
+        @POST(Address.PREFIX_FILE+"/delete")
+        @FormUrlEncoded
+        Observable<Reply<ApiList<String>>> deleteFile(@Field(LABEL_PATH) List<String> paths);
+
         @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
     }
@@ -83,13 +90,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         Debug.D(getClass(),"AAAAAAA "+clickCount+" "+data);
         switch (clickCount){
             case 1:
-//                if (null!=data&&data instanceof FileMeta){
-//                    onFileMetaClick((FileMeta)data);
-//                    return true;
-//                }
-//                break;
-//            case 2:
+                if (null!=data&&data instanceof FileMeta){
+                    return onFileMetaClick(view,resId,(FileMeta)data);
+                }
                 break;
+//            case 2:
+//                break;
         }
         return false;
     }
@@ -144,29 +150,65 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 //        }
 //    }
 
-    private boolean onFileMetaClick(FileMeta file){
+    private boolean onFileMetaClick(View view,int resId,FileMeta file){
         if (null!=file) {
-            if (isMultiMode().get()) {
-                multiChoose(file);
-            } else {
-                if (file.isDirectory()) {
-                    browserPath(file.getPath(), "After directory click.");
-                } else {//Open file
-                    if (!file.isAccessible()) {
-                        return toast(R.string.nonePermission);
-                    }
-                    String extension = file.getExtension();
-                    if (extension.equals("mp3")) {
-                        return MediaPlayService.play(getContext(), file.getMeta(), 0, false);
+            switch (resId) {
+                case R.string.delete:
+                    deleteFile(file);
+                    return true;
+                default:
+                    if (isMultiMode().get()) {
+                        multiChoose(file);
                     } else {
-                        return toast(R.string.noneSupportOpenFileType, extension);
+                        if (file.isDirectory()) {
+                            browserPath(file.getPath(), "After directory click.");
+                        } else {//Open file
+                            if (!file.isAccessible()) {
+                                return toast(R.string.nonePermission);
+                            }
+                            String extension = file.getExtension();
+                            if (extension.equals("mp3")) {
+                                return MediaPlayService.play(getContext(), file.getMeta(), 0, false);
+                            } else {
+                                return toast(R.string.noneSupportOpenFileType, extension);
+                            }
+                        }
                     }
-                }
+                    break;
             }
         }
         return false;
     }
 
+    private boolean deleteFile(Object objects){
+        List<String> paths=null;
+        if (null!=objects){
+            paths=new ArrayList<>();
+            if (objects instanceof FileMeta){
+                FileMeta meta=(FileMeta)objects;
+                String path=null!=meta?meta.getPath():null;
+                if (null!=path&&path.length()>0){
+                    paths.add(path);
+                }
+            }else if (objects instanceof Collection){
+
+            }
+        }
+        if (null!=paths&&paths.size()>0){
+            return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what,note,data,arg)->{
+                boolean succeed=what==WHAT_SUCCEED;
+                toast(succeed?R.string.succeed : R.string.fail);
+                List<String> deleted=null!=data?data.getData():null;
+                BrowserAdapter adapter=mBrowserAdapter;
+                if (succeed&&null!=deleted&&deleted.size()>0&&null!=adapter){
+                    adapter.remove(deleted);
+                }
+            }).deleteFile(paths);
+//            }).deleteFile(new String[]{path,"/ddd/ddd"});
+        }
+        Debug.D(getClass(),"Can't delete file.path="+paths);
+        return false;
+    }
 //    @Override
 //    public boolean onItemLongClick(View view, int sourceId,int position, Object data) {
 //        if(null!=data&&data instanceof FileMeta){

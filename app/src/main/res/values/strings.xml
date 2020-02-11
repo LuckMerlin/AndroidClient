@@ -30,4 +30,6 @@
     <string name="copy">复制</string>
     <string name="download">下载</string>
     <string name="setAsHome">设为主页</string>
+    <string name="succeed">成功</string>
+    <string name="fail">失败</string>
 </resources>

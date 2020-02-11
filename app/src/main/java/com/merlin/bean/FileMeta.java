@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 import com.merlin.file.Permissions;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
@@ -93,6 +95,16 @@ public final class FileMeta implements Parcelable {
         return md5;
     }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (null!=obj){
+            if (obj instanceof String){
+                String path=getPath();
+                return null!=path&&path.equals(obj);
+            }
+        }
+        return super.equals(obj);
+    }
 
     @Override
     public int describeContents() {

@@ -49,6 +49,11 @@ public final class Permissions {
         return (permissions & FILE_PERMISSION_OTHER_EXECUTABLE) >0;
     }
 
+    public final static boolean canDelete(int permissions){
+        Permissions per=new Permissions();
+        return per.isOtherWriteable(permissions)&&per.isOtherReadable(permissions);
+    }
+
     public final boolean isOtherReadable(int permissions){
 //        String oct=Integer.toOctalString(permi);
 //        int length=null!=oct?oct.length():-1;

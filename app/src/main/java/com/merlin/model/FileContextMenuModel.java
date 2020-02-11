@@ -23,7 +23,7 @@ public class FileContextMenuModel extends Model implements OnTapClick {
             if (null!=meta){
                 int permissions=meta.getPermissions();
                 Permissions per=new Permissions();
-                fcmb.setDeleteEnable(per.isOtherReadable(permissions)&&per.isOtherWriteable(permissions));
+//                fcmb.setDeleteEnable(per.isOtherReadable(permissions)&&per.isOtherWriteable(permissions));
             }
         }
     }

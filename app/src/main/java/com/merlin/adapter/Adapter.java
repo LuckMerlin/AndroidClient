@@ -52,6 +52,26 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         return false;
     }
 
+    public final boolean remove(List datas){
+        int count=null!=datas?datas.size():-1;
+        if (count>0){
+            for (Object data:datas) {
+                remove(data);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean remove(Object data){
+        List<T> datas=null!=data?mData:null;
+        int index=null!=datas?datas.indexOf(data):-1;
+        if (index>=0&&datas.remove(data)){
+            notifyItemRemoved(index);
+            return true;
+        }
+        return false;
+    }
 
     public final boolean append(boolean notify,T ...data){
         if (null!=data&&data.length>0){
