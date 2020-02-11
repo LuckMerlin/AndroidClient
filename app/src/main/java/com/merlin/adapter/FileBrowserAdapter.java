@@ -39,7 +39,7 @@ public class FileBrowserAdapter extends BaseAdapter<FileMeta, ItemListFileBindin
             sub+=" "+ FileSize.formatSizeText(data.getLength());
             sub+=" "+sdf.format(new Date((long)data.getModifyTime()));
             sub+=" "+data.getPermissions();
-            setText(binding.itemListFileSub,sub,null);
+//            setText(binding.itemListFileSub,sub,null);
         }
     }
 

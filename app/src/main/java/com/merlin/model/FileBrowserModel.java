@@ -57,8 +57,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         }
     };
 
-    private final PopupWindow mPopupWindow=new PopupWindow(true);
-
     private interface Api{
         @POST(Address.PREFIX_FILE_BROWSER)
         @FormUrlEncoded
@@ -91,16 +89,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 //                }
 //                break;
 //            case 2:
-                PopupWindow popupWindow=mPopupWindow;
-                if (null!=popupWindow&&null!=data&&data instanceof FileMeta){
-                    FileContextMenuBinding binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
-                    if (null!=binding){
-                        binding.setFile((FileMeta)data);
-                        popupWindow.setContentView(binding.getRoot());
-                        popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
-                        return true;
-                    }
-                }
                 break;
         }
         return false;
@@ -108,7 +96,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     @Override
     public boolean onLongClick(View view, int clickCount, int resId, Object data) {
-        Debug.D(getClass(),"BBBBBBB "+clickCount+" "+data);
+        if (null!=data&&data instanceof FileMeta){
+            FileContextMenuBinding binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
+            if (null!=binding){
+                binding.setFile((FileMeta)data);
+                showAtLocationAsContext(view,binding);
+                return true;
+            }
+        }
         return false;
     }
 

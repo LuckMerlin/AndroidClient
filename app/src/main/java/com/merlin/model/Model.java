@@ -7,11 +7,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
+
+import com.merlin.bean.FileMeta;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
+import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.retrofit.Retrofit;
@@ -27,7 +34,7 @@ import java.util.List;
 public class Model {
     private WeakReference<View> mRootView=null;
     private final static String LABEL_ACTIVITY_DATA="activityData";
-//    private PopupWindow mPopwindow;
+    private PopupWindow mPopWindow;
     public final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
@@ -106,6 +113,44 @@ public class Model {
     public final Context getContext(){
         Context context=getViewContext();
         return null!=context?context.getApplicationContext():null;
+    }
+
+    public final boolean dismiss(ViewDataBinding binding){
+        return null!=binding&&dismiss(binding.getRoot());
+    }
+
+    public final boolean dismiss(View view){
+        PopupWindow popupWindow=null!=view?mPopWindow:null;
+        View content=null!=popupWindow?popupWindow.getContentView():null;
+        if (null!=content&&content==view){
+            popupWindow.dismiss();
+            return true;
+        }
+        return false;
+    }
+
+    protected final boolean showAtLocationAsContext(View parent,ViewDataBinding binding) {
+        return showAtLocation(parent,binding,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
+    }
+
+    protected final boolean showAtLocation(View parent,ViewDataBinding binding,Integer dismissFlag){
+        return null!=binding&&showAtLocation(parent,binding.getRoot(),dismissFlag);
+    }
+
+    protected final boolean showAtLocationAsContext(View parent,View root) {
+        return showAtLocation(parent,root,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
+    }
+
+    protected final boolean showAtLocation(View parent,View root,Integer dismissFlag){
+        if (null!=root&&(null==root.getParent())){
+            PopupWindow popupWindow=mPopWindow;
+            popupWindow=null!=popupWindow?popupWindow:(mPopWindow=new PopupWindow(true));
+            popupWindow.setContentView(root);
+            dismissFlag=null==dismissFlag?PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK:dismissFlag;
+            popupWindow.showAtLocation(parent, Gravity.CENTER,0,0,getRoot(),dismissFlag);
+            return true;
+        }
+        return false;
     }
 
     protected final boolean runOnUiThread(Runnable runnable){

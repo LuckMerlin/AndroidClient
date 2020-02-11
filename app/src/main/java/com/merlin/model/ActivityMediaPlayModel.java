@@ -19,7 +19,6 @@ import com.merlin.media.MediaPlayer;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
-import com.merlin.view.ContextMenuWindow;
 import com.merlin.view.OnTapClick;
 
 public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayerBindChange,OnPlayerStatusUpdate {
@@ -27,7 +26,6 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
-    private final ContextMenuWindow mPopupWindow=new ContextMenuWindow(true);
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter((recyclerView, newState)->{
         if (newState==RecyclerView.SCROLL_STATE_IDLE){
             RecyclerView.Adapter adapter=null!=recyclerView?recyclerView.getAdapter():null;
@@ -63,8 +61,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
                             break;
                         case R.id.activityMediaPlay_addToSheetIV:
 //                            Debug.D(getClass(),"AAAAAAAAAAA "+resId);
-                            mPopupWindow.reset(R.string.createSheet);
-                            mPopupWindow.showAtLocation(view, Gravity.LEFT,0,0);
+//                            mPopupWindow.reset(R.string.createSheet);
+//                            mPopupWindow.showAtLocation(view, Gravity.LEFT,0,0);
                             break;
                         case R.id.activityMediaPlay_playModeIV:
                             break;

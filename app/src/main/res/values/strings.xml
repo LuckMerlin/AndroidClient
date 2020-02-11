@@ -27,4 +27,7 @@
     <string name="favorite">收藏</string>
     <string name="delete">删除</string>
     <string name="move">移动</string>
+    <string name="copy">复制</string>
+    <string name="download">下载</string>
+    <string name="setAsHome">设为主页</string>
 </resources>

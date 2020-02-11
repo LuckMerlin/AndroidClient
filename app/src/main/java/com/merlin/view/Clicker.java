@@ -2,6 +2,7 @@ package com.merlin.view;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.ImageView;
@@ -12,6 +13,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.binding.IDs;
+import com.merlin.binding.MBinding;
 import com.merlin.classes.Classes;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -64,6 +66,14 @@ public final class Clicker {
         return click(type,arg,null,coverLister);
     }
 
+    public static Click multiClick(Object arg,boolean coverLister){
+        return multiClick(arg,null,coverLister);
+    }
+
+    public static Click multiClick(Object arg,Integer resourceId,boolean coverLister){
+        return click(SINGLE_TAP_MASK|SINGLE_LONG_CLICK_MASK,arg,resourceId,coverLister);
+    }
+
     public static Click click(int type,Object arg,Integer resourceId,boolean coverLister){
         return new Click(type,arg,resourceId,coverLister);
     }
@@ -93,6 +103,25 @@ public final class Clicker {
         return false;
     }
 
+    public static boolean putRes(View view,Res res){
+         if (null!=view){
+             Object existedResObject=view.getTag(R.id.viewResource);
+             final Res existedRes=null!=existedResObject&&existedResObject instanceof Res?(Res)existedResObject:null;
+             if (null==res){
+                 if (null!=existedRes){
+                     view.setTag(R.id.viewResource,null);
+                     return true;
+                 }
+             }else{
+                 Integer resourceId=res.getResourceId();
+                 Object arg=res.getArg();
+                 resourceId=null!=resourceId&&resourceId!=Resources.ID_NULL?resourceId:(null!=existedRes?existedRes.getResourceId():null);
+                 arg=(null!=arg?arg:(null!=existedRes?existedRes.getArg():null));
+                 view.setTag(R.id.viewResource,new Res(resourceId,arg));
+             }
+         }
+        return false;
+    }
 
     public static class Click{
         private final int mType;
@@ -197,14 +226,24 @@ public final class Clicker {
                         }
                     };
                     root.setTag(R.id.viewResource,res);
-                    root.setOnClickListener((view)->{
-                        view.removeCallbacks(multiRunnable);
-                        multiRunnable.mView=view;
-                        if (multiRunnable.mClickCount==0){
-                            multiRunnable.mFirstTime=System.currentTimeMillis();
+                    long[] downTime=new long[1];
+                    root.setOnTouchListener(( v, event)->{
+                        if (event.getAction()==MotionEvent.ACTION_DOWN){
+                            downTime[0]=System.currentTimeMillis();
                         }
-                        multiRunnable.mClickCount+=1;
-                        view.postDelayed(multiRunnable,maxInterval);
+                        return false;
+                    });
+                    root.setOnClickListener((view)->{
+                        long duration=System.currentTimeMillis()-downTime[0];
+                        if (duration<500){
+                            view.removeCallbacks(multiRunnable);
+                            multiRunnable.mView=view;
+                            if (multiRunnable.mClickCount==0){
+                                multiRunnable.mFirstTime=System.currentTimeMillis();
+                            }
+                            multiRunnable.mClickCount+=1;
+                            view.postDelayed(multiRunnable,maxInterval);
+                        }
                     });
                     return true;
                 }
@@ -216,6 +255,7 @@ public final class Clicker {
 
     private boolean dispatchClickToModel(View view,View root,Dispatcher dispatcher){
         if (null!=view&&null!=dispatcher){
+//            Object object=view.getTag(R.id.modelBind);
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
             Class cls=null!=binding?binding.getClass().getSuperclass():null;
             Method[] methods=null!=cls?cls.getDeclaredMethods():null;
@@ -243,16 +283,18 @@ public final class Clicker {
             ViewParent parent=interrupted?null:view.getParent();
             if (null!=parent&&parent instanceof View &&(parent!=view)){
                 Object interrupter=((View)parent).getTag(R.id.interruptClick);
+                interrupter=interrupter instanceof WeakReference?((WeakReference)interrupter).get():null;
+                Object modelBind=((View)parent).getTag(R.id.modelBind);
+                if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,(Model)modelBind,binding)){
+                    return true;
+                }
                 if (null!=interrupter){
-                    interrupter=interrupter instanceof WeakReference?((WeakReference)interrupter).get():null;
-                    Debug.D(getClass(),"DDDDinterrupterDDDd "+interrupter);
                     if (interrupter instanceof Model){
                         return dispatcher.onDispatch(view,root,(Model)interrupter,binding);
                     }else if (interrupter instanceof View){
                         return dispatchClickToModel((View)interrupter,root,dispatcher);
                     }
                 }
-                Debug.D(getClass(),"DDDparentDDDDd "+parent);
                 return dispatchClickToModel((View)parent,root,dispatcher);
             }
             return interrupted;

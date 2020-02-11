@@ -5,17 +5,36 @@
         <variable
             name="file"
             type="com.merlin.bean.FileMeta" />
+        <variable
+            name="vm"
+            type="com.merlin.model.FileContextMenuModel" />
         <import type="com.merlin.view.ContextMenu"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.client.R"/>
+        <variable
+            name="deleteEnable"
+            type="boolean" />
     </data>
     <LinearLayout
+        binding:createModel="@{null}"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <include layout="@layout/item_context_menu"
-            binding:menu="@{ContextMenu.create(@string/delete,file)}"/>
+            binding:menu="@{ContextMenu.create(R.string.download,file)}"/>
         <include layout="@layout/item_context_menu"
-            binding:menu="@{ContextMenu.create(@string/move,file)}"/>
+            binding:menu="@{ContextMenu.create(R.string.move,file)}"/>
         <include layout="@layout/item_context_menu"
-            binding:menu="@{ContextMenu.create(@string/detail,file)}"/>
+            android:visibility="@{file.directory&amp;&amp;deleteEnable?View.VISIBLE:View.GONE}"
+            binding:menu="@{ContextMenu.create(R.string.setAsHome,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.copy,file)}"/>
+        <include layout="@layout/item_context_menu"
+            android:visibility="@{deleteEnable?View.VISIBLE:View.GONE}"
+            binding:menu="@{ContextMenu.create(R.string.delete,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.rename,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.detail,file)}"/>
     </LinearLayout>
 </layout>

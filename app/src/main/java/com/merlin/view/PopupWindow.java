@@ -1,20 +1,28 @@
 package com.merlin.view;
 
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 
 public class PopupWindow {
     private final android.widget.PopupWindow mWindow=new android.widget.PopupWindow();
     private Drawable mBackground;
+    public final static int DISMISS_OUT_MASK=0x01;//0001
+    public final static int DISMISS_INNER_MASK=0x02;//0010
+    private int mDismissFlag=0;
+    private Integer mAppliedDismissFlag;
 
     public PopupWindow(boolean touchable){
         setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
         setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-        setOutsideTouchable(touchable);
         android.widget.PopupWindow window=mWindow;
         window.setOnDismissListener(()->{
             View view=window.getContentView();
@@ -23,6 +31,39 @@ public class PopupWindow {
                 ((ViewGroup)parent).removeView(view);
             }
         });
+        setDismissFlag(mDismissFlag|(touchable?DISMISS_OUT_MASK:0));
+    }
+
+    public final boolean setDismissFlag(int flag){
+        if (flag!=mDismissFlag){
+            mDismissFlag=flag;
+            applyDismissFlag(flag);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean applyDismissFlag(int flag){
+        android.widget.PopupWindow window=mWindow;
+        if (null!=window){
+            if (null==mAppliedDismissFlag||(flag!=mAppliedDismissFlag)){
+                mAppliedDismissFlag=flag;
+                window.setOutsideTouchable((flag&DISMISS_OUT_MASK)>0);
+                window.setTouchInterceptor(null);
+                if ((flag&DISMISS_INNER_MASK)>0){
+                    window.setTouchInterceptor(( v, event)->{
+                        int action=event.getAction();
+                        if (action==MotionEvent.ACTION_UP||action==MotionEvent.ACTION_CANCEL){
+                            v.setVisibility(View.GONE);
+                            v.postDelayed(()->dismiss(),200);
+                        }
+                        return false;
+                    });
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     public final boolean setWidth(int width){
@@ -43,12 +84,27 @@ public class PopupWindow {
         return false;
     }
 
-    public boolean showAtLocation(View parent, int gravity, int x, int y){
+    public boolean showAtLocation(View parent, int flag){
+        return showAtLocation(parent, Gravity.CENTER,0,0,flag);
+    }
+
+    public boolean showAtLocation(View parent, int gravity, int x, int y,Integer dismissFlag){
+        return showAtLocation(parent,gravity,x,y,null,dismissFlag);
+    }
+
+    public boolean showAtLocation(View parent, int gravity, int x, int y,View interrupter) {
+        return showAtLocation(parent,gravity,x,y,interrupter,mDismissFlag);
+    }
+
+    public boolean showAtLocation(View parent, int gravity, int x, int y,View interrupter,Integer dismissFlag){
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&null!=parent) {
-            View contentView=getContentView();
+            View contentView=null!=interrupter?getContentView():null;
             if (null!=contentView){
-                Clicker.setInterrupterTag(contentView,parent);
+                Clicker.setInterrupterTag(contentView,interrupter);
+            }
+            if (null!=dismissFlag){
+                applyDismissFlag(dismissFlag);
             }
             window.showAtLocation(parent, gravity, x, y);
             return true;
@@ -64,16 +120,14 @@ public class PopupWindow {
                     .getDrawable(R.drawable.round_corner_gray);
             window.setBackgroundDrawable(drawable);
             window.setContentView(view);
+            applyDismissFlag(mDismissFlag);
             return true;
         }
         return false;
     }
 
     public final void setOutsideTouchable(boolean touchable){
-        android.widget.PopupWindow window=mWindow;
-        if (null!=window){
-            window.setOutsideTouchable(touchable);
-        }
+       setDismissFlag(touchable?(mDismissFlag|DISMISS_OUT_MASK):(mDismissFlag&~DISMISS_OUT_MASK));
     }
 
     public final View getContentView(){

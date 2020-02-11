@@ -47,7 +47,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         if (audioTrack.getPlayState()!=AudioTrack.PLAYSTATE_PLAYING){
             audioTrack.play();
         }
-        audioTrack.write(bytes,0,length);
+//        audioTrack.write(bytes,0,length);
     }
 
     private AudioTrack buildAudioTrack(int sampleRateInHz,int channelConfig){

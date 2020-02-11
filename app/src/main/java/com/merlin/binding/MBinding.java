@@ -38,6 +38,7 @@ import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
 import com.merlin.view.MultiPageAdapterRefreshBridge;
 import com.merlin.view.OnTextChanged;
+import com.merlin.view.Res;
 
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
@@ -64,32 +65,39 @@ public class MBinding {
                 view.setText((String)resId);
             } else if (resId instanceof Integer) {
                 view.setText((Integer)resId);
-                view.setTag(R.id.resourceId,new IDs((Integer)resId,null));
+                Clicker.putRes(view,new Res((Integer)resId,null));
             }
         }
     }
 
-
     @BindingAdapter("android:src")
-    public static void setSrc(ImageView view, String path) {
-        RoundedCorners roundedCorners = new RoundedCorners(10);
-        RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+    public static void setSrc(ImageView view, Object img) {
+        if (null!=img){
+            if (img instanceof Integer){
+                view.setImageResource((Integer)img);
+                Clicker.putRes(view,new Res((Integer)img,null));
+            }else if (img instanceof String){
+                String path=(String)img;
+                RoundedCorners roundedCorners = new RoundedCorners(10);
+                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
 //        Debug.D(MBinding.class,"AAAAAAAAAa "+Address.URL+path);
 //         String ddd="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg";
-        if (null!=path){
-            if (path.startsWith("/")){
-                path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
+                if (null!=path){
+                    if (path.startsWith("/")){
+                        path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
+                    }
+                }
+                Debug.D(MBinding.class," "+path);
+                Glide.with(view.getContext())
+                        .load(path)
+                        .centerCrop()
+                        .apply(options)
+                        .thumbnail(1f)
+                        .placeholder(R.drawable.ic_picture_default)
+//                .error(R.drawable.ic_default_pic)
+                        .into(view);
             }
         }
-        Debug.D(MBinding.class," "+path);
-        Glide.with(view.getContext())
-                .load(path)
-                .centerCrop()
-                .apply(options)
-                .thumbnail(1f)
-                .placeholder(R.drawable.ic_picture_default)
-//                .error(R.drawable.ic_default_pic)
-                .into(view);
     }
 
     @BindingAdapter(value = {"textWatcher"})
@@ -119,8 +127,6 @@ public class MBinding {
             });
         }
     }
-
-
 
     @BindingAdapter(value = {"createModel"})
     public static void createModel(View view, Object modeClass) {
