@@ -99,7 +99,7 @@ public class Dialog implements View.OnClickListener{
         return this;
     }
 
-    public final Dialog sure(int sureTextId){
+    public final Dialog left(int sureTextId){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
             binding.setSureTextId(sureTextId);
@@ -107,7 +107,7 @@ public class Dialog implements View.OnClickListener{
         return this;
     }
 
-    public final Dialog cancel(int cancelTextId){
+    public final Dialog right(int cancelTextId){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
             binding.setCancelTextId(cancelTextId);

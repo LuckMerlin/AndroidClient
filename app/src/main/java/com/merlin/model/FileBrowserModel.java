@@ -83,7 +83,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         @FormUrlEncoded
         Observable<Reply<FileModify>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name);
 
-
         @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
 
@@ -162,10 +161,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     private boolean rebootClient(String debug){
-        Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
         Dialog dialog=new Dialog(getViewContext());
-        dialog.create().title(R.string.reboot).sure(R.string.sure).cancel(R.string.cancel).show((view,clickCount,resId,data)-> {
+        dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
                 if (resId==R.string.sure){
+                    Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
                     call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note)).rebootClient();
                 }
                 dialog.dismiss();
@@ -224,12 +223,15 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             return false;
         }
         final Dialog dialog=new Dialog(getViewContext());
-        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).show(( view, clickCount,  resId, data)->{
+        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
+                .right(R.string.cancel).show(( view, clickCount,  resId, data)->{
                String input=dialog.getViewText(R.id.edit_text,null);
                if (null==input||input.length()<=0){
                    toast(R.string.inputNotNull);
                }else{
+                   dialog.dismiss();
                    return null!=call(Api.class,(OnApiFinish<Reply<FileModify>>)(what,note,data2,arg)->{
+                       toast(note);
                    }).createFile(parent,input,dir);
                }
             return false;
