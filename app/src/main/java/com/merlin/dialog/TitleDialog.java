@@ -13,7 +13,7 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.DlgLayoutBinding;
 import com.merlin.util.Text;
 
-public class TitleDialog extends Dialog {
+public class TitleDialog extends Dialog_old {
 
     protected Integer onResolveContentLayout(){
         //Do nothing

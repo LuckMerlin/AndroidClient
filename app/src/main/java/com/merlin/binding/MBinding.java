@@ -1,9 +1,12 @@
 package com.merlin.binding;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -12,6 +15,7 @@ import android.widget.TextView;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,6 +60,18 @@ public class MBinding {
         }
     }
 
+    @BindingAdapter("layout")
+    public static void inflateLayout(View view, Object layout) {
+        if (null!=view&&view instanceof ViewGroup&&null!=layout){
+            if (layout instanceof Integer){
+                if (!layout.equals(Resources.ID_NULL)){
+                    DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),(Integer)layout,(ViewGroup)view,true);
+                }
+            }else if (layout instanceof View&&null==((View)layout).getParent()){
+                ((ViewGroup)view).addView((View)layout,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+        }
+    }
 
     @BindingAdapter("android:text")
     public static void setText(TextView view, Object resId) {
@@ -63,7 +79,7 @@ public class MBinding {
             resId = null == resId ? "" : resId;
             if (resId instanceof String) {
                 view.setText((String)resId);
-            } else if (resId instanceof Integer) {
+            } else if (resId instanceof Integer&&!resId.equals(Resources.ID_NULL)) {
                 view.setText((Integer)resId);
                 Clicker.putRes(view,new Res((Integer)resId,null));
             }
@@ -74,8 +90,10 @@ public class MBinding {
     public static void setSrc(ImageView view, Object img) {
         if (null!=img){
             if (img instanceof Integer){
-                view.setImageResource((Integer)img);
-                Clicker.putRes(view,new Res((Integer)img,null));
+                if (!img.equals(Resources.ID_NULL)){
+                    view.setImageResource((Integer)img);
+                    Clicker.putRes(view,new Res((Integer)img,null));
+                }
             }else if (img instanceof String){
                 String path=(String)img;
                 RoundedCorners roundedCorners = new RoundedCorners(10);

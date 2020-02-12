@@ -80,6 +80,14 @@ public class Model {
         return toast((null!=text?text:"")+(null!=note?note:""));
     }
 
+    protected final <T extends ViewDataBinding> T inflate(int layoutId){
+        return inflate(getViewContext(),layoutId);
+    }
+
+    protected final <T extends ViewDataBinding> T inflate(Context context,int layoutId){
+        return null!=context?DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,null,false):null;
+    }
+
     public final boolean toast(String msg){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;

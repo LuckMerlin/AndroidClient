@@ -7,7 +7,7 @@ import com.merlin.task.Transport;
 
 import java.util.List;
 
-public class DownloadFileExistDialog extends Dialog {
+public class DownloadFileExistDialog extends Dialog_old {
     private Callback mCallback;
 
     public DownloadFileExistDialog(Context context){

@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
+import com.merlin.bean.FileModify;
 import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
+import com.merlin.debug.Debug;
 import com.merlin.util.FileSize;
 
 import java.text.SimpleDateFormat;
@@ -40,6 +42,18 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
             itemBinding.setMeta(data);
             itemBinding.setPosition(position);
         }
+    }
+
+    public final boolean renamePath(FileMeta meta, FileModify modify){
+        List<FileMeta> list=null!=meta&&null!=modify?getData():null;
+        int size=null!=list?list.size():-1;
+        int index=size>0?list.indexOf(meta):-1;
+        meta=index>=0&&index<size?list.get(index):null;
+        if (null!=meta&&meta.applyModify(modify)){
+            notifyItemChanged(index);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -90,7 +104,6 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
         return list;
     }
 
-
     public boolean multiChoose(FileMeta meta){
         List<FileMeta> list=mMultiChoose;
         if (null!=meta){
@@ -103,7 +116,6 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
         }
         return false;
     }
-
 
     public boolean isChoose(FileMeta meta){
         List<FileMeta> choose=mMultiChoose;

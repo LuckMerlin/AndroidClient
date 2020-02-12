@@ -20,4 +20,5 @@ public interface Label{
    String  LABEL_FORMAT = "format";
    String  LABEL_MD5 = "md5";
    String  LABEL_PLAY = "play";
+   String  LABEL_FOLDER = "folder";
 }

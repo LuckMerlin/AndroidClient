@@ -5,6 +5,7 @@
     <string name="detail">详情</string>
     <string name="notOnline">设备未在线</string>
     <string name="fileNotExist">文件不存在</string>
+    <string name="fileAlreadyExist">文件已经存在</string>
     <string name="nonePermission">没有访问权限</string>
     <string name="requestFail">请求失败</string>
     <string name="createSheet">创建歌单</string>
@@ -32,4 +33,9 @@
     <string name="setAsHome">设为主页</string>
     <string name="succeed">成功</string>
     <string name="fail">失败</string>
+    <string name="inputNotNull">输入不能为空</string>
+    <string name="noneChanged">没有任何变化</string>
+    <string name="createFolder">创建文件夹</string>
+    <string name="createFile">创建文件</string>
+    <string name="pathNotExist">路径不存在</string>
 </resources>

@@ -6,6 +6,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.debug.Debug;
 import com.merlin.file.Permissions;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
@@ -28,6 +29,19 @@ public final class FileMeta implements Parcelable {
     private String thumbImageUrl;
     private String title;
     private Media meta;
+
+    public boolean applyModify(FileModify modify){
+        if (null!=modify){
+            String path=modify.getPath();
+            String name=modify.getName();
+            if (null!=path||null!=name){
+                this.path=path;
+                this.name=name;
+                return true;
+            }
+        }
+        return false;
+    }
 
     public String getName() {
         return name;

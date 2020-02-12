@@ -95,8 +95,12 @@ public final class Clicker {
     }
 
     public static boolean setInterrupterTag(View view,Object object){
+        return setInterrupterTag(view,object,true);
+    }
+
+    public static boolean setInterrupterTag(View view,Object object,boolean weak){
         if (null!=view){
-            object=null!=object?new WeakReference<>(object):null;
+            object=null!=object?weak?new WeakReference<>(object):object:null;
             view.setTag(R.id.interruptClick,object);
             return true;
         }
@@ -282,18 +286,18 @@ public final class Clicker {
             }
             ViewParent parent=interrupted?null:view.getParent();
             if (null!=parent&&parent instanceof View &&(parent!=view)){
-                Object interrupter=((View)parent).getTag(R.id.interruptClick);
-                interrupter=interrupter instanceof WeakReference?((WeakReference)interrupter).get():null;
                 Object modelBind=((View)parent).getTag(R.id.modelBind);
                 if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,(Model)modelBind,binding)){
                     return true;
                 }
+                Object interrupter=((View)parent).getTag(R.id.interruptClick);
+                interrupter=null!=interrupter?interrupter instanceof WeakReference?((WeakReference)interrupter).get():interrupter:null;
                 if (null!=interrupter){
-                    if (interrupter instanceof Model){
-                        return dispatcher.onDispatch(view,root,(Model)interrupter,binding);
-                    }else if (interrupter instanceof View){
+                   if (interrupter instanceof View){
                         return dispatchClickToModel((View)interrupter,root,dispatcher);
-                    }
+                   }else{
+                       return dispatcher.onDispatch(view,root,interrupter,binding);
+                   }
                 }
                 return dispatchClickToModel((View)parent,root,dispatcher);
             }
@@ -303,7 +307,7 @@ public final class Clicker {
     }
 
     private interface Dispatcher{
-        boolean onDispatch(View view, View root, Model model,ViewDataBinding binding);
+        boolean onDispatch(View view, View root, Object model,ViewDataBinding binding);
     }
 
     private static abstract class MultiClickRunnable implements Runnable{

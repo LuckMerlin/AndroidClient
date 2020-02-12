@@ -8,7 +8,7 @@
 //import com.merlin.adapter.DownloadAdapter;
 //import com.merlin.client.R;
 //
-//public class TransportingDialog extends Dialog {
+//public class TransportingDialog extends Dialog_old {
 //
 //    public TransportingDialog(Context context){
 //        super(context);

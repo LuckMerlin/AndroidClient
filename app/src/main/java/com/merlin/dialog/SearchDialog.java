@@ -7,7 +7,7 @@ import android.widget.EditText;
 
 import com.merlin.client.R;
 
-public final class SearchDialog extends Dialog{
+public final class SearchDialog extends Dialog_old {
     private OnSearchInputChange mInputChangeListener;
     private EditText mInput;
     public interface OnSearchInputChange{

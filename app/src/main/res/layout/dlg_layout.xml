@@ -3,13 +3,13 @@
     <data>
         <variable
             name="dialog"
-            type="com.merlin.dialog.Dialog" />
+            type="com.merlin.dialog.Dialog_old" />
 
     </data>
     <LinearLayout
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:background="@drawable/round_corner_small"
+            android:background="@drawable/round_corner_black"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="40dp"
             android:paddingTop="5dp"
@@ -45,6 +45,7 @@
                     android:id="@+id/dlg_cancelTV"
                     android:layout_weight="1"
                     android:padding="8dp"
+                    android:layout_marginLeft="2dp"
                     android:background="@drawable/round_corner_small"
                     android:onClick="@{dialog::onClick}"
                     android:text="@string/cancel"

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableBoolean;
@@ -18,10 +19,14 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
+import com.merlin.bean.FileModify;
 import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
+import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
+import com.merlin.dialog.MessageDialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.MediaPlayService;
 import com.merlin.protocol.Tag;
@@ -39,6 +44,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
+import static com.merlin.api.What.WHAT_FILE_EXIST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
@@ -75,11 +81,16 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
         @POST(Address.PREFIX_FILE+"/rename")
         @FormUrlEncoded
-        Observable<Reply<String>> renameFile(@Field(LABEL_PATH) String path,@Field(LABEL_NAME) String name);
+        Observable<Reply<FileModify>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name);
 
 
         @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
+
+        @POST(Address.PREFIX_FILE+"/create")
+        @FormUrlEncoded
+        Observable<Reply<FileModify>> createFile(@Field(LABEL_PATH) String path,@Field(LABEL_NAME) String name,@Field(LABEL_FOLDER) boolean folder);
+
     }
 
     private interface OnChooseExist{
@@ -93,11 +104,28 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        Debug.D(getClass(),"AAAAAAA "+clickCount+" "+data);
         switch (clickCount){
             case 1:
-                if (null!=data&&data instanceof FileMeta){
-                    return onFileMetaClick(view,resId,(FileMeta)data);
+                switch (resId){
+                    case R.string.reboot:
+                        return rebootClient("After reboot tap click.");
+                    case R.string.createFile:
+                         return createFile(false);
+                    case R.string.createFolder:
+                        return createFile(true);
+                    case R.drawable.ic_menu_normal:
+                        FileBrowserMenuBinding binding=inflate(R.layout.file_browser_menu);
+                        if (null!=binding){
+                            binding.setFolder(mCurrent.get());
+                            showAtLocationAsContext(view,binding);
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (null!=data&&data instanceof FileMeta){
+                            return onFileMetaClick(view,resId,(FileMeta)data);
+                        }
+                        break;
                 }
                 break;
 //            case 2:
@@ -135,16 +163,17 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     private boolean rebootClient(String debug){
         Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-        return null!=call(Api.class,(OnApiFinish<Reply>)(what, note, data, arg)->{
-            if(what==WHAT_SUCCEED){
-                toast(R.string.rebooting);
-            }
-        }).rebootClient();
+        Dialog dialog=new Dialog(getViewContext());
+        dialog.create().title(R.string.reboot).sure(R.string.sure).cancel(R.string.cancel).show((view,clickCount,resId,data)-> {
+                if (resId==R.string.sure){
+                    call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note)).rebootClient();
+                }
+                dialog.dismiss();
+                return true;
+        });
+        return true;
     }
 
-    private void showFileContextMenu(FileMeta meta){
-//        mContextMenu.showAtLocation()
-    }
 //    @Override
 //    public void onItemClick(View view, int sourceId,int position, Object data) {
 //        if (null!=data){
@@ -187,26 +216,50 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
-    private boolean renameFile(FileMeta meta){
-        String path=null!=meta?meta.getPath():null;
-        if (null!=path&&path.length()>0){
-            new SingleInputDialog(getContext()).show(R.string.rename, new SingleInputDialog.OnSingleInputCommit() {
-                @Override
+    private boolean createFile(boolean dir){
+        FolderMeta folderMeta=mCurrent.get();
+        final String parent=null!=folderMeta?folderMeta.getParent():null;
+        if (null==parent||parent.length()<=0){
+            toast(R.string.pathNotExist);
+            return false;
+        }
+        final Dialog dialog=new Dialog(getViewContext());
+        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).show(( view, clickCount,  resId, data)->{
+               String input=dialog.getViewText(R.id.edit_text,null);
+               if (null==input||input.length()<=0){
+                   toast(R.string.inputNotNull);
+               }else{
+                   return null!=call(Api.class,(OnApiFinish<Reply<FileModify>>)(what,note,data2,arg)->{
+                   }).createFile(parent,input,dir);
+               }
+            return false;
+        });
+    }
 
-                public void onSingleInputCommit(SingleInputDialog dlg, String text) {
-                    Debug.D(getClass(),"SSSSSSSSSS "+text);
+    private boolean renameFile(FileMeta meta){
+        final String path=null!=meta?meta.getPath():null;
+        if (null!=path&&path.length()>0){
+            final String name=meta.getName();
+            return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
+                if (null==text||text.length()<=0){
+                    toast(R.string.inputNotNull);
+                }else if (null!=name&&text.equals(name)){
+                    toast(R.string.noneChanged);
+                }else{
+                    if (null!=dlg){
+                        dlg.dismiss();
+                    }
+                    call(Api.class,(OnApiFinish<Reply<FileModify>>)(what,note,data,arg)->{
+                        boolean succeed=what==WHAT_SUCCEED;
+                        toast(succeed?R.string.succeed : what==WHAT_FILE_EXIST?R.string.fileAlreadyExist:R.string.fail);
+                        BrowserAdapter adapter=mBrowserAdapter;
+                        FileModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
+                        if (succeed&&null!=modify&&null!=adapter){
+                            adapter.renamePath(meta,modify);
+                        }
+                    }).renameFile(path,text);
                 }
             });
-            Debug.D(getClass(),"SSSSSSSSSSsss ");
-            return null!=call(Api.class,(OnApiFinish<Reply<String>>)(what,note,data,arg)->{
-                boolean succeed=what==WHAT_SUCCEED;
-                toast(succeed?R.string.succeed : R.string.fail);
-                String newPath=null!=data?data.getData():null;
-                BrowserAdapter adapter=mBrowserAdapter;
-//                if (succeed&&null!=newPath&&newPath>0&&null!=adapter){
-//                    adapter.remove(deleted);
-//                }
-            }).renameFile(path,"");
         }
         Debug.W(getClass(),"Can't rename file.path="+path);
         return false;

@@ -10,6 +10,7 @@
             type="com.merlin.bean.ClientMeta" />
         <import type="com.merlin.util.FileSize"/>
         <import type="android.view.View"/>
+        <import type="com.merlin.client.R"/>
     </data>
     <RelativeLayout
         binding:createModel="@{null}"
@@ -109,8 +110,8 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
                 <ImageView
-                    android:id="@+id/fileBrowser_menuIV"
-                    android:src="@drawable/ic_menu_normal"
+                    android:src="@{R.drawable.ic_menu_normal}"
+                    binding:enableClick="@{true}"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:padding="10dp"/>

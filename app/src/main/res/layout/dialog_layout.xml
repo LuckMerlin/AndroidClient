@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="sureTextId"
+            type="int" />
+        <variable
+            name="cancelTextId"
+            type="int" />
+        <variable
+            name="titleTextId"
+            type="int" />
+        <variable
+            name="contentLayout"
+            type="Object" />
+        <import type="android.content.res.Resources"/>
+        <import type="android.view.View"/>
+    </data>
+    <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:background="@drawable/round_corner_black"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:text="@{titleTextId==Resources.ID_NULL?``:titleTextId}"
+                android:visibility="@{titleTextId==Resources.ID_NULL?View.GONE:View.VISIBLE}"
+                android:layout_marginBottom="15dp"
+                style="@style/titleNormalTextView"/>
+
+            <FrameLayout
+                android:visibility="@{null!=contentLayout?View.VISIBLE:View.GONE}"
+                binding:layout="@{contentLayout}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:visibility="@{sureTextId!=Resources.ID_NULL||cancelTextId!=Resources.ID_NULL?View.VISIBLE:View.GONE}"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    binding:enableClick="@{true}"
+                    android:text="@{sureTextId==Resources.ID_NULL?``:sureTextId}"
+                    android:visibility="@{sureTextId==Resources.ID_NULL?View.GONE:View.VISIBLE}"
+                    android:background="@drawable/selector_round_dark_corner_small"
+                    style="@style/titleNormalTextView"/>
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    binding:enableClick="@{true}"
+                    android:text="@{cancelTextId==Resources.ID_NULL?``:cancelTextId}"
+                    android:visibility="@{cancelTextId==Resources.ID_NULL?View.GONE:View.VISIBLE}"
+                    android:layout_marginLeft="5dp"
+                    android:background="@drawable/selector_round_dark_corner_small"
+                    style="@style/titleNormalTextView"/>
+            </LinearLayout>
+        </LinearLayout>
+</layout>
