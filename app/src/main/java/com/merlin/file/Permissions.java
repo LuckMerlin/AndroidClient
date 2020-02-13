@@ -1,5 +1,8 @@
 package com.merlin.file;
 
+import com.merlin.binding.MBinding;
+import com.merlin.debug.Debug;
+
 public final class Permissions {
     private static final int FILE_TYPE_MASK = 0170000 ;//文件类型屏蔽字
     private static final int FILE_TYPE_IS_DIRECTORY = 0040000 ;//目录文件
@@ -51,6 +54,7 @@ public final class Permissions {
 
     public final static boolean canDelete(int permissions){
         Permissions per=new Permissions();
+//        Debug.D(MBinding.class,"&&&&& "+per.isOtherWriteable(permissions)+" "+per.isOtherReadable(permissions));
         return per.isOtherWriteable(permissions)&&per.isOtherReadable(permissions);
     }
 
@@ -58,7 +62,6 @@ public final class Permissions {
 //        String oct=Integer.toOctalString(permi);
 //        int length=null!=oct?oct.length():-1;
 //        oct=length>=3?oct.substring(length-3,length):null;
-
         return (permissions & FILE_PERMISSION_OTHER_READABLE) >0;
     }
 

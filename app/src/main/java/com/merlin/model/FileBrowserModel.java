@@ -364,6 +364,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         String parent=null!=current?current.getParent():null;
         String curr=null!=current?current.getPath():null;
         if (null==parent||parent.length()<=0||(null!=curr&&curr.equals(parent))){
+            toast(R.string.alreadyArrivedRoot);
             return false;
         }
         return browserPath(parent,debug);
