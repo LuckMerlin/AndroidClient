@@ -132,12 +132,17 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         }
                         break;
                     default:
+                        break;
+                }
+                break;
+            case 2:
+                switch (resId){
+                    default:
                         if (null!=data&&data instanceof FileMeta){
                             return onFileMetaClick(view,resId,(FileMeta)data);
                         }
                         break;
                 }
-                break;
         }
         return false;
     }

@@ -197,7 +197,7 @@ public final class Clicker {
             }
             if ((click.mType&SINGLE_TAP_MASK)>0){
                 if (cover||!root.hasOnClickListeners()){
-                    final int maxInterval=200;
+                    final int maxInterval=300;
                     final MultiClickRunnable multiRunnable=new MultiClickRunnable(){
                         @Override
                         public void run() {
