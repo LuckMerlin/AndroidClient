@@ -285,7 +285,7 @@ public class MBinding {
 
                     @Override
                     public void onRefresh() {
-                        if (!multiPageAdapter.resetLoad()&&!multiPageAdapter.isLoading()){
+                        if (!multiPageAdapter.resetLoad("After refresh.")&&!multiPageAdapter.isLoading()){
                             refreshLayout.setRefreshing(false);
                         }
                     }

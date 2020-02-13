@@ -35,6 +35,7 @@ public class Model {
     private WeakReference<View> mRootView=null;
     private final static String LABEL_ACTIVITY_DATA="activityData";
     private PopupWindow mPopWindow;
+
     public final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
@@ -151,8 +152,13 @@ public class Model {
 
     protected final boolean showAtLocation(View parent,View root,Integer dismissFlag){
         if (null!=root&&(null==root.getParent())){
-            PopupWindow popupWindow=mPopWindow;
-            popupWindow=null!=popupWindow?popupWindow:(mPopWindow=new PopupWindow(true));
+            PopupWindow currentPopWindow=mPopWindow;
+            final PopupWindow popupWindow=null!=currentPopWindow?currentPopWindow:(mPopWindow=new PopupWindow(true,(window)->{
+                PopupWindow curr=mPopWindow;
+                if (null!=curr&&null!=window&&curr==window){
+                    mPopWindow=null;
+                }
+            }));
             popupWindow.setContentView(root);
             dismissFlag=null==dismissFlag?PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK:dismissFlag;
             popupWindow.showAtLocation(parent, Gravity.CENTER,0,0,getRoot(),dismissFlag);

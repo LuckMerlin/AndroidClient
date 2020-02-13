@@ -34,8 +34,12 @@ public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapt
         return (page.getPage()<=0?setData(list):append(true,list));
     }
 
-    public boolean resetLoad(){
-        return loadPage(mCurrentPage);
+    public boolean resetLoad(String debug){
+        Page<D> page=mCurrentPage;
+        D arg=null!=page?page.mArg:null;
+        mCurrentPage=null;
+        empty();
+        return loadPage(arg,debug);
     }
 
     public final Page<D> getLoadingPage() {

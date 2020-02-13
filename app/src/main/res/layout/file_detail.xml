@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="file"
+            type="com.merlin.bean.FileMeta" />
+        <variable
+            name="loadState"
+            type="int" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.api.What"/>
+        <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.util.Time"/>
+        <import type="com.merlin.util.FileType"/>
+    </data>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_gravity="center_horizontal"
+                android:text="@{file.name}"
+                style="@style/titleNormalTextView"/>
+            <include binding:key="@{R.string.name}" binding:value="@{file.title}" layout="@layout/item_file_detail"/>
+            <include binding:key="@{R.string.size}" binding:value="@{file.directory?``+file.size:FileSize.formatSizeText(file.length)}" layout="@layout/item_file_detail"/>
+            <include binding:key="@{R.string.format}" binding:value="@{file.directory?(Integer)R.string.folder:(file.mime??file.extension)}" layout="@layout/item_file_detail"/>
+            <include binding:key="@{R.string.type}" binding:value="@{FileType.formatType(file.mode)}" layout="@layout/item_file_detail"/>
+            <include binding:key="@{R.string.path}" binding:value="@{file.path}" layout="@layout/item_file_detail"/>
+            <include binding:key="@{R.string.modifyTime}" binding:value="@{Time.formatTime((long)file.modifyTime)}" layout="@layout/item_file_detail"/>
+            <include android:visibility="@{What.WHAT_INVALID!=loadState?View.GONE:View.VISIBLE}" layout="@layout/loading" binding:message="@{`加载中`}" />
+            <LinearLayout
+                android:visibility="@{What.WHAT_INVALID!=loadState?View.VISIBLE:View.GONE}"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <include binding:key="@{R.string.accessTime}" binding:value="@{Time.formatTime((long)file.accessTime)}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.createTime}" binding:value="@{Time.formatTime((long)file.createTime)}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.permission}" binding:value="@{``+file.permissions}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.md5}" binding:value="@{file.md5}" android:visibility="@{file.directory?View.GONE:View.VISIBLE}" layout="@layout/item_file_detail"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</layout>

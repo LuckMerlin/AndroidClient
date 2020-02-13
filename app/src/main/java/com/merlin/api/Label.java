@@ -21,4 +21,6 @@ public interface Label{
    String  LABEL_MD5 = "md5";
    String  LABEL_PLAY = "play";
    String  LABEL_FOLDER = "folder";
+   String  LABEL_ACCESS_TIME = "accessTime";
+   String  LABEL_MODEL = "mode";
 }

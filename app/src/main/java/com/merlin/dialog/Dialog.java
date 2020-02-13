@@ -73,7 +73,7 @@ public class Dialog implements View.OnClickListener{
                 Resources resources =null!=context?context.getResources():null;
                 DisplayMetrics dm = null!=resources?resources.getDisplayMetrics():null;
                 int width=null!=dm?dm.widthPixels:800;
-                dialog.getWindow().setLayout((int)((width<=0?800:width)*0.6), ViewGroup.LayoutParams.WRAP_CONTENT);
+                dialog.getWindow().setLayout((int)((width<=0?800:width)*0.75), ViewGroup.LayoutParams.WRAP_CONTENT);
             }
         }
         return this;

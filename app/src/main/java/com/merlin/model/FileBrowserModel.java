@@ -17,6 +17,7 @@ import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
+import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FileModify;
@@ -24,6 +25,7 @@ import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
+import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.MessageDialog;
@@ -37,7 +39,9 @@ import com.merlin.view.PopupWindow;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -90,6 +94,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         @FormUrlEncoded
         Observable<Reply<FileModify>> createFile(@Field(LABEL_PATH) String path,@Field(LABEL_NAME) String name,@Field(LABEL_FOLDER) boolean folder);
 
+        @POST(Address.PREFIX_FILE+"/detail")
+        @FormUrlEncoded
+        Observable<Reply<FileMeta>> getDetail(@Field(LABEL_PATH) String path);
     }
 
     private interface OnChooseExist{
@@ -112,6 +119,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                          return createFile(false);
                     case R.string.createFolder:
                         return createFile(true);
+                    case R.string.upload:
+                        return null!=data&&data instanceof FileMeta&&uploadFile((FileMeta)data);
+                    case R.string.detail:
+                        return null!=data&&data instanceof FileMeta&&showFileDetail((FileMeta)data);
                     case R.drawable.ic_menu_normal:
                         FileBrowserMenuBinding binding=inflate(R.layout.file_browser_menu);
                         if (null!=binding){
@@ -127,8 +138,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         break;
                 }
                 break;
-//            case 2:
-//                break;
         }
         return false;
     }
@@ -144,6 +153,42 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             }
         }
         return false;
+    }
+
+    private boolean uploadFile(FileMeta meta){
+        String path=null!=meta?meta.getPath():null;
+        if (null==path||path.length()<=0 ||!meta.isDirectory()){
+            toast(R.string.pathInvalid);
+            return false;
+        }
+        return false;
+    }
+
+    private boolean showFileDetail(FileMeta meta){
+        String path=null!=meta?meta.getPath():null;
+        FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
+        if (null==binding){
+            toast(R.string.pathInvalid);
+            return false;
+        }
+        binding.setFile(meta);
+        binding.setLoadState(What.WHAT_INVALID);
+        final Dialog dialog=new Dialog(getViewContext());
+        dialog.setContentView(null!=binding?binding.getRoot():null).show(( view, clickCount, resId, data)->{
+            return true;
+        },false);
+        return null!=call(Api.class,(OnApiFinish<Reply<FileMeta>>)(what,note,data2,arg)->{
+            FileMeta detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
+            if (null!=detail){
+                binding.setFile(detail);
+            }
+            binding.setLoadState(what);
+        }).getDetail(path);
+    }
+
+    private boolean resetBrowserCurrentFolder(String debug){
+        BrowserAdapter adapter=mBrowserAdapter;
+        return null!=adapter&&adapter.resetLoad(debug);
     }
 
     private boolean browserPath(String pathValue, String debug){
@@ -173,22 +218,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return true;
     }
 
-//    @Override
-//    public void onItemClick(View view, int sourceId,int position, Object data) {
-//        if (null!=data){
-//            if (data instanceof FileMeta){
-//                onFileMetaClick(view, sourceId, position, (FileMeta) data);
-//            }else if (data instanceof ContextMenu){
-//                onContextMenuClick(view,sourceId,position,(ContextMenu)data);
-//            }
-//        }
-//    }
-
     private boolean onFileMetaClick(View view,int resId,FileMeta file){
         if (null!=file) {
             switch (resId) {
                 case R.string.delete:
-                    return deleteFile(file);
+                    List<FileMeta> list=null!=file?new ArrayList<>():null;
+                    return null!=list&&list.add(file)&&deleteFile(list);
                 case R.string.rename:
                     return renameFile(file);
                 default:
@@ -217,7 +252,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     private boolean createFile(boolean dir){
         FolderMeta folderMeta=mCurrent.get();
-        final String parent=null!=folderMeta?folderMeta.getParent():null;
+        final String parent=null!=folderMeta?folderMeta.getPath():null;
         if (null==parent||parent.length()<=0){
             toast(R.string.pathNotExist);
             return false;
@@ -225,16 +260,23 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         final Dialog dialog=new Dialog(getViewContext());
         return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
                 .right(R.string.cancel).show(( view, clickCount,  resId, data)->{
-               String input=dialog.getViewText(R.id.edit_text,null);
-               if (null==input||input.length()<=0){
-                   toast(R.string.inputNotNull);
-               }else{
-                   dialog.dismiss();
-                   return null!=call(Api.class,(OnApiFinish<Reply<FileModify>>)(what,note,data2,arg)->{
-                       toast(note);
-                   }).createFile(parent,input,dir);
+               if (resId==R.string.sure){
+                   String input=dialog.getViewText(R.id.edit_text,null);
+                   if (null==input||input.length()<=0){
+                       toast(R.string.inputNotNull);
+                       return true;
+                   }else{
+                       dialog.dismiss();
+                       return null!=call(Api.class,(OnApiFinish<Reply<FileModify>>)(what,note,data2,arg)->{
+                           if(what==WHAT_SUCCEED){
+                               resetBrowserCurrentFolder("After file create succeed.");
+                           }
+                           toast(note);
+                       }).createFile(parent,input,dir);
+                   }
                }
-            return false;
+               dialog.dismiss();
+            return true;
         });
     }
 
@@ -267,104 +309,42 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
-    private boolean deleteFile(Object objects){
-        List<String> paths=null;
-        if (null!=objects){
-            paths=new ArrayList<>();
-            if (objects instanceof FileMeta){
-                FileMeta meta=(FileMeta)objects;
+    private boolean deleteFile(List<FileMeta> files){
+        final int length=null!=files?files.size():-1;
+        if (length>0){
+            List<String> paths=new ArrayList<>();
+            Map<String,FileMeta> map=new HashMap<>(length);
+            for (FileMeta meta:files) {
                 String path=null!=meta?meta.getPath():null;
                 if (null!=path&&path.length()>0){
                     paths.add(path);
+                    map.put(path,meta);
                 }
-            }else if (objects instanceof Collection){
-
+            }
+            if (null!=paths&&paths.size()>0){
+                return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what,note,data,arg)->{
+                    toast(note);
+                    if (what==WHAT_SUCCEED){
+                        List<String> deletedPaths=null!=data?data.getData():null;
+                        BrowserAdapter adapter=mBrowserAdapter;
+                        int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
+                        if (size>0){
+                            List<FileMeta> deleted=new ArrayList<>(size);
+                            for (String  path:deletedPaths) {
+                                FileMeta child=null!=path?map.get(path):null;
+                                if (null!=child){
+                                    deleted.add(child);
+                                }
+                            }
+                            adapter.remove(deleted);
+                        }
+                    }
+                }).deleteFile(paths);
             }
         }
-        if (null!=paths&&paths.size()>0){
-            return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what,note,data,arg)->{
-                boolean succeed=what==WHAT_SUCCEED;
-                toast(succeed?R.string.succeed : R.string.fail);
-                List<String> deleted=null!=data?data.getData():null;
-                BrowserAdapter adapter=mBrowserAdapter;
-                if (succeed&&null!=deleted&&deleted.size()>0&&null!=adapter){
-                    adapter.remove(deleted);
-                }
-            }).deleteFile(paths);
-//            }).deleteFile(new String[]{path,"/ddd/ddd"});
-        }
-        Debug.D(getClass(),"Can't delete file.path="+paths);
+        Debug.D(getClass(),"Can't delete file.");
         return false;
     }
-//    @Override
-//    public boolean onItemLongClick(View view, int sourceId,int position, Object data) {
-//        if(null!=data&&data instanceof FileMeta){
-//            mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
-//            mPopupWindow.setOnItemClickListener(this);
-//            mPopupWindow.reset(R.string.rename,R.string.addToFavorite,R.string.detail);
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    private void onContextMenuClick(View view, int sourceId,int position, ContextMenu menu){
-//        if (null!=menu){
-//            toast("点击了 "+menu.getTextId());
-//        }
-//    }
-//
-//    @Override
-//    public boolean onItemMultiClick(View view, int clickCount, int sourceId, int position, Object data) {
-//        switch (clickCount){
-//            case= 2:
-//
-//                break;
-//            case 3:
-//                if (null!=data&&data instanceof FileMeta){
-//                    return !isMultiMode().get()&&multiMode(true);
-//                }
-//                break;
-//        }
-//        return false;
-//    }
-
-//    @Override
-//    public void onViewClick(View v, int id,Object obj) {
-//        Debug.D(getClass()," onViewClick "+v);
-//        switch (id){
-//            case R.id.fileBrowser_cancelIV:
-//                onBackPressed();
-//                break;
-//            case R.id.fileBrowser_topBackIV:
-//                if (!browserParent("After top back click.")){
-//                    toast(R.string.alreadyArrivedRoot);
-//                }
-//                break;
-//            case R.id.fileBrowser_chooseAllIV:
-//                chooseAll(true);
-//                break;
-//            case R.id.fileBrowser_unChooseAllIV:
-//                chooseAll(false);
-//                break;
-//            case R.id.fileBrowser_menuIV:
-//                mPopupWindow.showAtLocation(v, Gravity.CENTER,0,0);
-//                mPopupWindow.setOnItemClickListener(this);
-////                mPopupWindow.reset(R.string.reboot);
-//                rebootClient("test");
-//                break;
-//            case R.id.fileBrowser_topSearchIV:
-//                 new SearchDialog(v.getContext()).setOnSearchInputChange((input)->{
-//                     toast("该表了 "+input);
-//                 }).show();
-//                break;
-//            case R.id.fileBrowser_transmitIV:
-//                startActivity(TransportActivity.class);
-//                break;
-//            case R.id.fileBrowser_downloadTV:
-////                runChoose((list)->DownloadService.postDownload(v.getContext(),getClientAccount(),null,list),true);
-//                break;
-//        }
-//    }
 
     private boolean browserParent(String debug){
         FolderMeta current=mCurrent.get();
@@ -375,13 +355,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         }
         return browserPath(parent,debug);
     }
-
-//    @Override
-//    public void onRefresh() {
-//        setRefreshing(false);
-//        refreshCurrentPath("While list refresh trigger.");//Browser current path again
-//    }
-
 
     @Override
     public boolean onActivityBackPressed(Activity activity) {

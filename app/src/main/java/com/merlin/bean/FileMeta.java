@@ -17,18 +17,20 @@ public final class FileMeta implements Parcelable {
     private String name;
     private String md5;
     private String mime;
+    private int mode;
     private String extension;
     private double createTime;
     private double modifyTime;
     private int permissions;
     private long length;
+    private long size;
     private double insertTime;
-    private int childCount;
     private boolean favorite;
     private String extra;
     private String thumbImageUrl;
     private String title;
     private Media meta;
+    private double accessTime;
 
     public boolean applyModify(FileModify modify){
         if (null!=modify){
@@ -48,7 +50,15 @@ public final class FileMeta implements Parcelable {
     }
 
     public boolean isDirectory(){
-        return childCount!=WHAT_NOT_DIRECTORY;
+        return size!=WHAT_NOT_DIRECTORY;
+    }
+
+    public int getMode() {
+        return mode;
+    }
+
+    public long getSize() {
+        return size;
     }
 
     public long getLength() {
@@ -60,15 +70,15 @@ public final class FileMeta implements Parcelable {
     }
 
     public double getModifyTime() {
-        return modifyTime*1000;
+        return modifyTime;
+    }
+
+    public double getAccessTime() {
+        return accessTime;
     }
 
     public String getPath() {
         return path;
-    }
-
-    public int getChildCount() {
-        return childCount;
     }
 
     public String getTitle() {
@@ -77,6 +87,14 @@ public final class FileMeta implements Parcelable {
 
     public void setPermissions(int permissions) {
         this.permissions = permissions;
+    }
+
+    public double getCreateTime() {
+        return createTime;
+    }
+
+    public String getMime() {
+        return mime;
     }
 
     public  boolean isAccessible(){
@@ -142,7 +160,7 @@ public final class FileMeta implements Parcelable {
         modifyTime=in.readDouble();
         insertTime=in.readDouble();
         permissions=in.readInt();
-        childCount=in.readInt();
+        size=in.readLong();
         favorite=in.readBoolean();
         Parcelable parcelable=in.readParcelable(FileMeta.class.getClassLoader());
         meta=null!=parcelable&&parcelable instanceof Media?(Media)parcelable:null;
@@ -165,7 +183,7 @@ public final class FileMeta implements Parcelable {
         dest.writeDouble(modifyTime);
         dest.writeDouble(insertTime);
         dest.writeInt(permissions);
-        dest.writeInt(childCount);
+        dest.writeLong(size);
         dest.writeBoolean(favorite);
         dest.writeParcelable(meta,0);
 

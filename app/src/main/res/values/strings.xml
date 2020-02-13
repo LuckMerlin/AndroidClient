@@ -38,4 +38,23 @@
     <string name="createFolder">创建文件夹</string>
     <string name="createFile">创建文件</string>
     <string name="pathNotExist">路径不存在</string>
+    <string name="name">名字</string>
+    <string name="type">类型</string>
+    <string name="format">格式</string>
+    <string name="size">大小</string>
+    <string name="modifyTime">修改时间</string>
+    <string name="path">路径</string>
+    <string name="createTime">创建时间</string>
+    <string name="accessTime">访问时间</string>
+    <string name="permission">权限</string>
+    <string name="folder">文件夹</string>
+    <string name="socket">套接字</string>
+    <string name="characterDevice">字符设备</string>
+    <string name="blockDevice">块设备</string>
+    <string name="regularFile">普通文件</string>
+    <string name="pipe">管道</string>
+    <string name="link">链接</string>
+    <string name="md5">MD5</string>
+    <string name="file">文件</string>
+    <string name="upload">上传</string>
 </resources>

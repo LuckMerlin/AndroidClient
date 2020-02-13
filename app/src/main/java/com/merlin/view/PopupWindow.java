@@ -20,7 +20,15 @@ public class PopupWindow {
     private int mDismissFlag=0;
     private Integer mAppliedDismissFlag;
 
-    public PopupWindow(boolean touchable){
+    public interface OnDismissListener{
+        void onDismiss(PopupWindow popupWindow);
+    }
+
+    public PopupWindow(boolean touchable) {
+        this(touchable,null);
+    }
+
+    public PopupWindow(boolean touchable, OnDismissListener listener){
         setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
         setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         android.widget.PopupWindow window=mWindow;
@@ -29,6 +37,9 @@ public class PopupWindow {
             ViewParent parent=null!=view?view.getParent():null;
             if (null!=parent&&parent instanceof ViewGroup){
                 ((ViewGroup)parent).removeView(view);
+            }
+            if (null!=listener){
+                listener.onDismiss(this);
             }
         });
         setDismissFlag(mDismissFlag|(touchable?DISMISS_OUT_MASK:0));

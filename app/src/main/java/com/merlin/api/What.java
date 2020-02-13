@@ -1,6 +1,7 @@
 package com.merlin.api;
 
 public interface What {
+    int WHAT_INVALID = 0;
     int WHAT_SUCCEED = -1000;
     int WHAT_ERROR_UNKNOWN = -1001;
     int WHAT_MEDIA_NOT_EXIST = -1002;

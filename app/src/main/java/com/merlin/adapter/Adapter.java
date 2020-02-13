@@ -21,6 +21,16 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         append(false,data);
     }
 
+    public boolean empty(){
+        List<T> data=mData;
+        if (null!=data&&data.size()>0){
+            data.clear();
+            notifyDataSetChanged();
+            return true;
+        }
+        return false;
+    }
+
     public final boolean setData(Collection<T> data){
         boolean changed=false;
         List<T> current=mData;
@@ -52,10 +62,10 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         return false;
     }
 
-    public final boolean remove(List datas){
+    public final boolean remove(List<T> datas){
         int count=null!=datas?datas.size():-1;
         if (count>0){
-            for (Object data:datas) {
+            for (T data:datas) {
                 remove(data);
             }
             return true;
@@ -63,7 +73,7 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         return false;
     }
 
-    public final boolean remove(Object data){
+    public final boolean remove(T data){
         List<T> datas=null!=data?mData:null;
         int index=null!=datas?datas.indexOf(data):-1;
         if (index>=0&&datas.remove(data)){

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <import type="com.merlin.client.R"/>
+        <variable
+            name="message"
+            type="Object" />
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.wang.avi.AVLoadingIndicatorView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            binding:indicatorName="SemiCircleSpinIndicator"/>
+        <TextView
+            android:layout_marginTop="5dp"
+            android:text="@{message}"
+            style="@style/titleNormalTextView"/>
+    </LinearLayout>
+</layout>
