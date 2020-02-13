@@ -56,7 +56,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private final ObservableField<ClientMeta> mClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
-    private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
+    private final ObservableField<Integer> mMode=new ObservableField<>();
+//    private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
+    public final static int MODE_NORMAL=1212;
+    public final static int MODE_MULTI_CHOOSE=1213;
+    public final static int MODE_COPY=1214;
+    public final static int MODE_MOVE=1215;
     private final BrowserAdapter mBrowserAdapter=new BrowserAdapter(){
         @Override
         protected boolean onPageLoad(String path, int page, OnApiFinish<Reply<FolderMeta>> finish) {
@@ -106,6 +111,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     public FileBrowserModel(){
         refreshClientMeta("While model create.");
         browserPath("","While model create.");
+        entryMode(MODE_NORMAL);
     }
 
     @Override
@@ -113,6 +119,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         switch (clickCount){
             case 1:
                 switch (resId){
+                    case R.drawable.selector_back:
+                        return browserParent("After back pressed");
                     case R.string.reboot:
                         return rebootClient("After reboot tap click.");
                     case R.string.createFile:
@@ -123,15 +131,47 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         return null!=data&&data instanceof FileMeta&&uploadFile((FileMeta)data);
                     case R.string.detail:
                         return null!=data&&data instanceof FileMeta&&showFileDetail((FileMeta)data);
+                    case R.drawable.cancel_selector:
+                        return isMode(MODE_MULTI_CHOOSE)&&entryMode(MODE_NORMAL);
+                    case R.drawable.choose_all_selector:
+                        BrowserAdapter adapter=isMode(MODE_MULTI_CHOOSE)?mBrowserAdapter:null;
+                        return null!=adapter&&adapter.chooseAll(true);
+                    case R.drawable.ic_menu_alls:
+                         adapter=isMode(MODE_MULTI_CHOOSE)?mBrowserAdapter:null;
+                        return null!=adapter&&adapter.chooseAll(false);
                     case R.drawable.ic_menu_normal:
                         FileBrowserMenuBinding binding=inflate(R.layout.file_browser_menu);
                         if (null!=binding){
                             binding.setFolder(mCurrent.get());
-                            showAtLocationAsContext(view,binding);
-                            return true;
+                            return showAtLocationAsContext(view,binding);
                         }
-                        break;
+                        return false;
+                    case R.string.delete:
+                        List<FileMeta> list=null!=data&&data instanceof FileMeta?new ArrayList<>():null;
+                        return null!=list&&list.add((FileMeta)data)&&deleteFile(list);
+                    case R.string.rename:
+                        return null!=data&&data instanceof FileMeta&&renameFile((FileMeta)data);
                     default:
+                        if (null!=data&&data instanceof FileMeta){
+                            FileMeta file=(FileMeta)data;
+                            if (isMode(MODE_MULTI_CHOOSE)) {
+                                multiChoose(file);
+                            } else {
+                                if (file.isDirectory()) {
+                                    browserPath(file.getPath(), "After directory click.");
+                                } else {//Open file
+                                    if (!file.isAccessible()) {
+                                        return toast(R.string.nonePermission);
+                                    }
+                                    String extension = file.getExtension();
+                                    if (extension.equals("mp3")) {
+                                        return MediaPlayService.play(getContext(), file.getMeta(), 0, false);
+                                    } else {
+                                        return toast(R.string.noneSupportOpenFileType, extension);
+                                    }
+                                }
+                            }
+                        }
                         break;
                 }
                 break;
@@ -139,7 +179,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 switch (resId){
                     default:
                         if (null!=data&&data instanceof FileMeta){
-                            return onFileMetaClick(view,resId,(FileMeta)data);
+                            FileContextMenuBinding  binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
+                            if (null!=binding){
+                                binding.setFile((FileMeta)data);
+                                showAtLocationAsContext(view,binding);
+                                return true;
+                            }
                         }
                         break;
                 }
@@ -150,12 +195,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     @Override
     public boolean onLongClick(View view, int clickCount, int resId, Object data) {
         if (null!=data&&data instanceof FileMeta){
-            FileContextMenuBinding binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
-            if (null!=binding){
-                binding.setFile((FileMeta)data);
-                showAtLocationAsContext(view,binding);
-                return true;
-            }
+            return entryMode(MODE_MULTI_CHOOSE);
         }
         return false;
     }
@@ -221,38 +261,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 return true;
         });
         return true;
-    }
-
-    private boolean onFileMetaClick(View view,int resId,FileMeta file){
-        if (null!=file) {
-            switch (resId) {
-                case R.string.delete:
-                    List<FileMeta> list=null!=file?new ArrayList<>():null;
-                    return null!=list&&list.add(file)&&deleteFile(list);
-                case R.string.rename:
-                    return renameFile(file);
-                default:
-                    if (isMultiMode().get()) {
-                        multiChoose(file);
-                    } else {
-                        if (file.isDirectory()) {
-                            browserPath(file.getPath(), "After directory click.");
-                        } else {//Open file
-                            if (!file.isAccessible()) {
-                                return toast(R.string.nonePermission);
-                            }
-                            String extension = file.getExtension();
-                            if (extension.equals("mp3")) {
-                                return MediaPlayService.play(getContext(), file.getMeta(), 0, false);
-                            } else {
-                                return toast(R.string.noneSupportOpenFileType, extension);
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        return false;
     }
 
     private boolean createFile(boolean dir){
@@ -361,10 +369,16 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return browserPath(parent,debug);
     }
 
+    private boolean isMode(int mode){
+        ObservableField<Integer> current=mMode;
+        Integer curr=null!=current?current.get():null;
+        return null!=curr&&mode==curr;
+    }
+
     @Override
     public boolean onActivityBackPressed(Activity activity) {
-        if (isMultiMode().get()){
-            return chooseAll(false)||multiMode(false);
+        if (!isMode(MODE_NORMAL)){
+            return entryMode(MODE_NORMAL);
         }
         return browserParent("After back pressed called.");
     }
@@ -379,9 +393,29 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return browserPath(null!=meta?meta.getPath():null,debug);
     }
 
+    private boolean entryMode(int mode){
+        if (!isMode(mode)){
+            mMode.set(mode);
+            BrowserAdapter adapter=mBrowserAdapter;
+            if (null!=adapter){
+                adapter.setMode(mode);
+            }
+            switch (mode){
+                case MODE_MULTI_CHOOSE:
+                    return refreshMultiChooseCount();
+                case MODE_COPY:
+                    break;
+                case MODE_MOVE:
+                    break;
+            }
+            return true;
+        }
+        return false;
+    }
+
     public final boolean chooseAll(boolean choose){
         BrowserAdapter adapter=mBrowserAdapter;
-        if (isMultiMode().get()&&null!=adapter&&adapter.chooseAll(choose)){
+        if (isMode(MODE_MULTI_CHOOSE)&&null!=adapter&&adapter.chooseAll(choose)){
             refreshMultiChooseCount();
             return true;
         }
@@ -392,25 +426,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return mClientMeta;
     }
 
-    public ObservableBoolean isMultiMode() {
-        return mMultiMode;
-    }
 
-    private boolean multiMode(boolean entry){
-        boolean curr=mMultiMode.get();
-        BrowserAdapter adapter=mBrowserAdapter;
-        if (entry!=curr&&null!=adapter){
-            adapter.multiMode(entry);
-            mMultiMode.set(entry);
-            refreshMultiChooseCount();
-            return true;
-        }
-        return false;
+    public ObservableField<Integer> getMode() {
+        return mMode;
     }
 
     private boolean multiChoose(FileMeta meta){
         BrowserAdapter adapter=mBrowserAdapter;
-        if (null!=meta&&mMultiMode.get()&&adapter.multiChoose(meta)){
+        if (null!=meta&&isMode(MODE_MULTI_CHOOSE)&&adapter.multiChoose(meta)){
             refreshMultiChooseCount();
             return true;
         }
@@ -421,7 +444,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return mAllChoose;
     }
 
-    private void refreshMultiChooseCount() {
+    private boolean refreshMultiChooseCount() {
         FolderMeta folderMeta=mCurrent.get();
         int length=null!=folderMeta?folderMeta.getLength():0;
         BrowserAdapter adapter=mBrowserAdapter;
@@ -431,7 +454,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             List<FileMeta> data=adapter.getData();
             int size=null!=data?data.size():0;
             mAllChoose.set(size==count&&size>0);
+            return true;
         }
+        return false;
     }
 
     public ObservableField<String> getMultiChooseCount() {

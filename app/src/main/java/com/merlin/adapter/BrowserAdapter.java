@@ -13,6 +13,7 @@ import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.debug.Debug;
+import com.merlin.model.FileBrowserModel;
 import com.merlin.util.FileSize;
 
 import java.text.SimpleDateFormat;
@@ -82,16 +83,17 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
         return false;
     }
 
-    public void multiMode(boolean entry){
+    public boolean setMode(int mode){
         List current=mMultiChoose;
         if (null!=current){
             current.clear();
         }
         mMultiChoose=null;
-        if (entry){
+        if (mode == FileBrowserModel.MODE_MULTI_CHOOSE){
             mMultiChoose=new ArrayList<>(1);
         }
         notifyDataSetChanged();
+        return false;
     }
 
     public int getChooseCount(){

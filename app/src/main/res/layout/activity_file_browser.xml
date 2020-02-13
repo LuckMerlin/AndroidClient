@@ -11,6 +11,7 @@
         <import type="com.merlin.util.FileSize"/>
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
+        <import type="com.merlin.model.FileBrowserModel" alias="Model"/>
     </data>
     <RelativeLayout
         binding:createModel="@{null}"
@@ -33,60 +34,58 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                     <ImageView
-                        android:id="@+id/fileBrowser_topBackIV"
+                        binding:enableClick="@{true}"
                         android:layout_width="@dimen/titleIconSize"
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
-                        android:src="@drawable/ic_back"/>
+                        android:visibility="@{vm.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
+                        android:src="@{R.drawable.selector_back}"/>
                     <ImageView
-                        android:id="@+id/fileBrowser_cancelIV"
+                        binding:enableClick="@{true}"
                         android:layout_width="@dimen/titleIconSize"
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
-                        android:src="@drawable/cancel_selector"/>
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
+                        android:src="@{R.drawable.cancel_selector}"/>
                     <TextView
                         android:text="@{vm.clientMeta.name}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
                         android:text="@{` (`+vm.current.length+')'}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{(vm.isMultiMode()||(null==vm.clientMeta&amp;&amp;vm.current.size()&lt;1))?View.GONE:View.VISIBLE}"
+                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.clientMeta&amp;&amp;vm.current.size()&lt;1))?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
                         android:text="@{vm.getMultiChooseCount()}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/fileBrowser_chooseAllIV"
-                android:orientation="horizontal"
+                binding:enableClick="@{true}"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:visibility="@{vm.isMultiMode()&amp;&amp;!vm.isAllChoose()?View.VISIBLE:View.GONE}"
-                android:src="@drawable/choose_all_selector"
+                android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;!vm.isAllChoose()?View.VISIBLE:View.GONE}"
+                android:src="@{R.drawable.choose_all_selector}"
                 android:layout_width="@dimen/titleIconSize"
                 android:layout_height="@dimen/titleIconSize"/>
             <ImageView
-                android:id="@+id/fileBrowser_unChooseAllIV"
-                android:orientation="horizontal"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:visibility="@{vm.isMultiMode()&amp;&amp;vm.isAllChoose()?View.VISIBLE:View.GONE}"
-                android:src="@drawable/ic_menu_alls"
+                binding:enableClick="@{true}"
+                android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;vm.isAllChoose()?View.VISIBLE:View.GONE}"
+                android:src="@{R.drawable.ic_menu_alls}"
                 android:layout_width="@dimen/titleIconSize"
                 android:layout_height="@dimen/titleIconSize"/>
 
@@ -94,12 +93,13 @@
                 android:orientation="horizontal"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:visibility="@{vm.isMultiMode()?View.GONE:View.VISIBLE}"
+                android:visibility="@{vm.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <ImageView
                     android:id="@+id/fileBrowser_transmitIV"
                     android:src="@drawable/ic_searchgo_normal"
+                    android:visibility="gone"
                     android:padding="10dp"
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
@@ -176,7 +176,7 @@
         <LinearLayout
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
-            android:visibility="@{vm.isMultiMode()?View.VISIBLE:View.GONE}"
+            android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
             android:paddingBottom="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
