@@ -91,26 +91,34 @@ public class Dialog implements View.OnClickListener{
         return this;
     }
 
-    public final Dialog title(int title){
+    public final Dialog title(Object title){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
-            binding.setTitleTextId(title);
+            binding.setTitleText(title);
         }
         return this;
     }
 
-    public final Dialog left(int sureTextId){
+    public final Dialog message(Object msgTextId){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
-            binding.setSureTextId(sureTextId);
+            binding.setMessageText(msgTextId);
         }
         return this;
     }
 
-    public final Dialog right(int cancelTextId){
+    public final Dialog left(Object sureTextId){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
-            binding.setCancelTextId(cancelTextId);
+            binding.setLeftText(sureTextId);
+        }
+        return this;
+    }
+
+    public final Dialog right(Object cancelTextId){
+        DialogLayoutBinding binding=mBinding;
+        if (null!=binding){
+            binding.setRightText(cancelTextId);
         }
         return this;
     }

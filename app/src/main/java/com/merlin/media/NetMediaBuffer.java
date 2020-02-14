@@ -5,6 +5,7 @@ import com.merlin.api.Label;
 import com.merlin.bean.Media;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
+import com.merlin.file.DownloadApi;
 import com.merlin.player.MediaBuffer;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Closer;
@@ -32,13 +33,6 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
     private final String mCachePath;
     private Reader mReader;
     private final Retrofit mRetrofit=new Retrofit();
-
-    private interface Api{
-        @Streaming
-        @POST(Address.PREFIX_FILE+"/download")
-        @FormUrlEncoded
-        Call<ResponseBody> downloadFile(@Field(Label.LABEL_PATH) String path,@Field(Label.LABEL_PLAY) boolean play);
-    }
 
     public NetMediaBuffer(Media media, double seek){
         super(media,seek);
@@ -71,7 +65,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
         reader.mWriteComplete=false;
         reader.mState= Reader.STATE_OPENING;
         Debug.D(getClass(),"下载 "+Address.URL+url);
-        retrofit.call(Api.class, Schedulers.newThread()).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
+        retrofit.call(DownloadApi.class, Schedulers.newThread()).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
                     private void finishRequest(int what,String debug){
                         reader.mWriteComplete=true;
                         reader.setCanceler(null);

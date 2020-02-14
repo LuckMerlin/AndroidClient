@@ -1,12 +1,10 @@
 package com.merlin.bean;
 
-import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.debug.Debug;
 import com.merlin.file.Permissions;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
@@ -144,7 +142,6 @@ public final class FileMeta implements Parcelable {
     }
 
 
-    @SuppressLint("NewApi")
     private FileMeta(Parcel in){
         id=in.readLong();
         length=in.readLong();
@@ -161,12 +158,11 @@ public final class FileMeta implements Parcelable {
         insertTime=in.readDouble();
         permissions=in.readInt();
         size=in.readLong();
-        favorite=in.readBoolean();
+        favorite=in.readInt()==1;
         Parcelable parcelable=in.readParcelable(FileMeta.class.getClassLoader());
         meta=null!=parcelable&&parcelable instanceof Media?(Media)parcelable:null;
     }
 
-    @SuppressLint("NewApi")
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
@@ -184,7 +180,7 @@ public final class FileMeta implements Parcelable {
         dest.writeDouble(insertTime);
         dest.writeInt(permissions);
         dest.writeLong(size);
-        dest.writeBoolean(favorite);
+        dest.writeInt(favorite?1:0);
         dest.writeParcelable(meta,0);
 
     }

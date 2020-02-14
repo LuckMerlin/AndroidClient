@@ -12,6 +12,8 @@ import android.view.ViewParent;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
+import java.lang.ref.WeakReference;
+
 public class PopupWindow {
     private final android.widget.PopupWindow mWindow=new android.widget.PopupWindow();
     private Drawable mBackground;
@@ -112,7 +114,7 @@ public class PopupWindow {
         if (null!=window&&null!=parent) {
             View contentView=null!=interrupter?getContentView():null;
             if (null!=contentView){
-                Clicker.setInterrupterTag(contentView,interrupter);
+                Clicker.setInterrupterTag(contentView,interrupter,true);
             }
             if (null!=dismissFlag){
                 applyDismissFlag(dismissFlag);

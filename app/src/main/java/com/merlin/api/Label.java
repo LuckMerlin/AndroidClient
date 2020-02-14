@@ -22,5 +22,9 @@ public interface Label{
    String  LABEL_PLAY = "play";
    String  LABEL_FOLDER = "folder";
    String  LABEL_ACCESS_TIME = "accessTime";
-   String  LABEL_MODEL = "mode";
+   String  LABEL_MODE = "mode";
+   String  LABEL_COPY = "copy";
+   String  LABEL_MOVE = "move";
+   String  LABEL_FROM = "from";
+   String  LABEL_TO = "to";
 }

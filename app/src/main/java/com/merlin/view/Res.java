@@ -1,5 +1,7 @@
 package com.merlin.view;
 
+import androidx.annotation.NonNull;
+
 public final class Res {
     private final Integer mResourceId;
     private final Object mArg;
@@ -15,5 +17,11 @@ public final class Res {
 
     public Object getArg() {
         return mArg;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return super.toString()+" "+mResourceId+" "+mArg;
     }
 }

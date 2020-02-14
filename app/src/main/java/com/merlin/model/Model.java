@@ -70,10 +70,10 @@ public class Model {
         return toast(textResId,null);
     }
 
-    public final String getText(int textResId){
+    public final String getText(int textResId,Object ...args){
         View root=getRoot();
         Context context=null!=root?root.getContext():null;
-        return null!=context?context.getResources().getString(textResId):null;
+        return null!=context?context.getResources().getString(textResId,args):null;
     }
 
     public final boolean toast(int textResId,String note){
@@ -213,7 +213,6 @@ public class Model {
         }
         return null;
     }
-
 
     public final Object getActivityDataFromIntent(Intent intent){
         Bundle bundle=null!=intent?intent.getExtras():null;

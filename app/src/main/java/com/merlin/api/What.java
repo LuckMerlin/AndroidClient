@@ -20,5 +20,10 @@ public interface What {
     int WHAT_TOKEN_INVALID = - 1015;
     int WHAT_CANCEL = - 1016;
     int WHAT_FILE_EXIST = - 1017;
+    int WHAT_CREATE_FAILED = - 1018;
+    int WHAT_SKIP = - 1019;
+    int WHAT_REPLACE = - 1020;
+    int WHAT_NORMAL = - 1021;
+    int WHAT_NOT_SUPPORT = - 1022;
 }
 

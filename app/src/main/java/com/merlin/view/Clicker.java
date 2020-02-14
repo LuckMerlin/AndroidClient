@@ -23,6 +23,8 @@ import com.merlin.model.Model;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class Clicker {
     private Object mListener;
@@ -107,10 +109,14 @@ public final class Clicker {
         return false;
     }
 
+    public static Res getRes(View view,Res def){
+        Object object=view.getTag(R.id.viewResource);
+        return null!=object&&object instanceof Res?(Res)object:def;
+    }
+
     public static boolean putRes(View view,Res res){
          if (null!=view){
-             Object existedResObject=view.getTag(R.id.viewResource);
-             final Res existedRes=null!=existedResObject&&existedResObject instanceof Res?(Res)existedResObject:null;
+             final Res existedRes=getRes(view,null);
              if (null==res){
                  if (null!=existedRes){
                      view.setTag(R.id.viewResource,null);
@@ -119,7 +125,8 @@ public final class Clicker {
              }else{
                  Integer resourceId=res.getResourceId();
                  Object arg=res.getArg();
-                 resourceId=null!=resourceId&&resourceId!=Resources.ID_NULL?resourceId:(null!=existedRes?existedRes.getResourceId():null);
+                 resourceId=null!=resourceId&&resourceId!=Resources.ID_NULL?resourceId:
+                         (null!=existedRes?existedRes.getResourceId():null);
                  arg=(null!=arg?arg:(null!=existedRes?existedRes.getArg():null));
                  view.setTag(R.id.viewResource,new Res(resourceId,arg));
              }
@@ -169,28 +176,31 @@ public final class Clicker {
             boolean cover= click.mCoverExisted;
             if ((click.mType&SINGLE_LONG_CLICK_MASK)>0){
 //                    if (cover){
-                root.setTag(R.id.viewResource,res);
+                Clicker.putRes(root,res);
                 root.setOnLongClickListener(((v)->{
-                    Object object=root.getTag(R.id.viewResource);
+                    Res longRes=getRes(root,null);
                     Object arg=null;
                     Integer resId;
-                    if (null!=object&&object instanceof Res){
-                        resId=((Res)object).getResourceId();
-                        arg=((Res)object).getArg();
+                    if (null!=longRes){
+                        resId=longRes.getResourceId();
+                        arg=longRes.getArg();
                     }else{
                         resId=root.getId();
                     }
                     final int resIdFinal=null==resId?root.getId():resId;
                     final Object argFinal=arg;
+                    final List<Object> dispatched=new ArrayList<>(10);
                     final boolean interrupted=dispatchClickToModel(root,root, ( r, vi, model, binding)->{
-                        return null!=model&&model instanceof OnLongClick&&((OnLongClick)model)
-                                .onLongClick(root,1,resIdFinal,argFinal);
+                        if (null!=model&&model instanceof OnLongClick&&!dispatched.contains(model)){
+                            dispatched.add(model);
+                            return ((OnLongClick)model).onLongClick(root,1,resIdFinal,argFinal);
+                        }
+                        return false;
                     });
-                    Context context=null!=root?root.getContext():null;
-                    if (null!=context&&context instanceof OnLongClick){
-                        return ((OnLongClick)context).onLongClick(root,1,resIdFinal,argFinal);
-                    }
-                    return interrupted;
+                    Context context=!interrupted&&null!=root?root.getContext():null;
+                    OnLongClick longClick=null!=context&&context instanceof OnLongClick&&!dispatched.contains(context)?(OnLongClick)context:null;
+                    dispatched.clear();
+                    return null!=longClick&&longClick.onLongClick(root,1,resIdFinal,argFinal);
                 }));
 
 //                    }
@@ -203,33 +213,36 @@ public final class Clicker {
                         public void run() {
                             final int count=mClickCount;
                             mClickCount=0;//Reset
-                            Object object=root.getTag(R.id.viewResource);
+                            Res clickRes=getRes(root,null);
                             Object arg=null;
                             Integer resId;
-                            if (null!=object&&object instanceof Res){
-                                resId=((Res)object).getResourceId();
-                                arg=((Res)object).getArg();
+                            if (null!=clickRes){
+                                resId=clickRes.getResourceId();
+                                arg=clickRes.getArg();
                             }else{
                                 resId=root.getId();
                             }
                             final int resourceIdFinal=resId=null==resId?root.getId():resId;
                             final Object argFinal=arg;
                             OnTapClick listener=getListener();
-                            if (null==listener||!listener.onTapClick(root,count,resId,object)){ //Try dispatch to model
+                            final List<Object> dispatched=new ArrayList<>(10);
+                            if (null==listener||!listener.onTapClick(root,count,resId,argFinal)){ //Try dispatch to model
                                 final boolean interrupted= dispatchClickToModel(root, root, ( view, rt, model, binding)->{
-                                     return null!=model&&model instanceof OnTapClick&&((OnTapClick)model).
-                                            onTapClick(root,count,resourceIdFinal,argFinal);
-                                });
-                                if (!interrupted){
-                                    Context context=root.getContext();
-                                    if (null!=context&&context instanceof OnTapClick){
-                                        ((OnTapClick)context).onTapClick(root,count,resourceIdFinal,argFinal);
+                                    if (null!=model&&model instanceof OnTapClick&&!dispatched.contains(model)){
+                                        dispatched.add(model);
+                                        return ((OnTapClick)model).onTapClick(root,count,resourceIdFinal,argFinal);
                                     }
+                                    return false;
+                                });
+                                Context context=!interrupted?root.getContext():null;
+                                if (null!=context&&context instanceof OnTapClick&&!dispatched.contains(context)){
+                                    ((OnTapClick)context).onTapClick(root,count,resourceIdFinal,argFinal);
                                 }
+                                dispatched.clear();
                             }
                         }
                     };
-                    root.setTag(R.id.viewResource,res);
+                    Clicker.putRes(root,res);
                     long[] downTime=new long[1];
                     root.setOnTouchListener(( v, event)->{
                         if (event.getAction()==MotionEvent.ACTION_DOWN){
@@ -259,35 +272,15 @@ public final class Clicker {
 
     private boolean dispatchClickToModel(View view,View root,Dispatcher dispatcher){
         if (null!=view&&null!=dispatcher){
-//            Object object=view.getTag(R.id.modelBind);
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
-            Class cls=null!=binding?binding.getClass().getSuperclass():null;
-            Method[] methods=null!=cls?cls.getDeclaredMethods():null;
-            boolean interrupted=false;
-            if (null!=methods&&methods.length>0){
-                Class type;
-                for (Method method:methods) {
-                    if (null!=method&&null!=(type=method.getReturnType())){
-                        Class[] types=method.getParameterTypes();
-                        if ((null==types||types.length<=0)&&Classes.isAssignableFrom(type,Model.class)){
-                            method.setAccessible(true);
-                            try {
-                                Object data=method.invoke(binding);
-                                if (null!=data&&data instanceof Model&&dispatcher.onDispatch(view,root,(Model)data,binding)){
-                                    interrupted=true;
-                                    break;
-                                }
-                            } catch (Exception e) {
-                               //Do nothing
-                            }
-                        }
-                    }
-                }
+            Object modelBind=view.getTag(R.id.modelBind);
+            if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,modelBind,binding)){
+                return true;
             }
-            ViewParent parent=interrupted?null:view.getParent();
+            ViewParent parent=view.getParent();
             if (null!=parent&&parent instanceof View &&(parent!=view)){
-                Object modelBind=((View)parent).getTag(R.id.modelBind);
-                if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,(Model)modelBind,binding)){
+                modelBind=((View)parent).getTag(R.id.modelBind);
+                if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,modelBind,binding)){
                     return true;
                 }
                 Object interrupter=((View)parent).getTag(R.id.interruptClick);
@@ -301,7 +294,7 @@ public final class Clicker {
                 }
                 return dispatchClickToModel((View)parent,root,dispatcher);
             }
-            return interrupted;
+            return false;
         }
         return false;
     }

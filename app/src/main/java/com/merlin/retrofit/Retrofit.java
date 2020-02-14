@@ -77,7 +77,11 @@ public final class Retrofit implements What {
         return call(cls,null,observeOn,dither,callbacks);
     }
 
-    public final <T> T call(Class<T> cls, Interceptor[] interceptors, Scheduler observeOn, Object dither, Callback...callbacks){
+    public final <T> T call(Class<T> cls,Scheduler subscribeOn,Scheduler observeOn,Object dither, Callback...callbacks){
+        return call(cls,null,subscribeOn,observeOn,dither,callbacks);
+    }
+
+    public final <T> T call(Class<T> cls, Interceptor[] interceptors,Scheduler subscribeOn, Scheduler observeOn, Object dither, Callback...callbacks){
         if (null!=cls){
             return (T)Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls},(proxy, method,args)->{
                         if (null==dither||!isExistDither(dither)){
@@ -90,7 +94,7 @@ public final class Retrofit implements What {
                                 if (null!=dither){
                                     addDither(dither);
                                 }
-                                subscribe((Observable) ret,observeOn,finish, callbacks);
+                                subscribe((Observable) ret,subscribeOn,observeOn,finish, callbacks);
                             }
                             return ret;
                         }
@@ -102,12 +106,16 @@ public final class Retrofit implements What {
         return null;
     }
 
-    public final <M> boolean subscribe(Observable observable, Scheduler observeOn,OnApiFinish innerFinish, Callback ...callbacks){
+    public final <M> boolean subscribe(Observable observable, Scheduler observeOn,OnApiFinish innerFinish, Callback ...callbacks) {
+        return subscribe(observable,null,observeOn,innerFinish,callbacks);
+    }
+
+    public final <M> boolean subscribe(Observable observable,Scheduler subscribeOn, Scheduler observeOn,OnApiFinish innerFinish, Callback ...callbacks){
         if (null==observable){
             finish(WHAT_ARGS_INVALID,"Observable is Null.",null,null,innerFinish,callbacks);
             return false;
         }
-        observable=observable.subscribeOn(Schedulers.newThread()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread());
+        observable=observable.subscribeOn(null!=subscribeOn?subscribeOn:Schedulers.newThread()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread());
         WeakReference<LifecycleProvider> reference=mLifecycleProvider;
         LifecycleProvider provider=null!=reference?reference.get():null;
         if (null!=provider&&provider instanceof Activity){

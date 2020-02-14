@@ -2,13 +2,10 @@ package com.merlin.model;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 
 import com.merlin.adapter.BrowserAdapter;
@@ -21,6 +18,7 @@ import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FileModify;
+import com.merlin.bean.FilePaste;
 import com.merlin.bean.FolderMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
@@ -28,17 +26,15 @@ import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
-import com.merlin.dialog.MessageDialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.MediaPlayService;
 import com.merlin.protocol.Tag;
+import com.merlin.transport.TransportService;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
-import com.merlin.view.PopupWindow;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +53,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableField<Integer> mMode=new ObservableField<>();
-//    private final ObservableBoolean mMultiMode=new ObservableBoolean(false);
+    private Object mProcessing;
     public final static int MODE_NORMAL=1212;
     public final static int MODE_MULTI_CHOOSE=1213;
     public final static int MODE_COPY=1214;
@@ -102,6 +98,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
         Observable<Reply<FileMeta>> getDetail(@Field(LABEL_PATH) String path);
+
+        @POST(Address.PREFIX_FILE+"/paste")
+        @FormUrlEncoded
+        Observable<Reply<ApiList<Reply<FilePaste>>>> pasteFile(@Field(LABEL_MODE) String mode,@Field(LABEL_PATH) List<FilePaste> paths);
     }
 
     private interface OnChooseExist{
@@ -120,9 +120,19 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             case 1:
                 switch (resId){
                     case R.drawable.selector_back:
-                        return browserParent("After back pressed");
+                        return browserParent("After back pressed.");
+                    case R.id.fileBrowser_bottom_cancel_TV:
+                        return cancel("After cancel tap click.");
+                    case R.string.download:
+                        return downloadFile(null!=data&&data instanceof FileMeta?(FileMeta)data:null,"After cancel tap click.");
+                    case R.id.fileBrowser_bottom_paste_TV:
+                        return pasteFileOnCurrent("After paste tap click.")&&entryMode(MODE_NORMAL);
                     case R.string.reboot:
                         return rebootClient("After reboot tap click.");
+                    case R.string.copy:
+                        return copyFile(null!=data&&data instanceof FileMeta?(FileMeta)data:null,"After copy tap click.");
+                    case R.string.move:
+                        return moveFile(null!=data&&data instanceof FileMeta?(FileMeta)data:null,"After move tap click.");
                     case R.string.createFile:
                          return createFile(false);
                     case R.string.createFolder:
@@ -132,7 +142,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.string.detail:
                         return null!=data&&data instanceof FileMeta&&showFileDetail((FileMeta)data);
                     case R.drawable.cancel_selector:
-                        return isMode(MODE_MULTI_CHOOSE)&&entryMode(MODE_NORMAL);
+                        return !isMode(MODE_NORMAL)&&entryMode(MODE_NORMAL);
                     case R.drawable.choose_all_selector:
                         BrowserAdapter adapter=isMode(MODE_MULTI_CHOOSE)?mBrowserAdapter:null;
                         return null!=adapter&&adapter.chooseAll(true);
@@ -200,11 +210,99 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
+    private boolean downloadFile(FileMeta meta,String debug){
+        String path=null!=meta?meta.getPath():null;
+        if (null!=path&&path.length()>0){
+            ArrayList<FileMeta> list=new ArrayList<>();
+            list.add(meta);
+            return downloadFile(list,debug);
+        }
+        toast(R.string.pathInvalid);
+        return false;
+    }
+
+    private boolean downloadFile(ArrayList<FileMeta> files,String debug){
+        if (null==files||files.size()<=0){
+            return false;
+        }
+        return TransportService.download(getContext(),files,debug);
+    }
+
     private boolean uploadFile(FileMeta meta){
         String path=null!=meta?meta.getPath():null;
         if (null==path||path.length()<=0 ||!meta.isDirectory()){
             toast(R.string.pathInvalid);
             return false;
+        }
+        return false;
+    }
+
+    private boolean cancel(String debug){
+        if (!isMode(MODE_NORMAL)&&entryMode(MODE_NORMAL)){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean pasteFileOnCurrent(String debug){
+        final int mode=mMode.get();
+        if (mode== MODE_COPY||mode==MODE_MOVE){
+            FolderMeta folder=mCurrent.get();
+            String folderPath=null!=folder?folder.getPath():null;
+            if (null!=folderPath&&folderPath.length()>0){
+                Object object=mProcessing;
+                FileMeta file=null!=object&&object instanceof FileMeta?(FileMeta)object:null;
+                String path=null!=file?file.getPath():null;
+                if (null!=path&&path.length()>0){
+                    List<FilePaste> list=new ArrayList<>();
+                    list.add(new FilePaste(path,folderPath,What.WHAT_NORMAL));
+                    return pasteFiles(mode,list,debug);
+                }
+                toast(R.string.pathInvalid);
+                return false;
+            }
+            toast(R.string.pathInvalid);
+            return false;
+        }
+        return false;
+    }
+
+    private boolean pasteFiles(int mode,List<FilePaste> processes, String debug){
+        if(null!=processes&&processes.size()>0){
+            String modeValue=mode== MODE_COPY?Label.LABEL_COPY:mode==MODE_MOVE?LABEL_MODE:null;
+            if (null==modeValue){
+                return false;
+            }
+            return null!=call(Api.class,(OnApiFinish<Reply<ApiList<Reply<FilePaste>>>>)(what,note,data,arg)->{
+                  toast(note);
+                  ApiList<Reply<FilePaste>> list=what!=WHAT_SUCCEED&&null!=data?data.getData():null;
+                  if (null!=list&&list.size()>0){
+                      for (Reply<FilePaste> child:list) {
+                          if (null!=child&&child.isSuccess()){
+                              FilePaste paste=child.getData();
+//                              if (null!=paste){
+//                                  Debug.D(getClass(),"QQQQQ "+paste.getMode()+" "+paste.getFrom()+" "+paste.getTo()+" ");
+//                              }
+                          }
+                      }
+                  }
+            }).pasteFile(modeValue,processes);
+        }
+        return false;
+    }
+
+    private boolean moveFile(FileMeta meta,String debug){
+        if (null!=meta&&isMode(MODE_MOVE)||entryMode(MODE_MOVE)){
+            mProcessing=meta;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean copyFile(FileMeta meta,String debug){
+        if (null!=meta&&isMode(MODE_COPY)||entryMode(MODE_COPY)){
+            mProcessing=meta;
+            return true;
         }
         return false;
     }
@@ -325,35 +423,45 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean deleteFile(List<FileMeta> files){
         final int length=null!=files?files.size():-1;
         if (length>0){
-            List<String> paths=new ArrayList<>();
-            Map<String,FileMeta> map=new HashMap<>(length);
-            for (FileMeta meta:files) {
-                String path=null!=meta?meta.getPath():null;
-                if (null!=path&&path.length()>0){
-                    paths.add(path);
-                    map.put(path,meta);
-                }
-            }
-            if (null!=paths&&paths.size()>0){
-                return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what,note,data,arg)->{
-                    toast(note);
-                    if (what==WHAT_SUCCEED){
-                        List<String> deletedPaths=null!=data?data.getData():null;
-                        BrowserAdapter adapter=mBrowserAdapter;
-                        int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
-                        if (size>0){
-                            List<FileMeta> deleted=new ArrayList<>(size);
-                            for (String  path:deletedPaths) {
-                                FileMeta child=null!=path?map.get(path):null;
-                                if (null!=child){
-                                    deleted.add(child);
-                                }
-                            }
-                            adapter.remove(deleted);
-                        }
-                    }
-                }).deleteFile(paths);
-            }
+            Dialog dialog=new Dialog(getViewContext());
+            FileMeta first=files.get(0);
+            String name=null!=first?first.getName():null;
+            String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()?R.string.folder:R.string.file)+" "+name):""):getText(R.string.items,length));
+            return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view, clickCount,  resId, data)->{
+                dialog.dismiss();
+                if (resId ==R.string.sure){
+                     List<String> paths=new ArrayList<>();
+                     Map<String,FileMeta> map=new HashMap<>(length);
+                     for (FileMeta meta:files) {
+                         String path=null!=meta?meta.getPath():null;
+                         if (null!=path&&path.length()>0){
+                             paths.add(path);
+                             map.put(path,meta);
+                         }
+                     }
+                     if (null!=paths&&paths.size()>0){
+                         return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what,note,data3,arg)->{
+                             toast(note);
+                             if (what==WHAT_SUCCEED){
+                                 List<String> deletedPaths=null!=data3?data3.getData():null;
+                                 BrowserAdapter adapter=mBrowserAdapter;
+                                 int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
+                                 if (size>0){
+                                     List<FileMeta> deleted=new ArrayList<>(size);
+                                     for (String  path:deletedPaths) {
+                                         FileMeta child=null!=path?map.get(path):null;
+                                         if (null!=child){
+                                             deleted.add(child);
+                                         }
+                                     }
+                                     adapter.remove(deleted);
+                                 }
+                             }
+                         }).deleteFile(paths);
+                     }
+                 }
+                return true;
+            },false);
         }
         Debug.D(getClass(),"Can't delete file.");
         return false;
@@ -396,6 +504,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     private boolean entryMode(int mode){
         if (!isMode(mode)){
+            mProcessing=null;
             mMode.set(mode);
             BrowserAdapter adapter=mBrowserAdapter;
             if (null!=adapter){
@@ -426,7 +535,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     public ObservableField<ClientMeta> getClientMeta() {
         return mClientMeta;
     }
-
 
     public ObservableField<Integer> getMode() {
         return mMode;

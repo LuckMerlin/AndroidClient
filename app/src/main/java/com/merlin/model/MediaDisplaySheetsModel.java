@@ -75,8 +75,6 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
     }
 
     private void selectCategory(int id){
-        View view=findViewById(R.id.test);
-        Debug.D(getClass(),"城东sad噶  "+view);
     }
 
     private boolean queryCategories(){

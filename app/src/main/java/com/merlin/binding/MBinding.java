@@ -2,6 +2,7 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.media.audiofx.DynamicsProcessing;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;

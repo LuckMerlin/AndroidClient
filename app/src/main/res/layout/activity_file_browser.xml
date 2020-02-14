@@ -47,7 +47,7 @@
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.cancel_selector}"/>
                     <TextView
                         android:text="@{vm.clientMeta.name}"
@@ -156,7 +156,7 @@
         </LinearLayout>
         <View
             android:id="@+id/fileBrowser_meta_dividerV"
-            android:background="#34000000"
+            android:background="#34ffffff"
             android:layout_below="@id/fileBrowser_cloud_meta_LL"
             android:layout_marginTop="3dp"
             android:layout_marginBottom="3dp"
@@ -164,7 +164,103 @@
             android:paddingRight="5dp"
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
+        <FrameLayout
+            android:id="@+id/fileBrowser_bottom_root_FL"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="3dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:visibility="@{vm.mode==Model.MODE_COPY?View.VISIBLE:View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/fileBrowser_bottom_paste_TV"
+                    android:text="@{R.string.paste}"
+                    binding:enableClick="@{true}"
+                    android:layout_weight="1"
+                    style="@style/buttonStyle"/>
+                <TextView
+                    android:id="@+id/fileBrowser_bottom_cancel_TV"
+                    android:text="@{R.string.cancel}"
+                    binding:enableClick="@{true}"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    style="@style/buttonStyle"/>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:visibility="@{vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@id/fileBrowser_bottom_paste_TV"
+                    android:text="@{R.string.paste}"
+                    binding:enableClick="@{true}"
+                    android:layout_weight="1"
+                    style="@style/buttonStyle"/>
+                <TextView
+                    android:id="@id/fileBrowser_bottom_cancel_TV"
+                    android:text="@{R.string.cancel}"
+                    binding:enableClick="@{true}"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    style="@style/buttonStyle"/>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <com.merlin.view.MenuTextView
+                    android:id="@+id/fileBrowser_downloadTV"
+                    android:drawableTop="@drawable/ic_back"
+                    android:text="Download"
+                    android:textColor="#fff"
+                    android:textStyle="bold"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <com.merlin.view.MenuTextView
+                    android:id="@+id/selector_copy"
+                    android:drawableTop="@drawable/selector_copy"
+                    android:text="Copy"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <com.merlin.view.MenuTextView
+                    android:id="@+id/fileBrowser_moveTV"
+                    android:drawableTop="@drawable/selector_move"
+                    android:text="Move"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <com.merlin.view.MenuTextView
+                    android:id="@+id/fileBrowser_deleteTV"
+                    android:drawableTop="@drawable/selector_delete"
+                    android:text="Delete"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <com.merlin.view.MenuTextView
+                    android:id="@+id/fileBrowser_moreTV"
+                    android:drawableTop="@drawable/selector_more"
+                    android:text="More"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </FrameLayout>
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:layout_above="@id/fileBrowser_bottom_root_FL"
             android:layout_below="@id/fileBrowser_meta_dividerV"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -173,55 +269,5 @@
                 binding:adapter="@{vm.browserAdapter}"
                 android:layout_height="match_parent"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-        <LinearLayout
-            android:layout_alignParentBottom="true"
-            android:orientation="horizontal"
-            android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
-            android:paddingBottom="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <com.merlin.view.MenuTextView
-                android:id="@+id/fileBrowser_downloadTV"
-                android:drawableTop="@drawable/ic_back"
-                android:text="Download"
-                android:textColor="#fff"
-                android:textStyle="bold"
-                android:gravity="center_horizontal"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
-            <com.merlin.view.MenuTextView
-                android:id="@+id/selector_copy"
-                android:drawableTop="@drawable/selector_copy"
-                android:text="Copy"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
-            <com.merlin.view.MenuTextView
-                android:id="@+id/fileBrowser_moveTV"
-                android:drawableTop="@drawable/selector_move"
-                android:text="Move"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
-            <com.merlin.view.MenuTextView
-                android:id="@+id/fileBrowser_deleteTV"
-                android:drawableTop="@drawable/selector_delete"
-                android:text="Delete"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
-            <com.merlin.view.MenuTextView
-                android:id="@+id/fileBrowser_moreTV"
-                android:drawableTop="@drawable/selector_more"
-                android:text="More"
-                android:gravity="center_horizontal"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
     </RelativeLayout>
 </layout>

@@ -54,6 +54,7 @@
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <service android:name="com.merlin.task.DownloadService"/>
         <service android:name="com.merlin.media.MediaPlayService"/>
+        <service android:name="com.merlin.transport.TransportService"/>
     </application>
 
 </manifest>
