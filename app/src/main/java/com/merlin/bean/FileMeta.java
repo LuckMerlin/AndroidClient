@@ -6,10 +6,11 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 
 import com.merlin.file.Permissions;
+import com.merlin.player.Playable;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public final class FileMeta implements Parcelable {
+public final class FileMeta implements Parcelable , Playable {
     private long id;
     private String path;
     private String name;
@@ -26,8 +27,7 @@ public final class FileMeta implements Parcelable {
     private boolean favorite;
     private String extra;
     private String thumbImageUrl;
-    private String title;
-    private Media meta;
+    private Music meta;
     private double accessTime;
 
     public boolean applyModify(FileModify modify){
@@ -79,10 +79,6 @@ public final class FileMeta implements Parcelable {
         return path;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     public void setPermissions(int permissions) {
         this.permissions = permissions;
     }
@@ -113,7 +109,7 @@ public final class FileMeta implements Parcelable {
         this.favorite = favorite;
     }
 
-    public Media getMeta() {
+    public Music getMeta() {
         return meta;
     }
 
@@ -147,7 +143,6 @@ public final class FileMeta implements Parcelable {
         length=in.readLong();
         path=in.readString();
         name=in.readString();
-        title=in.readString();
         md5=in.readString();
         mime=in.readString();
         extension=in.readString();
@@ -160,7 +155,7 @@ public final class FileMeta implements Parcelable {
         size=in.readLong();
         favorite=in.readInt()==1;
         Parcelable parcelable=in.readParcelable(FileMeta.class.getClassLoader());
-        meta=null!=parcelable&&parcelable instanceof Media?(Media)parcelable:null;
+        meta=null!=parcelable&&parcelable instanceof Music ?(Music)parcelable:null;
     }
 
     @Override
@@ -169,7 +164,6 @@ public final class FileMeta implements Parcelable {
         dest.writeLong(length);
         dest.writeString(path);
         dest.writeString(name);
-        dest.writeString(title);
         dest.writeString(md5);
         dest.writeString(mime);
         dest.writeString(extension);

@@ -11,6 +11,8 @@ import com.merlin.api.PageData;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaSheetBinding;
 import com.merlin.bean.Sheet;
+import com.merlin.view.OnTapClick;
+
 import java.util.List;
 
 public abstract class MediaSheetCategoryAdapter extends MultiPageAdapter<String,Sheet, PageData<Sheet>> {

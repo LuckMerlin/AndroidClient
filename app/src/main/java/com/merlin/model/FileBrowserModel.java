@@ -16,6 +16,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
+import com.merlin.bean.File;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FileModify;
 import com.merlin.bean.FilePaste;
@@ -123,6 +124,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         return browserParent("After back pressed.");
                     case R.id.fileBrowser_bottom_cancel_TV:
                         return cancel("After cancel tap click.");
+                    case R.string.open:
+                        return null!=data&&data instanceof File&&open((File)data,"After open tap click.");
                     case R.string.download:
                         return downloadFile(null!=data&&data instanceof FileMeta?(FileMeta)data:null,"After cancel tap click.");
                     case R.id.fileBrowser_bottom_paste_TV:
@@ -162,24 +165,20 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.string.rename:
                         return null!=data&&data instanceof FileMeta&&renameFile((FileMeta)data);
                     default:
-                        if (null!=data&&data instanceof FileMeta){
-                            FileMeta file=(FileMeta)data;
-                            if (isMode(MODE_MULTI_CHOOSE)) {
-                                multiChoose(file);
-                            } else {
-                                if (file.isDirectory()) {
-                                    browserPath(file.getPath(), "After directory click.");
-                                } else {//Open file
-                                    if (!file.isAccessible()) {
-                                        return toast(R.string.nonePermission);
-                                    }
-                                    String extension = file.getExtension();
-                                    if (extension.equals("mp3")) {
-                                        return MediaPlayService.play(getContext(), file.getMeta(), 0, false);
-                                    } else {
-                                        return toast(R.string.noneSupportOpenFileType, extension);
+                        if (null!=data){
+                            if (data instanceof FileMeta){
+                                FileMeta file=(FileMeta)data;
+                                if (isMode(MODE_MULTI_CHOOSE)) {
+                                    multiChoose(file);
+                                } else if(file.isAccessible()){
+                                    if (file.isDirectory()) {
+                                        browserPath(file.getPath(), "After directory click.");
+                                    } else if(!file.isAccessible()){//Open file
+                                        toast(R.string.nonePermission);
                                     }
                                 }
+                            }else if (data instanceof File){
+                                open((File)data,"After file item tap.");
                             }
                         }
                         break;
@@ -199,6 +198,15 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         break;
                 }
         }
+        return false;
+    }
+
+    private boolean open(File file,String debug){
+        String path=null!=file?file.getPath():null;
+        if (null!=path&&path.length()>0){
+            return  MediaPlayService.play(getContext(), file, 0, false);
+        }
+        toast(R.string.pathInvalid);
         return false;
     }
 

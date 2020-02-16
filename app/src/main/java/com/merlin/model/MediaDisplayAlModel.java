@@ -1,9 +1,7 @@
 package com.merlin.model;
 
 import android.content.Context;
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +15,7 @@ import com.merlin.api.PageQuery;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.Media;
+import com.merlin.bean.Music;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
@@ -118,9 +116,9 @@ public final class MediaDisplayAlModel extends BaseModel implements Label,What, 
 
     @Override
     public void onItemClick(View view, int sourceId, int position, FileMeta data) {
-        Media media=null!=data?data.getMeta():null;
+        Music media=null!=data?data.getMeta():null;
         if (null!=media&&null!=data&&null!=view){
-            MediaPlayService.play(view.getContext(),media,0,false);
+//            MediaPlayService.play(view.getContext(),media,0,false);
         }
     }
 

@@ -25,7 +25,7 @@ public final class Sheet implements Parcelable {
     private String id;
     private String note;
     private long create;
-    private List<Media> data;
+    private List<Music> data;
 
     public Sheet(String id,String title,long size){
         setId(id);
@@ -85,11 +85,11 @@ public final class Sheet implements Parcelable {
         return note;
     }
 
-    public void setData(List<Media> data) {
+    public void setData(List<Music> data) {
         this.data = data;
     }
 
-    public List<Media> getData() {
+    public List<Music> getData() {
         return data;
     }
 
@@ -108,7 +108,7 @@ public final class Sheet implements Parcelable {
             create=in.readLong();
             account=in.readString();
             note=in.readString();
-            data=in.readParcelableList(new ArrayList<>(), Media.class.getClassLoader());
+            data=in.readParcelableList(new ArrayList<>(), Music.class.getClassLoader());
         }
     }
 

@@ -13,7 +13,7 @@ public class MediaSheet implements Serializable {
     private String imageUrl;
     private String note;
     private String title;
-    private List<Media> data;
+    private List<Music> data;
 
     public void setSize(int size) {
         this.size = size;
@@ -87,11 +87,11 @@ public class MediaSheet implements Serializable {
         this.title = title;
     }
 
-    public List<Media> getData() {
+    public List<Music> getData() {
         return data;
     }
 
-    public void setData(List<Media> data) {
+    public void setData(List<Music> data) {
         this.data = data;
     }
 }

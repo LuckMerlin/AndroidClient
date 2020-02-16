@@ -3,8 +3,8 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="mediaFile"
-            type="com.merlin.bean.FileMeta" />
+            name="file"
+            type="com.merlin.bean.File" />
         <variable
             name="position"
             type="int" />
@@ -18,7 +18,7 @@
      <RelativeLayout
          android:id="@+id/itemMediaAll_rootRL"
          android:background="@drawable/selector_round_dark_corner_small"
-         binding:enableMultiClick="@{Clicker.click(mediaFile.meta,true)}"
+         binding:enableClick="@{Clicker.click(file,true)}"
          android:orientation="horizontal"
          android:paddingLeft="10dp"
          android:paddingRight="10dp"
@@ -30,15 +30,15 @@
              android:text="@{Integer.toString(position+1)}"
              android:layout_alignParentLeft="true"
              android:layout_marginRight="5dp"
+             android:textStyle="bold"
              android:layout_gravity="center_vertical"
-             style="@style/titleSubNormalTextView"/>
+             style="@style/titleNormalTextView"/>
 
          <LinearLayout
              android:id="@+id/item_media_rightLL"
              android:layout_weight="1"
              android:orientation="horizontal"
              android:layout_alignParentRight="true"
-             android:duplicateParentState="false"
              android:gravity="center_vertical|right"
              android:layout_width="wrap_content"
              android:paddingRight="10dp"
@@ -46,10 +46,12 @@
              <ImageView
                  android:id="@+id/itemMediaAll_favoriteIV"
                  android:src="@drawable/selector_heart"
-                 binding:selected="@{mediaFile.favorite}"
-                 binding:enableMultiClick="@{Clicker.click(mediaFile.meta,true)}"
-                 android:layout_width="25dp"
-                 android:layout_height="25dp"/>
+                 android:duplicateParentState="false"
+                 binding:selected="@{file.favorite}"
+                 android:padding="2dp"
+                 binding:enableClick="@{Clicker.click(file,true)}"
+                 android:layout_width="30dp"
+                 android:layout_height="30dp"/>
          </LinearLayout>
 
          <LinearLayout
@@ -64,7 +66,7 @@
              android:paddingRight="5dp"
              android:layout_height="match_parent">
              <TextView
-                 android:text="@{mediaFile.title??mediaFile.name??``}"
+                 android:text="@{file.name}"
                  android:singleLine="true"
                  style="@style/titleNormalTextView"/>
 <!--             <LinearLayout-->

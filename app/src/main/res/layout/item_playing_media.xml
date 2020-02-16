@@ -3,7 +3,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.bean.Media" />
+            type="com.merlin.bean.Music" />
         <variable
             name="position"
             type="int" />

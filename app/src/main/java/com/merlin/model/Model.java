@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.api.Label;
 import com.merlin.bean.FileMeta;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
@@ -233,6 +234,15 @@ public class Model {
 
     protected final boolean startActivity(Class<? extends Activity> cls){
         return startActivityWithBundle(cls,null);
+    }
+
+    protected final boolean startActivityWithBundle(Class<? extends Activity> cls, String key,String value){
+        Bundle bundle=null;
+        if (null!=key&&null!=value){
+            bundle=new Bundle();
+            bundle.putString(key,value);
+        }
+        return startActivityWithBundle(cls,bundle);
     }
 
     protected final boolean startActivityWithBundle(Class<? extends Activity> cls, Bundle bundle){

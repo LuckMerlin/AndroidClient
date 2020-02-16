@@ -24,11 +24,19 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <TextView
+            <ImageView
+                android:src="@{file.thumbImageUrl}"
+                android:visibility="@{(null==file.thumbImageUrl)?View.GONE:View.VISIBLE}"
                 android:layout_gravity="center_horizontal"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+            <TextView
                 android:text="@{file.name}"
+                android:textStyle="bold"
+                android:visibility="@{null==file.name?View.GONE:View.VISIBLE}"
+                android:layout_gravity="center_horizontal"
                 style="@style/titleNormalTextView"/>
-            <include binding:key="@{R.string.name}" binding:value="@{file.title}" layout="@layout/item_file_detail"/>
+            <include binding:key="@{R.string.name}" binding:value="@{file.meta.title}"  android:visibility="@{null==file.meta.title?View.GONE:View.VISIBLE}" layout="@layout/item_file_detail"/>
             <include binding:key="@{R.string.size}" binding:value="@{file.directory?``+file.size:FileSize.formatSizeText(file.length)}" layout="@layout/item_file_detail"/>
             <include binding:key="@{R.string.format}" binding:value="@{file.directory?(Integer)R.string.folder:(file.mime??file.extension)}" layout="@layout/item_file_detail"/>
             <include binding:key="@{R.string.type}" binding:value="@{FileType.formatType(file.mode)}" layout="@layout/item_file_detail"/>
@@ -44,7 +52,9 @@
                 <include binding:key="@{R.string.createTime}" binding:value="@{Time.formatTime((long)file.createTime)}" layout="@layout/item_file_detail"/>
                 <include binding:key="@{R.string.permission}" binding:value="@{``+file.permissions}" layout="@layout/item_file_detail"/>
                 <include binding:key="@{R.string.md5}" binding:value="@{file.md5}" android:visibility="@{file.directory?View.GONE:View.VISIBLE}" layout="@layout/item_file_detail"/>
-
+                <include binding:key="@{R.string.sampleRate}" binding:value="@{``+file.meta.sampleRate}" android:visibility="@{file.meta.sampleRate>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.duration}" binding:value="@{``+file.meta.duration}" android:visibility="@{file.meta.duration>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.channel}" binding:value="@{``+file.meta.channel}" android:visibility="@{file.meta.channel>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

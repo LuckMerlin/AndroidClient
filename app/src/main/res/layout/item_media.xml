@@ -65,7 +65,7 @@
              android:paddingRight="5dp"
              android:layout_height="match_parent">
              <TextView
-                 android:text="@{mediaFile.title??mediaFile.name??``}"
+                 android:text="@{mediaFile.meta.title??mediaFile.name??``}"
                  android:singleLine="true"
                  style="@style/titleNormalTextView"/>
              <LinearLayout

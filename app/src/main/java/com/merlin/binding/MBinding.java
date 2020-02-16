@@ -2,7 +2,9 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.media.audiofx.DynamicsProcessing;
+import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -87,6 +89,38 @@ public class MBinding {
         }
     }
 
+
+    @BindingAdapter("android:background")
+    public static void setBackgroundc(View view, Object img) {
+        if (null!=view&&null!=img){
+            if (img instanceof Integer){
+                view.setBackgroundResource((Integer)img);
+            }else if (img instanceof Drawable){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    view.setBackground((Drawable)img);
+                }
+            }else if (img instanceof String){
+                String path=(String)img;
+                RoundedCorners roundedCorners = new RoundedCorners(10);
+                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+               if (null!=path){
+                    if (path.startsWith("/")){
+                        path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
+                    }
+                }
+                Debug.D(MBinding.class," "+path);
+//                Glide.with(view.getContext())
+//                        .load(path)
+//                        .centerCrop()
+//                        .apply(options)
+//                        .thumbnail(1f)
+//                        .placeholder(R.drawable.ic_picture_default)
+////                .error(R.drawable.ic_default_pic)
+//                        .into()
+            }
+        }
+    }
+
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, Object img) {
         if (null!=img){
@@ -101,10 +135,8 @@ public class MBinding {
                 RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
 //        Debug.D(MBinding.class,"AAAAAAAAAa "+Address.URL+path);
 //         String ddd="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1579668574979&di=2c09057e986a070149d31ba342ec5985&imgtype=0&src=http%3A%2F%2Farticle.fd.zol-img.com.cn%2Ft_s640x2000%2Fg3%2FM04%2F0C%2F03%2FCg-4V1RjLO2IIKzYAATUS9gV0gUAARNqwD3bwkABNRj460.jpg";
-                if (null!=path){
-                    if (path.startsWith("/")){
-                        path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
-                    }
+                if (path.startsWith("/")){
+                    path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
                 }
                 Debug.D(MBinding.class," "+path);
                 Glide.with(view.getContext())
@@ -113,11 +145,13 @@ public class MBinding {
                         .apply(options)
                         .thumbnail(1f)
                         .placeholder(R.drawable.ic_picture_default)
-//                .error(R.drawable.ic_default_pic)
+                        .error(R.drawable.ic_picture_default)
                         .into(view);
             }
         }
     }
+
+
 
     @BindingAdapter(value = {"textWatcher"})
     public static void setEditTextListener(EditText view, Callback callback) {

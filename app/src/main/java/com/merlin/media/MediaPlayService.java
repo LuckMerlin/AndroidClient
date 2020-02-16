@@ -8,10 +8,13 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.Media;
+import com.merlin.bean.File;
+import com.merlin.bean.Music;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
@@ -92,7 +95,7 @@ public class MediaPlayService extends Service implements Status {
         }
 
         @Override
-        public List<Media> getQueue() {
+        public List<Playable> getQueue() {
             MPlayer player=mPlayer;
             return null!=player?player.getQueue():null;
         }
@@ -119,7 +122,7 @@ public class MediaPlayService extends Service implements Status {
     @Override
     public void onCreate() {
         super.onCreate();
-        Debug.D(getClass(),"Media play service onCreate.");
+        Debug.D(getClass(),"Music play service onCreate.");
     }
 
     @Override
@@ -132,13 +135,18 @@ public class MediaPlayService extends Service implements Status {
     private void handStartIntent(Bundle bundle){
         Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
         if (null!=object){
-            if (object instanceof Media){
-                if (bundle.getBoolean(LABEL_PLAY,false)){
-                    Object pos=bundle.get(LABEL_POSITION);
-                    float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
-                    mPlayerBinder.play(object,seek,null);
+            if (object instanceof File){
+                File file=(File)object;
+                String extension = file.getExtension();
+                if (extension.equals("mp3")) {
+                    if (bundle.getBoolean(LABEL_PLAY,false)){
+                        Object pos=bundle.get(LABEL_POSITION);
+                        float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
+                        mPlayerBinder.play(object,seek,null);
+                    }
+                    return;
                 }
-
+                Toast.makeText(this,R.string.noneSupportOpenFileType,Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -146,7 +154,7 @@ public class MediaPlayService extends Service implements Status {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Debug.D(getClass(),"Media play service onDestroy.");
+        Debug.D(getClass(),"Music play service onDestroy.");
         MPlayer player=mPlayer;
         if (null!=player){
             player.destroy();
@@ -168,7 +176,7 @@ public class MediaPlayService extends Service implements Status {
         return false;
     }
 
-    public static boolean play(Context context, Media media,int position, boolean addIntoQueue){
+    public static boolean play(Context context, File media, int position, boolean addIntoQueue){
         if (null!=media&&null!=context) {
             Intent intent = new Intent();
             intent.putExtra(LABEL_MEDIAS, media);
@@ -181,16 +189,16 @@ public class MediaPlayService extends Service implements Status {
         return false;
     }
 
-    public static boolean add(Context context, Media media, int index){
-        if (null!=context&&null!=media){
-            Intent intent=new Intent();
-            intent.putExtra(LABEL_MEDIAS,media);
-            intent.putExtra(LABEL_INDEX,index);
-            return start(context,intent);
-        }
-        Debug.W(MediaPlayService.class,"Can't add media by start service.media="+media+" context="+context);
-        return false;
-    }
+//    public static boolean add(Context context, Music media, int index){
+//        if (null!=context&&null!=media){
+//            Intent intent=new Intent();
+//            intent.putExtra(LABEL_MEDIAS,media);
+//            intent.putExtra(LABEL_INDEX,index);
+//            return start(context,intent);
+//        }
+//        Debug.W(MediaPlayService.class,"Can't add media by start service.media="+media+" context="+context);
+//        return false;
+//    }
 
     public static boolean bind(Activity activity){
         if (null!=activity){

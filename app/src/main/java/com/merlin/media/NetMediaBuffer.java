@@ -1,40 +1,34 @@
 package com.merlin.media;
 
 import com.merlin.api.Address;
-import com.merlin.api.Label;
-import com.merlin.bean.Media;
+import com.merlin.bean.File;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.file.DownloadApi;
 import com.merlin.player.MediaBuffer;
+import com.merlin.player.Playable;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Closer;
 import com.merlin.util.FileMaker;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import com.merlin.api.What;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
-import retrofit2.http.Streaming;
 
-public final class NetMediaBuffer extends MediaBuffer<Media> {
+public final class NetMediaBuffer extends MediaBuffer<File> {
     private final String mCachePath;
     private Reader mReader;
     private final Retrofit mRetrofit=new Retrofit();
 
-    public NetMediaBuffer(Media media, double seek){
+    public NetMediaBuffer(File media, double seek){
         super(media,seek);
         mCachePath="/sdcard/a/temp2.mp3";
     }
@@ -46,7 +40,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
             Debug.D(getClass(),"Can't play media "+(null!=debug?debug:".")+" retrofit="+retrofit);
             return false;
         }
-        final Media media=getPlayable();
+        final Playable media=getPlayable();
         final String url=null!=media?media.getPath():null;
         if (null==url||url.length()<=0){
             Debug.D(getClass(),"Can't play media,Url invalid "+(null!=debug?debug:".")+" url="+url+" "+media);
@@ -65,7 +59,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
         reader.mWriteComplete=false;
         reader.mState= Reader.STATE_OPENING;
         Debug.D(getClass(),"下载 "+Address.URL+url);
-        retrofit.call(DownloadApi.class, Schedulers.newThread()).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
+        retrofit.call(DownloadApi.class, Schedulers.newThread(),null,null).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
                     private void finishRequest(int what,String debug){
                         reader.mWriteComplete=true;
                         reader.setCanceler(null);
@@ -78,7 +72,6 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-
                         if (null!=response&&response.isSuccessful()){
                             ResponseBody responseBody=response.body();
                             MediaType mediaType=null!=responseBody?responseBody.contentType():null;
@@ -185,7 +178,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
 
         public boolean open(double seek,String debug){
             String path=mCachePath;
-            File file=null!=path&&path.length()>0?new FileMaker().makeFile(path,true):null;
+            java.io.File file=null!=path&&path.length()>0?new FileMaker().makeFile(path,true):null;
             if (null!=file&&file.exists()&&file.isFile()){
                 try {
                     mAccess=new RandomAccessFile(file,"rwd");
@@ -226,6 +219,7 @@ public final class NetMediaBuffer extends MediaBuffer<Media> {
                                      access.seek(nextStart);
                                      readSize=access.read(buffer,offset,length);
                                  }
+                                 Debug.D(getClass(),"AAAAAAAdd   "+mNextStart+" "+readSize);
                                  if (readSize>0){
                                      mNextStart+=readSize;
                                      return readSize;

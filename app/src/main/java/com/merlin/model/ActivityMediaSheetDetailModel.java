@@ -13,15 +13,15 @@ import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.SheetMediaAdapter;
 import com.merlin.bean.MediaSheet;
+import com.merlin.bean.Music;
 import com.merlin.bean.User;
-import com.merlin.bean.Media;
 import com.merlin.media.MediaPlayService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityMediaSheetDetailModel extends DataListModel<Media> implements
-        BaseAdapter.OnItemClickListener<Media>, BaseModel.OnIntentChanged {
+public class ActivityMediaSheetDetailModel extends DataListModel<Music> implements
+        BaseAdapter.OnItemClickListener<Music>, BaseModel.OnIntentChanged {
     private final ObservableField<MediaSheet> mSheet=new ObservableField<>();
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -36,11 +36,11 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         sheet.setCreateUser(user);
         mSheet.set(sheet);
         //
-        List<Media> list=new ArrayList<>();
+        List<Music> list=new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-            Media media=new Media();
-            media.setTitle("我们");
-            list.add(media);
+//            Music media=new Music();
+//            media.setTitle("我们");
+//            list.add(media);
         }
         getAdapter().setData(list);
     }
@@ -56,9 +56,9 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
     }
 
     @Override
-    public void onItemClick(View view, int sourceId, int position, Media data) {
+    public void onItemClick(View view, int sourceId, int position, Music data) {
         if (null!=data){
-            MediaPlayService.add(view.getContext(),data,-1);
+//            MediaPlayService.add(view.getContext(),data,-1);
         }
     }
 

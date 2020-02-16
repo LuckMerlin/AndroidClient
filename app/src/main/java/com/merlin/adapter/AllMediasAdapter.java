@@ -7,15 +7,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
+import com.merlin.bean.File;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.Media;
+import com.merlin.bean.Music;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaAllBinding;
-import com.merlin.client.databinding.ItemMediaBinding;
 
 import java.util.List;
 
-public abstract class AllMediasAdapter extends MultiPageAdapter<String, FileMeta, PageData<FileMeta>>  {
+public abstract class AllMediasAdapter extends MultiPageAdapter<String, File, PageData<File>>  {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -23,9 +23,9 @@ public abstract class AllMediasAdapter extends MultiPageAdapter<String, FileMeta
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, File data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemMediaAllBinding){
-            ((ItemMediaAllBinding)binding).setMediaFile(data);
+            ((ItemMediaAllBinding)binding).setFile(data);
             ((ItemMediaAllBinding)binding).setPosition(position);
             ((ItemMediaAllBinding)binding).setPlaying(false);
         }
@@ -33,10 +33,10 @@ public abstract class AllMediasAdapter extends MultiPageAdapter<String, FileMeta
 
     public final boolean notifyFavoriteChange(String path, boolean favorite){
         if (null!=path&&path.length()>0){
-            List<FileMeta> list=getData();
+            List<File> list=getData();
             int length=null!=list?list.size():0;
             for (int i = 0; i < length; i++) {
-                FileMeta media=list.get(i);
+                File media=list.get(i);
                 String curr=null!=media?media.getPath():null;
                 if (null!=curr&&curr.equals(path)){
                     media.setFavorite(favorite);

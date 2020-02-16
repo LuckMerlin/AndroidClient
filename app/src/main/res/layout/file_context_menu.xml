@@ -15,6 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.open,file)}"/>
+        <include layout="@layout/item_context_menu"
             android:visibility="@{file.directory?View.VISIBLE:View.GONE}"
             binding:menu="@{ContextMenu.create(R.string.upload,file)}"/>
         <include layout="@layout/item_context_menu"

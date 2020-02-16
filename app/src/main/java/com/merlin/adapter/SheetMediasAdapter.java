@@ -8,13 +8,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
-import com.merlin.bean.Media;
+import com.merlin.bean.File;
+import com.merlin.bean.Music;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemSheetMediaBinding;
 
 import java.util.List;
 
-public abstract class SheetMediasAdapter extends MultiPageAdapter<String, Media, PageData<Media>> {
+public abstract class SheetMediasAdapter extends MultiPageAdapter<String, File, PageData<File>> {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -22,10 +23,10 @@ public abstract class SheetMediasAdapter extends MultiPageAdapter<String, Media,
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Media data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, File data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemSheetMediaBinding){
             ((ItemSheetMediaBinding)binding).setPosition(position);
-            ((ItemSheetMediaBinding)binding).setMedia(data);
+            ((ItemSheetMediaBinding)binding).setFile(data);
         }
     }
 

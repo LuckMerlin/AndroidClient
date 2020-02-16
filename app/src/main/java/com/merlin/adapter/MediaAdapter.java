@@ -3,12 +3,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.PageData;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaBinding;
-import com.merlin.bean.Media;
-import com.merlin.debug.Debug;
 
 import java.util.List;
 
