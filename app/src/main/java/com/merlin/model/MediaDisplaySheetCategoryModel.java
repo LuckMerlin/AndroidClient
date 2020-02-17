@@ -1,6 +1,7 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.merlin.activity.MediaSheetActivity;
@@ -57,7 +58,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     private boolean addCategory(){
         Context context=getViewContext();
         final Dialog dialog=new Dialog(context);
-
+        LayoutInflater.from(context).inflate(R.layout.edit_text,null,false);
         return dialog.setContentView(R.layout.edit_text).title(R.string.createSheet).
                 left(R.string.sure).right(R.string.cancel).show((view, clickCount, resId, data)->{
 //                    dialog.getContext()
