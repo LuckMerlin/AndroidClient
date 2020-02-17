@@ -273,6 +273,9 @@ public final class Clicker {
     private boolean dispatchClickToModel(View view,View root,Dispatcher dispatcher){
         if (null!=view&&null!=dispatcher){
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
+            if (dispatcher.onDispatch(view,root,view,binding)){
+                return true;
+            }
             Object modelBind=view.getTag(R.id.modelBind);
             if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,modelBind,binding)){
                 return true;

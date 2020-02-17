@@ -15,10 +15,9 @@ import com.merlin.api.PageQuery;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.Music;
+import com.merlin.bean.Media;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.media.MediaPlayService;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -116,7 +115,7 @@ public final class MediaDisplayAlModel extends BaseModel implements Label,What, 
 
     @Override
     public void onItemClick(View view, int sourceId, int position, FileMeta data) {
-        Music media=null!=data?data.getMeta():null;
+        Media media=null!=data?data.getMeta():null;
         if (null!=media&&null!=data&&null!=view){
 //            MediaPlayService.play(view.getContext(),media,0,false);
         }

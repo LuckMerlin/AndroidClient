@@ -10,11 +10,8 @@ import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.File;
-import com.merlin.bean.FileMeta;
-import com.merlin.bean.Music;
+import com.merlin.bean.Media;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.media.MediaPlayService;
 import com.merlin.view.OnTapClick;
 
 import io.reactivex.Observable;
@@ -26,22 +23,20 @@ import retrofit2.http.POST;
 public final class MediaDisplayAllMediasModel extends Model implements OnTapClick,Label,What,OnTextChange {
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        protected boolean onPageLoad(String name, int page, OnApiFinish<Reply<PageData<File>>> finish) {
+        protected boolean onPageLoad(String name, int page, OnApiFinish<Reply<PageData<Media>>> finish) {
             return null!=call(Api.class,finish).queryAllMedias(page,50,name);
         }
     };
 
-
-
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<File>>> queryAllMedias(@Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit,
-                                                             @Field(LABEL_NAME) String name,
-                                                             @Field(LABEL_FORMAT) String... formats);
-        @POST(Address.PREFIX_FILE+"/favorite")
+        Observable<Reply<PageData<Media>>> queryAllMedias(@Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit,
+                                                          @Field(LABEL_NAME) String name,
+                                                          @Field(LABEL_FORMAT) String... formats);
+        @POST(Address.PREFIX_MEDIA+"/favorite")
         @FormUrlEncoded
-        Observable<Reply<File>> makeFavorite(@Field(LABEL_PATH) String path, @Field(LABEL_DATA) boolean favorite);
+        Observable<Reply<Media>> makeFavorite(@Field(LABEL_MD5) String md5, @Field(LABEL_DATA) boolean favorite);
     }
 
     public MediaDisplayAllMediasModel(){
@@ -52,29 +47,29 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             case R.id.itemMediaAll_favoriteIV:
-                return null!=data&&null!=view&&data instanceof File &&
-                        makeFavorite((File)data,!view.isSelected());
+                return null!=data&&null!=view&&data instanceof Media &&
+                        makeFavorite((Media)data,!view.isSelected());
             case R.id.itemMediaAll_rootRL:
 //                if (null!=view&&null!=data&&data instanceof  &&(clickCount==1||clickCount==2)){
-//                    return MediaPlayService.play(view.getContext(),(Music)data,0,clickCount==2);
+//                    return MediaPlayService.play(view.getContext(),(Media)data,0,clickCount==2);
 //                }
                 return false;
         }
         return false;
     }
 
-    private boolean makeFavorite(File meta, boolean favorite){
-        final String path=null!=meta?meta.getPath():null;
-        if (null==path||path.length()<=0){
+    private boolean makeFavorite(Media meta, boolean favorite){
+        final String md5=null!=meta?meta.getMd5():null;
+        if (null==md5||md5.length()<=0){
             return false;
         }
         return null!=call(Api.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
             AllMediasAdapter adapter=mAdapter;
             toast(note);
             if (what==WHAT_SUCCEED&&null!=data){
-                adapter.notifyFavoriteChange(path, favorite);
+                adapter.notifyFavoriteChange(md5, favorite);
             }
-        }).makeFavorite(path,favorite);
+        }).makeFavorite(md5,favorite);
     }
 
     private boolean queryAllMedias(String name,String debug){

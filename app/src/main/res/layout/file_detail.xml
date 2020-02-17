@@ -52,8 +52,10 @@
                 <include binding:key="@{R.string.createTime}" binding:value="@{Time.formatTime((long)file.createTime)}" layout="@layout/item_file_detail"/>
                 <include binding:key="@{R.string.permission}" binding:value="@{``+file.permissions}" layout="@layout/item_file_detail"/>
                 <include binding:key="@{R.string.md5}" binding:value="@{file.md5}" android:visibility="@{file.directory?View.GONE:View.VISIBLE}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.artist}" binding:value="@{``+file.meta.artist}" android:visibility="@{null!=file.meta.artist?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.album}" binding:value="@{``+file.meta.album}" android:visibility="@{null!=file.meta.album?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
                 <include binding:key="@{R.string.sampleRate}" binding:value="@{``+file.meta.sampleRate}" android:visibility="@{file.meta.sampleRate>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
-                <include binding:key="@{R.string.duration}" binding:value="@{``+file.meta.duration}" android:visibility="@{file.meta.duration>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
+                <include binding:key="@{R.string.duration}" binding:value="@{``+Time.formatMediaDuration(file.meta.duration)}" android:visibility="@{file.meta.duration>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
                 <include binding:key="@{R.string.channel}" binding:value="@{``+file.meta.channel}" android:visibility="@{file.meta.channel>0?View.VISIBLE:View.GONE}" layout="@layout/item_file_detail"/>
             </LinearLayout>
         </LinearLayout>

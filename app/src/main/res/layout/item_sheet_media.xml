@@ -2,8 +2,8 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
-            name="file"
-            type="com.merlin.bean.File" />
+            name="media"
+            type="com.merlin.bean.Media" />
         <import type="android.view.View"/>
         <variable
             name="position"
@@ -36,13 +36,13 @@
             <TextView
                 android:textSize="@dimen/textTitle"
                 android:textColor="@color/textTitle"
-                android:text="@{file.name}"
+                android:text="@{media.title}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:textSize="@dimen/textSmall"
                 android:textColor="@color/textTitleSub"
-                android:text="@{file.md5}"
+                android:text="@{media.artist}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>

@@ -5,7 +5,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 
 import com.merlin.bean.File;
-import com.merlin.bean.Music;
+import com.merlin.bean.Media;
 import com.merlin.debug.Debug;
 import com.merlin.media.Indexer;
 import com.merlin.media.Mode;
@@ -44,7 +44,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         if (audioTrack.getPlayState()!=AudioTrack.PLAYSTATE_PLAYING){
             audioTrack.play();
         }
-        audioTrack.write(bytes,0,length);
+//        audioTrack.write(bytes,0,length);
     }
 
     private AudioTrack buildAudioTrack(int sampleRateInHz,int channelConfig){
@@ -281,7 +281,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
                 for (int i=0;i<size;i++){
                     child=queue.get(i);
                     if (null!=child){
-                         if(media instanceof Music &&child.equals(media)) {
+                         if(media instanceof Media &&child.equals(media)) {
                             return new Object[]{media,i};
                         }else if (media instanceof String){
 //                            String path=child.getPath();

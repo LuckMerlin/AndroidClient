@@ -13,7 +13,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.merlin.bean.File;
-import com.merlin.bean.Music;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.player.OnPlayerStatusUpdate;
@@ -122,7 +121,7 @@ public class MediaPlayService extends Service implements Status {
     @Override
     public void onCreate() {
         super.onCreate();
-        Debug.D(getClass(),"Music play service onCreate.");
+        Debug.D(getClass(),"Media play service onCreate.");
     }
 
     @Override
@@ -154,7 +153,7 @@ public class MediaPlayService extends Service implements Status {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Debug.D(getClass(),"Music play service onDestroy.");
+        Debug.D(getClass(),"Media play service onDestroy.");
         MPlayer player=mPlayer;
         if (null!=player){
             player.destroy();
@@ -189,7 +188,7 @@ public class MediaPlayService extends Service implements Status {
         return false;
     }
 
-//    public static boolean add(Context context, Music media, int index){
+//    public static boolean add(Context context, Media media, int index){
 //        if (null!=context&&null!=media){
 //            Intent intent=new Intent();
 //            intent.putExtra(LABEL_MEDIAS,media);

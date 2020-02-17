@@ -15,8 +15,8 @@ public class MediasAllLayout extends LinearLayout {
 
     public MediasAllLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-//        List<Music> list=new ArrayList<>();
-//        Music media=new Music();
+//        List<Media> list=new ArrayList<>();
+//        Media media=new Media();
 //        media.setTitle("我不愿让你一个人");
 //        media.setArtist("吴越");
 //        media.setAlbum("专辑");

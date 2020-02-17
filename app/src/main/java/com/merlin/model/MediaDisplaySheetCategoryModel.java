@@ -1,5 +1,6 @@
 package com.merlin.model;
 
+import android.content.Context;
 import android.view.View;
 
 import com.merlin.activity.MediaSheetActivity;
@@ -11,7 +12,9 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.Sheet;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
 import com.merlin.view.OnTapClick;
 
 import io.reactivex.Observable;
@@ -42,10 +45,25 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
             case 1:
-//                String title=null!=data&&data instanceof Sheet?((Sheet)data).getTitle():null;
+                switch (resId){
+                    case R.string.add:
+                        return addCategory()||true;
+                }
                 return null!=data&&data instanceof Sheet&&startActivity(MediaSheetDetailActivity.class,(Sheet)data);
         }
         return true;
+    }
+
+    private boolean addCategory(){
+        Context context=getViewContext();
+        final Dialog dialog=new Dialog(context);
+
+        return dialog.setContentView(R.layout.edit_text).title(R.string.createSheet).
+                left(R.string.sure).right(R.string.cancel).show((view, clickCount, resId, data)->{
+//                    dialog.getContext()
+                    dialog.dismiss();
+                    return true;
+        },false);
     }
 
     private boolean queryPage(String debug){

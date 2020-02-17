@@ -4,13 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.bean.Media;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPlayingMediaBinding;
-import com.merlin.bean.Music;
 
 import java.util.List;
 
-public class MediaListAdapter  extends BaseAdapter<Music, ItemPlayingMediaBinding>{
+public class MediaListAdapter  extends BaseAdapter<Media, ItemPlayingMediaBinding>{
     private  RecyclerView.LayoutManager mLayoutManager;
 
     @Override
@@ -19,7 +19,7 @@ public class MediaListAdapter  extends BaseAdapter<Music, ItemPlayingMediaBindin
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemPlayingMediaBinding binding, int position, Music data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemPlayingMediaBinding binding, int position, Media data, @NonNull List<Object> payloads) {
         if (null!=binding){
             binding.setMedia(data);
             binding.setPosition(position);

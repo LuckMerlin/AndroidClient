@@ -7,15 +7,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
-import com.merlin.bean.File;
-import com.merlin.bean.FileMeta;
-import com.merlin.bean.Music;
+import com.merlin.bean.Media;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaAllBinding;
 
 import java.util.List;
 
-public abstract class AllMediasAdapter extends MultiPageAdapter<String, File, PageData<File>>  {
+public abstract class AllMediasAdapter extends MultiPageAdapter<String, Media, PageData<Media>>  {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -23,22 +21,22 @@ public abstract class AllMediasAdapter extends MultiPageAdapter<String, File, Pa
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, File data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Media data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemMediaAllBinding){
-            ((ItemMediaAllBinding)binding).setFile(data);
+            ((ItemMediaAllBinding)binding).setMedia(data);
             ((ItemMediaAllBinding)binding).setPosition(position);
             ((ItemMediaAllBinding)binding).setPlaying(false);
         }
     }
 
-    public final boolean notifyFavoriteChange(String path, boolean favorite){
-        if (null!=path&&path.length()>0){
-            List<File> list=getData();
+    public final boolean notifyFavoriteChange(String md5, boolean favorite){
+        if (null!=md5&&md5.length()>0){
+            List<Media> list=getData();
             int length=null!=list?list.size():0;
             for (int i = 0; i < length; i++) {
-                File media=list.get(i);
-                String curr=null!=media?media.getPath():null;
-                if (null!=curr&&curr.equals(path)){
+                Media media=list.get(i);
+                String curr=null!=media?media.getMd5():null;
+                if (null!=curr&&curr.equals(md5)){
                     media.setFavorite(favorite);
                     notifyItemChanged(i);
                     return true;

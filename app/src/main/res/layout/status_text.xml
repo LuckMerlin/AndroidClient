@@ -5,6 +5,6 @@
 
     </data>
     <TextView
-        binding:enableModelClick="@{true}"
+        binding:enableClick="@{true}"
         style="@style/titleNormalTextView"/>
 </layout>

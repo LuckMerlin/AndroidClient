@@ -17,12 +17,12 @@
         android:layout_height="wrap_content">
 
         <RelativeLayout
-            android:background="@drawable/round_corner_small"
+            android:background="@drawable/selector_round_dark_corner_small"
             android:layout_width="120dp"
             android:layout_height="120dp">
             <ImageView
                 android:src="@{sheet.imageUrl}"
-                android:scaleType="fitCenter"
+                android:scaleType="fitXY"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
             <TextView

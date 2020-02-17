@@ -11,7 +11,6 @@ import com.merlin.bean.FileMeta;
 import com.merlin.debug.Debug;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TransportService extends Service {
     private final FileDownloader mDownloader=new FileDownloader();

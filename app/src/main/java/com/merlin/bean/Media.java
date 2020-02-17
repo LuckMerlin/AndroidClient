@@ -5,15 +5,21 @@ import android.os.Parcelable;
 
 import com.merlin.util.Time;
 
-public class Music implements Parcelable {
+public class Media implements Parcelable {
+    private String md5;
     private String title;
     private String album;
     private String artist;
     private int channel;
     private long duration=0;
+    private boolean favorite;
     private long bitrate;
     private long sampleRate;
     private String bitrateMode;
+
+    public boolean isFavorite() {
+        return favorite;
+    }
 
     public String getTitle() {
         return this.title;
@@ -29,6 +35,14 @@ public class Music implements Parcelable {
     }
     public long getDuration() {
         return this.duration;
+    }
+
+    public String getMd5() {
+        return md5;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 
     public int getChannel() {
@@ -58,7 +72,7 @@ public class Music implements Parcelable {
         return 0;
     }
 
-    private Music(Parcel in){
+    private Media(Parcel in){
         duration=in.readLong();
         title=in.readString();
         album=in.readString();
@@ -73,15 +87,15 @@ public class Music implements Parcelable {
         dest.writeString(artist);
     }
 
-    public static final Creator<Music> CREATOR = new Creator<Music>() {
+    public static final Creator<Media> CREATOR = new Creator<Media>() {
         @Override
-        public Music createFromParcel(Parcel in) {
-            return new Music(in);
+        public Media createFromParcel(Parcel in) {
+            return new Media(in);
         }
 
         @Override
-        public Music[] newArray(int size) {
-            return new Music[size];
+        public Media[] newArray(int size) {
+            return new Media[size];
         }
     };
 

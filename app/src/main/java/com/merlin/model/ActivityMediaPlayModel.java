@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.bean.File;
-import com.merlin.bean.Music;
+import com.merlin.bean.Media;
 import com.merlin.bean.Sheet;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
@@ -25,7 +25,7 @@ import com.merlin.view.OnTapClick;
 public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayerBindChange,OnPlayerStatusUpdate {
     private MediaPlayer mPlayer;
     private final ObservableField<Integer> mStatus=new ObservableField<>();
-    private final ObservableField<Music> mPlaying=new ObservableField<>();
+    private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter((recyclerView, newState)->{
         if (newState==RecyclerView.SCROLL_STATE_IDLE){
@@ -36,7 +36,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
                 if (null!=model){
 
                     if (model instanceof MediaPlayModel){
-                        Music playing=mPlaying.get();
+                        Media playing=mPlaying.get();
                         setStatusBar(null!=playing?playing.getTitle():R.string.mediaPlayer,StatusBar.CENTER);
                     }else if (model instanceof MediaDisplaySheetCategoryModel){
                         setStatusBar(R.string.sheet,StatusBar.CENTER);
@@ -93,7 +93,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
             player.addListener(this);
             updatePlaying("After player bind.");
         }
-//        Music media=new Music();
+//        Media media=new Media();
 //            media.setPath("/volume1/music/李善姬 - 人海之中遇见你.mp3");
 //        media.setPath("/volume1/music/筷子兄弟 - 老男孩.mp3");
 //        media.setTitle("小酒窝");
@@ -126,7 +126,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
     private void updatePlaying(String debug){
         final MediaPlayer player=mPlayer;
         Playable playable=null!=player?player.getPlaying():null;
-        Music playing=null!=playable&&playable instanceof Music ?(Music)playable:null;
+        Media playing=null!=playable&&playable instanceof Media ?(Media)playable:null;
         String title=null!=playing?playing.getTitle():null;
         mPlaying.set(playing);
         setStatusBar(title, StatusBar.CENTER);
@@ -148,7 +148,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
         return mDisplayAdapter;
     }
 
-    public ObservableField<Music> getPlaying() {
+    public ObservableField<Media> getPlaying() {
         return mPlaying;
     }
 

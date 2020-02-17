@@ -21,7 +21,8 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
     private OnRecyclerScrollStateChange mChange;
 
     public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
-        super(R.layout.media_display_play,R.layout.media_display_all_medias,R.layout.media_display_sheet_category);
+        super(R.layout.media_display_sheet_category);
+//        super(R.layout.media_display_play,R.layout.media_display_all_medias,R.layout.media_display_sheet_category);
         mChange=change;
     }
 

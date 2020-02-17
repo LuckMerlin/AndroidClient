@@ -5,10 +5,13 @@
         <variable
             name="categoryModel"
             type="com.merlin.model.MediaDisplaySheetCategoryModel" />
+        <import type="com.merlin.binding.StatusBar"/>
+        <import type="com.merlin.client.R"/>
     </data>
 
         <LinearLayout
             binding:createModel="@{null}"
+            binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,null,R.string.add)}"
             android:orientation="vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"

@@ -3,8 +3,8 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="file"
-            type="com.merlin.bean.File" />
+            name="media"
+            type="com.merlin.bean.Media" />
         <variable
             name="position"
             type="int" />
@@ -18,7 +18,7 @@
      <RelativeLayout
          android:id="@+id/itemMediaAll_rootRL"
          android:background="@drawable/selector_round_dark_corner_small"
-         binding:enableClick="@{Clicker.click(file,true)}"
+         binding:enableClick="@{Clicker.click(media,true)}"
          android:orientation="horizontal"
          android:paddingLeft="10dp"
          android:paddingRight="10dp"
@@ -47,9 +47,9 @@
                  android:id="@+id/itemMediaAll_favoriteIV"
                  android:src="@drawable/selector_heart"
                  android:duplicateParentState="false"
-                 binding:selected="@{file.favorite}"
+                 binding:selected="@{media.favorite}"
                  android:padding="2dp"
-                 binding:enableClick="@{Clicker.click(file,true)}"
+                 binding:enableClick="@{Clicker.click(media,true)}"
                  android:layout_width="30dp"
                  android:layout_height="30dp"/>
          </LinearLayout>
@@ -66,7 +66,7 @@
              android:paddingRight="5dp"
              android:layout_height="match_parent">
              <TextView
-                 android:text="@{file.name}"
+                 android:text="@{media.title}"
                  android:singleLine="true"
                  style="@style/titleNormalTextView"/>
 <!--             <LinearLayout-->

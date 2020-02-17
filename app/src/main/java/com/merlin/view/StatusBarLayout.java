@@ -23,7 +23,12 @@ import com.merlin.client.databinding.StatusTextBinding;
 import com.merlin.debug.Debug;
 import com.merlin.util.Resource;
 
-public final class StatusBarLayout extends RelativeLayout {
+import java.lang.ref.WeakReference;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+public final class StatusBarLayout extends RelativeLayout implements OnTapClick{
+    private final WeakHashMap<OnTapClick,Long> mTapClicks=new WeakHashMap(0);
 
     public StatusBarLayout(Context context) {
         this(context, null);
@@ -52,6 +57,16 @@ public final class StatusBarLayout extends RelativeLayout {
         return null;
     }
 
+    public boolean addTapClick(OnTapClick click){
+        WeakHashMap<OnTapClick,Long> reference=null!=click?mTapClicks:null;
+        return null!=reference&&null==reference.put(click,System.currentTimeMillis());
+    }
+
+    public boolean removeTapClick(OnTapClick click){
+        WeakHashMap<OnTapClick,Long> reference=null!=click?mTapClicks:null;
+        return null!=reference&&null!=reference.remove(click);
+    }
+
     public boolean set(Object object, int position){
             Context context=getContext();
             View last= findPosition(position);
@@ -74,7 +89,7 @@ public final class StatusBarLayout extends RelativeLayout {
                 }
                 View root=null!=binding?binding.getRoot():null;
                 if (null!=root){
-                    root.setTag(R.id.resourceId,new IDs(resourceId,position));
+                    Clicker.putRes(root,new Res(resourceId,position));
                     RelativeLayout.LayoutParams rlp=null;
                     if (position== StatusBar.LEFT||position==StatusBar.CENTER||position==StatusBar.RIGHT){
                         ViewGroup.LayoutParams params=root.getLayoutParams();
@@ -124,4 +139,19 @@ public final class StatusBarLayout extends RelativeLayout {
         return null;
     }
 
+    @Override
+    public final boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        WeakHashMap<OnTapClick,Long> reference=mTapClicks;
+        Set<OnTapClick> set=null!=reference?reference.keySet():null;
+        if (null!=set){
+            synchronized (set){
+                for (OnTapClick click:set){
+                    if (null!=click&&click.onTapClick(view,clickCount,resId,data)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

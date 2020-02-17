@@ -24,8 +24,7 @@ public final class Sheet implements Parcelable {
     private String imageUrl;
     private String id;
     private String note;
-    private long create;
-    private List<Music> data;
+    private long createTime;
 
     public Sheet(String id,String title,long size){
         setId(id);
@@ -57,12 +56,12 @@ public final class Sheet implements Parcelable {
         this.id = id;
     }
 
-    public long getCreate() {
-        return create;
+    public long getCreateTime() {
+        return createTime;
     }
 
-    public void setCreate(long create) {
-        this.create = create;
+    public void setCreateTime(long create) {
+        this.createTime = create;
     }
 
     public void setAccount(String account) {
@@ -85,14 +84,6 @@ public final class Sheet implements Parcelable {
         return note;
     }
 
-    public void setData(List<Music> data) {
-        this.data = data;
-    }
-
-    public List<Music> getData() {
-        return data;
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public Sheet(){
         this(null);
@@ -105,10 +96,10 @@ public final class Sheet implements Parcelable {
             size=in.readLong();
             imageUrl=in.readString();
             id=in.readString();
-            create=in.readLong();
+            createTime=in.readLong();
             account=in.readString();
             note=in.readString();
-            data=in.readParcelableList(new ArrayList<>(), Music.class.getClassLoader());
+//            data=in.readParcelableList(new ArrayList<>(), Media.class.getClassLoader());
         }
     }
 
@@ -119,10 +110,10 @@ public final class Sheet implements Parcelable {
         dest.writeLong(size);
         dest.writeString(imageUrl);
         dest.writeString(id);
-        dest.writeLong(create);
+        dest.writeLong(createTime);
         dest.writeString(account);
         dest.writeString(note);
-        dest.writeParcelableList(data,flags);
+//        dest.writeParcelableList(data,flags);
     }
 
     @Override

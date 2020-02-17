@@ -23,6 +23,7 @@ import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.retrofit.Retrofit;
+import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 import com.merlin.view.StatusBarLayout;
 import com.trello.rxlifecycle2.LifecycleProvider;
@@ -61,10 +62,18 @@ public class Model {
     private boolean initial(View view){
         if (null!=view){
             mRootView=new WeakReference<>(view);
+            checkStatusBarTapBind();
             onRootAttached(view);
             return true;
         }
         return false;
+    }
+
+    private void checkStatusBarTapBind() {
+        StatusBarLayout statusBar=this instanceof OnTapClick?getStatusBar():null;
+        if (null!=statusBar) {
+            statusBar.addTapClick((OnTapClick)Model.this);
+        }
     }
 
     public final boolean toast(int textResId){
@@ -299,10 +308,17 @@ public class Model {
         return null;
     }
 
+    protected final StatusBarLayout getStatusBar(){
+        View root=getRoot();
+        root= null!=root?root.getRootView():null;
+        View view=null!=root?root.findViewById(R.id.status_root_RL):null;
+        return null!=view&&view instanceof StatusBarLayout?(StatusBarLayout)view:null;
+    }
+
     protected final boolean setStatusBar(Object id,int position){
         if (position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT){
-            View view=findViewById(R.id.status_root_RL);
-            return null!=view&&view instanceof StatusBarLayout &&((StatusBarLayout)view).set(id,position);
+            StatusBarLayout statusBar=getStatusBar();
+            return null!=statusBar&&statusBar.set(id,position);
         }
         return false;
     }

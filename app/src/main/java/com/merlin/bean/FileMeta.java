@@ -27,7 +27,7 @@ public final class FileMeta implements Parcelable , Playable {
     private boolean favorite;
     private String extra;
     private String thumbImageUrl;
-    private Music meta;
+    private Media meta;
     private double accessTime;
 
     public boolean applyModify(FileModify modify){
@@ -109,7 +109,7 @@ public final class FileMeta implements Parcelable , Playable {
         this.favorite = favorite;
     }
 
-    public Music getMeta() {
+    public Media getMeta() {
         return meta;
     }
 
@@ -155,7 +155,7 @@ public final class FileMeta implements Parcelable , Playable {
         size=in.readLong();
         favorite=in.readInt()==1;
         Parcelable parcelable=in.readParcelable(FileMeta.class.getClassLoader());
-        meta=null!=parcelable&&parcelable instanceof Music ?(Music)parcelable:null;
+        meta=null!=parcelable&&parcelable instanceof Media ?(Media)parcelable:null;
     }
 
     @Override
