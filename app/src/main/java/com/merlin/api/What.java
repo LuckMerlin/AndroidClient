@@ -25,5 +25,7 @@ public interface What {
     int WHAT_REPLACE = - 1020;
     int WHAT_NORMAL = - 1021;
     int WHAT_NOT_SUPPORT = - 1022;
+    int WHAT_NOT_EXIST = - 1023;
+    int WHAT_FAIL_UNKNOWN = - 1024;
 }
 

@@ -161,7 +161,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         return false;
                     case R.string.delete:
                         List<FileMeta> list=null!=data&&data instanceof FileMeta?new ArrayList<>():null;
-                        return null!=list&&list.add((FileMeta)data)&&deleteFile(list);
+                        return null!=list&&list.add((FileMeta)data)&&deleteFile(list,"After delete tap click.");
                     case R.string.rename:
                         return null!=data&&data instanceof FileMeta&&renameFile((FileMeta)data);
                     default:
@@ -428,7 +428,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
-    private boolean deleteFile(List<FileMeta> files){
+    private boolean deleteFile(List<FileMeta> files,String debug){
         final int length=null!=files?files.size():-1;
         if (length>0){
             Dialog dialog=new Dialog(getViewContext());
@@ -462,7 +462,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                                              deleted.add(child);
                                          }
                                      }
-                                     adapter.remove(deleted);
+                                     adapter.remove(deleted,debug);
                                  }
                              }
                          }).deleteFile(paths);
