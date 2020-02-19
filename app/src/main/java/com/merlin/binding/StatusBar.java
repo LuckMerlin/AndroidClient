@@ -30,32 +30,11 @@ public final class StatusBar {
     public final static int IDLE =-19991;
     public final static int ICON_BACK = -2000;
 
-    private boolean applyRelativeRule(View view,int verb, Integer subject){
-        if (null!=view){
-            ViewGroup.LayoutParams lp=view.getLayoutParams();
-            RelativeLayout.LayoutParams params=null!=lp&&lp instanceof RelativeLayout.LayoutParams?(RelativeLayout.LayoutParams) lp:new RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            if (null!=subject){
-                params.addRule(verb,subject);
-            }else{
-                params.addRule(verb);
-            }
-            view.setLayoutParams(params);
-        }
-        return false;
-    }
-
     private StatusBinding createContent(final View view){
         ViewParent parent=null!=view?view.getParent():null;
         if (null!=parent&&parent instanceof RecyclerView){
             parent = parent.getParent();
         }
-//        view =null!=view?view.getRootView():null;
-//        view=null!=view?view.findViewById(android.R.id.content):null;
-//        if (null!=view&&view instanceof ViewGroup){
-//            int count=((ViewGroup)view).getChildCount();
-//            view=count>=0?((ViewGroup)view).getChildAt(0):null;
-//        }
         ViewGroup vg=null!=parent&&parent instanceof ViewGroup?(ViewGroup)parent:null;
         if (null!=vg){
             int count=vg.getChildCount();
@@ -68,29 +47,10 @@ public final class StatusBar {
                     }
                 }
             }
-//            final View first=count>0?vg.getChildAt(0):null;
             StatusBinding binding=DataBindingUtil.inflate(LayoutInflater.from(vg.getContext()), R.layout.status,vg,true);
             View root=null!=binding?binding.getRoot():null;
             if (null != root&&root instanceof StatusBarLayout){
                 StatusBar.enableStatusBarHeight(vg,true);
-
-//                if (root instanceof StatusBarLayout){
-//                    if (vg instanceof RelativeLayout) {
-////                            applyRelativeRule(root, RelativeLayout.ALIGN_PARENT_TOP, null);
-////                            int id=root.getId();
-////                            Debug.D(getClass(),"EEEEEEEEEEEEE "+id+" "+vg);
-////                            if (null!=first){
-////                                applyRelativeRule(first,RelativeLayout.BELOW,id);
-////                            }
-//                        }else if (vg instanceof LinearLayout){
-////                            vg.removeView(root);
-//
-//                        }
-////                    vg.addView(root,0);
-//                }else{
-////                    vg.removeView(root);
-////                    StatusBar.enableStatusBarHeight(view,false);
-//                }
             }
             return  binding;
         }
@@ -160,13 +120,20 @@ public final class StatusBar {
             view.setPadding(view.getPaddingLeft(),view.getPaddingTop()+height,view.getPaddingRight(),view.getPaddingBottom());
             ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
             int count=null!=vg?vg.getChildCount():-1;
-            height=height<<1;
+            height<<=1;
             for (int i = 0; i < count; i++) {
                 View v=vg.getChildAt(i);
-                if (null!=v){
-                    v.setPadding(v.getPaddingLeft(),v.getPaddingTop()+height,v.getPaddingRight(),v.getPaddingBottom());
+                if (null!=v&&!(v instanceof StatusBarLayout)){
+                    ViewGroup.LayoutParams params=v.getLayoutParams();
+                    ViewGroup.MarginLayoutParams marginParams=(null!=params&&params instanceof ViewGroup.MarginLayoutParams?(ViewGroup.MarginLayoutParams)params:
+                            new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+                    if (null!=marginParams){
+                        marginParams.topMargin = (marginParams.topMargin>0?marginParams.topMargin:0)+height;
+                        v.setLayoutParams(marginParams);
+                    }
                 }
             }
+            return true;
         }
         return false;
     }
