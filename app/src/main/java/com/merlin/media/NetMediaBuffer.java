@@ -59,7 +59,7 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
         reader.mWriteComplete=false;
         reader.mState= Reader.STATE_OPENING;
         Debug.D(getClass(),"下载 "+Address.URL+url);
-        retrofit.call(DownloadApi.class, Schedulers.newThread(),null,null).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
+        retrofit.call(DownloadApi.class, Schedulers.newThread(),null).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
                     private void finishRequest(int what,String debug){
                         reader.mWriteComplete=true;
                         reader.setCanceler(null);

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="sheet"
+            type="com.merlin.bean.Sheet" />
+        <import type="com.merlin.view.Clicker"/>
+    </data>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingTop="3dp"
+        binding:enableClick="@{Clicker.click(sheet,true)}"
+        android:paddingBottom="3dp"
+        android:text="@{sheet.title}"
+        style="@style/titleNormalTextView"/>
+</layout>

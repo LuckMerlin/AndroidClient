@@ -69,10 +69,6 @@ public final class Retrofit implements What {
         return retrofit.create(cls);
     }
 
-    public final <T> T call(Class<T> cls,Object dither, Callback...callbacks){
-        return call(cls,null,dither,callbacks);
-    }
-
     public final <T> T call(Class<T> cls,Scheduler observeOn,Object dither, Callback...callbacks){
         return call(cls,null,observeOn,dither,callbacks);
     }

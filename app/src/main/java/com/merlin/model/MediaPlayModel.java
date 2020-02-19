@@ -1,11 +1,14 @@
 package com.merlin.model;
+import android.view.View;
+
 import com.merlin.activity.OnBackPressed;
 import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 import com.merlin.player.Status;
+import com.merlin.view.OnTapClick;
 
-public class MediaPlayModel extends Model implements Label, What,Status {
+public class MediaPlayModel extends Model implements Label, What,Status, OnTapClick {
 
     public MediaPlayModel(){
 //        mPlayingAdapter=new MediaListAdapter();
@@ -13,7 +16,14 @@ public class MediaPlayModel extends Model implements Label, What,Status {
 //        post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
     }
 
-//    private boolean setMediaPlayer(MediaPlayer player){
+    @Override
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        Debug.D(getClass(),"BBBBBBBBBBBB "+resId);
+        return false;
+    }
+
+
+    //    private boolean setMediaPlayer(MediaPlayer player){
 //        MediaPlayer curr=mMediaPlayer;
 //        mMediaPlayer=player;
 //        if (null!=player){

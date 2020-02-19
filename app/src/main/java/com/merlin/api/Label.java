@@ -28,4 +28,5 @@ public interface Label{
    String  LABEL_FROM = "from";
    String  LABEL_TO = "to";
    String  LABEL_URL = "url";
+   String  LABEL_USER = "user";
 }

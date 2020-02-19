@@ -67,4 +67,7 @@
     <string name="artist">艺术家</string>
     <string name="album">专辑</string>
     <string name="add">添加</string>
+    <string name="play">播放</string>
+    <string name="orderNext">下一首播放</string>
+    <string name="addToSheet">添加到歌单</string>
 </resources>

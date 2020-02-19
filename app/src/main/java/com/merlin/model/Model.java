@@ -25,6 +25,7 @@ import com.merlin.global.Application;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
+import com.merlin.view.Res;
 import com.merlin.view.StatusBarLayout;
 import com.trello.rxlifecycle2.LifecycleProvider;
 
@@ -91,12 +92,21 @@ public class Model {
         return toast((null!=text?text:"")+(null!=note?note:""));
     }
 
-    protected final <T extends ViewDataBinding> T inflate(int layoutId){
-        return inflate(getViewContext(),layoutId);
+    protected final <T extends ViewDataBinding> T inflate(int layoutId, Res ...res){
+        return inflate(getViewContext(),layoutId,res);
     }
 
-    protected final <T extends ViewDataBinding> T inflate(Context context,int layoutId){
-        return null!=context?DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,null,false):null;
+    protected final <T extends ViewDataBinding> T inflate(Context context,int layoutId, Res ...res){
+        T binding=null!=context?DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,null,false):null;
+        if (null!=binding&&null!=res&&res.length>0){
+            for (Res r:res) {
+                Integer resourceId=null!=r?r.getResourceId():null;
+                if (null!=resourceId){
+                    binding.setVariable(resourceId,r.getArg());
+                }
+            }
+        }
+        return binding;
     }
 
     public final boolean toast(String msg){
@@ -303,7 +313,7 @@ public class Model {
     protected final <T> T call(Class<T> cls, Object dither, com.merlin.api.Callback...callbacks){
         Retrofit retrofit=mRetrofit;
         if (null!=cls){
-            return retrofit.call(cls,dither,callbacks);
+            return retrofit.call(cls,null,dither,callbacks);
         }
         return null;
     }

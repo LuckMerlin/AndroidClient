@@ -26,11 +26,11 @@ public class Application extends android.app.Application implements ActivityLife
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mClient.setOnFrameReceive(mOnFrameReceiveListener);
         mClient.putListener(mStatusChange);
-        mClient.connect((connected,what)->{
-             if (connected){
-                 mClient.login("wuyue","123456");
-             }
-        });
+//        mClient.connect((connected,what)->{
+//             if (connected){
+//                 mClient.login("wuyue","123456");
+//             }
+//        });
     }
 
     @Override

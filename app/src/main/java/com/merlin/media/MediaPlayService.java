@@ -8,11 +8,13 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.merlin.bean.File;
+import com.merlin.bean.Media;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.player.OnPlayerStatusUpdate;
@@ -24,91 +26,89 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MediaPlayService extends Service implements Status {
-    private final MPlayer mPlayer=new MPlayer();
-    private final static String LABEL_MEDIAS="medias";
-    private final static String LABEL_POSITION="position";
-    private final static String LABEL_ADD_INTO_QUEUE="addIntoQueue";
-    private final static String LABEL_PLAY="play";
-    private final static String LABEL_INDEX="index";
-    private final static List<ServiceConnection> mConnections=new ArrayList<>();
+    private final MPlayer mPlayer = new MPlayer();
+    private final static String LABEL_MEDIAS = "medias";
+    private final static String LABEL_POSITION = "position";
+    private final static String LABEL_PLAY_TYPE = "playType";
+    private final static List<ServiceConnection> mConnections = new ArrayList<>();
 
-    private final MediaPlayer mPlayerBinder=new MediaPlayer(){
+    private final MediaPlayer mPlayerBinder = new MediaPlayer() {
         @Override
         public boolean play(Object object, float seek, OnPlayerStatusUpdate update) {
-            MPlayer player=mPlayer;
-            return null!=player&&player.play(object,seek,update);
+            MPlayer player = mPlayer;
+            return null != player && player.play(object, seek, update);
         }
 
         @Override
         public boolean pre() {
-            MPlayer player=mPlayer;
-            return null!=player&&player.playPre();
+            MPlayer player = mPlayer;
+            return null != player && player.playPre();
         }
 
         @Override
         public boolean next() {
-            MPlayer player=mPlayer;
-            return null!=player&&player.playNext(true);
+            MPlayer player = mPlayer;
+            return null != player && player.playNext(true);
         }
 
         @Override
         public boolean pause(boolean stop, Object... obj) {
-            MPlayer player=mPlayer;
-            return null!=player&&player.pause(stop,obj);
+            MPlayer player = mPlayer;
+            return null != player && player.pause(stop, obj);
         }
 
         @Override
         public Mode playMode(Mode mode) {
-            MPlayer player=mPlayer;
-            return null!=player?player.playMode(mode):null;
+            MPlayer player = mPlayer;
+            return null != player ? player.playMode(mode) : null;
         }
 
         @Override
         public boolean togglePlayPause(Object media) {
-            MPlayer player=mPlayer;
-            return null!=player&& player.togglePausePlay(media);
+            MPlayer player = mPlayer;
+            return null != player && player.togglePausePlay(media);
         }
 
         @Override
         public int getPlayState() {
-            MPlayer player=mPlayer;
-            return null!=player?player.getPlayerStatus(): STATUS_UNKNOWN;
+            MPlayer player = mPlayer;
+            return null != player ? player.getPlayerStatus() : STATUS_UNKNOWN;
         }
 
         @Override
         public long getDuration() {
-            MPlayer player=mPlayer;
-            return null!=player?player.getDuration():0;
+            MPlayer player = mPlayer;
+            return null != player ? player.getDuration() : 0;
         }
 
         @Override
         public long getPosition() {
-            MPlayer player=mPlayer;
-            return null!=player?player.getPosition():0;
+            MPlayer player = mPlayer;
+            return null != player ? player.getPosition() : 0;
         }
 
         @Override
         public Playable getPlaying(Object... obj) {
-            MPlayer player=mPlayer;
-            return null!=player?player.getPlayingMedia(obj):null;
+            MPlayer player = mPlayer;
+            return null != player ? player.getPlayingMedia(obj) : null;
         }
 
         @Override
         public List<Playable> getQueue() {
-            MPlayer player=mPlayer;
-            return null!=player?player.getQueue():null;
+            MPlayer player = mPlayer;
+            return null != player ? player.getQueue() : null;
         }
 
         @Override
         public boolean addListener(OnPlayerStatusUpdate update) {
-            MPlayer player=mPlayer;
-            return null!=player&&null!=update&&player.addListener(update);
+            MPlayer player = mPlayer;
+            return null != player && null != update && player.addListener(update);
         }
 
         @Override
         public boolean removeListener(OnPlayerStatusUpdate update) {
-            MPlayer player=mPlayer;
-            return null!=player&&null!=update&&player.removeListener(update);
+            MPlayer player = mPlayer;
+            return null != player && null != update && player.removeListener(update);
         }
     };
 
@@ -121,67 +121,92 @@ public class MediaPlayService extends Service implements Status {
     @Override
     public void onCreate() {
         super.onCreate();
-        Debug.D(getClass(),"Media play service onCreate.");
+        Debug.D(getClass(), "Media play service onCreate.");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle bundle=null!=intent?intent.getExtras():null;
+        Bundle bundle = null != intent ? intent.getExtras() : null;
         handStartIntent(bundle);
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void handStartIntent(Bundle bundle){
-        Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
-        if (null!=object){
-            if (object instanceof File){
-                File file=(File)object;
-                String extension = file.getExtension();
-                if (extension.equals("mp3")) {
-                    if (bundle.getBoolean(LABEL_PLAY,false)){
-                        Object pos=bundle.get(LABEL_POSITION);
-                        float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
-                        mPlayerBinder.play(object,seek,null);
-                    }
-                    return;
-                }
-                Toast.makeText(this,R.string.noneSupportOpenFileType,Toast.LENGTH_SHORT).show();
-            }
-        }
+    private void handStartIntent(Bundle bundle) {
+//        Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
+//        if (null!=object){
+//            if (object instanceof File){
+//                File file=(File)object;
+//                String extension = file.getExtension();
+//                if (extension.equals("mp3")) {
+//                    if (bundle.getBoolean(LABEL_PLAY,false)){
+//                        Object pos=bundle.get(LABEL_POSITION);
+//                        float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
+//                        mPlayerBinder.play(object,seek,null);
+//                    }
+//                    return;
+//                }
+//                Toast.makeText(this,R.string.noneSupportOpenFileType,Toast.LENGTH_SHORT).show();
+//            }
+//        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Debug.D(getClass(),"Media play service onDestroy.");
-        MPlayer player=mPlayer;
-        if (null!=player){
+        Debug.D(getClass(), "Media play service onDestroy.");
+        MPlayer player = mPlayer;
+        if (null != player) {
             player.destroy();
         }
     }
 
-    public static boolean start(Context context, Intent intent){
-        if (null!=context){
-            intent=null!=intent?intent:new Intent();
-            intent.setClass(context,MediaPlayService.class);
+    public static boolean start(Context context, Intent intent) {
+        if (null != context) {
+            intent = null != intent ? intent : new Intent();
+            intent.setClass(context, MediaPlayService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startService(intent);
-            }else{
+            } else {
                 context.startService(intent);
             }
             return true;
         }
-        Debug.W(MediaPlayService.class,"Can't start media play service. context="+context);
+        Debug.W(MediaPlayService.class, "Can't start media play service. context=" + context);
         return false;
     }
 
+    public static boolean play(Context context, Parcelable media, int position, int playType) {
+        if (null != media && null != context) {
+            Intent intent = new Intent();
+            intent.putExtra(LABEL_MEDIAS, media);
+            intent.putExtra(LABEL_POSITION, position);
+            intent.putExtra(LABEL_PLAY_TYPE, playType);
+            return start(context, intent);
+        }
+       return false;
+    }
+
+    public static boolean play(Context context, ArrayList<Parcelable> medias, int position, int playType) {
+        if (null != medias&&medias.size()>0 && null != context) {
+            Intent intent = new Intent();
+            intent.putParcelableArrayListExtra(LABEL_MEDIAS, medias);
+            intent.putExtra(LABEL_POSITION, position);
+            intent.putExtra(LABEL_PLAY_TYPE, playType);
+            return start(context, intent);
+        }
+        return false;
+    }
+
+    /**
+     * @deprecated
+     */
     public static boolean play(Context context, File media, int position, boolean addIntoQueue){
         if (null!=media&&null!=context) {
             Intent intent = new Intent();
             intent.putExtra(LABEL_MEDIAS, media);
             intent.putExtra(LABEL_POSITION, position);
-            intent.putExtra(LABEL_ADD_INTO_QUEUE, addIntoQueue);
-            intent.putExtra(LABEL_PLAY, true);
+//            intent.putExtra(LABEL_ADD_INTO_QUEUE, addIntoQueue);
+//            intent.putExtra(LABEL_PLAY, true);
             return start(context, intent);
         }
         Debug.W(MediaPlayService.class,"Can't play media by start service.media="+media+" context="+context);

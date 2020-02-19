@@ -33,14 +33,14 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
         protected boolean onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<Sheet>>> finish) {
-            return null!=call(Api.class,finish).queryCategory(arg,page,10);
+            return null!=call(Api.class,finish).queryCategory(arg,false,page,10);
         }
     };
 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<Sheet>>> queryCategory(@Field(LABEL_NAME) String name, @Field(LABEL_PAGE) int page,
+        Observable<Reply<PageData<Sheet>>> queryCategory(@Field(LABEL_NAME) String name,@Field(LABEL_USER) boolean user ,@Field(LABEL_PAGE) int page,
                                                   @Field(LABEL_LIMIT) int limit);
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/create")

@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
@@ -56,9 +57,30 @@ public class Dialog implements View.OnClickListener{
 
     public final Dialog setContentView(int layoutId){
         Context context=getContext();
-        View view=null!=context? LayoutInflater.from(context).inflate(layoutId,null):null;
+        if (null!=context){
+            LayoutInflater inflater=LayoutInflater.from(context);
+            ViewDataBinding binding=DataBindingUtil.inflate(inflater,layoutId,null,false);
+            if (null!=binding){
+                return setContentView(binding);
+            }
+            return setContentView(inflater.inflate(layoutId,null,false));
+        }
+        return this;
+    }
+
+    public final Dialog setContentView(ViewDataBinding binding){
+        View view=null!=binding?binding.getRoot():null;
         return null!=view?setContentView(view):this;
     }
+
+//    public final Dialog setVariable(int variableId, @Nullable Object value){
+//        DialogLayoutBinding binding = mBinding;
+//        null!=binding?binding.getContentLayout()
+//        if (null!=binding){
+//             binding.setVariable(variableId,value);
+//        }
+//        return this;
+//    }
 
     public final Dialog create(){
         final android.app.Dialog dialog=mDialog;

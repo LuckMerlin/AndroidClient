@@ -21,7 +21,7 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
     private OnRecyclerScrollStateChange mChange;
 
     public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
-//        super(R.layout.media_display_sheet_category);
+//        super(R.layout.media_display_all_medias);
         super(R.layout.media_display_play,R.layout.media_display_all_medias,R.layout.media_display_sheet_category);
         mChange=change;
     }
@@ -44,7 +44,7 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
         Context context=parent.getContext();
         final LayoutInflater in=LayoutInflater.from(context);
         ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
-        ViewHolder viewHolder=new ViewHolder(null!=binding?binding.getRoot():null);
+        ViewHolder viewHolder=new ViewHolder(null!=binding?binding.getRoot():new View(context));
         return viewHolder;
     }
 

@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayerStatusUpdate {
+    public static final int PLAY_TYPE_ORDER_INTO_NEXT = 0x01; //0000 0001
+    public static final int PLAY_TYPE_PLAY_NOW = 0x02; //0000 0010
+    public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x11; //0000 0011
+
     private final List<Playable> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();

@@ -13,12 +13,12 @@
             type="boolean" />
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.util.Time"/>
     </data>
 
      <RelativeLayout
-         android:id="@+id/itemMediaAll_rootRL"
          android:background="@drawable/selector_round_dark_corner_small"
-         binding:enableClick="@{Clicker.click(media,true)}"
+         binding:enableClick="@{Clicker.multiClick(media,true)}"
          android:orientation="horizontal"
          android:paddingLeft="10dp"
          android:paddingRight="10dp"
@@ -65,26 +65,34 @@
              android:paddingLeft="5dp"
              android:paddingRight="5dp"
              android:layout_height="match_parent">
-             <TextView
-                 android:text="@{media.title}"
-                 android:singleLine="true"
-                 style="@style/titleNormalTextView"/>
-<!--             <LinearLayout-->
-<!--                 android:layout_width="wrap_content"-->
-<!--                 android:orientation="horizontal"-->
-<!--                 android:layout_marginLeft="10dp"-->
-<!--                 android:visibility="gone"-->
-<!--                 android:layout_height="wrap_content">-->
-<!--                 <TextView-->
-<!--                     android:text="@{mediaFile.meta.durationText}"-->
-<!--                     style="@style/smallNormalTextView" />-->
-<!--                 <TextView-->
-<!--                     android:text="@{` `+mediaFile.meta.artist??``}"-->
-<!--                     style="@style/smallNormalTextView" />-->
-<!--                 <TextView-->
-<!--                     android:text="@{` `+mediaFile.meta.album??``}"-->
-<!--                     style="@style/smallNormalTextView" />-->
-<!--             </LinearLayout>-->
+             <LinearLayout
+                 android:orientation="horizontal"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
+                 <TextView
+                     android:text="@{media.title}"
+                     android:layout_weight="4"
+                     android:gravity="left"
+                     android:singleLine="true"
+                     style="@style/titleNormalTextView"/>
+                 <TextView
+                     android:singleLine="true"
+                     android:layout_weight="1"
+                     android:text="@{Time.formatMediaDuration(media.duration)}"
+                     style="@style/titleSubNormalTextView"/>
+             </LinearLayout>
+                 <LinearLayout
+                     android:layout_width="wrap_content"
+                     android:orientation="horizontal"
+                     android:layout_height="wrap_content">
+                     <TextView
+                         android:text="@{media.artist??` `}"
+                         style="@style/smallNormalTextView" />
+                     <TextView
+                         android:layout_marginLeft="3dp"
+                         android:text="@{media.album??` `}"
+                         style="@style/smallNormalTextView" />
+                 </LinearLayout>
          </LinearLayout>
 
      </RelativeLayout>

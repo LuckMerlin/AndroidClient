@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="media"
+            type="com.merlin.bean.Media" />
+        <import type="com.merlin.view.ContextMenu"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.file.Permissions"/>
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.play,media)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.orderNext,media)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.addToSheet,media)}"/>
+    </LinearLayout>
+</layout>

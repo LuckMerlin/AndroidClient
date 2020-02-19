@@ -2,6 +2,7 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.audiofx.DynamicsProcessing;
 import android.os.Build;
@@ -55,11 +56,8 @@ public class MBinding {
 
     @BindingAdapter(value = {"enableBarPadding"})
     public static void enableBarPadding(View view, int enable) {
-        Context context=null!=view?view.getContext():null;
-        int height=null!=context? StatusBar.height(context):-1;
-        if (height>0){
-            view.setPadding(view.getPaddingLeft(),view.getPaddingTop()+height,
-                    view.getPaddingRight(),view.getPaddingBottom());
+        if (null!=view){
+            StatusBar.enableStatusBarHeight(view,true);
         }
     }
 
@@ -71,7 +69,10 @@ public class MBinding {
                     DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),(Integer)layout,(ViewGroup)view,true);
                 }
             }else if (layout instanceof View&&null==((View)layout).getParent()){
-                ((ViewGroup)view).addView((View)layout,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
+                ViewGroup.LayoutParams params=view.getLayoutParams();
+                int width=null!=params?params.width:ViewGroup.LayoutParams.WRAP_CONTENT;
+                int height=null!=params?params.height:ViewGroup.LayoutParams.WRAP_CONTENT;
+                ((ViewGroup)view).addView((View)layout,new ViewGroup.LayoutParams(width,height));
             }
         }
     }

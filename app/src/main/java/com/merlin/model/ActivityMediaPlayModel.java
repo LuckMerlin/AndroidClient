@@ -34,7 +34,6 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
                 MediaPlayDisplayAdapter ad=((MediaPlayDisplayAdapter)adapter);
                 Model model=ad.getCurrentModel();
                 if (null!=model){
-
                     if (model instanceof MediaPlayModel){
                         Media playing=mPlaying.get();
                         setStatusBar(null!=playing?playing.getTitle():R.string.mediaPlayer,StatusBar.CENTER);

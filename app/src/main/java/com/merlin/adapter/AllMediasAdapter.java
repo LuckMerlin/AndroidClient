@@ -46,7 +46,6 @@ public abstract class AllMediasAdapter extends MultiPageAdapter<String, Media, P
         return false;
     }
 
-
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         if (null!=rv){
