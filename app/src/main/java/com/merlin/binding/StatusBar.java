@@ -68,27 +68,29 @@ public final class StatusBar {
                     }
                 }
             }
-            final View first=count>0?vg.getChildAt(0):null;
+//            final View first=count>0?vg.getChildAt(0):null;
             StatusBinding binding=DataBindingUtil.inflate(LayoutInflater.from(vg.getContext()), R.layout.status,vg,true);
             View root=null!=binding?binding.getRoot():null;
-            if (null != root){
-                if (root instanceof StatusBarLayout){
-                    Debug.D(getClass(),"EEEEEEEEEEEEE "+vg);
-                    if (vg instanceof RelativeLayout) {
-                            applyRelativeRule(root, RelativeLayout.ALIGN_PARENT_TOP, null);
-                            int id=root.getId();
-                            if (null!=first){
-                                applyRelativeRule(first,RelativeLayout.BELOW,id);
-                            }
-                        }else if (vg instanceof LinearLayout){
-                            vg.removeView(root);
-                            vg.addView(root,0);
-                        }
-//                    StatusBar.enableStatusBarHeight(view,true);
-                }else{
-                    vg.removeView(root);
-//                    StatusBar.enableStatusBarHeight(view,false);
-                }
+            if (null != root&&root instanceof StatusBarLayout){
+                StatusBar.enableStatusBarHeight(vg,true);
+
+//                if (root instanceof StatusBarLayout){
+//                    if (vg instanceof RelativeLayout) {
+////                            applyRelativeRule(root, RelativeLayout.ALIGN_PARENT_TOP, null);
+////                            int id=root.getId();
+////                            Debug.D(getClass(),"EEEEEEEEEEEEE "+id+" "+vg);
+////                            if (null!=first){
+////                                applyRelativeRule(first,RelativeLayout.BELOW,id);
+////                            }
+//                        }else if (vg instanceof LinearLayout){
+////                            vg.removeView(root);
+//
+//                        }
+////                    vg.addView(root,0);
+//                }else{
+////                    vg.removeView(root);
+////                    StatusBar.enableStatusBarHeight(view,false);
+//                }
             }
             return  binding;
         }
@@ -156,6 +158,15 @@ public final class StatusBar {
         int height=null!=context? StatusBar.height(context):-1;
         if (height>0){
             view.setPadding(view.getPaddingLeft(),view.getPaddingTop()+height,view.getPaddingRight(),view.getPaddingBottom());
+            ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
+            int count=null!=vg?vg.getChildCount():-1;
+            height=height<<1;
+            for (int i = 0; i < count; i++) {
+                View v=vg.getChildAt(i);
+                if (null!=v){
+                    v.setPadding(v.getPaddingLeft(),v.getPaddingTop()+height,v.getPaddingRight(),v.getPaddingBottom());
+                }
+            }
         }
         return false;
     }
