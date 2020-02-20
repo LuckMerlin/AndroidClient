@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnLayoutManagerResolve  {
     private List<T> mData;
@@ -27,6 +28,36 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
             data.clear();
             notifyDataSetChanged();
             return true;
+        }
+        return false;
+    }
+
+    public synchronized final boolean replace(List<T> data,int from){
+        int size=null!=data?data.size():-1;
+        if (size>0&&from>=0){
+            List<T> curr=mData;
+            curr=null!=curr?curr:(mData=new ArrayList<>());
+            synchronized (curr){
+                int length=curr.size();
+                if (length<from){
+                    return false;
+                }
+                int index=0;
+                boolean changed=false;
+                for (int i = 0; i < size; i++) {
+                    if ((index = from + i) < length) {
+                        curr.remove(curr.get(index));
+                        changed = true;
+                    }
+                    curr.add(index, data.get(i));
+                    if (changed) {
+                        notifyItemChanged(index);
+                    }else{
+                        notifyItemInserted(index);
+                    }
+                }
+                return true;
+            }
         }
         return false;
     }

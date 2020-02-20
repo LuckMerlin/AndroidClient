@@ -7,13 +7,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
+import com.merlin.api.SectionData;
 import com.merlin.bean.Media;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaAllBinding;
 
 import java.util.List;
 
-public abstract class AllMediasAdapter extends MultiPageAdapter<String, Media, PageData<Media>>  {
+public abstract class AllMediasAdapter extends MultiSectionAdapter<String, Media, SectionData<Media>>  {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

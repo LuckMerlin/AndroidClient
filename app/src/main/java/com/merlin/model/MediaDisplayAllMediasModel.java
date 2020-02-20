@@ -10,6 +10,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
+import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.bean.File;
 import com.merlin.bean.Media;
@@ -31,17 +32,18 @@ import retrofit2.http.POST;
 
 
 public final class MediaDisplayAllMediasModel extends Model implements OnTapClick, OnLongClick,Label,What,OnTextChange {
+
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        protected boolean onPageLoad(String name, int page, OnApiFinish<Reply<PageData<Media>>> finish) {
-            return null!=call(Api.class,finish).queryAllMedias(page,50,name);
+        protected boolean onPageLoad(String name, int from, OnApiFinish<Reply<SectionData<Media>>> finish) {
+            return null!=call(Api.class,finish).queryAllMedias(from,from+1,name);
         }
     };
 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<Media>>> queryAllMedias(@Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit,
+        Observable<Reply<SectionData<Media>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
                                                           @Field(LABEL_NAME) String name,
                                                           @Field(LABEL_FORMAT) String... formats);
         @POST(Address.PREFIX_MEDIA+"/favorite")

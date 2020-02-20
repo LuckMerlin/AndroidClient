@@ -6,17 +6,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
+import com.merlin.api.SectionData;
 import com.merlin.debug.Debug;
+
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import static com.merlin.api.What.WHAT_SUCCEED;
 
-/**
- * @deprecated
- */
-public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapter<T>  implements OnMoreLoadable{
+public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends  Adapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
@@ -24,25 +23,36 @@ public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapt
     public interface OnPageLoadUpdate{
         int UPDATE_PAGE_END=123;
         int UPDATE_PAGE_START=124;
-        void onPageLoadUpdate(int state,boolean idle,Page page);
+        void onPageLoadUpdate(int state, boolean idle, Page page);
     }
 
     protected abstract boolean onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
 
-    private final boolean fillPage(PageData<T> page){
+    private final boolean fillPage(SectionData<T> page){
         if (null==page){
             return false;
         }
         List<T> list=page.getData();
-        return (page.getPage()<=0?setData(list):append(true,list));
+        int size=null!=list?list.size():0;
+        int from=page.getFrom();
+        int to=page.getTo();
+        if (from<0||to<from||(size!=(to-from))){
+            return false;
+        }
+        return replace(list,from);
     }
 
-    public boolean resetLoad(String debug){
+    public boolean reset(String debug){
         Page<D> page=mCurrentPage;
         D arg=null!=page?page.mArg:null;
         mCurrentPage=null;
         empty();
         return loadPage(arg,debug);
+    }
+
+    public boolean refresh(String debug){
+
+        return false;
     }
 
     public final Page<D> getLoadingPage() {

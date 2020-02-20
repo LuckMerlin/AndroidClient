@@ -2,22 +2,18 @@ package com.merlin.api;
 
 import java.util.List;
 
-/**
- *
- * @deprecated
- */
-public class PageData<T> {
+public final class SectionData<T> {
     private int length;
-    private int page;
-    private int limit;
+    private int from;
+    private int to;
     private List<T> data;
 
-    public final int getLimit() {
-        return limit;
+    public int getFrom() {
+        return from;
     }
 
-    public final int getPage() {
-        return page;
+    public int getTo() {
+        return to;
     }
 
     public final void setData(List<T> data) {
