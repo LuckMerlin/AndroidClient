@@ -21,7 +21,6 @@
     <string name="rebooting">重启中……</string>
     <string name="noneSupportOpenFileType">暂时不支持打开此类型文件</string>
     <string name="fileBrowser">文件浏览器</string>
-    <string name="mediaPlayer">播放器</string>
     <string name="fileTransport">文件传输</string>
     <string name="all">全部</string>
     <string name="sheet">歌单</string>
@@ -70,4 +69,6 @@
     <string name="play">播放</string>
     <string name="orderNext">下一首播放</string>
     <string name="addToSheet">添加到歌单</string>
+    <string name="allMedias">所有媒体文件</string>
+    <string name="mediaPlay">媒体播放</string>
 </resources>

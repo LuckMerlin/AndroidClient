@@ -3,6 +3,7 @@ package com.merlin.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +11,7 @@ import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
@@ -39,6 +41,14 @@ public class Model {
     private final static String LABEL_ACTIVITY_DATA="activityData";
     private PopupWindow mPopWindow;
 
+    public interface OnModelAttachedToWindow{
+        void onModelAttachedToWindow(View v,Model model);
+    }
+
+    public interface OnModelDetachedFromWindow{
+        void onModelDetachedFromWindow(View v,Model model);
+    }
+
     public final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
@@ -63,6 +73,23 @@ public class Model {
     private boolean initial(View view){
         if (null!=view){
             mRootView=new WeakReference<>(view);
+//            ViewTreeObserver observer=view.getViewTreeObserver();
+//            view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+//                @Override
+//                public void onViewAttachedToWindow(View v) {
+//                    if (Model.this instanceof OnModelAttachedToWindow){
+//                        ((OnModelAttachedToWindow)Model.this).onModelAttachedToWindow(v,Model.this);
+//                    }
+//                }
+//
+//                @Override
+//                public void onViewDetachedFromWindow(View v) {
+//                    if (Model.this instanceof OnModelDetachedFromWindow){
+//                        ((OnModelDetachedFromWindow)Model.this).onModelDetachedFromWindow(v,Model.this);
+//                    }
+//                    view.removeOnAttachStateChangeListener(this);
+//                }
+//            });
             checkStatusBarTapBind();
             onRootAttached(view);
             return true;
@@ -318,27 +345,21 @@ public class Model {
         return null;
     }
 
-    protected final StatusBarLayout getStatusBar(){
+    private final StatusBarLayout getStatusBar(){
         View root=getRoot();
         root= null!=root?root.getRootView():null;
         View view=null!=root?root.findViewById(R.id.status_root_RL):null;
         return null!=view&&view instanceof StatusBarLayout?(StatusBarLayout)view:null;
     }
 
-    protected final boolean setStatusBar(Object id,int position){
-        if (position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT){
-            StatusBarLayout statusBar=getStatusBar();
-            return null!=statusBar&&statusBar.set(id,position);
-        }
-        return false;
+    protected final boolean setStatusBar(StatusBar statusBar){
+        StatusBarLayout layout=null!=statusBar?getStatusBar():null;
+        return null!=layout&&layout.set(statusBar);
     }
 
-    protected final boolean show(){
-//        mPopwindow=new PopupWindow(true);
-        //            mPopupWindow.showAtLocation(view, Gravity.CENTER,0,0);
-//            mPopupWindow.setOnItemClickListener(this);
-//            mPopupWindow.reset(R.string.rename,R.string.addToFavorite,R.string.detail);x
-        return false;
+    protected final boolean setStatusBar(Object id,int position){
+        StatusBarLayout statusBar=position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT?getStatusBar():null;
+        return null!=statusBar&&statusBar.set(id,position);
     }
 
 }

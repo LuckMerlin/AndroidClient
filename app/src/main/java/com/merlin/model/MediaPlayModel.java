@@ -4,6 +4,7 @@ import android.view.View;
 import com.merlin.activity.OnBackPressed;
 import com.merlin.api.Label;
 import com.merlin.api.What;
+import com.merlin.binding.StatusBar;
 import com.merlin.debug.Debug;
 import com.merlin.player.Status;
 import com.merlin.view.OnTapClick;

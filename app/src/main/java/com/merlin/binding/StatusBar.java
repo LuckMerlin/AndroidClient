@@ -18,12 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.BR;
 import com.merlin.client.R;
+import com.merlin.client.databinding.ItemFileDetailBinding;
 import com.merlin.client.databinding.StatusBinding;
 import com.merlin.debug.Debug;
 import com.merlin.view.StatusBarLayout;
 
 public final class StatusBar {
-    private final @IdRes Integer mLeft,mCenter,mRight;
+    private final Object mLeft,mCenter,mRight;
     public final static int LEFT =RelativeLayout.ALIGN_PARENT_LEFT;
     public final static int CENTER =RelativeLayout.CENTER_IN_PARENT;
     public final static int RIGHT =RelativeLayout.ALIGN_PARENT_RIGHT;
@@ -31,9 +32,15 @@ public final class StatusBar {
     public final static int ICON_BACK = -2000;
 
     private StatusBinding createContent(final View view){
-        ViewParent parent=null!=view?view.getParent():null;
-        if (null!=parent&&parent instanceof RecyclerView){
-            parent = parent.getParent();
+        Object parent=null!=view?view.getParent():null;
+        if (null!=parent&&parent instanceof ViewParent){
+            if (parent instanceof RecyclerView){
+                if (view instanceof ViewGroup){ //Use self to create
+                    parent=view;
+                }else{ //Use parent to create
+                    parent = ((ViewParent)parent).getParent();
+                }
+            }
         }
         ViewGroup vg=null!=parent&&parent instanceof ViewGroup?(ViewGroup)parent:null;
         if (null!=vg){
@@ -49,8 +56,16 @@ public final class StatusBar {
             }
             StatusBinding binding=DataBindingUtil.inflate(LayoutInflater.from(vg.getContext()), R.layout.status,vg,true);
             View root=null!=binding?binding.getRoot():null;
-            if (null != root&&root instanceof StatusBarLayout){
-                StatusBar.enableStatusBarHeight(vg,true);
+            if (null != root){
+                if (root instanceof StatusBarLayout){
+                    if (vg instanceof LinearLayout){
+                        vg.removeView(root);
+                        vg.addView(root,0);
+                    }
+                    StatusBar.enableStatusBarHeight(vg,true);
+                }else{
+                    vg.removeView(root);
+                }
             }
             return  binding;
         }
@@ -72,21 +87,21 @@ public final class StatusBar {
         return false;
     }
 
-    private StatusBar(Integer left, Integer center, Integer right){
+    public StatusBar(Object left, Object center, Object right){
         mLeft=left;
         mCenter=center;
         mRight=right;
     }
 
-    public Integer getLeft() {
+    public Object getLeft() {
         return mLeft;
     }
 
-    public Integer getCenter() {
+    public Object getCenter() {
         return mCenter;
     }
 
-    public Integer getRight() {
+    public Object getRight() {
         return mRight;
     }
 
@@ -99,9 +114,7 @@ public final class StatusBar {
     }
 
     public static StatusBar statusBar(Object left, Object center, Object right){
-        return new StatusBar(null!=left&&left instanceof Integer?(Integer)left:null,
-                null!=center&&center instanceof Integer?(Integer)center:null,
-                null!=right&&right instanceof Integer?(Integer)right:null);
+        return new StatusBar(left,center,right);
     }
 
     public static int height(Context context){
@@ -118,21 +131,21 @@ public final class StatusBar {
         int height=null!=context? StatusBar.height(context):-1;
         if (height>0){
             view.setPadding(view.getPaddingLeft(),view.getPaddingTop()+height,view.getPaddingRight(),view.getPaddingBottom());
-            ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
-            int count=null!=vg?vg.getChildCount():-1;
-            height<<=1;
-            for (int i = 0; i < count; i++) {
-                View v=vg.getChildAt(i);
-                if (null!=v&&!(v instanceof StatusBarLayout)){
-                    ViewGroup.LayoutParams params=v.getLayoutParams();
-                    ViewGroup.MarginLayoutParams marginParams=(null!=params&&params instanceof ViewGroup.MarginLayoutParams?(ViewGroup.MarginLayoutParams)params:
-                            new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
-                    if (null!=marginParams){
-                        marginParams.topMargin = (marginParams.topMargin>0?marginParams.topMargin:0)+height;
-                        v.setLayoutParams(marginParams);
-                    }
-                }
-            }
+//            ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
+//            int count=null!=vg?vg.getChildCount():-1;
+//            height<<=1;
+//            for (int i = 0; i < count; i++) {
+//                View v=vg.getChildAt(i);
+//                if (null!=v&&!(v instanceof StatusBarLayout)){
+//                    ViewGroup.LayoutParams params=v.getLayoutParams();
+//                    ViewGroup.MarginLayoutParams marginParams=(null!=params&&params instanceof ViewGroup.MarginLayoutParams?(ViewGroup.MarginLayoutParams)params:
+//                            new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+//                    if (null!=marginParams){
+//                        marginParams.topMargin = (marginParams.topMargin>0?marginParams.topMargin:0)+height;
+//                        v.setLayoutParams(marginParams);
+//                    }
+//                }
+//            }
             return true;
         }
         return false;

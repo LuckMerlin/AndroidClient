@@ -11,7 +11,7 @@
 
         <LinearLayout
             binding:createModel="@{null}"
-            binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,null,R.string.add)}"
+            binding:statusBar="@{StatusBar.statusBar(null,R.string.mediaSheet,R.string.add)}"
             android:orientation="vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"

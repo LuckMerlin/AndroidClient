@@ -20,9 +20,16 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
     private LinearLayoutManager mManager;
     private OnRecyclerScrollStateChange mChange;
 
+    public interface OnMediaPlayModelShow{
+        void onMediaPlayModelShow();
+    }
+
+    public MediaPlayDisplayAdapter(){
+        this(null);
+    }
+
     public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
-//        super(R.layout.media_display_all_medias);
-        super(R.layout.media_display_play,R.layout.media_display_all_medias,R.layout.media_display_sheet_category);
+        super(R.layout.media_display_sheet_category,R.layout.media_display_play,R.layout.media_display_all_medias);
         mChange=change;
     }
 
@@ -36,6 +43,12 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
         View root=getCurrentView();
         Object object=null!=root?root.getTag(R.id.modelBind):null;
         return null!=object&&object instanceof Model?((Model)object):null;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        recyclerView.scrollToPosition(1);
     }
 
     @NonNull
@@ -71,6 +84,12 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
 
     @Override
     public void onRecyclerScrollStateChanged(RecyclerView recyclerView, int newState) {
+        if (newState==RecyclerView.SCROLL_STATE_IDLE){
+            Model model=getCurrentModel();
+            if (null!=model&&model instanceof OnMediaPlayModelShow){
+                ((OnMediaPlayModelShow)model).onMediaPlayModelShow();
+            }
+        }
         OnRecyclerScrollStateChange change=mChange;
         if (null!=change){
             change.onRecyclerScrollStateChanged(recyclerView,newState);

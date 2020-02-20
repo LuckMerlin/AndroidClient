@@ -47,8 +47,8 @@ public final class StatusBarLayout extends RelativeLayout implements OnTapClick{
         if (count>0){
             View child;
             for (int i = 0; i < count; i++) {
-                Object object=null!=(child=getChildAt(i))?child.getTag(R.id.resourceId):null;
-                Object arg=null!=object&&object instanceof IDs?((IDs)object).getArg():null;
+                Res res=null!=(child=getChildAt(i))?Clicker.getRes(child,null):null;
+                Object arg=null!=res?res.getArg():null;
                 if (null!=arg&&arg instanceof Integer&&(Integer)arg==position){
                     return child;
                 }
@@ -67,10 +67,19 @@ public final class StatusBarLayout extends RelativeLayout implements OnTapClick{
         return null!=reference&&null!=reference.remove(click);
     }
 
+    public boolean set(StatusBar statusBar){
+        if (null!=statusBar){
+            set(statusBar.getLeft(),StatusBar.LEFT);
+            set(statusBar.getCenter(),StatusBar.CENTER);
+            set(statusBar.getRight(),StatusBar.RIGHT);
+            return true;
+        }
+        return false;
+    }
+
     public boolean set(Object object, int position){
             Context context=getContext();
             View last= findPosition(position);
-
             if (null!=last){
                 removeView(last);
             }
@@ -82,10 +91,12 @@ public final class StatusBarLayout extends RelativeLayout implements OnTapClick{
                     if (id==StatusBar.ICON_BACK){
                         id=R.drawable.ic_back;
                     }
-                    binding=createView(context,id);
+                    binding=createResourceIdView(context,id);
                     resourceId=id;
                 }else if (object instanceof String){
                     binding=createStatusTextView(context,(String)object);
+                }else if (object instanceof Drawable){
+                    binding=createStatusImageView(context,(Drawable) object);
                 }
                 View root=null!=binding?binding.getRoot():null;
                 if (null!=root){
@@ -105,24 +116,31 @@ public final class StatusBarLayout extends RelativeLayout implements OnTapClick{
         return true;
     }
 
-    private final ViewDataBinding createView(Context context,  Integer id){
+    private final ViewDataBinding createResourceIdView(Context context, Integer id){
         Resources res=null!=context&&null!=id?context.getResources():null;
         if (null!=res){
             Drawable drawable=Resource.isExistResource(R.drawable.class,id)? android.os.Build.VERSION.SDK_INT >=
                     android.os.Build.VERSION_CODES.LOLLIPOP?res.getDrawable(id, context.getTheme()):res.getDrawable(id):null;
             if (null!=drawable){
-                StatusIconBinding iconBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_icon,this,true);
-                View view= null!=iconBinding?iconBinding.getRoot():null;//LayoutInflater.from(context).inflate(R.layout.status_icon,null);
-                if (null!=view&&view instanceof ImageView){
-                    ((ImageView)view).setImageDrawable(drawable);
-                }
-                return iconBinding;
+                return createStatusImageView(context,drawable);
             }
             String text=Resource.isExistResource(R.string.class,id)?res.getString(id):null;
             if (null!=text){
                 return createStatusTextView(context,text);
             }
             return Resource.isExistResource(R.layout.class,id)? DataBindingUtil.inflate(LayoutInflater.from(context),id,this,true):null;
+        }
+        return null;
+    }
+
+    private final ViewDataBinding createStatusImageView(Context context,Drawable image){
+        if (null!=image){
+            StatusIconBinding iconBinding=DataBindingUtil.inflate(LayoutInflater.from(context),R.layout.status_icon,this,true);
+            View view= null!=iconBinding?iconBinding.getRoot():null;//LayoutInflater.from(context).inflate(R.layout.status_icon,null);
+            if (null!=view&&view instanceof ImageView){
+                ((ImageView)view).setImageDrawable(image);
+            }
+            return iconBinding;
         }
         return null;
     }

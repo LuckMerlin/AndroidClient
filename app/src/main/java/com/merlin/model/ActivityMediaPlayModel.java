@@ -27,25 +27,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
-    private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter((recyclerView, newState)->{
-        if (newState==RecyclerView.SCROLL_STATE_IDLE){
-            RecyclerView.Adapter adapter=null!=recyclerView?recyclerView.getAdapter():null;
-            if (null!=adapter&&adapter instanceof MediaPlayDisplayAdapter){
-                MediaPlayDisplayAdapter ad=((MediaPlayDisplayAdapter)adapter);
-                Model model=ad.getCurrentModel();
-                if (null!=model){
-                    if (model instanceof MediaPlayModel){
-                        Media playing=mPlaying.get();
-                        setStatusBar(null!=playing?playing.getTitle():R.string.mediaPlayer,StatusBar.CENTER);
-                    }else if (model instanceof MediaDisplaySheetCategoryModel){
-                        setStatusBar(R.string.sheet,StatusBar.CENTER);
-                    }else if (model instanceof MediaDisplayAllMediasModel){
-                        setStatusBar(R.string.all,StatusBar.CENTER);
-                    }
-                }
-            }
-        }
-    });
+
+    private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
@@ -128,7 +111,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick,OnPlayer
         Media playing=null!=playable&&playable instanceof Media ?(Media)playable:null;
         String title=null!=playing?playing.getTitle():null;
         mPlaying.set(playing);
-        setStatusBar(title, StatusBar.CENTER);
+        setStatusBar(null!=playing?title:R.string.mediaPlay, StatusBar.CENTER);
     }
 
     private boolean showMediaSheetDetail(Sheet sheet){

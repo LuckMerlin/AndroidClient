@@ -5,10 +5,14 @@
         <variable
             name="vm"
             type="com.merlin.model.MediaDisplayAllMediasModel" />
+        <import type="com.merlin.binding.StatusBar"/>
+        <import type="com.merlin.client.R"/>
     </data>
     <LinearLayout
-        android:padding="@dimen/contentGap"
         binding:createModel="@{true}"
+        android:paddingLeft="@dimen/contentGap"
+        android:paddingRight="@dimen/contentGap"
+        binding:statusBar="@{StatusBar.statusBar(null, R.string.allMedias,null)}"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -21,7 +25,6 @@
                 style="@style/editTextNormal"/>
         </RelativeLayout>
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:layout_marginTop="3dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView

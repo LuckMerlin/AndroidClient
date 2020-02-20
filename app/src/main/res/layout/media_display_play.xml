@@ -8,10 +8,11 @@
         <import type="com.merlin.player.Status"/>
         <import type="com.merlin.player.Time"/>
         <import type="com.merlin.binding.StatusBar"/>
+        <import type="com.merlin.client.R"/>
     </data>
     <RelativeLayout
         android:id="@+id/media_display_play_rootRL"
-        binding:statusBar="@{StatusBar.statusBar(`你好`)}"
+        binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,R.string.mediaPlay,null)}"
         binding:createModel="@{true}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

@@ -43,7 +43,7 @@
         </activity>
         <activity android:name="com.merlin.activity.MediaPlayActivity"
             android:launchMode="singleInstance"
-            android:label="@string/mediaPlayer">
+            android:label="@string/mediaPlay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -7,6 +7,7 @@ import android.widget.EditText;
 
 import com.merlin.activity.MediaSheetActivity;
 import com.merlin.activity.MediaSheetDetailActivity;
+import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaSheetCategoryAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
@@ -29,7 +30,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTapClick, OnLongClick {
+public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDisplayAdapter.OnMediaPlayModelShow,Label, OnTapClick, OnLongClick {
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
         protected boolean onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<Sheet>>> finish) {
@@ -54,7 +55,12 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     }
 
     public MediaDisplaySheetCategoryModel(){
-        queryPage("While model create.");
+        queryPage(false,"While model create.");
+    }
+
+    @Override
+    public void onMediaPlayModelShow() {
+        queryPage(true,"After model show.");
     }
 
     @Override
@@ -124,9 +130,9 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
         },false);
     }
 
-    private boolean queryPage(String debug){
+    private boolean queryPage(boolean reset,String debug){
         MediaSheetCategoryAdapter adapter=mCategoryAdapter;
-        return null!=adapter&&adapter.loadPage(null,debug);
+        return null!=adapter&&(reset?adapter.resetLoad(debug):adapter.loadPage(null,debug));
     }
 
     public MediaSheetCategoryAdapter getCategoryAdapter() {
