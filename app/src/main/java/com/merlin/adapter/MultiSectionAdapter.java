@@ -97,6 +97,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
             if(!onPageLoad(page.mArg,pageIndex,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
+                Debug.D(getClass(),"AAAAAAAA "+idle+" "+page+" "+mLoadingPage);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
                 if (idle){
                     mLoadingPage=null;

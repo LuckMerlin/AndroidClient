@@ -32,6 +32,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.LoadMoreInterceptor;
 import com.merlin.adapter.MultiPageAdapter;
+import com.merlin.adapter.MultiSectionAdapter;
 import com.merlin.adapter.OnMoreLoadable;
 import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
@@ -300,13 +301,13 @@ public class MBinding {
                     }
                 });
             }
-            final ViewParent parent=adapter instanceof MultiPageAdapter?view.getParent():null;
+            final ViewParent parent=adapter instanceof MultiSectionAdapter ?view.getParent():null;
             if (null!=parent&&parent instanceof SwipeRefreshLayout){
                 final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
-                final MultiPageAdapter multiPageAdapter=(MultiPageAdapter)adapter;
+                final MultiSectionAdapter multiPageAdapter=(MultiSectionAdapter)adapter;
                 final MultiPageAdapterRefreshBridge refresh=new MultiPageAdapterRefreshBridge(){
                     @Override
-                    public void onPageLoadUpdate(int state, boolean idle, MultiPageAdapter.Page page) {
+                    public void onPageLoadUpdate(int state, boolean idle, MultiSectionAdapter.Page page) {
                         switch (state){
                             case UPDATE_PAGE_START:
                                 refreshLayout.setRefreshing(true);
@@ -321,7 +322,7 @@ public class MBinding {
 
                     @Override
                     public void onRefresh() {
-                        if (!multiPageAdapter.resetLoad("After refresh.")&&!multiPageAdapter.isLoading()){
+                        if (!multiPageAdapter.reset("After refresh.")&&!multiPageAdapter.isLoading()){
                             refreshLayout.setRefreshing(false);
                         }
                     }
