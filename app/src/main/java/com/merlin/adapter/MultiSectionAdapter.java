@@ -129,8 +129,8 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
 
     public final boolean loadNextPage(String debug){
         Page<D> current=mCurrentPage;
-        return !isLoading()&&null!=current&&loadPage(new Page<>
-                (current.mArg,current.mFrom+1,null),debug);
+        int size=getDataSize();
+        return !isLoading()&&null!=current&&loadPage(new Page<>(current.mArg,size,null),debug);
     }
 
     public final boolean loadPage(D arg,String debug){
