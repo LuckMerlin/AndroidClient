@@ -31,7 +31,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDisplayAdapter.OnMediaPlayModelShow,Label, OnTapClick, OnLongClick {
+public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTapClick, OnLongClick, MediaPlayDisplayAdapter.OnMediaPlayModelShow {
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
         protected boolean onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Sheet>>> finish) {
@@ -57,11 +57,6 @@ public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDi
 
     public MediaDisplaySheetCategoryModel(){
         queryPage(false,"While model create.");
-    }
-
-    @Override
-    public void onMediaPlayModelShow() {
-//        queryPage(true,"After model show.");
     }
 
     @Override
@@ -122,7 +117,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDi
                    toast(note);
                    MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                    if (null!=adapter){
-//                       adapter.resetLoad("After sheet create succeed.");
+                       adapter.reset("After sheet create succeed.");
                    }
                }).createSheet(text,null,null);
            }
@@ -134,6 +129,14 @@ public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDi
     private boolean queryPage(boolean reset,String debug){
         MediaSheetCategoryAdapter adapter=mCategoryAdapter;
         return null!=adapter&&(reset?adapter.reset(debug):adapter.loadPage(null,debug));
+    }
+
+    @Override
+    public void onMediaPlayModelShow() {
+        MediaSheetCategoryAdapter adapter= mCategoryAdapter;
+        if (null!=adapter){
+            adapter.reloadVisible("After media sheet model show.");
+        }
     }
 
     public MediaSheetCategoryAdapter getCategoryAdapter() {

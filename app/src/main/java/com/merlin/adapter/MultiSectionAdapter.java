@@ -16,14 +16,13 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
+import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import static com.merlin.api.What.WHAT_SUCCEED;
 
 public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends  Adapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
@@ -44,10 +43,9 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         }
         page.getLength();
         List<T> list=page.getData();
-        int size=null!=list?list.size():0;
         int from=page.getFrom();
         int to=page.getTo();
-        if (from<0||to<from||(size!=(to-from))){
+        if (from<0||to<from){
             return false;
         }
         return replace(list,from);
@@ -61,7 +59,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         return loadPage(arg,debug);
     }
 
-    public boolean refresh(String debug){
+    public boolean reloadVisible(String debug){
 
         return false;
     }
@@ -99,20 +97,10 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
                 View view=lm.findViewByPosition(firstPosition);
                 return view.getTop()==rv.getPaddingTop()?loadNextPage("After page not full "+
                         (null!=debug?debug:".")):reset("After page pull down.");
-            }else if (manager instanceof GridLayoutManager){
-//                ((GridLayoutManager)manager).findFirstVisibleItemPosition()
             }else if (manager instanceof StaggeredGridLayoutManager){
 //                ((StaggeredGridLayoutManager)manager).f
             }
         }
-//        Page<D> page=mCurrentPage;
-//        Integer total=null!=page?page.mTotal:null;
-//        if (null!=total){
-//            if(getDataSize()>=total){
-//                return true;
-//            }
-//        }
-//        return reset(debug);
         return false;
     }
 
@@ -155,7 +143,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
                 if (idle){
                     mLoadingPage=null;
-                    if (what== WHAT_SUCCEED){
+                    if (what== What.WHAT_SUCCEED){
                         M m=null!=data?data.getData():null;
                         int total=null!=m?m.getLength():-1;
                         if (total>=0){

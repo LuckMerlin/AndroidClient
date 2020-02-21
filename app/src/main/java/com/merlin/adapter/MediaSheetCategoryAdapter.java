@@ -16,7 +16,7 @@ import com.merlin.view.OnTapClick;
 
 import java.util.List;
 
-public abstract class MediaSheetCategoryAdapter extends MultiSectionAdapter<String,Sheet, SectionData<Sheet>> {
+public abstract class MediaSheetCategoryAdapter extends MultiSectionAdapter<String,Sheet, SectionData<Sheet>>  {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -33,9 +33,7 @@ public abstract class MediaSheetCategoryAdapter extends MultiSectionAdapter<Stri
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         if (null!=rv){
-            GridLayoutManager glm=new GridLayoutManager(rv.getContext(), 3,RecyclerView.VERTICAL,false);
-            glm.setSmoothScrollbarEnabled(true);
-            return glm;
+            return new GridLayoutManager(rv.getContext(), 3,RecyclerView.VERTICAL,false);
         }
         return null;
     }

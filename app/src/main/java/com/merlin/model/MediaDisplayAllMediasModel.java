@@ -71,6 +71,11 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
                 return (null!=data&&null!=view&&data instanceof Media&&play((Media)data,true))||true;
             case R.string.addToSheet://Get through
                 return (null!=data&&null!=view&&data instanceof Media&&addToSheet((Media)data))||true;
+            default:
+                if (null!=data&&data instanceof Media){
+                    play((Media)data,clickCount>1);
+                }
+                break;
         }
         return true;
     }
@@ -84,15 +89,14 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         if (null!=md5&&md5.length()>0){
             Dialog dialog=new Dialog(getViewContext());
             ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(BR.media,media));
-//            return showAtLocation(getRoot(),inflate(R.layout.media_sheet_choose,new Res(BR.media,media)),PopupWindow.DISMISS_OUT_MASK);
-            return dialog.setContentView(binding).title(R.string.addToSheet).right(R.string.cancel).
+           return dialog.setContentView(binding).title(R.string.addToSheet).left(R.string.createSheet).right(R.string.cancel).
                     show((view,clickCount,resId,data)->{
                         dialog.dismiss();
                         String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
                         if (null!=sheetId&&sheetId.length()>0){
-                            call(Api.class,(OnApiFinish<Reply<Media>>)(what,note,m,arg)->{
+                            return null!=call(Api.class,(OnApiFinish<Reply<Media>>)(what,note,m,arg)->{
                                 toast(note);
-                            }).addIntoSheet(md5,sheetId);
+                            }).addIntoSheet(md5,sheetId)||true;
                         }
                         return false;},false);
         }

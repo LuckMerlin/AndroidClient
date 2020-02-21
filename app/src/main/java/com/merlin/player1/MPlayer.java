@@ -79,6 +79,10 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return null!=media&&add(media,-1);
     }
 
+    public final boolean play(Playable playable,String debug){
+        return false;
+    }
+
     public final boolean add(Playable media, int index){
         if (null!=media&&!isExist(media)){
             List<Playable> queue=mQueue;
@@ -123,12 +127,12 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 //                    return new FileBuffer(media,seek);
 //                }
 //            }
-            String url=media.getPath();
-            if (null!=url&&url.length()>0){
-                if (media instanceof File){
-                    return new NetMediaBuffer((File) media,seek);
-                }
-            }
+//            String url=media.getPath();
+//            if (null!=url&&url.length()>0){
+//                if (media instanceof File){
+//                    return new NetMediaBuffer((File) media,seek);
+//                }
+//            }
         }
         return null;
     }

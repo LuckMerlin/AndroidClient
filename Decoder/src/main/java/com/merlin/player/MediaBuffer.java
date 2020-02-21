@@ -63,7 +63,6 @@ public abstract class MediaBuffer<T extends Playable> {
     @Override
     public String toString() {
         T playable=mPlayable;
-        String path=null!=playable?playable.getPath():null;
-        return ""+path+" "+super.toString();
+        return ""+playable+" "+super.toString();
     }
 }

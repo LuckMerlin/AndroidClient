@@ -12,10 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
@@ -29,6 +31,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.merlin.adapter.Adapter;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.LoadMoreInterceptor;
 import com.merlin.adapter.MultiPageAdapter;
@@ -271,7 +274,7 @@ public class MBinding {
     }
 
     @BindingAdapter("adapter")
-    public static void adapter(RecyclerView view, com.merlin.adapter.Adapter adapter) {
+    public static void adapter(RecyclerView view, Adapter adapter) {
         if (null!=view&&null!=adapter){
             RecyclerView.LayoutManager manager=adapter.onResolveLayoutManager(view);
             if (null!=manager){

@@ -43,6 +43,8 @@ public abstract class LoadMoreInterceptor extends RecyclerView.OnScrollListener 
         onRecyclerScrollStateChanged(recyclerView,newState);
     }
 
+
+
     @Override
     public final void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);

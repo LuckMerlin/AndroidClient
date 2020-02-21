@@ -4,6 +4,7 @@ package com.merlin.model;
 import android.view.View;
 import android.view.ViewParent;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.RecyclerView;
 

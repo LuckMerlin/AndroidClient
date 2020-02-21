@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="media"
@@ -8,10 +9,12 @@
         <variable
             name="position"
             type="long" />
+        <import type="com.merlin.view.Clicker"/>
     </data>
     <RelativeLayout
-        android:background="@drawable/round_dark_corner_small_normal"
+        android:background="@drawable/selector_round_dark_corner_small"
         android:padding="5dp"
+        binding:enableClick="@{Clicker.multiClick(media,true)}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"

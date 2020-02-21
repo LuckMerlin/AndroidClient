@@ -11,7 +11,8 @@ public final class FileBuffer<T  extends Playable> extends MediaBuffer<T> {
 
      public FileBuffer(T playable,double seek){
         super(playable,seek);
-         mPath=null!=playable?playable.getPath():null;
+        mPath=null;
+//         mPath=null!=playable?playable.getPath():null;
     }
 
     @Override

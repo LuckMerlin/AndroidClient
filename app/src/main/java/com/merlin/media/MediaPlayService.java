@@ -23,6 +23,7 @@ import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class MediaPlayService extends Service implements Status {
@@ -132,7 +133,33 @@ public class MediaPlayService extends Service implements Status {
     }
 
     private void handStartIntent(Bundle bundle) {
-//        Object object=null!=bundle?bundle.get(LABEL_MEDIAS):null;
+        final MPlayer player=mPlayer;
+        if (null!=bundle&&null!=player){
+            Object object=bundle.get(LABEL_MEDIAS);
+            if (null!=object){
+                if (object instanceof Collection){
+                    if (((Collection)object).size()>0){
+                        Object positionObj=bundle.get(LABEL_POSITION);
+                        Object playTypeObj=bundle.get(LABEL_PLAY_TYPE);
+                        if (null!=positionObj&&positionObj instanceof Integer){
+                            if ((((Integer)positionObj)&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE)>0){
+                                for (Object obj:(Collection)object){
+                                    if (null!=obj&&obj instanceof Media){
+                                        player.add((Media)obj,0);
+                                    }
+                                }
+                            }
+                        }
+                        if (null!=playTypeObj&&playTypeObj instanceof Integer&&(((Integer)positionObj)&MPlayer.PLAY_TYPE_PLAY_NOW)>0){
+                            Object next=((Collection)object).iterator().next();
+                            if (null!=next&&next instanceof Media){
+                                player.play((Media)next,"After play from intent.");
+                            }
+                        }
+                    }
+                }
+            }
+        }
 //        if (null!=object){
 //            if (object instanceof File){
 //                File file=(File)object;
@@ -177,11 +204,9 @@ public class MediaPlayService extends Service implements Status {
 
     public static boolean play(Context context, Parcelable media, int position, int playType) {
         if (null != media && null != context) {
-            Intent intent = new Intent();
-            intent.putExtra(LABEL_MEDIAS, media);
-            intent.putExtra(LABEL_POSITION, position);
-            intent.putExtra(LABEL_PLAY_TYPE, playType);
-            return start(context, intent);
+            ArrayList<Parcelable> list=new ArrayList<>(1);
+            list.add(media);
+            return play(context,list,position,playType);
         }
        return false;
     }
@@ -212,17 +237,6 @@ public class MediaPlayService extends Service implements Status {
         Debug.W(MediaPlayService.class,"Can't play media by start service.media="+media+" context="+context);
         return false;
     }
-
-//    public static boolean add(Context context, Media media, int index){
-//        if (null!=context&&null!=media){
-//            Intent intent=new Intent();
-//            intent.putExtra(LABEL_MEDIAS,media);
-//            intent.putExtra(LABEL_INDEX,index);
-//            return start(context,intent);
-//        }
-//        Debug.W(MediaPlayService.class,"Can't add media by start service.media="+media+" context="+context);
-//        return false;
-//    }
 
     public static boolean bind(Activity activity){
         if (null!=activity){

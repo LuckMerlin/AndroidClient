@@ -41,7 +41,8 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
             return false;
         }
         final Playable media=getPlayable();
-        final String url=null!=media?media.getPath():null;
+//        final String url=null!=media?media.getPath():null;
+        final String url=null;
         if (null==url||url.length()<=0){
             Debug.D(getClass(),"Can't play media,Url invalid "+(null!=debug?debug:".")+" url="+url+" "+media);
             return false;

@@ -33,8 +33,7 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
     }
 
     public synchronized final boolean replace(List<T> data,int from){
-        int size=null!=data?data.size():-1;
-        if (size>0&&from>=0){
+        if (from>=0){
             List<T> curr=mData;
             curr=null!=curr?curr:(mData=new ArrayList<>());
             synchronized (curr){
@@ -42,19 +41,25 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
                 if (length<from){
                     return false;
                 }
-                int index=0;
-                boolean changed=false;
-                for (int i = 0; i < size; i++) {
-                    if ((index = from + i) < length) {
-                        curr.remove(curr.get(index));
-                        changed = true;
+                int size=null!=data?data.size():-1;
+                if (size>0){
+                    boolean changed=false;
+                    int index=0;
+                    for (int i = 0; i < size; i++) {
+                        if ((index = from + i) < length) {
+                            curr.remove(curr.get(index));
+                            changed = true;
+                        }
+                        curr.add(index, data.get(i));
+                        if (changed) {
+                            notifyItemChanged(index);
+                        }else{
+                            notifyItemInserted(index);
+                        }
                     }
-                    curr.add(index, data.get(i));
-                    if (changed) {
-                        notifyItemChanged(index);
-                    }else{
-                        notifyItemInserted(index);
-                    }
+                }else if (length>0){
+                    curr.clear();
+                    notifyDataSetChanged();
                 }
                 return true;
             }

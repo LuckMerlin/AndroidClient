@@ -3,9 +3,10 @@ package com.merlin.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.merlin.player.Playable;
 import com.merlin.util.Time;
 
-public class Media implements Parcelable {
+public class Media implements Parcelable, Playable {
     private String md5;
     private String title;
     private String album;
