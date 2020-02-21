@@ -21,7 +21,7 @@ public final class Sheet implements Parcelable {
     private String account;
     private String title;
     private long size;
-    private String imageUrl;
+    private String url;
     private String id;
     private String note;
     private long createTime;
@@ -44,8 +44,15 @@ public final class Sheet implements Parcelable {
         return size;
     }
 
+    /**
+     * @deprecated
+     */
     public String getImageUrl() {
-        return imageUrl;
+        return url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public String getId() {
@@ -94,7 +101,7 @@ public final class Sheet implements Parcelable {
         if (null!=in){
             title=in.readString();
             size=in.readLong();
-            imageUrl=in.readString();
+            url=in.readString();
             id=in.readString();
             createTime=in.readLong();
             account=in.readString();
@@ -108,7 +115,7 @@ public final class Sheet implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(title);
         dest.writeLong(size);
-        dest.writeString(imageUrl);
+        dest.writeString(url);
         dest.writeString(id);
         dest.writeLong(createTime);
         dest.writeString(account);

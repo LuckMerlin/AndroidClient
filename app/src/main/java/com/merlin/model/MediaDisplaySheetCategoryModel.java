@@ -16,6 +16,7 @@ import com.merlin.api.Modify;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
+import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.bean.MediaSheet;
 import com.merlin.bean.Sheet;
@@ -33,16 +34,16 @@ import retrofit2.http.POST;
 public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDisplayAdapter.OnMediaPlayModelShow,Label, OnTapClick, OnLongClick {
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
-        protected boolean onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<Sheet>>> finish) {
-            return null!=call(Api.class,finish).queryCategory(arg,false,page,10);
+        protected boolean onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Sheet>>> finish) {
+            return null!=call(Api.class,finish).queryCategory(arg,false,from,from+10);
         }
     };
 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<Sheet>>> queryCategory(@Field(LABEL_NAME) String name,@Field(LABEL_USER) boolean user ,@Field(LABEL_PAGE) int page,
-                                                  @Field(LABEL_LIMIT) int limit);
+        Observable<Reply<SectionData<Sheet>>> queryCategory(@Field(LABEL_NAME) String name,@Field(LABEL_USER) boolean user ,@Field(LABEL_FROM) int from,
+                                                  @Field(LABEL_TO) int to);
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/create")
         @FormUrlEncoded
@@ -60,7 +61,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDi
 
     @Override
     public void onMediaPlayModelShow() {
-        queryPage(true,"After model show.");
+//        queryPage(true,"After model show.");
     }
 
     @Override
@@ -121,7 +122,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDi
                    toast(note);
                    MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                    if (null!=adapter){
-                       adapter.resetLoad("After sheet create succeed.");
+//                       adapter.resetLoad("After sheet create succeed.");
                    }
                }).createSheet(text,null,null);
            }
@@ -132,7 +133,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements MediaPlayDi
 
     private boolean queryPage(boolean reset,String debug){
         MediaSheetCategoryAdapter adapter=mCategoryAdapter;
-        return null!=adapter&&(reset?adapter.resetLoad(debug):adapter.loadPage(null,debug));
+        return null!=adapter&&(reset?adapter.reset(debug):adapter.loadPage(null,debug));
     }
 
     public MediaSheetCategoryAdapter getCategoryAdapter() {

@@ -3,7 +3,7 @@ package com.merlin.api;
 import java.util.List;
 
 public final class SectionData<T> {
-    private int length;
+    private int length=-1;
     private int from;
     private int to;
     private List<T> data;

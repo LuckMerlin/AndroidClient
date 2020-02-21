@@ -69,6 +69,7 @@
     <string name="play">播放</string>
     <string name="orderNext">下一首播放</string>
     <string name="addToSheet">添加到歌单</string>
-    <string name="allMedias">所有媒体文件</string>
+    <string name="allMedias">所有媒体</string>
     <string name="mediaPlay">媒体播放</string>
+    <string name="noMoreData">已经没有更多了</string>
 </resources>

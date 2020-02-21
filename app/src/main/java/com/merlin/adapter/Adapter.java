@@ -149,6 +149,11 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         return null;
     }
 
+    public final int getDataSize() {
+        List<T> data=mData;
+        return null!=data?data.size():-1;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
