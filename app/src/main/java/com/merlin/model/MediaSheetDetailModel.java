@@ -10,11 +10,9 @@ import com.merlin.adapter.SheetMediasAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
-import com.merlin.bean.File;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.media.MediaPlayService;
 import com.merlin.player1.MPlayer;
@@ -30,7 +28,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private final ObservableField<Sheet> mSheet=new ObservableField<>();
     private final SheetMediasAdapter mAdapter=new SheetMediasAdapter(){
         @Override
-        protected boolean onPageLoad(String title, int page, OnApiFinish<Reply<SectionData<Media>>> finish) {
+        protected boolean onPageLoad(String title, int page, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
             return null!=call(Api.class,finish).queryMedias(title,page,10);
         }
     };
@@ -38,7 +36,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/medias")
         @FormUrlEncoded
-        Observable<Reply<SectionData<Media>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
+        Observable<Reply<SectionData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
     }
 
 
@@ -55,8 +53,8 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             default:
-                if (null!=data&&data instanceof Media){
-                    MediaPlayService.play(getContext(),(Media)data,0, clickCount>1?MPlayer.PLAY_TYPE_PLAY_NOW&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
+                if (null!=data&&data instanceof NasMedia){
+                    MediaPlayService.play(getContext(),(NasMedia)data,0, clickCount>1?MPlayer.PLAY_TYPE_PLAY_NOW&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
                 }
                 break;
         }

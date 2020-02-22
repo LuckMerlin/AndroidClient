@@ -4,7 +4,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.bean.Media" />
+            type="com.merlin.bean.NasMedia" />
         <variable
             name="position"
             type="int" />
@@ -14,6 +14,7 @@
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>
         <import type="com.merlin.util.Time"/>
+        <import type="com.merlin.client.R"/>
     </data>
 
      <RelativeLayout
@@ -30,7 +31,6 @@
              android:text="@{Integer.toString(position+1)}"
              android:layout_alignParentLeft="true"
              android:layout_marginRight="5dp"
-             android:textStyle="bold"
              android:layout_gravity="center_vertical"
              style="@style/titleNormalTextView"/>
 
@@ -44,8 +44,7 @@
              android:paddingRight="10dp"
              android:layout_height="match_parent">
              <ImageView
-                 android:id="@+id/itemMediaAll_favoriteIV"
-                 android:src="@drawable/selector_heart"
+                 android:src="@{R.drawable.selector_heart}"
                  android:duplicateParentState="false"
                  binding:selected="@{media.favorite}"
                  android:padding="2dp"
@@ -65,22 +64,26 @@
              android:paddingLeft="5dp"
              android:paddingRight="5dp"
              android:layout_height="match_parent">
-             <LinearLayout
+             <RelativeLayout
                  android:orientation="horizontal"
                  android:layout_width="match_parent"
                  android:layout_height="wrap_content">
                  <TextView
-                     android:text="@{media.title}"
-                     android:layout_weight="4"
-                     android:gravity="left"
+                     android:id="@+id/item_media_durationTV"
                      android:singleLine="true"
-                     style="@style/titleNormalTextView"/>
-                 <TextView
-                     android:singleLine="true"
-                     android:layout_weight="1"
+                     android:layout_alignParentRight="true"
                      android:text="@{Time.formatMediaDuration(media.duration)}"
                      style="@style/titleSubNormalTextView"/>
-             </LinearLayout>
+
+                 <TextView
+                     android:text="@{media.title}"
+                     android:gravity="left"
+                     android:layout_alignParentLeft="true"
+                     android:singleLine="true"
+                     android:layout_marginRight="3dp"
+                     android:layout_toLeftOf="@id/item_media_durationTV"
+                     style="@style/titleNormalTextView"/>
+             </RelativeLayout>
                  <LinearLayout
                      android:layout_width="wrap_content"
                      android:orientation="horizontal"

@@ -4,12 +4,11 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 
-import com.merlin.bean.File;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasMedia;
 import com.merlin.debug.Debug;
 import com.merlin.media.Indexer;
 import com.merlin.media.Mode;
-import com.merlin.media.NetMediaBuffer;
+import com.merlin.media.NasMediaBuffer;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.OnMediaFrameDecodeFinish;
 import com.merlin.player.OnPlayerStatusUpdate;
@@ -23,7 +22,6 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     public static final int PLAY_TYPE_ORDER_INTO_NEXT = 0x01; //0000 0001
     public static final int PLAY_TYPE_PLAY_NOW = 0x02; //0000 0010
     public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x11; //0000 0011
-
     private final List<Playable> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
@@ -48,7 +46,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         if (audioTrack.getPlayState()!=AudioTrack.PLAYSTATE_PLAYING){
             audioTrack.play();
         }
-//        audioTrack.write(bytes,0,length);
+        audioTrack.write(bytes,0,length);
     }
 
     private AudioTrack buildAudioTrack(int sampleRateInHz,int channelConfig){
@@ -75,28 +73,6 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return audioTrack;
     }
 
-    public final boolean append(Playable media){
-        return null!=media&&add(media,-1);
-    }
-
-    public final boolean play(Playable playable,String debug){
-        return false;
-    }
-
-    public final boolean add(Playable media, int index){
-        if (null!=media&&!isExist(media)){
-            List<Playable> queue=mQueue;
-            if (null!=queue){
-                int size=null!=queue?queue.size():0;
-                synchronized (queue){
-                     queue.add(index<0||index>size?size:index,media);
-                     return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public final Mode playMode(Mode mode) {
         if (null!=mode){
             mPlayMode=mode;
@@ -120,6 +96,9 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 
     private MediaBuffer createMediaBuffer(Playable media, double seek){
         if (null!=media){
+            if (media instanceof NasMedia){
+                return new NasMediaBuffer((NasMedia)media,seek);
+            }
 //            String path=media.getPath();//Try local media file firstly
 //            if (null!=path&&path.length()>0){
 //                File localFile=new File(path);
@@ -130,40 +109,27 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 //            String url=media.getPath();
 //            if (null!=url&&url.length()>0){
 //                if (media instanceof File){
-//                    return new NetMediaBuffer((File) media,seek);
+//                    return new __NetMediaBuffer((File) media,seek);
 //                }
 //            }
         }
         return null;
     }
 
-    public final Playable getPlayingMedia(Object ...objects){
-        Playable playable=super.getPlaying();
+    public final boolean play(Playable playable, double seek, OnPlayerStatusUpdate update,String debug){
         if (null!=playable){
-            if (null!=objects&&objects.length>0){
-                Playable media;
-                for (Object object:objects ) {
-                    if (null!=object&&null!=(media=indexMedia(object))){
-//                        return media;
-                    }
-                }
-                return null;
-            }
-            return playable;
+             MediaBuffer buffer=createMediaBuffer(playable,seek);
+             if (null!=buffer){
+                return play(buffer,update,debug);
+             }
+             Debug.W(getClass(),"Can't play media which create media buffer fail "+(null!=debug?debug:"."));
+            return false;
         }
-        return null;
-    }
-
-    public final boolean play(File media, double seek, OnPlayerStatusUpdate update){
-        MediaBuffer buffer=null!=media?createMediaBuffer(media,seek):null;
-        if (null!=buffer){
-            return play(buffer,update);
-        }
-        Debug.W(getClass(),"Can't play media.Create buffer failed."+media);
+        Debug.W(getClass(),"Can't play media with is NULL."+(null!=debug?debug:"."));
         return false;
     }
 
-    public final boolean play(Object object, double seek, OnPlayerStatusUpdate update){
+    public final boolean play(Object object, double seek, OnPlayerStatusUpdate update,String debug){
         if (null!=object){
             if (object instanceof Integer){
                 int index=(Integer)object;
@@ -176,13 +142,13 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
                         media=index<size?playing.get(index):null;
                     }
                     if (null!=media) {
-                        return play(media, seek, update);
+                        return play(media, seek, update,debug);
                     }
                 }
                 Debug.W(getClass(),"Can't play media.index="+index+" playing="+playing);
                 return false;
-            }else if (object instanceof File){
-                return play((File) object,seek,update);
+            }else if (object instanceof Playable){
+                return play((Playable)object,seek,update,debug);
             }
             Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
             return false;
@@ -195,7 +161,45 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return false;
     }
 
-    public final boolean playPre(){
+    public synchronized final boolean append(Playable media){
+        return null!=media&&add(media,-1);
+    }
+
+    public synchronized final boolean add(Playable media, int index){
+        Boolean exist=null!=media?!isExist(media):null;
+        if (null!=exist&&exist){
+            List<Playable> queue=mQueue;
+            if (null!=queue){
+                int size=null!=queue?queue.size():0;
+                synchronized (queue){
+                    queue.add(index<0||index>size?size:index,media);
+                    return true;
+                }
+            }
+            return false;
+        }
+        Debug.W(getClass(),"Can't add media into queue.exist="+exist);
+        return false;
+    }
+
+    public final Playable getPlayingMedia(Object ...objects){
+        Playable playable=super.getPlaying();
+        if (null!=playable){
+            if (null!=objects&&objects.length>0){
+                Playable media;
+                for (Object object:objects ) {
+                    if (null!=object&&null!=(media=indexMedia(object))){
+                        return media;
+                    }
+                }
+                return null;
+            }
+            return playable;
+        }
+        return null;
+    }
+
+    public final boolean playPre(String debug){
         List<Playable> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
@@ -206,14 +210,14 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
                 int count=queue.size();
                 nextIndex=indexer.pre(mode,current,count);
             }
-            return play(nextIndex,0,null);
+            return play(nextIndex,0,null,debug);
         }
         return false;
     }
 
-    public final boolean playNext(boolean user){
+    public final boolean playNext(boolean user,String debug){
         Playable next=indexQueueNext(super.getPlaying(),user);
-        return null!=next&&play(next,0,null);
+        return null!=next&&play(next,0,null,debug);
     }
 
     public final Playable indexQueueNext(Playable media, boolean user){
@@ -288,15 +292,8 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
                 Playable child;
                 for (int i=0;i<size;i++){
                     child=queue.get(i);
-                    if (null!=child){
-                         if(media instanceof Media &&child.equals(media)) {
-                            return new Object[]{media,i};
-                        }else if (media instanceof String){
-//                            String path=child.getPath();
-//                            if (null!=path&&path.equals(media)) {
-//                                return new Object[]{media,i};
-//                            }
-                        }
+                    if (null!=child&&child.equals(media)){
+                        return new Object[]{media,i};
                     }
                 }
             }

@@ -16,7 +16,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasMedia;
 import com.merlin.bean.MediaSheet;
 import com.merlin.bean.SheetTitle;
 import com.merlin.client.R;
@@ -42,7 +42,7 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/detail")
         @FormUrlEncoded
-        Observable<Reply<ApiList<Media>>> querySheetById(@Field(LABEL_ID) long id, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
+        Observable<Reply<ApiList<NasMedia>>> querySheetById(@Field(LABEL_ID) long id, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/all")
         @FormUrlEncoded
@@ -98,12 +98,12 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
        }
        final long sheetId=sheet.getId();
        mQueryDetailId=sheetId;
-       return null!=call(Api.class,(OnApiFinish<Reply<ApiList<Media>>>)(what, note, data, arg)->{
+       return null!=call(Api.class,(OnApiFinish<Reply<ApiList<NasMedia>>>)(what, note, data, arg)->{
            Long queryId=mQueryDetailId;
            if (null!=queryId&&queryId.equals(sheetId)){
                mQueryDetailId=null;
                if (what==WHAT_SUCCEED){
-                   ApiList<Media> list=null!=data?data.getData():null;
+                   ApiList<NasMedia> list=null!=data?data.getData():null;
                    if (page<=0){
                        mShowingSheet.set(sheet);
                        mSheetMediaAdapter.setData(list,true);

@@ -4,10 +4,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class TransportService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (null!=intent){
-            ArrayList<FileMeta> list=intent.getParcelableArrayListExtra(LABEL_FILE_META_LIST);
+            ArrayList<NasFile> list=intent.getParcelableArrayListExtra(LABEL_FILE_META_LIST);
             if (null!=list&&list.size()>0){
                 onFileMetaListReceived(intent,list,"Receive from intent.");
             }
@@ -36,7 +37,7 @@ public class TransportService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private boolean onFileMetaListReceived(Intent intent,ArrayList<FileMeta> list,String debug){
+    private boolean onFileMetaListReceived(Intent intent, ArrayList<NasFile> list, String debug){
         if (null!=list&&list.size()>0){
             switch (null!=intent?intent.getIntExtra(LABEL_MODE,MODE_INVALID):MODE_INVALID){
                 case MODE_DOWNLOAD:
@@ -47,7 +48,17 @@ public class TransportService extends Service {
         return false;
     }
 
-    public static boolean download(Context context, ArrayList<FileMeta> list, String debug){
+
+    public static boolean download(Context context, Parcelable file, String debug){
+           if (null!=context&&null!=file){
+               ArrayList<Parcelable> list=new ArrayList<>(1);
+//               list.add(file);
+               return download(context,list,debug);
+           }
+            return false;
+    }
+
+    public static boolean download(Context context, ArrayList<Parcelable> list, String debug){
         final int size=null!=list&&null!=context?list.size():-1;
         if (size>0){
             Debug.D(TransportService.class,"Post download to service "+size+" "+(null!=debug?debug:"."));

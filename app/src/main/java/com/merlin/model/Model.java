@@ -3,7 +3,6 @@ package com.merlin.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,17 +10,13 @@ import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
-import com.merlin.api.Label;
-import com.merlin.bean.FileMeta;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
-import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.retrofit.Retrofit;
@@ -348,8 +343,10 @@ public class Model {
     private final StatusBarLayout getStatusBar(){
         View root=getRoot();
         root= null!=root?root.getRootView():null;
-        View view=null!=root?root.findViewById(R.id.status_root_RL):null;
-        return null!=view&&view instanceof StatusBarLayout?(StatusBarLayout)view:null;
+        
+//        View view=null!=root?root.findViewById(R.id.status_root_RL):null;
+//        return null!=view&&view instanceof StatusBarLayout?(StatusBarLayout)view:null;
+        return null;
     }
 
     protected final boolean setStatusBar(StatusBar statusBar){

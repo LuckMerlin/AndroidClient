@@ -51,18 +51,24 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         return replace(list,from);
     }
 
+    @Override
+    public final boolean empty() {
+        boolean succeed=super.empty();
+        mCurrentPage=null;
+        return succeed;
+    }
+
     public boolean reset(String debug){
         Page<D> page=mCurrentPage;
         D arg=null!=page?page.mArg:null;
-        mCurrentPage=null;
         empty();
         return loadPage(arg,debug);
     }
 
-    public boolean reloadVisible(String debug){
-
-        return false;
-    }
+//    public boolean reloadVisible(String debug){
+//
+//        return false;
+//    }
 
     public final Page<D> getLoadingPage() {
         return mLoadingPage;
@@ -79,14 +85,14 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
 
     @Override
     public final boolean onLoadMore(RecyclerView rv, int state, String debug) {
-        if (state==LoadMoreInterceptor.TAIL){
-            if (isAllLoaded()){
-                Context context=null!=rv?rv.getContext():null;
-                if (null!=context){
-                    Toast.makeText(context, R.string.noMoreData,Toast.LENGTH_SHORT).show();
-                }
-                return false;
+        if (isAllLoaded()){
+            Context context=null!=rv?rv.getContext():null;
+            if (null!=context){
+                Toast.makeText(context, R.string.noMoreData,Toast.LENGTH_SHORT).show();
             }
+            return false;
+        }
+        if (state==LoadMoreInterceptor.TAIL){
             return loadNextPage(debug);
         }
         RecyclerView.LayoutManager manager=null!=rv?rv.getLayoutManager():null;
@@ -95,8 +101,29 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
                 LinearLayoutManager lm=(LinearLayoutManager)manager;
                 int firstPosition=lm.findFirstVisibleItemPosition();
                 View view=lm.findViewByPosition(firstPosition);
-                return view.getTop()==rv.getPaddingTop()?loadNextPage("After page not full "+
-                        (null!=debug?debug:".")):reset("After page pull down.");
+                int[] location = new int[2];
+                int orientation=lm.getOrientation();
+                if (orientation==LinearLayoutManager.VERTICAL){
+                    rv.getLocationInWindow(location);
+                    int rvTop=location[1];
+                    if (null!=view) {
+                        view.getLocationInWindow(location);
+                        int viewTop = location[1] - view.getTop();
+                        if (viewTop == rvTop){
+                            return loadNextPage("After page not full " + (null != debug ? debug : "."));
+                        }
+                    }
+                    return reset("After page pull down.");
+                }else if (orientation==LinearLayoutManager.HORIZONTAL){
+                    rv.getLocationInWindow(location);
+                    int rvLeft=location[0];
+                    if (null!=view) {
+                        view.getLocationInWindow(location);
+                        int viewLeft = location[0] - view.getLeft();
+                        return viewLeft == rvLeft ? loadNextPage("After page not full " +
+                                (null != debug ? debug : ".")) : reset("After page pull left.");
+                    }
+                }
             }else if (manager instanceof StaggeredGridLayoutManager){
 //                ((StaggeredGridLayoutManager)manager).f
             }
@@ -124,8 +151,15 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
     public final boolean loadPage(D arg,String debug){
         Page<D> current=mCurrentPage;
         D currArg=null!=current?current.mArg:null;
-        return loadPage(((null==arg&&null==currArg)||((null!=currArg&&null!=arg&&currArg.equals(arg)))
-                ?new Page<>(currArg,(null==current?0:current.mFrom+1),null):new Page<>(arg,0,null)),debug);
+        if ((null==arg&&null==currArg)||(null!=currArg&&null!=arg&&currArg.equals(arg))){
+            return loadPage(new Page<>(arg,(null==current?0:current.mFrom+1),null),debug);
+        }
+        empty();
+        return loadPage(new Page<>(arg,0,null),debug);
+    }
+
+    protected void onNoMoreData(M data){
+        Debug.D(getClass(),"没有更多内容了");
     }
 
     private boolean loadPage(Page<D> page,String debug){
@@ -143,13 +177,18 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
                 if (idle){
                     mLoadingPage=null;
-                    if (what== What.WHAT_SUCCEED){
-                        M m=null!=data?data.getData():null;
-                        int total=null!=m?m.getLength():-1;
-                        if (total>=0){
-                            mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
-                            fillPage(m);
-                        }
+                    switch (what){
+                        case What.WHAT_SUCCEED:
+                            M m=null!=data?data.getData():null;
+                            int total=null!=m?m.getLength():-1;
+                            if (total>=0){
+                                mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
+                                fillPage(m);
+                            }
+                            break;
+                        case What.WHAT_OUT_OF_BOUNDS:
+                            onNoMoreData(null!=data?data.getData():null);
+                            break;
                     }
                 } })){
                 mLoadingPage=null;

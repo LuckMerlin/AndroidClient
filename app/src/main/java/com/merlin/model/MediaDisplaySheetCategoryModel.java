@@ -135,7 +135,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     public void onMediaPlayModelShow() {
         MediaSheetCategoryAdapter adapter= mCategoryAdapter;
         if (null!=adapter){
-            adapter.reloadVisible("After media sheet model show.");
+            adapter.reset("After media sheet model show.");
         }
     }
 

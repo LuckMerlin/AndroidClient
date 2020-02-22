@@ -4,7 +4,7 @@
     <data>
         <variable
             name="file"
-            type="com.merlin.bean.FileMeta" />
+            type="com.merlin.bean.NasFile" />
         <variable
             name="loadState"
             type="int" />

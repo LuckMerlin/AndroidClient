@@ -12,15 +12,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.merlin.adapter.BaseAdapter;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.SheetMediaAdapter;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasMedia;
 import com.merlin.bean.MediaSheet;
 import com.merlin.bean.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityMediaSheetDetailModel extends DataListModel<Media> implements
-        BaseAdapter.OnItemClickListener<Media>, BaseModel.OnIntentChanged {
+public class ActivityMediaSheetDetailModel extends DataListModel<NasMedia> implements
+        BaseAdapter.OnItemClickListener<NasMedia>, BaseModel.OnIntentChanged {
     private final ObservableField<MediaSheet> mSheet=new ObservableField<>();
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -35,9 +35,9 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
         sheet.setCreateUser(user);
         mSheet.set(sheet);
         //
-        List<Media> list=new ArrayList<>();
+        List<NasMedia> list=new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-//            Media media=new Media();
+//            NasMedia media=new NasMedia();
 //            media.setTitle("我们");
 //            list.add(media);
         }
@@ -55,7 +55,7 @@ public class ActivityMediaSheetDetailModel extends DataListModel<Media> implemen
     }
 
     @Override
-    public void onItemClick(View view, int sourceId, int position, Media data) {
+    public void onItemClick(View view, int sourceId, int position, NasMedia data) {
         if (null!=data){
 //            MediaPlayService.add(view.getContext(),data,-1);
         }

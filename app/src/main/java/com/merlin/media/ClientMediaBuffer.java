@@ -1,6 +1,6 @@
 //package com.merlin.media;
 //
-//import com.merlin.bean.Media;
+//import com.merlin.bean.NasMedia;
 //import com.merlin.client.Client;
 //import com.merlin.debug.Debug;
 //import com.merlin.oksocket.Callback;
@@ -12,12 +12,12 @@
 //import java.io.IOException;
 //import java.io.RandomAccessFile;
 //
-//public final class ClientMediaBuffer extends MediaBuffer<Media> {
+//public final class ClientMediaBuffer extends MediaBuffer<NasMedia> {
 //    private final Client mClient;
 //    private final String mCachePath;
 //    private Reader mReader;
 //
-//    public ClientMediaBuffer(Client client, Media media, double seek){
+//    public ClientMediaBuffer(Client client, NasMedia media, double seek){
 //        super(media,seek);
 //        mCachePath="/sdcard/a/temp.mp3";
 //        mClient=client;
@@ -31,7 +31,7 @@
 //            Debug.D(getClass(),"Can't play media while failed open client url,Not login "+(null!=debug?debug:".")+" client="+client);
 //            return false;
 //        }
-//        final Media media=getPlayable();
+//        final NasMedia media=getPlayable();
 //        final String url=null!=media?media.getPath():null;
 //        if (null==url||url.length()<=0){
 //            Debug.D(getClass(),"Can't play media,Url invalid "+(null!=debug?debug:".")+" url="+url+" "+media);
@@ -65,7 +65,7 @@
 //                    reader.setCanceler(null);
 //                    break;
 //                case What.WHAT_HEAD_DATA:
-//                    Debug.D(getClass(),"Media file head got."+account+" "+url);
+//                    Debug.D(getClass(),"NasMedia file head got."+account+" "+url);
 //                    reader.wakeUp(What.WHAT_HEAD_DATA,"Client head response."+account+" "+url);
 //                    break;
 //                case Callback.REQUEST_SUCCEED://Bytes received

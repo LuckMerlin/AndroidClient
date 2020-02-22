@@ -29,4 +29,6 @@ public interface Label{
    String  LABEL_TO = "to";
    String  LABEL_URL = "url";
    String  LABEL_USER = "user";
+   String  LABEL_POSITION="position";
+   String  LABEL_ENABLE="enable";
 }

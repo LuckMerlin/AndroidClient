@@ -2,14 +2,32 @@ package com.merlin.model;
 import android.view.View;
 
 import com.merlin.activity.OnBackPressed;
+import com.merlin.adapter.AllMediasAdapter;
+import com.merlin.api.Address;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
+import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.bean.File;
+import com.merlin.bean.NasMedia;
 import com.merlin.binding.StatusBar;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.player.Status;
 import com.merlin.view.OnTapClick;
 
+import io.reactivex.Observable;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+
 public class MediaPlayModel extends Model implements Label, What,Status, OnTapClick {
+
+    private interface Api{
+        @POST(Address.PREFIX_MEDIA+"/favorite")
+        @FormUrlEncoded
+        Observable<Reply<NasMedia>> makeFavorite(@Field(LABEL_MD5) String md5, @Field(LABEL_DATA) boolean favorite);
+    }
 
     public MediaPlayModel(){
 //        mPlayingAdapter=new MediaListAdapter();
@@ -19,8 +37,23 @@ public class MediaPlayModel extends Model implements Label, What,Status, OnTapCl
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        Debug.D(getClass(),"BBBBBBBBBBBB "+resId);
         return false;
+    }
+
+
+
+    private boolean makeFavorite(NasMedia meta, boolean favorite){
+        final String md5=null!=meta?meta.getMd5():null;
+        if (null==md5||md5.length()<=0){
+            return false;
+        }
+        return null!=call(Api.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
+//            AllMediasAdapter adapter=mAdapter;
+            toast(note);
+            if (what==WHAT_SUCCEED&&null!=data){
+//                adapter.notifyFavoriteChange(md5, favorite);
+            }
+        }).makeFavorite(md5,favorite);
     }
 
 

@@ -6,7 +6,7 @@
         <import type="com.merlin.client.R"/>
         <variable
             name="folder"
-            type="com.merlin.bean.FolderMeta" />
+            type="com.merlin.bean.NasFolder" />
         <import type="android.view.View"/>
     </data>
     <LinearLayout

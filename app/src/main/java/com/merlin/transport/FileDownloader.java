@@ -1,13 +1,10 @@
 package com.merlin.transport;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
-import com.merlin.retrofit.Retrofit;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.reactivex.schedulers.Schedulers;
 
 public final class FileDownloader {
     private final List<FileDownload> mWaiting=new ArrayList<>();
@@ -95,9 +92,9 @@ public final class FileDownloader {
         return false;
     }
 
-    public boolean download(List<FileMeta> files,String folder,String debug){
+    public boolean download(List<NasFile> files, String folder, String debug){
         if (null!=files&&files.size()>0){
-            for (FileMeta meta:files){
+            for (NasFile meta:files){
                 if (null!=meta&&add(new FileDownload(meta,folder),debug)){
 
                 }

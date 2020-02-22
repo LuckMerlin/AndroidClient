@@ -7,24 +7,20 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.NasFile;
 import com.merlin.bean.FileModify;
-import com.merlin.bean.FolderMeta;
+import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
-import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
-import com.merlin.util.FileSize;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, FolderMeta> implements OnMoreLoadable{
-    private List<FileMeta> mMultiChoose;
+public abstract class BrowserAdapter extends MultiSectionAdapter<String, NasFile, NasFolder> implements OnMoreLoadable{
+    private List<NasFile> mMultiChoose;
 
-    public List<FileMeta> getMultiChoose() {
+    public List<NasFile> getMultiChoose() {
         return mMultiChoose;
     }
 
@@ -34,7 +30,7 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             boolean multiChoose=null!=mMultiChoose;
@@ -45,8 +41,8 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
         }
     }
 
-    public final boolean renamePath(FileMeta meta, FileModify modify){
-        List<FileMeta> list=null!=meta&&null!=modify?getData():null;
+    public final boolean renamePath(NasFile meta, FileModify modify){
+        List<NasFile> list=null!=meta&&null!=modify?getData():null;
         int size=null!=list?list.size():-1;
         int index=size>0?list.indexOf(meta):-1;
         meta=index>=0&&index<size?list.get(index):null;
@@ -63,8 +59,8 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
     }
 
     public final boolean chooseAll(boolean choose){
-        List<FileMeta> list = mMultiChoose;
-        List<FileMeta> data = getData();
+        List<NasFile> list = mMultiChoose;
+        List<NasFile> data = getData();
         int size = null != data ? data.size() : 0;
         if (choose && (size > 0 &&(null==list||size != list.size()))) {
             if (null==list){
@@ -97,17 +93,17 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
     }
 
     public int getChooseCount(){
-        List<FileMeta> list=mMultiChoose;
+        List<NasFile> list=mMultiChoose;
         return null!=list?list.size():0;
     }
 
-    public List<FileMeta> getChoose(){
-        List<FileMeta> list=mMultiChoose;
+    public List<NasFile> getChoose(){
+        List<NasFile> list=mMultiChoose;
         return list;
     }
 
-    public boolean multiChoose(FileMeta meta){
-        List<FileMeta> list=mMultiChoose;
+    public boolean multiChoose(NasFile meta){
+        List<NasFile> list=mMultiChoose;
         if (null!=meta){
             if (null==list?(list=new ArrayList<>()).add(meta):
                     (list.contains(meta)?list.remove(meta):list.add(meta))){
@@ -119,8 +115,8 @@ public abstract class BrowserAdapter extends MultiPageAdapter<String,FileMeta, F
         return false;
     }
 
-    public boolean isChoose(FileMeta meta){
-        List<FileMeta> choose=mMultiChoose;
+    public boolean isChoose(NasFile meta){
+        List<NasFile> choose=mMultiChoose;
         return null!=meta&&null!=choose&&choose.contains(meta);
     }
 

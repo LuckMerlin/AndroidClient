@@ -58,7 +58,7 @@ public class Player implements Status{
         return null;
     }
 
-    public synchronized boolean play(final MediaBuffer buffer,final OnPlayerStatusUpdate update){
+    public synchronized boolean play(final MediaBuffer buffer,final OnPlayerStatusUpdate update,String debug){
         if (null==buffer){
             Debug.W(getClass(),"Can't play media buffer.buffer="+buffer);
             notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",null);

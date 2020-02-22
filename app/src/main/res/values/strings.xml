@@ -72,4 +72,5 @@
     <string name="allMedias">所有媒体</string>
     <string name="mediaPlay">媒体播放</string>
     <string name="noMoreData">已经没有更多了</string>
+    <string name="scan">扫描</string>
 </resources>

@@ -14,8 +14,8 @@ import com.merlin.api.PageData;
 import com.merlin.api.PageQuery;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.FileMeta;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasFile;
+import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
@@ -27,14 +27,14 @@ import retrofit2.http.POST;
 /**
  * @deprecated
  */
-public final class MediaDisplayAlModel extends BaseModel implements Label,What, BaseModel.OnModelViewClick, BaseAdapter.OnItemClickListener<FileMeta> {
+public final class MediaDisplayAlModel extends BaseModel implements Label,What, BaseModel.OnModelViewClick, BaseAdapter.OnItemClickListener<NasFile> {
     private PageQuery<String> mQuerying;
-    private PageData<FileMeta> mLatestQueried=null;
+    private PageData<NasFile> mLatestQueried=null;
 
     private final MediaAdapter mAdapter=new MediaAdapter(){
         @Override
         public boolean onLoadMore(RecyclerView recyclerView, int state, String debug) {
-            PageData<FileMeta> query=mLatestQueried;
+            PageData<NasFile> query=mLatestQueried;
             return null!=query&&queryAllMedias(query.getPage()+1);
         }
     };
@@ -42,12 +42,9 @@ public final class MediaDisplayAlModel extends BaseModel implements Label,What, 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<FileMeta>>> queryAllMedias(@Field(LABEL_FORMAT) String format,
-                                                          @Field(LABEL_PAGE)int page,
-                                                          @Field(LABEL_LIMIT)int limit);
-        @POST(Address.PREFIX_FILE+"/favorite")
-        @FormUrlEncoded
-        Observable<Reply<FileMeta>> makeFavorite(@Field(LABEL_MD5) String md5,@Field(LABEL_DATA) boolean favorite );
+        Observable<Reply<PageData<NasFile>>> queryAllMedias(@Field(LABEL_FORMAT) String format,
+                                                            @Field(LABEL_PAGE)int page,
+                                                            @Field(LABEL_LIMIT)int limit);
     }
 
 
@@ -65,18 +62,6 @@ public final class MediaDisplayAlModel extends BaseModel implements Label,What, 
         return queryAllMedias(new PageQuery(format,page, 10));
     }
 
-    private boolean makeFavorite(String md5,boolean favorite){
-        if (null==md5||md5.length()<=0){
-            return false;
-        }
-        Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(Api.class,(OnApiFinish<Reply<FileMeta>>)(what, note, data, arg)->{
-            MediaAdapter adapter=mAdapter;
-            if (what==WHAT_SUCCEED&&null!=data){
-                adapter.notifyFavoriteChange(md5, favorite);
-            }
-        }).makeFavorite(md5,favorite);
-    }
 
     private boolean queryAllMedias(PageQuery<String> query){
         if (null==query){
@@ -88,12 +73,12 @@ public final class MediaDisplayAlModel extends BaseModel implements Label,What, 
         }
         String filter="我";
         mQuerying=query;
-        return null!= call(Api.class, (OnApiFinish<Reply<PageData<FileMeta>>>)(what, note, data, arg)->{
+        return null!= call(Api.class, (OnApiFinish<Reply<PageData<NasFile>>>)(what, note, data, arg)->{
             PageQuery<String> newCurrent=mQuerying;
             if (null!=newCurrent&&newCurrent.equals(query)){
                 mQuerying=null;
                 if (what== What.WHAT_SUCCEED){
-                    PageData<FileMeta> pageData=null!=data?data.getData():null;
+                    PageData<NasFile> pageData=null!=data?data.getData():null;
                     mLatestQueried=pageData;
                     mAdapter.fillPage(pageData);
                 }
@@ -104,18 +89,18 @@ public final class MediaDisplayAlModel extends BaseModel implements Label,What, 
     @Override
     public void onViewClick(View v, int id, Object object) {
         switch (id){
-            case R.id.itemMedia_favoriteIV:
-                if (null!=v&&null!=object&&object instanceof FileMeta){
-                    makeFavorite(((FileMeta)object).getMd5(),!v.isSelected());
-                }
-                break;
+//            case R.id.itemMedia_favoriteIV:
+//                if (null!=v&&null!=object&&object instanceof NasFile){
+//                    makeFavorite(((NasFile)object).getMd5(),!v.isSelected());
+//                }
+//                break;
 
         }
     }
 
     @Override
-    public void onItemClick(View view, int sourceId, int position, FileMeta data) {
-        Media media=null!=data?data.getMeta():null;
+    public void onItemClick(View view, int sourceId, int position, NasFile data) {
+        NasMedia media=null!=data?data.getMeta():null;
         if (null!=media&&null!=data&&null!=view){
 //            MediaPlayService.play(view.getContext(),media,0,false);
         }

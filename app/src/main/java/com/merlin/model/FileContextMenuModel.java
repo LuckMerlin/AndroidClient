@@ -5,7 +5,7 @@ import android.view.View;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.file.Permissions;
@@ -18,7 +18,7 @@ public class FileContextMenuModel extends Model implements OnTapClick {
         ViewDataBinding binding= null!=root? DataBindingUtil.getBinding(root):null;
         if (null!=binding&&binding instanceof FileContextMenuBinding){
             FileContextMenuBinding fcmb=(FileContextMenuBinding)binding;
-            FileMeta meta=fcmb.getFile();
+            NasFile meta=fcmb.getFile();
             if (null!=meta){
                 int permissions=meta.getPermissions();
                 Permissions per=new Permissions();
@@ -31,8 +31,8 @@ public class FileContextMenuModel extends Model implements OnTapClick {
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
             case 1://Single tap
-                if (null!=data&&data instanceof FileMeta){
-                    onFileMetaClick(view,resId,(FileMeta)data);
+                if (null!=data&&data instanceof NasFile){
+                    onFileMetaClick(view,resId,(NasFile)data);
                     return true;
                 }
                 break;
@@ -40,7 +40,7 @@ public class FileContextMenuModel extends Model implements OnTapClick {
         return false;
     }
 
-    private void onFileMetaClick(View view,int resId,FileMeta meta){
+    private void onFileMetaClick(View view, int resId, NasFile meta){
         if (null!=meta){
             switch (resId){
                 case R.string.delete:

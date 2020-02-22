@@ -3,21 +3,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaBinding;
 
 import java.util.List;
 
-public abstract class MediaAdapter extends PageAdapter<FileMeta,ItemMediaBinding> implements OnMoreLoadable {
+public abstract class MediaAdapter extends PageAdapter<NasFile,ItemMediaBinding> implements OnMoreLoadable {
 
 
     public final boolean notifyFavoriteChange(String md5, boolean favorite){
         if (null!=md5&&md5.length()>0){
-            List<FileMeta> list=getData();
+            List<NasFile> list=getData();
             int length=null!=list?list.size():0;
             for (int i = 0; i < length; i++) {
-                FileMeta meta=list.get(i);
+                NasFile meta=list.get(i);
                 String curr=null!=meta?meta.getMd5():null;
                 if (null!=curr&&curr.equals(md5)){
                     meta.setFavorite(favorite);
@@ -35,7 +35,7 @@ public abstract class MediaAdapter extends PageAdapter<FileMeta,ItemMediaBinding
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemMediaBinding binding, int position, FileMeta data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemMediaBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, binding, position, data, payloads);
         if (null!=data&&null!=binding){
             binding.setMediaFile(data);

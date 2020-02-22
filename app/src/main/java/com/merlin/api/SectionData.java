@@ -2,7 +2,7 @@ package com.merlin.api;
 
 import java.util.List;
 
-public final class SectionData<T> {
+public class SectionData<T> {
     private int length=-1;
     private int from;
     private int to;

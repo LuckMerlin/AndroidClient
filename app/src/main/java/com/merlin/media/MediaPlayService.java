@@ -9,13 +9,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.merlin.bean.File;
-import com.merlin.bean.Media;
-import com.merlin.client.R;
+import com.merlin.bean.NasMedia;
 import com.merlin.debug.Debug;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
@@ -37,19 +35,19 @@ public class MediaPlayService extends Service implements Status {
         @Override
         public boolean play(Object object, float seek, OnPlayerStatusUpdate update) {
             MPlayer player = mPlayer;
-            return null != player && player.play(object, seek, update);
+            return null != player && player.play(object, seek, update,"After play call from binder.");
         }
 
         @Override
-        public boolean pre() {
+        public boolean pre(String debug) {
             MPlayer player = mPlayer;
-            return null != player && player.playPre();
+            return null != player && player.playPre(debug);
         }
 
         @Override
-        public boolean next() {
+        public boolean next(String debug) {
             MPlayer player = mPlayer;
-            return null != player && player.playNext(true);
+            return null != player && player.playNext(true,debug);
         }
 
         @Override
@@ -122,7 +120,7 @@ public class MediaPlayService extends Service implements Status {
     @Override
     public void onCreate() {
         super.onCreate();
-        Debug.D(getClass(), "Media play service onCreate.");
+        Debug.D(getClass(), "NasMedia play service onCreate.");
     }
 
     @Override
@@ -141,46 +139,31 @@ public class MediaPlayService extends Service implements Status {
                     if (((Collection)object).size()>0){
                         Object positionObj=bundle.get(LABEL_POSITION);
                         Object playTypeObj=bundle.get(LABEL_PLAY_TYPE);
-                        if (null!=positionObj&&positionObj instanceof Integer){
-                            if ((((Integer)positionObj)&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE)>0){
+                       if (null!=positionObj&&positionObj instanceof Integer){
+                            if ((((Integer)playTypeObj)&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE)>0){
                                 for (Object obj:(Collection)object){
-                                    if (null!=obj&&obj instanceof Media){
-                                        player.add((Media)obj,0);
+                                    if (null!=obj&&obj instanceof NasMedia){
+                                        player.append((NasMedia)obj);
                                     }
                                 }
                             }
                         }
-                        if (null!=playTypeObj&&playTypeObj instanceof Integer&&(((Integer)positionObj)&MPlayer.PLAY_TYPE_PLAY_NOW)>0){
+                        if (null!=playTypeObj&&playTypeObj instanceof Integer&&(((Integer)playTypeObj)&MPlayer.PLAY_TYPE_PLAY_NOW)>0){
                             Object next=((Collection)object).iterator().next();
-                            if (null!=next&&next instanceof Media){
-                                player.play((Media)next,"After play from intent.");
+                            if (null!=next&&next instanceof NasMedia){
+                                player.play((NasMedia)next,null!=positionObj&&positionObj instanceof Number?positionObj instanceof  Float||positionObj instanceof Double?((Double)positionObj):(Integer)positionObj:0,null,"After play from intent.");
                             }
                         }
                     }
                 }
             }
         }
-//        if (null!=object){
-//            if (object instanceof File){
-//                File file=(File)object;
-//                String extension = file.getExtension();
-//                if (extension.equals("mp3")) {
-//                    if (bundle.getBoolean(LABEL_PLAY,false)){
-//                        Object pos=bundle.get(LABEL_POSITION);
-//                        float seek= null!=pos?pos instanceof Integer?(float)((int) pos):pos instanceof Float?(Float)pos:0:0;
-//                        mPlayerBinder.play(object,seek,null);
-//                    }
-//                    return;
-//                }
-//                Toast.makeText(this,R.string.noneSupportOpenFileType,Toast.LENGTH_SHORT).show();
-//            }
-//        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Debug.D(getClass(), "Media play service onDestroy.");
+        Debug.D(getClass(), "NasMedia play service onDestroy.");
         MPlayer player = mPlayer;
         if (null != player) {
             player.destroy();

@@ -10,8 +10,8 @@ import java.util.List;
 public abstract class MediaPlayer extends Binder {
     public abstract boolean pause(boolean stop,Object ...obj);
     public abstract boolean play(Object media, float seek, OnPlayerStatusUpdate update);
-    public abstract boolean pre();
-    public abstract boolean next();
+    public abstract boolean pre(String debug);
+    public abstract boolean next(String debug);
     public abstract Mode playMode(Mode mode);
     public abstract boolean togglePlayPause(Object media);
     public abstract long getDuration();

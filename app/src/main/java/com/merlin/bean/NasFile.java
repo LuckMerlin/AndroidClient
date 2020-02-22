@@ -10,7 +10,7 @@ import com.merlin.player.Playable;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public final class FileMeta implements Parcelable , Playable {
+public final class NasFile implements Parcelable , Playable {
     private long id;
     private String path;
     private String name;
@@ -27,7 +27,7 @@ public final class FileMeta implements Parcelable , Playable {
     private boolean favorite;
     private String extra;
     private String thumbImageUrl;
-    private Media meta;
+    private NasMedia meta;
     private double accessTime;
 
     public boolean applyModify(FileModify modify){
@@ -109,7 +109,7 @@ public final class FileMeta implements Parcelable , Playable {
         this.favorite = favorite;
     }
 
-    public Media getMeta() {
+    public NasMedia getMeta() {
         return meta;
     }
 
@@ -138,7 +138,7 @@ public final class FileMeta implements Parcelable , Playable {
     }
 
 
-    private FileMeta(Parcel in){
+    private NasFile(Parcel in){
         id=in.readLong();
         length=in.readLong();
         path=in.readString();
@@ -154,8 +154,8 @@ public final class FileMeta implements Parcelable , Playable {
         permissions=in.readInt();
         size=in.readLong();
         favorite=in.readInt()==1;
-        Parcelable parcelable=in.readParcelable(FileMeta.class.getClassLoader());
-        meta=null!=parcelable&&parcelable instanceof Media ?(Media)parcelable:null;
+        Parcelable parcelable=in.readParcelable(NasFile.class.getClassLoader());
+        meta=null!=parcelable&&parcelable instanceof NasMedia ?(NasMedia)parcelable:null;
     }
 
     @Override
@@ -179,15 +179,15 @@ public final class FileMeta implements Parcelable , Playable {
 
     }
 
-    public static final Creator<FileMeta> CREATOR = new Creator<FileMeta>() {
+    public static final Creator<NasFile> CREATOR = new Creator<NasFile>() {
         @Override
-        public FileMeta createFromParcel(Parcel in) {
-            return new FileMeta(in);
+        public NasFile createFromParcel(Parcel in) {
+            return new NasFile(in);
         }
 
         @Override
-        public FileMeta[] newArray(int size) {
-            return new FileMeta[size];
+        public NasFile[] newArray(int size) {
+            return new NasFile[size];
         }
     };
 

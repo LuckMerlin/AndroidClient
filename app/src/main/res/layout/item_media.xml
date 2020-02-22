@@ -4,7 +4,7 @@
     <data>
         <variable
             name="mediaFile"
-            type="com.merlin.bean.FileMeta" />
+            type="com.merlin.bean.NasFile" />
         <variable
             name="position"
             type="int" />
@@ -13,6 +13,8 @@
             type="boolean" />
         <import type="android.view.View"/>
         <import type="com.merlin.binding.ClickBinding"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.view.Clicker"/>
     </data>
     <FrameLayout
         android:background="@drawable/selector_round_dark_corner_small"
@@ -45,10 +47,9 @@
              android:paddingRight="10dp"
              android:layout_height="match_parent">
              <ImageView
-                 android:id="@+id/itemMedia_favoriteIV"
-                 android:src="@drawable/selector_heart"
+                 android:src="@{R.drawable.selector_heart}"
                  binding:selected="@{mediaFile.favorite}"
-                 binding:enableModelClick="@{ClickBinding.bind(true,mediaFile)}"
+                 binding:enableClick="@{Clicker.click(mediaFile,true)}"
                  android:layout_width="25dp"
                  android:layout_height="25dp"/>
          </LinearLayout>

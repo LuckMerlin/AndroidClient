@@ -6,15 +6,14 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.PageData;
 import com.merlin.api.SectionData;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaAllBinding;
 
 import java.util.List;
 
-public abstract class AllMediasAdapter extends MultiSectionAdapter<String, Media, SectionData<Media>>  {
+public abstract class AllMediasAdapter extends MultiSectionAdapter<String, NasMedia, SectionData<NasMedia>>  {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -22,7 +21,7 @@ public abstract class AllMediasAdapter extends MultiSectionAdapter<String, Media
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Media data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasMedia data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemMediaAllBinding){
             ((ItemMediaAllBinding)binding).setMedia(data);
             ((ItemMediaAllBinding)binding).setPosition(position);
@@ -32,10 +31,10 @@ public abstract class AllMediasAdapter extends MultiSectionAdapter<String, Media
 
     public final boolean notifyFavoriteChange(String md5, boolean favorite){
         if (null!=md5&&md5.length()>0){
-            List<Media> list=getData();
+            List<NasMedia> list=getData();
             int length=null!=list?list.size():0;
             for (int i = 0; i < length; i++) {
-                Media media=list.get(i);
+                NasMedia media=list.get(i);
                 String curr=null!=media?media.getMd5():null;
                 if (null!=curr&&curr.equals(md5)){
                     media.setFavorite(favorite);

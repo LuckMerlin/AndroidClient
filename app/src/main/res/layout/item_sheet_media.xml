@@ -4,7 +4,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.bean.Media" />
+            type="com.merlin.bean.NasMedia" />
         <import type="android.view.View"/>
         <variable
             name="position"

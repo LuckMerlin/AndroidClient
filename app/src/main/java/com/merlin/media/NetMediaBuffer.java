@@ -1,7 +1,8 @@
 package com.merlin.media;
 
 import com.merlin.api.Address;
-import com.merlin.bean.File;
+import com.merlin.api.Label;
+import com.merlin.api.What;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.file.DownloadApi;
@@ -9,12 +10,11 @@ import com.merlin.player.MediaBuffer;
 import com.merlin.player.Playable;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Closer;
-import com.merlin.util.FileMaker;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import com.merlin.api.What;
 
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -22,57 +22,53 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+import retrofit2.http.Streaming;
 
-public final class NetMediaBuffer extends MediaBuffer<File> {
-    private final String mCachePath;
+public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T> {
     private Reader mReader;
-    private final Retrofit mRetrofit=new Retrofit();
 
-    public NetMediaBuffer(File media, double seek){
+    public NetMediaBuffer(T media, double seek){
         super(media,seek);
-        mCachePath="/sdcard/a/temp2.mp3";
     }
 
+    protected abstract  Call<ResponseBody> onResolvePlayCall(T media);
+
     @Override
-    protected boolean open(double seek, String debug) {
-        final Retrofit retrofit=mRetrofit;
-        if (null==retrofit){
-            Debug.D(getClass(),"Can't play media "+(null!=debug?debug:".")+" retrofit="+retrofit);
+    protected synchronized final boolean open(double seek, String debug) {
+        final T media=getPlayable();
+        final Call<ResponseBody> call=null!=media?onResolvePlayCall(media):null;
+        if (null==call){
+            Debug.D(getClass(),"Can't play media,Url invalid "+(null!=debug?debug:".")+" call="+call+" "+media);
             return false;
         }
-        final Playable media=getPlayable();
-//        final String url=null!=media?media.getPath():null;
-        final String url=null;
-        if (null==url||url.length()<=0){
-            Debug.D(getClass(),"Can't play media,Url invalid "+(null!=debug?debug:".")+" url="+url+" "+media);
-            return false;
-        }
-        Debug.D(getClass(),"Play media  "+url);
-        final String cachePath=mCachePath;
+        Debug.D(getClass(),"Play media "+media);
         Reader curr=mReader;
         if (null!=curr){
             curr.recycle("Before play new media.");
         }
-        final Reader reader=mReader=new Reader(cachePath);
+        final Reader reader=mReader=new Reader();
         if (!reader.open(seek,debug)){
             return false;
         }
         reader.mWriteComplete=false;
         reader.mState= Reader.STATE_OPENING;
-        Debug.D(getClass(),"下载 "+Address.URL+url);
-        retrofit.call(DownloadApi.class, Schedulers.newThread(),null).downloadFile(url,true).enqueue(new Callback<ResponseBody>() {
-                    private void finishRequest(int what,String debug){
-                        reader.mWriteComplete=true;
-                        reader.setCanceler(null);
-                        reader.mState= what;
-                        reader.wakeUp(what,debug);
-                    }
+//        Debug.D(getClass(),"下载 "+ url);
+        call.enqueue(new Callback<ResponseBody>() {
+            private void finishRequest(int what,String debug){
+                reader.mWriteComplete=true;
+                reader.setCanceler(null);
+                reader.mState= what;
+                reader.wakeUp(what,debug);
+            }
 
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                new Thread(new Runnable() {
                     @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
+                    public void run() {
                         if (null!=response&&response.isSuccessful()){
                             ResponseBody responseBody=response.body();
                             MediaType mediaType=null!=responseBody?responseBody.contentType():null;
@@ -81,24 +77,24 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
                             if (null!=contentType&&contentType.equals("octet-stream")){
                                 InputStream is = null!=responseBody?responseBody.byteStream():null;
                                 try {
-                                        reader.mState= What.WHAT_SUCCEED;
-                                        byte[] buffer = new byte[1024*1024];
-                                        if (reader.mState!=What.WHAT_CANCEL){
-                                            int len;
-                                            boolean canceled=false;
-                                            while ((len=is.read(buffer))>0){
-                                                if (canceled=(reader.mState==What.WHAT_CANCEL)||
-                                                        !reader.write(buffer,0,len,false)){
-                                                    canceled=true;
-                                                    break;
-                                                }
+                                    reader.mState= What.WHAT_SUCCEED;
+                                    byte[] buffer = new byte[1024*1024];
+                                    if (reader.mState!=What.WHAT_CANCEL){
+                                        int len;
+                                        boolean canceled=false;
+                                        while ((len=is.read(buffer))>0){
+                                            if (canceled=(reader.mState==What.WHAT_CANCEL)||
+                                                    !reader.write(buffer,0,len,false)){
+                                                canceled=true;
+                                                break;
                                             }
-                                            if (!canceled){
-                                                reader.write(buffer,0,0,true);
-                                            }
-                                            Debug.D(getClass(),"Net media file cache finish."+canceled+" "+len+" "+url);
-                                            return;
                                         }
+                                        if (!canceled){
+                                            reader.write(buffer,0,0,true);
+                                        }
+                                        Debug.D(getClass(),"Net media file cache finish."+canceled+" "+len+" "+media);
+                                        return;
+                                    }
                                 }catch (Exception e){
                                     Debug.E(getClass(),""+e);
                                     e.printStackTrace();
@@ -106,26 +102,26 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
                                     new Closer().close(is);
                                 }
                             }
-                            Debug.D(getClass(),"Invalid file stream length response. "+contentType+" "+url);
-                            finishRequest(What.WHAT_ERROR_UNKNOWN,"Invalid file stream length response. "+url);
+                            Debug.D(getClass(),"Invalid file stream length response. "+contentType+" "+media);
+                            finishRequest(What.WHAT_ERROR_UNKNOWN,"Invalid file stream length response. "+media);
                         }
 
 
-                            }
-                        }).start();
-
                     }
+                }).start();
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Debug.D(getClass(),"Fail request file stream "+url);
-                        finishRequest(What.WHAT_ERROR_UNKNOWN, "Fail request file stream "+url);
-                    }
-                });
-        reader.waitHere(Reader.STATE_OPENING,"For client open response "+url);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Debug.D(getClass(),"Fail request file stream "+t+" "+media);
+                finishRequest(What.WHAT_ERROR_UNKNOWN, "Fail request file stream "+media);
+            }
+        });
+        reader.waitHere(Reader.STATE_OPENING,"For client open response "+media);
         int state=reader.mState;
-        if (state==What.WHAT_SUCCEED||state==Reader.STATE_WRITE_UPDATE){
-            Debug.D(getClass(),"File stream reply succeed."+url);
+        if (state==What.WHAT_SUCCEED||state== Reader.STATE_WRITE_UPDATE){
+            Debug.D(getClass(),"File stream reply succeed."+media);
             return true;//Reply succeed,Now return true to prepare play
         }
         reader.recycle("While client response failed.state="+reader.mState);//
@@ -133,25 +129,25 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
     }
 
     @Override
-    protected int read(byte[] buffer, int offset, int length) {
+    protected final int read(byte[] buffer, int offset, int length) {
         Reader curr=mReader;
         return null!=curr?curr.read(buffer,offset,length):0;
     }
 
     @Override
-    protected boolean close(String debug) {
+    protected final boolean close(String debug) {
         Reader reader=mReader;
         return null!=reader?reader.recycle("While close media buffer "+(null!=debug?debug:".")):false;
     }
 
     @Override
-    protected boolean seek(double seek) {
+    protected final boolean seek(double seek) {
 
         return false;
     }
 
     @Override
-    public boolean isOpened() {
+    public final boolean isOpened() {
         Reader curr=mReader;
         RandomAccessFile access=null!=curr?curr.mAccess:null;
         return null!=access;
@@ -164,7 +160,6 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
         private final static int STATE_WAITING_WRITE=2013;
         private final static int STATE_WRITE_UPDATE=2014;
         private final static int BUFFER_SIZE=1014*1024;
-        private final String mCacheFile;
         private boolean mWriteComplete=false;
         private int mState=STATE_NORMAL;
         private RandomAccessFile mAccess;
@@ -172,67 +167,65 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
         private final Boolean mMutex=true;
         private Client.Canceler mCanceler;
 
-        public Reader(String cacheFile){
-            mCacheFile=cacheFile;
+        public Reader(){
             mNextStart=0;
         }
 
         public boolean open(double seek,String debug){
-            String path=mCachePath;
-            java.io.File file=null!=path&&path.length()>0?new FileMaker().makeFile(path,true):null;
-            if (null!=file&&file.exists()&&file.isFile()){
                 try {
-                    mAccess=new RandomAccessFile(file,"rwd");
-                    Debug.D(getClass(),"Succeed open media cache file "+(null!=debug?debug:".")+file);
-                    return true;
+                    final File cacheFile= File.createTempFile("mediaPlay",".temp");
+                    if (null!=cacheFile){
+                        cacheFile.deleteOnExit();
+                        if (cacheFile.exists()&&cacheFile.isFile()){
+                            mAccess=new RandomAccessFile(cacheFile,"rwd");
+                            Debug.D(getClass(),"Succeed open media cache file "+(null!=debug?debug:".")+cacheFile);
+                            return true;
+                        }
+                    }
                 } catch (Exception e) {
-                    Debug.E(getClass(),"Exception open media cache file "+(null!=debug?debug:".")+file+" e="+e,e);
+                    Debug.E(getClass(), "Exception open media cache file " + (null != debug ? debug : ".") + " e=" + e, e);
                     closeIO(mAccess);
                     return false;
                 }
-            }
-            Debug.D(getClass(),"Failed open media cache file "+(null!=debug?debug:".")+" "+file);
+            Debug.D(getClass(),"Failed open media cache file "+(null!=debug?debug:"."));
             return false;
         }
 
         int read(byte[] buffer, int offset, int length) {
             final int bufferLength=null!=buffer?buffer.length:-1;
             if (bufferLength>0&&offset>=0&&length>0&&(offset+length)<=bufferLength){
-                 RandomAccessFile access=mAccess;
-                 if (null!=access){
-                     try {
-                         while (true) {
-                             long nextStart = mNextStart;
-                             long cacheFileLength;
-                             synchronized (access) {
-                                 cacheFileLength = access.length();
-                             }
-//                             Debug.D(getClass(), "%%%%% cacheFileLength %%%%%% " +
-//                                     cacheFileLength + " " + nextStart);
-                             if (nextStart >= cacheFileLength) {//Not enough cached bytes,Need wait here
-                                 if (mWriteComplete){
-                                     return BUFFER_READ_FINISH_EOF;
-                                 }
-                                 waitHere(STATE_WAITING_WRITE, "While cache not enough for read." + nextStart + " " + cacheFileLength);
-                             }else {
-                                 int readSize;
-                                 synchronized (access) {
-                                     access.seek(nextStart);
-                                     readSize=access.read(buffer,offset,length);
-                                 }
-                                 Debug.D(getClass(),"AAAAAAAdd   "+mNextStart+" "+readSize);
-                                 if (readSize>0){
-                                     mNextStart+=readSize;
-                                     return readSize;
-                                 }
-                             }
-                         }
-                     } catch (IOException e) {
-                         Debug.E(getClass(),"Exception read from buffer e="+e,e);
-                         return BUFFER_READ_FINISH_EXCEPTION;
-                     }
-                 }
-                 return READ_FINISH_NOT_OPEN;
+                RandomAccessFile access=mAccess;
+                if (null!=access){
+                    try {
+                        while (true) {
+                            long nextStart = mNextStart;
+                            long cacheFileLength;
+                            synchronized (access) {
+                                cacheFileLength = access.length();
+                            }
+                            if (nextStart >= cacheFileLength) {//Not enough cached bytes,Need wait here
+                                if (mWriteComplete){
+                                    return BUFFER_READ_FINISH_EOF;
+                                }
+                                waitHere(STATE_WAITING_WRITE, "While cache not enough for read." + nextStart + " " + cacheFileLength);
+                            }else {
+                                int readSize;
+                                synchronized (access) {
+                                    access.seek(nextStart);
+                                    readSize=access.read(buffer,offset,length);
+                                }
+                                if (readSize>0){
+                                    mNextStart+=readSize;
+                                    return readSize;
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        Debug.E(getClass(),"Exception read from buffer e="+e,e);
+                        return BUFFER_READ_FINISH_EXCEPTION;
+                    }
+                }
+                return READ_FINISH_NOT_OPEN;
             }
             return READ_FINISH_ARG_INVALID;
         }
@@ -243,31 +236,31 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
                 return false;
             }
             if (null==fis){
-                Debug.W(getClass(),"Can't write bytes into cache file.fis="+fis+" "+mCacheFile);
+                Debug.W(getClass(),"Can't write bytes into cache file.fis="+fis+" ");
                 return false;
             }
             try {
                 boolean needWakeup=false;
-                    mWriteComplete = complete;
-                    synchronized (fis) {
-                        if (length>0){
-                            fis.seek(fis.length());//Make append
-                            fis.write(bytes,offset,length);
-                        }
-                        long railPointer = fis.getFilePointer();
-                        mState=complete?BUFFER_READ_FINISH_EOF:mState;
-                        long nextStart = mNextStart;
-                        if(nextStart<railPointer){
-                            needWakeup=true;
-                        }
+                mWriteComplete = complete;
+                synchronized (fis) {
+                    if (length>0){
+                        fis.seek(fis.length());//Make append
+                        fis.write(bytes,offset,length);
                     }
+                    long railPointer = fis.getFilePointer();
+                    mState=complete?BUFFER_READ_FINISH_EOF:mState;
+                    long nextStart = mNextStart;
+                    if(nextStart<railPointer){
+                        needWakeup=true;
+                    }
+                }
 
-                    if(needWakeup){
-                        wakeUp(STATE_WRITE_UPDATE,"While write bytes succeed.");
-                    }
-                    return true;
+                if(needWakeup){
+                    wakeUp(STATE_WRITE_UPDATE,"While write bytes succeed.");
+                }
+                return true;
             } catch (IOException e) {
-                Debug.E(getClass(),"Exception write bytes into cache file.e="+e+" "+mCacheFile,e);
+                Debug.E(getClass(),"Exception write bytes into cache file.e="+e,e);
                 return false;
             }
         }
@@ -315,4 +308,6 @@ public final class NetMediaBuffer extends MediaBuffer<File> {
             return false;
         }
     }
+
+
 }

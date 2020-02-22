@@ -79,8 +79,8 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         if (size>0){
             (mData=new ArrayList<>(size)).addAll(data);
             changed=true;
-            notifyDataSetChanged();
         }
+        notifyDataSetChanged();
         return changed;
     }
 
@@ -91,6 +91,7 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
             for (T child:data) {
                 if (null!=child&&list.add(child)&&notify){
                     notifyItemChanged(list.size());
+//                    notifyDataSetChanged();
                 }
             }
             return true;

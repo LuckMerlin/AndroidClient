@@ -10,7 +10,7 @@
             type="Boolean" />
         <variable
             name="meta"
-            type="com.merlin.bean.FileMeta" />
+            type="com.merlin.bean.NasFile" />
         <variable
             name="position"
             type="int" />

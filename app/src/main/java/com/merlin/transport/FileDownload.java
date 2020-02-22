@@ -1,14 +1,12 @@
 package com.merlin.transport;
 
-import com.merlin.bean.FileMeta;
-
-import java.net.HttpURLConnection;
+import com.merlin.bean.NasFile;
 
 public class FileDownload {
-    private final FileMeta mFile;
+    private final NasFile mFile;
     private final String mFolder;
 
-    public FileDownload(FileMeta file,String folder){
+    public FileDownload(NasFile file, String folder){
         mFile=file;
         mFolder=folder;
     }

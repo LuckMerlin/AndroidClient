@@ -34,6 +34,7 @@ public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapt
             return false;
         }
         List<T> list=page.getData();
+        Debug.D(getClass(),"AAAAAAAAA "+page.getPage());
         return (page.getPage()<=0?setData(list):append(true,list));
     }
 

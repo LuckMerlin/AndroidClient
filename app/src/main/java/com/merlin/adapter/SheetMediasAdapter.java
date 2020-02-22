@@ -7,16 +7,14 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.PageData;
 import com.merlin.api.SectionData;
-import com.merlin.bean.File;
-import com.merlin.bean.Media;
+import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemSheetMediaBinding;
 
 import java.util.List;
 
-public abstract class SheetMediasAdapter extends MultiSectionAdapter<String, Media, SectionData<Media>> {
+public abstract class SheetMediasAdapter extends MultiSectionAdapter<String, NasMedia, SectionData<NasMedia>> {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -24,7 +22,7 @@ public abstract class SheetMediasAdapter extends MultiSectionAdapter<String, Med
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Media data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasMedia data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemSheetMediaBinding){
             ((ItemSheetMediaBinding)binding).setPosition(position);
             ((ItemSheetMediaBinding)binding).setMedia(data);

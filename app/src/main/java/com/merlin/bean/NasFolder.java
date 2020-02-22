@@ -1,8 +1,8 @@
 package com.merlin.bean;
 
-import com.merlin.api.PageData;
+import com.merlin.api.SectionData;
 
-public class FolderMeta extends PageData<FileMeta> {
+public class NasFolder extends SectionData<NasFile> {
     private String path;
     private String parent;
 

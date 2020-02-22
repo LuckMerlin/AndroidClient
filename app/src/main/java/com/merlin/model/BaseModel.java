@@ -368,8 +368,8 @@ public class BaseModel implements androidx.databinding.DataBindingComponent,View
 
     protected final boolean setStatusBar(Integer id,int position){
         if (position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT){
-            View view=findViewById(R.id.status_root_RL);
-            return null!=view&&view instanceof StatusBarLayout&&((StatusBarLayout)view).set(id,position);
+//            View view=findViewById(R.id.status_root_RL);
+//            return null!=view&&view instanceof StatusBarLayout&&((StatusBarLayout)view).set(id,position);
         }
         return false;
     }
