@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 public class Player implements Status{
-    private static WeakReference<OnMediaFrameDecodeFinish> mListener;
+    private static OnMediaFrameDecodeFinish mListener;
     private static WeakHashMap<OnPlayerStatusUpdate,Long> mUpdate;
     private static OnPlayerStatusUpdate mInnerUpdate;
     private MediaBuffer mPlaying;
@@ -21,15 +21,13 @@ public class Player implements Status{
         System.loadLibrary("linqiang");
     }
 
-    public final void setOnDecodeFinishListener(OnMediaFrameDecodeFinish listener){
-        WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
-        mListener=null;
-        if (null!=reference){
-            reference.clear();
-        }
-        if (null!=listener){
-            mListener=new WeakReference<>(listener);
-        }
+    public Player(){
+        mListener=this instanceof OnMediaFrameDecodeFinish?new OnMediaFrameDecodeFinish(){
+            @Override
+            public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed) {
+                ((OnMediaFrameDecodeFinish)Player.this).onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed);
+            }
+        }:null;
     }
 
     public final boolean addListener(OnPlayerStatusUpdate listener){
@@ -202,6 +200,7 @@ public class Player implements Status{
         WeakHashMap reference=mUpdate;
         mUpdate=null;
         mHandler=null;
+        mListener=null;
         if (null!=reference){
             reference.clear();
         }
@@ -256,11 +255,10 @@ public class Player implements Status{
      *
      *Call by native C
      */
-    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int offset,int length,int speed){
-        WeakReference<OnMediaFrameDecodeFinish> reference=mListener;
-        OnMediaFrameDecodeFinish listener=null!=reference?reference.get():null;
-        if (null!=listener){
-            listener.onMediaFrameDecodeFinish(mediaType,bytes,offset,length);
+    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int channels,int sampleRate,int speed){
+        OnMediaFrameDecodeFinish reference=mListener;
+        if (null!=reference){
+            reference.onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed);
         }
     }
 

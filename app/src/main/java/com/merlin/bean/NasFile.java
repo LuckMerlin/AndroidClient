@@ -122,6 +122,11 @@ public final class NasFile implements Parcelable , Playable {
     }
 
     @Override
+    public String getTitle() {
+        return getName();
+    }
+
+    @Override
     public boolean equals(@Nullable Object obj) {
         if (null!=obj){
             if (obj instanceof String){

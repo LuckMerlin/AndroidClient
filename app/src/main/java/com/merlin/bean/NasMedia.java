@@ -16,8 +16,9 @@ public class NasMedia implements Parcelable, Playable {
     private int channel;
     private long duration=0;
     private boolean favorite;
-    private long bitrate;
-    private long sampleRate;
+    private int bitrate;
+    private int sampleRate;
+    private String imageUrl;
     private String bitrateMode;
 
     public boolean isFavorite() {
@@ -27,6 +28,7 @@ public class NasMedia implements Parcelable, Playable {
     public String getTitle() {
         return this.title;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -60,11 +62,13 @@ public class NasMedia implements Parcelable, Playable {
         return sampleRate;
     }
 
+    public String  getThumbImageUrl() {
+        return imageUrl;
+    }
 
     public String getBitrateMode() {
         return bitrateMode;
     }
-
 
     public String getDurationText(){
         return Time.formatMediaDuration(duration);
@@ -81,6 +85,10 @@ public class NasMedia implements Parcelable, Playable {
         album=in.readString();
         artist=in.readString();
         md5=in.readString();
+        favorite=in.readInt()==1;
+        imageUrl=in.readString();
+        sampleRate=in.readInt();
+        bitrate=in.readInt();
     }
 
     @Override
@@ -90,6 +98,10 @@ public class NasMedia implements Parcelable, Playable {
         dest.writeString(album);
         dest.writeString(artist);
         dest.writeString(md5);
+        dest.writeInt(favorite?1:0);
+        dest.writeString(imageUrl);
+        dest.writeInt(sampleRate);
+        dest.writeInt(bitrate);
     }
 
     public static final Creator<NasMedia> CREATOR = new Creator<NasMedia>() {

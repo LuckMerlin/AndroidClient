@@ -1,14 +1,17 @@
 package com.merlin.model;
 
 
+import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewParent;
 
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.MediaAdapter;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
+import com.merlin.adapter.MediaPlayingQueueAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
@@ -19,37 +22,36 @@ import com.merlin.bean.NasFile;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.binding.StatusBar;
+import com.merlin.client.BR;
 import com.merlin.client.R;
+import com.merlin.client.databinding.MediaPlayingQueueBinding;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
+import com.merlin.media.AddToSheetApi;
+import com.merlin.media.FavoriteApi;
 import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
-import com.merlin.task.Transporter;
 import com.merlin.transport.TransportService;
 import com.merlin.view.OnTapClick;
+import com.merlin.view.Res;
 
-import io.reactivex.Observable;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
+import java.util.List;
 
 public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label,OnPlayerBindChange,OnPlayerStatusUpdate {
     private MediaPlayer mPlayer;
     private final ObservableField<Integer> mStatus=new ObservableField<>();
+    private final ObservableField<Integer> mMode=new ObservableField<>();
+    private final ObservableField<Boolean> mFavorite=new ObservableField<>();
     private final ObservableField<NasMedia> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
+    private final ObservableField<Object> mAlbumImage=new ObservableField<>();
     private final ObservableField<Integer> mCurrPosition=new ObservableField<>();
-
+    private final ObservableField<String> mSampleRate=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
-
-    private interface Api{
-        @POST(Address.PREFIX_FILE+"/favorite")
-        @FormUrlEncoded
-        Observable<Reply<NasFile>> makeFavorite(@Field(LABEL_MD5) String md5, @Field(LABEL_DATA) boolean favorite );
-    }
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
@@ -61,31 +63,25 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
                     switch (resId){
                         case R.drawable.selector_media_pause://Get through
                         case R.drawable.selector_media_play:
-                            return pause_play("After play_pause tap click.");
-                        case R.drawable.single_normal://Get through
-                            return changePlayMode(resId,"After mode tap click.");
+                            return pause_play("After play_pause tap click.")||true;
+                        case R.drawable.single_normal:
+                        case R.drawable.random_normal:
+                        case R.drawable.list_sort_normal:
+                            return changePlayMode("After mode tap click.")||true;
                         case R.drawable.selector_pre:
-                            return pre("After pre media tap click.");
+                            return pre("After pre media tap click.")||true;
                         case R.drawable.selector_menu:
-                            return showPlayingQueue("After menu tap click.");
+                            return showPlayingQueue("After menu tap click.")||true;
+                        case R.drawable.selector_add_to_sheet:
+                            return addToSheet("After add sheet tap click.")||true;
                         case R.drawable.selector_next:
-                            return next("After next media tap click.");
+                            return next("After next media tap click.")||true;
                         case R.drawable.selector_download_media:
                             NasMedia media=mPlaying.get();
-                            return null!=media&&TransportService.download(getContext(),media,"After play display download tap.");
+                            return null!=media&&TransportService.download(getContext(),media,"After play display download tap.")||true;
                         case R.drawable.heart_pressed://Get through
                         case R.drawable.heart_normal://get through
-                        case R.drawable.selector_heart:
-                            if (null!=view&&null!=data){
-                                makeFavorite(data,!view.isSelected());
-                            }
-                            return true;
-
-
-                            //                        default:
-//                            if (null!=data&&data instanceof File){
-//                                MediaPlayService.play(getContext(),data,0,false);
-//                            }
+                            return (null!=view&&makeFavorite(resId!=R.drawable.heart_pressed))||true;
                     }
                 }
                 break;
@@ -103,7 +99,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         if (null!=player){
             mPlayer=player;
             player.addListener(this);
-            updatePlaying("After player bind.");
+            updatePlaying(null,"After player bind.");
+            updatePlayMode(null,"After player bind.");
         }
     }
 
@@ -112,7 +109,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         mStatus.set(status);
         switch (status){
             case STATUS_START:
-                updatePlaying("While status start.");
+                updatePlaying(null,"While status start.");
                 break;
             case STATUS_PROGRESS:
                 Debug.D(getClass(),"^^^^^^^^ "+data);
@@ -120,12 +117,47 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         }
     }
 
-    private boolean changePlayMode(Integer id,String debug){
+    private boolean updatePlayMode(Mode mode,String debug){
         MediaPlayer player=mPlayer;
-        if (null!=player){
-//            return player.playMode(Mode.SINGLE);
+        mode = null==mode&&null!=player?player.playMode(null):mode;
+        int id= R.drawable.single_normal;
+        if (null!=mode){
+            switch (mode){
+                case SINGLE:
+                    id=R.drawable.single_normal;break;
+                case RANDOM:
+                    id=R.drawable.random_normal;break;
+                case QUEUE_SORT:
+                    id=R.drawable.list_sort_normal;break;
+            }
+        }
+        mMode.set(id);
+        return true;
+    }
+
+    private boolean addToSheet(String debug){
+        NasMedia playing=mPlaying.get();
+        String md5=null!=playing?playing.getMd5():null;
+        if (null!=md5&&md5.length()>0){
+            Dialog dialog=new Dialog(getViewContext());
+            ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(com.merlin.client.BR.media,playing));
+            return dialog.setContentView(binding).title(R.string.addToSheet).left(R.string.create).right(R.string.cancel).
+                    show((view,clickCount,resId,data)->{
+                        dialog.dismiss();
+                        String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
+                        if (null!=sheetId&&sheetId.length()>0){
+                            return null!=call(AddToSheetApi.class,(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+                                toast(note);
+                            }).addIntoSheet(md5,sheetId)||true;
+                        }
+                        return false;},false);
         }
         return false;
+    }
+
+    private boolean changePlayMode(String debug){
+        MediaPlayer player=mPlayer;
+        return null!=player&&updatePlayMode(player.playMode(Mode.CHANGE_MODE),debug);
     }
 
     private boolean pre(String debug){
@@ -139,22 +171,37 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     }
 
     private boolean showPlayingQueue(String debug){
-
+        MediaPlayer player=mPlayer;
+        List<Playable> playing=null!=player?player.getQueue():null;
+        final int size=null!=playing?playing.size():-1;
+        if (size<=0){
+            return toast(R.string.listEmpty)&&false;
+        }
+        MediaPlayingQueueBinding binding=inflate(R.layout.media_playing_queue);
+        if (null!=binding){
+            Dialog dialog=new Dialog(getViewContext());
+            MediaPlayingQueueAdapter adapter=new MediaPlayingQueueAdapter(playing);
+            binding.setAdapter(adapter);
+            String title=getText(R.string.playing);
+            title=null!=title?title+" ("+size+")":null;
+            return dialog.setContentView(binding).title(title).show();
+        }
         return false;
     }
 
-    private boolean makeFavorite(Object media,boolean favorite){
-        String md5=null!=media?media instanceof NasMedia?((NasMedia)media).getMd5():null:null;
-        toast(""+media);
+    private boolean makeFavorite(boolean favorite){
+        final NasMedia playing=mPlaying.get();
+        String md5=null!=playing?playing.getMd5():null;
         if (null==md5||md5.length()<=0){
             return false;
         }
         Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(Api.class,(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
+        return null!=call(FavoriteApi.class,(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED&&null!=data){
-//                ((NasMedia)m)
-//                  if ()
-//                adapter.notifyFavoriteChange(md5, favorite);
+                playing.setFavorite(favorite);
+                updatePlaying(playing,"After favorite succeed.");
+            }else{
+                toast(note);
             }
         }).makeFavorite(md5,favorite);
     }
@@ -164,12 +211,20 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return null!=player&&player.togglePlayPause(null);
     }
 
-    private void updatePlaying(String debug){
-        final MediaPlayer player=mPlayer;
-        Playable playable=null!=player?player.getPlaying():null;
-        NasMedia playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
+    private void updatePlaying(NasMedia media,String debug){
+        NasMedia playing=media;
+        if (null==playing){
+            MediaPlayer player=mPlayer;
+            Playable playable=null!=player?player.getPlaying():null;
+            playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
+        }
         String title=null!=playing?playing.getTitle():null;
         mPlaying.set(playing);
+        mFavorite.set(null!=playing&&playing.isFavorite());
+        String imageUrl=null!=playing?playing.getThumbImageUrl():null;
+        mAlbumImage.set(null!=imageUrl&&imageUrl.length()>0?imageUrl:R.drawable.album_default);
+        long sampleRate=null!=playing?playing.getSampleRate():-1;
+        mSampleRate.set(sampleRate>0?""+sampleRate:"");
         setStatusBar(null!=playing?title:R.string.mediaPlay, StatusBar.CENTER);
     }
 
@@ -198,8 +253,24 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 
     }
 
-    public ObservableField<Integer> getCurerntPosition() {
+    public ObservableField<Integer> getCurrentPosition() {
         return mCurrPosition;
+    }
+
+    public ObservableField<Boolean> getFavorite() {
+        return mFavorite;
+    }
+
+    public ObservableField<Integer> getMode() {
+        return mMode;
+    }
+
+    public ObservableField<Object> getAlbumImage() {
+        return mAlbumImage;
+    }
+
+    public ObservableField<String> getSampleRate() {
+        return mSampleRate;
     }
 
     public static ActivityMediaPlayModel getModelFromChild(Model model){

@@ -9,6 +9,7 @@
     <string name="nonePermission">没有访问权限</string>
     <string name="requestFail">请求失败</string>
     <string name="createSheet">创建歌单</string>
+    <string name="create">创建</string>
     <string name="sure">确定</string>
     <string name="cancel">取消</string>
     <string name="createSucceed">创建成功</string>
@@ -73,4 +74,7 @@
     <string name="mediaPlay">媒体播放</string>
     <string name="noMoreData">已经没有更多了</string>
     <string name="scan">扫描</string>
+    <string name="listEmpty">列表为空</string>
+    <string name="playing">正在播放</string>
+    <string name="setNext">设置下一个</string>
 </resources>

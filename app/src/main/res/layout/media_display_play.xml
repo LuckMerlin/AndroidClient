@@ -10,6 +10,7 @@
         <import type="com.merlin.binding.StatusBar"/>
         <import type="com.merlin.client.R"/>
         <import type="android.view.View"/>
+        <import type="com.merlin.view.Clicker"/>
     </data>
     <RelativeLayout
         android:id="@+id/media_display_play_rootRL"
@@ -39,7 +40,7 @@
                         android:textColor="@color/textTitle"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
-                        android:text="@{Time.formatTime(vm.model.curerntPosition??0)}"
+                        android:text="@{Time.formatTime(vm.model.currentPosition??0)}"
                         android:textSize="@dimen/textSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -79,7 +80,7 @@
 
                     <ImageView
                         binding:enableClick="@{true}"
-                        android:src="@{R.drawable.single_normal}"
+                        android:src="@{vm.model.mode}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeSmall"
                         android:layout_height="@dimen/iconSizeSmall"/>
@@ -101,7 +102,6 @@
                     <ImageView
                         binding:enableClick="@{true}"
                         android:src="@{R.drawable.selector_next}"
-                        binding:enableMultiClick="@{true}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeMedium"
                         android:layout_height="@dimen/iconSizeMedium"/>
@@ -118,10 +118,18 @@
                 android:layout_above="@id/mediaPlayBottomRL"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:text="@{vm.model.sampleRate}"
+                        style="@style/titleSubNormalTextView" />
+                </LinearLayout>
                 <ImageView
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/album_default"
+                    android:src="@{vm.model.albumImage}"
                     android:alpha="0.3"
                     android:layout_marginBottom="20dp"
                     android:layout_width="150dp"
@@ -135,27 +143,29 @@
                     <ImageView
                         binding:enableClick="@{true}"
                         android:visibility="@{vm.model.playing==null?View.INVISIBLE:View.VISIBLE}"
-                        android:src="@{vm.model.playing.favorite?R.drawable.heart_pressed:R.drawable.heart_normal}"
-                        android:selected="@{vm.model.playing.favorite}"
+                        android:src="@{vm.model.favorite?R.drawable.heart_pressed:R.drawable.heart_normal}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>
                     <ImageView
                         binding:enableClick="@{true}"
                         android:src="@{R.drawable.selector_download_media}"
+                        android:visibility="@{vm.model.playing==null?View.INVISIBLE:View.VISIBLE}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>
                     <ImageView
-                        android:id="@+id/activityMediaPlay_addToSheetIV"
-                        android:src="@drawable/add_to_sheet_pressed"
-                        binding:enableMultiClick="@{true}"
+                        android:src="@{R.drawable.selector_add_to_sheet}"
+                        android:visibility="@{vm.model.playing==null?View.INVISIBLE:View.VISIBLE}"
+                        binding:enableClick="@{true}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>
 
                     <ImageView
-                        android:src="@drawable/share_normal"
+                        android:src="@{R.drawable.share_normal}"
+                        android:visibility="@{vm.model.playing==null?View.GONE:View.GONE}"
+                        binding:enableClick="@{true}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>

@@ -67,6 +67,12 @@ public class File implements Parcelable, Playable {
         return null;
     }
 
+
+    @Override
+    public String getTitle() {
+        return getName();
+    }
+
     private File(Parcel in){
         id=in.readLong();
         path=in.readString();

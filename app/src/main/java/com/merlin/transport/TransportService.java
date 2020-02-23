@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -53,6 +54,7 @@ public class TransportService extends Service {
            if (null!=context&&null!=file){
                ArrayList<Parcelable> list=new ArrayList<>(1);
 //               list.add(file);
+               Toast.makeText(context,"下载 "+file,Toast.LENGTH_SHORT).show();
                return download(context,list,debug);
            }
             return false;

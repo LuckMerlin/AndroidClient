@@ -1,7 +1,6 @@
 package com.merlin.media;
 
 import android.app.Activity;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -14,7 +13,9 @@ import androidx.annotation.Nullable;
 
 import com.merlin.bean.File;
 import com.merlin.bean.NasMedia;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.global.Service;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Status;
@@ -131,33 +132,65 @@ public class MediaPlayService extends Service implements Status {
     }
 
     private void handStartIntent(Bundle bundle) {
-        final MPlayer player=mPlayer;
-        if (null!=bundle&&null!=player){
+        if (null!=bundle){
             Object object=bundle.get(LABEL_MEDIAS);
             if (null!=object){
-                if (object instanceof Collection){
-                    if (((Collection)object).size()>0){
+                if (object instanceof List){
+                    final int size=((List)object).size();
+                    if (size>0){
                         Object positionObj=bundle.get(LABEL_POSITION);
                         Object playTypeObj=bundle.get(LABEL_PLAY_TYPE);
+                       final int playType=null!=playTypeObj&&playTypeObj instanceof Integer?((Integer)playTypeObj):MPlayer.PLAY_TYPE_NONE;
+                       final double seek=null!=positionObj&&positionObj instanceof Number?positionObj instanceof  Float||positionObj instanceof Double?((Double)positionObj):(Integer)positionObj:0;
                        if (null!=positionObj&&positionObj instanceof Integer){
-                            if ((((Integer)playTypeObj)&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE)>0){
-                                for (Object obj:(Collection)object){
-                                    if (null!=obj&&obj instanceof NasMedia){
-                                        player.append((NasMedia)obj);
-                                    }
-                                }
+                            if ((playType&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE)==MPlayer.PLAY_TYPE_ADD_INTO_QUEUE){
+                               addIntoQueue((List)object,"After call from intent.");
                             }
                         }
-                        if (null!=playTypeObj&&playTypeObj instanceof Integer&&(((Integer)playTypeObj)&MPlayer.PLAY_TYPE_PLAY_NOW)>0){
+                        if ((playType&MPlayer.PLAY_TYPE_PLAY_NOW)==MPlayer.PLAY_TYPE_PLAY_NOW){
                             Object next=((Collection)object).iterator().next();
-                            if (null!=next&&next instanceof NasMedia){
-                                player.play((NasMedia)next,null!=positionObj&&positionObj instanceof Number?positionObj instanceof  Float||positionObj instanceof Double?((Double)positionObj):(Integer)positionObj:0,null,"After play from intent.");
+                            if (null!=next&&next instanceof Playable){
+                                play((Playable)next,seek,"After call from intent.");
+                            }
+                        }
+                        if ((playType&MPlayer.PLAY_TYPE_ORDER_NEXT)==MPlayer.PLAY_TYPE_ORDER_NEXT){
+                            Object obj=((List)object).get(size-1);
+                            if (null!=obj&&obj instanceof Playable){
+                                setNext(((Playable)obj),seek,"After call from intent.");
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    private boolean play(Playable playable,double seek,String debug){
+        final MPlayer player=null!=playable?mPlayer:null;
+        return null!=player&&player.play(playable,seek,null,debug);
+    }
+
+    private boolean addIntoQueue(List data,String debug){
+        final MPlayer player=null!=data&&data.size()>0?mPlayer:null;
+        if (null!=player){
+            int count=0;
+            for (Object obj:data){
+                if (null!=obj&&obj instanceof NasMedia){
+                    count=player.append((NasMedia)obj)?++count:count;
+                }
+            }
+            toast(""+getText(R.string.add)+" "+String.format(""+getText(R.string.items),count));
+            return true;
+        }
+        return false;
+    }
+
+    private boolean setNext(Playable playable,double seek,String debug){
+        final MPlayer player=null!=playable?mPlayer:null;
+        if (null!=player&&null!=player.setNext(playable,seek,debug)){
+            return toast(getText(R.string.setNext)+ " "+playable.getTitle());
+        }
+        return false;
     }
 
     @Override

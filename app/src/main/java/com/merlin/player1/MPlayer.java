@@ -7,6 +7,7 @@ import android.media.AudioTrack;
 import com.merlin.bean.NasMedia;
 import com.merlin.debug.Debug;
 import com.merlin.media.Indexer;
+import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.media.NasMediaBuffer;
 import com.merlin.player.MediaBuffer;
@@ -16,24 +17,26 @@ import com.merlin.player.Playable;
 import com.merlin.player.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayerStatusUpdate {
-    public static final int PLAY_TYPE_ORDER_INTO_NEXT = 0x01; //0000 0001
+    public static final int PLAY_TYPE_NONE = 0x00; //0000 0000
+    public static final int PLAY_TYPE_ORDER_NEXT = 0x01; //0000 0001
     public static final int PLAY_TYPE_PLAY_NOW = 0x02; //0000 0010
-    public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x11; //0000 0011
+    public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x04; //0000 0100
     private final List<Playable> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
     private Mode mPlayMode;
 
     public MPlayer(){
-        setOnDecodeFinishListener(this);
+        addListener(this);
         mPlayMode=Mode.QUEUE_SORT;
     }
 
     @Override
-    public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate) {
+    public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed) {
         final int length=null!=bytes?bytes.length:-1;
         if (length<=0){//Invalid frame data
             return;
@@ -75,7 +78,19 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 
     public final Mode playMode(Mode mode) {
         if (null!=mode){
-            mPlayMode=mode;
+            Mode curr=mPlayMode;
+            curr = null!=curr?curr:Mode.QUEUE_SORT;
+            if (mode==Mode.CHANGE_MODE){
+                Mode[] modes=Mode.values();
+                int length=null!=modes?modes.length:-1;
+                if (length>0){
+                    int index=(Arrays.binarySearch(modes,curr)+1);
+                    index=index>=0&&index<length?index:0;
+                    mPlayMode=modes[index];
+                }
+            }else{
+                mPlayMode=mode;
+            }
             //Save mode here
             notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",super.getPlaying());
         }
@@ -84,7 +99,6 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 
     @Override
     public void onPlayerStatusUpdated(Player player, int status, String note, Playable media, Object data) {
-
     }
 
     @Override
@@ -114,6 +128,11 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 //            }
         }
         return null;
+    }
+
+    public final MediaBuffer setNext(Playable playable,double seek,String debug){
+        MediaBuffer buffer=null!=playable?createMediaBuffer(playable,seek):null;
+        return null!=buffer&&setNext(buffer,debug)?buffer:null;
     }
 
     public final boolean play(Playable playable, double seek, OnPlayerStatusUpdate update,String debug){
@@ -302,14 +321,19 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     public final List<Playable> getQueue() {
+        List<Playable> result=null;
+        Playable playing=getPlaying();
         List<Playable> list=mQueue;
         int size=null!=list?list.size():0;
-        if (size>0){
-            List<Playable> result=new ArrayList<>(size);
+        final boolean existPlaying=null!=playing;
+        if (size>0||existPlaying){
+            result=new ArrayList<>(size+(existPlaying?1:0));
             result.addAll(list);
-            return result;
+            if (existPlaying&&!result.contains(playing)){
+                result.add(playing);
+            }
         }
-        return null;
+        return result;
     }
 
 }

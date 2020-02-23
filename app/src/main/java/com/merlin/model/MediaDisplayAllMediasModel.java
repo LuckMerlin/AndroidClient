@@ -19,6 +19,8 @@ import com.merlin.client.BR;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediasAllContextMenuBinding;
 import com.merlin.dialog.Dialog;
+import com.merlin.media.AddToSheetApi;
+import com.merlin.media.FavoriteApi;
 import com.merlin.media.MediaPlayService;
 import com.merlin.player1.MPlayer;
 import com.merlin.view.OnLongClick;
@@ -47,10 +49,6 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         Observable<Reply<SectionData<NasMedia>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
                                                                 @Field(LABEL_NAME) String name,
                                                                 @Field(LABEL_FORMAT) String... formats);
-        @POST(Address.PREFIX_MEDIA+"/play/addMediaIntoSheet")
-        @FormUrlEncoded
-        Observable<Reply<NasMedia>> addIntoSheet(@Field(LABEL_MD5) String md5, @Field(LABEL_ID) String sheet_id);
-
     }
 
     public MediaDisplayAllMediasModel(){
@@ -60,27 +58,35 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
-//            case R.id.itemMediaAll_favoriteIV:
-//                return (null!=data&&null!=view&&data instanceof NasMedia &&makeFavorite((NasMedia)data,!view.isSelected()))|true;
+            case R.drawable.selector_heart:
+                return (null!=data&&null!=view&&data instanceof NasMedia &&makeFavorite((NasMedia)data,!view.isSelected()))|true;
             case R.string.play://Get through
-                return (null!=data&&null!=view&&data instanceof NasMedia &&play((NasMedia)data,false))||true;
+                return (null!=data&&null!=view&&data instanceof NasMedia &&play((NasMedia)data,MPlayer.PLAY_TYPE_PLAY_NOW))||true;
             case R.string.orderNext://Get through
-                return (null!=data&&null!=view&&data instanceof NasMedia &&play((NasMedia)data,true))||true;
+                return (null!=data&&null!=view&&data instanceof NasMedia &&play((NasMedia)data,MPlayer.PLAY_TYPE_ORDER_NEXT))||true;
             case R.string.addToSheet://Get through
                 return (null!=data&&null!=view&&data instanceof NasMedia &&addToSheet((NasMedia)data))||true;
-            case R.drawable.selector_heart:
-                return false;
-                default:
-                if (null!=data&&data instanceof NasMedia){
-                    play((NasMedia)data,clickCount>1);
+            default:
+                if (null!=data&&data instanceof NasMedia) {
+                    NasMedia media=(NasMedia)data;
+                    switch (clickCount) {
+                        case 1:
+                            return play(media,MPlayer.PLAY_TYPE_PLAY_NOW);
+                        case 2:
+                            return play(media,MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE);
+                        case 3:
+                            return play(media,MPlayer.PLAY_TYPE_ORDER_NEXT);
+                        default:
+                            return play(media,MPlayer.PLAY_TYPE_ORDER_NEXT|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE);
+                    }
                 }
                 break;
         }
         return true;
     }
 
-    private boolean play(NasMedia media, boolean append){
-        return MediaPlayService.play(getViewContext(),media,0, append?MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
+    private boolean play(NasMedia media, int playType){
+        return MediaPlayService.play(getViewContext(),media,0,playType);
     }
 
     private boolean addToSheet(NasMedia media){
@@ -93,7 +99,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
                         dialog.dismiss();
                         String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
                         if (null!=sheetId&&sheetId.length()>0){
-                            return null!=call(Api.class,(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+                            return null!=call(AddToSheetApi.class,(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
                                 toast(note);
                             }).addIntoSheet(md5,sheetId)||true;
                         }
@@ -111,6 +117,21 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
             return true;
         }
         return true;
+    }
+
+    private boolean makeFavorite(NasMedia meta, boolean favorite){
+        final String md5=null!=meta?meta.getMd5():null;
+        if (null==md5||md5.length()<=0){
+            return false;
+        }
+        return null!=call(FavoriteApi.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
+            AllMediasAdapter adapter=mAdapter;
+            if (what==WHAT_SUCCEED&&null!=data){
+                adapter.notifyFavoriteChange(md5, favorite);
+            }else{
+                toast(note);
+            }
+        }).makeFavorite(md5,favorite);
     }
 
     private boolean queryAllMedias(String name,String debug){

@@ -44,6 +44,21 @@ jint JNI_OnLoad(JavaVM* vm,void* resolved){
     return JNI_VERSION_1_6;
 }
 
+void notifyStatusChange(int status,jobject media, const char* note){
+    JNIEnv *env;
+    int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
+    if(res==JNI_OK){
+        jclass playerClass = (*env)->FindClass(env,"com/merlin/player/Player");
+        jmethodID methodId=(*env)->GetStaticMethodID(env,playerClass,"onStatusChanged","(ILcom/merlin/player/MediaBuffer;Ljava/lang/String;)V");
+        jstring noteString= NULL==note?NULL:(*env)->NewStringUTF(env,"While play.");;
+        (*env)->CallStaticVoidMethod(env,playerClass,methodId,status,media,noteString);
+        (*env)->DeleteLocalRef(env, playerClass);
+        if (NULL!=noteString){
+            (*env)->DeleteLocalRef(env, noteString);
+        }
+    }
+}
+
 static inline signed int scale(mad_fixed_t sample){
     /* round */
     sample += (1L << (MAD_F_FRACBITS - 16));
@@ -95,27 +110,12 @@ static inline void onFrameDecode(int mediaType,jobject media,struct mad_header h
         (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,mediaType,data,channels,sampleRate,speed);
         (*jniEnv)->DeleteLocalRef(jniEnv, data);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
-//        notifyStatusChanged(STATUS_PROGRESS,path,"Update progress.");
+//        notifyStatusChange(STATUS_PROGRESS,media,"Update progress.");
     }
 }
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond  = PTHREAD_COND_INITIALIZER;
-
-void notifyStatusChange(int status,jobject media, const char* note){
-    JNIEnv *env;
-    int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
-    if(res==JNI_OK){
-        jclass playerClass = (*env)->FindClass(env,"com/merlin/player/Player");
-        jmethodID methodId=(*env)->GetStaticMethodID(env,playerClass,"onStatusChanged","(ILcom/merlin/player/MediaBuffer;Ljava/lang/String;)V");
-        jstring noteString= NULL==note?NULL:(*env)->NewStringUTF(env,"While play.");;
-        (*env)->CallStaticVoidMethod(env,playerClass,methodId,status,media,noteString);
-        (*env)->DeleteLocalRef(env, playerClass);
-        if (NULL!=noteString){
-            (*env)->DeleteLocalRef(env, noteString);
-        }
-    }
-}
 
 struct BufferHandle{
     jobject media;

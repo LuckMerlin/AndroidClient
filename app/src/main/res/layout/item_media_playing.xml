@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="media"
+            type="com.merlin.player.Playable" />
+        <variable
+            name="position"
+            type="int" />
+        <variable
+            name="playing"
+            type="boolean" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.util.Time"/>
+        <import type="com.merlin.client.R"/>
+    </data>
+
+     <LinearLayout
+         android:background="@drawable/selector_round_dark_corner_small"
+         binding:enableClick="@{Clicker.multiClick(media,true)}"
+         android:orientation="horizontal"
+         android:paddingLeft="10dp"
+         android:paddingRight="10dp"
+         android:layout_width="match_parent"
+         android:layout_height="40dp">
+         <TextView
+             android:text="@{Integer.toString(position+1)+`. `}"
+             android:layout_marginRight="5dp"
+             android:layout_gravity="center_vertical"
+             style="@style/titleSubNormalTextView"/>
+         <TextView
+             android:text="@{media.title}"
+             android:layout_gravity="center_vertical"
+             style="@style/titleSubNormalTextView"/>
+     </LinearLayout>
+</layout>
