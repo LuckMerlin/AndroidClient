@@ -13,12 +13,19 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
+import com.merlin.media.Mode;
+import com.merlin.model.MediaDisplayModel;
 import com.merlin.model.Model;
+import com.merlin.player.Playable;
+
+import java.lang.ref.WeakReference;
 
 public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyclerScrollStateChange{
     private final PagerSnapHelper mHelper=new PagerSnapHelper();
     private LinearLayoutManager mManager;
     private OnRecyclerScrollStateChange mChange;
+    private WeakReference<Playable> mPlaying;
 
     public interface OnMediaPlayModelShow{
         void onMediaPlayModelShow();
@@ -43,6 +50,31 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
         View root=getCurrentView();
         Object object=null!=root?root.getTag(R.id.modelBind):null;
         return null!=object&&object instanceof Model?((Model)object):null;
+    }
+
+    protected final Playable getPlaying() {
+        WeakReference<Playable> reference=mPlaying;
+        return null!=reference?reference.get():null;
+    }
+
+    public final boolean setPlaying(Playable playable){
+        WeakReference<Playable> playing=mPlaying;
+        mPlaying=null;
+        if (null!=playing){
+            playing.clear();
+        }
+        if (null!=playable){
+            mPlaying=new WeakReference<>(playable);
+        }
+        setCurrentPlaying(playable);
+        return true;
+    }
+
+    private void setCurrentPlaying(Playable playing){
+        Model model=getCurrentModel();
+        if (null!=model&&model instanceof MediaDisplayModel){
+            ((MediaDisplayModel)model).onPlayingChange(playing);
+        }
     }
 
     @Override
@@ -90,9 +122,13 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
                 ((OnMediaPlayModelShow)model).onMediaPlayModelShow();
             }
         }
+        if (newState==RecyclerView.SCROLL_STATE_IDLE){
+            setCurrentPlaying(getPlaying());
+        }
         OnRecyclerScrollStateChange change=mChange;
         if (null!=change){
             change.onRecyclerScrollStateChanged(recyclerView,newState);
         }
+
     }
 }

@@ -28,15 +28,15 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private final ObservableField<Sheet> mSheet=new ObservableField<>();
     private final SheetMediasAdapter mAdapter=new SheetMediasAdapter(){
         @Override
-        protected boolean onPageLoad(String title, int page, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
-            return null!=call(Api.class,finish).queryMedias(title,page,10);
+        protected boolean onPageLoad(String title, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
+            return null!=call(Api.class,finish).queryMedias(title,from,from+20);
         }
     };
 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/medias")
         @FormUrlEncoded
-        Observable<Reply<SectionData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
+        Observable<Reply<SectionData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
     }
 
 

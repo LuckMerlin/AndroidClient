@@ -10,10 +10,13 @@ import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
@@ -342,10 +345,17 @@ public class Model {
 
     private final StatusBarLayout getStatusBar(){
         View root=getRoot();
-        root= null!=root?root.getRootView():null;
-        
-//        View view=null!=root?root.findViewById(R.id.status_root_RL):null;
-//        return null!=view&&view instanceof StatusBarLayout?(StatusBarLayout)view:null;
+        Object parent=null!=root?root instanceof ViewGroup&&!(root instanceof RecyclerView)?root:root.getParent():null;
+        if(null!=parent&&parent instanceof ViewGroup){
+            ViewGroup vg=(ViewGroup)parent;
+            int count=null!=vg?vg.getChildCount():-1;
+            for (int i = 0; i < count; i++) {
+                View child=vg.getChildAt(i);
+                if (null!=child&&child instanceof StatusBarLayout){
+                    return (StatusBarLayout)child;
+                }
+            }
+        }
         return null;
     }
 

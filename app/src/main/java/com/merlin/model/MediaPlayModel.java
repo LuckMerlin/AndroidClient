@@ -13,6 +13,7 @@ import com.merlin.bean.NasMedia;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.player.Playable;
 import com.merlin.player.Status;
 import com.merlin.view.OnTapClick;
 
@@ -21,40 +22,43 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaPlayModel extends Model implements Label, What,Status, OnTapClick {
+public class MediaPlayModel extends MediaDisplayModel implements Label, What,Status {
 
-    private interface Api{
-        @POST(Address.PREFIX_MEDIA+"/favorite")
-        @FormUrlEncoded
-        Observable<Reply<NasMedia>> makeFavorite(@Field(LABEL_MD5) String md5, @Field(LABEL_DATA) boolean favorite);
-    }
+//    private interface Api{
+//        @POST(Address.PREFIX_MEDIA+"/favorite")
+//        @FormUrlEncoded
+//        Observable<Reply<NasMedia>> makeFavorite(@Field(LABEL_MD5) String md5, @Field(LABEL_DATA) boolean favorite);
+//    }
 
-    public MediaPlayModel(){
+    public MediaPlayModel() {
 //        mPlayingAdapter=new MediaListAdapter();
 //        mPlayingAdapter.setOnItemClickListener(this);
 //        post(()->{setStatusBar(R.string.cancel, StatusBar.CENTER);},3000);
+
+//        String title=null!=playing?playing.getTitle():null;
+//        setStatusBar(null!=playing?title:R.string.mediaPlay, StatusBar.CENTER);
     }
 
     @Override
-    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        return false;
+    public void onPlayingChange(Playable playable) {
+        super.onPlayingChange(playable);
+        String title=null!=playable?playable.getTitle():null;
+        setStatusBar(null!=playable?title:R.string.mediaPlay, StatusBar.CENTER);
     }
 
-
-
-    private boolean makeFavorite(NasMedia meta, boolean favorite){
-        final String md5=null!=meta?meta.getMd5():null;
-        if (null==md5||md5.length()<=0){
-            return false;
-        }
-        return null!=call(Api.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
-//            AllMediasAdapter adapter=mAdapter;
-            toast(note);
-            if (what==WHAT_SUCCEED&&null!=data){
-//                adapter.notifyFavoriteChange(md5, favorite);
-            }
-        }).makeFavorite(md5,favorite);
-    }
+    //    private boolean makeFavorite(NasMedia meta, boolean favorite){
+//        final String md5=null!=meta?meta.getMd5():null;
+//        if (null==md5||md5.length()<=0){
+//            return false;
+//        }
+//        return null!=call(Api.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
+////            AllMediasAdapter adapter=mAdapter;
+//            toast(note);
+//            if (what==WHAT_SUCCEED&&null!=data){
+////                adapter.notifyFavoriteChange(md5, favorite);
+//            }
+//        }).makeFavorite(md5,favorite);
+//    }
 
 
     //    private boolean setMediaPlayer(MediaPlayer player){

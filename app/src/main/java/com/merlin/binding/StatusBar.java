@@ -54,6 +54,7 @@ public final class StatusBar {
                     }
                 }
             }
+
             StatusBinding binding=DataBindingUtil.inflate(LayoutInflater.from(vg.getContext()), R.layout.status,vg,true);
             View root=null!=binding?binding.getRoot():null;
             if (null != root){
@@ -131,21 +132,26 @@ public final class StatusBar {
         int height=null!=context? StatusBar.height(context):-1;
         if (height>0){
             view.setPadding(view.getPaddingLeft(),view.getPaddingTop()+height,view.getPaddingRight(),view.getPaddingBottom());
-//            ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
-//            int count=null!=vg?vg.getChildCount():-1;
-//            height<<=1;
-//            for (int i = 0; i < count; i++) {
-//                View v=vg.getChildAt(i);
-//                if (null!=v&&!(v instanceof StatusBarLayout)){
-//                    ViewGroup.LayoutParams params=v.getLayoutParams();
-//                    ViewGroup.MarginLayoutParams marginParams=(null!=params&&params instanceof ViewGroup.MarginLayoutParams?(ViewGroup.MarginLayoutParams)params:
-//                            new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
-//                    if (null!=marginParams){
-//                        marginParams.topMargin = (marginParams.topMargin>0?marginParams.topMargin:0)+height;
-//                        v.setLayoutParams(marginParams);
-//                    }
-//                }
-//            }
+            ViewGroup vg=null!=view&&view instanceof ViewGroup?(ViewGroup)view:null;
+            int count=null!=vg?vg.getChildCount():-1;
+            if (count>0){
+                if (view instanceof LinearLayout&&((LinearLayout)view).getOrientation()==LinearLayout.VERTICAL){
+                    count = 1;
+                }
+                height<<=1;
+                for (int i = 0; i < count; i++) {
+                    View v=vg.getChildAt(i);
+                    if (null!=v&&!(v instanceof StatusBarLayout)){
+                        ViewGroup.LayoutParams params=v.getLayoutParams();
+                        ViewGroup.MarginLayoutParams marginParams=(null!=params&&params instanceof ViewGroup.MarginLayoutParams?(ViewGroup.MarginLayoutParams)params:
+                                new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+                        if (null!=marginParams){
+                            marginParams.topMargin = (marginParams.topMargin>0?marginParams.topMargin:0)+height;
+                            v.setLayoutParams(marginParams);
+                        }
+                    }
+                }
+            }
             return true;
         }
         return false;

@@ -50,7 +50,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private final ObservableField<Integer> mProgress=new ObservableField<>();
     private final ObservableField<Object> mAlbumImage=new ObservableField<>();
     private final ObservableField<Integer> mCurrPosition=new ObservableField<>();
-    private final ObservableField<String> mSampleRate=new ObservableField<>();
+    private final ObservableField<String> mPlayingMeta=new ObservableField<>();
+    private final ObservableField<String> mPlayingArtistAlbum=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
 
     @Override
@@ -108,9 +109,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     public void onPlayerStatusUpdated(Player player, int status, String note, Playable media, Object data) {
         mStatus.set(status);
         switch (status){
-            case STATUS_START:
-                updatePlaying(null,"While status start.");
-                break;
+            case STATUS_START: updatePlaying(null,"While status start.");break;
+            case STATUS_STOP:updatePlaying(null,"While status stop.");break;
             case STATUS_PROGRESS:
                 Debug.D(getClass(),"^^^^^^^^ "+data);
                 break;
@@ -218,14 +218,22 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
             Playable playable=null!=player?player.getPlaying():null;
             playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
         }
-        String title=null!=playing?playing.getTitle():null;
         mPlaying.set(playing);
         mFavorite.set(null!=playing&&playing.isFavorite());
         String imageUrl=null!=playing?playing.getThumbImageUrl():null;
         mAlbumImage.set(null!=imageUrl&&imageUrl.length()>0?imageUrl:R.drawable.album_default);
-        long sampleRate=null!=playing?playing.getSampleRate():-1;
-        mSampleRate.set(sampleRate>0?""+sampleRate:"");
-        setStatusBar(null!=playing?title:R.string.mediaPlay, StatusBar.CENTER);
+        int sampleRate=null!=playing?playing.getSampleRate():-1;
+        String bitrateMode=null!=playing?playing.getBitrateMode():null;
+        String meta=sampleRate>0?(sampleRate/1000.f)+"KHZ ":"";
+        meta=null!=bitrateMode?meta+bitrateMode:"";
+        String artist=null!=playing?playing.getArtist():"";
+        String album=null!=playing?playing.getAlbum():"";
+        mPlayingArtistAlbum.set((null!=artist?artist:"")+"\n "+(null!=album?album:""));
+        mPlayingMeta.set(meta);
+        MediaPlayDisplayAdapter adapter=mDisplayAdapter;
+        if (null!=adapter){
+            adapter.setPlaying(playing);
+        }
     }
 
     private boolean showMediaSheetDetail(Sheet sheet){
@@ -269,8 +277,12 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return mAlbumImage;
     }
 
-    public ObservableField<String> getSampleRate() {
-        return mSampleRate;
+    public ObservableField<String> getPlayingMeta() {
+        return mPlayingMeta;
+    }
+
+    public ObservableField<String> getPlayingArtistAlbum() {
+        return mPlayingArtistAlbum;
     }
 
     public static ActivityMediaPlayModel getModelFromChild(Model model){
