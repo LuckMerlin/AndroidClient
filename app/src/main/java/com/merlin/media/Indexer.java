@@ -1,5 +1,7 @@
 package com.merlin.media;
 
+import com.merlin.debug.Debug;
+
 public class Indexer {
 
     public int pre(Mode mode, int current, int count) {
@@ -19,7 +21,7 @@ public class Indexer {
             if (mode == Mode.QUEUE_SORT) {
                 return next>=0&&next<count?next:user?0:-1;
             }else if (mode == Mode.RANDOM) {
-                return (int)Math.random()*count;
+                return (int)(Math.random()*count);
             } else if (mode == Mode.SINGLE) {
                 return user?(int)Math.random()*count:current;
             }

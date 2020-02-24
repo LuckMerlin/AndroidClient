@@ -60,7 +60,6 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
         MediaPlayService.bind(this);
     }
 
-
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         if (null!=service&&service instanceof MediaPlayer){
@@ -72,6 +71,7 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
     public void onServiceDisconnected(ComponentName name) {
         setMediaPlayer(null);
     }
+
 
     private boolean setMediaPlayer(MediaPlayer player){
          Model model=getModel();
