@@ -3,6 +3,7 @@ package com.merlin.adapter;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +13,7 @@ import com.merlin.bean.FileModify;
 import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
+import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
 
 import java.util.ArrayList;

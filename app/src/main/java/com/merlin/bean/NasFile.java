@@ -26,7 +26,7 @@ public final class NasFile implements Parcelable , Playable {
     private double insertTime;
     private boolean favorite;
     private String extra;
-    private String thumbImageUrl;
+    private String imageUrl;
     private NasMedia meta;
     private double accessTime;
 
@@ -101,8 +101,8 @@ public final class NasFile implements Parcelable , Playable {
         return permissions;
     }
 
-    public String getThumbImageUrl() {
-        return thumbImageUrl;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public void setFavorite(boolean favorite) {
@@ -152,7 +152,7 @@ public final class NasFile implements Parcelable , Playable {
         mime=in.readString();
         extension=in.readString();
         extra=in.readString();
-        thumbImageUrl=in.readString();
+        imageUrl=in.readString();
         createTime=in.readDouble();
         modifyTime=in.readDouble();
         insertTime=in.readDouble();
@@ -173,7 +173,7 @@ public final class NasFile implements Parcelable , Playable {
         dest.writeString(mime);
         dest.writeString(extension);
         dest.writeString(extra);
-        dest.writeString(thumbImageUrl);
+        dest.writeString(imageUrl);
         dest.writeDouble(createTime);
         dest.writeDouble(modifyTime);
         dest.writeDouble(insertTime);

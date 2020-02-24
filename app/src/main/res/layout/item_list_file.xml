@@ -29,7 +29,7 @@
         <ImageView
             android:id="@+id/itemListFile_icon"
             android:layout_alignParentLeft="true"
-            android:src="@{meta.thumbImageUrl}"
+            android:src="@{meta.imageUrl}"
             android:padding="1dp"
             android:layout_margin="1dp"
             android:layout_width="@dimen/listItemNormal"
