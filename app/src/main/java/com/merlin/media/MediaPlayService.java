@@ -64,6 +64,12 @@ public class MediaPlayService extends Service implements Status {
         }
 
         @Override
+        public boolean seek(double seek, String debug) {
+            MPlayer player = mPlayer;
+            return null != player && player.seek(seek);
+        }
+
+        @Override
         public boolean togglePlayPause(Object media) {
             MPlayer player = mPlayer;
             return null != player && player.togglePausePlay(media);
@@ -83,8 +89,9 @@ public class MediaPlayService extends Service implements Status {
 
         @Override
         public long getPosition() {
-            MPlayer player = mPlayer;
-            return null != player ? player.getPosition() : 0;
+//            MPlayer player = mPlayer;
+//            return null != player ? player.getPosition() : 0;
+            return 0;
         }
 
         @Override
@@ -141,6 +148,9 @@ public class MediaPlayService extends Service implements Status {
                         Object positionObj=bundle.get(LABEL_POSITION);
                         Object playTypeObj=bundle.get(LABEL_PLAY_TYPE);
                        final int playType=null!=playTypeObj&&playTypeObj instanceof Integer?((Integer)playTypeObj):MPlayer.PLAY_TYPE_NONE;
+                       if ((playType&MPlayer.PLAY_TYPE_CLEAN_QUEUE)==MPlayer.PLAY_TYPE_CLEAN_QUEUE){
+                            cleanPlayingQueue("After call from intent.");
+                       }
                        final double seek=null!=positionObj&&positionObj instanceof Number?positionObj instanceof  Float||positionObj instanceof Double?((Double)positionObj):(Integer)positionObj:0;
                        if (null!=positionObj&&positionObj instanceof Integer){
                             if ((playType&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE)==MPlayer.PLAY_TYPE_ADD_INTO_QUEUE){
@@ -148,13 +158,13 @@ public class MediaPlayService extends Service implements Status {
                             }
                         }
                         if ((playType&MPlayer.PLAY_TYPE_PLAY_NOW)==MPlayer.PLAY_TYPE_PLAY_NOW){
-                            Object next=((Collection)object).iterator().next();
+                            Object next=((List)object).get(0);
                             if (null!=next&&next instanceof Playable){
                                 play((Playable)next,seek,"After call from intent.");
                             }
                         }
                         if ((playType&MPlayer.PLAY_TYPE_ORDER_NEXT)==MPlayer.PLAY_TYPE_ORDER_NEXT){
-                            Object obj=((List)object).get(size-1);
+                            Object obj=((List)object).get(0);
                             if (null!=obj&&obj instanceof Playable){
                                 setNext(((Playable)obj),seek,"After call from intent.");
                             }
@@ -163,6 +173,11 @@ public class MediaPlayService extends Service implements Status {
                 }
             }
         }
+    }
+
+    private boolean cleanPlayingQueue(String debug){
+        final MPlayer player=mPlayer;
+        return null!=player&&player.cleanPlayingQueue(debug);
     }
 
     private boolean play(Playable playable,double seek,String debug){
@@ -227,7 +242,7 @@ public class MediaPlayService extends Service implements Status {
        return false;
     }
 
-    public static boolean play(Context context, ArrayList<Parcelable> medias, int position, int playType) {
+    public static boolean play(Context context, ArrayList<? extends Parcelable> medias, int position, int playType) {
         if (null != medias&&medias.size()>0 && null != context) {
             Intent intent = new Intent();
             intent.putParcelableArrayListExtra(LABEL_MEDIAS, medias);

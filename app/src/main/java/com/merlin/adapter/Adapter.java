@@ -144,11 +144,11 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         return null;
     }
 
-    public final List<T> getData() {
+    public final ArrayList<T> getData() {
         List<T> data=mData;
         int size=null!=data?data.size():-1;
         if (size>0){
-           List<T> result=new ArrayList<>(size);
+            ArrayList<T> result=new ArrayList<>(size);
            result.addAll(data);
            return result;
         }

@@ -1,4 +1,5 @@
 package com.merlin.model;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.EditText;
 
@@ -26,6 +27,9 @@ import com.merlin.player1.MPlayer;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -58,6 +62,8 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
+            case R.string.playAll:
+                return playAll("After play all tap click.");
             case R.drawable.selector_heart:
                 return (null!=data&&null!=view&&data instanceof NasMedia &&makeFavorite((NasMedia)data,!view.isSelected()))|true;
             case R.string.play://Get through
@@ -83,6 +89,15 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
                 break;
         }
         return true;
+    }
+
+    private boolean playAll(String debug){
+        AllMediasAdapter adapter=mAdapter;
+        ArrayList<NasMedia> list=null!=adapter?adapter.getData():null;
+        if (null==list||list.size()<=0){
+            return toast(R.string.listEmpty);
+        }
+        return MediaPlayService.play(getViewContext(),list,0,(MPlayer.PLAY_TYPE_ADD_INTO_QUEUE&MPlayer.PLAY_TYPE_CLEAN_QUEUE));
     }
 
     private boolean play(NasMedia media, int playType){

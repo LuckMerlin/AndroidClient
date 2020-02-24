@@ -20,4 +20,5 @@ public interface Status {;
  int  STATUS_OPENED= 2018;
  int  STATUS_PLAYING= 2019;
  int  STATUS_MODE_CHANGED= 2020;
+
 }

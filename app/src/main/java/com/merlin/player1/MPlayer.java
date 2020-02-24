@@ -10,6 +10,7 @@ import com.merlin.media.Indexer;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.media.NasMediaBuffer;
+import com.merlin.media.NetMediaBuffer;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.OnMediaFrameDecodeFinish;
 import com.merlin.player.OnPlayerStatusUpdate;
@@ -25,6 +26,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     public static final int PLAY_TYPE_ORDER_NEXT = 0x01; //0000 0001
     public static final int PLAY_TYPE_PLAY_NOW = 0x02; //0000 0010
     public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x04; //0000 0100
+    public static final int PLAY_TYPE_CLEAN_QUEUE = 0x08; //0000 1000
     private final List<Playable> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
@@ -36,7 +38,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     @Override
-    public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed) {
+    public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed,long currPosition) {
         final int length=null!=bytes?bytes.length:-1;
         if (length<=0){//Invalid frame data
             return;
@@ -133,6 +135,17 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     public final MediaBuffer setNext(Playable playable,double seek,String debug){
         MediaBuffer buffer=null!=playable?createMediaBuffer(playable,seek):null;
         return null!=buffer&&setNext(buffer,debug)?buffer:null;
+    }
+
+    public final boolean cleanPlayingQueue(String debug){
+        List<Playable> queue=mQueue;
+        int size=null!=queue?queue.size():-1;
+        if (size>0){
+            Debug.D(getClass(),"Clean playing queue("+size+")"+(null!=debug?debug:"."));
+            queue.clear();
+            return true;
+        }
+        return false;
     }
 
     public final boolean play(Playable playable, double seek, OnPlayerStatusUpdate update,String debug){
@@ -243,6 +256,10 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         List<Playable> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
+        Playable playing=null!=mode&&mode==Mode.SINGLE?getPlaying():null;
+        if (null!=playing){
+            return playing;
+        }
         if (null!=queue&&null!=indexer){
             int nextIndex;
             int current=index(media);
@@ -253,6 +270,23 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             }
         }
         return null;
+    }
+
+    @Override
+    public long getDuration() {
+        Playable playable=getPlaying();
+        return null!=playable&&playable instanceof NasMedia?((NasMedia)playable).getDuration():0;
+    }
+
+    @Override
+    public float getCurrentProgress() {
+        MediaBuffer buffer=getPlayingBuffer();
+        if (null!=buffer&&buffer instanceof NetMediaBuffer){
+            Long length=buffer.getContentLength();
+            long next=null!=length&&length>0?((NetMediaBuffer)buffer).getCurrentPosition():-1;
+            return next>0?(float)(next/(double)length):0;
+        }
+        return 0;
     }
 
     public final boolean pause(boolean stop, Object... objects) {

@@ -44,6 +44,18 @@ jint JNI_OnLoad(JavaVM* vm,void* resolved){
     return JNI_VERSION_1_6;
 }
 
+struct BufferHandle{
+    jobject media;
+    struct mad_stream stream;
+    struct mad_frame frame;
+    struct mad_synth synth;
+    mad_timer_t timer;
+    int playStatus;
+    jbyteArray  buffer;
+};
+
+struct BufferHandle* handle;
+
 void notifyStatusChange(int status,jobject media, const char* note){
     JNIEnv *env;
     int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
@@ -59,6 +71,16 @@ void notifyStatusChange(int status,jobject media, const char* note){
     }
 }
 
+long getCurrentPosition(){
+    struct BufferHandle * currentHandle =handle;
+    if (NULL!=currentHandle){
+        long dd=mad_timer_count(currentHandle->timer,MAD_UNITS_SECONDS);
+//        LOGD("dddd %ld 强", dd);
+        return dd;
+    }
+    return 0;
+}
+
 static inline signed int scale(mad_fixed_t sample){
     /* round */
     sample += (1L << (MAD_F_FRACBITS - 16));
@@ -71,7 +93,7 @@ static inline signed int scale(mad_fixed_t sample){
     return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
-static inline void onFrameDecode(int mediaType,jobject media,struct mad_header header,struct mad_pcm pcm){
+static inline void onFrameDecode(int mediaType,jobject media,mad_timer_t timer,struct mad_header header,struct mad_pcm pcm){
     /* pcm->samplerate contains the sampling frequency */
     unsigned int layer=header.layer;
     unsigned int mode=header.mode;
@@ -80,7 +102,11 @@ static inline void onFrameDecode(int mediaType,jobject media,struct mad_header h
     unsigned int channels = pcm.channels;
     unsigned int length= pcm.length;
     unsigned int samples=length;
+    mad_timer_add(&timer,header.duration);
+//    LOGD("AAA %ld %ld", header.duration.seconds, header.duration.fraction);
+//    mad_timer_fraction(timer,header.duration.fraction);
     mad_fixed_t const *left_ch, *right_ch;
+    left_ch   = pcm.samples[0];
     left_ch   = pcm.samples[0];
     right_ch  = pcm.samples[1];
 //    LOGD("bitrate %ld Mode %d Layer %d 通道 %d 采样率 %d",bitrate,mode,layer,channels,sampleRate);
@@ -98,35 +124,25 @@ static inline void onFrameDecode(int mediaType,jobject media,struct mad_header h
         }
         index++;
     }
+    long currentPosition=getCurrentPosition();
     int speed = sampleRate * 2;    /*播放速度是采样率的两倍 */
     length *= channels * 2;         //数据长度为pcm音频的4倍
     JNIEnv *jniEnv;
     int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
     if(res==JNI_OK){
         jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
-        jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onNativeDecodeFinish","(I[BIII)V");
+        jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onNativeDecodeFinish","(I[BIIIJ)V");
         jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
         (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
-        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,mediaType,data,channels,sampleRate,speed);
+        (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,mediaType,data,channels,sampleRate,speed,currentPosition);
         (*jniEnv)->DeleteLocalRef(jniEnv, data);
         (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
-//        notifyStatusChange(STATUS_PROGRESS,media,"Update progress.");
+        notifyStatusChange(STATUS_PROGRESS,media,"Update progress.");
     }
 }
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond  = PTHREAD_COND_INITIALIZER;
-
-struct BufferHandle{
-    jobject media;
-    struct mad_stream stream;
-    struct mad_frame frame;
-    struct mad_synth synth;
-    int playStatus;
-    jbyteArray  buffer;
-};
-
-struct BufferHandle* handle;
 
 int readMediaBytes(jobject media,jbyteArray buffer,int offset,int length){
     if(media!=NULL&&NULL!=buffer){
@@ -172,6 +188,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
     handle->buffer=(*env)->NewByteArray(env, INPUT_BUFFER_SIZE);
     mad_stream_init(&(handle->stream));
     mad_frame_init(&handle->frame);
+    mad_timer_reset(&handle->timer);
     mad_synth_init(&handle->synth);
     notifyStatusChange(STATUS_START,media,"Media play start.");
     handle->playStatus=STATUS_PLAYING;
@@ -233,7 +250,7 @@ Java_com_merlin_player_Player_playMedia(JNIEnv *env, jobject thiz, jobject media
             }
         }while (JNI_TRUE);
         mad_synth_frame(&handle->synth, &handle->frame);
-        onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->frame.header, handle->synth.pcm);
+        onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->timer, handle->frame.header, handle->synth.pcm);
         if (readState==BUFFER_READ_FINISH_EOF){
             handle->playStatus=STATUS_FINISH;
             LOGD("End play media file.");
@@ -268,18 +285,40 @@ Java_com_merlin_player_Player_getPlayerStatus(JNIEnv *env, jobject thiz) {
     return NULL!=currentHandle?currentHandle->playStatus:STATUS_IDLE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jdouble seek) {
-    return seekTo(seek);
-}
+//int seekTo(double seek){
+//    struct BufferHandle * currentHandle =handle;
+//    jobject media=NULL!=currentHandle?currentHandle->media:NULL;
+//    if (NULL!=media) {
+//        JNIEnv *env;
+//        int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
+//        if(res==JNI_OK){
+//            jclass bufferClass = (*env)->FindClass(env, "com/merlin/player/MediaBuffer");
+//            jmethodID methodId = (*env)->GetMethodID(env, bufferClass, "seekd", "(D)V");
+//             (*env)->CallVoidMethodA(env, media, methodId, 0);
+////            (*env)->DeleteLocalRef(env, bufferClass);
+////            (*env)->DeleteLocalRef(env, methodId);
+////            notifyStatusChange(STATUS_SEEK, media, "Media play seek.");
+//
+////            jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/MediaBuffer");
+////            jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"read","([BII)I");
+////            jint opened=(*env)->CallIntMethod(env,media,methodId,buffer,offset,length);
+//            (*env)->DeleteLocalRef(env, bufferClass);
+//
+////            return succeed;
+//        }
+//    }
+//    return JNI_FALSE;
+//}
+
+//JNIEXPORT jboolean JNICALL
+//Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jdouble seek) {
+//    return seekTo(seek);
+//}
 
 JNIEXPORT jboolean JNICALL
 Java_com_merlin_player_Player_start(JNIEnv *env, jobject thiz, jdouble seek) {
     struct BufferHandle * currentHandle =handle;
     if(NULL!=currentHandle&&currentHandle->playStatus!=STATUS_IDLE&&currentHandle->playStatus!=STATUS_PLAYING){
-        if (seek>=0){
-            seekTo(seek);
-        }
         pthread_mutex_lock(&mutex);
         pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
@@ -290,7 +329,7 @@ Java_com_merlin_player_Player_start(JNIEnv *env, jobject thiz, jdouble seek) {
 
 JNIEXPORT jlong JNICALL
 Java_com_merlin_player_Player_getPosition(JNIEnv *env, jobject thiz) {
-    return 0;
+    return getCurrentPosition();
 }
 
 JNIEXPORT jlong JNICALL
@@ -308,27 +347,6 @@ Java_com_merlin_player_Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
         }else if (!stop&&currentHandle->playStatus!=STATUS_PAUSE){
             currentHandle->playStatus=STATUS_PAUSE;
             return JNI_TRUE;
-        }
-    }
-    return JNI_FALSE;
-}
-
-
-int seekTo(double seek){
-    struct BufferHandle * currentHandle =handle;
-    jobject media=NULL!=currentHandle?currentHandle->media:NULL;
-    if (NULL!=media) {
-        JNIEnv *env;
-        int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
-        if(res==JNI_OK){
-            jclass bufferClass = (*env)->FindClass(env, "com/merlin/player/MediaBuffer");
-            jmethodID methodId = (*env)->GetMethodID(env, bufferClass, "seek", "(D)Z");
-            jboolean succeed = JNI_FALSE;
-            succeed = (*env)->CallBooleanMethod(env, media, methodId, seek);
-            (*env)->DeleteLocalRef(env, bufferClass);
-//            (*env)->DeleteLocalRef(env, methodId);
-            notifyStatusChange(STATUS_SEEK, media, "Media play seek.");
-            return succeed;
         }
     }
     return JNI_FALSE;

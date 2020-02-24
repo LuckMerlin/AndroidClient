@@ -12,7 +12,7 @@
         binding:createModel="@{true}"
         android:paddingLeft="@dimen/contentGap"
         android:paddingRight="@dimen/contentGap"
-        binding:statusBar="@{StatusBar.statusBar(null, R.string.allMedias,null)}"
+        binding:statusBar="@{StatusBar.statusBar(null, R.string.allMedias,R.string.playAll)}"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

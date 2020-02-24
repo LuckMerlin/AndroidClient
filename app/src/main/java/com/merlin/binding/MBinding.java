@@ -15,6 +15,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -49,6 +50,8 @@ import com.merlin.model.OnTextChange;
 import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
 import com.merlin.view.MultiPageAdapterRefreshBridge;
+import com.merlin.view.OnSeekBarChangeListener;
+import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTextChanged;
 import com.merlin.view.Res;
 
@@ -233,6 +236,20 @@ public class MBinding {
     public static void onEditorActionChange(EditText view, TextView.OnEditorActionListener listener) {
         if (null != view && null != listener) {
             view.setOnEditorActionListener(listener);
+        }
+    }
+
+    @BindingAdapter("onChange")
+    public static void onSeekbarChange(SeekBar view, OnSeekBarProgressChange listener) {
+        if (null != view && null != listener) {
+            view.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (null!=listener){
+                        listener.onProgressChanged(seekBar,progress,fromUser);
+                    }
+                }
+            });
         }
     }
 

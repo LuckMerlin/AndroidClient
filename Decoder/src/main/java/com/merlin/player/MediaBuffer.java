@@ -42,6 +42,10 @@ public abstract class MediaBuffer<T extends Playable> {
 
     protected abstract boolean seek(double seek);
 
+    public Long getContentLength(){
+        return null;
+    }
+
     public final double getSeek() {
         return mSeek;
     }

@@ -12,6 +12,8 @@ import java.util.WeakHashMap;
 public class Player implements Status{
     private static OnMediaFrameDecodeFinish mListener;
     private static WeakHashMap<OnPlayerStatusUpdate,Long> mUpdate;
+    private WeakReference<OnMediaFrameDecodeFinish> mDecodeListener;
+    private long mCurrPosition;
     private static OnPlayerStatusUpdate mInnerUpdate;
     private MediaBuffer mPlaying;
     private Handler mHandler;
@@ -24,10 +26,28 @@ public class Player implements Status{
     public Player(){
         mListener=this instanceof OnMediaFrameDecodeFinish?new OnMediaFrameDecodeFinish(){
             @Override
-            public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed) {
-                ((OnMediaFrameDecodeFinish)Player.this).onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed);
+            public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed,long currentPosition) {
+                Player.this.mCurrPosition=currentPosition;
+                ((OnMediaFrameDecodeFinish)Player.this).onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed,currentPosition);
+                WeakReference<OnMediaFrameDecodeFinish> reference=mDecodeListener;
+                OnMediaFrameDecodeFinish listener=null!=reference?reference.get():null;
+                if (null!=listener){
+                    listener.onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed,currentPosition);
+                }
             }
         }:null;
+    }
+
+    public final boolean setDecodeListener(OnMediaFrameDecodeFinish frameDecodeFinish){
+        WeakReference<OnMediaFrameDecodeFinish> reference=mDecodeListener;
+        mDecodeListener=null;
+        if (null!=reference){
+            reference.clear();
+        }
+        if (null!=frameDecodeFinish){
+            mDecodeListener=new WeakReference<>(frameDecodeFinish);
+        }
+        return true;
     }
 
     public final boolean addListener(OnPlayerStatusUpdate listener){
@@ -65,6 +85,9 @@ public class Player implements Status{
         mInnerUpdate=null!=mInnerUpdate?mInnerUpdate:new OnPlayerStatusUpdate() {
             @Override
             public void onPlayerStatusUpdated(Player p,final int status,final String note,final Playable media,final Object data) {
+                if (status==STATUS_IDLE||status==STATUS_STOP){
+                    mCurrPosition=0;
+                }
                 if (Player.this instanceof OnPlayerStatusUpdate){
                     runOnUiThread(new Runnable() {
                         @Override
@@ -165,12 +188,28 @@ public class Player implements Status{
         return null!=pending&&pending.mRunning;
     }
 
+    public long getDuration(){
+        return 0;
+    }
+
+    public float getCurrentProgress(){
+        return 0;
+    }
+//    public long getCurrentDuration(boolean nat){
+//        return nat?getPosition():mCurrPosition;
+//    }
+
     public final Playable getPlaying(){
         MediaBuffer buffer=getPlayingBuffer();
         return null!=buffer?buffer.getPlayable():null;
     }
 
-    private MediaBuffer getPlayingBuffer(){
+    public final boolean seek(double seek){
+        MediaBuffer buffer=getPlayingBuffer();
+        return null!=buffer&&buffer.seek(seek);
+    }
+
+    protected final MediaBuffer getPlayingBuffer(){
         return mPlaying;
     }
 
@@ -198,6 +237,7 @@ public class Player implements Status{
         Debug.D(getClass(),"Destroy player.");
         boolean succeed=isIdle()||pause(true);
         WeakHashMap reference=mUpdate;
+        mCurrPosition=0;
         mUpdate=null;
         mHandler=null;
         mListener=null;
@@ -255,10 +295,10 @@ public class Player implements Status{
      *
      *Call by native C
      */
-    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int channels,int sampleRate,int speed){
+    private final static void onNativeDecodeFinish(int mediaType,byte[] bytes,int channels,int sampleRate,int speed,long currentPosition){
         OnMediaFrameDecodeFinish reference=mListener;
         if (null!=reference){
-            reference.onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed);
+            reference.onMediaFrameDecodeFinish(mediaType,bytes,channels,sampleRate,speed,currentPosition);
         }
     }
 
@@ -270,11 +310,9 @@ public class Player implements Status{
 
     private native int playMedia(MediaBuffer buffer, double seek);
 
-    public native long getPosition();
+//    private native long getPosition();
 
-    public native long getDuration();
-
-    public native boolean seek(double seek);
+//    private native long getDuration();
 
     public native boolean start(double seek);
 

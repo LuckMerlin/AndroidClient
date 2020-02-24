@@ -40,7 +40,7 @@
                         android:textColor="@color/textTitle"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
-                        android:text="@{Time.formatTime(vm.model.currentPosition??0)}"
+                        android:text="@{vm.model.currentPosition??Time.formatTime(0)}"
                         android:textSize="@dimen/textSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
@@ -58,7 +58,9 @@
                         android:id="@+id/mediaPlayBottomProgressSB"
                         android:layout_toLeftOf="@id/mediaPlayBottomDurationTV"
                         android:layout_toRightOf="@id/mediaPlayBottomPositionTV"
-                        android:progress="@{vm.model.progress}"
+                        android:clickable="true"
+                        binding:onChange="@{vm.model.onSeekChange}"
+                        android:progress="@{vm.model.currentProgress}"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="3dp"
                         android:layout_marginRight="3dp"
@@ -67,6 +69,8 @@
                         android:focusable="true"
                         android:maxHeight="4.0dip"
                         android:minHeight="4.0dip"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
                         android:paddingLeft="16.0dip"
                         android:paddingRight="16.0dip"
                         android:progressDrawable="@drawable/seekbar"/>

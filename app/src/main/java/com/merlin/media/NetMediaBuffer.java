@@ -1,14 +1,10 @@
 package com.merlin.media;
 
-import com.merlin.api.Address;
-import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
-import com.merlin.file.DownloadApi;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.Playable;
-import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Closer;
 
 import java.io.File;
@@ -16,16 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
-import retrofit2.http.Streaming;
 
 public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T> {
     private Reader mReader;
@@ -61,6 +52,7 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
                 reader.mWriteComplete=true;
                 reader.setCanceler(null);
                 reader.mState= what;
+                reader.mContentLength=null;
                 reader.wakeUp(what,debug);
             }
 
@@ -71,9 +63,9 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
                     public void run() {
                         if (null!=response&&response.isSuccessful()){
                             ResponseBody responseBody=response.body();
+                            reader.mContentLength=responseBody.contentLength();
                             MediaType mediaType=null!=responseBody?responseBody.contentType():null;
                             String contentType=null!=mediaType?mediaType.subtype():null;
-//                            Debug.D(getClass(),"contentType "+contentType);
                             if (null!=contentType&&contentType.equals("octet-stream")){
                                 InputStream is = null!=responseBody?responseBody.byteStream():null;
                                 try {
@@ -105,8 +97,6 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
                             Debug.D(getClass(),"Invalid file stream length response. "+contentType+" "+media);
                             finishRequest(What.WHAT_ERROR_UNKNOWN,"Invalid file stream length response. "+media);
                         }
-
-
                     }
                 }).start();
 
@@ -129,6 +119,17 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
     }
 
     @Override
+    public Long getContentLength() {
+        Reader reader=mReader;
+        return null!=reader?reader.mContentLength:null;
+    }
+
+    public long getCurrentPosition() {
+        Reader reader=mReader;
+        return null!=reader?reader.mNextStart:null;
+    }
+
+    @Override
     protected final int read(byte[] buffer, int offset, int length) {
         Reader curr=mReader;
         return null!=curr?curr.read(buffer,offset,length):0;
@@ -142,7 +143,15 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
 
     @Override
     protected final boolean seek(double seek) {
-
+        if (seek>0){
+            Reader reader=mReader;
+            Long length=null!=reader?reader.mContentLength:null;
+            if (null!=length&&seek<length){
+                long position=(long)(seek<1?(long)(length*seek):seek);
+                reader.mNextStart=position;
+                return true;
+            }
+        }
         return false;
     }
 
@@ -163,6 +172,7 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
         private boolean mWriteComplete=false;
         private int mState=STATE_NORMAL;
         private RandomAccessFile mAccess;
+        private Long mContentLength=null;
         private long mNextStart=0;
         private final Boolean mMutex=true;
         private Client.Canceler mCanceler;

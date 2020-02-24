@@ -17,6 +17,7 @@ public abstract class MediaPlayer extends Binder {
     public abstract long getDuration();
     public abstract long getPosition();
     public abstract int getPlayState();
+    public abstract boolean seek(double seek,String debug);
     public abstract Playable getPlaying(Object ...obj);
     public abstract List<Playable> getQueue();
     public abstract boolean addListener(OnPlayerStatusUpdate update);

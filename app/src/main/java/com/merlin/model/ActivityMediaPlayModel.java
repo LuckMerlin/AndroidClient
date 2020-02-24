@@ -4,6 +4,7 @@ package com.merlin.model;
 import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.SeekBar;
 
 import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
@@ -35,7 +36,9 @@ import com.merlin.media.Mode;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
+import com.merlin.player.Time;
 import com.merlin.transport.TransportService;
+import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
 
@@ -49,10 +52,16 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private final ObservableField<NasMedia> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
     private final ObservableField<Object> mAlbumImage=new ObservableField<>();
-    private final ObservableField<Integer> mCurrPosition=new ObservableField<>();
+    private final ObservableField<String> mCurrPosition=new ObservableField<>();
     private final ObservableField<String> mPlayingMeta=new ObservableField<>();
     private final ObservableField<String> mPlayingArtistAlbum=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
+    private final OnSeekBarProgressChange mOnSeekChange=(seekBar, progress, fromUser)-> {
+        MediaPlayer player=fromUser?mPlayer:null;
+        if (null!=player){
+            player.seek(progress/100.f,"After seekBar tap click.");
+        }
+    };
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
@@ -111,8 +120,15 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         switch (status){
             case STATUS_START: updatePlaying(null,"While status start.");break;
             case STATUS_STOP:updatePlaying(null,"While status stop.");break;
+            case STATUS_IDLE:updatePlaying(null,"While status idle.");break;
             case STATUS_PROGRESS:
-                Debug.D(getClass(),"^^^^^^^^ "+data);
+                float progress=null!=player?player.getCurrentProgress():0;
+                progress=progress>=0&&progress<=1?progress:0;
+                long duration=player.getDuration();
+                if (duration>0){
+                    mCurrPosition.set(Time.formatTime((long)(progress*duration)));
+                }
+                mProgress.set((int)(progress*100));
                 break;
         }
     }
@@ -256,12 +272,15 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return mPlaying;
     }
 
-    public ObservableField<Integer> getProgress() {
+    public ObservableField<Integer> getCurrentProgress() {
         return mProgress;
-
     }
 
-    public ObservableField<Integer> getCurrentPosition() {
+    public OnSeekBarProgressChange getOnSeekChange() {
+        return mOnSeekChange;
+    }
+
+    public ObservableField<String> getCurrentPosition() {
         return mCurrPosition;
     }
 
