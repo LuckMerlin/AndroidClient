@@ -34,7 +34,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 
     public MPlayer(){
         addListener(this);
-        mPlayMode=Mode.QUEUE_SORT;
+        mPlayMode=Mode.RANDOM;
     }
 
     @Override
@@ -85,9 +85,9 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             if (mode==Mode.CHANGE_MODE){
                 Mode[] modes=Mode.values();
                 int length=null!=modes?modes.length:-1;
-                if (length>0){
+                if (length>1){
                     int index=(Arrays.binarySearch(modes,curr)+1);
-                    index=index>=0&&index<length?index:0;
+                    index=index>=0&&index<length?index:1;
                     mPlayMode=modes[index];
                 }
             }else{
@@ -106,6 +106,11 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     @Override
     protected final MediaBuffer onResolveNext(MediaBuffer buffer) {
         Playable playable=null!=buffer?buffer.getPlayable():null;
+        Mode mode=mPlayMode;
+        Playable played=null!=mode&&mode==Mode.SINGLE?buffer.getPlayable():null;
+        if (null!=mode&&mode==Mode.SINGLE&&null!=played){
+            return createMediaBuffer(played,0);
+        }
         Playable media=indexQueueNext(playable,false);
         return null!=media?createMediaBuffer(media,0):null;
     }
@@ -256,10 +261,6 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         List<Playable> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
-        Playable playing=null!=mode&&mode==Mode.SINGLE?getPlaying():null;
-        if (null!=playing){
-            return playing;
-        }
         if (null!=queue&&null!=indexer){
             int nextIndex;
             int current=index(media);

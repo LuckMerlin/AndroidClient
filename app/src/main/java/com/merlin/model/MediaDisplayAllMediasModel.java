@@ -19,6 +19,7 @@ import com.merlin.bean.Sheet;
 import com.merlin.client.BR;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediasAllContextMenuBinding;
+import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
@@ -97,7 +98,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         if (null==list||list.size()<=0){
             return toast(R.string.listEmpty);
         }
-        return MediaPlayService.play(getViewContext(),list,0,(MPlayer.PLAY_TYPE_ADD_INTO_QUEUE&MPlayer.PLAY_TYPE_CLEAN_QUEUE));
+        return MediaPlayService.play(getViewContext(),list,0,(MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE|MPlayer.PLAY_TYPE_CLEAN_QUEUE));
     }
 
     private boolean play(NasMedia media, int playType){

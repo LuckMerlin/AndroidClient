@@ -234,6 +234,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
             Playable playable=null!=player?player.getPlaying():null;
             playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
         }
+        mCurrPosition.set(Time.formatTime(0));
+        mProgress.set(0);
         mPlaying.set(playing);
         mFavorite.set(null!=playing&&playing.isFavorite());
         String imageUrl=null!=playing?playing.getThumbImageUrl():null;
