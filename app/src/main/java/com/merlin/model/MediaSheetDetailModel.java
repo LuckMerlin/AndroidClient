@@ -14,9 +14,14 @@ import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
+import com.merlin.client.R;
+import com.merlin.client.databinding.SheetMediasMenusBinding;
+import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.player1.MPlayer;
 import com.merlin.view.OnTapClick;
+
+import java.util.ArrayList;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -39,7 +44,6 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
         Observable<Reply<SectionData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
     }
 
-
     @Override
     public void onActivityIntentChanged(Activity activity, Intent intent) {
         Object object=null!=intent?getActivityDataFromIntent(intent):null;
@@ -52,6 +56,10 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
+            case R.drawable.selector_menu:
+                return showDetailContextMenu(view);
+            case R.string.playAll:
+                return playAll("After play all tap click.");
             default:
                 if (null!=data&&data instanceof NasMedia){
                     MediaPlayService.play(getContext(),(NasMedia)data,0, clickCount>1?MPlayer.PLAY_TYPE_PLAY_NOW&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
@@ -59,6 +67,20 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
                 break;
         }
         return true;
+    }
+
+    private boolean playAll(String debug){
+        SheetMediasAdapter adapter=mAdapter;
+        ArrayList<NasMedia> list=null!=adapter?adapter.getData():null;
+        if (null==list||list.size()<=0){
+            return toast(R.string.listEmpty);
+        }
+        return MediaPlayService.play(getContext(),list,0,MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE|MPlayer.PLAY_TYPE_CLEAN_QUEUE);
+    }
+
+    private boolean showDetailContextMenu(View view) {
+        SheetMediasMenusBinding binding=null!=view?inflate(R.layout.sheet_medias_menus):null;
+        return null!=binding&&showAtLocationAsContext(view,binding);
     }
 
     private boolean loadSheetMedias(String debug){

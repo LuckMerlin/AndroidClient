@@ -58,6 +58,11 @@ public class ModelBinder {
         return null;
     }
 
+    public static Model getBindModel(View view){
+        Object object=null!=view?view.getTag(R.id.modelBind):null;
+        return null!=object&&object instanceof Model?(Model)object:null;
+    }
+
     public boolean bind(View view,Object  modeClassName){
         if (null!=view){
             Class perferClass=findModelClass(view,modeClassName);

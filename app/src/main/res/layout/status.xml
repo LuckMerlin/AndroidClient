@@ -5,6 +5,8 @@
     </data>
 
     <com.merlin.view.StatusBarLayout
+        android:paddingLeft="@dimen/contentGap"
+        android:paddingRight="@dimen/contentGap"
         android:layout_width="match_parent"
         android:layout_height="60dp"/>
 </layout>

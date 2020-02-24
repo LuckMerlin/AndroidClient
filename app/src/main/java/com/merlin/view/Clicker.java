@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -14,6 +15,7 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.binding.IDs;
 import com.merlin.binding.MBinding;
+import com.merlin.binding.ModelBinder;
 import com.merlin.classes.Classes;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -294,6 +296,20 @@ public final class Clicker {
                    }else{
                        return dispatcher.onDispatch(view,root,interrupter,binding);
                    }
+                }
+                if (((View)parent).getId()==android.R.id.content&&parent instanceof ViewGroup){//Give up
+                    ViewGroup vg=(ViewGroup)parent;
+                    int count=null!=vg?vg.getChildCount():0;
+                    View child;
+                    for (int i=0;i<count;i++){
+                        if (null!=(child=vg.getChildAt(i))&&!(child instanceof StatusBarLayout)){
+                            Model model=ModelBinder.getBindModel(child);
+                            if (null!=model&&dispatcher.onDispatch(child,root,model,binding)){
+                                break;
+                            }
+                        }
+                     }
+                    return true;
                 }
                 return dispatchClickToModel((View)parent,root,dispatcher);
             }

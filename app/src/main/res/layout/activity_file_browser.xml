@@ -110,7 +110,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp" />
                 <ImageView
-                    android:src="@{R.drawable.ic_menu_normal}"
+                    android:src="@{R.drawable.selector_menu}"
                     binding:enableClick="@{true}"
                     android:layout_width="40dp"
                     android:layout_height="40dp"

@@ -19,7 +19,7 @@ import com.merlin.bean.Sheet;
 import com.merlin.client.BR;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediasAllContextMenuBinding;
-import com.merlin.debug.Debug;
+import com.merlin.client.databinding.MediasAllMenusBinding;
 import com.merlin.dialog.Dialog;
 import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
@@ -63,6 +63,8 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
+            case R.drawable.selector_menu:
+                return showContextMenu(view);
             case R.string.playAll:
                 return playAll("After play all tap click.");
             case R.drawable.selector_heart:
@@ -90,6 +92,14 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
                 break;
         }
         return true;
+    }
+
+    private boolean showContextMenu(View view){
+        MediasAllMenusBinding binding=null!=view?inflate(R.layout.medias_all_menus):null;
+        if (null!=binding){
+            return showAtLocationAsContext(view,binding);
+        }
+        return false;
     }
 
     private boolean playAll(String debug){

@@ -7,17 +7,16 @@
             type="com.merlin.model.MediaSheetDetailModel" />
         <import type="android.view.View"/>
         <import type="com.merlin.binding.StatusBar"/>
+        <import type="com.merlin.client.R"/>
     </data>
 
     <LinearLayout
         android:layout_margin="10dp"
         android:orientation="vertical"
-        binding:createModel="@{null}"
-        binding:enableBarPadding="@{0}"
-        binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,null,null)}"
+        binding:createModel="@{true}"
+        binding:statusBar="@{StatusBar.statusBar(StatusBar.ICON_BACK,null,R.drawable.selector_menu)}"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <include layout="@layout/status" />
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
