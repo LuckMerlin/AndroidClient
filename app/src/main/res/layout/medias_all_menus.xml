@@ -2,6 +2,9 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
+        <variable
+            name="mediaCount"
+            type="int" />
         <import type="com.merlin.view.ContextMenu"/>
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
@@ -11,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <include layout="@layout/item_context_menu"
+            android:visibility="@{mediaCount>0?View.VISIBLE:View.GONE}"
             binding:menu="@{ContextMenu.create(R.string.playAll)}"/>
     </LinearLayout>
 </layout>

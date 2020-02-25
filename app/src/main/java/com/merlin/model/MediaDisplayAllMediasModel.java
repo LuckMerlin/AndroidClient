@@ -30,7 +30,6 @@ import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -97,6 +96,8 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     private boolean showContextMenu(View view){
         MediasAllMenusBinding binding=null!=view?inflate(R.layout.medias_all_menus):null;
         if (null!=binding){
+            AllMediasAdapter adapter=mAdapter;
+            binding.setMediaCount(null!=adapter?adapter.getDataCount():0);
             return showAtLocationAsContext(view,binding);
         }
         return false;
