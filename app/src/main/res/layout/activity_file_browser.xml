@@ -50,20 +50,16 @@
                         android:layout_marginRight="15dp"
                         android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.cancel_selector}"/>
-                    <Spinner
-                        android:id="@+id/fileBrowser_deviceSP"
-                        enableClick="@{Clicker.multiClick(null,true)}"
-                        android:entries="@{vm.devicesName}"
-                        android:textSize="@dimen/textTitle"
-                        android:textStyle="bold"
-                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                    <include
+                        android:id="@+id/fileBrowser_deviceNameTV"
+                        binding:device="@{vm.currentClientMeta}"
+                        layout="@layout/device_text"
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
                     <TextView
                         android:text="@{` (`+vm.current.length+')'}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.clientMeta&amp;&amp;vm.current.size()&lt;1))?View.GONE:View.VISIBLE}"
+                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.currentClientMeta&amp;&amp;vm.current.size()&lt;1))?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -121,16 +117,16 @@
                 android:layout_width="10dp"
                 android:layout_height="10dp"/>
             <TextView
-                android:text='@{""+FileSize.formatSizeText(vm.clientMeta.free)+"/"+FileSize.formatSizeText(vm.clientMeta.total)}'
+                android:text='@{""+FileSize.formatSizeText(vm.currentClientMeta.free)+"/"+FileSize.formatSizeText(vm.currentClientMeta.total)}'
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:textSize="@dimen/textSmall"
-                android:visibility="@{null==vm.clientMeta?View.GONE:View.VISIBLE}"
+                android:visibility="@{null==vm.currentClientMeta?View.GONE:View.VISIBLE}"
                 android:singleLine="true"
                 android:layout_height="wrap_content"/>
             <HorizontalScrollView
                 android:layout_marginLeft="5dp"
-                android:visibility="@{null==vm.clientMeta?View.GONE:View.VISIBLE}"
+                android:visibility="@{null==vm.currentClientMeta?View.GONE:View.VISIBLE}"
                 android:layout_weight="1"
                 android:scrollbars="none"
                 android:layout_width="0dp"

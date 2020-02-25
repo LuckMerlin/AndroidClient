@@ -109,7 +109,7 @@ public class PopupWindow {
         return showAtLocation(parent,gravity,x,y,interrupter,mDismissFlag);
     }
 
-    public boolean showAtLocation(View parent, int gravity, int x, int y,View interrupter,Integer dismissFlag){
+    public boolean showAtLocation(View parent, int gravity, int x, int y,Object interrupter,Integer dismissFlag){
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&null!=parent) {
             View contentView=null!=interrupter?getContentView():null;
@@ -120,6 +120,22 @@ public class PopupWindow {
                 applyDismissFlag(dismissFlag);
             }
             window.showAtLocation(parent, gravity, x, y);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean showAsDropDown(View anchor, int x, int y,Object interrupter,Integer dismissFlag) {
+        android.widget.PopupWindow window=mWindow;
+        if (null!=window&&null!=anchor) {
+            View contentView=null!=interrupter?getContentView():null;
+            if (null!=contentView){
+                Clicker.setInterrupterTag(contentView,interrupter,true);
+            }
+            if (null!=dismissFlag){
+                applyDismissFlag(dismissFlag);
+            }
+            window.showAsDropDown(anchor,x,y);
             return true;
         }
         return false;

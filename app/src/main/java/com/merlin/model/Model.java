@@ -187,6 +187,7 @@ public class Model {
         return showAtLocation(parent,binding,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
     }
 
+
     protected final boolean showAtLocation(View parent,ViewDataBinding binding,Integer dismissFlag){
         return null!=binding&&showAtLocation(parent,binding.getRoot(),dismissFlag);
     }
@@ -195,19 +196,51 @@ public class Model {
         return showAtLocation(parent,root,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
     }
 
-    protected final boolean showAtLocation(View parent,View root,Integer dismissFlag){
+    protected final boolean showAtLocation(View parent,View root,Integer dismissFlag) {
+        return showAtLocation(parent,root,Gravity.CENTER,0,0,dismissFlag);
+    }
+    protected final boolean showAtLocation(View parent,ViewDataBinding binding,int gravity,int x,int y,Integer dismissFlag) {
+        return null!=binding&&showAtLocation(parent,binding.getRoot(),gravity,x,y,dismissFlag);
+    }
+
+    private PopupWindow fetchPopWindow(){
+        PopupWindow currentPopWindow=mPopWindow;
+        final PopupWindow popupWindow=null!=currentPopWindow?currentPopWindow:(mPopWindow=new PopupWindow(true,(window)->{
+            PopupWindow curr=mPopWindow;
+            if (null!=curr&&null!=window&&curr==window){
+                mPopWindow=null;
+            }
+        }));
+        return popupWindow;
+    }
+
+    protected final boolean showAtLocation(View parent,View root,int gravity,int x,int y,Integer dismissFlag){
         if (null!=root&&(null==root.getParent())){
-            PopupWindow currentPopWindow=mPopWindow;
-            final PopupWindow popupWindow=null!=currentPopWindow?currentPopWindow:(mPopWindow=new PopupWindow(true,(window)->{
-                PopupWindow curr=mPopWindow;
-                if (null!=curr&&null!=window&&curr==window){
-                    mPopWindow=null;
-                }
-            }));
-            popupWindow.setContentView(root);
-            dismissFlag=null==dismissFlag?PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK:dismissFlag;
-            popupWindow.showAtLocation(parent, Gravity.CENTER,0,0,getRoot(),dismissFlag);
-            return true;
+            PopupWindow popupWindow=fetchPopWindow();
+            if (null!=popupWindow) {
+                popupWindow.setContentView(root);
+                dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
+                popupWindow.showAtLocation(parent, gravity, x, y, getRoot(), dismissFlag);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    protected final boolean showAsDropDown(View anchor,ViewDataBinding binding, int x, int y,Integer dismissFlag) {
+        return null!=binding&&showAsDropDown(anchor,binding.getRoot(),x,y,null,dismissFlag);
+    }
+
+    protected final boolean showAsDropDown(View anchor,View root, int x, int y,Object interrupter,Integer dismissFlag){
+        if (null!=anchor&&null!=root&&null==root.getParent()&&(anchor!=root)){
+            PopupWindow popupWindow=fetchPopWindow();
+            if (null!=popupWindow){
+                popupWindow.setContentView(root);
+                dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
+                return popupWindow.showAsDropDown(anchor, x, y, null!=interrupter?interrupter:getRoot(), dismissFlag);
+            }
+            return false;
         }
         return false;
     }

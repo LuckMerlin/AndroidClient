@@ -1,12 +1,17 @@
 package com.merlin.model;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.Address;
@@ -21,7 +26,9 @@ import com.merlin.bean.NasFile;
 import com.merlin.bean.FileModify;
 import com.merlin.bean.FilePaste;
 import com.merlin.bean.NasFolder;
+import com.merlin.client.Client;
 import com.merlin.client.R;
+import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.client.databinding.FileDetailBinding;
@@ -30,7 +37,6 @@ import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.MediaPlayService;
 import com.merlin.protocol.Tag;
-import com.merlin.transport.TransportService;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -50,11 +56,11 @@ import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
     private final ObservableField<NasFolder> mCurrent=new ObservableField();
-    private final ObservableField<ClientMeta> mClientMeta=new ObservableField<>();
+    private final ObservableField<ClientMeta> mCurrentClientMeta=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
+    private List<ClientMeta> mAllClientMetas;
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableField<Integer> mMode=new ObservableField<>();
-    private final ObservableField<List<String>> mDevicesName=new ObservableField<>();
     private Object mProcessing;
     public final static int MODE_NORMAL=1212;
     public final static int MODE_MULTI_CHOOSE=1213;
@@ -115,10 +121,15 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     public FileBrowserModel(){
+        entryMode(MODE_NORMAL);
         refreshClientMeta("While model create.");
         browserPath("","While model create.");
-        entryMode(MODE_NORMAL);
-        addClientMeta(createLocalClientMeta(),"After mode create.");
+    }
+
+    @Override
+    protected void onRootAttached(View root) {
+        super.onRootAttached(root);
+        addClientMeta(ClientMeta.buildLocalClient(getContext()),"After mode create.");
     }
 
     @Override
@@ -126,9 +137,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         switch (clickCount){
             case 1:
                 switch (resId){
-                    case R.id.fileBrowser_deviceSP:
-                        toast("带年纪 ");
-                        return true;
+                    case R.id.fileBrowser_deviceNameTV:
+                        return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -208,13 +218,53 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
-    private ClientMeta createLocalClientMeta(){
-
-        return null;
+    private boolean addClientMeta(ClientMeta meta,String debug){
+        if (null!=meta){
+            List<ClientMeta> list=mAllClientMetas;
+            list=null!=list?list:(mAllClientMetas=new ArrayList<>());
+            Debug.D(getClass(),"添加  "+meta);
+            if (!list.contains(meta)&&list.add(meta)){
+                return changeDevice(meta,false,debug)||true;
+            }
+        }
+        return false;
     }
 
-    private boolean addClientMeta(ClientMeta meta,String debug){
+    private boolean changeDevice(ClientMeta client,boolean force,String debug){
+        if (null!=client){
+            if (force||null==mCurrentClientMeta.get()){
+                Debug.D(getClass(),"Change browser device "+client.getName()+" "+(null!=debug?debug:"."));
+                mCurrentClientMeta.set(client);
+                return true;
+            }
+        }
+        return false;
+    }
 
+    private boolean showClientMenu(TextView tv,String debug){
+        List<ClientMeta> list=mAllClientMetas;
+        Context context=null!=tv?tv.getContext():null;
+        final int size=null!=context&&null!=list?list.size():0;
+        if (size>0){
+            LinearLayout ll=new LinearLayout(context);
+            ll.setOrientation(LinearLayout.VERTICAL);
+            final OnTapClick click=( view, clickCount, resId, data)-> {
+                return (null!=data&&data instanceof ClientMeta&&changeDevice((ClientMeta)data,true,"After device choose."))||true;
+            };
+            ClientMeta current=mCurrentClientMeta.get();
+            for (int i = 0; i < size; i++) {
+                ClientMeta meta=list.get(i);
+                if (null!=meta&&(null==current||!current.equals(meta))){
+                    DeviceTextBinding binding=inflate(R.layout.device_text);
+                    View root=null!=binding?binding.getRoot():null;
+                    if (null!=root){
+                        binding.setDevice(meta);
+                        ll.addView(root);
+                    }
+                }
+            }
+            return showAsDropDown(tv,ll,0,0,click,null);
+        }
         return false;
     }
 
@@ -373,10 +423,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         }).getDetail(path);
     }
 
-    private void refreshDeviceName(String debug){
-
-    }
-
     private boolean resetBrowserCurrentFolder(String debug){
         BrowserAdapter adapter=mBrowserAdapter;
         return null!=adapter&&adapter.reset(debug);
@@ -392,8 +438,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=call(Api.class,(OnApiFinish<Reply<ClientMeta>>)(what, note, data, arg)->{
             if(what==WHAT_SUCCEED){
                 ClientMeta meta=null!=data?data.getData():null;
-                mClientMeta.set(meta);
-                refreshDeviceName("After client meta responed.");
+                addClientMeta(meta,"After client meta responed.");
             }
         }).queryClientMeta();
     }
@@ -582,12 +627,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
-    public ObservableField<List<String>> getDevicesName() {
-        return mDevicesName;
-    }
-
-    public ObservableField<ClientMeta> getClientMeta() {
-        return mClientMeta;
+    public ObservableField<ClientMeta> getCurrentClientMeta() {
+        return mCurrentClientMeta;
     }
 
     public ObservableField<Integer> getMode() {

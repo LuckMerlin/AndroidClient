@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -136,6 +137,12 @@ public class MBinding {
         }
     }
 
+    @BindingAdapter("adapter")
+    public static void setSrc(Spinner view, SpinnerAdapter adapter) {
+        if (null!=view&&null!=adapter){
+            view.setAdapter(adapter);
+        }
+    }
 
     @BindingAdapter("android:entries")
     public static void setSrc(Spinner view, Object entries) {
