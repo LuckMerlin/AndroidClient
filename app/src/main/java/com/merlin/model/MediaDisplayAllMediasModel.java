@@ -168,7 +168,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
 
     @Override
     public void onTextChanged(EditText et, CharSequence s, int start, int before, int count) {
-           queryAllMedias(mFilter=null!=s&&s.length()>0?""+s:null,"After text change.");
+           queryAllMedias(mFilter=null!=s&&s.length()>0?""+s:null,"After title_text change.");
     }
 
     public AllMediasAdapter getAdapter() {

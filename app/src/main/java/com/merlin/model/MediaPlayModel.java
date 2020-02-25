@@ -1,5 +1,8 @@
 package com.merlin.model;
+import android.graphics.Rect;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.SeekBar;
 
 import com.merlin.activity.OnBackPressed;
 import com.merlin.adapter.AllMediasAdapter;
@@ -38,6 +41,31 @@ public class MediaPlayModel extends MediaDisplayModel implements Label, What,Sta
 //        String title=null!=playing?playing.getTitle():null;
 //        setStatusBar(null!=playing?title:R.string.mediaPlay, StatusBar.CENTER);
     }
+
+//    @Override
+//    protected void onRootAttached(View root) {
+//        super.onRootAttached(root);
+//        final SeekBar seekbar=null!=root?root.findViewById(R.id.mediaPlayBottomProgressSB):null;
+//        if (null!=seekbar){
+//            root.setOnTouchListener((v,event)-> {
+//                    Rect seekRect = new Rect();
+//                    seekbar.getHitRect(seekRect);
+//                    if ((event.getY() >= (seekRect.top - 500)) && (event.getY() <= (seekRect.bottom + 500))) {
+//                        float y = seekRect.top + seekRect.height() / 2;
+//                        float x = event.getX() - seekRect.left;
+//                        if (x < 0) {
+//                            x = 0;
+//                        } else if (x > seekRect.width()) {
+//                            x = seekRect.width();
+//                        }
+//                        MotionEvent me = MotionEvent.obtain(event.getDownTime(), event.getEventTime(),
+//                                event.getAction(), x, y, event.getMetaState());
+//                        return seekbar.onTouchEvent(me);
+//                    }
+//                    return false;
+//            });
+//        }
+//    }
 
     @Override
     public void onPlayingChange(Playable playable) {

@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.api.What;
+import com.merlin.debug.Debug;
 import com.merlin.file.Permissions;
 import com.merlin.player.Playable;
 
@@ -92,6 +94,9 @@ public final class NasFile implements Parcelable , Playable {
     }
 
     public  boolean isAccessible(){
+        if (size== What.WHAT_NONE_PERMISSION){
+            return false;
+        }
         int permission=permissions;
         Permissions permissions=new Permissions();
         return permissions.isOtherReadable(permission)&&(!isDirectory()||permissions.isOtherExecutable(permission));

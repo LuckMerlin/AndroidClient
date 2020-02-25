@@ -219,6 +219,11 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return false;
     }
 
+    public final int getQueueSize(){
+        List<Playable> queue=mQueue;
+        return null!=queue?queue.size():-1;
+    }
+
     public final Playable getPlayingMedia(Object ...objects){
         Playable playable=super.getPlaying();
         if (null!=playable){
@@ -245,6 +250,10 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             synchronized (queue){
                 int current=index(super.getPlaying());
                 int count=queue.size();
+                Playable playing=count<=0?getPlaying():null;
+                if (null!=playing){
+                    return play(playing,0,null,debug);
+                }
                 nextIndex=indexer.pre(mode,current,count);
             }
             return play(nextIndex,0,null,debug);
@@ -266,6 +275,9 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             int current=index(media);
             synchronized (queue){
                 int count=queue.size();
+                if (count<=0){
+                    return user?getPlaying():null;
+                }
                 nextIndex=indexer.next(mode,current,count,user);
                 return nextIndex>=0&&nextIndex<count?queue.get(nextIndex):null;
             }

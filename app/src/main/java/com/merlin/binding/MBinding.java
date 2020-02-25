@@ -13,9 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -55,6 +57,11 @@ import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTextChanged;
 import com.merlin.view.Res;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
 })
@@ -84,7 +91,7 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("android:text")
+    @BindingAdapter("android:title_text")
     public static void setText(TextView view, Object resId) {
         if (null!=view) {
             resId = null == resId ? "" : resId;
@@ -125,6 +132,28 @@ public class MBinding {
 //                        .placeholder(R.drawable.ic_picture_default)
 ////                .error(R.drawable.ic_default_pic)
 //                        .into()
+            }
+        }
+    }
+
+
+    @BindingAdapter("android:entries")
+    public static void setSrc(Spinner view, Object entries) {
+        if (view!=null&&null!=entries){
+            if (entries instanceof Collection){
+                Iterator iterator=((Collection)entries).iterator();
+                List<CharSequence> values=new ArrayList<>();
+                while (null!=iterator&&iterator.hasNext()){
+                    Object object=iterator.next();
+                    String value=null!=object?object.toString():null;
+                    if (null!=value){
+                        values.add(value);
+                    }
+                }
+                final ArrayAdapter<CharSequence> adapter = new ArrayAdapter(
+                        view.getContext(), R.layout.title_text, values);
+                view.setAdapter(adapter);
+//                adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
             }
         }
     }

@@ -108,9 +108,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         }
         if (null!=player){
             mPlayer=player;
-            player.addListener(this);
             updatePlaying(null,"After player bind.");
             updatePlayMode(null,"After player bind.");
+            player.addListener(this);
         }
     }
 

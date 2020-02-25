@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.binding.ModelBinder;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.media.Mode;
@@ -37,6 +38,7 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
 
     public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
         super(R.layout.media_display_sheet_category,R.layout.media_display_play,R.layout.media_display_all_medias);
+//        super(R.layout.media_display_play);
         mChange=change;
     }
 
@@ -71,7 +73,18 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
     }
 
     private void setCurrentPlaying(Playable playing){
-        Model model=getCurrentModel();
+        View root=getCurrentView();
+        if (null!=root){
+            applyPlaying(root,playing);
+        }
+    }
+
+    private void applyPlaying(View root,Playable playing){
+        if (playing==null){
+            WeakReference<Playable> reference=null!=root?mPlaying:null;
+            playing=null!=reference?reference.get():null;
+        }
+        Model model=null!=playing?ModelBinder.getBindModel(root):null;
         if (null!=model&&model instanceof MediaDisplayModel){
             ((MediaDisplayModel)model).onPlayingChange(playing);
         }
@@ -89,7 +102,9 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
         Context context=parent.getContext();
         final LayoutInflater in=LayoutInflater.from(context);
         ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
-        ViewHolder viewHolder=new ViewHolder(null!=binding?binding.getRoot():new View(context));
+        View  root=null!=binding?binding.getRoot():null;
+        ViewHolder viewHolder=new ViewHolder(null!=root?root:new View(context));
+        root.postDelayed(()->applyPlaying(root,null),500);
         return viewHolder;
     }
 

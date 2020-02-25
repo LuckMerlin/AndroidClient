@@ -42,13 +42,13 @@ public class MediaPlayService extends Service implements Status {
         @Override
         public boolean pre(String debug) {
             MPlayer player = mPlayer;
-            return null != player && player.playPre(debug);
+            return null!=player&&player.playPre(debug);
         }
 
         @Override
         public boolean next(String debug) {
             MPlayer player = mPlayer;
-            return null != player && player.playNext(true,debug);
+            return null!=player&&player.playNext(true,debug);
         }
 
         @Override

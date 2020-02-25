@@ -54,6 +54,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private final ObservableField<String> mMultiCount=new ObservableField<>();
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableField<Integer> mMode=new ObservableField<>();
+    private final ObservableField<List<String>> mDevicesName=new ObservableField<>();
     private Object mProcessing;
     public final static int MODE_NORMAL=1212;
     public final static int MODE_MULTI_CHOOSE=1213;
@@ -117,6 +118,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         refreshClientMeta("While model create.");
         browserPath("","While model create.");
         entryMode(MODE_NORMAL);
+        addClientMeta(createLocalClientMeta(),"After mode create.");
     }
 
     @Override
@@ -124,6 +126,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         switch (clickCount){
             case 1:
                 switch (resId){
+                    case R.id.fileBrowser_deviceSP:
+                        toast("带年纪 ");
+                        return true;
+                    case R.drawable.selector_menu:
+                        return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
                         return browserParent("After back pressed.");
                     case R.id.fileBrowser_bottom_cancel_TV:
@@ -158,13 +165,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.drawable.ic_menu_alls:
                          adapter=isMode(MODE_MULTI_CHOOSE)?mBrowserAdapter:null;
                         return null!=adapter&&adapter.chooseAll(false);
-                    case R.drawable.ic_menu_normal:
-                        FileBrowserMenuBinding binding=inflate(R.layout.file_browser_menu);
-                        if (null!=binding){
-                            binding.setFolder(mCurrent.get());
-                            return showAtLocationAsContext(view,binding);
-                        }
-                        return false;
                     case R.string.delete:
                         List<NasFile> list=null!=data&&data instanceof NasFile ?new ArrayList<>():null;
                         return null!=list&&list.add((NasFile)data)&&deleteFile(list,"After delete tap click.");
@@ -179,9 +179,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                                 } else if(file.isAccessible()){
                                     if (file.isDirectory()) {
                                         browserPath(file.getPath(), "After directory click.");
-                                    } else if(!file.isAccessible()){//Open file
-                                        toast(R.string.nonePermission);
+                                    } else{//Open file
                                     }
+                                }else{
+                                    toast(R.string.nonePermission);
                                 }
                             }else if (data instanceof File){
                                 open((File)data,"After file item tap.");
@@ -203,6 +204,25 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         }
                         break;
                 }
+        }
+        return false;
+    }
+
+    private ClientMeta createLocalClientMeta(){
+
+        return null;
+    }
+
+    private boolean addClientMeta(ClientMeta meta,String debug){
+
+        return false;
+    }
+
+    private boolean showBrowserMenu(View view,String debug){
+        FileBrowserMenuBinding binding=null!=view?inflate(R.layout.file_browser_menu):null;
+        if (null!=binding){
+            binding.setFolder(mCurrent.get());
+            return showAtLocationAsContext(view,binding);
         }
         return false;
     }
@@ -353,6 +373,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         }).getDetail(path);
     }
 
+    private void refreshDeviceName(String debug){
+
+    }
+
     private boolean resetBrowserCurrentFolder(String debug){
         BrowserAdapter adapter=mBrowserAdapter;
         return null!=adapter&&adapter.reset(debug);
@@ -367,7 +391,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         Debug.D(getClass(),"Refresh client meta "+(null!=debug?debug:"."));
         return null!=call(Api.class,(OnApiFinish<Reply<ClientMeta>>)(what, note, data, arg)->{
             if(what==WHAT_SUCCEED){
-                mClientMeta.set(null!=data?data.getData():null);
+                ClientMeta meta=null!=data?data.getData():null;
+                mClientMeta.set(meta);
+                refreshDeviceName("After client meta responed.");
             }
         }).queryClientMeta();
     }
@@ -554,6 +580,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             return true;
         }
         return false;
+    }
+
+    public ObservableField<List<String>> getDevicesName() {
+        return mDevicesName;
     }
 
     public ObservableField<ClientMeta> getClientMeta() {

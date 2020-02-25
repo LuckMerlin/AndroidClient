@@ -62,6 +62,10 @@ public class ModelActivity <T extends Model>extends Activity {
         }
     }
 
+    public void onModelBind(Model model){
+        //DO nothing
+    }
+
     public final  T getModel(Class<T> cls){
         Model model=getModel();
         return null!=model&&(null==cls||model.getClass().isAssignableFrom(cls))?(T)model:null;

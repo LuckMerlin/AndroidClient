@@ -90,7 +90,7 @@ public final class StatusBarLayout extends RelativeLayout implements OnTapClick{
                 if (object instanceof Integer){
                     int id=(Integer)object;
                     if (id==StatusBar.ICON_BACK){
-                        id=R.drawable.ic_back;
+                        id=R.drawable.selector_back;
                     }
                     binding=createResourceIdView(context,id);
                     resourceId=id;

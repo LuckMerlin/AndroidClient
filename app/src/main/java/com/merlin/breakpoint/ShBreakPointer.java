@@ -27,7 +27,7 @@ public class ShBreakPointer implements BreakPointer {
         if (null!=path&&path.length()>0){
             String text=new Gson().toJson(breakpoint);
             if (null==text||text.length()<=0){
-                Debug.W(getClass(),"Can't add download breakpoint.text="+text+" "+path);
+                Debug.W(getClass(),"Can't add download breakpoint.title_text="+text+" "+path);
                 return false;
             }
             SharedPreferences sh=mContext.getSharedPreferences(LABEL_BREAKPOINT,Context.MODE_PRIVATE);

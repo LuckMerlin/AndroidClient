@@ -17,14 +17,14 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
+import com.merlin.model.ActivityMediaPlayModel;
 import com.merlin.model.BaseModel;
 import com.merlin.model.MediaPlayModel;
 import com.merlin.model.Model;
 import com.merlin.model.OnPlayerBindChange;
 
 public class MediaPlayActivity extends ModelActivity implements ServiceConnection{
-
-
+    private MediaPlayer mPlayer;
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -72,8 +72,17 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
         setMediaPlayer(null);
     }
 
+    @Override
+    public void onModelBind(Model model) {
+        super.onModelBind(model);
+        MediaPlayer player=null!=model&&model instanceof ActivityMediaPlayModel?mPlayer:null;
+        if (null!=player&&model instanceof OnPlayerBindChange){
+            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
+        }
+    }
 
     private boolean setMediaPlayer(MediaPlayer player){
+        mPlayer=player;
          Model model=getModel();
         if (null!=model&&model instanceof OnPlayerBindChange){
             ((OnPlayerBindChange)model).onPlayerBindChanged(player);

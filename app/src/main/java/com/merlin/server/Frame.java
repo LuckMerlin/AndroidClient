@@ -148,7 +148,7 @@ public final class Frame implements Tag {
             encoding = encoding==null||encoding.length()<=0?"utf-8":encoding;
             return null!=bytes&&bytes.length>0?new String(bytes,encoding):def;
         } catch (UnsupportedEncodingException e) {
-            Debug.E(Frame.class,"Can't decode text data.e="+e+" encoding="+encoding,e);
+            Debug.E(Frame.class,"Can't decode title_text data.e="+e+" encoding="+encoding,e);
             e.printStackTrace();
         }
         return def;

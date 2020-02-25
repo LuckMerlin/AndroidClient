@@ -11,6 +11,7 @@
         <import type="com.merlin.util.FileSize"/>
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
+        <import type="com.merlin.view.Clicker"/>
         <import type="com.merlin.model.FileBrowserModel" alias="Model"/>
     </data>
     <RelativeLayout
@@ -49,8 +50,10 @@
                         android:layout_marginRight="15dp"
                         android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.cancel_selector}"/>
-                    <TextView
-                        android:text="@{vm.clientMeta.name}"
+                    <Spinner
+                        android:id="@+id/fileBrowser_deviceSP"
+                        enableClick="@{Clicker.multiClick(null,true)}"
+                        android:entries="@{vm.devicesName}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
                         android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}"
@@ -97,24 +100,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <ImageView
-                    android:id="@+id/fileBrowser_transmitIV"
-                    android:src="@drawable/ic_searchgo_normal"
-                    android:visibility="gone"
-                    android:padding="10dp"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp" />
-                <ImageView
-                    android:id="@+id/fileBrowser_topSearchIV"
-                    android:src="@drawable/ic_searchgo_normal"
-                    android:padding="10dp"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp" />
-                <ImageView
                     android:src="@{R.drawable.selector_menu}"
                     binding:enableClick="@{true}"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="10dp"/>
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"/>
             </LinearLayout>
         </RelativeLayout>
         <LinearLayout
