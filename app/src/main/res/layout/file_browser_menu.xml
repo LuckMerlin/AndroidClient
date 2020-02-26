@@ -6,7 +6,7 @@
         <import type="com.merlin.client.R"/>
         <variable
             name="folder"
-            type="com.merlin.bean.NasFolder" />
+            type="com.merlin.bean.FolderData" />
         <variable
             name="client"
             type="com.merlin.bean.ClientMeta" />

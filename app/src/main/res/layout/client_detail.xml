@@ -31,10 +31,10 @@
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal"
                 style="@style/titleNormalTextView"/>
-            <include binding:key="@{R.string.address}" binding:value="@{client.url}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.name}" binding:value="@{client.account}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.address}" binding:value="@{client.url}"  android:visibility="@{null==client.url?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.account}" binding:value="@{client.account}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.type}" binding:value="@{client.deviceType}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.platform}" binding:value="@{client.platform}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.platform}" binding:value="@{client.platform}"  android:visibility="@{null==client.platform?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.capacity}" binding:value="@{FileSize.formatSizeText((double)client.free)+`/`+FileSize.formatSizeText((double)client.total)}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
         </LinearLayout>
     </ScrollView>

@@ -12,10 +12,8 @@ import com.merlin.player.Playable;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public final class NasFile implements Parcelable , Playable {
+public final class NasFile extends FileMeta implements Parcelable , Playable {
     private long id;
-    private String path;
-    private String name;
     private String md5;
     private String mime;
     private int mode;
@@ -31,23 +29,6 @@ public final class NasFile implements Parcelable , Playable {
     private String imageUrl;
     private NasMedia meta;
     private double accessTime;
-
-    public boolean applyModify(FileModify modify){
-        if (null!=modify){
-            String path=modify.getPath();
-            String name=modify.getName();
-            if (null!=path||null!=name){
-                this.path=path;
-                this.name=name;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public String getName() {
-        return name;
-    }
 
     public boolean isDirectory(){
         return size!=WHAT_NOT_DIRECTORY;
@@ -75,10 +56,6 @@ public final class NasFile implements Parcelable , Playable {
 
     public double getAccessTime() {
         return accessTime;
-    }
-
-    public String getPath() {
-        return path;
     }
 
     public void setPermissions(int permissions) {
@@ -151,8 +128,8 @@ public final class NasFile implements Parcelable , Playable {
     private NasFile(Parcel in){
         id=in.readLong();
         length=in.readLong();
-        path=in.readString();
-        name=in.readString();
+//        path=in.readString();
+//        name=in.readString();
         md5=in.readString();
         mime=in.readString();
         extension=in.readString();
@@ -172,8 +149,8 @@ public final class NasFile implements Parcelable , Playable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeLong(length);
-        dest.writeString(path);
-        dest.writeString(name);
+//        dest.writeString(path);
+//        dest.writeString(name);
         dest.writeString(md5);
         dest.writeString(mime);
         dest.writeString(extension);

@@ -1,50 +1,26 @@
 package com.merlin.adapter;
 
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.bean.FileMeta;
+import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.FileModify;
-import com.merlin.bean.NasFolder;
-import com.merlin.client.R;
-import com.merlin.client.databinding.ItemListFileBinding;
-import com.merlin.debug.Debug;
-import com.merlin.model.FileBrowserModel;
+import com.merlin.model.BrowserModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BrowserAdapter extends MultiSectionAdapter<String, NasFile, NasFolder> implements OnMoreLoadable{
-    private List<NasFile> mMultiChoose;
+public abstract class BrowserAdapter<T extends FileMeta> extends MultiSectionAdapter<String, T, FolderData<T>> implements OnMoreLoadable{
+    private List<T> mMultiChoose;
 
-    public List<NasFile> getMultiChoose() {
+    public final List<T> getMultiChoose() {
         return mMultiChoose;
     }
 
-    @Override
-    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
-        return R.layout.item_list_file;
-    }
-
-    @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
-        if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
-            ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
-            boolean multiChoose=null!=mMultiChoose;
-            itemBinding.setIsChoose(isChoose(data));
-            itemBinding.setIsMultiChoose(multiChoose);
-            itemBinding.setMeta(data);
-            itemBinding.setPosition(position);
-        }
-    }
-
-    public final boolean renamePath(NasFile meta, FileModify modify){
-        List<NasFile> list=null!=meta&&null!=modify?getData():null;
+    public final boolean renamePath(T meta, FileModify modify){
+        List<T> list=null!=meta&&null!=modify?getData():null;
         int size=null!=list?list.size():-1;
         int index=size>0?list.indexOf(meta):-1;
         meta=index>=0&&index<size?list.get(index):null;
@@ -61,8 +37,8 @@ public abstract class BrowserAdapter extends MultiSectionAdapter<String, NasFile
     }
 
     public final boolean chooseAll(boolean choose){
-        List<NasFile> list = mMultiChoose;
-        List<NasFile> data = getData();
+        List<T> list = mMultiChoose;
+        List<T> data = getData();
         int size = null != data ? data.size() : 0;
         if (choose && (size > 0 &&(null==list||size != list.size()))) {
             if (null==list){
@@ -81,31 +57,35 @@ public abstract class BrowserAdapter extends MultiSectionAdapter<String, NasFile
         return false;
     }
 
-    public boolean setMode(int mode){
+    public final boolean setMode(int mode){
         List current=mMultiChoose;
         if (null!=current){
             current.clear();
         }
         mMultiChoose=null;
-        if (mode == FileBrowserModel.MODE_MULTI_CHOOSE){
+        if (mode == BrowserModel.MODE_MULTI_CHOOSE){
             mMultiChoose=new ArrayList<>(1);
         }
         notifyDataSetChanged();
         return false;
     }
 
-    public int getChooseCount(){
-        List<NasFile> list=mMultiChoose;
+    public final int getChooseCount(){
+        List<T> list=mMultiChoose;
         return null!=list?list.size():0;
     }
 
-    public List<NasFile> getChoose(){
-        List<NasFile> list=mMultiChoose;
+    public final boolean isMultiChoose(){
+        return null!=mMultiChoose;
+    }
+
+    public final List<T> getChoose(){
+        List<T> list=mMultiChoose;
         return list;
     }
 
-    public boolean multiChoose(NasFile meta){
-        List<NasFile> list=mMultiChoose;
+    public final boolean multiChoose(T meta){
+        List<T> list=mMultiChoose;
         if (null!=meta){
             if (null==list?(list=new ArrayList<>()).add(meta):
                     (list.contains(meta)?list.remove(meta):list.add(meta))){
@@ -117,8 +97,8 @@ public abstract class BrowserAdapter extends MultiSectionAdapter<String, NasFile
         return false;
     }
 
-    public boolean isChoose(NasFile meta){
-        List<NasFile> choose=mMultiChoose;
+    public final boolean isChoose(NasFile meta){
+        List<T> choose=mMultiChoose;
         return null!=meta&&null!=choose&&choose.contains(meta);
     }
 
