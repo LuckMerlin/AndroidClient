@@ -46,7 +46,7 @@ public final class Retrofit implements What {
         return prepare(cls,null,interceptors);
     }
 
-    public final <T> T prepare(Class<T> cls, String url, Interceptor ...interceptors){
+    public final <T> T   prepare(Class<T> cls, String url, Interceptor ...interceptors){
         final String uri=null!=url&&url.length()>0?url:mUrl;
         final int timeout =mTimeout>=0?mTimeout:10;
         OkHttpClient.Builder builder=new OkHttpClient().newBuilder()
@@ -77,11 +77,15 @@ public final class Retrofit implements What {
         return call(cls,null,subscribeOn,observeOn,dither,callbacks);
     }
 
-    public final <T> T call(Class<T> cls, Interceptor[] interceptors,Scheduler subscribeOn, Scheduler observeOn, Object dither, Callback...callbacks){
+    public final <T> T call(Class<T> cls, Interceptor[] interceptors,Scheduler subscribeOn, Scheduler observeOn, Object dither, Callback...callbacks) {
+        return call(null,cls,interceptors,subscribeOn,observeOn,dither,callbacks);
+    }
+
+    public final <T> T call(String url,Class<T> cls, Interceptor[] interceptors,Scheduler subscribeOn, Scheduler observeOn, Object dither, Callback...callbacks){
         if (null!=cls){
             return (T)Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls},(proxy, method,args)->{
                         if (null==dither||!isExistDither(dither)){
-                            T instance=prepare(cls,interceptors);
+                            T instance=prepare(cls,url,interceptors);
                             Object ret=null!=instance?method.invoke(instance,args):null;
                             if (null!=ret&&ret instanceof Observable) {
                                 final OnApiFinish finish=null!=dither?(what, note, data, arg)->{

@@ -7,7 +7,6 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.bean.NasFile;
 import com.merlin.client.R;
-import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.file.Permissions;
 import com.merlin.view.OnTapClick;
 
@@ -16,15 +15,15 @@ public class FileContextMenuModel extends Model implements OnTapClick {
     @Override
     protected void onRootAttached(View root) {
         ViewDataBinding binding= null!=root? DataBindingUtil.getBinding(root):null;
-        if (null!=binding&&binding instanceof FileContextMenuBinding){
-            FileContextMenuBinding fcmb=(FileContextMenuBinding)binding;
-            NasFile meta=fcmb.getFile();
-            if (null!=meta){
-                int permissions=meta.getPermissions();
-                Permissions per=new Permissions();
-//                fcmb.setDeleteEnable(per.isOtherReadable(permissions)&&per.isOtherWriteable(permissions));
-            }
-        }
+//        if (null!=binding&&binding instanceof FileContextMenuBinding){
+//            FileContextMenuBinding fcmb=(FileContextMenuBinding)binding;
+//            NasFile meta=fcmb.getFile();
+//            if (null!=meta){
+//                int permissions=meta.getPermissions();
+//                Permissions per=new Permissions();
+////                fcmb.setDeleteEnable(per.isOtherReadable(permissions)&&per.isOtherWriteable(permissions));
+//            }
+//        }
     }
 
     @Override

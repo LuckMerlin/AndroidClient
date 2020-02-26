@@ -1,6 +1,6 @@
 package com.merlin.bean;
 
-public class FileMeta {
+public abstract class FileMeta {
     private String path;
     private String name;
 
@@ -24,4 +24,8 @@ public class FileMeta {
     public String getPath() {
         return path;
     }
+
+    public abstract boolean isAccessible();
+
+    public abstract boolean isDirectory();
 }

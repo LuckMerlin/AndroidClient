@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
 
+import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.NasBrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
@@ -71,7 +72,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             Map<String,Object> list=mAllClientMetas;
             Object object=(list=null!=list?list:(mAllClientMetas=new HashMap<>())).get(url);
             if (null!=object&&object instanceof BrowserModel){
-                ((BrowserModel)object).getClientMeta().set(meta);
+                ((BrowserModel)object).setMeta(meta,"After meta put.");
             }else{
                 object=meta;
             }
@@ -86,20 +87,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     private BrowserModel createModel(ClientMeta meta){
         if (null!=meta){
-            BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(meta):
-                    new NasBrowserModel(meta, new NasBrowserAdapter() {
-                        @Override
-                        protected boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
-                            return null!=path&&null!=call(NasBrowserAdapter.Api.class,(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
-                                if (what==WHAT_SUCCEED){
-//                                    mCurrent.set(null!=data?data.getData():null);
-                                }
-                                if (null!=finish){
-                                    finish.onApiFinish(what,note,data,arg);
-                                }
-                            }).queryFiles(path, from,from+50);
-                        }
-                    });
+            BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(meta): new NasBrowserModel(meta,meta.getUrl());
             if (null!=model){
                 mCurrent.set(model);
                 return model;
@@ -145,7 +133,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     @Override
-    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+    public boolean onTapClick(View view, int clickCount, int resId, Object data)  {
         switch (clickCount){
             case 1:
                 switch (resId){
@@ -153,16 +141,19 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
-//                    case R.drawable.selector_back:
-//                        return browserParent("After back pressed.");
-//                    case R.drawable.cancel_selector:
-//                        return !isMode(MODE_NORMAL)&&entryMode(MODE_NORMAL);
-//                    case R.drawable.choose_all_selector:
-//                        BrowserAdapter adapter=isMode(MODE_MULTI_CHOOSE)?mNasBrowserAdapter:null;
-//                        return null!=adapter&&adapter.chooseAll(true);
-//                    case R.drawable.ic_menu_alls:
-//                         adapter=isMode(MODE_MULTI_CHOOSE)?mNasBrowserAdapter:null;
-//                        return null!=adapter&&adapter.chooseAll(false);
+                    case R.drawable.selector_back:
+                        return onBackIconPressed("After back pressed.");
+                    case R.drawable.cancel_selector:
+                        BrowserModel model=getCurrentModel();
+                        return null!=model&&(!model.isMode(BrowserModel.MODE_NORMAL)&&model.entryMode(BrowserModel.MODE_NORMAL,"After cancel tap click."));
+                    case R.drawable.choose_all_selector:
+                        model=getCurrentModel();
+                        BrowserAdapter adapter=null!=model&&model.isMode(BrowserModel.MODE_MULTI_CHOOSE)?model.getBrowserAdapter():null;
+                        return null!=adapter&&adapter.chooseAll(true);
+                    case R.drawable.ic_menu_alls:
+                        model=getCurrentModel();
+                        adapter=null!=model&&model.isMode(BrowserModel.MODE_MULTI_CHOOSE)?model.getBrowserAdapter():null;
+                        return null!=adapter&&adapter.chooseAll(false);
                     default:
                         break;
                 }
@@ -171,16 +162,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 switch (resId){
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&null!=data&&data instanceof ClientMeta&&showClientDetail(view,(ClientMeta)data,"After tap click."))||true;
-//                    default:
-//                        if (null!=data&&data instanceof NasFile){
-//                            FileContextMenuBinding  binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
-//                            if (null!=binding){
-//                                binding.setFile((NasFile)data);
-//                                showAtLocationAsContext(view,binding);
-//                                return true;
-//                            }
-//                        }
-//                        break;
                 }
         }
         BrowserModel model=getCurrentModel();
@@ -257,6 +238,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
           if (null!=model&&model instanceof OnActivityResume){
               ((OnActivityResume)model).onActivityResume(activity,intent);
           }
+    }
+
+
+    private boolean onBackIconPressed(String debug){
+        BrowserModel model=getCurrentModel();
+        return null!=model&&model.onBackIconPressed(debug);
     }
 
     private ClientMeta getCurrentModelMeta(){

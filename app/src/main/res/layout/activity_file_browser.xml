@@ -59,7 +59,7 @@
                         android:text="@{` (`+vm.current.currentFolder.length+')'}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{(vm.current.mode==Model.MODE_MULTI_CHOOSE||(null==vm.current.clientMeta&amp;&amp;vm.current.currentFolder.size()&lt;1))?View.GONE:View.VISIBLE}"
+                        android:visibility="@{(vm.current.mode==Model.MODE_MULTI_CHOOSE||(null==vm.current.clientMeta&amp;&amp;vm.current.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView

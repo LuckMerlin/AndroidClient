@@ -103,35 +103,35 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
-            case R.string.open:
-                return null!=data&&data instanceof File &&open((File)data,"After open tap click.");
-            case R.string.reboot:
-                return rebootClient("After reboot tap click.");
-            case R.string.scan:
-                return null!=data&&data instanceof NasFile&&scan((NasFile)data,false)||true;
-            case R.string.detail:
-                return null!=data&&data instanceof NasFile &&showFileDetail((NasFile)data);
-            case R.string.createFile:
-                return createFile(false);
-            case R.string.createFolder:
-                return createFile(true);
-            case R.string.delete:
-                List<NasFile> list=null!=data&&data instanceof NasFile ?new ArrayList<>():null;
-                return null!=list&&list.add((NasFile)data)&&deleteFile(list,"After delete tap click.");
-            case R.string.rename:
-                return null!=data&&data instanceof NasFile &&renameFile((NasFile)data);
+//            case R.string.open:
+//                return null!=data&&data instanceof File &&open((File)data,"After open tap click.");
+//            case R.string.reboot:
+//                return rebootClient("After reboot tap click.");
+//            case R.string.scan:
+//                return null!=data&&data instanceof NasFile&&scan((NasFile)data,false)||true;
+//            case R.string.detail:
+//                return null!=data&&data instanceof NasFile &&showFileDetail((NasFile)data);
+//            case R.string.createFile:
+//                return createFile(false);
+//            case R.string.createFolder:
+//                return createFile(true);
+//            case R.string.delete:
+//                List<NasFile> list=null!=data&&data instanceof NasFile ?new ArrayList<>():null;
+//                return null!=list&&list.add((NasFile)data)&&deleteFile(list,"After delete tap click.");
+//            case R.string.rename:
+//                return null!=data&&data instanceof NasFile &&renameFile((NasFile)data);
 //            case R.id.fileBrowser_bottom_cancel_TV:
 //                return cancel("After cancel tap click.");
-            case R.string.download:
-                return downloadFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After cancel tap click.");
+//            case R.string.download:
+//                return downloadFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After cancel tap click.");
 //            case R.id.fileBrowser_bottom_paste_TV:
 //                return pasteFileOnCurrent("After paste tap click.")&&entryMode(MODE_NORMAL);
-            case R.string.copy:
-                return copyFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After copy tap click.");
-            case R.string.move:
-                return moveFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After move tap click.");
-            case R.string.upload:
-                return null!=data&&data instanceof NasFile &&uploadFile((NasFile)data);
+//            case R.string.copy:
+//                return copyFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After copy tap click.");
+//            case R.string.move:
+//                return moveFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After move tap click.");
+//            case R.string.upload:
+//                return null!=data&&data instanceof NasFile &&uploadFile((NasFile)data);
 
             default:
                 if (null!=data){

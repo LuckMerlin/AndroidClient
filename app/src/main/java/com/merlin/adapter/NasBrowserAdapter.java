@@ -16,23 +16,19 @@ import com.merlin.bean.NasFile;
 import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
+import com.merlin.debug.Debug;
+import com.merlin.retrofit.Retrofit;
 
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import okhttp3.Interceptor;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public abstract class NasBrowserAdapter extends BrowserAdapter<NasFile> implements Label{
-
-    protected interface Api {
-        @POST(Address.PREFIX_FILE_BROWSER)
-        @FormUrlEncoded
-        Observable<Reply<NasFolder>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FROM) int from,
-                                                @Field(LABEL_TO) int to);
-    }
-
+public abstract class NasBrowserAdapter extends BrowserAdapter<NasFile>{
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
