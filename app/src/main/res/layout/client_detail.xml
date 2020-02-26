@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="client"
+            type="com.merlin.bean.ClientMeta" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.api.What"/>
+        <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.client.R"/>
+    </data>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:padding="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp"
+            android:orientation="vertical"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@{client.imageUrl}"
+                android:visibility="@{(null==client.imageUrl)?View.GONE:View.VISIBLE}"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+            <TextView
+                android:text="@{client.name}"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
+                style="@style/titleNormalTextView"/>
+            <include binding:key="@{R.string.address}" binding:value="@{client.url}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.name}" binding:value="@{client.account}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.type}" binding:value="@{client.deviceType}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.platform}" binding:value="@{client.platform}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.capacity}" binding:value="@{FileSize.formatSizeText((double)client.free)+`/`+FileSize.formatSizeText((double)client.total)}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+        </LinearLayout>
+    </ScrollView>
+</layout>

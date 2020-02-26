@@ -8,9 +8,10 @@
             type="com.merlin.bean.ClientMeta" />
     </data>
     <TextView
-        binding:enableClick="@{Clicker.multiClick(device,true)}"
+        binding:enableClick="@{Clicker.click(device,true)}"
         android:text="@{device.name}"
         android:textSize="@dimen/textTitle"
+        android:padding="3dp"
         android:textStyle="bold"
         style="@style/titleNormalTextView"/>
 </layout>

@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.BR;
 import com.merlin.client.R;
-import com.merlin.client.databinding.ItemFileDetailBinding;
 import com.merlin.client.databinding.StatusBinding;
 import com.merlin.debug.Debug;
 import com.merlin.view.StatusBarLayout;

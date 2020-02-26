@@ -7,6 +7,9 @@
         <variable
             name="folder"
             type="com.merlin.bean.NasFolder" />
+        <variable
+            name="client"
+            type="com.merlin.bean.ClientMeta" />
         <import type="android.view.View"/>
     </data>
     <LinearLayout
@@ -20,6 +23,7 @@
             android:visibility="@{null!=folder?View.VISIBLE:View.GONE}"
             binding:menu="@{ContextMenu.create(R.string.createFile,folder)}"/>
         <include layout="@layout/item_context_menu"
+            android:visibility="@{client.localClient?View.GONE:View.VISIBLE}"
             binding:menu="@{ContextMenu.create(R.string.reboot,folder)}"/>
     </LinearLayout>
 </layout>

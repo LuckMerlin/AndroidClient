@@ -26,8 +26,10 @@ import com.merlin.bean.NasFile;
 import com.merlin.bean.FileModify;
 import com.merlin.bean.FilePaste;
 import com.merlin.bean.NasFolder;
+import com.merlin.client.BR;
 import com.merlin.client.Client;
 import com.merlin.client.R;
+import com.merlin.client.databinding.ClientDetailBinding;
 import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
@@ -39,6 +41,7 @@ import com.merlin.media.MediaPlayService;
 import com.merlin.protocol.Tag;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
+import com.merlin.view.Res;
 
 
 import java.util.ArrayList;
@@ -66,7 +69,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     public final static int MODE_MULTI_CHOOSE=1213;
     public final static int MODE_COPY=1214;
     public final static int MODE_MOVE=1215;
-    private final BrowserAdapter mBrowserAdapter=new BrowserAdapter(){
+    private final BrowserAdapter mNasBrowserAdapter=new BrowserAdapter(){
         @Override
         protected boolean onPageLoad(String path, int from, OnApiFinish<Reply<NasFolder>> finish) {
             return null!=path&&null!=call(Api.class,(OnApiFinish<Reply<NasFolder>>)(what, note, data, arg)->{
@@ -170,10 +173,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.drawable.cancel_selector:
                         return !isMode(MODE_NORMAL)&&entryMode(MODE_NORMAL);
                     case R.drawable.choose_all_selector:
-                        BrowserAdapter adapter=isMode(MODE_MULTI_CHOOSE)?mBrowserAdapter:null;
+                        BrowserAdapter adapter=isMode(MODE_MULTI_CHOOSE)?mNasBrowserAdapter:null;
                         return null!=adapter&&adapter.chooseAll(true);
                     case R.drawable.ic_menu_alls:
-                         adapter=isMode(MODE_MULTI_CHOOSE)?mBrowserAdapter:null;
+                         adapter=isMode(MODE_MULTI_CHOOSE)?mNasBrowserAdapter:null;
                         return null!=adapter&&adapter.chooseAll(false);
                     case R.string.delete:
                         List<NasFile> list=null!=data&&data instanceof NasFile ?new ArrayList<>():null;
@@ -203,6 +206,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 break;
             case 2:
                 switch (resId){
+                    case R.id.fileBrowser_deviceNameTV:
+                        return (null!=view&&null!=data&&data instanceof ClientMeta&&showClientDetail(view,(ClientMeta)data,"After tap click."))||true;
                     default:
                         if (null!=data&&data instanceof NasFile){
                             FileContextMenuBinding  binding=DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),R.layout.file_context_menu,null,false);
@@ -222,10 +227,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         if (null!=meta){
             List<ClientMeta> list=mAllClientMetas;
             list=null!=list?list:(mAllClientMetas=new ArrayList<>());
-            Debug.D(getClass(),"添加  "+meta);
-            if (!list.contains(meta)&&list.add(meta)){
-                return changeDevice(meta,false,debug)||true;
-            }
+            return ((!list.contains(meta)&&list.add(meta))&&changeDevice(meta,false,debug))||true;
         }
         return false;
     }
@@ -237,6 +239,15 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 mCurrentClientMeta.set(client);
                 return true;
             }
+        }
+        return false;
+    }
+
+    private boolean showClientDetail(View view,ClientMeta meta,String debug){
+        ClientDetailBinding binding=null!=view&&null!=meta?inflate(R.layout.client_detail):null;
+        if (null!=binding){
+            binding.setClient(meta);
+            return showAtLocation(view,binding,Gravity.CENTER,0,0,null);
         }
         return false;
     }
@@ -272,6 +283,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         FileBrowserMenuBinding binding=null!=view?inflate(R.layout.file_browser_menu):null;
         if (null!=binding){
             binding.setFolder(mCurrent.get());
+            binding.setClient(mCurrentClientMeta.get());
             return showAtLocationAsContext(view,binding);
         }
         return false;
@@ -424,12 +436,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     private boolean resetBrowserCurrentFolder(String debug){
-        BrowserAdapter adapter=mBrowserAdapter;
+        BrowserAdapter adapter=mNasBrowserAdapter;
         return null!=adapter&&adapter.reset(debug);
     }
 
     private boolean browserPath(String pathValue, String debug){
-        BrowserAdapter adapter=mBrowserAdapter;
+        BrowserAdapter adapter=mNasBrowserAdapter;
         return null!=adapter&&adapter.loadPage(pathValue,debug);
     }
 
@@ -502,7 +514,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     call(Api.class,(OnApiFinish<Reply<FileModify>>)(what,note,data,arg)->{
                         boolean succeed=what==WHAT_SUCCEED;
                         toast(succeed?R.string.succeed : what==WHAT_FILE_EXIST?R.string.fileAlreadyExist:R.string.fail);
-                        BrowserAdapter adapter=mBrowserAdapter;
+                        BrowserAdapter adapter=mNasBrowserAdapter;
                         FileModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
                         if (succeed&&null!=modify&&null!=adapter){
                             adapter.renamePath(meta,modify);
@@ -539,7 +551,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                              toast(note);
                              if (what==WHAT_SUCCEED){
                                  List<String> deletedPaths=null!=data3?data3.getData():null;
-                                 BrowserAdapter adapter=mBrowserAdapter;
+                                 BrowserAdapter adapter=mNasBrowserAdapter;
                                  int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
                                  if (size>0){
                                      List<NasFile> deleted=new ArrayList<>(size);
@@ -601,7 +613,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         if (!isMode(mode)){
             mProcessing=null;
             mMode.set(mode);
-            BrowserAdapter adapter=mBrowserAdapter;
+            BrowserAdapter adapter=mNasBrowserAdapter;
             if (null!=adapter){
                 adapter.setMode(mode);
             }
@@ -619,7 +631,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     public final boolean chooseAll(boolean choose){
-        BrowserAdapter adapter=mBrowserAdapter;
+        BrowserAdapter adapter=mNasBrowserAdapter;
         if (isMode(MODE_MULTI_CHOOSE)&&null!=adapter&&adapter.chooseAll(choose)){
             refreshMultiChooseCount();
             return true;
@@ -636,7 +648,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     private boolean multiChoose(NasFile meta){
-        BrowserAdapter adapter=mBrowserAdapter;
+        BrowserAdapter adapter=mNasBrowserAdapter;
         if (null!=meta&&isMode(MODE_MULTI_CHOOSE)&&adapter.multiChoose(meta)){
             refreshMultiChooseCount();
             return true;
@@ -651,7 +663,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean refreshMultiChooseCount() {
         NasFolder folderMeta=mCurrent.get();
         int length=null!=folderMeta?folderMeta.getLength():0;
-        BrowserAdapter adapter=mBrowserAdapter;
+        BrowserAdapter adapter=mNasBrowserAdapter;
         int count=null!=adapter?adapter.getChooseCount():0;
         mMultiCount.set(count<=0?"None selected(0/"+length+")":"Selected("+count+"/"+length+")");
         if (null!=adapter){
@@ -668,7 +680,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     private void runChoose(OnChooseExist exit,boolean emptyToast){
-        BrowserAdapter adapter=mBrowserAdapter;
+        BrowserAdapter adapter=mNasBrowserAdapter;
         List<NasFile> list=null!=adapter?adapter.getChoose():null;
         if (null==list||list.size()<=0){
             if (emptyToast){
@@ -684,6 +696,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     public BrowserAdapter getBrowserAdapter() {
-        return mBrowserAdapter;
+        return mNasBrowserAdapter;
     }
 }

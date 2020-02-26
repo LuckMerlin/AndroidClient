@@ -92,7 +92,7 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("android:title_text")
+    @BindingAdapter("android:text")
     public static void setText(TextView view, Object resId) {
         if (null!=view) {
             resId = null == resId ? "" : resId;

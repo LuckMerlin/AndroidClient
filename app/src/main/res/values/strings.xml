@@ -79,4 +79,9 @@
     <string name="setNext">设置下一个</string>
     <string name="playAll">播放所有</string>
     <string name="local">本地</string>
+    <string name="platform">平台</string>
+    <string name="address">地址</string>
+    <string name="available">剩余</string>
+    <string name="used">使用</string>
+    <string name="capacity">容量</string>
 </resources>
