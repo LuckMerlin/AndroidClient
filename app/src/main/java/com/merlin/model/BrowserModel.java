@@ -28,7 +28,7 @@ import com.merlin.view.Res;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume, FileBrowserModel.OnBrowserModelChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
+public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume, FileBrowserModel.OnBrowserClientChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
     public final static int MODE_INVALID=1211;
     public final static int MODE_NORMAL=1212;
     public final static int MODE_MULTI_CHOOSE=1213;
@@ -42,13 +42,11 @@ public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume,
     private WeakReference<Context> mContext;
     private Object mProcessing;
     private PopupWindow mPopWindow;
+    private final ClientCallback mCallback;
 
-    public interface OnPageDataLoad{
-        void onPageDataLoad(BrowserModel model,FolderData folder);
-    }
-
-    public BrowserModel(Context context,ClientMeta meta){
+    public BrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         mClientMeta=meta;
+        mCallback=callback;
         mContext=null!=context?new WeakReference<>(context):null;
         entryMode(MODE_NORMAL,"After model create.");
     }
@@ -168,7 +166,12 @@ public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume,
     protected final boolean entryMode(int mode,String debug){
         if (!isMode(mode)){
             mProcessing=null;
+            int last=mMode;
             mMode=mode;
+            ClientCallback callback=mCallback;
+            if (null!=callback){
+                callback.onBrowserModeChange(this,last,mode);
+            }
             BrowserAdapter adapter=mBrowserAdapter;
             if (null!=adapter){
                 adapter.setMode(mode);
@@ -199,7 +202,7 @@ public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume,
     }
 
     @Override
-    public void onBrowserModelChanged(BrowserModel last, BrowserModel current) {
+    public void onBrowserClientChanged(BrowserModel last, BrowserModel current) {
         if (null!=current&&current==this){
             refreshCurrentPath("After browser model changed.");
         }

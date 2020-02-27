@@ -79,8 +79,8 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     }
 
-    public NasBrowserModel(Context context,ClientMeta meta,OnPageDataLoad loaded){
-        super(context,meta);
+    public NasBrowserModel(Context context,ClientMeta meta,ClientCallback callback){
+        super(context,meta,callback);
         setAdapter(new NasBrowserAdapter(){
             @Override
             protected final boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
@@ -89,8 +89,8 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
                         finish.onApiFinish(what,note,data,arg);
                     }
                     if (what== What.WHAT_SUCCEED){
-                        if (null!=loaded){
-                            loaded.onPageDataLoad(NasBrowserModel.this,null!=data?data.getData():null);
+                        if (null!=callback){
+                            callback.onPageDataLoad(NasBrowserModel.this,null!=data?data.getData():null);
                         }
                     }
                 }).queryFiles(path, from,from+50);

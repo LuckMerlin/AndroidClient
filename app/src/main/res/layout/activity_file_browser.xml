@@ -41,7 +41,7 @@
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:visibility="@{vm.current.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
+                        android:visibility="@{vm.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.selector_back}"/>
                     <ImageView
                         binding:enableClick="@{true}"
@@ -49,7 +49,7 @@
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE||vm.current.mode==Model.MODE_COPY||vm.current.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.cancel_selector}"/>
                     <LinearLayout
                         android:orientation="vertical"
@@ -57,9 +57,9 @@
                         android:layout_height="wrap_content">
                         <include
                             android:id="@+id/fileBrowser_deviceNameTV"
-                            binding:device="@{vm.current.clientMeta}"
+                            binding:device="@{vm.currentMeta}"
                             layout="@layout/device_text"
-                            android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
+                            android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
 
                         <LinearLayout
                             android:layout_below="@id/fileBrowser_topRL"
@@ -75,11 +75,11 @@
                                 android:layout_width="10dp"
                                 android:layout_height="10dp"/>
                             <TextView
-                                android:text='@{""+FileSize.formatSizeText(vm.current.clientMeta.free)+"/"+FileSize.formatSizeText(vm.current.clientMeta.total)}'
+                                android:text='@{""+FileSize.formatSizeText(vm.currentMeta.free)+"/"+FileSize.formatSizeText(vm.currentMeta.total)}'
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:textSize="@dimen/textSmall"
-                                android:visibility="@{null==vm.current.clientMeta?View.GONE:View.VISIBLE}"
+                                android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
                                 android:singleLine="true"
                                 android:layout_height="wrap_content"/>
                         </LinearLayout>
@@ -88,14 +88,14 @@
                         android:text="@{` (`+vm.currentFolder.length+')'}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{(vm.current.mode==Model.MODE_MULTI_CHOOSE||(null==vm.current.clientMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
+                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
-                        android:text="@{vm.current.multiChooseSummary}"
+                        android:text="@{vm.currentMultiChooseSummary}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
+                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
             </LinearLayout>
@@ -104,7 +104,7 @@
                 android:orientation="horizontal"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:visibility="@{vm.current.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
+                android:visibility="@{vm.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <ImageView
@@ -113,28 +113,28 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
 
-                <ImageView
-                    binding:enableClick="@{true}"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;!vm.current.isAllChoose()?View.VISIBLE:View.GONE}"
-                    android:src="@{R.drawable.choose_all_selector}"
-                    android:layout_width="@dimen/titleIconSize"
-                    android:layout_height="@dimen/titleIconSize"/>
-                <ImageView
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    binding:enableClick="@{true}"
-                    android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;vm.current.isAllChoose()?View.VISIBLE:View.GONE}"
-                    android:src="@{R.drawable.ic_menu_alls}"
-                    android:layout_width="@dimen/titleIconSize"
-                    android:layout_height="@dimen/titleIconSize"/>
+<!--                <ImageView-->
+<!--                    binding:enableClick="@{true}"-->
+<!--                    android:layout_alignParentRight="true"-->
+<!--                    android:layout_centerVertical="true"-->
+<!--                    android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;!vm.isAllChoose()?View.VISIBLE:View.GONE}"-->
+<!--                    android:src="@{R.drawable.choose_all_selector}"-->
+<!--                    android:layout_width="@dimen/titleIconSize"-->
+<!--                    android:layout_height="@dimen/titleIconSize"/>-->
+<!--                <ImageView-->
+<!--                    android:layout_alignParentRight="true"-->
+<!--                    android:layout_centerVertical="true"-->
+<!--                    binding:enableClick="@{true}"-->
+<!--                    android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;vm.current.isAllChoose()?View.VISIBLE:View.GONE}"-->
+<!--                    android:src="@{R.drawable.ic_menu_alls}"-->
+<!--                    android:layout_width="@dimen/titleIconSize"-->
+<!--                    android:layout_height="@dimen/titleIconSize"/>-->
 
             </LinearLayout>
         </RelativeLayout>
         <HorizontalScrollView
             android:layout_marginLeft="5dp"
-            android:visibility="@{null==vm.current.clientMeta?View.GONE:View.VISIBLE}"
+            android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
             android:scrollbars="none"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">

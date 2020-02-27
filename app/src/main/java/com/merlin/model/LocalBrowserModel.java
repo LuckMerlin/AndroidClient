@@ -6,8 +6,8 @@ import com.merlin.bean.ClientMeta;
 
 public class LocalBrowserModel extends BrowserModel {
 
-    public LocalBrowserModel(Context context,ClientMeta meta){
-        super(context,meta);
+    public LocalBrowserModel(Context context,ClientMeta meta,ClientCallback callback){
+        super(context,meta,callback);
     }
 
 }
