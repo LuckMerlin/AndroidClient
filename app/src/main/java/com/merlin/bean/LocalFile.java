@@ -1,5 +1,7 @@
 package com.merlin.bean;
 
+import com.merlin.client.R;
+
 import java.io.File;
 
 public final class LocalFile implements FileMeta{
@@ -7,7 +9,7 @@ public final class LocalFile implements FileMeta{
     private String title;
     private String name;
     private String extension;
-    private String imageUrl;
+    private Object imageUrl;
     private long size;
     private double modifyTime;
     private boolean directory;
@@ -20,14 +22,20 @@ public final class LocalFile implements FileMeta{
     public LocalFile(File file,String imageUrl){
         if (null!=file){
             this.parent=file.getParent();
+            this.parent=null!=this.parent?this.parent+File.separator:null;
             String name=this.title=file.getName();
             int index=null!=name&&name.length()>0?name.lastIndexOf("."):-1;
             this.extension=index>0?name.substring(index):null;
             this.name=index<=0?name:name.substring(0,index);
             this.imageUrl=imageUrl;
+            boolean directory=this.directory=file.isDirectory();
             this.size=file.length();
+            if (directory){
+                String[] names=file.list();
+                this.size=null!=names?names.length:0;
+            }
+            this.imageUrl=null!=imageUrl&&imageUrl.length()>0?imageUrl:createDefaultThumb(file);
             this.modifyTime=file.lastModified();
-            this.directory=file.isDirectory();
             this.accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
         }
     }
@@ -42,6 +50,15 @@ public final class LocalFile implements FileMeta{
         this.modifyTime=modifyTime;
     }
 
+    private Object createDefaultThumb(File file){
+        if (null!=file){
+            if (file.isDirectory()){
+                return R.drawable.folder;
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean applyModify(FileModify modify) {
 
@@ -49,7 +66,7 @@ public final class LocalFile implements FileMeta{
     }
 
     @Override
-    public String getImageUrl() {
+    public Object getImageUrl() {
         return imageUrl;
     }
 

@@ -21,8 +21,7 @@ public class LocalBrowserModel extends BrowserModel {
 
     public LocalBrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         super(context,meta,callback);
-        setAdapter(new LocalBrowserAdapter()
-        {
+        setAdapter(new LocalBrowserAdapter() {
             @Override
             protected boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<LocalFile>>> finish) {
                 return null!=path&&browserFolder(path,from,from+50,(what, note, data, arg)->{
@@ -103,7 +102,7 @@ public class LocalBrowserModel extends BrowserModel {
         if (null!=finish){
             finish.onApiFinish(reply.getWhat(),note,reply,arg);
         }
-        return false;
+        return true;
     }
 
 

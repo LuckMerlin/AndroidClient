@@ -25,7 +25,6 @@ public abstract class LocalBrowserAdapter  extends BrowserAdapter<LocalFile> {
         if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             boolean multiChoose=isMultiChoose();
-
 //            itemBinding.setIsChoose(isChoose(data));
             itemBinding.setIsMultiChoose(multiChoose);
             itemBinding.setMeta(data);

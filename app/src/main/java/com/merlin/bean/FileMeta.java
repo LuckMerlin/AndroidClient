@@ -2,7 +2,7 @@ package com.merlin.bean;
 
 public interface FileMeta {
 
-     String getImageUrl();
+     Object getImageUrl();
 
      String getPath();
 
