@@ -326,63 +326,65 @@ public class MBinding {
 
     @BindingAdapter("adapter")
     public static void adapter(RecyclerView view, Adapter adapter) {
-        if (null!=view&&null!=adapter){
-            RecyclerView.LayoutManager manager=adapter.onResolveLayoutManager(view);
-            if (null!=manager){
-                view.setLayoutManager(manager);
-            }
-            if (adapter instanceof OnMoreLoadable || adapter instanceof OnRecyclerScroll||adapter instanceof OnRecyclerScrollStateChange){
-                view.addOnScrollListener(new LoadMoreInterceptor(){
-                    @Override
-                    protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
-                        if (adapter instanceof OnMoreLoadable) {
-                            ((OnMoreLoadable) adapter).onLoadMore(recyclerView, state, debug);
+        if (null!=view){
+            if (null!=adapter){
+                RecyclerView.LayoutManager manager=adapter.onResolveLayoutManager(view);
+                if (null!=manager){
+                    view.setLayoutManager(manager);
+                }
+                if (adapter instanceof OnMoreLoadable || adapter instanceof OnRecyclerScroll||adapter instanceof OnRecyclerScrollStateChange){
+                    view.addOnScrollListener(new LoadMoreInterceptor(){
+                        @Override
+                        protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {
+                            if (adapter instanceof OnMoreLoadable) {
+                                ((OnMoreLoadable) adapter).onLoadMore(recyclerView, state, debug);
+                            }
                         }
-                    }
 
-                    @Override
-                    protected void onRecyclerScrolled(RecyclerView recyclerView, int dx, int dy) {
-                        if (adapter instanceof OnRecyclerScroll){
-                            ((OnRecyclerScroll)adapter).onRecyclerScrolled(recyclerView,dx,dy);
+                        @Override
+                        protected void onRecyclerScrolled(RecyclerView recyclerView, int dx, int dy) {
+                            if (adapter instanceof OnRecyclerScroll){
+                                ((OnRecyclerScroll)adapter).onRecyclerScrolled(recyclerView,dx,dy);
+                            }
                         }
-                    }
 
-                    @Override
-                    protected void onRecyclerScrollStateChanged(RecyclerView recyclerView, int newState) {
-                        if (adapter instanceof OnRecyclerScrollStateChange){
-                            ((OnRecyclerScrollStateChange)adapter).onRecyclerScrollStateChanged(recyclerView,newState);
+                        @Override
+                        protected void onRecyclerScrollStateChanged(RecyclerView recyclerView, int newState) {
+                            if (adapter instanceof OnRecyclerScrollStateChange){
+                                ((OnRecyclerScrollStateChange)adapter).onRecyclerScrollStateChanged(recyclerView,newState);
+                            }
                         }
-                    }
-                });
-            }
-            final ViewParent parent=adapter instanceof MultiSectionAdapter ?view.getParent():null;
-            if (null!=parent&&parent instanceof SwipeRefreshLayout){
-                final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
-                final MultiSectionAdapter multiPageAdapter=(MultiSectionAdapter)adapter;
-                final MultiPageAdapterRefreshBridge refresh=new MultiPageAdapterRefreshBridge(){
-                    @Override
-                    public void onPageLoadUpdate(int state, boolean idle, MultiSectionAdapter.Page page) {
-                        switch (state){
-                            case UPDATE_PAGE_START:
-                                refreshLayout.setRefreshing(true);
-                                break;
-                            case UPDATE_PAGE_END:
-                                if (idle){
-                                    refreshLayout.setRefreshing(false);
-                                }
-                                break;
+                    });
+                }
+                final ViewParent parent=adapter instanceof MultiSectionAdapter ?view.getParent():null;
+                if (null!=parent&&parent instanceof SwipeRefreshLayout){
+                    final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
+                    final MultiSectionAdapter multiPageAdapter=(MultiSectionAdapter)adapter;
+                    final MultiPageAdapterRefreshBridge refresh=new MultiPageAdapterRefreshBridge(){
+                        @Override
+                        public void onPageLoadUpdate(int state, boolean idle, MultiSectionAdapter.Page page) {
+                            switch (state){
+                                case UPDATE_PAGE_START:
+                                    refreshLayout.setRefreshing(true);
+                                    break;
+                                case UPDATE_PAGE_END:
+                                    if (idle){
+                                        refreshLayout.setRefreshing(false);
+                                    }
+                                    break;
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onRefresh() {
-                        if (!multiPageAdapter.reset("After refresh.")&&!multiPageAdapter.isLoading()){
-                            refreshLayout.setRefreshing(false);
+                        @Override
+                        public void onRefresh() {
+                            if (!multiPageAdapter.reset("After refresh.")&&!multiPageAdapter.isLoading()){
+                                refreshLayout.setRefreshing(false);
+                            }
                         }
-                    }
-                };
-                ((SwipeRefreshLayout)parent).setOnRefreshListener(refresh);
-                multiPageAdapter.add(refresh);
+                    };
+                    ((SwipeRefreshLayout)parent).setOnRefreshListener(refresh);
+                    multiPageAdapter.add(refresh);
+                }
             }
             view.setAdapter(adapter);
         }

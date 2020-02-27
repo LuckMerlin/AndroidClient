@@ -20,6 +20,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.NasFolder;
@@ -47,7 +48,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     private Map<String,Object> mAllClientMetas=new HashMap<>();
     private final ObservableField<BrowserModel> mCurrent=new ObservableField<>();
     private final ObservableField<FolderData> mCurrentFolder=new ObservableField<>();
-    private final ObservableField<Integer> mMode=new ObservableField<>();
+    private final ObservableField<Integer> mCurrentMode=new ObservableField<>();
     private final ObservableField<Adapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
     private final ObservableField<String> mCurrentMultiChooseSummary=new ObservableField<>();
@@ -62,14 +63,14 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     }
 
     public FileBrowserModel(){
-        mMode.set(BrowserModel.MODE_NORMAL);
+        mCurrentMode.set(BrowserModel.MODE_NORMAL);
     }
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
         putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-//        refreshClientMeta("After mode create.");
+        refreshClientMeta("After mode create.");
     }
 
     private boolean putClientMeta(ClientMeta meta,String debug){
@@ -96,11 +97,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
             Context context=getViewContext();
             BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(context,meta,this)
                     : new NasBrowserModel(context,meta,this);
-            if (null!=model){
-                mCurrent.set(model);
-                return model;
-            }
-            return null;
+            return model;
         }
         return null;
     }
@@ -115,8 +112,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     @Override
     public void onBrowserModeChange(BrowserModel model, int lase, int curr) {
         if (isCurrentModel(model)){
-            Debug.D(getClass(),"DDDDDDDDddddDDDDD "+curr);
-            mMode.set(curr);
+            mCurrentMode.set(curr);
         }
     }
 
@@ -138,11 +134,12 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                     model=null!=object&&object instanceof BrowserModel?(BrowserModel)object: createModel(client);
                     if (null!=model){
                          BrowserModel curr=mCurrent.get();
-                         mCurrentAdapter.set(model.getBrowserAdapter());
+                         BrowserAdapter<FileMeta> adapter=model.getBrowserAdapter();
+                         mCurrentAdapter.set(adapter);
+                         mCurrentFolder.set(null!=adapter?adapter.getLastPage():null);
                          mCurrentMeta.set(model.getClientMeta());
                          mCurrent.set(model);
-                         Debug.D(getClass(),"DDDDDDDDDDDDD "+model.getMode());
-                         mMode.set(model.getMode());
+                         mCurrentMode.set(model.getMode());
                          if (null!=model&&model instanceof BrowserModel){
                              model.onBrowserClientChanged(curr,model);
                          }
@@ -287,7 +284,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     }
 
     public ObservableField<Integer> getMode() {
-        return mMode;
+        return mCurrentMode;
     }
 
     public ObservableField<FolderData> getCurrentFolder(){

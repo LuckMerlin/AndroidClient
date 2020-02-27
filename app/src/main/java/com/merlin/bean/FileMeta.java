@@ -4,6 +4,16 @@ public abstract class FileMeta {
     private String path;
     private String name;
 
+    public FileMeta(){
+        this(null,null);
+    }
+
+    public FileMeta(String path,String name){
+        this.path=path;
+        this.name=name;
+    }
+
+
     public boolean applyModify(FileModify modify){
         if (null!=modify){
             String path=modify.getPath();

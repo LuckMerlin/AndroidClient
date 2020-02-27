@@ -6,14 +6,13 @@ import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.NasFile;
+import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 
 import java.util.List;
 
-
-public abstract class NasBrowserAdapter extends BrowserAdapter<NasFile>{
+public abstract class LocalBrowserAdapter  extends BrowserAdapter<LocalFile> {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -21,15 +20,16 @@ public abstract class NasBrowserAdapter extends BrowserAdapter<NasFile>{
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, LocalFile data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
-            boolean multiChoose=isMultiChoose();
-            itemBinding.setIsChoose(isChoose(data));
-            itemBinding.setIsMultiChoose(multiChoose);
-            itemBinding.setMeta(data);
-            itemBinding.setPosition(position);
+//            boolean multiChoose=isMultiChoose();
+//            itemBinding.setIsChoose(isChoose(data));
+//            itemBinding.setIsMultiChoose(multiChoose);
+//            itemBinding.setMeta(data);
+//            itemBinding.setPosition(position);
         }
     }
+
 
 }

@@ -24,7 +24,6 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
         <RelativeLayout
-            android:id="@+id/fileBrowser_topRL"
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="@dimen/listItemNormal"
@@ -32,6 +31,7 @@
             <LinearLayout
                 android:layout_alignParentLeft="true"
                 android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_centerVertical="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -55,17 +55,25 @@
                         android:orientation="vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content">
-                        <include
-                            android:id="@+id/fileBrowser_deviceNameTV"
-                            binding:device="@{vm.currentMeta}"
-                            layout="@layout/device_text"
-                            android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
-
                         <LinearLayout
-                            android:layout_below="@id/fileBrowser_topRL"
-                            android:layout_width="match_parent"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <include
+                                android:id="@+id/fileBrowser_deviceNameTV"
+                                binding:device="@{vm.currentMeta}"
+                                layout="@layout/device_text"
+                                android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
+                            <TextView
+                                android:text="@{` (`+vm.currentFolder.length+')'}"
+                                android:textSize="@dimen/textTitle"
+                                android:textStyle="bold"
+                                android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
                             android:orientation="horizontal"
                             android:layout_height="wrap_content">
                             <ImageView
@@ -76,21 +84,13 @@
                                 android:layout_height="10dp"/>
                             <TextView
                                 android:text='@{""+FileSize.formatSizeText(vm.currentMeta.free)+"/"+FileSize.formatSizeText(vm.currentMeta.total)}'
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
+                                android:layout_width="wrap_content"
                                 android:textSize="@dimen/textSmall"
                                 android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
                                 android:singleLine="true"
                                 android:layout_height="wrap_content"/>
                         </LinearLayout>
                     </LinearLayout>
-                    <TextView
-                        android:text="@{` (`+vm.currentFolder.length+')'}"
-                        android:textSize="@dimen/textTitle"
-                        android:textStyle="bold"
-                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
                     <TextView
                         android:text="@{vm.currentMultiChooseSummary}"
                         android:textSize="@dimen/textTitle"
@@ -140,6 +140,7 @@
             android:layout_height="wrap_content">
             <TextView
                 android:text="@{vm.currentFolder.path}"
+                android:visibility="@{vm.currentFolder.path.length()>0?View.VISIBLE:View.GONE}"
                 android:layout_width="wrap_content"
                 android:singleLine="true"
                 android:textSize="@dimen/textSmall"

@@ -90,11 +90,14 @@ public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume,
 
     private boolean browserPath(String pathValue, String debug){
         BrowserAdapter adapter=mBrowserAdapter;
+        if (null==adapter){
+            return false;
+        }
         if (null==pathValue){
             pathValue="";
             adapter.empty();
         }
-        return null!=adapter&&adapter.loadPage(pathValue,debug);
+        return adapter.loadPage(pathValue,debug);
     }
 
     private boolean browserParent(View view,String debug){
