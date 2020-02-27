@@ -28,6 +28,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
+    private M mLastPage;
 
     public interface OnPageLoadUpdate{
         int UPDATE_PAGE_END=123;
@@ -37,7 +38,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
 
     protected abstract boolean onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
 
-    private final boolean fillPage(SectionData<T> page){
+    private final boolean fillPage(M page){
         if (null==page){
             return false;
         }
@@ -48,6 +49,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         if (from<0||to<from){
             return false;
         }
+        mLastPage=page;
         return replace(list,from);
     }
 
@@ -55,6 +57,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
     public final boolean empty() {
         boolean succeed=super.empty();
         mCurrentPage=null;
+        mLastPage=null;
         return succeed;
     }
 
@@ -65,7 +68,11 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         return loadPage(arg,debug);
     }
 
-//    public boolean reloadVisible(String debug){
+    public final M getLastPage() {
+        return mLastPage;
+    }
+
+    //    public boolean reloadVisible(String debug){
 //
 //        return false;
 //    }

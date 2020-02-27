@@ -1,5 +1,6 @@
 package com.merlin.model;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -27,6 +28,7 @@ import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.MediaPlayService;
 import com.merlin.retrofit.Retrofit;
+import com.merlin.server.Frame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +44,8 @@ import static com.merlin.api.What.WHAT_FILE_EXIST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
+    private final Retrofit mRetrofit=new Retrofit();
+    private final String mUrl;
     private interface Api {
         @POST(Address.PREFIX_FILE_BROWSER)
         @FormUrlEncoded
@@ -73,19 +77,17 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     }
 
-    public NasBrowserModel(ClientMeta meta,String url){
-        super(meta);
-        final Retrofit retrofit=new Retrofit();
+    public NasBrowserModel(Context context,ClientMeta meta, String url, OnPageDataLoad loaded){
+        super(context,meta);
+        mUrl=url;
         setAdapter(new NasBrowserAdapter(){
             @Override
             protected final boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
-                if (null==url||url.length()<=0){
-                    Debug.W(getClass(),"Can't load nas folder with NULL url."+url);
-                    return false;
-                }
-                return null!=path&&null!=retrofit&&null!=retrofit.call(url,Api.class,null,null,null,null,(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
+                return null!=path&&null!=call(Api.class,(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
                     if (what== What.WHAT_SUCCEED){
-                        getCurrentFolder().set(null!=data?data.getData():null);
+                        if (null!=loaded){
+                            loaded.onPageDataLoad(NasBrowserModel.this,null!=data?data.getData():null);
+                        }
                     }
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
@@ -98,10 +100,8 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        if (super.onTapClick(view,clickCount,resId,data)){
+        if (!super.onTapClick(view,clickCount,resId,data)){
             switch (clickCount){
-                case 1:
-                    return onSingleTapClick(view,resId,data)||true;
                 default:
                     if (null!=data&&data instanceof NasFile){
                         NasFileContextMenuBinding binding= DataBindingUtil.inflate(LayoutInflater.from(view.getContext()), R.layout.nas_file_context_menu,null,false);
@@ -235,7 +235,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     }
 
     private final boolean createFile(boolean dir){
-        FolderData folderMeta=getCurrentFolderData();
+        FolderData folderMeta=getLastPage();
         final String parent=null!=folderMeta?folderMeta.getPath():null;
         if (null==parent||parent.length()<=0){
             toast(R.string.pathNotExist);
@@ -355,9 +355,27 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     private boolean open(File file,String debug){
         String path=null!=file?file.getPath():null;
         if (null!=path&&path.length()>0){
-            return  MediaPlayService.play(getContext(), file, 0, false);
+            return  MediaPlayService.play(getViewContext(), file, 0, false);
         }
         toast(R.string.pathInvalid);
         return false;
     }
+
+    protected final <T> T call(Class<T> cls,  com.merlin.api.Callback...callbacks){
+        return call(cls,null,callbacks);
+    }
+
+    protected final <T> T call(Class<T> cls, Object dither, com.merlin.api.Callback...callbacks){
+        String url=mUrl;
+        if (null==url||url.length()<=0){
+            Debug.W(getClass(),"Can't load nas folder with NULL url."+url);
+            url="";
+        }
+        Retrofit retrofit=mRetrofit;
+        if (null!=retrofit&&null!=cls){
+            return retrofit.call(url,cls,null,null,null,callbacks);
+        }
+        return null;
+    }
+
 }

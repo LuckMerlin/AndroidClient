@@ -56,10 +56,10 @@
                         layout="@layout/device_text"
                         android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
                     <TextView
-                        android:text="@{` (`+vm.current.currentFolder.length+')'}"
+                        android:text="@{` (`+vm.currentFolder.length+')'}"
                         android:textSize="@dimen/textTitle"
                         android:textStyle="bold"
-                        android:visibility="@{(vm.current.mode==Model.MODE_MULTI_CHOOSE||(null==vm.current.clientMeta&amp;&amp;vm.current.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
+                        android:visibility="@{(vm.current.mode==Model.MODE_MULTI_CHOOSE||(null==vm.current.clientMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <TextView
@@ -133,7 +133,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:text="@{vm.current.currentFolder.path}"
+                    android:text="@{vm.currentFolder.path}"
                     android:layout_width="wrap_content"
                     android:singleLine="true"
                     android:textSize="@dimen/textSmall"

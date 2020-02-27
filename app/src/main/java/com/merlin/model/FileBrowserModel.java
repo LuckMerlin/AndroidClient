@@ -45,9 +45,16 @@ import static com.merlin.api.What.WHAT_SUCCEED;
 public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
     private Map<String,Object> mAllClientMetas=new HashMap<>();
     private final ObservableField<BrowserModel> mCurrent=new ObservableField<>();
+    private final ObservableField<FolderData> mCurrentFolder=new ObservableField<>();
+    private final BrowserModel.OnPageDataLoad mPageDataLoad=(model,folder)-> {
+        BrowserModel curr=mCurrent.get();
+        if (null!=curr&&null!=model&&model==curr){
+            mCurrentFolder.set(folder);
+        }
+    };
 
     public interface OnBrowserModelChange{
-        void onBrowserModelChanged(Model last,Model current);
+        void onBrowserModelChanged(BrowserModel last,BrowserModel current);
     }
 
     private interface Api{
@@ -87,7 +94,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     private BrowserModel createModel(ClientMeta meta){
         if (null!=meta){
-            BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(meta): new NasBrowserModel(meta,meta.getUrl());
+            Context context=getViewContext();
+            BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(context,meta): new NasBrowserModel(context,meta,meta.getUrl(),mPageDataLoad);
             if (null!=model){
                 mCurrent.set(model);
                 return model;
@@ -110,8 +118,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     if (null!=model){
                         BrowserModel curr=mCurrent.get();
                          mCurrent.set(model);
-                         if (null!=model&&model instanceof BrowserModel.OnBrowserModelChange){
-                             ((BrowserModel.OnBrowserModelChange)model).onBrowserModelChanged(curr,model);
+                         if (null!=model&&model instanceof BrowserModel){
+                             ((BrowserModel)model).onBrowserModelChanged(curr,model);
                          }
                          return true;
                     }
@@ -142,7 +150,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
-                        return onBackIconPressed("After back pressed.");
+                        return onBackIconPressed(view,"After back pressed.");
                     case R.drawable.cancel_selector:
                         BrowserModel model=getCurrentModel();
                         return null!=model&&(!model.isMode(BrowserModel.MODE_NORMAL)&&model.entryMode(BrowserModel.MODE_NORMAL,"After cancel tap click."));
@@ -189,11 +197,10 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 return (null!=data&&data instanceof ClientMeta&&changeDevice((ClientMeta)data,true,"After device choose."))||true;
             };
             BrowserModel currentModel=mCurrent.get();
-            ObservableField<ClientMeta> clientMeta=null!=currentModel?currentModel.getClientMeta():null;
-            ClientMeta current=null!=clientMeta?clientMeta.get():null;
+            ClientMeta current=null!=currentModel?currentModel.getClientMeta():null;
             for (String child:set) {
                 Object object= null!=child?map.get(child):null;
-                object=null!=object?object instanceof BrowserModel?((BrowserModel)object).getMeta():object:null;
+                object=null!=object?object instanceof BrowserModel?((BrowserModel)object).getClientMeta():object:null;
                 ClientMeta meta=null!=object&&object instanceof ClientMeta?(ClientMeta)object:null;
                 if (null!=meta&&(null==current||!current.equals(meta))){
                     DeviceTextBinding binding=inflate(R.layout.device_text);
@@ -213,7 +220,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean showBrowserMenu(View view,String debug){
         FileBrowserMenuBinding binding=null!=view?inflate(R.layout.file_browser_menu):null;
         if (null!=binding){
-            binding.setFolder(getCurrentFolder());
+            binding.setFolder(mCurrentFolder.get());
             binding.setClient(getCurrentModelMeta());
             return showAtLocationAsContext(view,binding);
         }
@@ -240,16 +247,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
           }
     }
 
-
-    private boolean onBackIconPressed(String debug){
+    private boolean onBackIconPressed(View view,String debug){
         BrowserModel model=getCurrentModel();
-        return null!=model&&model.onBackIconPressed(debug);
+        return null!=model&&model.onBackIconPressed(view,debug);
     }
 
     private ClientMeta getCurrentModelMeta(){
         BrowserModel model=getCurrentModel();
-        ObservableField<ClientMeta> meta= null!=model?model.getClientMeta():null;
-        return null!=meta?meta.get():null;
+        return null!=model?model.getClientMeta():null;
     }
 
     private BrowserModel getCurrentModel(){
@@ -260,10 +265,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return mCurrent;
     }
 
-    private FolderData getCurrentFolder(){
-        BrowserModel model=getCurrentModel();
-        ObservableField<FolderData> folder=null!=model?model.getCurrentFolder():null;
-        return null!=folder?folder.get():null;
+    public ObservableField<FolderData> getCurrentFolder(){
+        return mCurrentFolder;
     }
 
 }

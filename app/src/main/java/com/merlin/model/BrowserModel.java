@@ -1,50 +1,62 @@
 package com.merlin.model;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.File;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.NasFile;
-import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
+import com.merlin.retrofit.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
+import com.merlin.view.PopupWindow;
+import com.merlin.view.Res;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-public class BrowserModel<T extends FileMeta> extends Model implements Model.OnActivityResume, FileBrowserModel.OnBrowserModelChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
+public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume, FileBrowserModel.OnBrowserModelChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
+    public final static int MODE_INVALID=1211;
     public final static int MODE_NORMAL=1212;
     public final static int MODE_MULTI_CHOOSE=1213;
     public final static int MODE_COPY=1214;
     public final static int MODE_MOVE=1215;
     private ClientMeta mClientMeta;
-    private final ObservableField<FolderData> mCurrentFolder=new ObservableField();
-    private final ObservableField<Integer> mMode=new ObservableField<>();
+    private int mMode=MODE_INVALID;
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
     private final ObservableField<String> mMultiChooseSummary=new ObservableField<>();
     private BrowserAdapter<T> mBrowserAdapter;
+    private WeakReference<Context> mContext;
     private Object mProcessing;
+    private PopupWindow mPopWindow;
 
-    public interface OnBrowserModelChange{
-        void onBrowserModelChanged(Model last,Model current);
+    public interface OnPageDataLoad{
+        void onPageDataLoad(BrowserModel model,FolderData folder);
     }
 
-    public BrowserModel(ClientMeta meta){
+    public BrowserModel(Context context,ClientMeta meta){
         mClientMeta=meta;
+        mContext=null!=context?new WeakReference<>(context):null;
         entryMode(MODE_NORMAL,"After model create.");
     }
 
     protected final boolean setAdapter(BrowserAdapter<T> adapter){
         if (null!=adapter){
             mBrowserAdapter=adapter;
-            browserPath("","After model adapter set.");
+            return browserPath("","After model adapter set.");
         }
         return false;
     }
@@ -62,13 +74,19 @@ public class BrowserModel<T extends FileMeta> extends Model implements Model.OnA
         return null!=adapter&&adapter.reset(debug);
     }
 
+    public final FolderData getLastPage(){
+        BrowserAdapter<T> adapter=mBrowserAdapter;
+        FolderData meta=null!=adapter?adapter.getLastPage():null;
+        return meta;
+    }
+
     private final boolean refreshCurrentPath(String debug){
-        FolderData meta=mCurrentFolder.get();
+        FolderData meta=getLastPage();
         return browserPath(null!=meta?meta.getPath():null,debug);
     }
 
-    protected boolean onBackIconPressed(String debug){
-        return browserParent(debug);
+    protected boolean onBackIconPressed(View view,String debug){
+        return browserParent(view,debug);
     }
 
     private boolean browserPath(String pathValue, String debug){
@@ -76,44 +94,26 @@ public class BrowserModel<T extends FileMeta> extends Model implements Model.OnA
         return null!=adapter&&adapter.loadPage(pathValue,debug);
     }
 
-    private boolean browserParent(String debug){
-        FolderData current=mCurrentFolder.get();
+    private boolean browserParent(View view,String debug){
+        FolderData current=getLastPage();
         String parent=null!=current?current.getParent():null;
         String curr=null!=current?current.getPath():null;
         if (null==parent||parent.length()<=0||(null!=curr&&curr.equals(parent))){
-            toast(R.string.alreadyArrivedRoot);
+            Context context=null!=view?view.getContext():null;
+            if (null!=context){
+                Toast.makeText(context,R.string.alreadyArrivedRoot,Toast.LENGTH_SHORT).show();
+            }
             return false;
         }
-        return browserPath(parent,debug);
-    }
-
-    /**
-     * @deprecated
-     * @return
-     * @return
-     */
-    protected ClientMeta getMeta() {
-        return getClientMeta();
+        return null!=parent&&browserPath(parent,debug);
     }
 
     public ClientMeta getClientMeta() {
         return mClientMeta;
     }
 
-    public final ObservableField<Integer> getMode() {
+    public final int getMode() {
         return mMode;
-    }
-
-    /**
-     * @deprecated
-     */
-    protected final FolderData getCurrentFolderData() {
-        return getCurrentFolder();
-    }
-
-    public final FolderData getCurrentFolder() {
-        ObservableField<FolderData> data=mCurrentFolder;
-        return null!=data?data.get():null;
     }
 
     public final ObservableField<String> getMultiChooseSummary() {
@@ -148,7 +148,7 @@ public class BrowserModel<T extends FileMeta> extends Model implements Model.OnA
                         } else{//Open file
                         }
                     }else{
-                        toast(R.string.nonePermission);
+                        Toast.makeText(view.getContext(),R.string.nonePermission,Toast.LENGTH_SHORT).show();
                     }
                 }
         }
@@ -160,11 +160,10 @@ public class BrowserModel<T extends FileMeta> extends Model implements Model.OnA
         return false;
     }
 
-
     protected final boolean entryMode(int mode,String debug){
         if (!isMode(mode)){
             mProcessing=null;
-            mMode.set(mode);
+            mMode=mode;
             BrowserAdapter adapter=mBrowserAdapter;
             if (null!=adapter){
                 adapter.setMode(mode);
@@ -186,27 +185,24 @@ public class BrowserModel<T extends FileMeta> extends Model implements Model.OnA
         return mProcessing;
     }
 
-
     protected final void setProcessing(Object processing,String debug) {
         this.mProcessing = processing;
     }
 
     protected final boolean isMode(int mode){
-        ObservableField<Integer> current=mMode;
-        Integer curr=null!=current?current.get():null;
-        return null!=curr&&mode==curr;
+        return mode==mMode;
     }
 
     @Override
-    public void onBrowserModelChanged(Model last, Model current) {
+    public void onBrowserModelChanged(BrowserModel last, BrowserModel current) {
         if (null!=current&&current==this){
             refreshCurrentPath("After browser model changed.");
         }
     }
 
     private boolean refreshMultiChooseCount() {
-        FolderData folderMeta=mCurrentFolder.get();
-        int length=null!=folderMeta?folderMeta.getLength():0;
+        FolderData folder=getLastPage();
+        int length=null!=folder?folder.getLength():0;
         BrowserAdapter adapter=mBrowserAdapter;
         int count=null!=adapter?adapter.getChooseCount():0;
         mMultiChooseSummary.set(count<=0?"None selected(0/"+length+")":"Selected("+count+"/"+length+")");
@@ -226,13 +222,116 @@ public class BrowserModel<T extends FileMeta> extends Model implements Model.OnA
 
     @Override
     public boolean onActivityBackPressed(Activity activity) {
-        if (!isMode(MODE_NORMAL)){
-            return entryMode(MODE_NORMAL,"After activity  back press.");
-        }
-        return browserParent("After back pressed called.");
+        return !isMode(MODE_NORMAL)? entryMode(MODE_NORMAL,"After activity  back press."):browserParent(null,"After back pressed called.");
     }
 
     public BrowserAdapter<T> getBrowserAdapter() {
         return mBrowserAdapter;
     }
+
+    protected final Context getViewContext(){
+        WeakReference<Context> reference=mContext;
+        return null!=reference?reference.get():null;
+    }
+
+    protected final boolean toast(Object id){
+        Context context=null!=id?getViewContext():null;
+        if (null!=context){
+            Object text=id instanceof Integer?context.getString((Integer)id):id;
+            if (text instanceof String){
+                if (Looper.getMainLooper()!=Looper.myLooper()){
+                    new Handler(Looper.getMainLooper()).post(()->Toast.makeText(context,(String)text,Toast.LENGTH_SHORT).show());
+                }else{
+                    Toast.makeText(context,(String)id,Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected final String getText(int textResId,Object ...args){
+        Context context=getViewContext();
+        return null!=context?context.getResources().getString(textResId,args):null;
+    }
+
+    protected final <T extends ViewDataBinding> T inflate(int layoutId, Res...res){
+        return inflate(getViewContext(),layoutId,res);
+    }
+
+    protected final <T extends ViewDataBinding> T inflate(Context context,int layoutId, Res ...res){
+        T binding=null!=context? DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,null,false):null;
+        if (null!=binding&&null!=res&&res.length>0){
+            for (Res r:res) {
+                Integer resourceId=null!=r?r.getResourceId():null;
+                if (null!=resourceId){
+                    binding.setVariable(resourceId,r.getArg());
+                }
+            }
+        }
+        return binding;
+    }
+
+    protected final boolean showAtLocationAsContext(View parent,ViewDataBinding binding) {
+        return showAtLocation(parent,binding, PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
+    }
+
+
+    protected final boolean showAtLocation(View parent,ViewDataBinding binding,Integer dismissFlag){
+        return null!=binding&&showAtLocation(parent,binding.getRoot(),dismissFlag);
+    }
+
+    protected final boolean showAtLocationAsContext(View parent,View root) {
+        return showAtLocation(parent,root,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
+    }
+
+    protected final boolean showAtLocation(View parent,View root,Integer dismissFlag) {
+        return showAtLocation(parent,root, Gravity.CENTER,0,0,dismissFlag);
+    }
+
+    protected final boolean showAtLocation(View parent,ViewDataBinding binding,int gravity,int x,int y,Integer dismissFlag) {
+        return null!=binding&&showAtLocation(parent,binding.getRoot(),gravity,x,y,dismissFlag);
+    }
+    protected final boolean showAtLocation(View parent,View root,int gravity,int x,int y,Integer dismissFlag){
+        if (null!=root&&(null==root.getParent())){
+            PopupWindow popupWindow=fetchPopWindow();
+            if (null!=popupWindow) {
+                popupWindow.setContentView(root);
+                dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
+                popupWindow.showAtLocation(parent, gravity, x, y, this, dismissFlag);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    protected final boolean showAsDropDown(View anchor,ViewDataBinding binding, int x, int y,Integer dismissFlag) {
+        return null!=binding&&showAsDropDown(anchor,binding.getRoot(),x,y,null,dismissFlag);
+    }
+
+    protected final boolean showAsDropDown(View anchor,View root, int x, int y,Object interrupter,Integer dismissFlag){
+        if (null!=anchor&&null!=root&&null==root.getParent()&&(anchor!=root)){
+            PopupWindow popupWindow=fetchPopWindow();
+            if (null!=popupWindow){
+                popupWindow.setContentView(root);
+                dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
+                return popupWindow.showAsDropDown(anchor, x, y, null!=interrupter?interrupter:this, dismissFlag);
+            }
+            return false;
+        }
+        return false;
+    }
+
+    private PopupWindow fetchPopWindow(){
+        PopupWindow currentPopWindow=mPopWindow;
+        final PopupWindow popupWindow=null!=currentPopWindow?currentPopWindow:(mPopWindow=new PopupWindow(true,(window)->{
+            PopupWindow curr=mPopWindow;
+            if (null!=curr&&null!=window&&curr==window){
+                mPopWindow=null;
+            }
+        }));
+        return popupWindow;
+    }
+
 }
