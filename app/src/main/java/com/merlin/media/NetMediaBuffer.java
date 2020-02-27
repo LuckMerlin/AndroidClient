@@ -111,7 +111,7 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
         reader.waitHere(Reader.STATE_OPENING,"For client open response "+media);
         int state=reader.mState;
         if (state==What.WHAT_SUCCEED||state== Reader.STATE_WRITE_UPDATE){
-            Debug.D(getClass(),"File stream reply succeed."+media);
+            Debug.D(getClass(),"File_ stream reply succeed."+media);
             return true;//Reply succeed,Now return true to prepare play
         }
         reader.recycle("While client response failed.state="+reader.mState);//

@@ -11,8 +11,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.ClientMeta;
-import com.merlin.bean.File;
+import com.merlin.bean.File_;
 import com.merlin.bean.FileModify;
 import com.merlin.bean.FilePaste;
 import com.merlin.bean.NasFile;
@@ -104,7 +103,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
 //            case R.string.open:
-//                return null!=data&&data instanceof File &&open((File)data,"After open tap click.");
+//                return null!=data&&data instanceof File_ &&open((File_)data,"After open tap click.");
 //            case R.string.reboot:
 //                return rebootClient("After reboot tap click.");
 //            case R.string.scan:
@@ -147,8 +146,8 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
 //                        }else{
 //                            toast(R.string.nonePermission);
 //                        }
-                    }else if (data instanceof File){
-                        open((File)data,"After file item tap.");
+                    }else if (data instanceof File_){
+                        open((File_)data,"After file item tap.");
                     }
                 }
                 break;
@@ -156,7 +155,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean open(File file,String debug){
+    private boolean open(File_ file, String debug){
         String path=null!=file?file.getPath():null;
         if (null!=path&&path.length()>0){
             return  MediaPlayService.play(getContext(), file, 0, false);

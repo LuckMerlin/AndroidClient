@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
+import com.merlin.debug.Debug;
 
 import java.util.List;
 
@@ -23,11 +24,12 @@ public abstract class LocalBrowserAdapter  extends BrowserAdapter<LocalFile> {
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, LocalFile data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
-//            boolean multiChoose=isMultiChoose();
+            boolean multiChoose=isMultiChoose();
+
 //            itemBinding.setIsChoose(isChoose(data));
-//            itemBinding.setIsMultiChoose(multiChoose);
-//            itemBinding.setMeta(data);
-//            itemBinding.setPosition(position);
+            itemBinding.setIsMultiChoose(multiChoose);
+            itemBinding.setMeta(data);
+            itemBinding.setPosition(position);
         }
     }
 

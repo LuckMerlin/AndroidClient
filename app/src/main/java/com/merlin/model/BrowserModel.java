@@ -19,6 +19,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;

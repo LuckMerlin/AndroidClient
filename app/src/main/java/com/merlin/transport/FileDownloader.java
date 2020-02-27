@@ -79,7 +79,7 @@ public final class FileDownloader {
                         }
                     }
                 });
-                thread.setName("File Downloader.");
+                thread.setName("File_ Downloader.");
                 thread.start();
             }else{
                 synchronized (waiting){

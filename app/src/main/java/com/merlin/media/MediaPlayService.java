@@ -11,7 +11,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.File;
+import com.merlin.bean.File_;
 import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -22,7 +22,6 @@ import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class MediaPlayService extends Service implements Status {
@@ -256,7 +255,7 @@ public class MediaPlayService extends Service implements Status {
     /**
      * @deprecated
      */
-    public static boolean play(Context context, File media, int position, boolean addIntoQueue){
+    public static boolean play(Context context, File_ media, int position, boolean addIntoQueue){
         if (null!=media&&null!=context) {
             Intent intent = new Intent();
             intent.putExtra(LABEL_MEDIAS, media);

@@ -1,29 +1,11 @@
 package com.merlin.model;
-import android.graphics.Rect;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.SeekBar;
 
-import com.merlin.activity.OnBackPressed;
-import com.merlin.adapter.AllMediasAdapter;
-import com.merlin.api.Address;
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.File;
-import com.merlin.bean.NasMedia;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.player.Playable;
 import com.merlin.player.Status;
-import com.merlin.view.OnTapClick;
-
-import io.reactivex.Observable;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
 
 public class MediaPlayModel extends MediaDisplayModel implements Label, What,Status {
 
@@ -79,7 +61,7 @@ public class MediaPlayModel extends MediaDisplayModel implements Label, What,Sta
 //        if (null==md5||md5.length()<=0){
 //            return false;
 //        }
-//        return null!=call(Api.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
+//        return null!=call(Api.class,(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
 ////            AllMediasAdapter adapter=mAdapter;
 //            toast(note);
 //            if (what==WHAT_SUCCEED&&null!=data){

@@ -211,7 +211,7 @@ public class DownloadService extends Service {
         File targetFile=new File(targetFolder,name);
         boolean exist=targetFile.exists();
         if (exist&&targetFile.isDirectory()){
-            Debug.W(getClass(),"Can't download file.File already existed."+targetFile);
+            Debug.W(getClass(),"Can't download file.File_ already existed."+targetFile);
             return null;
         }
         Client client=mClient;

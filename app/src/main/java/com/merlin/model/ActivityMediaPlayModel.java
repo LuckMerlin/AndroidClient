@@ -1,36 +1,28 @@
 package com.merlin.model;
 
 
-import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewParent;
-import android.widget.SeekBar;
 
 import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.MediaSheetDetailActivity;
-import com.merlin.adapter.MediaAdapter;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaPlayingQueueAdapter;
-import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.File;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
-import com.merlin.binding.StatusBar;
-import com.merlin.client.BR;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaPlayingQueueBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
-import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.player.OnPlayerStatusUpdate;

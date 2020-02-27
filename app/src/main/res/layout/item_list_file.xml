@@ -10,7 +10,7 @@
             type="Boolean" />
         <variable
             name="meta"
-            type="com.merlin.bean.NasFile" />
+            type="com.merlin.bean.FileMeta" />
         <variable
             name="position"
             type="int" />
@@ -45,7 +45,7 @@
                 android:layout_width="match_parent"
                 android:textSize="@dimen/textTitle"
                 android:singleLine="true"
-                android:text="@{meta.meta.title??meta.name}"
+                android:text="@{meta.title??meta.name}"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
             <LinearLayout
@@ -60,7 +60,7 @@
                 android:text="@{Time.formatTime((long)meta.modifyTime)}"/>
                 <TextView
                     style="@style/titleSmallTextView"
-                    android:text="@{``+meta.permissions}"/>
+                    android:text="@{``+meta.permission()}"/>
             </LinearLayout>
         </LinearLayout>
         <CheckBox

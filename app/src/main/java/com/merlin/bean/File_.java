@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.merlin.player.Playable;
 
-public class File implements Parcelable, Playable {
+public class File_ implements Parcelable, Playable {
     private long id;
     private String path;
     private String thumbImageUrl;
@@ -73,7 +73,7 @@ public class File implements Parcelable, Playable {
         return getName();
     }
 
-    private File(Parcel in){
+    private File_(Parcel in){
         id=in.readLong();
         path=in.readString();
         thumbImageUrl=in.readString();
@@ -101,15 +101,15 @@ public class File implements Parcelable, Playable {
         return 0;
     }
 
-    public static final Creator<File> CREATOR = new Creator<File>() {
+    public static final Creator<File_> CREATOR = new Creator<File_>() {
         @Override
-        public File createFromParcel(Parcel in) {
-            return new File(in);
+        public File_ createFromParcel(Parcel in) {
+            return new File_(in);
         }
 
         @Override
-        public File[] newArray(int size) {
-            return new File[size];
+        public File_[] newArray(int size) {
+            return new File_[size];
         }
     };
 }

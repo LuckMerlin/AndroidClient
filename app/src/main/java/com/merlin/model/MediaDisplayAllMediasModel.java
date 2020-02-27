@@ -1,5 +1,4 @@
 package com.merlin.model;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.EditText;
 
@@ -13,7 +12,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
 import com.merlin.api.What;
-import com.merlin.bean.File;
+import com.merlin.bean.File_;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.client.BR;
@@ -151,7 +150,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         if (null==md5||md5.length()<=0){
             return false;
         }
-        return null!=call(FavoriteApi.class,(OnApiFinish<Reply<File>>)(what, note, data, arg)->{
+        return null!=call(FavoriteApi.class,(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
             AllMediasAdapter adapter=mAdapter;
             if (what==WHAT_SUCCEED&&null!=data){
                 adapter.notifyFavoriteChange(md5, favorite);

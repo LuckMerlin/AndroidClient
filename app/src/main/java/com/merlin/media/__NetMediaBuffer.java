@@ -1,7 +1,7 @@
 package com.merlin.media;
 
 import com.merlin.api.Address;
-import com.merlin.bean.File;
+import com.merlin.bean.File_;
 import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.file.DownloadApi;
@@ -23,12 +23,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public final class __NetMediaBuffer extends MediaBuffer<File> {
+public final class __NetMediaBuffer extends MediaBuffer<File_> {
     private final String mCachePath;
     private Reader mReader;
     private final Retrofit mRetrofit=new Retrofit();
 
-    public __NetMediaBuffer(File media, double seek){
+    public __NetMediaBuffer(File_ media, double seek){
         super(media,seek);
         mCachePath="/sdcard/a/temp2.mp3";
     }
@@ -125,7 +125,7 @@ public final class __NetMediaBuffer extends MediaBuffer<File> {
         reader.waitHere(Reader.STATE_OPENING,"For client open response "+url);
         int state=reader.mState;
         if (state==What.WHAT_SUCCEED||state==Reader.STATE_WRITE_UPDATE){
-            Debug.D(getClass(),"File stream reply succeed."+url);
+            Debug.D(getClass(),"File_ stream reply succeed."+url);
             return true;//Reply succeed,Now return true to prepare play
         }
         reader.recycle("While client response failed.state="+reader.mState);//

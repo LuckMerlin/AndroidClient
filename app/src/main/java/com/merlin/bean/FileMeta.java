@@ -1,41 +1,27 @@
 package com.merlin.bean;
 
-public abstract class FileMeta {
-    private String path;
-    private String name;
+public interface FileMeta {
 
-    public FileMeta(){
-        this(null,null);
-    }
+     String getImageUrl();
 
-    public FileMeta(String path,String name){
-        this.path=path;
-        this.name=name;
-    }
+     String getPath();
 
+     boolean applyModify(FileModify modify);
 
-    public boolean applyModify(FileModify modify){
-        if (null!=modify){
-            String path=modify.getPath();
-            String name=modify.getName();
-            if (null!=path||null!=name){
-                this.path=path;
-                this.name=name;
-                return true;
-            }
-        }
-        return false;
-    }
+     String getExtension();
 
-    public String getName() {
-        return name;
-    }
+     String getTitle();
 
-    public String getPath() {
-        return path;
-    }
+     long getSize();
 
-    public abstract boolean isAccessible();
+     double getModifyTime();
 
-    public abstract boolean isDirectory();
+     String getName();
+
+     String getParent();
+
+      boolean isDirectory();
+      boolean isAccessible();
+      String permission();
+
 }

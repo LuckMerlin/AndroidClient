@@ -122,15 +122,15 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             }
 //            String path=media.getPath();//Try local media file firstly
 //            if (null!=path&&path.length()>0){
-//                File localFile=new File(path);
+//                File_ localFile=new File_(path);
 //                if (localFile.exists()&&localFile.length()>0){
 //                    return new FileBuffer(media,seek);
 //                }
 //            }
 //            String url=media.getPath();
 //            if (null!=url&&url.length()>0){
-//                if (media instanceof File){
-//                    return new __NetMediaBuffer((File) media,seek);
+//                if (media instanceof File_){
+//                    return new __NetMediaBuffer((File_) media,seek);
 //                }
 //            }
         }

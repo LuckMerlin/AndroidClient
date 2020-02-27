@@ -8,7 +8,7 @@
 //import com.merlin.protocol.What;
 //import com.merlin.util.FileMaker;
 //
-//import java.io.File;
+//import java.io.File_;
 //import java.io.IOException;
 //import java.io.RandomAccessFile;
 //
@@ -55,7 +55,7 @@
 ////            Debug.D(getClass(),"$$$$$$$$$ "+succeed+" "+what+" "+note);
 //            switch (what){
 //                case What.WHAT_NOT_EXIST:
-//                    Debug.D(getClass(),"File not exist."+account+" "+url);
+//                    Debug.D(getClass(),"File_ not exist."+account+" "+url);
 //                    reader.wakeUp(What.WHAT_NOT_EXIST,"Url file not exist."+account+" "+url);
 //                    reader.setCanceler(null);
 //                    break;
@@ -149,7 +149,7 @@
 //
 //        public boolean open(double seek,String debug){
 //            String path=mCachePath;
-//            File file=null!=path&&path.length()>0?new FileMaker().makeFile(path,true):null;
+//            File_ file=null!=path&&path.length()>0?new FileMaker().makeFile(path,true):null;
 //            if (null!=file&&file.exists()&&file.isFile()){
 //                try {
 //                    mAccess=new RandomAccessFile(file,"rwd");

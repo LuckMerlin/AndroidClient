@@ -12,54 +12,50 @@ import com.merlin.player.Playable;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public final class NasFile extends FileMeta implements Parcelable , Playable {
+public class NasFile  implements FileMeta,Parcelable , Playable {
     private long id;
     private String md5;
     private String mime;
     private int mode;
-    private String extension;
     private double createTime;
-    private double modifyTime;
     private int permissions;
     private long length;
-    private long size;
     private double insertTime;
     private boolean favorite;
     private String extra;
     private String imageUrl;
     private NasMedia meta;
     private double accessTime;
-
-    public boolean isDirectory(){
-        return size!=WHAT_NOT_DIRECTORY;
-    }
+    private String parent;
+    private String name;
+    private String title;
+    private String extension;
+    private long size;
+    private double modifyTime;
 
     public int getMode() {
         return mode;
-    }
-
-    public long getSize() {
-        return size;
     }
 
     public long getLength() {
         return length;
     }
 
-    public String getExtension() {
-        return extension;
-    }
-
-    public double getModifyTime() {
-        return modifyTime;
+    public boolean applyModify(FileModify modify){
+        if (null!=modify){
+            String path=modify.getPath();
+            String name=modify.getName();
+            if (null!=path||null!=name){
+//                this.path=path;
+//                this.name=name;
+                return true;
+            }
+        }
+        return false;
     }
 
     public double getAccessTime() {
         return accessTime;
-    }
-
-    public void setPermissions(int permissions) {
-        this.permissions = permissions;
     }
 
     public double getCreateTime() {
@@ -68,23 +64,6 @@ public final class NasFile extends FileMeta implements Parcelable , Playable {
 
     public String getMime() {
         return mime;
-    }
-
-    public  boolean isAccessible(){
-        if (size== What.WHAT_NONE_PERMISSION){
-            return false;
-        }
-        int permission=permissions;
-        Permissions permissions=new Permissions();
-        return permissions.isOtherReadable(permission)&&(!isDirectory()||permissions.isOtherExecutable(permission));
-    }
-
-    public int getPermissions() {
-        return permissions;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
     }
 
     public void setFavorite(boolean favorite) {
@@ -103,9 +82,79 @@ public final class NasFile extends FileMeta implements Parcelable , Playable {
         return md5;
     }
 
+    public double getInsertTime() {
+        return insertTime;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    @Override
+    public double getModifyTime() {
+        return modifyTime;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    @Override
+    public String getExtension() {
+        return extension;
+    }
+
     @Override
     public String getTitle() {
-        return getName();
+        return title;
+    }
+
+    @Override
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getPath() {
+        return null!=parent&&null!=name?parent+name:null;
+    }
+
+    @Override
+    public String getParent() {
+        return parent;
+    }
+
+    @Override
+    public boolean isAccessible(){
+        if (getSize()== What.WHAT_NONE_PERMISSION){
+            return false;
+        }
+        int permission=permissions;
+        Permissions permissions=new Permissions();
+        return permissions.isOtherReadable(permission)&&(!isDirectory()||permissions.isOtherExecutable(permission));
+    }
+
+    public final int getPermissions() {
+        return permissions;
+    }
+
+    public final boolean isDirectory(){
+        return getSize()!=WHAT_NOT_DIRECTORY;
+    }
+
+    @Override
+    public String permission() {
+        return Integer.toString(permissions);
     }
 
     @Override
@@ -132,14 +181,14 @@ public final class NasFile extends FileMeta implements Parcelable , Playable {
 //        name=in.readString();
         md5=in.readString();
         mime=in.readString();
-        extension=in.readString();
+//        extension=in.readString();
         extra=in.readString();
         imageUrl=in.readString();
         createTime=in.readDouble();
-        modifyTime=in.readDouble();
+//        modifyTime=in.readDouble();
         insertTime=in.readDouble();
         permissions=in.readInt();
-        size=in.readLong();
+//        size=in.readLong();
         favorite=in.readInt()==1;
         Parcelable parcelable=in.readParcelable(NasFile.class.getClassLoader());
         meta=null!=parcelable&&parcelable instanceof NasMedia ?(NasMedia)parcelable:null;
@@ -153,14 +202,14 @@ public final class NasFile extends FileMeta implements Parcelable , Playable {
 //        dest.writeString(name);
         dest.writeString(md5);
         dest.writeString(mime);
-        dest.writeString(extension);
+//        dest.writeString(extension);
         dest.writeString(extra);
         dest.writeString(imageUrl);
         dest.writeDouble(createTime);
-        dest.writeDouble(modifyTime);
+//        dest.writeDouble(modifyTime);
         dest.writeDouble(insertTime);
         dest.writeInt(permissions);
-        dest.writeLong(size);
+//        dest.writeLong(size);
         dest.writeInt(favorite?1:0);
         dest.writeParcelable(meta,0);
 
