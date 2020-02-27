@@ -56,7 +56,8 @@ public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume,
     protected final boolean setAdapter(BrowserAdapter<T> adapter){
         if (null!=adapter){
             mBrowserAdapter=adapter;
-            return browserPath("","After model adapter set.");
+//            return browserPath("","After model adapter set.");
+            return true;
         }
         return false;
     }
@@ -91,6 +92,10 @@ public class BrowserModel<T extends FileMeta> implements Model.OnActivityResume,
 
     private boolean browserPath(String pathValue, String debug){
         BrowserAdapter adapter=mBrowserAdapter;
+        if (null==pathValue){
+            pathValue="";
+            adapter.empty();
+        }
         return null!=adapter&&adapter.loadPage(pathValue,debug);
     }
 

@@ -42,7 +42,6 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         if (null==page){
             return false;
         }
-        page.getLength();
         List<T> list=page.getData();
         int from=page.getFrom();
         int to=page.getTo();
@@ -179,6 +178,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
             }
             mLoadingPage=page;
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
+            Debug.D(getClass(),"Load page "+(null!=debug?debug:"."));
             if(!onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);

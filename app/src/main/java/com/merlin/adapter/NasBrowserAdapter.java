@@ -21,12 +21,6 @@ import com.merlin.retrofit.Retrofit;
 
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
-import okhttp3.Interceptor;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
 
 public abstract class NasBrowserAdapter extends BrowserAdapter<NasFile>{
 

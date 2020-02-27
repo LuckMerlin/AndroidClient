@@ -10,6 +10,7 @@ import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.NasBrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
+import com.merlin.api.Callback;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import okhttp3.Interceptor;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -45,7 +48,6 @@ import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     private final Retrofit mRetrofit=new Retrofit();
-    private final String mUrl;
     private interface Api {
         @POST(Address.PREFIX_FILE_BROWSER)
         @FormUrlEncoded
@@ -77,20 +79,19 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     }
 
-    public NasBrowserModel(Context context,ClientMeta meta, String url, OnPageDataLoad loaded){
+    public NasBrowserModel(Context context,ClientMeta meta,OnPageDataLoad loaded){
         super(context,meta);
-        mUrl=url;
         setAdapter(new NasBrowserAdapter(){
             @Override
             protected final boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
                 return null!=path&&null!=call(Api.class,(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
+                    if (null!=finish){
+                        finish.onApiFinish(what,note,data,arg);
+                    }
                     if (what== What.WHAT_SUCCEED){
                         if (null!=loaded){
                             loaded.onPageDataLoad(NasBrowserModel.this,null!=data?data.getData():null);
                         }
-                    }
-                    if (null!=finish){
-                        finish.onApiFinish(what,note,data,arg);
                     }
                 }).queryFiles(path, from,from+50);
             }
@@ -102,13 +103,16 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         if (!super.onTapClick(view,clickCount,resId,data)){
             switch (clickCount){
-                default:
-                    if (null!=data&&data instanceof NasFile){
-                        NasFileContextMenuBinding binding= DataBindingUtil.inflate(LayoutInflater.from(view.getContext()), R.layout.nas_file_context_menu,null,false);
-                        if (null!=binding){
-                            binding.setFile((NasFile)data);
-                            showAtLocationAsContext(view,binding);
-                        }
+                case 2:
+                    switch (resId){
+                        default:
+                            if (null!=data&&data instanceof NasFile){
+                                NasFileContextMenuBinding binding= DataBindingUtil.inflate(LayoutInflater.from(view.getContext()), R.layout.nas_file_context_menu,null,false);
+                                if (null!=binding){
+                                    binding.setFile((NasFile)data);
+                                    showAtLocationAsContext(view,binding);
+                                }
+                            }
                     }
                     break;
             }
@@ -365,17 +369,19 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         return call(cls,null,callbacks);
     }
 
+    protected final String getClientUrl(){
+        ClientMeta meta=getClientMeta();
+        return null!=meta?meta.getUrl():null;
+    }
+
     protected final <T> T call(Class<T> cls, Object dither, com.merlin.api.Callback...callbacks){
-        String url=mUrl;
+        String url=getClientUrl();
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't load nas folder with NULL url."+url);
             url="";
         }
         Retrofit retrofit=mRetrofit;
-        if (null!=retrofit&&null!=cls){
-            return retrofit.call(url,cls,null,null,null,callbacks);
-        }
-        return null;
+        return null!=retrofit&&null!=cls?retrofit.call(url,cls,null,null,null,null,callbacks):null;
     }
 
 }

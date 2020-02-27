@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
 
+import com.merlin.adapter.Adapter;
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.NasBrowserAdapter;
 import com.merlin.api.Address;
@@ -52,6 +53,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             mCurrentFolder.set(folder);
         }
     };
+    private final ObservableField<Adapter> mCurrentAdapter=new ObservableField<>();
 
     public interface OnBrowserModelChange{
         void onBrowserModelChanged(BrowserModel last,BrowserModel current);
@@ -95,7 +97,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private BrowserModel createModel(ClientMeta meta){
         if (null!=meta){
             Context context=getViewContext();
-            BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(context,meta): new NasBrowserModel(context,meta,meta.getUrl(),mPageDataLoad);
+            BrowserModel model=meta.isLocalClient()?new LocalBrowserModel(context,meta)
+                    : new NasBrowserModel(context,meta,mPageDataLoad);
             if (null!=model){
                 mCurrent.set(model);
                 return model;
@@ -116,7 +119,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     Object object=map.get(url);
                     model=null!=object&&object instanceof BrowserModel?(BrowserModel)object: createModel(client);
                     if (null!=model){
-                        BrowserModel curr=mCurrent.get();
+                         BrowserModel curr=mCurrent.get();
+                         mCurrentAdapter.set(model.getBrowserAdapter());
                          mCurrent.set(model);
                          if (null!=model&&model instanceof BrowserModel){
                              ((BrowserModel)model).onBrowserModelChanged(curr,model);
@@ -269,4 +273,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return mCurrentFolder;
     }
 
+    public ObservableField<Adapter> getCurrentAdapter() {
+        return mCurrentAdapter;
+    }
 }

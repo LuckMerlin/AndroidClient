@@ -14,20 +14,21 @@
         <import type="com.merlin.view.Clicker"/>
         <import type="com.merlin.model.BrowserModel" alias="Model"/>
     </data>
-    <RelativeLayout
-        binding:createModel="@{true}"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="1dp"
-        android:paddingTop="10dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp">
+    <LinearLayout
+            binding:createModel="@{true}"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="1dp"
+            android:paddingTop="10dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp">
         <RelativeLayout
             android:id="@+id/fileBrowser_topRL"
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="@dimen/listItemNormal"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="15dp">
             <LinearLayout
                 android:layout_alignParentLeft="true"
                 android:orientation="horizontal"
@@ -50,11 +51,39 @@
                         android:layout_marginRight="15dp"
                         android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE||vm.current.mode==Model.MODE_COPY||vm.current.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.cancel_selector}"/>
-                    <include
-                        android:id="@+id/fileBrowser_deviceNameTV"
-                        binding:device="@{vm.current.clientMeta}"
-                        layout="@layout/device_text"
-                        android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <include
+                            android:id="@+id/fileBrowser_deviceNameTV"
+                            binding:device="@{vm.current.clientMeta}"
+                            layout="@layout/device_text"
+                            android:visibility="@{vm.current.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
+
+                        <LinearLayout
+                            android:layout_below="@id/fileBrowser_topRL"
+                            android:layout_width="match_parent"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:src="@drawable/switch_thumb_activated"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginRight="5dp"
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"/>
+                            <TextView
+                                android:text='@{""+FileSize.formatSizeText(vm.current.clientMeta.free)+"/"+FileSize.formatSizeText(vm.current.clientMeta.total)}'
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:textSize="@dimen/textSmall"
+                                android:visibility="@{null==vm.current.clientMeta?View.GONE:View.VISIBLE}"
+                                android:singleLine="true"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                    </LinearLayout>
                     <TextView
                         android:text="@{` (`+vm.currentFolder.length+')'}"
                         android:textSize="@dimen/textTitle"
@@ -103,63 +132,35 @@
 
             </LinearLayout>
         </RelativeLayout>
-        <LinearLayout
-            android:id="@+id/fileBrowser_cloud_meta_LL"
-            android:layout_below="@id/fileBrowser_topRL"
+        <HorizontalScrollView
+            android:layout_marginLeft="5dp"
+            android:visibility="@{null==vm.current.clientMeta?View.GONE:View.VISIBLE}"
+            android:scrollbars="none"
             android:layout_width="match_parent"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:orientation="horizontal"
             android:layout_height="wrap_content">
-            <ImageView
-                android:src="@drawable/switch_thumb_activated"
-                android:layout_gravity="center_vertical"
-                android:layout_marginRight="5dp"
-                android:layout_width="10dp"
-                android:layout_height="10dp"/>
             <TextView
-                android:text='@{""+FileSize.formatSizeText(vm.current.clientMeta.free)+"/"+FileSize.formatSizeText(vm.current.clientMeta.total)}'
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:textSize="@dimen/textSmall"
-                android:visibility="@{null==vm.current.clientMeta?View.GONE:View.VISIBLE}"
+                android:text="@{vm.currentFolder.path}"
+                android:layout_width="wrap_content"
                 android:singleLine="true"
+                android:textSize="@dimen/textSmall"
                 android:layout_height="wrap_content"/>
-            <HorizontalScrollView
-                android:layout_marginLeft="5dp"
-                android:visibility="@{null==vm.current.clientMeta?View.GONE:View.VISIBLE}"
-                android:layout_weight="1"
-                android:scrollbars="none"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:text="@{vm.currentFolder.path}"
-                    android:layout_width="wrap_content"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textSmall"
-                    android:layout_height="wrap_content"/>
-            </HorizontalScrollView>
-        </LinearLayout>
+        </HorizontalScrollView>
         <View
-            android:id="@+id/fileBrowser_meta_dividerV"
             android:background="#34ffffff"
-            android:layout_below="@id/fileBrowser_cloud_meta_LL"
             android:layout_marginTop="3dp"
             android:layout_marginBottom="3dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
-
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:layout_below="@id/fileBrowser_meta_dividerV"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
-                binding:adapter="@{vm.current.browserAdapter}"
+                binding:adapter="@{vm.currentAdapter}"
                 android:layout_height="match_parent"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    </RelativeLayout>
+        </LinearLayout>
 </layout>
