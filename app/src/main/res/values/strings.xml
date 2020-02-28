@@ -86,4 +86,7 @@
     <string name="capacity">容量</string>
     <string name="account">账号</string>
     <string name="outOfBounds">超出范围</string>
+    <string name="createFail">创建失败</string>
+    <string name="deleteFail">删除失败</string>
+    <string name="deleteSucceed">删除成功</string>
 </resources>

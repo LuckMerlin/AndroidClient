@@ -12,7 +12,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.File_;
-import com.merlin.bean.FileModify;
+import com.merlin.bean.FModify;
 import com.merlin.bean.FilePaste;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.NasFolder;
@@ -61,14 +61,14 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
 
         @POST(Address.PREFIX_FILE+"/rename")
         @FormUrlEncoded
-        Observable<Reply<FileModify>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name);
+        Observable<Reply<FModify>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name);
 
         @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
 
         @POST(Address.PREFIX_FILE+"/create")
         @FormUrlEncoded
-        Observable<Reply<FileModify>> createFile(@Field(LABEL_PATH) String path,@Field(LABEL_NAME) String name,@Field(LABEL_FOLDER) boolean folder);
+        Observable<Reply<FModify>> createFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name, @Field(LABEL_FOLDER) boolean folder);
 
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
@@ -421,7 +421,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         if (length>0){
             Dialog dialog=new Dialog(getViewContext());
             NasFile first=files.get(0);
-            String name=null!=first?first.getName():null;
+            String name=null!=first?first.getName(false):null;
             String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:R.string.file)+" "+name):""):getText(R.string.items,length));
             return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view, clickCount,  resId, data)->{
                 dialog.dismiss();
@@ -480,7 +480,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                             return true;
                         }else{
                             dialog.dismiss();
-                            return null!=call(Api.class,(OnApiFinish<Reply<FileModify>>)(what, note, data2, arg)->{
+                            return null!=call(Api.class,(OnApiFinish<Reply<FModify>>)(what, note, data2, arg)->{
                                 if(what==WHAT_SUCCEED){
                                     resetBrowserCurrentFolder("After file create succeed.");
                                 }
@@ -496,7 +496,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     private boolean renameFile(NasFile meta){
         final String path=null!=meta?meta.getPath():null;
         if (null!=path&&path.length()>0){
-            final String name=meta.getName();
+            final String name=meta.getName(false);
             return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
                 if (null==text||text.length()<=0){
                     toast(R.string.inputNotNull);
@@ -506,11 +506,11 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                     if (null!=dlg){
                         dlg.dismiss();
                     }
-                    call(Api.class,(OnApiFinish<Reply<FileModify>>)(what, note, data, arg)->{
+                    call(Api.class,(OnApiFinish<Reply<FModify>>)(what, note, data, arg)->{
                         boolean succeed=what==WHAT_SUCCEED;
                         toast(succeed?R.string.succeed : what==WHAT_FILE_EXIST?R.string.fileAlreadyExist:R.string.fail);
                         BrowserAdapter adapter=mNasBrowserAdapter;
-                        FileModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
+                        FModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
                         if (succeed&&null!=modify&&null!=adapter){
                             adapter.renamePath(meta,modify);
                         }

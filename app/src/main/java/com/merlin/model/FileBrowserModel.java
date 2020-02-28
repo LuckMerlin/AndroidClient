@@ -22,9 +22,6 @@ import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.NasFile;
-import com.merlin.bean.NasFolder;
-import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ClientDetailBinding;
 import com.merlin.client.databinding.DeviceTextBinding;
@@ -115,7 +112,6 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
             mCurrentMode.set(curr);
         }
     }
-
 
     private boolean isCurrentModel(BrowserModel model){
         BrowserModel curr=mCurrent.get();

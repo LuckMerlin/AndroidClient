@@ -1,10 +1,7 @@
 package com.merlin.model;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
-
-import androidx.databinding.DataBindingUtil;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.NasBrowserAdapter;
@@ -15,14 +12,14 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FileMeta;
 import com.merlin.bean.File_;
-import com.merlin.bean.FileModify;
+import com.merlin.bean.FModify;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileDetailBinding;
-import com.merlin.client.databinding.NasFileContextMenuBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
@@ -30,9 +27,7 @@ import com.merlin.media.MediaPlayService;
 import com.merlin.retrofit.Retrofit;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -67,11 +62,11 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
         @POST(Address.PREFIX_FILE+"/create")
         @FormUrlEncoded
-        Observable<Reply<FileModify>> createFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name, @Field(LABEL_FOLDER) boolean folder);
+        Observable<Reply<FModify>> createFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name, @Field(LABEL_FOLDER) boolean folder);
 
         @POST(Address.PREFIX_FILE+"/rename")
         @FormUrlEncoded
-        Observable<Reply<FileModify>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name);
+        Observable<Reply<FModify>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name);
 
     }
 
@@ -98,20 +93,6 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         if (!super.onTapClick(view,clickCount,resId,data)){
-            switch (clickCount){
-                case 2:
-                    switch (resId){
-                        default:
-                            if (null!=data&&data instanceof NasFile){
-                                NasFileContextMenuBinding binding= DataBindingUtil.inflate(LayoutInflater.from(view.getContext()), R.layout.nas_file_context_menu,null,false);
-                                if (null!=binding){
-                                    binding.setFile((NasFile)data);
-                                    showAtLocationAsContext(view,binding);
-                                }
-                            }
-                    }
-                    break;
-            }
         }
         return true;
     }
@@ -119,23 +100,19 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     @Override
     protected boolean onSingleTapClick(View view, int resId, Object data) {
             switch (resId){
-                case R.string.open:
-                    return null!=data&&data instanceof File_ &&open((File_)data,"After open tap click.");
+//                case R.string.open:
+//                    return null!=data&&data instanceof File_ &&open((File_)data,"After open tap click.");
                 case R.string.reboot:
                     return rebootClient("After reboot tap click.");
                 case R.string.scan:
                     return null!=data&&data instanceof NasFile&&scan((NasFile)data,false)||true;
-                case R.string.detail:
-                    return null!=data&&data instanceof NasFile &&showFileDetail((NasFile)data);
-                case R.string.createFile:
-                    return createFile(false);
-                case R.string.createFolder:
-                    return createFile(true);
-                case R.string.delete:
-                    List<NasFile> list=null!=data&&data instanceof NasFile ?new ArrayList<>():null;
-                    return null!=list&&list.add((NasFile)data)&&deleteFile(list,"After delete tap click.");
-                case R.string.rename:
-                    return null!=data&&data instanceof NasFile &&renameFile((NasFile)data);
+//                case R.string.detail:
+//                    return null!=data&&data instanceof NasFile &&showFileDetail((NasFile)data);
+//                case R.string.delete:
+//                    List<NasFile> list=null!=data&&data instanceof NasFile ?new ArrayList<>():null;
+//                    return null!=list&&list.add((NasFile)data)&&deleteFile(list,"After delete tap click.");
+//                case R.string.rename:
+//                    return null!=data&&data instanceof NasFile &&renameFile((NasFile)data);
                 case R.string.download:
                     return downloadFile(null!=data&&data instanceof NasFile ?(NasFile)data:null,"After cancel tap click.");
                 case R.string.copy:
@@ -186,35 +163,6 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         return false;
     }
 
-    private boolean renameFile(NasFile meta){
-        final String path=null!=meta?meta.getPath():null;
-        if (null!=path&&path.length()>0){
-            final String name=meta.getName();
-            return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
-                if (null==text||text.length()<=0){
-                    toast(R.string.inputNotNull);
-                }else if (null!=name&&text.equals(name)){
-                    toast(R.string.noneChanged);
-                }else{
-                    if (null!=dlg){
-                        dlg.dismiss();
-                    }
-                    call(Api.class,(OnApiFinish<Reply<FileModify>>)(what, note, data, arg)->{
-                        boolean succeed=what==WHAT_SUCCEED;
-                        toast(succeed?R.string.succeed : what==WHAT_FILE_EXIST?R.string.fileAlreadyExist:R.string.fail);
-                        BrowserAdapter adapter=getBrowserAdapter();
-                        FileModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
-                        if (succeed&&null!=modify&&null!=adapter){
-                            adapter.renamePath(meta,modify);
-                        }
-                    }).renameFile(path,text);
-                }
-            });
-        }
-        Debug.W(getClass(),"Can't rename file.path="+path);
-        return false;
-    }
-
     private boolean downloadFile(NasFile meta, String debug){
         String path=null!=meta?meta.getPath():null;
         if (null!=path&&path.length()>0){
@@ -234,84 +182,82 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         return false;
     }
 
-    private final boolean createFile(boolean dir){
-        FolderData folderMeta=getLastPage();
-        final String parent=null!=folderMeta?folderMeta.getPath():null;
-        if (null==parent||parent.length()<=0){
-            toast(R.string.pathNotExist);
-            return false;
-        }
-        final Dialog dialog=new Dialog(getViewContext());
-        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
-                .right(R.string.cancel).show(( view, clickCount,  resId, data)->{
-                    if (resId==R.string.sure){
-                        String input=dialog.getViewText(R.id.edit_text,null);
-                        if (null==input||input.length()<=0){
-                            toast(R.string.inputNotNull);
-                            return true;
-                        }else{
-                            dialog.dismiss();
-                            return null!=call(Api.class,(OnApiFinish<Reply<FileModify>>)(what, note, data2, arg)->{
-                                if(what==WHAT_SUCCEED){
-                                    resetBrowserCurrentFolder("After file create succeed.");
-                                }
-                                toast(note);
-                            }).createFile(parent,input,dir);
-                        }
-                    }
-                    dialog.dismiss();
-                    return true;
-                });
+    @Override
+    protected boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug) {
+        return null!=call(NasBrowserModel.Api.class,finish).createFile(folder,name,dir);
     }
 
-    private boolean deleteFile(List<NasFile> files, String debug){
-        final int length=null!=files?files.size():-1;
-        if (length>0){
-            Dialog dialog=new Dialog(getViewContext());
-            NasFile first=files.get(0);
-            String name=null!=first?first.getName():null;
-            String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:R.string.file)+" "+name):""):getText(R.string.items,length));
-            return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view, clickCount,  resId, data)->{
-                dialog.dismiss();
-                if (resId ==R.string.sure){
-                    List<String> paths=new ArrayList<>();
-                    Map<String, NasFile> map=new HashMap<>(length);
-                    for (NasFile meta:files) {
-                        String path=null!=meta?meta.getPath():null;
-                        if (null!=path&&path.length()>0){
-                            paths.add(path);
-                            map.put(path,meta);
-                        }
-                    }
-                    if (null!=paths&&paths.size()>0){
-                        return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what, note, data3, arg)->{
-                            toast(note);
-                            if (what==WHAT_SUCCEED){
-                                List<String> deletedPaths=null!=data3?data3.getData():null;
-                                BrowserAdapter adapter=getBrowserAdapter();
-                                int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
-                                if (size>0){
-                                    List<NasFile> deleted=new ArrayList<>(size);
-                                    for (String  path:deletedPaths) {
-                                        NasFile child=null!=path?map.get(path):null;
-                                        if (null!=child){
-                                            deleted.add(child);
-                                        }
-                                    }
-                                    adapter.remove(deleted,debug);
-                                }
-                            }
-                        }).deleteFile(paths);
-                    }
-                }
-                return true;
-            },false);
+    @Override
+    protected boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug) {
+        return null!=call(Api.class,finish).renameFile(path,name);
+    }
+
+    @Override
+    protected boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug) {
+        return null!=call(Api.class,finish).deleteFile(files);
+    }
+
+    @Override
+    protected boolean onOpenFile(List<FileMeta> meta, String debug) {
+        if (null!=meta&&meta.size()>0){
+//            return  MediaPlayService.play(getViewContext(), meta, 0, false);
+            return false;
         }
-        Debug.D(getClass(),"Can't delete file.");
+        toast(R.string.pathInvalid);
         return false;
     }
 
-    private boolean showFileDetail(NasFile meta){
+    //    private boolean deleteFile(List<NasFile> files, String debug){
+//        final int length=null!=files?files.size():-1;
+//        if (length>0){
+//            Dialog dialog=new Dialog(getViewContext());
+//            NasFile first=files.get(0);
+//            String name=null!=first?first.getName():null;
+//            String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:R.string.file)+" "+name):""):getText(R.string.items,length));
+//            return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view, clickCount,  resId, data)->{
+//                dialog.dismiss();
+//                if (resId ==R.string.sure){
+//                    List<String> paths=new ArrayList<>();
+//                    Map<String, NasFile> map=new HashMap<>(length);
+//                    for (NasFile meta:files) {
+//                        String path=null!=meta?meta.getPath():null;
+//                        if (null!=path&&path.length()>0){
+//                            paths.add(path);
+//                            map.put(path,meta);
+//                        }
+//                    }
+//                    if (null!=paths&&paths.size()>0){
+//                        return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what, note, data3, arg)->{
+//                            toast(note);
+//                            if (what==WHAT_SUCCEED){
+//                                List<String> deletedPaths=null!=data3?data3.getData():null;
+//                                BrowserAdapter adapter=getBrowserAdapter();
+//                                int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
+//                                if (size>0){
+//                                    List<NasFile> deleted=new ArrayList<>(size);
+//                                    for (String  path:deletedPaths) {
+//                                        NasFile child=null!=path?map.get(path):null;
+//                                        if (null!=child){
+//                                            deleted.add(child);
+//                                        }
+//                                    }
+//                                    adapter.remove(deleted,debug);
+//                                }
+//                            }
+//                        }).deleteFile(paths);
+//                    }
+//                }
+//                return true;
+//            },false);
+//        }
+//        Debug.D(getClass(),"Can't delete file.");
+//        return false;
+//    }
+
+
+    @Override
+    protected boolean onShowFileDetail(FileMeta file, String debug) {
+        NasFile meta=null!=file&&file instanceof FileMeta?((NasFile)file):null;
         String path=null!=meta?meta.getPath():null;
         FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
         if (null==binding){
@@ -349,16 +295,6 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     private boolean scan(NasFile file, boolean recursive){
         String path=null!=file?file.getPath():null;
         return null!=path&&path.length()>0&&null!=call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note)).scan(path,recursive);
-    }
-
-
-    private boolean open(File_ file, String debug){
-        String path=null!=file?file.getPath():null;
-        if (null!=path&&path.length()>0){
-            return  MediaPlayService.play(getViewContext(), file, 0, false);
-        }
-        toast(R.string.pathInvalid);
-        return false;
     }
 
     protected final <T> T call(Class<T> cls,  com.merlin.api.Callback...callbacks){

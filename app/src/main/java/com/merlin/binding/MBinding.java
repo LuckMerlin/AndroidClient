@@ -167,28 +167,33 @@ public class MBinding {
 
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, Object img) {
-        if (null!=img){
-            if (img instanceof Integer){
-                if (!img.equals(Resources.ID_NULL)){
-                    view.setImageResource((Integer)img);
-                    Clicker.putRes(view,new Res((Integer)img,null));
+        if (null!=view) {
+            if (null != img) {
+                if (img instanceof Integer) {
+                    if (!img.equals(Resources.ID_NULL)) {
+                        view.setImageResource((Integer) img);
+                        Clicker.putRes(view, new Res((Integer) img, null));
+                    }
+                } else if (img instanceof String) {
+                    String path = (String) img;
+                    RoundedCorners roundedCorners = new RoundedCorners(10);
+                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+                    if (!path.startsWith("http")) {
+                        path = Address.URL + Address.PREFIX_THUMB + "?path=" + path;
+                    }
+                    Debug.D(MBinding.class, " " + path);
+                    Glide.with(view.getContext())
+                            .load(path)
+                            .centerCrop()
+                            .apply(options)
+                            .thumbnail(1f)
+                            .placeholder(R.drawable.ic_picture_default)
+                            .error(R.drawable.ic_picture_default)
+                            .into(view);
                 }
-            }else if (img instanceof String){
-                String path=(String)img;
-                RoundedCorners roundedCorners = new RoundedCorners(10);
-                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-                if (!path.startsWith("http")){
-                    path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
-                }
-                Debug.D(MBinding.class," "+path);
-                Glide.with(view.getContext())
-                        .load(path)
-                        .centerCrop()
-                        .apply(options)
-                        .thumbnail(1f)
-                        .placeholder(R.drawable.ic_picture_default)
-                        .error(R.drawable.ic_picture_default)
-                        .into(view);
+            }else{
+                view.setImageDrawable(null);//Clean
+                Clicker.putRes(view,new Res(null,null));
             }
         }
     }

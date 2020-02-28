@@ -31,9 +31,9 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"/>
             <TextView
-                android:text="@{file.name}"
+                android:text="@{file.getName(false)}"
                 android:textStyle="bold"
-                android:visibility="@{null==file.name?View.GONE:View.VISIBLE}"
+                android:visibility="@{null==file.getName(false)?View.GONE:View.VISIBLE}"
                 android:layout_gravity="center_horizontal"
                 style="@style/titleNormalTextView"/>
             <include binding:key="@{R.string.name}" binding:value="@{file.meta.title}"  android:visibility="@{null==file.meta.title?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>

@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 
 import com.merlin.api.What;
-import com.merlin.debug.Debug;
 import com.merlin.file.Permissions;
 import com.merlin.player.Playable;
 
@@ -41,15 +40,15 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
         return length;
     }
 
-    public boolean applyModify(FileModify modify){
+    public boolean applyModify(FModify modify){
         if (null!=modify){
-            String path=modify.getPath();
-            String name=modify.getName();
-            if (null!=path||null!=name){
+//            String path=modify.getPath();
+//            String name=modify.getName();
+//            if (null!=path||null!=name){
 //                this.path=path;
 //                this.name=name;
-                return true;
-            }
+//                return true;
+//            }
         }
         return false;
     }
@@ -120,13 +119,14 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getName(boolean extension) {
+        return extension&&null!=this.extension&&null!=name?name+this.extension:name;
     }
 
     @Override
     public String getPath() {
-        return null!=parent&&null!=name?parent+name:null;
+        String value=getName(true);
+        return null!=parent&&null!=value?parent+value:null;
     }
 
     @Override

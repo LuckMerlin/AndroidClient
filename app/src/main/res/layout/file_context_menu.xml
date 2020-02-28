@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="file"
+            type="com.merlin.bean.FileMeta" />
+        <import type="com.merlin.view.ContextMenu"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.bean.LocalFile"/>
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.open,file)}"/>
+        <include layout="@layout/item_context_menu"
+            android:visibility="@{file instanceof LocalFile?View.VISIBLE:View.GONE}"
+            binding:menu="@{ContextMenu.create(R.string.upload,file)}"/>
+        <include layout="@layout/item_context_menu"
+            android:visibility="@{file instanceof LocalFile?View.GONE:View.VISIBLE}"
+            binding:menu="@{ContextMenu.create(R.string.download,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.move,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.copy,file)}"/>
+        <include layout="@layout/item_context_menu"
+            android:visibility="@{file.directory&amp;&amp;file.accessible?View.VISIBLE:View.GONE}"
+            binding:menu="@{ContextMenu.create(R.string.setAsHome,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.delete,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.rename,file)}"/>
+        <include layout="@layout/item_context_menu"
+            android:visibility="@{file instanceof LocalFile?View.GONE:View.VISIBLE}"
+            binding:menu="@{ContextMenu.create(R.string.scan,file)}"/>
+        <include layout="@layout/item_context_menu"
+            binding:menu="@{ContextMenu.create(R.string.detail,file)}"/>
+    </LinearLayout>
+</layout>

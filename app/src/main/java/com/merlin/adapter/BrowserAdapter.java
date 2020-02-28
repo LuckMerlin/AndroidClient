@@ -1,12 +1,17 @@
 package com.merlin.adapter;
 
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.NasFile;
-import com.merlin.bean.FileModify;
+import com.merlin.bean.FModify;
+import com.merlin.client.R;
+import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.model.BrowserModel;
 
 import java.util.ArrayList;
@@ -19,7 +24,7 @@ public abstract class BrowserAdapter<T extends FileMeta> extends MultiSectionAda
         return mMultiChoose;
     }
 
-    public final boolean renamePath(T meta, FileModify modify){
+    public final boolean renamePath(T meta, FModify modify){
         List<T> list=null!=meta&&null!=modify?getData():null;
         int size=null!=list?list.size():-1;
         int index=size>0?list.indexOf(meta):-1;
@@ -29,6 +34,23 @@ public abstract class BrowserAdapter<T extends FileMeta> extends MultiSectionAda
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
+        return R.layout.item_list_file;
+    }
+
+    @Override
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
+        if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
+            ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
+            boolean multiChoose=isMultiChoose();
+            itemBinding.setIsChoose(isChoose(data));
+            itemBinding.setIsMultiChoose(multiChoose);
+            itemBinding.setMeta(data);
+            itemBinding.setPosition(position);
+        }
     }
 
     @Override
@@ -97,7 +119,7 @@ public abstract class BrowserAdapter<T extends FileMeta> extends MultiSectionAda
         return false;
     }
 
-    public final boolean isChoose(NasFile meta){
+    public final boolean isChoose(T meta){
         List<T> choose=mMultiChoose;
         return null!=meta&&null!=choose&&choose.contains(meta);
     }

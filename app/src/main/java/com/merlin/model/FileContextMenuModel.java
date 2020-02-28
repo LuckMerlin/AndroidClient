@@ -43,13 +43,13 @@ public class FileContextMenuModel extends Model implements OnTapClick {
         if (null!=meta){
             switch (resId){
                 case R.string.delete:
-                    toast("删除 "+meta.getName());
+                    toast("删除 "+meta.getName(false));
                     break;
                 case R.string.move:
-                    toast("移动 "+meta.getName());
+                    toast("移动 "+meta.getName(false));
                     break;
                 case R.string.rename:
-                    toast("重命名 "+meta.getName());
+                    toast("重命名 "+meta.getName(false));
                     break;
             }
         }

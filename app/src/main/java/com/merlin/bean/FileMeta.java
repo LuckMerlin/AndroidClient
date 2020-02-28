@@ -6,7 +6,7 @@ public interface FileMeta {
 
      String getPath();
 
-     boolean applyModify(FileModify modify);
+     boolean applyModify(FModify modify);
 
      String getExtension();
 
@@ -16,12 +16,12 @@ public interface FileMeta {
 
      double getModifyTime();
 
-     String getName();
+     String getName(boolean extension);
 
      String getParent();
 
-      boolean isDirectory();
-      boolean isAccessible();
-      String permission();
+     boolean isDirectory();
+     boolean isAccessible();
+     String permission();
 
 }

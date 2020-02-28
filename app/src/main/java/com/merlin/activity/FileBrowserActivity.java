@@ -23,6 +23,7 @@ public final class FileBrowserActivity extends  ModelActivity<FileBrowserModel> 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         DataBindingUtil.setContentView(this, R.layout.activity_file_browser);
+        checkPermission();
     }
 
     private void checkPermission() {
