@@ -5,7 +5,9 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.audiofx.DynamicsProcessing;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -33,6 +35,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.merlin.adapter.Adapter;
@@ -58,6 +61,7 @@ import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTextChanged;
 import com.merlin.view.Res;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -174,22 +178,28 @@ public class MBinding {
                         view.setImageResource((Integer) img);
                         Clicker.putRes(view, new Res((Integer) img, null));
                     }
-                } else if (img instanceof String) {
+                } else if (img instanceof String&&((String)img).length()>0) {
                     String path = (String) img;
                     RoundedCorners roundedCorners = new RoundedCorners(10);
                     RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+                    RequestBuilder<Drawable> builder;
                     if (!path.startsWith("http")) {
-                        path = Address.URL + Address.PREFIX_THUMB + "?path=" + path;
+                        if (path.startsWith(Address.PREFIX_THUMB)){
+                            builder= Glide.with(view.getContext()).load(Address.URL +path);
+                        }else{
+                            builder=Glide.with(view.getContext()).load(new File(path));
+                        }
+                    }else {
+                        builder=Glide.with(view.getContext()).load((String)img);
                     }
-                    Debug.D(MBinding.class, " " + path);
-                    Glide.with(view.getContext())
-                            .load(path)
-                            .centerCrop()
-                            .apply(options)
-                            .thumbnail(1f)
-                            .placeholder(R.drawable.ic_picture_default)
-                            .error(R.drawable.ic_picture_default)
-                            .into(view);
+                    if (null!=builder) {
+                        builder.centerCrop()
+                                .apply(options)
+                                .thumbnail(1f)
+                                .placeholder(R.drawable.ic_picture_default)
+                                .error(R.drawable.ic_picture_default)
+                                .into(view);
+                    }
                 }
             }else{
                 view.setImageDrawable(null);//Clean

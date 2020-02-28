@@ -32,7 +32,7 @@
             android:id="@+id/itemListFile_icon"
             android:layout_alignParentLeft="true"
             android:src="@{meta.imageUrl??DefaultThumbs.getDefaultThumbByMeta(meta)}"
-            android:padding="5dp"
+            android:padding="2dp"
             android:layout_margin="1dp"
             android:layout_width="@dimen/listItemNormal"
             android:layout_height="@dimen/listItemNormal"/>
