@@ -1,12 +1,13 @@
 package com.merlin.transport;
 
+import com.google.gson.Gson;
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.debug.Debug;
-import com.merlin.retrofit.Retrofit;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,25 +15,31 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import retrofit2.http.Body;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
-import retrofit2.http.PartMap;
 
 
 public abstract class Uploader extends Transporter{
-    Retrofit retrofit=new Retrofit();
+//    Retrofit retrofit=new Retrofit();
 
     private interface Api{
         @Multipart
         @POST(Address.PREFIX_FILE+"/upload")
-        Observable<Reply<ApiList<String>>> upload(@PartMap Map<String, RequestBody> map, @Part List<MultipartBody.Part> parts);
+        Observable<Reply> upload(@Part List<MultipartBody.Part> parts);
     }
 
     public boolean upload(Collection collection, boolean interactive, int coverMode, ClientMeta meta, String folder, String debug) {
@@ -64,6 +71,7 @@ public abstract class Uploader extends Transporter{
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
         builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
         builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(coverMode));
+        final List<MultipartBody.Part> parts=new ArrayList<>();
         for (String path:paths) {
             File file=null!=path?new java.io.File(path):null;
             if (null==file||!file.exists()){
@@ -76,12 +84,15 @@ public abstract class Uploader extends Transporter{
             }
             Debug.D(getClass(),"Upload file "+path+" to "+url);
             RequestBody body = RequestBody.create(MediaType.parse("application/otcet-stream"), file);
-            MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), body);
+            MultipartBody.Part part = MultipartBody.Part.createFormData("files", file.getName(), body);
+            parts.add(part);
+//            MultipartBody.Part body =
+//                    MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+
 //            builder.addFormDataPart("file[]", file.getName(), RequestBody.create(MediaType.parse("image/*"), file));
         }
+        call(prepare(Api.class,url).upload(parts));
         return false;
-//        RequestBody requestBody = builder.build();
-//        return null!=retrofit.call(url,Api.class,null,null,null,null).upload(requestBody,folder);
     }
 }
 
