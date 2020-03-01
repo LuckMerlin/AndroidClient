@@ -16,28 +16,18 @@ public class MainActivity extends Activity implements Tag {
         super.onCreate(savedInstanceState);
         Intent intent=new Intent(this,FileBrowserActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ClientMeta meta=new ClientMeta();
 //        meta.setAccount("linqiang");
 //        meta.setDeviceType(TAG_NAS_DEVICE);
-        intent.putExtra(Tag.TAG_META,meta);
-//        startActivity(intent);
-        intent=new Intent(this,MediaPlayActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Tag.TAG_META,meta);
-        startActivity(intent);
 
         intent=new Intent(this,MediaSheetActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Tag.TAG_META,meta);
 //        startActivity(intent);
         intent=new Intent(this,MediaSheetDetailActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Tag.TAG_META,meta);
 //        startActivity(intent);
 
         intent=new Intent(this,TransportActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Tag.TAG_META,meta);
 //        startActivity(intent);
 //        finish();
 //        String ddd="/storage/sdcard0/storage/emulated/0/linqiang.mp3";

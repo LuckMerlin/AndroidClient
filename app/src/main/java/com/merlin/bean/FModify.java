@@ -1,11 +1,26 @@
 package com.merlin.bean;
 
 public final class FModify {
-    public final static int MODE_NONE=0;//0000 0000
-    public final static int MODE_COVER=1;//0000 0001
-    public final static int MODE_SKIP=2;//0000 0010
-    public final static int MODE_KEEP=4;//0000 0100
-    public final static int MODE_POSTFIX=8;//0000 1000
+    /**
+     * @deprecated
+     */
+    public final static int MODE_NONE=FMode.MODE_NONE;//0000 0000
+    /**
+     * @deprecated
+     */
+    public final static int MODE_COVER=FMode.MODE_COVER;//0000 0001
+    /**
+     * @deprecated
+     */
+    public final static int MODE_SKIP=FMode.MODE_SKIP;//0000 0010
+    /**
+     * @deprecated
+     */
+    public final static int MODE_KEEP=FMode.MODE_KEEP;//0000 0100
+    /**
+     * @deprecated
+     */
+    public final static int MODE_POSTFIX=FMode.MODE_POSTFIX;//0000 1000
     private int mode;
     private String parent;
     private String name;

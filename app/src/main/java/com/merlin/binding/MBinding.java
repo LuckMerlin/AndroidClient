@@ -28,6 +28,7 @@ import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -92,6 +93,15 @@ public class MBinding {
                 int width=null!=params?params.width:ViewGroup.LayoutParams.WRAP_CONTENT;
                 int height=null!=params?params.height:ViewGroup.LayoutParams.WRAP_CONTENT;
                 ((ViewGroup)view).addView((View)layout,new ViewGroup.LayoutParams(width,height));
+            }else if (layout instanceof ViewDataBinding){
+                  View root=((ViewDataBinding)layout).getRoot();
+                  if (null!=root&&null==root.getParent()){
+                      inflateLayout(view,root);
+                  }
+            }else if (layout instanceof Collection&&((Collection)layout).size()>0){
+                for (Object child:(Collection)layout) {
+                    inflateLayout(view,child);
+                }
             }
         }
     }

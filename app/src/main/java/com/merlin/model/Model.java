@@ -121,8 +121,16 @@ public class Model {
         return inflate(getViewContext(),layoutId,res);
     }
 
+    protected final <T extends ViewDataBinding> T inflate(int layoutId,ViewGroup parent, Res ...res) {
+        return inflate(getViewContext(),layoutId,parent,res);
+    }
+
     protected final <T extends ViewDataBinding> T inflate(Context context,int layoutId, Res ...res){
-        T binding=null!=context?DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,null,false):null;
+        return inflate(context,layoutId,null,res);
+    }
+
+    protected final <T extends ViewDataBinding> T inflate(Context context,int layoutId,ViewGroup parent, Res ...res){
+        T binding=null!=context?DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,parent,null!=parent):null;
         if (null!=binding&&null!=res&&res.length>0){
             for (Res r:res) {
                 Integer resourceId=null!=r?r.getResourceId():null;
@@ -400,6 +408,11 @@ public class Model {
     protected final boolean setStatusBar(Object id,int position){
         StatusBarLayout statusBar=position== StatusBar.LEFT|| position== StatusBar.CENTER||position== StatusBar.RIGHT?getStatusBar():null;
         return null!=statusBar&&statusBar.set(id,position);
+    }
+
+    protected final ViewDataBinding getBiniding(){
+        View root=getRoot();
+        return null!=root?DataBindingUtil.getBinding(root):null;
     }
 
 }

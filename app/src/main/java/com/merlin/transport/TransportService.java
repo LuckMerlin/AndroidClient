@@ -3,23 +3,43 @@ package com.merlin.transport;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FMode;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class TransportService extends Service {
     private final FileDownloader mDownloader=new FileDownloader();
+    private final Uploader mFileUploader=new Uploader(){
+        @Override
+        protected Context getContext() {
+            return TransportService.this;
+        }
+    };
+    /**
+     * @deprecated
+     */
     private final static String LABEL_FILE_META_LIST ="fileMetaList";
+    private final static String LABEL_FILE_LIST ="fileList";
     private final static int MODE_INVALID =-1;
     private final static int MODE_DOWNLOAD =123;
+    private final static int MODE_UPLOAD =124;
     private final static String LABEL_MODE ="mode";
+    private final static String LABEL_FOLDER ="folder";
+    private final static String LABEL_DEBUG ="debug";
+    private final static String LABEL_COVER_MODE ="coverMode";
+    private final static String LABEL_CLIENT ="client";
+    private final static String LABEL_INTERACTIVE ="interactive";
 
     @Nullable
     @Override
@@ -29,13 +49,32 @@ public class TransportService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (null!=intent){
-            ArrayList<NasFile> list=intent.getParcelableArrayListExtra(LABEL_FILE_META_LIST);
-            if (null!=list&&list.size()>0){
-                onFileMetaListReceived(intent,list,"Receive from intent.");
-            }
-        }
+        Bundle bundle=null!=intent?intent.getExtras():null;
+        handCommand(bundle);
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private final boolean handCommand(Bundle bundle){
+        Object mode=null!=bundle?bundle.get(LABEL_MODE):null;
+        if (null==mode){
+            return false;
+        }
+        if (mode.equals(MODE_UPLOAD)){
+            Uploader uploader=mFileUploader;
+            Object files=bundle.get(LABEL_FILE_LIST);
+            Object coverMode=bundle.get(LABEL_COVER_MODE);
+            Object client=bundle.get(LABEL_CLIENT);
+            Object folder=bundle.get(LABEL_FOLDER);
+            Object debug=bundle.get(LABEL_DEBUG);
+            Object interactive=bundle.get(LABEL_INTERACTIVE);
+            return uploader.upload(null!=files&&files instanceof Collection?((Collection)files):null,
+                    null!=interactive&&interactive instanceof Boolean?((Boolean)interactive):true,
+                    null!=coverMode&&coverMode instanceof Integer?((Integer)coverMode): FMode.MODE_NONE,
+                    null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,
+                    null!=folder&&folder instanceof String?((String)folder):null,
+                    null!=debug&&debug instanceof String?((String)debug):null);
+        }
+        return false;
     }
 
     private boolean onFileMetaListReceived(Intent intent, ArrayList<NasFile> list, String debug){
@@ -48,7 +87,6 @@ public class TransportService extends Service {
         }
         return false;
     }
-
 
     public static boolean download(Context context, Parcelable file, String debug){
            if (null!=context&&null!=file){
@@ -70,6 +108,28 @@ public class TransportService extends Service {
             context.startService(intent);
             return true;
         }
+        return false;
+    }
+
+    public static boolean upload(Context context,boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){
+        if (null!=files&&files.size()>0){
+            String url=null!=meta?meta.getUrl():null;
+            if (null==url||url.length()<=0){
+                Debug.W(TransportService.class,"Can't upload file with invalid server "+(null!=debug?debug:".")+" url="+url);
+                return false;
+            }
+            Debug.D(TransportService.class,"Post upload to service "+url+" "+mode+" "+" "+folder+" "+(null!=debug?debug:"."));
+            Intent intent=new Intent(context,TransportService.class);
+            intent.putCharSequenceArrayListExtra(LABEL_FILE_LIST,files);
+            intent.putExtra(LABEL_COVER_MODE,mode);
+            intent.putExtra(LABEL_CLIENT,meta);
+            intent.putExtra(LABEL_MODE,MODE_UPLOAD);
+            intent.putExtra(LABEL_INTERACTIVE,interactive);
+            intent.putExtra(LABEL_FOLDER,folder);
+            intent.putExtra(LABEL_DEBUG,debug);
+            return null!=context.startService(intent);
+        }
+        Debug.W(TransportService.class,"Can't upload file with EMPTY list "+(null!=debug?debug:"."));
         return false;
     }
 

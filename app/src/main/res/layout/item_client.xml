@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="client"
+            type="com.merlin.bean.ClientMeta" />
+        <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.util.FileSize"/>
+    </data>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            binding:enableClick="@{Clicker.click(client,true)}"
+            android:layout_width="match_parent"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@{R.drawable.selector_round_dark_corner_small}"
+            android:minHeight="@dimen/listItemSmall"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@{client.imageUrl}"
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+                    <TextView
+                        android:text="@{client.name}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:text="@{FileSize.formatSizeText(client.total-client.free)+`/`+FileSize.formatSizeText(client.total)}"
+                        android:layout_width="wrap_content"
+                        android:layout_marginLeft="1dp"
+                        android:textSize="8sp"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:text="@{client.url}"
+                        android:textSize="8sp"
+                        android:singleLine="true"
+                        android:layout_marginLeft="1dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+            </LinearLayout>
+    </FrameLayout>
+</layout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="childs"
+            type="java.util.Collection&lt;androidx.databinding.ViewDataBinding>" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.client.R"/>
+    </data>
+    <LinearLayout
+        binding:createModel="@{true}"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:gravity="center"
+        android:minWidth="200dp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/listItemNormal">
+        <LinearLayout
+            binding:layout="@{childs}"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <CheckBox
+            android:text="@string/defaultValue"
+            style="@style/checkboxStyle"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:clickable="false"/>
+    </LinearLayout>
+</layout>

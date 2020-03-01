@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:textSize="@dimen/textTitle"
                 android:singleLine="true"
-                android:text="@{meta instanceof LocalFile?(meta.getName(true)??meta.title):(meta.title??meta.getName(true))}"
+                android:text="@{meta.getName(true)}"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
             <LinearLayout

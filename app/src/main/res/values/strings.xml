@@ -89,4 +89,8 @@
     <string name="createFail">创建失败</string>
     <string name="deleteFail">删除失败</string>
     <string name="deleteSucceed">删除成功</string>
+    <string name="defaultValue">默认</string>
+    <string name="noneServerExist">没有可使用的服务器</string>
+    <string name="chooseServer">选择服务器</string>
+    <string name="invalidServer">不合法的服务器</string>
 </resources>
