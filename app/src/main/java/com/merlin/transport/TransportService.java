@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,7 +54,19 @@ public class TransportService extends Service {
     private final Binder mBinder=new Binder();
 
     private final Uploader.OnUploadProgress mUploadProgress=(from,folder, name, upload, total)-> {
-
+        Map<Transporter.Callback,Long> callbacks= mCallbacks;
+        if (null!=callbacks){
+            synchronized (callbacks){
+                Set<Transporter.Callback> set=callbacks.size()>0?callbacks.keySet():null;
+                if (null!=set){
+                    for (Transporter.Callback callback:set){
+                        if (null!=callback&&callback instanceof Uploader.OnUploadProgress){
+                            ((Uploader.OnUploadProgress)callback).onUploadProgress();
+                        }
+                    }
+                }
+            }
+        }
     };
 
     @Nullable
@@ -161,14 +174,24 @@ public class TransportService extends Service {
 
         @Override
         public boolean add(Transporter.Callback progress) {
-            Map<Transporter.Callback,Long> reference=mCallbacks;
-            return null!=reference&&null!=progress&&!reference.containsKey(progress)?null==reference.put(progress,System.currentTimeMillis()):false;
+            Map<Transporter.Callback,Long> reference=null!=progress?mCallbacks:null;
+            if (null!=reference){
+                synchronized (reference) {
+                    return !reference.containsKey(progress) && null == reference.put(progress, System.currentTimeMillis());
+                }
+            }
+            return false;
         }
 
         @Override
         public boolean remove(Transporter.Callback progress) {
-            Map<Transporter.Callback,Long> reference=mCallbacks;
-            return null!=reference&&null!=progress&&null!=reference.remove(progress);
+            Map<Transporter.Callback,Long> reference=null!=progress?mCallbacks:null;
+            if (null!=reference){
+                synchronized (reference) {
+                    return null != reference.remove(progress);
+                }
+            }
+            return false;
         }
     }
 
