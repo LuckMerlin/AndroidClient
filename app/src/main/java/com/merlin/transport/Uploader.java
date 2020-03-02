@@ -33,7 +33,7 @@ public abstract class Uploader extends Transporter{
     private final Map<String,UploadBody> mUploading=new ConcurrentHashMap<>();
 
     public interface OnUploadProgress extends Callback{
-        void onUploadProgress(int type,long upload,long total);
+        void onUploadProgress(Transport transport,long upload,long total);
     }
 
     private interface Api{

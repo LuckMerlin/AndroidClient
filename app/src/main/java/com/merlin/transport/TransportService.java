@@ -53,15 +53,16 @@ public class TransportService extends Service {
     private final Map<Transporter.Callback,Long> mCallbacks=new WeakHashMap<>();
     private final Binder mBinder=new Binder();
 
-    private final Uploader.OnUploadProgress mUploadProgress=(from,folder, name, upload, total)-> {
+    private final Uploader.OnUploadProgress mUploadProgress=(transport,uploaded, total)-> {
         Map<Transporter.Callback,Long> callbacks= mCallbacks;
         if (null!=callbacks){
+            final Handler handler=mHandler;
             synchronized (callbacks){
                 Set<Transporter.Callback> set=callbacks.size()>0?callbacks.keySet():null;
                 if (null!=set){
                     for (Transporter.Callback callback:set){
                         if (null!=callback&&callback instanceof Uploader.OnUploadProgress){
-                            ((Uploader.OnUploadProgress)callback).onUploadProgress();
+                            handler.post(()->((Uploader.OnUploadProgress)callback).onUploadProgress(transport,uploaded,total));
                         }
                     }
                 }
