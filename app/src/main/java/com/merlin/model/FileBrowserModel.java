@@ -175,7 +175,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
 //                list.add("/sdcard/PictureseditedJPEG_20200108_153014.jpg");
                 list.add("/sdcard/kgmusic/download/刘昊霖、Kidult - Landing Guy.mp3");
                 //test
-                TransportService.upload(getViewContext(),true,list,meta,null,FMode.MODE_COVER,debug);
+                TransportService.upload(getViewContext(),true,list,meta,"./data",FMode.MODE_COVER,debug);
                 launchTransportList("ddd");
             }
         }).queryClientMeta();

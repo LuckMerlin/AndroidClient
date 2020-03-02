@@ -97,45 +97,11 @@ public class TransportService extends Service {
             Object debug=bundle.get(LABEL_DEBUG);
             Object interactive=bundle.get(LABEL_INTERACTIVE);
             return uploader.upload(files,
+                    null!=folder&&folder instanceof String?((String)folder):null,
                     null!=interactive&&interactive instanceof Boolean?((Boolean)interactive):true,
                     null!=coverMode&&coverMode instanceof Integer?((Integer)coverMode): FMode.MODE_NONE,
-                    null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,
-                    null!=folder&&folder instanceof String?((String)folder):null,mUploadProgress,
+                    null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,mUploadProgress,
                     null!=debug&&debug instanceof String?((String)debug):null);
-        }
-        return false;
-    }
-
-    private boolean onFileMetaListReceived(Intent intent, ArrayList<NasFile> list, String debug){
-        if (null!=list&&list.size()>0){
-            switch (null!=intent?intent.getIntExtra(LABEL_MODE,MODE_INVALID):MODE_INVALID){
-                case MODE_DOWNLOAD:
-                    FileDownloader downloader=mDownloader;
-                    return null!=downloader&&downloader.download(list,"/sdcard/a",debug);
-            }
-        }
-        return false;
-    }
-
-    public static boolean download(Context context, Parcelable file, String debug){
-           if (null!=context&&null!=file){
-               ArrayList<Parcelable> list=new ArrayList<>(1);
-//               list.add(file);
-               Toast.makeText(context,"下载 "+file,Toast.LENGTH_SHORT).show();
-               return download(context,list,debug);
-           }
-            return false;
-    }
-
-    public static boolean download(Context context, ArrayList<Parcelable> list, String debug){
-        final int size=null!=list&&null!=context?list.size():-1;
-        if (size>0){
-            Debug.D(TransportService.class,"Post download to service "+size+" "+(null!=debug?debug:"."));
-            Intent intent=new Intent(context,TransportService.class);
-            intent.putParcelableArrayListExtra(LABEL_FILE_META_LIST,list);
-            intent.putExtra(LABEL_MODE,MODE_DOWNLOAD);
-            context.startService(intent);
-            return true;
         }
         return false;
     }

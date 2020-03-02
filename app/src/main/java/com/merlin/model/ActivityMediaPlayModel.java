@@ -78,9 +78,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
                             return addToSheet("After add sheet tap click.")||true;
                         case R.drawable.selector_next:
                             return next("After next media tap click.")||true;
-                        case R.drawable.selector_download_media:
-                            NasMedia media=mPlaying.get();
-                            return null!=media&&TransportService.download(getContext(),media,"After play display download tap.")||true;
+//                        case R.drawable.selector_download_media:
+//                            NasMedia media=mPlaying.get();
+//                            return null!=media&&TransportService.download(getContext(),media,"After play display download tap.")||true;
                         case R.drawable.heart_pressed://Get through
                         case R.drawable.heart_normal://get through
                             return (null!=view&&makeFavorite(resId!=R.drawable.heart_pressed))||true;

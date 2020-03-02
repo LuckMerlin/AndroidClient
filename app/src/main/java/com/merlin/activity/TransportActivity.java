@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 
+import com.merlin.client.R;
 import com.merlin.client.databinding.ActivityTransportBinding;
 import com.merlin.debug.Debug;
 import com.merlin.model.Model;
@@ -25,6 +27,7 @@ public class TransportActivity extends  ModelActivity<TransportModel>  {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DataBindingUtil.setContentView(this, R.layout.activity_transport);
         if (null==mConnection) {
             Intent intent = new Intent(this, TransportService.class);
             startService(intent);

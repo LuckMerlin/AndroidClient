@@ -1,16 +1,33 @@
 package com.merlin.model;
 
+import android.graphics.Color;
+import android.view.View;
+
 import com.merlin.adapter.TransportAdapter;
+import com.merlin.transport.Transport;
 import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
+import com.merlin.transport.Upload;
 import com.merlin.transport.Uploader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class TransportModel extends Model implements Uploader.OnUploadProgress {
     private final TransportAdapter mAdapter=new TransportAdapter();
     private TransportBinder mBinder;
 
     @Override
-    public void onUploadProgress(String from, String folder, String name, long upload, long total) {
+    protected void onRootAttached(View root) {
+        super.onRootAttached(root);
+        List<Transport> list=new ArrayList<>();
+        Upload upload=new Upload("path","/dddd","林强",null);
+        list.add(upload);
+        mAdapter.setData(list);
+    }
+
+    @Override
+    public void onUploadProgress(Transport transport, long upload, long total) {
 
     }
 

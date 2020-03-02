@@ -42,71 +42,67 @@ public abstract class Uploader extends Transporter{
         Observable<Reply> upload(@Part List<MultipartBody.Part> parts);
     }
 
-    public final boolean upload(Collection collection, boolean interactive, int coverMode,
-                                ClientMeta meta, String folder,OnUploadProgress progress, String debug) {
+    public final boolean upload(Collection collection, String folder, boolean interactive, int coverMode,
+                                ClientMeta meta,OnUploadProgress progress, String debug) {
         if (null != collection && collection.size() > 0) {
-            ArrayList<String> paths=new ArrayList<>();
             for (Object obj : collection) {
                 if (null!=obj&&obj instanceof String){
-                    paths.add((String)obj);
+                    upload(new Upload((String)obj,folder,null,meta),interactive,coverMode,meta,progress,debug);
                 }
             }
-            return upload(paths,interactive,coverMode,meta,folder,progress,debug);
         }
         return false;
     }
 
-    public final synchronized boolean upload(ArrayList<String> paths, boolean interactive, int coverMode,
-                                             ClientMeta meta, String folder,OnUploadProgress progress, String debug) {
-        if (null==paths||paths.size()<=0){
+    public final synchronized boolean upload(Upload upload, boolean interactive, int coverMode, ClientMeta meta, OnUploadProgress progress, String debug) {
+        final String path=null!=upload?upload.getPath():null;
+        if (null==path||path.length()<=0){
             return false;
         }
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
             return false;
         }
+        final Map<String,UploadBody> uploading=mUploading;
+        if (null!=uploading&&uploading.containsKey(path)){
+            Debug.W(getClass(),"Skip upload one file which already uploading."+path);
+            return false;
+        }
         List<String> exist=null;
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+        final String folder=null!=upload?upload.getFolder():null;
         builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
         builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(coverMode));
         final List<MultipartBody.Part> parts=new ArrayList<>();
-        Debug.D(getClass(),"Upload file "+paths.size());
+        Debug.D(getClass(),"Upload file "+path);
         final String charset="UTF-8";
-        for (String path:paths) {
-            File file=null!=path?new java.io.File(path):null;
-            if (null==file||!file.exists()){
-                Debug.W(getClass(),"Give up upload one file which not exist."+path);
-                continue;
-            }
-            if (!file.canRead()){
-                Debug.W(getClass(),"Give up upload one file which NONE read permission."+path);
-                continue;
-            }
-            final Map<String,UploadBody> uploading=mUploading;
-            if (null!=uploading&&uploading.containsKey(path)){
-                Debug.W(getClass(),"Skip upload one file which already uploading."+path);
-                continue;
-            }
-            Debug.D(getClass(),"Upload file "+path+" to "+url);
-            try {
-                final String name=file.getName();
-                final UploadBody uploadBody=new UploadBody(file){
-                    @Override
-                    protected void onUploadProgress(long uploaded, long total) {
-                        if (null!=progress){
-                            progress.onUploadProgress(path,folder,name,uploaded,total);
-                        }
+        File file=new java.io.File(path);
+        final String name=null!=upload?upload.getName():null;
+        final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
+            Debug.W(getClass(),"Give up upload one file which not exist."+path);
+            return false;
+        }
+        if (!file.canRead()){
+            Debug.W(getClass(),"Give up upload one file which NONE read permission."+path);
+            return false;
+        }
+        Debug.D(getClass(),"Upload file "+path+" to "+url);
+        try {
+            final UploadBody uploadBody=new UploadBody(path){
+                @Override
+                protected void onUploadProgress(long uploaded, long total) {
+                    if (null!=progress){
+                        progress.onUploadProgress(upload,uploaded,total);
                     }
-                };
-                parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset),
-                        URLEncoder.encode(name,charset), uploadBody));
-                if (null!=uploading){
-                    uploading.put(path,uploadBody);
                 }
-            } catch (UnsupportedEncodingException e) {
-                Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
-                e.printStackTrace();
+            };
+            parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
+            if (null!=uploading){
+                uploading.put(path,uploadBody);
             }
+        } catch (UnsupportedEncodingException e) {
+            Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
+            e.printStackTrace();
         }
         if (null!=folder) {
             parts.add(MultipartBody.Part.createFormData(Label.LABEL_FOLDER, folder));
@@ -138,18 +134,18 @@ public abstract class Uploader extends Transporter{
     }
 
     private static abstract class UploadBody extends RequestBody{
-        private final File mFile;
+        private final String mPath;
 
         protected abstract void onUploadProgress(long uploaded,long total);
 
-        public UploadBody(File file){
-            mFile=file;
+        public UploadBody(String path){
+            mPath=path;
         }
 
         @Override
         public long contentLength(){
-            File file=mFile;
-            return null!=file?file.length():-1;
+            String path=mPath;
+            return null!=path&&path.length()>0?new File(path).length():-1;
         }
 
         @Override
@@ -159,10 +155,11 @@ public abstract class Uploader extends Transporter{
 
         @Override
         public void writeTo(BufferedSink sink) throws IOException {
-            File file=mFile;
+            String path=mPath;
+            final File file=null!=path&&path.length()>0?new File(path):null;
             if (null!=file&&file.exists()){
                 long fileLength = file.length();
-                int bufferSize=1024*1024;
+                int bufferSize=1024*1024*2;
                 byte[] buffer = new byte[bufferSize];
                 FileInputStream in = new FileInputStream(file);
                 long uploaded = 0;
