@@ -8,6 +8,15 @@ import android.widget.Toast;
 import com.merlin.server.Retrofit;
 
 public abstract class Transporter extends Retrofit {
+    public final static int TYPE_NONE =0x00;//0000 0000
+    public final static int TYPE_DOWNLOAD =0x01;//0000 0001
+    public final static int TYPE_UPLOAD =0x02;//0000 0010
+    public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
+
+    public interface Callback{
+
+    }
+
     protected abstract Context getContext();
 
     protected final boolean toast(int textId){

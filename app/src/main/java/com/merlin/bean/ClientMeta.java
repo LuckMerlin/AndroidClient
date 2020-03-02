@@ -9,6 +9,7 @@ import android.os.StatFs;
 import androidx.annotation.NonNull;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 
 import java.io.Serializable;
 
@@ -102,15 +103,15 @@ public final class ClientMeta implements Parcelable {
     }
 
     private ClientMeta(Parcel in){
-        if (null!=in){
-            this.url=in.readString();
-            this.account=in.readString();
-            this.deviceType=in.readString();
-            this.name=in.readString();
-            this.imageUrl=in.readString();
-            this.platform=in.readString();
-            this.free=in.readLong();
-            this.total=in.readLong();
+        if (null!=in) {
+            this.url = in.readString();
+            this.account = in.readString();
+            this.deviceType = in.readString();
+            this.name = in.readString();
+            this.imageUrl = in.readString();
+            this.platform = in.readString();
+            this.free = in.readLong();
+            this.total = in.readLong();
         }
     }
 

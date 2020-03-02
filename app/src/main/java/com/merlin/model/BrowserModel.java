@@ -189,7 +189,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                 }
                 return null!=list&&list.size()>0&&deleteFile(list,"After delete tap click.");
             default:
-                if (null!=data&&data instanceof FileMeta ){
+                if (null!=data&&data instanceof FileMeta){
                     FileMeta file=(FileMeta)data;
                     if (isMode(MODE_MULTI_CHOOSE)) {
                         BrowserAdapter adapter=getBrowserAdapter();

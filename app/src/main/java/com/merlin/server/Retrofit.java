@@ -60,7 +60,7 @@ public class Retrofit {
 
         @Override
         public void onSubscribe(Disposable d) {
-            Debug.D(getClass(),"SonSubscribeSS "+d);
+//            Debug.D(getClass(),"SonSubscribeSS "+d);
         }
 
         @Override

@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-public final class LocalFile implements FileMeta, Parcelable {
+public final class LocalFile implements Parcelable,FileMeta {
     private String parent;
     private String name;
     private String title;
@@ -68,7 +68,6 @@ public final class LocalFile implements FileMeta, Parcelable {
         return result;
     }
 
-    @Override
     public boolean applyModify(FModify modify) {
         if (null!=modify){
             String name=modify.getName();
@@ -84,58 +83,47 @@ public final class LocalFile implements FileMeta, Parcelable {
         return false;
     }
 
-    @Override
     public Object getImageUrl() {
         return imageUrl;
     }
 
-    @Override
     public String getParent() {
         return parent;
     }
 
-    @Override
     public String getName(boolean extension) {
         return null!=name&&extension&&null!=this.extension?name+this.extension:name;
     }
 
-    @Override
     public String getTitle() {
         return title;
     }
 
-    @Override
     public String getExtension() {
         return extension;
     }
 
-    @Override
     public long getSize() {
         return size;
     }
 
-    @Override
     public double getModifyTime() {
         return modifyTime;
     }
 
-    @Override
     public String getPath() {
         String value=getName(true);
         return null!=parent&&null!=value?parent+value:null;
     }
 
-    @Override
     public boolean isAccessible() {
         return accessible;
     }
 
-    @Override
     public boolean isDirectory() {
         return directory;
     }
 
-    @Override
     public String permission() {
         return "";
     }
@@ -161,26 +149,26 @@ public final class LocalFile implements FileMeta, Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         parent=dest.readString();
-        name=dest.readString();
-        title=dest.readString();
-        extension=dest.readString();
-        imageUrl=dest.readString();
-        size=dest.readLong();
-        modifyTime=dest.readDouble();
-        directory=dest.readInt()==1;
-        accessible=dest.readInt()==1;
+//        name=dest.readString();
+//        title=dest.readString();
+//        extension=dest.readString();
+//        imageUrl=dest.readString();
+//        size=dest.readLong();
+//        modifyTime=dest.readDouble();
+//        directory=dest.readInt()==1;
+//        accessible=dest.readInt()==1;
     }
 
     private LocalFile(Parcel in){
         in.writeString(parent);
-        in.writeString(name);
-        in.writeString(title);
-        in.writeString(extension);
-        in.writeString(null!=imageUrl&&imageUrl instanceof String?(String)imageUrl:"");
-        in.writeLong(size);
-        in.writeDouble(modifyTime);
-        in.writeInt(directory?1:0);
-        in.writeInt(accessible?1:0);
+//        in.writeString(name);
+//        in.writeString(title);
+//        in.writeString(extension);
+//        in.writeString(null!=imageUrl&&imageUrl instanceof String?(String)imageUrl:"");
+//        in.writeLong(size);
+//        in.writeDouble(modifyTime);
+//        in.writeInt(directory?1:0);
+//        in.writeInt(accessible?1:0);
     }
 
     public static final Creator<LocalFile> CREATOR = new Creator<LocalFile>() {

@@ -33,6 +33,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.TransportActivity"
+            android:theme="@style/activityTransportStyle"
             android:launchMode="singleInstance"
             android:label="@string/fileTransport">
             <intent-filter>

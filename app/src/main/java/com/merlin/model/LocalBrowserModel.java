@@ -59,17 +59,15 @@ public class LocalBrowserModel extends BrowserModel {
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        if (!super.onTapClick(view,clickCount,resId,data)){
-            switch (resId){
-                case R.string.upload:
-                    ArrayList<LocalFile> list=null;
-                    if (null!=data&&data instanceof LocalFile){
-                        (list=new ArrayList<>(1)).add((LocalFile)data);
-                    }
-                    return null!=data&&upload(list,"./data" ,FMode.MODE_NONE,"After open tap click.");
-            }
+        switch (resId){
+            case R.string.upload:
+                ArrayList<LocalFile> list=null;
+                if (null!=data&&data instanceof LocalFile){
+                    (list=new ArrayList<>(1)).add((LocalFile)data);
+                }
+                return (null!=data&&upload(list,"./data" ,FMode.MODE_NONE,"After open tap click."))||true;
         }
-        return true;
+        return super.onTapClick(view,clickCount,resId,data);
     }
 
     @Override
@@ -283,6 +281,13 @@ public class LocalBrowserModel extends BrowserModel {
         int count=null!=files?files.size():-1;
         final Context context=getViewContext();
         if (count>0&&null!=context){
+            ArrayList<CharSequence> paths=new ArrayList<>();
+            for (LocalFile lf:files) {
+                String path=null!=lf?lf.getPath():null;
+                if (null!=path){
+                    paths.add(path);
+                }
+            }
             Dialog dialog=new Dialog(context);
             ServerChooseLayoutBinding binding=(ServerChooseLayoutBinding) inflate(R.layout.server_choose_layout);
             Collection<Object> values=getAllClients();
@@ -320,10 +325,10 @@ public class LocalBrowserModel extends BrowserModel {
                         toast(R.string.invalidServer);
                         return true;
                     }
-                    TransportService.upload(context,true,files,clientMeta,folder,mode,debug);
+                    TransportService.upload(context,true,paths,clientMeta,folder,mode,debug);
                 }
                 dialog.dismiss();
-                return true;},false);
+                return true;},false)||true;
         }
         Debug.W(getClass(),"Can't  upload file with EMPTY list "+(null!=debug?debug:"."));
         return false;

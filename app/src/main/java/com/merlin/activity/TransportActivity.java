@@ -11,37 +11,37 @@ import androidx.annotation.Nullable;
 
 import com.merlin.client.databinding.ActivityTransportBinding;
 import com.merlin.debug.Debug;
+import com.merlin.model.Model;
 import com.merlin.model.TransportModel;
 import com.merlin.task.DownloadService;
 import com.merlin.task.Transporter;
+import com.merlin.transport.TransportBinder;
+import com.merlin.transport.TransportService;
 
-public class TransportActivity extends  SocketActivity<ActivityTransportBinding, TransportModel>  {
-
+public class TransportActivity extends  ModelActivity<TransportModel>  {
     private static ServiceConnection mConnection;
-    private Transporter mDownloader;
+    private TransportBinder mBinder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Debug.D(getClass(),"####TransportActivity####  onCreate");
         if (null==mConnection) {
-            Intent intent = new Intent(this, DownloadService.class);
+            Intent intent = new Intent(this, TransportService.class);
             startService(intent);
             bindService(intent, mConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
-                        if (null!=service&&service instanceof Transporter){
-                            Transporter downloader=(Transporter)service;
-                            mDownloader=downloader;
-                            getViewModel().setDownloader(downloader);
-                        }
-                    Debug.D(getClass(),"####TransportActivity####  onServiceConnected");
+                    if (null!=service&&service instanceof TransportBinder){
+                        TransportBinder downloader=(TransportBinder)service;
+                        mBinder=downloader;
+                        setBinder(downloader,"After bind succeed");
+                    }
                 }
 
                 @Override
                 public void onServiceDisconnected(ComponentName name) {
-                    mDownloader=null;
-                    getViewModel().setDownloader(null);
+                    mBinder=null;
+                    setBinder(null,"After bind disconnected");
                     Debug.D(getClass(),"####TransportActivity####  onServiceDisconnected");
                 }
             }, Context.BIND_AUTO_CREATE);
@@ -49,20 +49,27 @@ public class TransportActivity extends  SocketActivity<ActivityTransportBinding,
     }
 
     @Override
+    public void onModelBind(Model model) {
+        super.onModelBind(model);
+        setBinder(mBinder,"After model bind.");
+    }
+
+    private boolean setBinder(TransportBinder binder, String debug){
+        Model model=getModel();
+        return null!=model&&model instanceof TransportModel&&((TransportModel)model).setBinder(binder,debug);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         Debug.D(getClass(),"####TransportActivity####  onDestroy");
-        getViewModel().setDownloader(null);
         ServiceConnection connection=mConnection;
+        setBinder(null,"After activity destroy.");
         if (null!=connection){
             mConnection=null;
             unbindService(connection);
         }
-        Transporter downloader=mDownloader;
-        mDownloader=null;
-        if (null!=downloader){
-            downloader.setCallback(null);
-        }
+        mBinder=null;
     }
 
 }

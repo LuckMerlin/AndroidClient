@@ -4,7 +4,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.widget.Toast;
 
@@ -16,8 +18,10 @@ import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class TransportService extends Service {
     private final FileDownloader mDownloader=new FileDownloader();
@@ -41,11 +45,17 @@ public class TransportService extends Service {
     private final static String LABEL_COVER_MODE ="coverMode";
     private final static String LABEL_CLIENT ="client";
     private final static String LABEL_INTERACTIVE ="interactive";
+    private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private final Binder mBinder=new Binder();
+
+    private final Uploader.OnUploadProgress mUploadProgress=(from,folder, name, upload, total)-> {
+
+    };
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -61,20 +71,18 @@ public class TransportService extends Service {
             return false;
         }
         if (mode.equals(MODE_UPLOAD)){
-            Debug.D(getClass(),"QQQQQQQQQQQQQQQQ ");
             Uploader uploader=mFileUploader;
-            Object files=bundle.get(LABEL_FILE_LIST);
+            ArrayList<CharSequence> files=bundle.getCharSequenceArrayList(LABEL_FILE_LIST);
             Object coverMode=bundle.get(LABEL_COVER_MODE);
             Object client=bundle.get(LABEL_CLIENT);
             Object folder=bundle.get(LABEL_FOLDER);
             Object debug=bundle.get(LABEL_DEBUG);
             Object interactive=bundle.get(LABEL_INTERACTIVE);
-            Debug.D(getClass(),"EEEEEEEEEEEEEEEEEEEE ");
-            return uploader.upload(null!=files&&files instanceof Collection?((Collection)files):null,
+            return uploader.upload(files,
                     null!=interactive&&interactive instanceof Boolean?((Boolean)interactive):true,
                     null!=coverMode&&coverMode instanceof Integer?((Integer)coverMode): FMode.MODE_NONE,
                     null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,
-                    null!=folder&&folder instanceof String?((String)folder):null,
+                    null!=folder&&folder instanceof String?((String)folder):null,mUploadProgress,
                     null!=debug&&debug instanceof String?((String)debug):null);
         }
         return false;
@@ -114,7 +122,7 @@ public class TransportService extends Service {
         return false;
     }
 
-    public static boolean upload(Context context, boolean interactive , ArrayList<LocalFile> files, ClientMeta meta, String folder, int mode, String debug){
+    public static boolean upload(Context context, boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){
         if (null!=files&&files.size()>0){
             String url=null!=meta?meta.getUrl():null;
             if (null==url||url.length()<=0){
@@ -123,17 +131,41 @@ public class TransportService extends Service {
             }
             Debug.D(TransportService.class,"Post upload to service "+url+" "+mode+" "+" "+folder+" "+(null!=debug?debug:"."));
             Intent intent=new Intent(context,TransportService.class);
-            intent.putParcelableArrayListExtra(LABEL_FILE_LIST,files);
             intent.putExtra(LABEL_COVER_MODE,mode);
             intent.putExtra(LABEL_CLIENT,meta);
             intent.putExtra(LABEL_MODE,MODE_UPLOAD);
             intent.putExtra(LABEL_INTERACTIVE,interactive);
             intent.putExtra(LABEL_FOLDER,folder);
             intent.putExtra(LABEL_DEBUG,debug);
+            intent.putCharSequenceArrayListExtra(LABEL_FILE_LIST,files);
             return null!=context.startService(intent);
         }
         Debug.W(TransportService.class,"Can't upload file with EMPTY list "+(null!=debug?debug:"."));
         return false;
+    }
+
+    private class Binder extends android.os.Binder implements TransportBinder {
+
+        @Override
+        public Collection<? extends Transport> getRunning(int type) {
+            Uploader uploader=(type& Transporter.TYPE_UPLOAD)==Transporter.TYPE_UPLOAD?mFileUploader:null;
+            if (null!=uploader){
+                return uploader.getUploading(null);
+            }
+            return null;
+        }
+
+        @Override
+        public boolean add(Uploader.OnUploadProgress progress) {
+
+            return false;
+        }
+
+        @Override
+        public boolean remove(Uploader.OnUploadProgress progress) {
+
+            return false;
+        }
     }
 
 }

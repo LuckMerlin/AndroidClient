@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.Adapter;
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.NasBrowserAdapter;
@@ -171,10 +172,11 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
             if(null!=meta){
                 putClientMeta(meta,"After client meta response.");
                 ArrayList<CharSequence> list=new ArrayList<>();
-                list.add("/sdcard/PictureseditedJPEG_20200108_153014.jpg");
-                list.add("/sdcard/PictureseditedJPEG_20200225_100920.jpg");
+//                list.add("/sdcard/PictureseditedJPEG_20200108_153014.jpg");
+                list.add("/sdcard/kgmusic/download/刘昊霖、Kidult - Landing Guy.mp3");
                 //test
-//                TransportService.upload(getViewContext(),true,list,meta,null,FMode.MODE_COVER,debug);
+                TransportService.upload(getViewContext(),true,list,meta,null,FMode.MODE_COVER,debug);
+                launchTransportList("ddd");
             }
         }).queryClientMeta();
     }
@@ -186,9 +188,8 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                 switch (resId){
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
-                    case R.string.upload:
-                         Debug.D(getClass(),"AAA "+data);
-                        return true;
+                    case R.string.transportList:
+                        return launchTransportList("After transport list tap click.");
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -265,6 +266,17 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
             binding.setFolder(mCurrentFolder.get());
             binding.setClient(getCurrentModelMeta());
             return showAtLocationAsContext(view,binding);
+        }
+        return false;
+    }
+
+    private boolean launchTransportList(String debug){
+        Context context=getContext();
+        if (null!=context){
+            Intent intent=new Intent(context, TransportActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            return true;
         }
         return false;
     }
