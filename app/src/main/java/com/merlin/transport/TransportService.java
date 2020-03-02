@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FMode;
+import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 
@@ -60,6 +61,7 @@ public class TransportService extends Service {
             return false;
         }
         if (mode.equals(MODE_UPLOAD)){
+            Debug.D(getClass(),"QQQQQQQQQQQQQQQQ ");
             Uploader uploader=mFileUploader;
             Object files=bundle.get(LABEL_FILE_LIST);
             Object coverMode=bundle.get(LABEL_COVER_MODE);
@@ -67,6 +69,7 @@ public class TransportService extends Service {
             Object folder=bundle.get(LABEL_FOLDER);
             Object debug=bundle.get(LABEL_DEBUG);
             Object interactive=bundle.get(LABEL_INTERACTIVE);
+            Debug.D(getClass(),"EEEEEEEEEEEEEEEEEEEE ");
             return uploader.upload(null!=files&&files instanceof Collection?((Collection)files):null,
                     null!=interactive&&interactive instanceof Boolean?((Boolean)interactive):true,
                     null!=coverMode&&coverMode instanceof Integer?((Integer)coverMode): FMode.MODE_NONE,
@@ -111,7 +114,7 @@ public class TransportService extends Service {
         return false;
     }
 
-    public static boolean upload(Context context,boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){
+    public static boolean upload(Context context, boolean interactive , ArrayList<LocalFile> files, ClientMeta meta, String folder, int mode, String debug){
         if (null!=files&&files.size()>0){
             String url=null!=meta?meta.getUrl():null;
             if (null==url||url.length()<=0){
@@ -120,7 +123,7 @@ public class TransportService extends Service {
             }
             Debug.D(TransportService.class,"Post upload to service "+url+" "+mode+" "+" "+folder+" "+(null!=debug?debug:"."));
             Intent intent=new Intent(context,TransportService.class);
-            intent.putCharSequenceArrayListExtra(LABEL_FILE_LIST,files);
+            intent.putParcelableArrayListExtra(LABEL_FILE_LIST,files);
             intent.putExtra(LABEL_COVER_MODE,mode);
             intent.putExtra(LABEL_CLIENT,meta);
             intent.putExtra(LABEL_MODE,MODE_UPLOAD);

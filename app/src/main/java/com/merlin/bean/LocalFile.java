@@ -1,10 +1,32 @@
 package com.merlin.bean;
 
-public final class LocalFile extends File {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.Nullable;
+
+public final class LocalFile implements FileMeta, Parcelable {
+    private String parent;
+    private String name;
+    private String title;
+    private String extension;
+    private Object imageUrl;
+    private long size;
+    private double modifyTime;
+    private boolean directory;
+    private boolean accessible;
 
     public LocalFile(String parent,String title,String name,String extension,
                      String imageUrl,long size,long modifyTime, boolean directory, boolean accessible){
-        super(parent,title,name,extension,imageUrl,size,modifyTime,directory,accessible);
+        this.parent=parent;
+        this.title=title;
+        this.name=name;
+        this.extension=extension;
+        this.imageUrl=imageUrl;
+        this.size=size;
+        this.modifyTime=modifyTime;
+        this.directory=directory;
+        this.accessible=accessible;
     }
 
     public static LocalFile create(java.io.File file, String imageUrl){
@@ -45,6 +67,132 @@ public final class LocalFile extends File {
         }
         return result;
     }
+
+    @Override
+    public boolean applyModify(FModify modify) {
+        if (null!=modify){
+            String name=modify.getName();
+            if (null!=name){
+                this.name=name;
+            }
+            String extension=modify.getExtension();
+            if (null!=extension){
+                this.extension=extension;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Object getImageUrl() {
+        return imageUrl;
+    }
+
+    @Override
+    public String getParent() {
+        return parent;
+    }
+
+    @Override
+    public String getName(boolean extension) {
+        return null!=name&&extension&&null!=this.extension?name+this.extension:name;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public String getExtension() {
+        return extension;
+    }
+
+    @Override
+    public long getSize() {
+        return size;
+    }
+
+    @Override
+    public double getModifyTime() {
+        return modifyTime;
+    }
+
+    @Override
+    public String getPath() {
+        String value=getName(true);
+        return null!=parent&&null!=value?parent+value:null;
+    }
+
+    @Override
+    public boolean isAccessible() {
+        return accessible;
+    }
+
+    @Override
+    public boolean isDirectory() {
+        return directory;
+    }
+
+    @Override
+    public String permission() {
+        return "";
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (null!=obj&&obj instanceof LocalFile){
+            LocalFile file=(LocalFile)obj;
+            return equals(file.parent,parent)&&equals(file.name,name)&&equals(file.extension,extension);
+        }
+        return super.equals(obj);
+    }
+
+    private boolean equals(String v1,String v2){
+        return null!=v1&&null!=v2?v1.equals(v2):(null==v1&&null==v2);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        parent=dest.readString();
+        name=dest.readString();
+        title=dest.readString();
+        extension=dest.readString();
+        imageUrl=dest.readString();
+        size=dest.readLong();
+        modifyTime=dest.readDouble();
+        directory=dest.readInt()==1;
+        accessible=dest.readInt()==1;
+    }
+
+    private LocalFile(Parcel in){
+        in.writeString(parent);
+        in.writeString(name);
+        in.writeString(title);
+        in.writeString(extension);
+        in.writeString(null!=imageUrl&&imageUrl instanceof String?(String)imageUrl:"");
+        in.writeLong(size);
+        in.writeDouble(modifyTime);
+        in.writeInt(directory?1:0);
+        in.writeInt(accessible?1:0);
+    }
+
+    public static final Creator<LocalFile> CREATOR = new Creator<LocalFile>() {
+        public LocalFile createFromParcel(Parcel in) {
+            return new LocalFile(in);
+        }
+
+        @Override
+        public LocalFile[] newArray(int size) {
+            return new LocalFile[size];
+        }
+    };
 
 
 }

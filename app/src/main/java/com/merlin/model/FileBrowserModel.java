@@ -83,7 +83,6 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         super.onRootAttached(root);
         putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
         refreshClientMeta("After mode create.");
-//        upload(list,"/",FMode.MODE_COVER,"");
     }
 
     private boolean putClientMeta(ClientMeta meta,String debug){
@@ -103,54 +102,6 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
             return true;
         }
         Debug.W(getClass(),"Can't put client meta "+(null!=debug?debug:"."));
-        return false;
-    }
-
-    private boolean upload(ArrayList<CharSequence> files,String folder,int mode, String debug){
-        int count=null!=files?files.size():-1;
-        final Context context=getViewContext();
-        if (count>0&&null!=context){
-            Dialog dialog=new Dialog(context);
-            ServerChooseLayoutBinding binding=inflate(R.layout.server_choose_layout);
-            Map<String,Object> map=mAllClientMetas;
-            Collection<Object> values=null!=map&&map.size()>0?map.values():null;
-            if (null!=values&&values.size()>0){
-                final Map<String, ViewDataBinding> added=new HashMap();
-                for (Object obj:values) {
-                    if (null!=(obj=null!=obj&&obj instanceof BrowserModel?((BrowserModel)obj).getClientMeta():obj)&&obj instanceof ClientMeta){
-                        ClientMeta client=(ClientMeta)obj;
-                        String url=null!=client?client.getUrl():null;
-                        if (null==url||url.length()<=0){
-                            Debug.W(getClass(),"Skip add client into choose list.url="+url+" "+client);
-                            continue;
-                        }
-                        ItemClientBinding clientBinding= !added.containsKey(url)?inflate(R.layout.item_client):null;
-                        if(null!=clientBinding){
-                            clientBinding.setClient(client);
-                            added.put(url,clientBinding);
-                        }
-                    }
-                }
-                if (null==added||added.size()<=0){
-                    toast(R.string.noneServerExist);
-                }else{
-                    binding.setChilds(added.values());
-                }
-            }
-            return dialog.setContentView(binding).title(R.string.chooseServer).left(R.string.cancel).show(( view, clickCount, resId, data)-> {
-                if (resId!=R.string.cancel&&null!=data&&data instanceof ClientMeta){
-                    ClientMeta clientMeta=(ClientMeta)data;
-                    final String url=null!=clientMeta?clientMeta.getUrl():null;
-                    if (null==url||url.length()<=0){
-                        toast(R.string.invalidServer);
-                        return true;
-                    }
-                    TransportService.upload(context,true,files,clientMeta,folder,mode,debug);
-                }
-                dialog.dismiss();
-                return true;},false);
-        }
-        Debug.W(getClass(),"Can't  upload file with EMPTY list "+(null!=debug?debug:"."));
         return false;
     }
 
@@ -223,7 +174,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                 list.add("/sdcard/PictureseditedJPEG_20200108_153014.jpg");
                 list.add("/sdcard/PictureseditedJPEG_20200225_100920.jpg");
                 //test
-                TransportService.upload(getViewContext(),true,list,meta,null,FMode.MODE_COVER,debug);
+//                TransportService.upload(getViewContext(),true,list,meta,null,FMode.MODE_COVER,debug);
             }
         }).queryClientMeta();
     }
@@ -235,6 +186,9 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                 switch (resId){
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
+                    case R.string.upload:
+                         Debug.D(getClass(),"AAA "+data);
+                        return true;
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -313,6 +267,12 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
             return showAtLocationAsContext(view,binding);
         }
         return false;
+    }
+
+    @Override
+    public Collection<Object> getAllClients() {
+        Map<String,Object> metas=mAllClientMetas;
+        return null!=metas?metas.values():null;
     }
 
     @Override

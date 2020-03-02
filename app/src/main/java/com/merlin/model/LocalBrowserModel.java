@@ -2,6 +2,9 @@ package com.merlin.model;
 
 import android.content.Context;
 import android.os.Environment;
+import android.view.View;
+
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.LocalBrowserAdapter;
 import com.merlin.api.ApiList;
@@ -9,18 +12,26 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FMode;
 import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
+import com.merlin.client.databinding.ItemClientBinding;
+import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
+import com.merlin.transport.TransportService;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LocalBrowserModel extends BrowserModel {
     private final Comparator<File> mComparator=( o1, o2)->{
@@ -44,6 +55,21 @@ public class LocalBrowserModel extends BrowserModel {
                 });
             }
         });
+    }
+
+    @Override
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        if (!super.onTapClick(view,clickCount,resId,data)){
+            switch (resId){
+                case R.string.upload:
+                    ArrayList<LocalFile> list=null;
+                    if (null!=data&&data instanceof LocalFile){
+                        (list=new ArrayList<>(1)).add((LocalFile)data);
+                    }
+                    return null!=data&&upload(list,"./data" ,FMode.MODE_NONE,"After open tap click.");
+            }
+        }
+        return true;
     }
 
     @Override
@@ -251,6 +277,56 @@ public class LocalBrowserModel extends BrowserModel {
             finish.onApiFinish(reply.getWhat(),note,reply,arg);
         }
         return true;
+    }
+
+    private boolean upload(ArrayList<LocalFile> files,String folder,int mode, String debug){
+        int count=null!=files?files.size():-1;
+        final Context context=getViewContext();
+        if (count>0&&null!=context){
+            Dialog dialog=new Dialog(context);
+            ServerChooseLayoutBinding binding=(ServerChooseLayoutBinding) inflate(R.layout.server_choose_layout);
+            Collection<Object> values=getAllClients();
+            if (null!=values&&values.size()>0){
+                final Map<String, ViewDataBinding> added=new HashMap();
+                for (Object obj:values) {
+                    if (null!=(obj=null!=obj&&obj instanceof BrowserModel?((BrowserModel)obj).getClientMeta():obj)&&obj instanceof ClientMeta){
+                        ClientMeta client=(ClientMeta)obj;
+                        if (client.isLocalClient()){
+                            continue;
+                        }
+                        String url=null!=client?client.getUrl():null;
+                        if (null==url||url.length()<=0){
+                            Debug.W(getClass(),"Skip add client into choose list.url="+url+" "+client);
+                            continue;
+                        }
+                        ItemClientBinding clientBinding= !added.containsKey(url)?(ItemClientBinding) inflate(R.layout.item_client):null;
+                        if(null!=clientBinding){
+                            clientBinding.setClient(client);
+                            added.put(url,clientBinding);
+                        }
+                    }
+                }
+                if (null==added||added.size()<=0){
+                    toast(R.string.noneServerExist);
+                }else{
+                    binding.setChilds(added.values());
+                }
+            }
+            return dialog.setContentView(binding).title(R.string.chooseServer).left(R.string.cancel).show(( view, clickCount, resId, data)-> {
+                if (resId!=R.string.cancel&&null!=data&&data instanceof ClientMeta){
+                    ClientMeta clientMeta=(ClientMeta)data;
+                    final String url=null!=clientMeta?clientMeta.getUrl():null;
+                    if (null==url||url.length()<=0){
+                        toast(R.string.invalidServer);
+                        return true;
+                    }
+                    TransportService.upload(context,true,files,clientMeta,folder,mode,debug);
+                }
+                dialog.dismiss();
+                return true;},false);
+        }
+        Debug.W(getClass(),"Can't  upload file with EMPTY list "+(null!=debug?debug:"."));
+        return false;
     }
 
 }

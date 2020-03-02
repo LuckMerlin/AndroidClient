@@ -18,16 +18,14 @@ import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.ApiList;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
+import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.File;
+import com.merlin.bean.FMode;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FModify;
-import com.merlin.bean.File_;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
-import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
@@ -43,8 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.merlin.api.What.WHAT_FILE_EXIST;
-import static com.merlin.api.What.WHAT_SUCCEED;
 
 public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivityResume, FileBrowserModel.OnBrowserClientChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
     public final static int MODE_INVALID=1211;
@@ -277,6 +273,11 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return false;
     }
 
+    protected final Collection<Object> getAllClients(){
+        ClientCallback callback=mCallback;
+        return null!=callback?callback.getAllClients():null;
+    }
+
     @Override
     public void onActivityResume(Activity activity, Intent intent) {
         refreshCurrentPath("After activity onResume.");
@@ -337,7 +338,6 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     protected final boolean showAtLocationAsContext(View parent,ViewDataBinding binding) {
         return showAtLocation(parent,binding, PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
     }
-
 
     protected final boolean showAtLocation(View parent,ViewDataBinding binding,Integer dismissFlag){
         return null!=binding&&showAtLocation(parent,binding.getRoot(),dismissFlag);
@@ -406,6 +406,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         }
         return false;
     }
+
     protected abstract boolean onShowFileDetail(FileMeta meta,String debug);
     protected abstract boolean onOpenFile(List<FileMeta> meta,String debug);
     protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
@@ -433,7 +434,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                     }
                     return null!=paths&&paths.size()>0&&onDeleteFile(paths,(what, note, data3, arg)->{
                         toast(note);
-                        if (what==WHAT_SUCCEED){
+                        if (what==What.WHAT_SUCCEED){
                             List<String> deletedPaths=null!=data3?data3.getData():null;
                             BrowserAdapter adapter=getBrowserAdapter();
                             int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
@@ -473,8 +474,8 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                             return true;
                         }else{
                             dialog.dismiss();
-                            return onCreateFile(dir, FModify.MODE_NONE,parent,input,(what, note, data2, arg)->{
-                                if(what==WHAT_SUCCEED){
+                            return onCreateFile(dir, FMode.MODE_NONE,parent,input,(what, note, data2, arg)->{
+                                if(what== What.WHAT_SUCCEED){
                                     resetBrowserCurrentFolder("After file create succeed.");
                                 }
                                 toast(note);
@@ -499,7 +500,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                         dlg.dismiss();
                     }
                     onRenameFile(path,text,mode,(what, note, data, arg)->{
-                        boolean succeed=what==WHAT_SUCCEED;
+                        boolean succeed=what==What.WHAT_SUCCEED;
                         toast(note);
                         BrowserAdapter adapter=getBrowserAdapter();
                         FModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
@@ -513,6 +514,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         Debug.W(getClass(),"Can't rename file.path="+path);
         return false;
     }
+
     private boolean open(List<FileMeta> meta,String debug){
         return onOpenFile(meta,debug);
     }
