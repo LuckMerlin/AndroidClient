@@ -22,6 +22,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TransportService extends Service {
     private final FileDownloader mDownloader=new FileDownloader();
@@ -46,6 +49,7 @@ public class TransportService extends Service {
     private final static String LABEL_CLIENT ="client";
     private final static String LABEL_INTERACTIVE ="interactive";
     private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private final Map<Transporter.Callback,Long> mCallbacks=new WeakHashMap<>();
     private final Binder mBinder=new Binder();
 
     private final Uploader.OnUploadProgress mUploadProgress=(from,folder, name, upload, total)-> {
@@ -156,15 +160,15 @@ public class TransportService extends Service {
         }
 
         @Override
-        public boolean add(Uploader.OnUploadProgress progress) {
-
-            return false;
+        public boolean add(Transporter.Callback progress) {
+            Map<Transporter.Callback,Long> reference=mCallbacks;
+            return null!=reference&&null!=progress&&!reference.containsKey(progress)?null==reference.put(progress,System.currentTimeMillis()):false;
         }
 
         @Override
-        public boolean remove(Uploader.OnUploadProgress progress) {
-
-            return false;
+        public boolean remove(Transporter.Callback progress) {
+            Map<Transporter.Callback,Long> reference=mCallbacks;
+            return null!=reference&&null!=progress&&null!=reference.remove(progress);
         }
     }
 
