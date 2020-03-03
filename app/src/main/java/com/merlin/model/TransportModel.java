@@ -24,6 +24,7 @@ public final class TransportModel extends Model implements Uploader.OnUploadProg
         list.add(upload);
         upload=new Upload("path","/dddd","林强",null);
         list.add(upload);
+        //
         mAdapter.setData(list);
     }
 
@@ -38,7 +39,7 @@ public final class TransportModel extends Model implements Uploader.OnUploadProg
             if (null==current||current!=binder){
                 mBinder=binder;
                 binder.add(this);
-                mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
+//                mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
                 return true;
             }
         }else if (null!=current){

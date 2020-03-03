@@ -8,22 +8,22 @@
     </data>
     <LinearLayout
         binding:createModel="@{true}"
-        android:layout_width="match_parent"
+        android:background="@drawable/round_corner_black"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="200dp"
+        android:minHeight="50dp"
         android:minWidth="250dp"
-        android:orientation="vertical"
-        android:background="@drawable/round_corner_black">
-
+        android:padding="10dp"
+        android:orientation="vertical">
         <TextView
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="5dp"
             android:text="@string/transportList"
             style="@style/titleNormalTextView"/>
-
         <androidx.recyclerview.widget.RecyclerView
+            android:layout_gravity="center_horizontal"
             binding:adapter="@{vm.adapter}"
-            android:background="#f00"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-    </LinearLayout>
+        </LinearLayout>
 </layout>

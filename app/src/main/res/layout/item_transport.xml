@@ -1,14 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
+        <variable
+            name="data"
+            type="com.merlin.transport.Transport" />
+        <variable
+            name="position"
+            type="int" />
+        <import type="com.merlin.util.FileSize"/>
     </data>
-    <RelativeLayout
+    <LinearLayout
+        android:orientation="horizontal"
+        binding:enableClick="@{true}"
+        android:background="@drawable/selector_round_dark_corner_small"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="2dp"
+        android:padding="3dp"
         android:layout_width="match_parent"
-        android:background="#f00"
-        android:layout_height="50dp">
+        android:layout_height="wrap_content">
         <TextView
-            android:text="dddddddddddddddddddddd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </RelativeLayout>
+            android:text="@{``+position}"
+            style="@style/titleSubNormalTextView"/>
+        <TextView
+            android:gravity="left"
+            android:layout_marginLeft="3dp"
+            android:layout_weight="6"
+            android:text="@{data.title}"
+            style="@style/titleSubNormalTextView"/>
+        <LinearLayout
+            android:layout_weight="2"
+            android:orientation="horizontal"
+            android:gravity="right"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content">
+            <TextView
+                android:text="@{FileSize.formatSizeText(0)}"
+                android:layout_margin="1dp"
+                style="@style/titleSubNormalTextView"/>
+            <ImageView
+                android:src="@drawable/single_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
 </layout>

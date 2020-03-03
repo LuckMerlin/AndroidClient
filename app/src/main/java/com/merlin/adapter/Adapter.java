@@ -10,6 +10,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.debug.Debug;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -168,6 +170,7 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
         Integer layoutId=onResolveItemLayoutId(parent,viewType);
         View root=null;
         if (null!=layoutId){
+
             ViewDataBinding binding=DataBindingUtil.inflate(in,layoutId,parent,false);
             if (null!=binding){
                 return new ViewHolder<>(binding);

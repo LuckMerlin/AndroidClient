@@ -88,7 +88,7 @@ public class Model {
 //                    view.removeOnAttachStateChangeListener(this);
 //                }
 //            });
-            checkStatusBarTapBind();
+//            checkStatusBarTapBind();
             onRootAttached(view);
             return true;
         }

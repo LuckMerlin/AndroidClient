@@ -24,8 +24,9 @@ public class TransportAdapter<T extends Transport> extends Adapter<T> {
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemTransportBinding){
-            Debug.D(getClass(),"AAAAAAAAAAAAA "+position+" "+binding.getRoot());
-//             ((ItemTransportBinding)binding).setData(data);
+            ItemTransportBinding itb=(ItemTransportBinding)binding;
+            itb.setPosition(position+1);
+            itb.setData(data);
          }
     }
 
