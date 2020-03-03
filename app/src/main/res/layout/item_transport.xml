@@ -35,7 +35,11 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content">
             <TextView
-                android:text="@{FileSize.formatSizeText(0)}"
+                android:text="12.00kb/s"
+                android:layout_margin="1dp"
+                style="@style/titleSubNormalTextView"/>
+            <TextView
+                android:text="@{FileSize.formatSizeText(0)+`/`+FileSize.formatSizeText(0)}"
                 android:layout_margin="1dp"
                 style="@style/titleSubNormalTextView"/>
             <ImageView
