@@ -1,6 +1,5 @@
 package com.merlin.model;
 
-import android.graphics.Color;
 import android.view.View;
 
 import com.merlin.adapter.TransportAdapter;
@@ -22,6 +21,8 @@ public final class TransportModel extends Model implements Uploader.OnUploadProg
         super.onRootAttached(root);
         List<Transport> list=new ArrayList<>();
         Upload upload=new Upload("path","/dddd","林强",null);
+        list.add(upload);
+        upload=new Upload("path","/dddd","林强",null);
         list.add(upload);
         mAdapter.setData(list);
     }

@@ -1,26 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable
-            name="data"
-            type="com.merlin.transport.Transport" />
-        <import type="android.view.View"/>
     </data>
-    <LinearLayout
-        android:orientation="vertical"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:background="@drawable/round_corner_small"
+        android:background="#f00"
         android:layout_height="50dp">
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <SeekBar
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:text="@{`哒哒哒哒哒哒多 `}"
-                style="@style/titleSmallTextView"/>
-        </LinearLayout>
-    </LinearLayout>
+        <TextView
+            android:text="dddddddddddddddddddddd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
 </layout>

@@ -10,11 +10,20 @@
         binding:createModel="@{true}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="200dp"
+        android:minWidth="250dp"
         android:orientation="vertical"
         android:background="@drawable/round_corner_black">
+
+        <TextView
+            android:layout_gravity="center_horizontal"
+            android:text="@string/transportList"
+            style="@style/titleNormalTextView"/>
+
         <androidx.recyclerview.widget.RecyclerView
             binding:adapter="@{vm.adapter}"
+            android:background="#f00"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </layout>
