@@ -25,17 +25,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import okhttp3.MultipartBody;
 
-public abstract class Transporter<M extends Transport,N> extends Retrofit implements Callback{
+public abstract class Transporter<M extends Transport,N extends Canceler> extends Retrofit implements Callback{
     public final static int TYPE_NONE =0x00;//0000 0000
     public final static int TYPE_DOWNLOAD =0x01;//0000 0001
     public final static int TYPE_UPLOAD =0x02;//0000 0010
     public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
     private final Map<M, N> mTransporting=new ConcurrentHashMap<>();
+    private final Handler mHandler;
     private WeakReference<Context> mContext;
     private final Map<OnStatusChange,Long> mListeners=new WeakHashMap<>();
 
     public Transporter(Context context){
+         this(context,null);
+    }
+
+    public Transporter(Context context,Looper looper){
         mContext=null!=context?new WeakReference<>(context):null;
+        mHandler=new Handler(null!=looper?looper:Looper.getMainLooper());
     }
 
     public final boolean listener(OnStatusChange listener,int status,String debug){
@@ -54,20 +60,23 @@ public abstract class Transporter<M extends Transport,N> extends Retrofit implem
 
     private final void notifyStatusChange(int status, Transport transport,OnStatusChange change){
         Map<OnStatusChange,Long> reference=mListeners;
+        Handler handler=mHandler;
         if (null!=reference){
             synchronized (reference){
                 Set<OnStatusChange> set=reference.keySet();
                 if (null!=set){
+                    handler.post(()->{
                     for (OnStatusChange child:set) {
                         if (null!=child){
                             child.onStatusChanged(status,transport);
                         }
-                    }
+                    }});
                 }
             }
         }
         if (null!=change){
-            change.onStatusChanged(status,transport);
+            handler.post(()->{
+            change.onStatusChanged(status,transport);});
         }
     }
 
@@ -124,7 +133,7 @@ public abstract class Transporter<M extends Transport,N> extends Retrofit implem
             }
         };
         N data=onAddTransport(transport,update,interactive);
-        if (null!=data){
+        if (null==data){
             notifyStatusChange(TRANSPORT_REMOVE,transport,progress);
             return false;
         }

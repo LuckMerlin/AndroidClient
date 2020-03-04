@@ -10,7 +10,6 @@ import com.merlin.bean.LocalFile;
 import com.merlin.debug.Debug;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;

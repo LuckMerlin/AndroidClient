@@ -47,7 +47,8 @@ public final class TransportModel extends Model implements OnStatusChange {
 //                binder.run(TRANSPORT_ADD,transport,"Test.");
                 //
                 ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
-                Transport transport=new Download("./data/林强.mp3","/sdcard/a",
+//                Transport transport=new Download("./data/林强.mp3","/sdcard/a",
+                Transport transport=new Download("./test2.mp3","/sdcard/a",
                         "林强.mp3",client,null);
                 binder.run(TRANSPORT_ADD,transport,"Test.");
                 //test end

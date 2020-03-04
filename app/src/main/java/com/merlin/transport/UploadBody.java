@@ -8,14 +8,21 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
 
-abstract class UploadBody extends RequestBody {
-
+abstract class UploadBody extends RequestBody implements Canceler{
     private final String mPath;
+    private boolean mCancel;
 
     protected abstract void onTransportProgress(long uploaded,long total,float speed);
 
     public UploadBody(String path){
         mPath=path;
+    }
+
+    @Override
+    public final boolean cancel(boolean cancel) {
+        boolean curr=mCancel;
+        mCancel=cancel;
+        return cancel!=curr;
     }
 
     @Override
@@ -41,12 +48,17 @@ abstract class UploadBody extends RequestBody {
             FileInputStream in = new FileInputStream(file);
             long uploaded = 0;
             try {
-                int read;
-                succeed=true;
-                while ((read = in.read(buffer)) != -1) {
-                    uploaded += read;
-                    sink.write(buffer, 0, read);
-                    onTransportProgress(uploaded,fileLength,-1);
+                if (!mCancel){
+                    int read;
+                    succeed=true;
+                    while ((read = in.read(buffer)) != -1) {
+                        if (mCancel){
+                            break;
+                        }
+                        uploaded += read;
+                        sink.write(buffer, 0, read);
+                        onTransportProgress(uploaded,fileLength,-1);
+                    }
                 }
             }catch (Exception e){
                 succeed=false;
