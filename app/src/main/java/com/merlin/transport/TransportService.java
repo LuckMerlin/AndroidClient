@@ -60,13 +60,8 @@ public class TransportService extends Service  implements Transporter.Callback {
             }
         }
     };
-    private final FileDownloader mDownloader=new FileDownloader();
-    private final Uploader mFileUploader=new Uploader(){
-        @Override
-        protected Context getContext() {
-            return TransportService.this;
-        }
-    };
+    private final Downloader mDownloader=new Downloader(this);
+    private final Uploader mFileUploader=new Uploader(this);
 
     @Override
     public void onCreate() {
@@ -92,6 +87,10 @@ public class TransportService extends Service  implements Transporter.Callback {
             Uploader uploader=mFileUploader;
             if (transport instanceof Upload&&null!=uploader){
                 return uploader.upload((Upload)transport,false,null,debug);
+            }
+            Downloader downloader=mDownloader;
+            if (transport instanceof Download&&null!=downloader){
+                return downloader.download((Download)transport,false,null,debug);
             }
         }
         return false;
@@ -122,28 +121,6 @@ public class TransportService extends Service  implements Transporter.Callback {
                     null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,mStatusChange,
                     null!=debug&&debug instanceof String?((String)debug):null);
         }
-        return false;
-    }
-
-    public static boolean upload(Context context, boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){
-        if (null!=files&&files.size()>0){
-            String url=null!=meta?meta.getUrl():null;
-            if (null==url||url.length()<=0){
-                Debug.W(TransportService.class,"Can't upload file with invalid server "+(null!=debug?debug:".")+" url="+url);
-                return false;
-            }
-            Debug.D(TransportService.class,"Post upload to service "+url+" "+mode+" "+" "+folder+" "+(null!=debug?debug:"."));
-            Intent intent=new Intent(context,TransportService.class);
-            intent.putExtra(LABEL_COVER_MODE,mode);
-            intent.putExtra(LABEL_CLIENT,meta);
-            intent.putExtra(LABEL_MODE,MODE_UPLOAD);
-            intent.putExtra(LABEL_INTERACTIVE,interactive);
-            intent.putExtra(LABEL_FOLDER,folder);
-            intent.putExtra(LABEL_DEBUG,debug);
-            intent.putCharSequenceArrayListExtra(LABEL_FILE_LIST,files);
-            return null!=context.startService(intent);
-        }
-        Debug.W(TransportService.class,"Can't upload file with EMPTY list "+(null!=debug?debug:"."));
         return false;
     }
 
@@ -188,4 +165,27 @@ public class TransportService extends Service  implements Transporter.Callback {
         super.onDestroy();
         mFileUploader.listener(mStatusChange, Transporter.Callback.TRANSPORT_REMOVE,"While service destroy.");
     }
+
+    public static boolean upload(Context context, boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){
+        if (null!=files&&files.size()>0){
+            String url=null!=meta?meta.getUrl():null;
+            if (null==url||url.length()<=0){
+                Debug.W(TransportService.class,"Can't upload file with invalid server "+(null!=debug?debug:".")+" url="+url);
+                return false;
+            }
+            Debug.D(TransportService.class,"Post upload to service "+url+" "+mode+" "+" "+folder+" "+(null!=debug?debug:"."));
+            Intent intent=new Intent(context,TransportService.class);
+            intent.putExtra(LABEL_COVER_MODE,mode);
+            intent.putExtra(LABEL_CLIENT,meta);
+            intent.putExtra(LABEL_MODE,MODE_UPLOAD);
+            intent.putExtra(LABEL_INTERACTIVE,interactive);
+            intent.putExtra(LABEL_FOLDER,folder);
+            intent.putExtra(LABEL_DEBUG,debug);
+            intent.putCharSequenceArrayListExtra(LABEL_FILE_LIST,files);
+            return null!=context.startService(intent);
+        }
+        Debug.W(TransportService.class,"Can't upload file with EMPTY list "+(null!=debug?debug:"."));
+        return false;
+    }
+
 }

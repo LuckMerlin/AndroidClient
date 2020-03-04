@@ -3,6 +3,7 @@ package com.merlin.model;
 import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
+import com.merlin.transport.Download;
 import com.merlin.transport.Transport;
 import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
@@ -41,8 +42,13 @@ public final class TransportModel extends Model implements Uploader.OnStatusChan
                 binder.callback(TRANSPORT_ADD,this);
                 mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
                 //test begin
+//                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
+//                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
+//                        "林强.mp3",client,null);
+//                binder.run(TRANSPORT_ADD,transport,"Test.");
+                //
                 ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
-                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
+                Transport transport=new Download("./data/林强.mp3","/sdcard/a",
                         "林强.mp3",client,null);
                 binder.run(TRANSPORT_ADD,transport,"Test.");
                 //test end

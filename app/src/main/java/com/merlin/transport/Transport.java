@@ -10,8 +10,12 @@ public abstract class Transport implements CoverMode {
     private float mSpeed;
     private final ClientMeta mClient;
     private final int mCoverMode;
+    private final String mFromPath;
+    private final String mToFolder;
 
-    public Transport(String name,ClientMeta client,Integer coverMode){
+    public Transport(String fromPath,String toFolder,String name,ClientMeta client,Integer coverMode){
+        mFromPath=fromPath;
+        mToFolder=toFolder;
         mName=name;
         mCoverMode=null!=coverMode?coverMode:CoverMode.COVER_MODE_NONE;
         mClient=client;
@@ -39,6 +43,14 @@ public abstract class Transport implements CoverMode {
 
     public final ClientMeta getClient() {
         return mClient;
+    }
+
+    public final String getFromPath() {
+        return mFromPath;
+    }
+
+    public final String getToFolder() {
+        return mToFolder;
     }
 
     public void setSize(long mSize) {

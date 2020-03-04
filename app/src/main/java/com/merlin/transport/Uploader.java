@@ -1,5 +1,7 @@
 package com.merlin.transport;
 
+import android.content.Context;
+
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
@@ -29,7 +31,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 
 
-public abstract class Uploader extends Transporter implements Transporter.Callback {
+public final class Uploader extends Transporter implements Transporter.Callback {
     private final Map<String,UploadBody> mUploading=new ConcurrentHashMap<>();
 
     private interface Api{
@@ -38,41 +40,43 @@ public abstract class Uploader extends Transporter implements Transporter.Callba
         Observable<Reply> upload(@Part List<MultipartBody.Part> parts);
     }
 
+    public Uploader(Context context){
+        super(context);
+    }
+
     public final boolean upload(Collection collection, String folder, boolean interactive, int coverMode,
                                 ClientMeta meta,OnStatusChange progress, String debug) {
         if (null != collection && collection.size() > 0) {
             for (Object obj : collection) {
                 if (null!=obj&&obj instanceof String){
-                    upload(new Upload((String)obj,folder,null,meta,null),interactive,progress,debug);
+                    add(new Upload((String)obj,folder,null,meta,null),interactive,progress,debug);
                 }
             }
         }
         return false;
     }
 
-    public final synchronized boolean upload(Upload upload, boolean interactive, OnStatusChange progress, String debug) {
-        final String path=null!=upload?upload.getPath():null;
-        if (null==path||path.length()<=0){
-            Debug.W(getClass(),"Can't upload file which path invalid."+path);
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
+    @Override
+    protected boolean onAddTransport(Transport transport,TransportUpdate update) {
+        if (null==transport||!(transport instanceof Upload)){
+            Debug.W(getClass(),"Can't add upload file which type NOT match."+transport);
             return false;
         }
-        final ClientMeta meta=upload.getMeta();
+        final ClientMeta meta=transport.getClient();
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
-            Debug.W(getClass(),"Can't upload file which client url invalid."+url+" "+path);
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
+            Debug.W(getClass(),"Can't add upload file which client url invalid."+url);
             return false;
         }
-        final Map<String,UploadBody> uploading=mUploading;
-        if (null!=uploading&&uploading.containsKey(path)){
-            Debug.W(getClass(),"Skip upload one file which already uploading."+path);
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
+        final String path=null!=transport?transport.getFromPath():null;
+        if (null==path||path.length()<=0){
+            Debug.W(getClass(),"Can't add upload file which path invalid."+path);
             return false;
         }
+        final Upload upload=(Upload)transport;
         List<String> exist=null;
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        final String folder=null!=upload?upload.getFolder():null;
+        final String folder=null!=upload?upload.getToFolder():null;
         builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
         builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(upload.getCoverMode()));
         final List<MultipartBody.Part> parts=new ArrayList<>();
@@ -81,23 +85,25 @@ public abstract class Uploader extends Transporter implements Transporter.Callba
         final String name=null!=upload?upload.getName():null;
         final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
             Debug.W(getClass(),"Give up upload one file which not exist."+path);
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         if (!file.canRead()){
             Debug.W(getClass(),"Give up upload one file which NONE read permission."+path);
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         Debug.D(getClass(),"Upload file "+path+" to "+url);
         try {
             final UploadBody uploadBody=new UploadBody(path){
                 @Override
-                protected void onUploadProgress(long uploaded, long total,float speed) {
-                    upload.setSize(uploaded);
-                    upload.setTotal(total);
-                    upload.setSpeed(speed);
-                    notifyStatusChange(OnStatusChange.TRANSPORT_PROGRESS,upload,progress);
+                public void onTransportFinish(boolean succeed) {
+                        //Do nothing
+                }
+
+                @Override
+                public void onTransportProgress(long uploaded, long total, float speed) {
+                        if (null!=update){
+                            update.onTransportProgress(uploaded,total,speed);
+                        }
                 }
             };
             parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
@@ -110,10 +116,8 @@ public abstract class Uploader extends Transporter implements Transporter.Callba
         } catch (UnsupportedEncodingException e) {
             Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
             e.printStackTrace();
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
-        notifyStatusChange(TRANSPORT_ADD,upload,progress);
         return call(prepare(Api.class, url).upload(parts),(OnApiFinish<Reply>)(succeed,what,note,data,arg)-> {
             if (interactive){
                 toast(note);
@@ -122,29 +126,9 @@ public abstract class Uploader extends Transporter implements Transporter.Callba
         });
     }
 
-    public final Collection<Upload> getUploading(String name){
-        Map<String,UploadBody> uploading=mUploading;
-        return null;
-    }
 
-    public final boolean isUploading(String ...paths){
-        Map<String,UploadBody> uploading=null!=paths&&paths.length>0?mUploading:null;
-        if (null!=uploading){
-            synchronized (uploading){
-                for (String path:paths) {
-                    if (null!=path&&path.length()>0&&uploading.containsKey(path)){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private static abstract class UploadBody extends RequestBody{
+    private static abstract class UploadBody extends RequestBody implements TransportUpdate{
         private final String mPath;
-
-        protected abstract void onUploadProgress(long uploaded,long total,float speed);
 
         public UploadBody(String path){
             mPath=path;
@@ -165,22 +149,26 @@ public abstract class Uploader extends Transporter implements Transporter.Callba
         public void writeTo(BufferedSink sink) throws IOException {
             String path=mPath;
             final File file=null!=path&&path.length()>0?new File(path):null;
+            boolean succeed=false;
             if (null!=file&&file.exists()){
                 long fileLength = file.length();
-                int bufferSize=1024*1024*2;
+                int bufferSize=1024;
                 byte[] buffer = new byte[bufferSize];
                 FileInputStream in = new FileInputStream(file);
                 long uploaded = 0;
-                float speed=0;
                 try {
                     int read;
+                    succeed=true;
                     while ((read = in.read(buffer)) != -1) {
                         uploaded += read;
                         sink.write(buffer, 0, read);
-                        onUploadProgress(uploaded,fileLength,speed);
+                        onTransportProgress(uploaded,fileLength,-1);
                     }
-                } finally {
+                }catch (Exception e){
+                    succeed=false;
+                }finally {
                     in.close();
+                    onTransportFinish(succeed);
                 }
             }
         }

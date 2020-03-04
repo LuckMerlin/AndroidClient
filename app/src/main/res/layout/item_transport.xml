@@ -12,6 +12,7 @@
         <import type="com.merlin.transport.Upload"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.util.Speed"/>
+        <import type="android.view.View"/>
     </data>
     <LinearLayout
         android:orientation="horizontal"
@@ -41,8 +42,9 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content">
             <TextView
-                android:text="@{Speed.formatNetworkSpeed(data.speed)}"
+                android:text="@{data.speed>=0?Speed.formatNetworkSpeed(data.speed):``}"
                 android:layout_margin="1dp"
+                android:visibility="@{data.speed>=0?View.VISIBLE:View.GONE}"
                 android:textSize="10sp"
                 style="@style/titleSubNormalTextView"/>
             <TextView
