@@ -7,12 +7,16 @@ import android.widget.Toast;
 
 import com.merlin.server.Retrofit;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
 public abstract class Transporter extends Retrofit {
     public final static int TYPE_NONE =0x00;//0000 0000
     public final static int TYPE_DOWNLOAD =0x01;//0000 0001
     public final static int TYPE_UPLOAD =0x02;//0000 0010
     public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
-
+    private final Map<OnStatusChange,Long> mListeners=new WeakHashMap<>();
     public interface Callback{
         int TRANSPORT_ADD=123;
         int TRANSPORT_PROGRESS=124;
@@ -32,8 +36,34 @@ public abstract class Transporter extends Retrofit {
         void onTransportProgress(Transport transport,long upload,long total);
     }
 
+    public final boolean listener(OnStatusChange listener,int status,String debug){
+        if (null!=listener){
+            Map<OnStatusChange,Long> reference=mListeners;
+            synchronized (reference){
+                if (status==Callback.TRANSPORT_ADD){
+                    reference.put(listener,System.currentTimeMillis());
+                    return true;
+                }
+                return null!=reference.remove(listener);
+            }
+        }
+        return false;
+    }
 
     protected final void notifyStatusChange(int status, Transport transport,OnStatusChange change){
+        Map<Uploader.OnStatusChange,Long> reference=mListeners;
+        if (null!=reference){
+            synchronized (reference){
+                Set<Uploader.OnStatusChange> set=reference.keySet();
+                if (null!=set){
+                    for (OnStatusChange child:set) {
+                        if (null!=child){
+                            child.onStatusChanged(status,transport);
+                        }
+                    }
+                }
+            }
+        }
         if (null!=change){
             change.onStatusChanged(status,transport);
         }

@@ -28,20 +28,11 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TransportService extends Service  implements Transporter.Callback {
-    private final FileDownloader mDownloader=new FileDownloader();
-    private final Uploader mFileUploader=new Uploader(){
-        @Override
-        protected Context getContext() {
-            return TransportService.this;
-        }
-    };
     /**
      * @deprecated
      */
     private final static String LABEL_FILE_META_LIST ="fileMetaList";
     private final static String LABEL_FILE_LIST ="fileList";
-    private final static int MODE_INVALID =-1;
-    private final static int MODE_DOWNLOAD =123;
     private final static int MODE_UPLOAD =124;
     private final static String LABEL_MODE ="mode";
     private final static String LABEL_FOLDER ="folder";
@@ -69,6 +60,19 @@ public class TransportService extends Service  implements Transporter.Callback {
             }
         }
     };
+    private final FileDownloader mDownloader=new FileDownloader();
+    private final Uploader mFileUploader=new Uploader(){
+        @Override
+        protected Context getContext() {
+            return TransportService.this;
+        }
+    };
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mFileUploader.listener(mStatusChange, Transporter.Callback.TRANSPORT_ADD,"While service create.");
+    }
 
     @Nullable
     @Override
@@ -179,4 +183,9 @@ public class TransportService extends Service  implements Transporter.Callback {
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mFileUploader.listener(mStatusChange, Transporter.Callback.TRANSPORT_REMOVE,"While service destroy.");
+    }
 }

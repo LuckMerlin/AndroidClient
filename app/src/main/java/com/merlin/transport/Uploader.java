@@ -29,7 +29,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 
 
-public abstract class Uploader extends Transporter{
+public abstract class Uploader extends Transporter implements Transporter.Callback {
     private final Map<String,UploadBody> mUploading=new ConcurrentHashMap<>();
 
     private interface Api{
@@ -53,16 +53,21 @@ public abstract class Uploader extends Transporter{
     public final synchronized boolean upload(Upload upload, boolean interactive, OnStatusChange progress, String debug) {
         final String path=null!=upload?upload.getPath():null;
         if (null==path||path.length()<=0){
+            Debug.W(getClass(),"Can't upload file which path invalid."+path);
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         final ClientMeta meta=upload.getMeta();
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
+            Debug.W(getClass(),"Can't upload file which client url invalid."+url+" "+path);
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         final Map<String,UploadBody> uploading=mUploading;
         if (null!=uploading&&uploading.containsKey(path)){
             Debug.W(getClass(),"Skip upload one file which already uploading."+path);
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         List<String> exist=null;
@@ -71,16 +76,17 @@ public abstract class Uploader extends Transporter{
         builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
         builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(upload.getCoverMode()));
         final List<MultipartBody.Part> parts=new ArrayList<>();
-        Debug.D(getClass(),"Upload file "+path);
         final String charset="UTF-8";
         File file=new java.io.File(path);
         final String name=null!=upload?upload.getName():null;
         final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
             Debug.W(getClass(),"Give up upload one file which not exist."+path);
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         if (!file.canRead()){
             Debug.W(getClass(),"Give up upload one file which NONE read permission."+path);
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
             return false;
         }
         Debug.D(getClass(),"Upload file "+path+" to "+url);
@@ -98,18 +104,21 @@ public abstract class Uploader extends Transporter{
             if (null!=uploading){
                 uploading.put(path,uploadBody);
             }
+            if (null!=folder) {
+                parts.add(MultipartBody.Part.createFormData(Label.LABEL_FOLDER, folder));
+            }
         } catch (UnsupportedEncodingException e) {
             Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
             e.printStackTrace();
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
+            return false;
         }
-        if (null!=folder) {
-            parts.add(MultipartBody.Part.createFormData(Label.LABEL_FOLDER, folder));
-        }
-
+        notifyStatusChange(TRANSPORT_ADD,upload,progress);
         return call(prepare(Api.class, url).upload(parts),(OnApiFinish<Reply>)(succeed,what,note,data,arg)-> {
             if (interactive){
                 toast(note);
             }
+            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
         });
     }
 
