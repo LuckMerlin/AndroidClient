@@ -43,18 +43,19 @@ public abstract class Uploader extends Transporter{
         if (null != collection && collection.size() > 0) {
             for (Object obj : collection) {
                 if (null!=obj&&obj instanceof String){
-                    upload(new Upload((String)obj,folder,null,meta),interactive,coverMode,meta,progress,debug);
+                    upload(new Upload((String)obj,folder,null,meta,null),interactive,progress,debug);
                 }
             }
         }
         return false;
     }
 
-    public final synchronized boolean upload(Upload upload, boolean interactive, int coverMode, ClientMeta meta, OnStatusChange progress, String debug) {
+    public final synchronized boolean upload(Upload upload, boolean interactive, OnStatusChange progress, String debug) {
         final String path=null!=upload?upload.getPath():null;
         if (null==path||path.length()<=0){
             return false;
         }
+        final ClientMeta meta=upload.getMeta();
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
             return false;
@@ -68,7 +69,7 @@ public abstract class Uploader extends Transporter{
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
         final String folder=null!=upload?upload.getFolder():null;
         builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
-        builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(coverMode));
+        builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(upload.getCoverMode()));
         final List<MultipartBody.Part> parts=new ArrayList<>();
         Debug.D(getClass(),"Upload file "+path);
         final String charset="UTF-8";
@@ -86,8 +87,11 @@ public abstract class Uploader extends Transporter{
         try {
             final UploadBody uploadBody=new UploadBody(path){
                 @Override
-                protected void onUploadProgress(long uploaded, long total) {
-                    notifyStatusChange();
+                protected void onUploadProgress(long uploaded, long total,float speed) {
+                    upload.setSize(uploaded);
+                    upload.setTotal(total);
+                    upload.setSpeed(speed);
+                    notifyStatusChange(OnStatusChange.TRANSPORT_PROGRESS,upload,progress);
                 }
             };
             parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
@@ -131,7 +135,7 @@ public abstract class Uploader extends Transporter{
     private static abstract class UploadBody extends RequestBody{
         private final String mPath;
 
-        protected abstract void onUploadProgress(long uploaded,long total);
+        protected abstract void onUploadProgress(long uploaded,long total,float speed);
 
         public UploadBody(String path){
             mPath=path;
@@ -158,12 +162,13 @@ public abstract class Uploader extends Transporter{
                 byte[] buffer = new byte[bufferSize];
                 FileInputStream in = new FileInputStream(file);
                 long uploaded = 0;
+                float speed=0;
                 try {
                     int read;
                     while ((read = in.read(buffer)) != -1) {
                         uploaded += read;
                         sink.write(buffer, 0, read);
-                        onUploadProgress(uploaded,fileLength);
+                        onUploadProgress(uploaded,fileLength,speed);
                     }
                 } finally {
                     in.close();

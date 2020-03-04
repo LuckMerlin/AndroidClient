@@ -14,15 +14,14 @@ public abstract class Transporter extends Retrofit {
     public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
 
     public interface Callback{
-
+        int TRANSPORT_ADD=123;
+        int TRANSPORT_PROGRESS=124;
+        int TRANSPORT_REMOVE=125;
+        int TRANSPORT_PAUSE=126;
+        int TRANSPORT_START=127;
     }
 
     public interface OnStatusChange extends Callback{
-        int TRANSPORT_STATUS_ADD=123;
-        int TRANSPORT_STATUS_PROGRESS=124;
-        int TRANSPORT_STATUS_REMOVE=125;
-        int TRANSPORT_STATUS_PAUSE=126;
-        int TRANSPORT_STATUS_START=127;
         void onStatusChanged(int status,Transport transport);
     }
 

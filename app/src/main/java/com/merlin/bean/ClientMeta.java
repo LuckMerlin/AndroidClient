@@ -34,6 +34,16 @@ public final class ClientMeta implements Parcelable {
     private long total;
     private final static String LOCAL_URL="http://127.0.0.1";
 
+    /**
+     * @deprecated
+     */
+    public ClientMeta(String name,String url,String account,String imageUrl){
+        this.name=name;
+        this.url=url;
+        this.account=account;
+        this.imageUrl=imageUrl;
+    }
+
     public static ClientMeta buildLocalClient(Context context){
         ClientMeta meta=new ClientMeta(null);
         meta.url=LOCAL_URL;

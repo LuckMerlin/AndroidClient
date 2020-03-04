@@ -2,16 +2,15 @@ package com.merlin.transport;
 
 import com.merlin.bean.ClientMeta;
 
-public final class Upload implements Transport {
+public final class Upload extends Transport {
     private final String mPath;
     private final String mFolder;
-    private final String mName;
     private final ClientMeta mMeta;
 
-    public Upload(String path,String folder,String name,ClientMeta meta){
+    public Upload(String path,String folder,String name,ClientMeta meta,Integer coverMode){
+        super(name,meta,coverMode);
         mPath=path;
         mFolder=folder;
-        mName=name;
         mMeta=meta;
     }
 
@@ -19,9 +18,6 @@ public final class Upload implements Transport {
         return mMeta;
     }
 
-    public String getName() {
-        return mName;
-    }
 
     public String getFolder() {
         return mFolder;
@@ -31,23 +27,4 @@ public final class Upload implements Transport {
         return mPath;
     }
 
-    @Override
-    public String getSpeed() {
-        return "12.9 kb/s";
-    }
-
-    @Override
-    public long getSize() {
-        return 0;
-    }
-
-    @Override
-    public long getTotal() {
-        return 0;
-    }
-
-    @Override
-    public String getTitle() {
-        return mName;
-    }
 }
