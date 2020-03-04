@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TransportService extends Service  implements Transporter.Callback {
+public class TransportService extends Service  implements Callback {
     /**
      * @deprecated
      */
@@ -41,19 +41,19 @@ public class TransportService extends Service  implements Transporter.Callback {
     private final static String LABEL_CLIENT ="client";
     private final static String LABEL_INTERACTIVE ="interactive";
     private final Handler mHandler=new Handler(Looper.getMainLooper());
-    private final Map<Transporter.Callback,Long> mCallbacks=new WeakHashMap<>();
+    private final Map<Callback,Long> mCallbacks=new WeakHashMap<>();
     private final Binder mBinder=new Binder();
 
-    private final Uploader.OnStatusChange mStatusChange=(status,transport)-> {
-        Map<Transporter.Callback,Long> callbacks= mCallbacks;
+    private final OnStatusChange mStatusChange=(status,transport)-> {
+        Map<Callback,Long> callbacks= mCallbacks;
         if (null!=callbacks){
             final Handler handler=mHandler;
             synchronized (callbacks){
-                Set<Transporter.Callback> set=callbacks.size()>0?callbacks.keySet():null;
+                Set<Callback> set=callbacks.size()>0?callbacks.keySet():null;
                 if (null!=set){
-                    for (Transporter.Callback callback:set){
-                        if (null!=callback&&callback instanceof Uploader.OnStatusChange){
-                            handler.post(()->((Uploader.OnStatusChange)callback).onStatusChanged(status,transport));
+                    for (Callback callback:set){
+                        if (null!=callback&&callback instanceof OnStatusChange){
+                            handler.post(()->((OnStatusChange)callback).onStatusChanged(status,transport));
                         }
                     }
                 }
@@ -66,7 +66,7 @@ public class TransportService extends Service  implements Transporter.Callback {
     @Override
     public void onCreate() {
         super.onCreate();
-        mFileUploader.listener(mStatusChange, Transporter.Callback.TRANSPORT_ADD,"While service create.");
+        mFileUploader.listener(mStatusChange, TRANSPORT_ADD,"While service create.");
     }
 
     @Nullable
@@ -86,11 +86,11 @@ public class TransportService extends Service  implements Transporter.Callback {
         if (null!=transport){
             Uploader uploader=mFileUploader;
             if (transport instanceof Upload&&null!=uploader){
-                return uploader.upload((Upload)transport,false,null,debug);
+                return uploader.add((Upload) transport,false,null,debug);
             }
             Downloader downloader=mDownloader;
             if (transport instanceof Download&&null!=downloader){
-                return downloader.download((Download)transport,false,null,debug);
+                return downloader.add((Download)transport,false,null,debug);
             }
         }
         return false;
@@ -130,7 +130,7 @@ public class TransportService extends Service  implements Transporter.Callback {
         public Collection<? extends Transport> getRunning(int type) {
             Uploader uploader=(type& Transporter.TYPE_UPLOAD)==Transporter.TYPE_UPLOAD?mFileUploader:null;
             if (null!=uploader){
-                return uploader.getUploading(null);
+                return uploader.getTransporting(null);
             }
             return null;
         }
@@ -147,11 +147,11 @@ public class TransportService extends Service  implements Transporter.Callback {
         }
 
         @Override
-        public boolean callback(int status,Transporter.Callback callback) {
-            Map<Transporter.Callback,Long> reference=null!=callback?mCallbacks:null;
+        public boolean callback(int status,Callback callback) {
+            Map<Callback,Long> reference=null!=callback?mCallbacks:null;
             if (null!=reference){
                 synchronized (reference) {
-                    return status==Transporter.Callback.TRANSPORT_ADD?!reference.containsKey(callback) &&null == reference.put(callback,
+                    return status==TRANSPORT_ADD?!reference.containsKey(callback) &&null == reference.put(callback,
                             System.currentTimeMillis()):null != reference.remove(callback);
                 }
             }
@@ -163,7 +163,7 @@ public class TransportService extends Service  implements Transporter.Callback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mFileUploader.listener(mStatusChange, Transporter.Callback.TRANSPORT_REMOVE,"While service destroy.");
+        mFileUploader.listener(mStatusChange, TRANSPORT_REMOVE,"While service destroy.");
     }
 
     public static boolean upload(Context context, boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){

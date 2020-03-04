@@ -4,13 +4,12 @@ import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
 import com.merlin.transport.Download;
+import com.merlin.transport.OnStatusChange;
 import com.merlin.transport.Transport;
 import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
-import com.merlin.transport.Upload;
-import com.merlin.transport.Uploader;
 
-public final class TransportModel extends Model implements Uploader.OnStatusChange, Transporter.Callback {
+public final class TransportModel extends Model implements OnStatusChange {
     private final TransportAdapter mAdapter=new TransportAdapter();
     private TransportBinder mBinder;
 

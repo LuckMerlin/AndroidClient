@@ -25,12 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import okhttp3.MultipartBody;
 
-public abstract class Transporter<T> extends Retrofit implements Callback{
+public abstract class Transporter<M extends Transport,N> extends Retrofit implements Callback{
     public final static int TYPE_NONE =0x00;//0000 0000
     public final static int TYPE_DOWNLOAD =0x01;//0000 0001
     public final static int TYPE_UPLOAD =0x02;//0000 0010
     public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
-    private final Map<Transport, T> mTransporting=new ConcurrentHashMap<>();
+    private final Map<M, N> mTransporting=new ConcurrentHashMap<>();
     private WeakReference<Context> mContext;
     private final Map<OnStatusChange,Long> mListeners=new WeakHashMap<>();
 
@@ -94,14 +94,14 @@ public abstract class Transporter<T> extends Retrofit implements Callback{
         return false;
     }
 
-    protected abstract boolean onAddTransport(Transport transport,TransportUpdate update);
+    protected abstract N onAddTransport(M transport,TransportUpdate update,boolean interactive);
 
-    public final synchronized boolean add(Transport transport, boolean interactive, OnStatusChange progress, String debug) {
+    public final synchronized boolean add(M transport, boolean interactive, OnStatusChange progress, String debug) {
         if (null==transport){
             Debug.W(getClass(),"Skip add transport file which is NULL.");
             return false;
         }
-        final Map<Transport, T> transporting=mTransporting;
+        final Map<M, N> transporting=mTransporting;
         if (null!=transporting&&transporting.containsKey(transport)){
             Debug.W(getClass(),"Skip add transport file which already transporting."+transport);
             notifyStatusChange(TRANSPORT_REMOVE,transport,progress);
@@ -123,20 +123,21 @@ public abstract class Transporter<T> extends Retrofit implements Callback{
                 notifyStatusChange(TRANSPORT_PROGRESS,transport,progress);
             }
         };
-        if (!onAddTransport(transport,update)){
+        N data=onAddTransport(transport,update,interactive);
+        if (null!=data){
             notifyStatusChange(TRANSPORT_REMOVE,transport,progress);
             return false;
         }
         return true;
     }
 
-    public final Collection<Transport> getTransporting(String name){
-        Map<Transport, T> transporting=mTransporting;
+    public final Collection<M> getTransporting(String name){
+        Map<M, N> transporting=mTransporting;
         return null!=transporting?transporting.keySet():null;
     }
 
     public final boolean isTransporting(Object ...objects){
-        Map<Transport, T> transporting=null!=objects&&objects.length>0?mTransporting:null;
+        Map<M, N> transporting=null!=objects&&objects.length>0?mTransporting:null;
         if (null!=transporting){
             synchronized (transporting){
                 for (Object object:objects) {

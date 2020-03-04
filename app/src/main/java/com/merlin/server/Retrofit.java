@@ -7,6 +7,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -19,10 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Retrofit {
     private final retrofit2.Retrofit.Builder mBuilder;
-
-    public interface Callback{
-
-    }
 
     public interface OnApiFinish<T> extends Callback{
         void onApiFinish(boolean succeed,int what,String note,T data, Object arg);
@@ -37,8 +34,16 @@ public class Retrofit {
     }
 
     public final <T>T prepare(Class<T>  cls,String url){
+            return prepare(cls,url,null);
+    }
+
+    public final <T>T prepare(Class<T>  cls,String url,Executor callbackExecutor){
         retrofit2.Retrofit.Builder builder=mBuilder;
-        retrofit2.Retrofit retrofit=null!=builder?builder.baseUrl(url).build():null;
+        builder=null!=builder?builder.baseUrl(url):null;
+        if (null!=callbackExecutor&&null!=builder){
+            builder.callbackExecutor(callbackExecutor);
+        }
+        retrofit2.Retrofit retrofit=null!=builder?builder.build():null;
         return null!=retrofit?retrofit.create(cls):null;
     }
 

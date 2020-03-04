@@ -50,11 +50,11 @@ public class Debug {
             E(cls, mTag, msg, (Exception)null);
         }
 
-        public static void E(Class<?> cls, String msg, Exception e) {
+        public static void E(Class<?> cls, String msg, Throwable e) {
             E(cls, mTag, msg, e);
         }
 
-        public static void E(Class<?> cls, String tag, String msg, Exception e) {
+        public static void E(Class<?> cls, String tag, String msg, Throwable e) {
             tag = null == tag ? mTag : tag;
             if (isNeedPrintDebug(6, cls, tag, msg)) {
                 Log.e(null == tag ? DEFAULT_TAG : tag, formatMessage(cls, msg), e);

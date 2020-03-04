@@ -11,28 +11,19 @@ import com.merlin.debug.Debug;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.reactivex.Observable;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 
 
-public final class Uploader extends Transporter implements Transporter.Callback {
-    private final Map<String,UploadBody> mUploading=new ConcurrentHashMap<>();
+public final class Uploader extends Transporter<Upload,UploadBody> implements Callback {
 
     private interface Api{
         @Multipart
@@ -57,23 +48,22 @@ public final class Uploader extends Transporter implements Transporter.Callback 
     }
 
     @Override
-    protected boolean onAddTransport(Transport transport,TransportUpdate update) {
-        if (null==transport||!(transport instanceof Upload)){
-            Debug.W(getClass(),"Can't add upload file which type NOT match."+transport);
-            return false;
+    protected UploadBody onAddTransport(Upload upload,TransportUpdate update,boolean interactive) {
+        if (null==upload){
+            Debug.W(getClass(),"Can't add upload file which is NULL.");
+            return null;
         }
-        final ClientMeta meta=transport.getClient();
+        final ClientMeta meta=upload.getClient();
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't add upload file which client url invalid."+url);
-            return false;
+            return null;
         }
-        final String path=null!=transport?transport.getFromPath():null;
+        final String path=null!=upload?upload.getFromPath():null;
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't add upload file which path invalid."+path);
-            return false;
+            return null;
         }
-        final Upload upload=(Upload)transport;
         List<String> exist=null;
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
         final String folder=null!=upload?upload.getToFolder():null;
@@ -85,93 +75,40 @@ public final class Uploader extends Transporter implements Transporter.Callback 
         final String name=null!=upload?upload.getName():null;
         final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
             Debug.W(getClass(),"Give up upload one file which not exist."+path);
-            return false;
+            return null;
         }
         if (!file.canRead()){
             Debug.W(getClass(),"Give up upload one file which NONE read permission."+path);
-            return false;
+            return null;
         }
         Debug.D(getClass(),"Upload file "+path+" to "+url);
-        try {
-            final UploadBody uploadBody=new UploadBody(path){
-                @Override
-                public void onTransportFinish(boolean succeed) {
-                        //Do nothing
+        final UploadBody uploadBody=new UploadBody(path){
+            @Override
+            public void onTransportProgress(long uploaded, long total, float speed) {
+                if (null!=update){
+                    update.onTransportProgress(uploaded,total,speed);
                 }
-
-                @Override
-                public void onTransportProgress(long uploaded, long total, float speed) {
-                        if (null!=update){
-                            update.onTransportProgress(uploaded,total,speed);
-                        }
-                }
-            };
-            parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
-            if (null!=uploading){
-                uploading.put(path,uploadBody);
             }
+        };
+        try {
+            parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
             if (null!=folder) {
                 parts.add(MultipartBody.Part.createFormData(Label.LABEL_FOLDER, folder));
             }
         } catch (UnsupportedEncodingException e) {
             Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
             e.printStackTrace();
-            return false;
+            return null;
         }
         return call(prepare(Api.class, url).upload(parts),(OnApiFinish<Reply>)(succeed,what,note,data,arg)-> {
             if (interactive){
                 toast(note);
             }
-            notifyStatusChange(TRANSPORT_REMOVE,upload,progress);
-        });
-    }
-
-
-    private static abstract class UploadBody extends RequestBody implements TransportUpdate{
-        private final String mPath;
-
-        public UploadBody(String path){
-            mPath=path;
-        }
-
-        @Override
-        public long contentLength(){
-            String path=mPath;
-            return null!=path&&path.length()>0?new File(path).length():-1;
-        }
-
-        @Override
-        public MediaType contentType() {
-            return MediaType.parse("application/otcet-stream");
-        }
-
-        @Override
-        public void writeTo(BufferedSink sink) throws IOException {
-            String path=mPath;
-            final File file=null!=path&&path.length()>0?new File(path):null;
-            boolean succeed=false;
-            if (null!=file&&file.exists()){
-                long fileLength = file.length();
-                int bufferSize=1024;
-                byte[] buffer = new byte[bufferSize];
-                FileInputStream in = new FileInputStream(file);
-                long uploaded = 0;
-                try {
-                    int read;
-                    succeed=true;
-                    while ((read = in.read(buffer)) != -1) {
-                        uploaded += read;
-                        sink.write(buffer, 0, read);
-                        onTransportProgress(uploaded,fileLength,-1);
-                    }
-                }catch (Exception e){
-                    succeed=false;
-                }finally {
-                    in.close();
-                    onTransportFinish(succeed);
-                }
+            if (null!=update){
+                update.onTransportFinish(succeed);
             }
-        }
+        })?uploadBody:null;
     }
+
 }
 
