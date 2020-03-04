@@ -23,6 +23,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:layout_gravity="center_horizontal"
             binding:adapter="@{vm.adapter}"
+            android:minHeight="100dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         </LinearLayout>

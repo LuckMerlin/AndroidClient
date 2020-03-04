@@ -17,6 +17,29 @@ public abstract class Transporter extends Retrofit {
 
     }
 
+    public interface OnStatusChange extends Callback{
+        int TRANSPORT_STATUS_ADD=123;
+        int TRANSPORT_STATUS_PROGRESS=124;
+        int TRANSPORT_STATUS_REMOVE=125;
+        int TRANSPORT_STATUS_PAUSE=126;
+        int TRANSPORT_STATUS_START=127;
+        void onStatusChanged(int status,Transport transport);
+    }
+
+    /**
+     * @deprecated
+     */
+    public interface OnTransportProgress extends Callback{
+        void onTransportProgress(Transport transport,long upload,long total);
+    }
+
+
+    protected final void notifyStatusChange(int status, Transport transport,OnStatusChange change){
+        if (null!=change){
+            change.onStatusChanged(status,transport);
+        }
+    }
+
     protected abstract Context getContext();
 
     protected final boolean toast(int textId){

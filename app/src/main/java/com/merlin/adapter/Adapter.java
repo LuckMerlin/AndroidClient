@@ -10,12 +10,9 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.debug.Debug;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnLayoutManagerResolve  {
     private List<T> mData;
@@ -65,6 +62,23 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
                 }
                 return true;
             }
+        }
+        return false;
+    }
+
+    public synchronized final boolean update(String debug,T ...datas){
+        List<T> list=null!=datas&&datas.length>0?mData:null;
+        if (null!=list){
+            synchronized (list) {
+                for (T data : datas) {
+                    int index=null != data?list.indexOf(data):-1;
+                    if (index>=0&&null!=list.remove(index)) {
+                        list.add(index,data);
+                        notifyItemChanged(index);
+                    }
+                }
+            }
+            return true;
         }
         return false;
     }

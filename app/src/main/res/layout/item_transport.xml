@@ -9,6 +9,8 @@
             name="position"
             type="int" />
         <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.transport.Upload"/>
+        <import type="com.merlin.client.R"/>
     </data>
     <LinearLayout
         android:orientation="horizontal"
@@ -16,7 +18,10 @@
         android:background="@drawable/selector_round_dark_corner_small"
         android:gravity="center_vertical"
         android:layout_marginBottom="2dp"
-        android:padding="3dp"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
@@ -35,15 +40,17 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content">
             <TextView
-                android:text="12.00kb/s"
+                android:text="@{data.speed}"
                 android:layout_margin="1dp"
+                android:textSize="10sp"
                 style="@style/titleSubNormalTextView"/>
             <TextView
-                android:text="@{FileSize.formatSizeText(0)+`/`+FileSize.formatSizeText(0)}"
+                android:text="@{FileSize.formatSizeText(data.size)+`/`+FileSize.formatSizeText(data.total)}"
                 android:layout_margin="1dp"
                 style="@style/titleSubNormalTextView"/>
             <ImageView
-                android:src="@drawable/single_normal"
+                android:layout_marginLeft="3dp"
+                android:src="@{data instanceof Upload?R.drawable.upload_normal:R.drawable.download_normal}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>

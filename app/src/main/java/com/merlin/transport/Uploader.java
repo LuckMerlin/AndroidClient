@@ -32,10 +32,6 @@ import retrofit2.http.Part;
 public abstract class Uploader extends Transporter{
     private final Map<String,UploadBody> mUploading=new ConcurrentHashMap<>();
 
-    public interface OnUploadProgress extends Callback{
-        void onUploadProgress(Transport transport,long upload,long total);
-    }
-
     private interface Api{
         @Multipart
         @POST(Address.PREFIX_FILE+"/upload")
@@ -43,7 +39,7 @@ public abstract class Uploader extends Transporter{
     }
 
     public final boolean upload(Collection collection, String folder, boolean interactive, int coverMode,
-                                ClientMeta meta,OnUploadProgress progress, String debug) {
+                                ClientMeta meta,OnStatusChange progress, String debug) {
         if (null != collection && collection.size() > 0) {
             for (Object obj : collection) {
                 if (null!=obj&&obj instanceof String){
@@ -54,7 +50,7 @@ public abstract class Uploader extends Transporter{
         return false;
     }
 
-    public final synchronized boolean upload(Upload upload, boolean interactive, int coverMode, ClientMeta meta, OnUploadProgress progress, String debug) {
+    public final synchronized boolean upload(Upload upload, boolean interactive, int coverMode, ClientMeta meta, OnStatusChange progress, String debug) {
         final String path=null!=upload?upload.getPath():null;
         if (null==path||path.length()<=0){
             return false;
@@ -91,9 +87,7 @@ public abstract class Uploader extends Transporter{
             final UploadBody uploadBody=new UploadBody(path){
                 @Override
                 protected void onUploadProgress(long uploaded, long total) {
-                    if (null!=progress){
-                        progress.onUploadProgress(upload,uploaded,total);
-                    }
+                    notifyStatusChange();
                 }
             };
             parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
@@ -107,6 +101,7 @@ public abstract class Uploader extends Transporter{
         if (null!=folder) {
             parts.add(MultipartBody.Part.createFormData(Label.LABEL_FOLDER, folder));
         }
+
         return call(prepare(Api.class, url).upload(parts),(OnApiFinish<Reply>)(succeed,what,note,data,arg)-> {
             if (interactive){
                 toast(note);

@@ -32,6 +32,21 @@ public final class Upload implements Transport {
     }
 
     @Override
+    public String getSpeed() {
+        return "12.9 kb/s";
+    }
+
+    @Override
+    public long getSize() {
+        return 0;
+    }
+
+    @Override
+    public long getTotal() {
+        return 0;
+    }
+
+    @Override
     public String getTitle() {
         return mName;
     }
