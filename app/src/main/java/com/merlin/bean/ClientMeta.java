@@ -30,6 +30,7 @@ public final class ClientMeta implements Parcelable {
     private String name;
     private String imageUrl;
     private String platform;
+    private String folder;
     private long free;
     private long total;
     private final static String LOCAL_URL="http://127.0.0.1";
@@ -102,6 +103,10 @@ public final class ClientMeta implements Parcelable {
         return null!=deviceType&&deviceType.equals(type);
     }
 
+    public String getFolder() {
+        return folder;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -122,6 +127,7 @@ public final class ClientMeta implements Parcelable {
             this.platform = in.readString();
             this.free = in.readLong();
             this.total = in.readLong();
+            this.folder=in.readString();
         }
     }
 
@@ -135,6 +141,7 @@ public final class ClientMeta implements Parcelable {
         dest.writeString(platform);
         dest.writeLong(free);
         dest.writeLong(total);
+        dest.writeString(folder);
     }
 
     @Override

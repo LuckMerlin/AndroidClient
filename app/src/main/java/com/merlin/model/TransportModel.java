@@ -6,7 +6,6 @@ import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.transport.Download;
 import com.merlin.transport.OnStatusChange;
 import com.merlin.transport.Transport;
@@ -48,9 +47,9 @@ public final class TransportModel extends Model implements OnStatusChange {
                     if (status==TRANSPORT_SUCCEED){
                         post(()->{
                             if (transport instanceof Upload){
-                                testUpload();
+//                                testUpload();
                             }else{
-                                testDownload();
+//                                testDownload();
                             }
                         },5000);
                     }
@@ -67,7 +66,7 @@ public final class TransportModel extends Model implements OnStatusChange {
             Transport transport = new Download("../林强.mp4", "/sdcard/a",
 //                Transport transport=new Download("./test2.mp3","/sdcard/a",
                     "林强.mp4", client, null);
-            binder.run(TRANSPORT_ADD, transport, "Test.");
+            binder.run(TRANSPORT_ADD, transport, true,"Test.");
         }
     }
 
@@ -75,9 +74,10 @@ public final class TransportModel extends Model implements OnStatusChange {
         TransportBinder binder=mBinder;
         if (null!=binder) {
                 ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
-                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
+//                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
+                Transport transport=new Upload("/sdcard/Musics/","./data",
                         "林强.mp3",client,null);
-                binder.run(TRANSPORT_ADD,transport,"Test.");
+                binder.run(TRANSPORT_ADD,transport,true,"Test.");
         }
     }
 
@@ -90,7 +90,7 @@ public final class TransportModel extends Model implements OnStatusChange {
                 mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
                 //test begin
                 testUpload();
-                testDownload();
+//                testDownload();
                 //test end
                 return true;
             }

@@ -58,7 +58,7 @@ public final class Upload extends Transport<UploadBody> {
         builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(getCoverMode()));
         final List<MultipartBody.Part> parts=new ArrayList<>();
         final String charset="UTF-8";
-        File file=new java.io.File(path);
+        final File file=new java.io.File(path);
         final String name=getName();
         final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
             Debug.W(getClass(),"Give up upload one file which not exist."+path);
@@ -71,7 +71,7 @@ public final class Upload extends Transport<UploadBody> {
             return null;
         }
         Debug.D(getClass(),"Upload file "+path+" to "+url);
-        final UploadBody uploadBody=new UploadBody(path){
+        final UploadBody uploadBody=new UploadBody(file){
             @Override
             public void onTransportProgress(long uploaded, long total, float speed) {
                 if (null!=update){
@@ -80,9 +80,14 @@ public final class Upload extends Transport<UploadBody> {
             }
         };
         try {
-            parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
+            if (file.isFile()){
+                parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path,charset), URLEncoder.encode(targetName,charset), uploadBody));
+            }
             if (null!=folder) {
-                parts.add(MultipartBody.Part.createFormData(Label.LABEL_FOLDER, folder));
+                parts.add(MultipartBody.Part.createFormData(Label.LABEL_PARENT, URLEncoder.encode(folder,charset)));
+            }
+            if (null!=name) {
+                parts.add(MultipartBody.Part.createFormData(Label.LABEL_NAME, URLEncoder.encode(name,charset)));
             }
         } catch (UnsupportedEncodingException e) {
             Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);

@@ -1,7 +1,5 @@
 package com.merlin.transport;
 
-import android.content.res.Resources;
-
 import com.merlin.bean.ClientMeta;
 import com.merlin.file.CoverMode;
 import com.merlin.server.Retrofit;

@@ -61,11 +61,7 @@ public class LocalBrowserModel extends BrowserModel {
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             case R.string.upload:
-                ArrayList<LocalFile> list=null;
-                if (null!=data&&data instanceof LocalFile){
-                    (list=new ArrayList<>(1)).add((LocalFile)data);
-                }
-                return (null!=data&&upload(list,"./data" ,FMode.MODE_NONE,"After open tap click."))||true;
+                return (null!=data&&data instanceof LocalFile&&upload((LocalFile)data,"./data" ,FMode.MODE_NONE,"After open tap click."))||true;
         }
         return super.onTapClick(view,clickCount,resId,data);
     }
@@ -277,6 +273,12 @@ public class LocalBrowserModel extends BrowserModel {
         return true;
     }
 
+
+    private boolean upload(LocalFile files,String folder,int mode, String debug){
+        ArrayList<LocalFile> list;
+        return null!=files&&files instanceof LocalFile&&(list=new ArrayList<>(1)).add(files)&&upload(list,folder,mode,debug);
+    }
+
     private boolean upload(ArrayList<LocalFile> files,String folder,int mode, String debug){
         int count=null!=files?files.size():-1;
         final Context context=getViewContext();
@@ -325,7 +327,7 @@ public class LocalBrowserModel extends BrowserModel {
                         toast(R.string.invalidServer);
                         return true;
                     }
-                    TransportService.upload(context,true,paths,clientMeta,folder,mode,debug);
+                    TransportService.upload(context,true,paths,clientMeta,folder,null,mode,debug);
                 }
                 dialog.dismiss();
                 return true;},false)||true;

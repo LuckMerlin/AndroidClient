@@ -71,7 +71,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     }
 
     private interface Api{
-        @POST(Address.PREFIX_FILE_CLIENT_META)
+        @POST(Address.PREFIX_USER+"/client/meta")
         Observable<Reply<ClientMeta>> queryClientMeta();
     }
 
