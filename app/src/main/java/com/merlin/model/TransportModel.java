@@ -26,18 +26,17 @@ public final class TransportModel extends Model implements OnStatusChange {
                     adapter.remove(transport,"After status remove.");
                     break;
                 case TRANSPORT_PAUSE:// Get through
+                case TRANSPORT_TARGET_EXIST:// Get through
+                case TRANSPORT_FAIL:// Get through
+                case TRANSPORT_START:// Get through
+                    transport.setStatus(status);// Get through
                 case TRANSPORT_PROGRESS:// Get through
-                case TRANSPORT_START:
                     adapter.update("After status change.",transport);
                     break;
                 case TRANSPORT_SKIP:// Get through
                 case TRANSPORT_CANCEL:// Get through
                 case TRANSPORT_ERROR:
-                    Debug.D(getClass(),"DDDDDDDDDDDD "+status);
-                    break;
-                case TRANSPORT_TARGET_EXIST:// Get through
-                case TRANSPORT_FAIL:// Get through
-
+                    adapter.remove(transport,"After status change."+status);
                     break;
             }
         }

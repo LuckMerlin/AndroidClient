@@ -13,6 +13,7 @@
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.util.Speed"/>
         <import type="android.view.View"/>
+        <import type="com.merlin.transport.Callback" alias="Status"/>
     </data>
     <LinearLayout
         android:orientation="horizontal"
@@ -41,6 +42,12 @@
             android:gravity="right"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content">
+            <TextView
+                android:text="@{data.status==Status.TRANSPORT_TARGET_EXIST?`存在`:data.status==Status.TRANSPORT_FAIL?`失败啦`:``}"
+                android:layout_margin="1dp"
+                android:visibility="@{data.status==Status.TRANSPORT_TARGET_EXIST||data.status==Status.TRANSPORT_FAIL?View.VISIBLE:View.GONE}"
+                android:textSize="10sp"
+                style="@style/titleSubNormalTextView"/>
             <TextView
                 android:text="@{data.speed>=0?Speed.formatNetworkSpeed(data.speed):``}"
                 android:layout_margin="1dp"

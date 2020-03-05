@@ -96,7 +96,6 @@ public final class Transporter implements Callback{
         return false;
     }
 
-
     public final synchronized boolean add(final Transport transport, boolean interactive, OnStatusChange progress, String debug) {
         if (null==transport){
             Debug.W(getClass(),"Skip add transport file which is NULL.");

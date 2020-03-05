@@ -13,6 +13,7 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
     private final int mCoverMode;
     private final String mFromPath;
     private final String mToFolder;
+    private int mStatus;
 
     public Transport(String fromPath,String toFolder,String name,ClientMeta client,Integer coverMode){
         mFromPath=fromPath;
@@ -20,6 +21,14 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
         mName=name;
         mCoverMode=null!=coverMode?coverMode:CoverMode.COVER_MODE_NONE;
         mClient=client;
+    }
+
+    public void setStatus(int mStatus) {
+        this.mStatus = mStatus;
+    }
+
+    public final int getStatus() {
+        return mStatus;
     }
 
     public final String getName() {

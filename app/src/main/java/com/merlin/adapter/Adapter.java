@@ -10,6 +10,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.debug.Debug;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -121,6 +123,17 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
             for (T data:datas) {
                 remove(data,debug);
             }
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean removeAt(int index,String debug){
+        List<T> data=index>=0?mData:null;
+        if (null!=data&&index<data.size()){
+            data.remove(index);
+            notifyItemRemoved(index);
+//            Debug.D(getClass(),"Remove item "+(null!=debug?debug:"."));
             return true;
         }
         return false;

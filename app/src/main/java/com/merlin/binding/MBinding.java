@@ -30,6 +30,7 @@ import androidx.databinding.BindingMethods;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -44,6 +45,7 @@ import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.LoadMoreInterceptor;
 import com.merlin.adapter.MultiPageAdapter;
 import com.merlin.adapter.MultiSectionAdapter;
+import com.merlin.adapter.OnItemTouchResolver;
 import com.merlin.adapter.OnMoreLoadable;
 import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
@@ -353,6 +355,11 @@ public class MBinding {
     public static void adapter(RecyclerView view, Adapter adapter) {
         if (null!=view){
             if (null!=adapter){
+                Object helper=adapter instanceof OnItemTouchResolver?((OnItemTouchResolver)adapter).onResolveItemTouch(view):null;
+                helper=null!=helper&&helper instanceof ItemTouchHelper.Callback?new ItemTouchHelper((ItemTouchHelper.Callback)helper):helper;
+                if (null!=helper&&helper instanceof ItemTouchHelper){
+                    ((ItemTouchHelper)helper).attachToRecyclerView(view);
+                }
                 RecyclerView.LayoutManager manager=adapter.onResolveLayoutManager(view);
                 if (null!=manager){
                     view.setLayoutManager(manager);

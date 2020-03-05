@@ -9,12 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemTransportBinding;
-import com.merlin.debug.Debug;
 import com.merlin.transport.Transport;
 
 import java.util.List;
 
-public class TransportAdapter<T extends Transport> extends Adapter<T> {
+public final class TransportAdapter<T extends Transport> extends Adapter<T> implements OnItemTouchResolver {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -33,5 +32,10 @@ public class TransportAdapter<T extends Transport> extends Adapter<T> {
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         return new LinearLayoutManager(rv.getContext(), RecyclerView.VERTICAL,false);
+    }
+
+    @Override
+    public Object onResolveItemTouch(RecyclerView recyclerView) {
+        return new ItemSlideRemover();
     }
 }
