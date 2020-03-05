@@ -7,25 +7,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Parcelable;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FMode;
-import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TransportService extends Service  implements Callback {
     /**
@@ -43,8 +36,8 @@ public class TransportService extends Service  implements Callback {
     private final Handler mHandler=new Handler(Looper.getMainLooper());
     private final Map<Callback,Long> mCallbacks=new WeakHashMap<>();
     private final Binder mBinder=new Binder();
-
-    private final OnStatusChange mStatusChange=(status,transport)-> {
+    private final Transporter mTransporter=new Transporter(this);
+    private final OnStatusChange mOnStatusChange=(int status, Transport transport)->{
         Map<Callback,Long> callbacks= mCallbacks;
         if (null!=callbacks){
             final Handler handler=mHandler;
@@ -60,13 +53,11 @@ public class TransportService extends Service  implements Callback {
             }
         }
     };
-    private final Downloader mDownloader=new Downloader(this);
-    private final Uploader mFileUploader=new Uploader(this);
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mFileUploader.listener(mStatusChange, TRANSPORT_ADD,"While service create.");
+        mTransporter.listener(mOnStatusChange, TRANSPORT_ADD,"While service create.");
     }
 
     @Nullable
@@ -83,17 +74,8 @@ public class TransportService extends Service  implements Callback {
     }
 
     private boolean add(Transport transport,String debug){
-        if (null!=transport){
-            Uploader uploader=mFileUploader;
-            if (transport instanceof Upload&&null!=uploader){
-                return uploader.add((Upload) transport,false,null,debug);
-            }
-            Downloader downloader=mDownloader;
-            if (transport instanceof Download&&null!=downloader){
-                return downloader.add((Download)transport,false,null,debug);
-            }
-        }
-        return false;
+        Transporter transporter=null!=transport?mTransporter:null;
+        return null!=transporter&&transporter.add(transport,false,null,debug);
     }
 
     private boolean remove(Transport transport,String debug){
@@ -107,19 +89,19 @@ public class TransportService extends Service  implements Callback {
             return false;
         }
         if (mode.equals(MODE_UPLOAD)){
-            Uploader uploader=mFileUploader;
+            Transporter transporter=mTransporter;
             ArrayList<CharSequence> files=bundle.getCharSequenceArrayList(LABEL_FILE_LIST);
             Object coverMode=bundle.get(LABEL_COVER_MODE);
             Object client=bundle.get(LABEL_CLIENT);
             Object folder=bundle.get(LABEL_FOLDER);
             Object debug=bundle.get(LABEL_DEBUG);
             Object interactive=bundle.get(LABEL_INTERACTIVE);
-            return uploader.upload(files,
-                    null!=folder&&folder instanceof String?((String)folder):null,
-                    null!=interactive&&interactive instanceof Boolean?((Boolean)interactive):true,
-                    null!=coverMode&&coverMode instanceof Integer?((Integer)coverMode): FMode.MODE_NONE,
-                    null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,mStatusChange,
-                    null!=debug&&debug instanceof String?((String)debug):null);
+//            return transporter.add(files,
+//                    null!=folder&&folder instanceof String?((String)folder):null,
+//                    null!=interactive&&interactive instanceof Boolean?((Boolean)interactive):true,
+//                    null!=coverMode&&coverMode instanceof Integer?((Integer)coverMode): FMode.MODE_NONE,
+//                    null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,null,
+//                    null!=debug&&debug instanceof String?((String)debug):null);
         }
         return false;
     }
@@ -128,7 +110,7 @@ public class TransportService extends Service  implements Callback {
 
         @Override
         public Collection<? extends Transport> getRunning(int type) {
-            Uploader uploader=(type& Transporter.TYPE_UPLOAD)==Transporter.TYPE_UPLOAD?mFileUploader:null;
+            Transporter uploader=mTransporter;
             if (null!=uploader){
                 return uploader.getTransporting(null);
             }
@@ -163,7 +145,7 @@ public class TransportService extends Service  implements Callback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mFileUploader.listener(mStatusChange, TRANSPORT_REMOVE,"While service destroy.");
+        mTransporter.listener(mOnStatusChange, TRANSPORT_REMOVE,"While service destroy.");
     }
 
     public static boolean upload(Context context, boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, int mode, String debug){

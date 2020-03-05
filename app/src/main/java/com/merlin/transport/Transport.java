@@ -2,8 +2,9 @@ package com.merlin.transport;
 
 import com.merlin.bean.ClientMeta;
 import com.merlin.file.CoverMode;
+import com.merlin.server.Retrofit;
 
-public abstract class Transport implements CoverMode {
+public abstract class Transport<T extends Canceler> implements CoverMode,Callback {
     private final String mName;
     private long mTotal;
     private long mSize;
@@ -68,4 +69,6 @@ public abstract class Transport implements CoverMode {
     public void setTotal(long mTotal) {
         this.mTotal = mTotal;
     }
+
+    protected abstract T onStart(OnTransportUpdate update, Retrofit retrofit);
 }

@@ -3,6 +3,7 @@ package com.merlin.model;
 import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
+import com.merlin.debug.Debug;
 import com.merlin.transport.Download;
 import com.merlin.transport.OnStatusChange;
 import com.merlin.transport.Transport;
@@ -28,6 +29,15 @@ public final class TransportModel extends Model implements OnStatusChange {
                 case TRANSPORT_PROGRESS:// Get through
                 case TRANSPORT_START:
                     adapter.update("After status change.",transport);
+                    break;
+                case TRANSPORT_SKIP:// Get through
+                case TRANSPORT_CANCEL:// Get through
+                case TRANSPORT_ERROR:
+                    Debug.D(getClass(),"DDDDDDDDDDDD "+status);
+                    break;
+                case TRANSPORT_TARGET_EXIST:// Get through
+                case TRANSPORT_FAIL:// Get through
+
                     break;
             }
         }
