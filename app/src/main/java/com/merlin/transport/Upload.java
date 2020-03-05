@@ -92,7 +92,7 @@ public final class Upload extends Transport<UploadBody> {
         }
         return retrofit.call(retrofit.prepare(Api.class, url).upload(parts),(Retrofit.OnApiFinish<Reply>)(succeed, what, note, data, arg)-> {
             succeed=null!=data&&data.isSuccess();
-            notifyFinish(false,succeed?TRANSPORT_REMOVE:TRANSPORT_FAIL,"Upload finish.",null,null,null,update);
+            notifyFinish(false,succeed?TRANSPORT_SUCCEED:TRANSPORT_FAIL,"Upload finish.",null,null,null,update);
         })?uploadBody:null;
     }
 

@@ -9,6 +9,7 @@ import com.merlin.transport.OnStatusChange;
 import com.merlin.transport.Transport;
 import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
+import com.merlin.transport.Upload;
 
 public final class TransportModel extends Model implements OnStatusChange {
     private final TransportAdapter mAdapter=new TransportAdapter();
@@ -35,10 +36,42 @@ public final class TransportModel extends Model implements OnStatusChange {
                     break;
                 case TRANSPORT_SKIP:// Get through
                 case TRANSPORT_CANCEL:// Get through
+                case TRANSPORT_SUCCEED:// Get through
                 case TRANSPORT_ERROR:
                     adapter.remove(transport,"After status change."+status);
+                    if (status==TRANSPORT_SUCCEED){
+                        post(()->{
+                            if (transport instanceof Upload){
+                                testUpload();
+                            }else{
+                                testDownload();
+                            }
+                        },2000);
+                    }
                     break;
             }
+        }
+    }
+
+
+    private void testDownload(){
+        TransportBinder binder=mBinder;
+        if (null!=binder) {
+            ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "");
+            Transport transport = new Download("./data/林强.mp3", "/sdcard/a",
+//                Transport transport=new Download("./test2.mp3","/sdcard/a",
+                    "林强.mp3", client, null);
+            binder.run(TRANSPORT_ADD, transport, "Test.");
+        }
+    }
+
+    private void testUpload(){
+        TransportBinder binder=mBinder;
+        if (null!=binder) {
+                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
+                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
+                        "林强.mp3",client,null);
+                binder.run(TRANSPORT_ADD,transport,"Test.");
         }
     }
 
@@ -50,16 +83,8 @@ public final class TransportModel extends Model implements OnStatusChange {
                 binder.callback(TRANSPORT_ADD,this);
                 mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
                 //test begin
-//                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
-//                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
-//                        "林强.mp3",client,null);
-//                binder.run(TRANSPORT_ADD,transport,"Test.");
-                //
-                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
-//                Transport transport=new Download("./data/林强.mp3","/sdcard/a",
-                Transport transport=new Download("./test2.mp3","/sdcard/a",
-                        "林强.mp3",client,null);
-                binder.run(TRANSPORT_ADD,transport,"Test.");
+                testUpload();
+                testDownload();
                 //test end
                 return true;
             }

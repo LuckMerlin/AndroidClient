@@ -40,33 +40,33 @@ public final class Download extends Transport<DownloadBody>{
     protected DownloadBody onStart(OnTransportUpdate update, Retrofit retrofit) {
          if (null==retrofit){
             Debug.W(getClass(),"Can't download file which retrofit is NULL.");
-            notifyFinish(false,TRANSPORT_ERROR,"File is NULL .",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"File is NULL .",null,null,null,update);
             return null;
         }
         final String path=getFromPath();
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't download file which path invalid."+path);
-            notifyFinish(false,TRANSPORT_ERROR,"Path is invalid.",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"Path is invalid.",null,null,null,update);
             return null;
         }
         final ClientMeta meta=getClient();
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't add download file which client url invalid."+url);
-            notifyFinish(false,TRANSPORT_ERROR,"Client url is invalid.",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"Client url is invalid.",null,null,null,update);
             return null;
         }
         final String folder=getToFolder();
         final String name=getName();
         if (null==folder||folder.length()<=0||null==name||name.length()<=0){
             Debug.W(getClass(),"Can't download file which folder invalid.name="+name+" folder="+folder);
-            notifyFinish(false,TRANSPORT_ERROR,"Folder is  invalid.",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"Folder is  invalid.",null,null,null,update);
             return null;
         }
         final File target=new File(folder,name);
         if (target.exists()&&target.length()>0){
             Debug.W(getClass(),"Can't download file which existed.target="+target);
-            notifyFinish(false,TRANSPORT_TARGET_EXIST," File existed.",null,null,null,update);
+            notifyFinish(TRANSPORT_TARGET_EXIST," File existed.",null,null,null,update);
             return null;
         }
         Call<ResponseBody> call=retrofit.prepare(Api.class, url, Executors.newSingleThreadExecutor()).download(path,0);
@@ -74,7 +74,7 @@ public final class Download extends Transport<DownloadBody>{
             final  DownloadBody downloadBody=new DownloadBody() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    String note=null;Boolean succeed=null;Integer what=null;
+                    String note=null;Integer what=null;
                     ResponseBody responseBody=null!=response?response.body():null;
                     if (null!=responseBody){
                         MediaType mediaType=null!=responseBody?responseBody.contentType():null;
@@ -95,63 +95,68 @@ public final class Download extends Transport<DownloadBody>{
                                             if ((coverMode & CoverMode.COVER_MODE_REPLACE) > 0) {
                                                 needDownload=true;
                                             } else if ((coverMode & CoverMode.COVER_MODE_SKIP) > 0) {
-                                                needDownload=false;succeed=false;what=TRANSPORT_SKIP;note="Skip download already exist file.";
+                                                needDownload=false;what=TRANSPORT_SKIP;note="Skip download already exist file.";
                                             }else if ((coverMode & CoverMode.COVER_MODE_KEEP_BOTH) > 0){
                                                 //Nothing
                                             }
                                         }
                                         if (needDownload) {
                                             os = new FileOutputStream(target);
-                                            succeed = false;
                                             is = null != responseBody ? responseBody.byteStream() : null;
                                             byte[] buffer = new byte[1024];
                                             int count;
                                             long downloaded = 0;
                                             long lastTime = System.currentTimeMillis(), currentTime;
                                             OnTransportUpdate innerUpdate = update;
+//                                            float speed=0;
+//                                            long duration=0;
                                             while ((count = is.read(buffer)) > 0) {
                                                 if (isCanceled()) {
-                                                    succeed = false;what = TRANSPORT_CANCEL;note = "Download file cancel.";
+                                                    what = TRANSPORT_CANCEL;note = "Download file cancel.";
                                                     break;
                                                 }
                                                 downloaded += count;
                                                 currentTime = System.currentTimeMillis();
                                                 os.write(buffer, 0, count);
                                                 if (null != innerUpdate) {
-                                                    innerUpdate.onTransportUpdate(false,TRANSPORT_PROGRESS, null, downloaded, contentLength,
-                                                            (currentTime > lastTime ? (count / 1024.f) / ((currentTime - lastTime) / 1000) : 0));
+//                                                    speed=count / 1024.f;
+//                                                    duration=(currentTime - lastTime)/1000;
+//                                                    speed=(currentTime >= lastTime ? speed / (duration==0?1:duration) : 0);
+//                                                    Debug.D(getClass()," "+(count / 1024.f)+" "+speed);
+//                                                    lastTime = System.currentTimeMillis();
+                                                    innerUpdate.onTransportUpdate(false,TRANSPORT_PROGRESS, null, downloaded, contentLength,-1f);
                                                 }
-                                                lastTime = currentTime;
                                             }
-                                            succeed = contentLength == target.length();
-                                            Debug.D(getClass(), (succeed ? "Succeed" : "Failed") + " download file " + target + " from " + path);
+                                            what = contentLength == target.length()?TRANSPORT_SUCCEED:TRANSPORT_FAIL;
+                                            target.delete();
+                                            Debug.D(getClass(), (what==TRANSPORT_SUCCEED ? "Succeed" : "Failed") + " download file " + target + " from " + path);
                                         }
                                     }
                                 }else{
                                     String responseText=responseBody.string();
                                     Debug.D(getClass(),"AAAAAAA "+responseText);
-                                    succeed=false;what=TRANSPORT_ERROR;note=responseText;
+                                    what=TRANSPORT_ERROR;note=responseText;
                                 }
                             } catch (IOException e) {
-                                succeed = false;what=TRANSPORT_FAIL;note="Exception download "+e+" "+target;
+                                what=TRANSPORT_FAIL;note="Exception download "+e+" "+target;
                                 Debug.E(getClass(),note,e);
                                 e.printStackTrace();
                             }finally {
                                 new Closer().close(is,os);
-                                if (null!=succeed&&!succeed&&null!=target){
+                                if ((null==what||what!=TRANSPORT_SUCCEED)&&null!=target){
                                     Debug.D(getClass(),"Delete download fail file."+target);
                                     target.delete();
                                 }
                             }
                         }
                     }
-                    notifyFinish(succeed,what,note,null,null,null,update);
+                    notifyFinish(what,note,null,null,null,update);
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Debug.E(getClass(),"Exception download file ."+t+" "+folder,t);
-                    notifyFinish(false,TRANSPORT_FAIL,"Exception download file ."+t,null,null,null,update);
+                    notifyFinish(TRANSPORT_FAIL,"Exception download file ."+t,null,null,null,update);
                 }};
             Debug.D(getClass(),"Download file "+path+" to "+target);
             call.enqueue(downloadBody);
@@ -160,7 +165,7 @@ public final class Download extends Transport<DownloadBody>{
         return null;
     }
 
-    final void notifyFinish(boolean succeed,Integer what,String note,Long uploaded, Long total,Float speed,OnTransportUpdate update){
+    final void notifyFinish(Integer what,String note,Long uploaded, Long total,Float speed,OnTransportUpdate update){
         if (null!=update&&null!=what){
             update.onTransportUpdate(true,what,note,uploaded,total,speed);
         }
