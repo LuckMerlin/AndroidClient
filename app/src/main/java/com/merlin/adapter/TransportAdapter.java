@@ -20,6 +20,21 @@ public final class TransportAdapter<T extends Transport> extends Adapter<T> impl
         return R.layout.item_transport;
     }
 
+    public final boolean updateErrorTextId(T data,String error,String debug){
+        if (null!=data){
+            data.setError(error);// Get through
+            return update(debug,data);
+        }
+        return false;
+    }
+
+    public final boolean remove(T data,Object anim,String debug){
+        if (null!=anim&&anim instanceof String){
+
+        }
+        return super.remove(data,debug);
+    }
+
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemTransportBinding){

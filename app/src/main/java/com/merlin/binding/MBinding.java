@@ -111,10 +111,11 @@ public class MBinding {
     @BindingAdapter("android:text")
     public static void setText(TextView view, Object resId) {
         if (null!=view) {
+            view.setText("");
             resId = null == resId ? "" : resId;
             if (resId instanceof String) {
                 view.setText((String)resId);
-            } else if (resId instanceof Integer&&!resId.equals(Resources.ID_NULL)) {
+            } else if (resId instanceof Integer&&(Integer)resId!=Resources.ID_NULL) {
                 view.setText((Integer)resId);
                 Clicker.putRes(view,new Res((Integer)resId,null));
             }

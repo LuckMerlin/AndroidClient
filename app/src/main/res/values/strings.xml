@@ -94,4 +94,8 @@
     <string name="chooseServer">选择服务器</string>
     <string name="invalidServer">不合法的服务器</string>
     <string name="transportList">传输器</string>
+    <string name="skip">忽略</string>
+    <string name="error">错误</string>
+    <string name="remove">移除</string>
+    <string name="pause">暂停</string>
 </resources>

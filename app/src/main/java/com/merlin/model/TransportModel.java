@@ -1,8 +1,11 @@
 package com.merlin.model;
 
+import android.content.res.Resources;
+
 import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
+import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.transport.Download;
 import com.merlin.transport.OnStatusChange;
@@ -21,24 +24,27 @@ public final class TransportModel extends Model implements OnStatusChange {
         if (null!=adapter){
             switch (status){
                 case TRANSPORT_ADD:
-                    adapter.append(true,transport);
-                    break;
-                case TRANSPORT_REMOVE:
-                    adapter.remove(transport,"After status remove.");
-                    break;
-                case TRANSPORT_PAUSE:// Get through
-                case TRANSPORT_TARGET_EXIST:// Get through
-                case TRANSPORT_FAIL:// Get through
-                case TRANSPORT_START:// Get through
-                    transport.setStatus(status);// Get through
-                case TRANSPORT_PROGRESS:// Get through
-                    adapter.update("After status change.",transport);
-                    break;
-                case TRANSPORT_SKIP:// Get through
-                case TRANSPORT_CANCEL:// Get through
-                case TRANSPORT_SUCCEED:// Get through
+                    adapter.append(true,transport);break;
+                case TRANSPORT_PAUSE:
+                    adapter.updateErrorTextId(transport,getText(R.string.pause),"After pause status.");break;
+                case TRANSPORT_TARGET_EXIST:
+                    adapter.updateErrorTextId(transport,getText(R.string.fileAlreadyExist),"After exist status.");break;
+                case TRANSPORT_FAIL:
+                    adapter.updateErrorTextId(transport,getText(R.string.fail),"After fail status.");break;
+                case TRANSPORT_START:
+                    adapter.updateErrorTextId(transport,getText(Resources.ID_NULL),"After start status.");break;
+                case TRANSPORT_PROGRESS:
+                    adapter.update("After status change.",transport);break;
+                case TRANSPORT_SKIP:
+                    adapter.remove(transport, getText(R.string.skip),"After status change."+status);break;
+                case TRANSPORT_CANCEL:
+                    adapter.remove(transport, getText(R.string.cancel),"After status change."+status);break;
                 case TRANSPORT_ERROR:
-                    adapter.remove(transport,"After status change."+status);
+                    adapter.remove(transport, getText(R.string.error),"After status change."+status);break;
+                case TRANSPORT_REMOVE:
+                    adapter.remove(transport, getText(R.string.remove),"After status change."+status);break;
+                case TRANSPORT_SUCCEED:
+                    adapter.remove(transport, getText(R.string.succeed),"After status change."+status);
                     if (status==TRANSPORT_SUCCEED){
                         post(()->{
                             if (transport instanceof Upload){
@@ -46,7 +52,7 @@ public final class TransportModel extends Model implements OnStatusChange {
                             }else{
                                 testDownload();
                             }
-                        },2000);
+                        },5000);
                     }
                     break;
             }
@@ -58,9 +64,9 @@ public final class TransportModel extends Model implements OnStatusChange {
         TransportBinder binder=mBinder;
         if (null!=binder) {
             ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "");
-            Transport transport = new Download("./data/林强.mp3", "/sdcard/a",
+            Transport transport = new Download("../林强.mp4", "/sdcard/a",
 //                Transport transport=new Download("./test2.mp3","/sdcard/a",
-                    "林强.mp3", client, null);
+                    "林强.mp4", client, null);
             binder.run(TRANSPORT_ADD, transport, "Test.");
         }
     }

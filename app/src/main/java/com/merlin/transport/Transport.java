@@ -1,5 +1,7 @@
 package com.merlin.transport;
 
+import android.content.res.Resources;
+
 import com.merlin.bean.ClientMeta;
 import com.merlin.file.CoverMode;
 import com.merlin.server.Retrofit;
@@ -13,7 +15,7 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
     private final int mCoverMode;
     private final String mFromPath;
     private final String mToFolder;
-    private int mStatus;
+    private String mError;
 
     public Transport(String fromPath,String toFolder,String name,ClientMeta client,Integer coverMode){
         mFromPath=fromPath;
@@ -23,12 +25,12 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
         mClient=client;
     }
 
-    public void setStatus(int mStatus) {
-        this.mStatus = mStatus;
+    public void setError(String error) {
+        this.mError = error;
     }
 
-    public final int getStatus() {
-        return mStatus;
+    public String getError() {
+        return mError;
     }
 
     public final String getName() {
