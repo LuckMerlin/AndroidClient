@@ -8,6 +8,7 @@ import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -18,7 +19,10 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okio.BufferedSink;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -33,6 +37,17 @@ public final class Upload extends AbsTransport<Canceler> {
 
     public Upload(String fromPath,String toFolder,String name,ClientMeta meta,Integer coverMode){
         super(fromPath,toFolder,name,meta,coverMode);
+    }
+
+    private static class FileUpload{
+        private final File mFile;
+        private final String mFolder;
+        private final String mName;
+        private FileUpload(File file,String folder,String name){
+            mFile=file;
+            mFolder=folder;
+            mName=name;
+        }
     }
 
     @Override
@@ -62,12 +77,41 @@ public final class Upload extends AbsTransport<Canceler> {
             notifyFinish(false,TRANSPORT_ERROR,"Folder is invalid.",null,null,null,update);
             return null;
         }
+        final String name=getName();
         final Canceler canceler=new Canceler();
-        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
-        builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(getCoverMode()));
+        final String charset="UTF-8";
         final File file=new java.io.File(fromPath);
-        retrofit.call(retrofit.prepare(Api.class,url).upload(null));
+        final List<FileUpload> files=new ArrayList<>();
+        iteratorAllFiles(file,fromPath,folder,files);
+        //Prepare all files
+        Debug.D(getClass(),"&&&&&&&&&&&& "+url+" "+file+"\n "+folder+" \n "+name);
+//      final List<MultipartBody.Part> parts=new ArrayList<>();
+//        try {
+//            parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(fromPath, charset), URLEncoder.encode(file.getName(), charset), new RequestBody(){
+//                @Override
+//                public long contentLength() throws IOException {
+//                    return null!=file&&file.exists()&&file.isFile()?file.length():0;
+//                }
+//
+//                @Override
+//                public void writeTo(BufferedSink sink) throws IOException {
+//
+//                }
+//
+//                @Override
+//                public MediaType contentType() {
+//
+//                    return null;
+//                }}));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//        retrofit.prepare(Api.class,url).upload().collect();
+//        retrofit.call(retrofit.prepare(Api.class,url).upload(null).);
+
+//        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+//        builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
+//        builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(getCoverMode()));
 //        upload(file,fromPath,folder);
 //        final String name=getName();
 //        final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
@@ -76,6 +120,30 @@ public final class Upload extends AbsTransport<Canceler> {
 //            return null;
 //        }
         return canceler;
+    }
+
+    private void iteratorAllFiles(File file,final String root,final String folder,final List<FileUpload> files){
+       if (null!=file&&null!=files&&null!=root&&null!=folder){
+           if (file.isDirectory()){
+               File[] children=file.listFiles();
+               if (null!=children&&children.length>0){
+                   for (File child:children) {
+                       iteratorAllFiles(child,root,folder,files);
+                   }
+               }else{//Empty folder
+
+               }
+           }else{
+                String name=file.getName();
+                Debug.D(getClass(),"AAA "+file+" ");
+           }
+//            String name=file.isFile()?file.getName():null;
+//            if (null!=name){
+//                Debug.D(getClass(),"AAA "+file+"\n"+(folder+" "));
+//            }else{
+//
+//            }
+       }
     }
 
     private boolean upload(File file,String fromRoot,String toFolder){
@@ -88,6 +156,11 @@ public final class Upload extends AbsTransport<Canceler> {
 //            notifyFinish(false,TRANSPORT_ERROR,"File NONE permission.",null,null,null,update);
             return false;
         }
+//        parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(file.getAbsolutePath(), charset), URLEncoder.encode(file.getName(), charset), new UploadBody(file){
+//          @Override
+//          protected void onTransportProgress(long uploaded, long total, float speed) {
+//
+//          }}));
         if (file.isDirectory()){
             File[] files=file.listFiles();
 

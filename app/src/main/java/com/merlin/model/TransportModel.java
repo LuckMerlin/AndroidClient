@@ -62,7 +62,7 @@ public final class TransportModel extends Model implements OnStatusChange {
     private void testDownload(){
         TransportBinder binder=mBinder;
         if (null!=binder) {
-            ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "");
+            ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "","");
             AbsTransport transport = new Download("../林强.mp4", "/sdcard/a",
 //                Transport transport=new Download("./test2.mp3","/sdcard/a",
                     "林强.mp4", client, null);
@@ -73,7 +73,7 @@ public final class TransportModel extends Model implements OnStatusChange {
     private void testUpload(){
         TransportBinder binder=mBinder;
         if (null!=binder) {
-                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
+                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".");
 //                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
                 AbsTransport transport=new Upload("/sdcard/Musics/",null,
                         "林强.mp3",client,null);

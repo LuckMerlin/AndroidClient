@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
+import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
@@ -13,7 +14,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public final class Transporter implements Callback{
     public final static int TYPE_NONE =0x00;//0000 0000
@@ -25,6 +30,7 @@ public final class Transporter implements Callback{
     private WeakReference<Context> mContext;
     private final Map<OnStatusChange,Long> mListeners=new WeakHashMap<>();
     private final Retrofit mRetrofit=new Retrofit();
+    private final ExecutorService mService = Executors.newCachedThreadPool();
 
     public Transporter(Context context, Looper looper){
         this(context,new Handler(null!=looper?looper:Looper.getMainLooper()));
@@ -107,9 +113,6 @@ public final class Transporter implements Callback{
             notifyStatusChange(TRANSPORT_REMOVE,transport,progress);
             return false;
         }
-        final Transporting<Canceler> transporting=new Transporting<>();
-        transportingMap.put(transport,transporting);
-        notifyStatusChange(TRANSPORT_ADD,transport,progress);
         Debug.D(getClass(),"Transport add "+transport);
         final OnTransportUpdate update=(finish,what,  note,  uploaded, total, speed)->{
                 if (null!=uploaded){
@@ -128,14 +131,20 @@ public final class Transporter implements Callback{
                 notifyStatusChange(what,transport,progress);
                 Handler handler=finish&&interactive&&null!=note&&note.length()>0?mHandler:null;
                 if (null!=handler){
-                    handler.post(()->{toast(note);});
+                    handler.post(()->toast(note));
                 }
         };
-        Canceler data=transport.onStart(update,mRetrofit);
-        if (null!=data){
-            transporting.mCanceler=data;
-        }
-        return null!=data;
+        final Transporting<Canceler> transporting=new Transporting<>();
+        transportingMap.put(transport,transporting);
+        notifyStatusChange(TRANSPORT_ADD,transport,progress);
+        mService.submit((Callable<Reply<?>>) ()-> {
+            Canceler data=transport.onStart(update,mRetrofit);
+            if (null!=data){
+                transporting.mCanceler=data;
+            }
+            return null;
+            });
+        return true;
     }
 
     public final Collection<AbsTransport> getTransporting(String name){
