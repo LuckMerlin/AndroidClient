@@ -1,5 +1,7 @@
 package com.merlin.api;
 
+import androidx.annotation.NonNull;
+
 public final class Reply<T> {
     private String note;
     private boolean success;
@@ -49,4 +51,13 @@ public final class Reply<T> {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "Reply{" +
+                "note='" + note + '\'' +
+                ", success=" + success +
+                ", what=" + what +
+                ", data=" + data +
+                '}';
+    }
 }

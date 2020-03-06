@@ -49,89 +49,82 @@ public final class Upload extends AbsTransport<Canceler> {
             notifyFinish(false,TRANSPORT_ERROR,"Client url is invalid.",null,null,null,update);
             return null;
         }
-        final String path=getFromPath();
-        if (null==path||path.length()<=0){
-            Debug.W(getClass(),"Can't add upload file which path invalid."+path);
+        final String fromPath=getFromPath();
+        if (null==fromPath||fromPath.length()<=0){
+            Debug.W(getClass(),"Can't add upload file which path invalid."+fromPath);
             notifyFinish(false,TRANSPORT_ERROR,"Path is invalid.",null,null,null,update);
             return null;
         }
-        String toFolder=getToFolder();
+        final String toFolder=getToFolder();
         final String folder=null!=toFolder&&toFolder.length()>0?toFolder:client.getFolder();
         if (null==folder||folder.length()<=0){
             Debug.W(getClass(),"Can't add upload file which folder invalid."+folder);
             notifyFinish(false,TRANSPORT_ERROR,"Folder is invalid.",null,null,null,update);
             return null;
         }
-        List<String> exist=null;
-        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.DIGEST);
+        final Canceler canceler=new Canceler();
+        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
         builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
         builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(getCoverMode()));
-        final List<MultipartBody.Part> parts=new ArrayList<>();
-        final File file=new java.io.File(path);
-        final String name=getName();
-        final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
-            Debug.W(getClass(),"Give up upload one file which not exist."+path);
-            notifyFinish(false,TRANSPORT_ERROR,"File not exist.",null,null,null,update);
-            return null;
+        final File file=new java.io.File(fromPath);
+        retrofit.call(retrofit.prepare(Api.class,url).upload(null));
+//        upload(file,fromPath,folder);
+//        final String name=getName();
+//        final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
+//            Debug.W(getClass(),"Give up upload one file which not exist."+path);
+//            notifyFinish(false,TRANSPORT_ERROR,"File not exist.",null,null,null,update);
+//            return null;
+//        }
+        return canceler;
+    }
+
+    private boolean upload(File file,String fromRoot,String toFolder){
+        if (null==file||null==fromRoot){
+            Debug.W(getClass(),"Give up upload one file which NONE file invalid."+file+" "+fromRoot);
+            return false;
         }
         if (!file.canRead()){
-            Debug.W(getClass(),"Give up upload one file which NONE read permission."+path);
-            notifyFinish(false,TRANSPORT_ERROR,"File NONE permission.",null,null,null,update);
-            return null;
+            Debug.W(getClass(),"Give up upload one file which NONE read permission."+file);
+//            notifyFinish(false,TRANSPORT_ERROR,"File NONE permission.",null,null,null,update);
+            return false;
         }
-        Debug.D(getClass(),"Upload file "+path+" to "+url+" "+folder+" "+name);
-        final Canceler canceler=new Canceler();
-        try {
-            if (null!=folder) {
-                parts.add(MultipartBody.Part.createFormData(Label.LABEL_PARENT, URLEncoder.encode(folder,charset)));
-            }
-            if (null!=name) {
-                parts.add(MultipartBody.Part.createFormData(Label.LABEL_NAME, URLEncoder.encode(name,charset)));
-            }
-            if (file.isFile()) {
-                parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path, charset), URLEncoder.encode(targetName, charset), uploadBody));
-            }
-        } catch (UnsupportedEncodingException e) {
-            Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
-            e.printStackTrace();
-            notifyFinish(false,TRANSPORT_FAIL,"File upload exception.",null,null,null,update);
-            return null;
-        }
+        if (file.isDirectory()){
+            File[] files=file.listFiles();
 
-        final UploadBody uploadBody=new UploadBody(file){
-            @Override
-            public void onTransportProgress(long uploaded, long total, float speed) {
-                if (null!=update){
-                    update.onTransportUpdate(false,TRANSPORT_PROGRESS,null,uploaded,total,speed);
-                }
-            }
-        };
-        try {
-             if (null!=folder) {
-                parts.add(MultipartBody.Part.createFormData(Label.LABEL_PARENT, URLEncoder.encode(folder,charset)));
-            }
-            if (null!=name) {
-                parts.add(MultipartBody.Part.createFormData(Label.LABEL_NAME, URLEncoder.encode(name,charset)));
-            }
-            if (file.isFile()) {
-                parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path, charset), URLEncoder.encode(targetName, charset), uploadBody));
-            }
-        } catch (UnsupportedEncodingException e) {
-            Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
-            e.printStackTrace();
-            notifyFinish(false,TRANSPORT_FAIL,"File upload exception.",null,null,null,update);
-            return null;
         }
-        final Retrofit.OnApiFinish<Reply> mCallback=new Retrofit.OnApiFinish<Reply>() {
-            @Override
-            public void onApiFinish(boolean succeed, int what, String note, Reply data, Object arg) {
-                if (null!=data&&data.isSuccess()){
-                    retrofit.call(retrofit.prepare(Api.class, url).upload(parts), Schedulers.io(),this);
-                }
-            }
-        };
-//        return retrofit.call(retrofit.prepare(Api.class, url).upload(parts), Schedulers.io(),mCallback)?uploadBody:null;
-        return canceler;
+//        Debug.D(getClass(),"Upload file "+path+" to "+url+" "+folder+" ");
+//        final Canceler canceler=new Canceler();
+//        final List<MultipartBody.Part> parts=new ArrayList<>();
+//        try {
+//            final String charset="UTF-8";
+//            if (null!=folder) {
+//                parts.add(MultipartBody.Part.createFormData(Label.LABEL_PARENT, URLEncoder.encode(folder,charset)));
+//            }
+////                if (null!=name) {
+////                    parts.add(MultipartBody.Part.createFormData(Label.LABEL_NAME, URLEncoder.encode(name,charset)));
+////                }
+//            if (file.isFile()) {
+//                parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(file.getAbsolutePath(), charset), URLEncoder.encode(file.getName(), charset), new UploadBody(file){
+//                    @Override
+//                    protected void onTransportProgress(long uploaded, long total, float speed) {
+//
+//                    }}));
+//            }
+//            final Retrofit.OnApiFinish<Reply> mCallback=new Retrofit.OnApiFinish<Reply>() {
+//                @Override
+//                public void onApiFinish(boolean succeed, int what, String note, Reply data, Object arg) {
+//                    Debug.D(getClass(),"上传 结束 "+data);
+//                    if (null!=data&&data.isSuccess()){
+////                            retrofit.call(retrofit.prepare(Api.class, url).upload(parts), Schedulers.io(),this);
+//                    }
+//                } };
+//            return retrofit.call(retrofit.prepare(Api.class, url).upload(parts), Schedulers.io(),mCallback)?canceler:null;
+//        } catch (UnsupportedEncodingException e) {
+//            Debug.E(getClass(),"Exception when upload file.e="+e+" "+file, e);
+//            e.printStackTrace();
+//            notifyFinish(false,TRANSPORT_FAIL,"File upload exception.",null,null,null,update);
+//        }
+        return false;
     }
 
     final void notifyFinish(boolean succeed, Integer what, String note, Long uploaded, Long total, Float speed, OnTransportUpdate update){
@@ -140,34 +133,48 @@ public final class Upload extends AbsTransport<Canceler> {
         }
     }
 
-    private Reply uploadFile(File file,String folder,String name){
-        if (null!=file){
-            final String charset="UTF-8";
-            final String targetName=null!=name&&name.length()>0?name:file.getName();
-            if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
-                Debug.W(getClass(),"Give up upload one file which not exist."+path);
-                notifyFinish(false,TRANSPORT_ERROR,"File not exist.",null,null,null,update);
-                return null;
-            }
-            try {
-                if (null!=folder) {
-                    parts.add(MultipartBody.Part.createFormData(Label.LABEL_PARENT, URLEncoder.encode(folder,charset)));
-                }
-                if (null!=name) {
-                    parts.add(MultipartBody.Part.createFormData(Label.LABEL_NAME, URLEncoder.encode(name,charset)));
-                }
-                if (file.isFile()) {
-                    parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(path, charset), URLEncoder.encode(targetName, charset), uploadBody));
-                }
-            } catch (UnsupportedEncodingException e) {
-                Debug.E(getClass(),"Exception when upload file.e="+e+" "+path, e);
-                e.printStackTrace();
-                notifyFinish(false,TRANSPORT_FAIL,"File upload exception.",null,null,null,update);
-                return null;
-            }
-        }
-        return false;
-    }
+//    private boolean uploadFile(Retrofit retrofit,String url,File file,String folder,String name, OnTransportUpdate update){
+//        if (null!=file){
+//            final String charset="UTF-8";
+//            final String targetName=null!=name&&name.length()>0?name:file.getName();
+//            if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
+//                Debug.W(getClass(),"Give up upload one file which not exist."+file);
+//                notifyFinish(false,TRANSPORT_ERROR,"File not exist.",null,null,null,update);
+//                return false;
+//            }
+//            final List<MultipartBody.Part> parts=new ArrayList<>();
+//            try {
+//                if (null!=folder) {
+//                    parts.add(MultipartBody.Part.createFormData(Label.LABEL_PARENT, URLEncoder.encode(folder,charset)));
+//                }
+//                if (null!=name) {
+//                    parts.add(MultipartBody.Part.createFormData(Label.LABEL_NAME, URLEncoder.encode(name,charset)));
+//                }
+//                if (file.isFile()) {
+//                    parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(file.getAbsolutePath(), charset), URLEncoder.encode(targetName, charset), new UploadBody(file){
+//                        @Override
+//                        protected void onTransportProgress(long uploaded, long total, float speed) {
+//
+//                        }
+//                    }));
+//                }
+//                final Retrofit.OnApiFinish<Reply> mCallback=new Retrofit.OnApiFinish<Reply>() {
+//                @Override
+//                public void onApiFinish(boolean succeed, int what, String note, Reply data, Object arg) {
+//                    if (null!=data&&data.isSuccess()){
+//                        retrofit.call(retrofit.prepare(Api.class, url).upload(parts), Schedulers.io(),this);
+//                    }
+//                }
+//                };
+//            } catch (UnsupportedEncodingException e) {
+//                Debug.E(getClass(),"Exception when upload file.e="+e+" "+file, e);
+//                e.printStackTrace();
+//                notifyFinish(false,TRANSPORT_FAIL,"File upload exception.",null,null,null,update);
+//                return false;
+//            }
+//        }
+//        return false;
+//    }
 
 
 
