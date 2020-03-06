@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -47,9 +48,13 @@ public class Retrofit {
         return null!=retrofit?retrofit.create(cls):null;
     }
 
-    public final<T> boolean call(Observable<T> observable,Callback ...callbacks){
+    public final<T> boolean call(Observable<T> observable, Callback ...callbacks){
+        return call(observable,null,callbacks);
+    }
+
+    public final<T> boolean call(Observable<T> observable, Scheduler observeOn, Callback ...callbacks){
         if (null!=observable){
-            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new InnerCallback<>(callbacks));
+            observable.subscribeOn(Schedulers.io()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread()).subscribe(new InnerCallback<>(callbacks));
             return true;
         }
         Debug.W(getClass(),"Can't call retrofit, Observable is NULL.");

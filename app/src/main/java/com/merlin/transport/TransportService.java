@@ -11,14 +11,11 @@ import android.os.Looper;
 import androidx.annotation.Nullable;
 
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FMode;
 import com.merlin.debug.Debug;
 import com.merlin.file.CoverMode;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -41,8 +38,8 @@ public class TransportService extends Service  implements Callback {
     private final Handler mHandler=new Handler(Looper.getMainLooper());
     private final Map<Callback,Long> mCallbacks=new WeakHashMap<>();
     private final Binder mBinder=new Binder();
-    private final Transporter mTransporter=new Transporter(this);
-    private final OnStatusChange mOnStatusChange=(int status, Transport transport)->{
+    private final Transporter mTransporter=new Transporter(this,mHandler);
+    private final OnStatusChange mOnStatusChange=(int status, AbsTransport transport)->{
         Map<Callback,Long> callbacks= mCallbacks;
         if (null!=callbacks){
             final Handler handler=mHandler;
@@ -78,12 +75,12 @@ public class TransportService extends Service  implements Callback {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private boolean add(Transport transport,boolean interactive,String debug){
+    private boolean add(AbsTransport transport, boolean interactive, String debug){
         Transporter transporter=null!=transport?mTransporter:null;
         return null!=transporter&&transporter.add(transport,interactive,null,debug);
     }
 
-    private boolean remove(Transport transport,String debug){
+    private boolean remove(AbsTransport transport, String debug){
 
         return false;
     }
@@ -137,7 +134,7 @@ public class TransportService extends Service  implements Callback {
     private class Binder extends android.os.Binder implements TransportBinder {
 
         @Override
-        public Collection<? extends Transport> getRunning(int type) {
+        public Collection<? extends AbsTransport> getRunning(int type) {
             Transporter uploader=mTransporter;
             if (null!=uploader){
                 return uploader.getTransporting(null);
@@ -146,7 +143,7 @@ public class TransportService extends Service  implements Callback {
         }
 
         @Override
-        public boolean run(int status, Transport transport, boolean interactive,String debug) {
+        public boolean run(int status, AbsTransport transport, boolean interactive, String debug) {
             switch (status){
                 case TRANSPORT_ADD:
                     return add(transport,interactive,debug);

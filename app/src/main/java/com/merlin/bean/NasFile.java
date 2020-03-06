@@ -30,7 +30,7 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     private String name;
     private String title;
     private String extension;
-    private long size;
+    private int size;
     private double modifyTime;
 
     public int getMode() {
@@ -96,7 +96,7 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     }
 
     @Override
-    public long getSize() {
+    public int getChildCount() {
         return size;
     }
 
@@ -137,7 +137,7 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
 
     @Override
     public boolean isAccessible(){
-        if (getSize()== What.WHAT_NONE_PERMISSION){
+        if (getChildCount()== What.WHAT_NONE_PERMISSION){
             return false;
         }
         int permission=permissions;
@@ -150,7 +150,7 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     }
 
     public final boolean isDirectory(){
-        return getSize()!=WHAT_NOT_DIRECTORY;
+        return getChildCount()!=WHAT_NOT_DIRECTORY;
     }
 
     @Override

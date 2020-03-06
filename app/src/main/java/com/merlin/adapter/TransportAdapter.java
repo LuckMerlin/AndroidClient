@@ -9,11 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemTransportBinding;
-import com.merlin.transport.Transport;
+import com.merlin.transport.AbsTransport;
 
 import java.util.List;
 
-public final class TransportAdapter<T extends Transport> extends Adapter<T> implements OnItemTouchResolver {
+public final class TransportAdapter<T extends AbsTransport> extends Adapter<T> implements OnItemTouchResolver {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

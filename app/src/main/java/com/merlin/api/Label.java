@@ -31,4 +31,5 @@ public interface Label{
    String  LABEL_USER = "user";
    String  LABEL_POSITION="position";
    String  LABEL_ENABLE="enable";
+   String  LABEL_LENGTH="length";
 }

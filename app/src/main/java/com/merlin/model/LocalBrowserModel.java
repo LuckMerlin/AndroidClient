@@ -61,7 +61,7 @@ public class LocalBrowserModel extends BrowserModel {
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             case R.string.upload:
-                return (null!=data&&data instanceof LocalFile&&upload((LocalFile)data,"./data" ,FMode.MODE_NONE,"After open tap click."))||true;
+                return (null!=data&&data instanceof LocalFile&&upload((LocalFile)data,null,"data2",FMode.MODE_NONE,"After open tap click."))||true;
         }
         return super.onTapClick(view,clickCount,resId,data);
     }
@@ -273,13 +273,12 @@ public class LocalBrowserModel extends BrowserModel {
         return true;
     }
 
-
-    private boolean upload(LocalFile files,String folder,int mode, String debug){
+    private boolean upload(LocalFile files,String folder,String name,int mode, String debug){
         ArrayList<LocalFile> list;
-        return null!=files&&files instanceof LocalFile&&(list=new ArrayList<>(1)).add(files)&&upload(list,folder,mode,debug);
+        return null!=files&&files instanceof LocalFile&&(list=new ArrayList<>(1)).add(files)&&upload(list,folder, name,mode,debug);
     }
 
-    private boolean upload(ArrayList<LocalFile> files,String folder,int mode, String debug){
+    private boolean upload(ArrayList<LocalFile> files,String folder,String name,int mode, String debug){
         int count=null!=files?files.size():-1;
         final Context context=getViewContext();
         if (count>0&&null!=context){
@@ -327,7 +326,7 @@ public class LocalBrowserModel extends BrowserModel {
                         toast(R.string.invalidServer);
                         return true;
                     }
-                    TransportService.upload(context,true,paths,clientMeta,folder,null,mode,debug);
+                    TransportService.upload(context,true,paths,clientMeta,folder,name,mode,debug);
                 }
                 dialog.dismiss();
                 return true;},false)||true;

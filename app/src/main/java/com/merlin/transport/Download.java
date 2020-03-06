@@ -23,7 +23,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import retrofit2.http.Streaming;
 
-public final class Download extends Transport<DownloadBody>{
+public final class Download extends AbsTransport<DownloadBody> {
 
     private interface Api{
         @Streaming
@@ -111,7 +111,7 @@ public final class Download extends Transport<DownloadBody>{
 //                                            float speed=0;
 //                                            long duration=0;
                                             while ((count = is.read(buffer)) > 0) {
-                                                if (isCanceled()) {
+                                                if (isCancel()) {
                                                     what = TRANSPORT_CANCEL;note = "Download file cancel.";
                                                     break;
                                                 }

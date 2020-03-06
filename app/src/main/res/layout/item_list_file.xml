@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content">
                 <TextView
                     style="@style/titleSmallTextView"
-                    android:text="@{meta.directory?`(`+(meta.size)+`)`:(meta.extension??``)}"/>
+                    android:text="@{meta.directory?`(`+(meta.childCount)+`)`:(meta.extension??``)}"/>
                 <TextView
                 style="@style/titleSmallTextView"
                 android:text="@{Time.formatTime((long)meta.modifyTime)}"/>

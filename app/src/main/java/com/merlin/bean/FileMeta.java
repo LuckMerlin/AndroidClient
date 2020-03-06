@@ -12,13 +12,12 @@ public interface FileMeta {
 
      String getTitle();
 
-     long getSize();
-
      double getModifyTime();
 
      String getName(boolean extension);
 
      String getParent();
+     int getChildCount();
 
      boolean isDirectory();
      boolean isAccessible();

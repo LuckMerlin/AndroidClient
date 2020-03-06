@@ -4,7 +4,7 @@
     <data>
         <variable
             name="data"
-            type="com.merlin.transport.Transport" />
+            type="com.merlin.transport.AbsTransport" />
         <variable
             name="position"
             type="int" />

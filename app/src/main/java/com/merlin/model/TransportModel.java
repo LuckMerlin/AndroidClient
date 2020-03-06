@@ -8,7 +8,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.client.R;
 import com.merlin.transport.Download;
 import com.merlin.transport.OnStatusChange;
-import com.merlin.transport.Transport;
+import com.merlin.transport.AbsTransport;
 import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
 import com.merlin.transport.Upload;
@@ -18,7 +18,7 @@ public final class TransportModel extends Model implements OnStatusChange {
     private TransportBinder mBinder;
 
     @Override
-    public void onStatusChanged(int status, Transport transport) {
+    public void onStatusChanged(int status, AbsTransport transport) {
         TransportAdapter adapter=null!=transport?mAdapter:null;
         if (null!=adapter){
             switch (status){
@@ -63,7 +63,7 @@ public final class TransportModel extends Model implements OnStatusChange {
         TransportBinder binder=mBinder;
         if (null!=binder) {
             ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "");
-            Transport transport = new Download("../林强.mp4", "/sdcard/a",
+            AbsTransport transport = new Download("../林强.mp4", "/sdcard/a",
 //                Transport transport=new Download("./test2.mp3","/sdcard/a",
                     "林强.mp4", client, null);
             binder.run(TRANSPORT_ADD, transport, true,"Test.");
@@ -75,7 +75,7 @@ public final class TransportModel extends Model implements OnStatusChange {
         if (null!=binder) {
                 ClientMeta client=new ClientMeta("林强设备", Address.URL,"","");
 //                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
-                Transport transport=new Upload("/sdcard/Musics/","./data",
+                AbsTransport transport=new Upload("/sdcard/Musics/",null,
                         "林强.mp3",client,null);
                 binder.run(TRANSPORT_ADD,transport,true,"Test.");
         }

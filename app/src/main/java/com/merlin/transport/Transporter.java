@@ -10,7 +10,6 @@ import com.merlin.server.Retrofit;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -21,19 +20,19 @@ public final class Transporter implements Callback{
     public final static int TYPE_DOWNLOAD =0x01;//0000 0001
     public final static int TYPE_UPLOAD =0x02;//0000 0010
     public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
-    private Map<Transport, Transporting<Canceler>> mTransporting;
+    private Map<AbsTransport, Transporting<Canceler>> mTransporting;
     private final Handler mHandler;
     private WeakReference<Context> mContext;
     private final Map<OnStatusChange,Long> mListeners=new WeakHashMap<>();
     private final Retrofit mRetrofit=new Retrofit();
 
-    public Transporter(Context context){
-         this(context,null);
+    public Transporter(Context context, Looper looper){
+        this(context,new Handler(null!=looper?looper:Looper.getMainLooper()));
     }
 
-    public Transporter(Context context, Looper looper){
+    public Transporter(Context context, Handler handler){
         mContext=null!=context?new WeakReference<>(context):null;
-        mHandler=new Handler(null!=looper?looper:Looper.getMainLooper());
+        mHandler=null!=handler?handler:new Handler(Looper.getMainLooper());
     }
 
     public final boolean listener(OnStatusChange listener,int status,String debug){
@@ -52,7 +51,7 @@ public final class Transporter implements Callback{
         return false;
     }
 
-    private final void notifyStatusChange(int status, Transport transport,OnStatusChange change){
+    private final void notifyStatusChange(int status, AbsTransport transport, OnStatusChange change){
         Map<OnStatusChange,Long> reference=mListeners;
         final Handler handler=mHandler;
         if (null!=reference&&null!=handler){
@@ -96,12 +95,12 @@ public final class Transporter implements Callback{
         return false;
     }
 
-    public final synchronized boolean add(final Transport transport, boolean interactive, OnStatusChange progress, String debug) {
+    public final synchronized boolean add(final AbsTransport transport, boolean interactive, OnStatusChange progress, String debug) {
         if (null==transport){
             Debug.W(getClass(),"Skip add transport file which is NULL.");
             return false;
         }
-        Map<Transport, Transporting<Canceler>> transportingMap=mTransporting;
+        Map<AbsTransport, Transporting<Canceler>> transportingMap=mTransporting;
         transportingMap=null!=transportingMap?transportingMap:(mTransporting=new ConcurrentHashMap<>());
         if (transportingMap.containsKey(transport)){
             Debug.W(getClass(),"Skip add transport file which already transporting."+transport);
@@ -122,11 +121,15 @@ public final class Transporter implements Callback{
                 if (null!=speed){
                     transport.setSpeed(speed);
                 }
-                Map<Transport, Transporting<Canceler>> map=finish?mTransporting:null;
+                Map<AbsTransport, Transporting<Canceler>> map=finish?mTransporting:null;
                 if (null!=map){
                     map.remove(transport);
                 }
                 notifyStatusChange(what,transport,progress);
+                Handler handler=finish&&interactive&&null!=note&&note.length()>0?mHandler:null;
+                if (null!=handler){
+                    handler.post(()->{toast(note);});
+                }
         };
         Canceler data=transport.onStart(update,mRetrofit);
         if (null!=data){
@@ -135,13 +138,13 @@ public final class Transporter implements Callback{
         return null!=data;
     }
 
-    public final Collection<Transport> getTransporting(String name){
-        Map<Transport, Transporting<Canceler>> transporting=mTransporting;
+    public final Collection<AbsTransport> getTransporting(String name){
+        Map<AbsTransport, Transporting<Canceler>> transporting=mTransporting;
         return null!=transporting?transporting.keySet():null;
     }
 
     public final boolean isTransporting(Object ...objects){
-        Map<Transport, Transporting<Canceler>> transporting=null!=objects&&objects.length>0?mTransporting:null;
+        Map<AbsTransport, Transporting<Canceler>> transporting=null!=objects&&objects.length>0?mTransporting:null;
         if (null!=transporting){
             synchronized (transporting){
                 for (Object object:objects) {

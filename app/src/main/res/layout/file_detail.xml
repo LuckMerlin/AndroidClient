@@ -37,7 +37,7 @@
                 android:layout_gravity="center_horizontal"
                 style="@style/titleNormalTextView"/>
             <include binding:key="@{R.string.name}" binding:value="@{file.meta.title}"  android:visibility="@{null==file.meta.title?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.size}" binding:value="@{file.directory?``+file.size:FileSize.formatSizeText(file.length)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.size}" binding:value="@{file.childCount>=0?``+file.childCount:FileSize.formatSizeText(file.length)}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.format}" binding:value="@{file.directory?(Integer)R.string.folder:(file.mime??file.extension)}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.type}" binding:value="@{FileType.formatType(file.mode)}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.path}" binding:value="@{file.path}" layout="@layout/item_key_value"/>

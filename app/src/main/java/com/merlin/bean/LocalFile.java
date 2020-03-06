@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+
+import com.merlin.api.What;
 
 public final class LocalFile implements Parcelable,FileMeta {
     private String parent;
@@ -12,15 +15,17 @@ public final class LocalFile implements Parcelable,FileMeta {
     private String extension;
     private Object imageUrl;
     private long size;
+    private int childCount;
     private double modifyTime;
     private boolean directory;
     private boolean accessible;
 
     public LocalFile(String parent,String title,String name,String extension,
-                     String imageUrl,long size,long modifyTime, boolean directory, boolean accessible){
+                     String imageUrl,int childCount,long size,long modifyTime, boolean directory, boolean accessible){
         this.parent=parent;
         this.title=title;
         this.name=name;
+        this.childCount=childCount;
         this.extension=extension;
         this.imageUrl=imageUrl;
         this.size=size;
@@ -39,13 +44,14 @@ public final class LocalFile implements Parcelable,FileMeta {
             String title=file.getName();
             boolean directory=file.isDirectory();
             long size=file.length();
+            int childCount= What.WHAT_NOT_DIRECTORY;
             if (directory){
                 String[] names=file.list();
-                size=null!=names?names.length:0;
+                childCount=null!=names?names.length:0;
             }
             long modifyTime=file.lastModified();
             boolean accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
-            return new LocalFile(parent,title,name,extension,imageUrl,size,modifyTime,directory,accessible);
+            return new LocalFile(parent,title,name,extension,imageUrl,childCount,size,modifyTime,directory,accessible);
         }
         return null;
     }
@@ -139,6 +145,11 @@ public final class LocalFile implements Parcelable,FileMeta {
 
     private boolean equals(String v1,String v2){
         return null!=v1&&null!=v2?v1.equals(v2):(null==v1&&null==v2);
+    }
+
+    @Override
+    public int getChildCount() {
+        return childCount;
     }
 
     @Override

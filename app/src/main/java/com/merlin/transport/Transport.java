@@ -1,26 +1,21 @@
 package com.merlin.transport;
-
-import com.merlin.bean.ClientMeta;
 import com.merlin.file.CoverMode;
-import com.merlin.server.Retrofit;
 
 public abstract class Transport<T extends Canceler> implements CoverMode,Callback {
     private final String mName;
     private long mTotal;
     private long mSize;
     private float mSpeed;
-    private final ClientMeta mClient;
     private final int mCoverMode;
     private final String mFromPath;
     private final String mToFolder;
     private String mError;
 
-    public Transport(String fromPath,String toFolder,String name,ClientMeta client,Integer coverMode){
+    public Transport(String fromPath, String toFolder, String name, Integer coverMode){
         mFromPath=fromPath;
         mToFolder=toFolder;
         mName=name;
         mCoverMode=null!=coverMode?coverMode:CoverMode.COVER_MODE_NONE;
-        mClient=client;
     }
 
     public void setError(String error) {
@@ -35,7 +30,7 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
         return mName;
     }
 
-    public String getTitle(){
+    public final String getTitle(){
         return getName();
     }
 
@@ -49,10 +44,6 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
 
     public final float getSpeed() {
         return mSpeed;
-    }
-
-    public final ClientMeta getClient() {
-        return mClient;
     }
 
     public final String getFromPath() {
@@ -79,5 +70,4 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
         this.mTotal = mTotal;
     }
 
-    protected abstract T onStart(OnTransportUpdate update, Retrofit retrofit);
 }

@@ -1,7 +1,15 @@
 package com.merlin.transport;
 
-public interface Canceler {
+public class Canceler {
+     private boolean mCancel;
 
-     boolean cancel(boolean cancel);
+     public final boolean cancel(boolean cancel){
+          boolean curr=mCancel;
+          mCancel=cancel;
+          return curr!=cancel;
+     }
 
+     public final boolean isCancel() {
+          return mCancel;
+     }
 }
