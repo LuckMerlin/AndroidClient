@@ -1,9 +1,15 @@
 package com.merlin.transport;
 
+import android.util.Log;
+
+import androidx.annotation.Nullable;
+
 import com.merlin.api.Address;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FileUpload;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
@@ -23,9 +29,13 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 
 public final class Upload extends AbsTransport<Canceler> {
 
@@ -33,21 +43,14 @@ public final class Upload extends AbsTransport<Canceler> {
         @Multipart
         @POST(Address.PREFIX_FILE+"/upload")
         Observable<Reply> upload(@Part List<MultipartBody.Part> parts);
+
+        @POST(Address.PREFIX_FILE+"/upload/prepare")
+        @FormUrlEncoded
+        Observable<Reply> uploadPrepare(@Field(Label.LABEL_PATH) List<FileUpload> uploads);
     }
 
     public Upload(String fromPath,String toFolder,String name,ClientMeta meta,Integer coverMode){
         super(fromPath,toFolder,name,meta,coverMode);
-    }
-
-    private static class FileUpload{
-        private final File mFile;
-        private final String mFolder;
-        private final String mName;
-        private FileUpload(File file,String folder,String name){
-            mFile=file;
-            mFolder=folder;
-            mName=name;
-        }
     }
 
     @Override
@@ -62,6 +65,12 @@ public final class Upload extends AbsTransport<Canceler> {
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't add upload file which client url invalid."+url);
             notifyFinish(false,TRANSPORT_ERROR,"Client url is invalid.",null,null,null,update);
+            return null;
+        }
+        final String pathSep=null!=client?client.getPathSep():null;
+        if (null==pathSep||pathSep.length()<=0){
+            Debug.W(getClass(),"Can't add upload file which client path sep invalid."+pathSep);
+            notifyFinish(false,TRANSPORT_ERROR,"Client path sep is invalid.",null,null,null,update);
             return null;
         }
         final String fromPath=getFromPath();
@@ -81,68 +90,37 @@ public final class Upload extends AbsTransport<Canceler> {
         final Canceler canceler=new Canceler();
         final String charset="UTF-8";
         final File file=new java.io.File(fromPath);
+        Debug.D(getClass(),"Uploading file "+fromPath+" to "+url+" "+folder);
         final List<FileUpload> files=new ArrayList<>();
-        iteratorAllFiles(file,fromPath,folder,files);
-        //Prepare all files
-        Debug.D(getClass(),"&&&&&&&&&&&& "+url+" "+file+"\n "+folder+" \n "+name);
-//      final List<MultipartBody.Part> parts=new ArrayList<>();
-//        try {
-//            parts.add(MultipartBody.Part.createFormData(URLEncoder.encode(fromPath, charset), URLEncoder.encode(file.getName(), charset), new RequestBody(){
-//                @Override
-//                public long contentLength() throws IOException {
-//                    return null!=file&&file.exists()&&file.isFile()?file.length():0;
-//                }
-//
-//                @Override
-//                public void writeTo(BufferedSink sink) throws IOException {
-//
-//                }
-//
-//                @Override
-//                public MediaType contentType() {
-//
-//                    return null;
-//                }}));
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-//        retrofit.prepare(Api.class,url).upload().collect();
-//        retrofit.call(retrofit.prepare(Api.class,url).upload(null).);
+        iteratorAllFiles(pathSep,file,file.getParent(),folder,files);//Iterate to add all  files
+        if (null!=files&&files.size()>0){
+            return retrofit.call(retrofit.prepare(Api.class, url).uploadPrepare(files), (OnApiFinish)( what, note, data, arg)-> {
 
-//        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-//        builder=null!=folder?builder.addFormDataPart(Label.LABEL_FOLDER, folder):builder;
-//        builder.addFormDataPart(Label.LABEL_MODE, Integer.toString(getCoverMode()));
-//        upload(file,fromPath,folder);
-//        final String name=getName();
-//        final String targetName=null!=name&&name.length()>0?name:file.getName();if (null==file||!file.exists()||targetName==null||targetName.length()<=0){
-//            Debug.W(getClass(),"Give up upload one file which not exist."+path);
-//            notifyFinish(false,TRANSPORT_ERROR,"File not exist.",null,null,null,update);
-//            return null;
-//        }
-        return canceler;
+            })?canceler:null;
+        }
+        notifyFinish(false,TRANSPORT_EMPTY,"None file need upload.",null,null,null,update);
+        return null;
     }
 
-    private void iteratorAllFiles(File file,final String root,final String folder,final List<FileUpload> files){
-       if (null!=file&&null!=files&&null!=root&&null!=folder){
-           if (file.isDirectory()){
-               File[] children=file.listFiles();
-               if (null!=children&&children.length>0){
-                   for (File child:children) {
-                       iteratorAllFiles(child,root,folder,files);
+    private void iteratorAllFiles(String pathSep,File file,final String root,final String folder,final List<FileUpload> files){
+       if (null!=pathSep&&null!=file&&null!=files&&null!=root&&null!=folder){
+           final String path=file.getAbsolutePath();
+           if (null!=path&&path.length()>0){
+               boolean isDirectory=file.isDirectory();
+               if (isDirectory){
+                   File[] children=file.listFiles();
+                   if (null!=children&&children.length>0){
+                       for (File child:children) {
+                           iteratorAllFiles(pathSep,child,root,folder,files);
+                           continue;
+                       }
                    }
-               }else{//Empty folder
-
                }
-           }else{
-                String name=file.getName();
-                Debug.D(getClass(),"AAA "+file+" ");
+               String targetPath=path.replaceFirst(root,folder);
+               if (null!=targetPath&&targetPath.length()>0){
+                   files.add(new FileUpload(path,targetPath,isDirectory));
+               }
            }
-//            String name=file.isFile()?file.getName():null;
-//            if (null!=name){
-//                Debug.D(getClass(),"AAA "+file+"\n"+(folder+" "));
-//            }else{
-//
-//            }
        }
     }
 

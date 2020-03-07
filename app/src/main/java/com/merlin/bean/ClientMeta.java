@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 
+import java.io.File;
 import java.io.Serializable;
 
 public final class ClientMeta implements Parcelable {
@@ -31,6 +32,7 @@ public final class ClientMeta implements Parcelable {
     private String imageUrl;
     private String platform;
     private String folder;
+    private String pathSep;
     private long free;
     private long total;
     private final static String LOCAL_URL="http://127.0.0.1";
@@ -53,6 +55,7 @@ public final class ClientMeta implements Parcelable {
         meta.deviceType="Mobile";
         meta.name=null!=context?context.getString(R.string.local):"Local";
         meta.account="Local";
+        meta.pathSep= File.pathSeparator;
         String path = Environment.getDataDirectory().getPath();
         if (null!=path&&path.length()>0){
             StatFs statFs = new StatFs(path);
@@ -104,6 +107,10 @@ public final class ClientMeta implements Parcelable {
         return null!=deviceType&&deviceType.equals(type);
     }
 
+    public String getPathSep() {
+        return pathSep;
+    }
+
     public String getFolder() {
         return folder;
     }
@@ -129,6 +136,7 @@ public final class ClientMeta implements Parcelable {
             this.free = in.readLong();
             this.total = in.readLong();
             this.folder=in.readString();
+            this.pathSep=in.readString();
         }
     }
 
@@ -143,6 +151,7 @@ public final class ClientMeta implements Parcelable {
         dest.writeLong(free);
         dest.writeLong(total);
         dest.writeString(folder);
+        dest.writeString(pathSep);
     }
 
     @Override
