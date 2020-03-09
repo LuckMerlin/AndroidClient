@@ -1,5 +1,5 @@
 package com.merlin.transport;
 
 public interface OnStatusChange extends Callback{
-    void onStatusChanged(int status, AbsTransport transport);
+    void onStatusChanged(int status, AbsTransport transport,Object data);
 }

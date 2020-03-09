@@ -1,7 +1,5 @@
 package com.merlin.api;
 
-import androidx.annotation.NonNull;
-
 public final class Reply<T> {
     private String note;
     private boolean success;

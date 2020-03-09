@@ -40,33 +40,33 @@ public final class Download extends AbsTransport<DownloadBody> {
     protected DownloadBody onStart(OnTransportUpdate update, Retrofit retrofit) {
          if (null==retrofit){
             Debug.W(getClass(),"Can't download file which retrofit is NULL.");
-            notifyFinish(TRANSPORT_ERROR,"File is NULL .",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"File is NULL .",update,null);
             return null;
         }
         final String path=getFromPath();
         if (null==path||path.length()<=0){
             Debug.W(getClass(),"Can't download file which path invalid."+path);
-            notifyFinish(TRANSPORT_ERROR,"Path is invalid.",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"Path is invalid.",update,null);
             return null;
         }
         final ClientMeta meta=getClient();
         final String url=null!=meta?meta.getUrl():null;
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't add download file which client url invalid."+url);
-            notifyFinish(TRANSPORT_ERROR,"Client url is invalid.",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"Client url is invalid.",update,null);
             return null;
         }
         final String folder=getToFolder();
         final String name=getName();
         if (null==folder||folder.length()<=0||null==name||name.length()<=0){
             Debug.W(getClass(),"Can't download file which folder invalid.name="+name+" folder="+folder);
-            notifyFinish(TRANSPORT_ERROR,"Folder is  invalid.",null,null,null,update);
+            notifyFinish(TRANSPORT_ERROR,"Folder is  invalid.",update,null);
             return null;
         }
         final File target=new File(folder,name);
         if (target.exists()&&target.length()>0){
             Debug.W(getClass(),"Can't download file which existed.target="+target);
-            notifyFinish(TRANSPORT_TARGET_EXIST," File existed.",null,null,null,update);
+            notifyFinish(TRANSPORT_TARGET_EXIST," File existed.",update,null);
             return null;
         }
         Call<ResponseBody> call=retrofit.prepare(Api.class, url, Executors.newSingleThreadExecutor()).download(path,0);
@@ -110,6 +110,7 @@ public final class Download extends AbsTransport<DownloadBody> {
                                             OnTransportUpdate innerUpdate = update;
 //                                            float speed=0;
 //                                            long duration=0;
+                                            final Progress progress=new Progress();
                                             while ((count = is.read(buffer)) > 0) {
                                                 if (isCancel()) {
                                                     what = TRANSPORT_CANCEL;note = "Download file cancel.";
@@ -124,7 +125,10 @@ public final class Download extends AbsTransport<DownloadBody> {
 //                                                    speed=(currentTime >= lastTime ? speed / (duration==0?1:duration) : 0);
 //                                                    Debug.D(getClass()," "+(count / 1024.f)+" "+speed);
 //                                                    lastTime = System.currentTimeMillis();
-                                                    innerUpdate.onTransportUpdate(false,TRANSPORT_PROGRESS, null, downloaded, contentLength,-1f);
+                                                    progress.setDoneSize(downloaded);
+                                                    progress.setTotalSize(contentLength);
+                                                    progress.setSpeed(-1f);
+                                                    innerUpdate.onTransportUpdate(false,TRANSPORT_PROGRESS, null,progress);
                                                 }
                                             }
                                             what = contentLength == target.length()?TRANSPORT_SUCCEED:TRANSPORT_FAIL;
@@ -150,13 +154,13 @@ public final class Download extends AbsTransport<DownloadBody> {
                             }
                         }
                     }
-                    notifyFinish(what,note,null,null,null,update);
+                    notifyFinish(what,note,update,null);
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Debug.E(getClass(),"Exception download file ."+t+" "+folder,t);
-                    notifyFinish(TRANSPORT_FAIL,"Exception download file ."+t,null,null,null,update);
+                    notifyFinish(TRANSPORT_FAIL,"Exception download file ."+t,update,null);
                 }};
             Debug.D(getClass(),"Download file "+path+" to "+target);
             call.enqueue(downloadBody);
@@ -165,9 +169,9 @@ public final class Download extends AbsTransport<DownloadBody> {
         return null;
     }
 
-    final void notifyFinish(Integer what,String note,Long uploaded, Long total,Float speed,OnTransportUpdate update){
+    final void notifyFinish(Integer what,String note,OnTransportUpdate update,Object data){
         if (null!=update&&null!=what){
-            update.onTransportUpdate(true,what,note,uploaded,total,speed);
+            update.onTransportUpdate(true,what,note,data);
         }
     }
 

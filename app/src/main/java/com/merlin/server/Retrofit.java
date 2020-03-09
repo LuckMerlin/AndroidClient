@@ -88,6 +88,7 @@ public class Retrofit {
 
         @Override
         public void onError(Throwable e) {
+            Debug.E(getClass(),"Error on api "+e,e);
             finishCall(What.WHAT_ERROR_UNKNOWN,null,mCallbacks,e,"After error.");
         }
 

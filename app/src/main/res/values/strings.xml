@@ -98,4 +98,5 @@
     <string name="error">错误</string>
     <string name="remove">移除</string>
     <string name="pause">暂停</string>
+    <string name="conflict">处理冲突</string>
 </resources>
