@@ -52,6 +52,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.merlin.activity.LoveActivity"
+            android:launchMode="singleInstance"
+            android:label="@string/love">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <service android:name="com.merlin.task.DownloadService"/>

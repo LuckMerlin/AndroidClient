@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
 import com.merlin.model.Model;
@@ -37,6 +38,10 @@ public class ModelActivity <T extends Model>extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         onIntentChanged(intent);
+    }
+
+    protected final void setModelContentView(int layoutId){
+        DataBindingUtil.setContentView(this,  layoutId);
     }
 
     @Override

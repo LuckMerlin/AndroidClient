@@ -259,7 +259,6 @@ public class LocalBrowserModel extends BrowserModel {
                 folderData.setData(list);
             }
             folderData.setFrom(from);
-            folderData.setTo(to);
             folderData.setLength(length);
             reply.setData(folderData);
         }
