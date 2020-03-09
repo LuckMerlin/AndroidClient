@@ -40,12 +40,13 @@ public final class ClientMeta implements Parcelable {
     /**
      * @deprecated
      */
-    public ClientMeta(String name,String url,String account,String imageUrl,String folder){
+    public ClientMeta(String name,String url,String account,String imageUrl,String folder,String pathSep){
         this.name=name;
         this.url=url;
         this.account=account;
         this.imageUrl=imageUrl;
         this.folder=folder;
+        this.pathSep=pathSep;
     }
 
     public static ClientMeta buildLocalClient(Context context){

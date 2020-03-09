@@ -4,6 +4,9 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPObject;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
@@ -18,7 +21,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 import io.reactivex.Observable;
@@ -46,7 +51,7 @@ public final class Upload extends AbsTransport<Canceler> {
 
         @POST(Address.PREFIX_FILE+"/upload/prepare")
         @FormUrlEncoded
-        Observable<Reply> uploadPrepare(@Field(Label.LABEL_PATH) List<FileUpload> uploads);
+        Observable<Reply> uploadPrepare(@Field(Label.LABEL_PATH) List<String> uploads);
     }
 
     public Upload(String fromPath,String toFolder,String name,ClientMeta meta,Integer coverMode){
@@ -91,8 +96,9 @@ public final class Upload extends AbsTransport<Canceler> {
         final String charset="UTF-8";
         final File file=new java.io.File(fromPath);
         Debug.D(getClass(),"Uploading file "+fromPath+" to "+url+" "+folder);
-        final List<FileUpload> files=new ArrayList<>();
+        final List<String> files=new ArrayList<>();
         iteratorAllFiles(pathSep,file,file.getParent(),folder,files);//Iterate to add all  files
+        Debug.D(getClass(),"AAAAAAAA "+files.size());
         if (null!=files&&files.size()>0){
             return retrofit.call(retrofit.prepare(Api.class, url).uploadPrepare(files), (OnApiFinish)( what, note, data, arg)-> {
 
@@ -102,23 +108,32 @@ public final class Upload extends AbsTransport<Canceler> {
         return null;
     }
 
-    private void iteratorAllFiles(String pathSep,File file,final String root,final String folder,final List<FileUpload> files){
+    private void iteratorAllFiles(String pathSep,File file,final String root,final String folder,final List<String> files){
        if (null!=pathSep&&null!=file&&null!=files&&null!=root&&null!=folder){
            final String path=file.getAbsolutePath();
            if (null!=path&&path.length()>0){
                boolean isDirectory=file.isDirectory();
                if (isDirectory){
                    File[] children=file.listFiles();
+                   Debug.D(getClass(),"AAAeeeeeeAAAAAA "+children);
                    if (null!=children&&children.length>0){
                        for (File child:children) {
+                           Debug.D(getClass(),"dddddd "+child);
                            iteratorAllFiles(pathSep,child,root,folder,files);
-                           continue;
                        }
                    }
                }
+               Debug.D(getClass(),"AAAA "+path+" "+folder);
                String targetPath=path.replaceFirst(root,folder);
+               Debug.D(getClass(),"AAAA "+targetPath);
                if (null!=targetPath&&targetPath.length()>0){
-                   files.add(new FileUpload(path,targetPath,isDirectory));
+                   Debug.D(getClass()," "+path+(isDirectory?pathSep:"")+" "+targetPath);
+//                   JSONObject json=new JSONObject();
+//                   json.put(Label.LABEL_FROM,path+(isDirectory?pathSep:""));
+//                   json.put(Label.LABEL_TO,targetPath);
+                   files.add(targetPath+(isDirectory?pathSep:""));
+//                   files.put(path+(isDirectory?pathSep:""),targetPath);
+//                   files.add(new FileUpload(path,targetPath,isDirectory?Label.LABEL_FOLDER:null));
                }
            }
        }
