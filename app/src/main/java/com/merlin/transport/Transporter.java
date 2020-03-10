@@ -57,7 +57,7 @@ public final class Transporter implements Callback{
         return false;
     }
 
-    private final void notifyStatusChange(int status, AbsTransport transport, OnStatusChange change){
+    private final void notifyStatusChange(int status, AbsTransport transport,Object data, OnStatusChange change){
         Map<OnStatusChange,Long> reference=mListeners;
         final Handler handler=mHandler;
         if (null!=reference&&null!=handler){
@@ -67,14 +67,14 @@ public final class Transporter implements Callback{
                     handler.post(()->{
                     for (OnStatusChange child:set) {
                         if (null!=child){
-                            child.onStatusChanged(status,transport);
+                            child.onStatusChanged(status,transport,data);
                         }
                     }});
                 }
             }
         }
         if (null!=change){
-            handler.post(()-> change.onStatusChanged(status,transport));
+            handler.post(()-> change.onStatusChanged(status,transport,data));
         }
     }
 
@@ -110,25 +110,21 @@ public final class Transporter implements Callback{
         transportingMap=null!=transportingMap?transportingMap:(mTransporting=new ConcurrentHashMap<>());
         if (transportingMap.containsKey(transport)){
             Debug.W(getClass(),"Skip add transport file which already transporting."+transport);
-            notifyStatusChange(TRANSPORT_REMOVE,transport,progress);
+            notifyStatusChange(TRANSPORT_REMOVE,transport,progress,null);
             return false;
         }
         Debug.D(getClass(),"Transport add "+transport);
-        final OnTransportUpdate update=(finish,what,  note,  uploaded, total, speed)->{
-                if (null!=uploaded){
-                    transport.setSize(uploaded);
-                }
-                if (null!=total){
-                    transport.setTotal(total);
-                }
-                if (null!=speed){
-                    transport.setSpeed(speed);
+        final OnTransportUpdate update=(finish,what,  note,  data)->{
+                if (null!=data&&data instanceof Progress){
+                    transport.setSize(((Progress)data).getDoneSize());
+                    transport.setTotal(((Progress)data).getTotalSize());
+                    transport.setSpeed(((Progress)data).getSpeed());
                 }
                 Map<AbsTransport, Transporting<Canceler>> map=finish?mTransporting:null;
                 if (null!=map){
                     map.remove(transport);
                 }
-                notifyStatusChange(what,transport,progress);
+                notifyStatusChange(what,transport,data,progress);
                 Handler handler=finish&&interactive&&null!=note&&note.length()>0?mHandler:null;
                 if (null!=handler){
                     handler.post(()->toast(note));
@@ -136,7 +132,7 @@ public final class Transporter implements Callback{
         };
         final Transporting<Canceler> transporting=new Transporting<>();
         transportingMap.put(transport,transporting);
-        notifyStatusChange(TRANSPORT_ADD,transport,progress);
+        notifyStatusChange(TRANSPORT_ADD,transport,null,progress);
         mService.submit((Callable<Reply<?>>) ()-> {
             Canceler data=transport.onStart(update,mRetrofit);
             if (null!=data){

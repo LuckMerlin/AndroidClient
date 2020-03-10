@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <!--        android:theme="@android:style/Theme.Translucent.NoTitleBar"-->
     <application
+        android:requestLegacyExternalStorage="true"
         android:name="com.merlin.global.Application"
         android:theme="@android:style/Theme.Wallpaper.NoTitleBar"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -45,6 +46,15 @@
         <activity android:name="com.merlin.activity.MediaPlayActivity"
             android:launchMode="singleInstance"
             android:label="@string/mediaPlay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.merlin.activity.LoveActivity"
+            android:launchMode="singleInstance"
+            android:label="@string/love">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

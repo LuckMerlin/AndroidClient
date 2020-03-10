@@ -25,7 +25,7 @@ public class TransportService extends Service  implements Callback {
      * @deprecated
      */
     private final static String LABEL_FILE_META_LIST ="fileMetaList";
-    private final static String LABEL_FILE_LIST ="fileList";
+    private final static String LABEL_FILES ="filePaths";
     private final static int MODE_UPLOAD =124;
     private final static int MODE_DOWNLOAD =125;
     private final static String LABEL_MODE ="mode";
@@ -39,7 +39,7 @@ public class TransportService extends Service  implements Callback {
     private final Map<Callback,Long> mCallbacks=new WeakHashMap<>();
     private final Binder mBinder=new Binder();
     private final Transporter mTransporter=new Transporter(this,mHandler);
-    private final OnStatusChange mOnStatusChange=(int status, AbsTransport transport)->{
+    private final OnStatusChange mOnStatusChange=(int status, AbsTransport transport, Object data)->{
         Map<Callback,Long> callbacks= mCallbacks;
         if (null!=callbacks){
             final Handler handler=mHandler;
@@ -48,7 +48,7 @@ public class TransportService extends Service  implements Callback {
                 if (null!=set){
                     for (Callback callback:set){
                         if (null!=callback&&callback instanceof OnStatusChange){
-                            handler.post(()->((OnStatusChange)callback).onStatusChanged(status,transport));
+                            handler.post(()->((OnStatusChange)callback).onStatusChanged(status,transport,data));
                         }
                     }
                 }
@@ -85,15 +85,9 @@ public class TransportService extends Service  implements Callback {
         return false;
     }
 
-    private boolean upload(ArrayList<CharSequence> paths,String folder,String name,boolean interactive,int coverMode,ClientMeta client,String debug){
-        if (null!=paths&&paths.size()>0&&null!=client){
-            Upload upload;
-            for (CharSequence path:paths){
-                if (null!=(upload=null!=path&&path instanceof String&&path.length()>0? new Upload((String)path,folder,name,client,coverMode):null)){
-                    add(upload,interactive,debug);
-                }
-            }
-            return true;
+    private boolean upload(String filePath,String folder,String name,boolean interactive,int coverMode,ClientMeta client,String debug){
+        if (null!=filePath&&filePath.length()>0&&null!=client){
+            return add(new Upload(filePath,folder,name,client,coverMode),interactive,debug);
         }
         return false;
     }
@@ -111,22 +105,23 @@ public class TransportService extends Service  implements Callback {
             return false;
         }
         if (mode.equals(MODE_UPLOAD)){
-            ArrayList<CharSequence> files=bundle.getCharSequenceArrayList(LABEL_FILE_LIST);
+            String filePath=bundle.getString(LABEL_FILES);
             int coverMode=bundle.getInt(LABEL_COVER_MODE,CoverMode.COVER_MODE_NONE);
             Object client=bundle.get(LABEL_CLIENT);
             String folder=bundle.getString(LABEL_FOLDER);
             String name=bundle.getString(LABEL_NAME);
             String debug=bundle.getString(LABEL_DEBUG,null);
             boolean interactive=bundle.getBoolean(LABEL_INTERACTIVE,false);
-            return upload(files,folder,name,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
+            return upload(filePath,folder,name,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
         }else if (mode.equals(MODE_DOWNLOAD)){
-            ArrayList<CharSequence> files=bundle.getCharSequenceArrayList(LABEL_FILE_LIST);
+            String filePath=bundle.getString(LABEL_FILES);
             int coverMode=bundle.getInt(LABEL_COVER_MODE,CoverMode.COVER_MODE_NONE);
             Object client=bundle.get(LABEL_CLIENT);
             String folder=bundle.getString(LABEL_FOLDER);
             String debug=bundle.getString(LABEL_DEBUG,null);
             boolean interactive=bundle.getBoolean(LABEL_INTERACTIVE,false);
-            return download(files,folder,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
+//            return download(files,folder,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
+            return false;
         }
         return false;
     }
@@ -173,8 +168,8 @@ public class TransportService extends Service  implements Callback {
         mTransporter.listener(mOnStatusChange, TRANSPORT_REMOVE,"While service destroy.");
     }
 
-    public static boolean upload(Context context, boolean interactive , ArrayList<CharSequence> files, ClientMeta meta, String folder, String name,int mode, String debug){
-        if (null!=files&&files.size()>0){
+    public static boolean upload(Context context, boolean interactive , CharSequence path, ClientMeta meta, String folder, String name,int mode, String debug){
+        if (null!=path&&path.length()>0){
             String url=null!=meta?meta.getUrl():null;
             if (null==url||url.length()<=0){
                 Debug.W(TransportService.class,"Can't upload file with invalid server "+(null!=debug?debug:".")+" url="+url);
@@ -189,7 +184,7 @@ public class TransportService extends Service  implements Callback {
             intent.putExtra(LABEL_NAME,name);
             intent.putExtra(LABEL_FOLDER,folder);
             intent.putExtra(LABEL_DEBUG,debug);
-            intent.putCharSequenceArrayListExtra(LABEL_FILE_LIST,files);
+            intent.putExtra(LABEL_FILES,path);
             return null!=context.startService(intent);
         }
         Debug.W(TransportService.class,"Can't upload file with EMPTY list "+(null!=debug?debug:"."));

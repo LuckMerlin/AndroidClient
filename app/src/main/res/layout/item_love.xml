@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="love"
+            type="com.merlin.bean.Love" />
+        <variable
+            name="position"
+            type="int" />
+        <import type="com.merlin.view.Clicker"/>
+    </data>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@{``+position}"
+            style="@style/titleNormalTextView"/>
+    </LinearLayout>
+</layout>

@@ -18,7 +18,6 @@ import java.util.List;
 public abstract class MediaSheetChooseListAdapter extends MultiSectionAdapter<String,Sheet, SectionData<Sheet>> {
 
 
-
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
         return R.layout.item_media_sheet_choose_list;

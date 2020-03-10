@@ -5,7 +5,6 @@ import java.util.List;
 public class SectionData<T> {
     private int length=-1;
     private int from;
-    private int to;
     private List<T> data;
 
     public int getFrom() {
@@ -13,7 +12,8 @@ public class SectionData<T> {
     }
 
     public int getTo() {
-        return to;
+        List<T>  list=from>=0?data:null;
+        return from+(null!=list?list.size():0);
     }
 
     public void setFrom(int from) {
@@ -23,10 +23,10 @@ public class SectionData<T> {
     public void setLength(int length) {
         this.length = length;
     }
-
-    public void setTo(int to) {
-        this.to = to;
-    }
+//
+//    public void setTo(int to) {
+//        this.to = to;
+//    }
 
     public final void setData(List<T> data) {
         this.data = data;

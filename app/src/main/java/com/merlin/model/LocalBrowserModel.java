@@ -1,11 +1,13 @@
 package com.merlin.model;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.view.View;
 
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.LocalBrowserAdapter;
 import com.merlin.api.ApiList;
 import com.merlin.api.OnApiFinish;
@@ -257,7 +259,6 @@ public class LocalBrowserModel extends BrowserModel {
                 folderData.setData(list);
             }
             folderData.setFrom(from);
-            folderData.setTo(to);
             folderData.setLength(length);
             reply.setData(folderData);
         }
@@ -273,22 +274,10 @@ public class LocalBrowserModel extends BrowserModel {
         return true;
     }
 
-    private boolean upload(LocalFile files,String folder,String name,int mode, String debug){
-        ArrayList<LocalFile> list;
-        return null!=files&&files instanceof LocalFile&&(list=new ArrayList<>(1)).add(files)&&upload(list,folder, name,mode,debug);
-    }
-
-    private boolean upload(ArrayList<LocalFile> files,String folder,String name,int mode, String debug){
-        int count=null!=files?files.size():-1;
+    private boolean upload(LocalFile file,String folder,String name,int mode, String debug){
         final Context context=getViewContext();
-        if (count>0&&null!=context){
-            ArrayList<CharSequence> paths=new ArrayList<>();
-            for (LocalFile lf:files) {
-                String path=null!=lf?lf.getPath():null;
-                if (null!=path){
-                    paths.add(path);
-                }
-            }
+        if (null!=file&&null!=context){
+            final String path=file.getPath();
             Dialog dialog=new Dialog(context);
             ServerChooseLayoutBinding binding=(ServerChooseLayoutBinding) inflate(R.layout.server_choose_layout);
             Collection<Object> values=getAllClients();
@@ -326,7 +315,8 @@ public class LocalBrowserModel extends BrowserModel {
                         toast(R.string.invalidServer);
                         return true;
                     }
-                    TransportService.upload(context,true,paths,clientMeta,folder,name,mode,debug);
+                    context.startActivity(new Intent(context, TransportActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                    TransportService.upload(context,true,path,clientMeta,folder,name,mode,debug);
                 }
                 dialog.dismiss();
                 return true;},false)||true;

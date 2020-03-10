@@ -109,7 +109,7 @@ public final class ClientMeta implements Parcelable {
     }
 
     public String getPathSep() {
-        return pathSep;
+        return null!=pathSep&&pathSep.equals("\\")?"\\":pathSep;
     }
 
     public String getFolder() {
