@@ -16,12 +16,14 @@ import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
 import com.merlin.transport.Upload;
 
+import java.io.File;
+
 public final class TransportModel extends Model implements OnStatusChange {
     private final TransportAdapter mAdapter=new TransportAdapter();
     private TransportBinder mBinder;
 
     @Override
-    public void onStatusChanged(int status, AbsTransport transport,Object data) {
+    public void onStatusChanged(int status, AbsTransport transport, Object data) {
         TransportAdapter adapter=null!=transport?mAdapter:null;
         if (null!=adapter){
             switch (status){
@@ -117,4 +119,5 @@ public final class TransportModel extends Model implements OnStatusChange {
     public TransportAdapter getAdapter() {
         return mAdapter;
     }
+
 }
