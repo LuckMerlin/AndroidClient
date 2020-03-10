@@ -27,6 +27,7 @@ import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
+import com.merlin.bean.NasFile;
 import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ClientDetailBinding;
@@ -36,6 +37,7 @@ import com.merlin.client.databinding.ItemClientBinding;
 import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
+import com.merlin.file.CoverMode;
 import com.merlin.protocol.Tag;
 import com.merlin.transport.TransportService;
 import com.merlin.view.OnLongClick;
@@ -64,6 +66,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     private final ObservableField<Integer> mCurrentMode=new ObservableField<>();
     private final ObservableField<Adapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
+    private Object mProcessing;
     private final ObservableField<String> mCurrentMultiChooseSummary=new ObservableField<>();
 
     public interface OnBrowserClientChange{
@@ -74,6 +77,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         @POST(Address.PREFIX_USER+"/client/meta")
         Observable<Reply<ClientMeta>> queryClientMeta();
     }
+
 
     public FileBrowserModel(){
         mCurrentMode.set(BrowserModel.MODE_NORMAL);
@@ -135,6 +139,13 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         return null!=curr&&null!=model&&model==curr;
     }
 
+    @Override
+    public final boolean onProcessSet(Object object, String debug) {
+        mProcessing=object;
+        Debug.D(getClass(),"Set processing "+mProcessing+" "+(null!=debug?debug:"."));
+        return true;
+    }
+
     private boolean changeDevice(ClientMeta client, boolean force, String debug){
         final String url=null!=client?client.getUrl():null;
         if (null!=url&&url.length()>0){
@@ -189,8 +200,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
                     case R.string.upload:
-
-                        return true;
+                        return upload(data,"After tap click.");
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
                     case R.drawable.selector_menu:
@@ -220,6 +230,22 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         }
         BrowserModel model=getCurrentModel();
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
+    }
+
+    private boolean upload(Object obj,String debug){
+        Object processing=mProcessing;
+        LocalFile localFile=null!=processing&&processing instanceof LocalFile?(LocalFile)processing:null;
+        String localFilePath=null!=localFile?localFile.getPath():null;
+        FolderData folderData=mCurrentFolder.get();
+        String folder=null!=folderData?folderData.getPath():null;
+        ClientMeta client=getCurrentModelMeta();
+        if (null!=folder&&null!=localFile&&null!=client){
+            if (client.isLocalClient()){
+                return toast(R.string.canNotOperateOnLocalDevice);
+            }
+            return TransportService.upload(getContext(),true,localFilePath,client,folder,null, CoverMode.COVER_MODE_NONE,debug);
+        }
+        return true;
     }
 
     private boolean showClientDetail(View view,ClientMeta meta,String debug){

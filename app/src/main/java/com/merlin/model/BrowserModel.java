@@ -55,15 +55,15 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
     private final ObservableField<String> mMultiChooseSummary=new ObservableField<>();
     private BrowserAdapter<T> mBrowserAdapter;
-    private final List<OnModeFinish> mModeFinish=new ArrayList<>();
+//    private final List<OnModeFinish> mModeFinish=new ArrayList<>();
     private WeakReference<Context> mContext;
-    private Object mProcessing;
+//    private Object mProcessing;
     private PopupWindow mPopWindow;
     private final ClientCallback mCallback;
 
-    protected interface OnModeFinish{
-        void onModeFinish(int last,int current);
-    }
+//    protected interface OnModeFinish{
+//        void onModeFinish(int last,int current);
+//    }
 
     public BrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         mClientMeta=meta;
@@ -221,14 +221,10 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     }
 
     protected final boolean entryMode(int mode,String debug){
-        return entryMode(mode,null,debug);
-    }
-
-    protected final boolean entryMode(int mode,Object processing,String debug){
         if (!isMode(mode)){
             int last=mMode;
             mMode=mode;
-            mProcessing=null;
+            setProcessing(null,"While mode entry.");
             ClientCallback callback=mCallback;
             if (null!=callback){
                 callback.onBrowserModeChange(this,last,mode);
@@ -242,7 +238,6 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                     return refreshMultiChooseCount();
                 case MODE_COPY:
                 case MODE_UPLOAD:
-                    mProcessing=processing;
                     break;
                 case MODE_MOVE:
                     break;
@@ -252,16 +247,14 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return false;
     }
 
-    protected final Object getProcessing() {
-        return mProcessing;
-    }
-
-    protected final void setProcessing(Object processing,String debug) {
-        this.mProcessing = processing;
-    }
 
     protected final boolean isMode(int mode){
         return mode==mMode;
+    }
+
+    protected boolean setProcessing(Object object,String debug){
+         final ClientCallback callback=mCallback;
+        return null!=callback&&callback.onProcessSet(object,debug);
     }
 
     @Override
