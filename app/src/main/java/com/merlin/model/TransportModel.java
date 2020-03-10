@@ -20,7 +20,7 @@ public final class TransportModel extends Model implements OnStatusChange {
     private TransportBinder mBinder;
 
     @Override
-    public void onStatusChanged(int status, AbsTransport transport) {
+    public void onStatusChanged(int status, AbsTransport transport, Object data) {
         TransportAdapter adapter=null!=transport?mAdapter:null;
         if (null!=adapter){
             switch (status){
@@ -108,4 +108,5 @@ public final class TransportModel extends Model implements OnStatusChange {
     public TransportAdapter getAdapter() {
         return mAdapter;
     }
+
 }

@@ -14,4 +14,5 @@ public class LoveActivity extends ModelActivity<LoveModel> {
         super.onCreate(savedInstanceState);
         setModelContentView(R.layout.activity_love);
     }
+
 }

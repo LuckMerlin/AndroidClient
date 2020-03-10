@@ -62,33 +62,33 @@ public final class Upload extends AbsTransport<Canceler> {
     protected Canceler onStart(OnTransportUpdate update,Retrofit retrofit) {
         if (null==retrofit){
             Debug.W(getClass(),"Can't upload file which retrofit is NULL.");
-            notifyFinish(false,TRANSPORT_ERROR,"File is NULL .",null,null,null,update);
+            notifyFinish(false,TRANSPORT_ERROR,"File is NULL .",null,update);
             return null;
         }
         final ClientMeta client=getClient();
         final String url=null!=client?client.getUrl():null;
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't add upload file which client url invalid."+url);
-            notifyFinish(false,TRANSPORT_ERROR,"Client url is invalid.",null,null,null,update);
+            notifyFinish(false,TRANSPORT_ERROR,"Client url is invalid.",null,update);
             return null;
         }
         final String pathSep=null!=client?client.getPathSep():null;
         if (null==pathSep||pathSep.length()<=0){
             Debug.W(getClass(),"Can't add upload file which client path sep invalid."+pathSep);
-            notifyFinish(false,TRANSPORT_ERROR,"Client path sep is invalid.",null,null,null,update);
+            notifyFinish(false,TRANSPORT_ERROR,"Client path sep is invalid.",null,update);
             return null;
         }
         final String fromPath=getFromPath();
         if (null==fromPath||fromPath.length()<=0){
             Debug.W(getClass(),"Can't add upload file which path invalid."+fromPath);
-            notifyFinish(false,TRANSPORT_ERROR,"Path is invalid.",null,null,null,update);
+            notifyFinish(false,TRANSPORT_ERROR,"Path is invalid.",null,update);
             return null;
         }
         final String toFolder=getToFolder();
         final String folder=null!=toFolder&&toFolder.length()>0?toFolder:client.getFolder();
         if (null==folder||folder.length()<=0){
             Debug.W(getClass(),"Can't add upload file which folder invalid."+folder);
-            notifyFinish(false,TRANSPORT_ERROR,"Folder is invalid.",null,null,null,update);
+            notifyFinish(false,TRANSPORT_ERROR,"Folder is invalid.",null,update);
             return null;
         }
         final String name=getName();
@@ -104,7 +104,7 @@ public final class Upload extends AbsTransport<Canceler> {
 
             })?canceler:null;
         }
-        notifyFinish(false,TRANSPORT_EMPTY,"None file need upload.",null,null,null,update);
+        notifyFinish(false,TRANSPORT_EMPTY,"None file need upload.",update,null);
         return null;
     }
 
@@ -193,9 +193,9 @@ public final class Upload extends AbsTransport<Canceler> {
         return false;
     }
 
-    final void notifyFinish(boolean succeed, Integer what, String note, Long uploaded, Long total, Float speed, OnTransportUpdate update){
+    final void notifyFinish(boolean succeed, Integer what, String note,Object data,OnTransportUpdate update){
         if (null!=update&&null!=what){
-            update.onTransportUpdate(true,what,note,uploaded,total,speed);
+            update.onTransportUpdate(true,what,note,data);
         }
     }
 
