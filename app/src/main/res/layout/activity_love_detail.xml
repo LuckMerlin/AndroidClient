@@ -4,14 +4,14 @@
     <data>
         <variable
             name="vm"
-            type="com.merlin.model.LoveModel" />
+            type="com.merlin.model.LoveDetailModel" />
         <import type="com.merlin.binding.StatusBar"/>
         <import type="com.merlin.client.R"/>
     </data>
     <FrameLayout
             binding:createModel="@{true}"
             android:orientation="vertical"
-            binding:statusBar="@{StatusBar.statusBar(null,R.string.love,R.string.add)}"
+            binding:statusBar="@{StatusBar.statusBar(null,vm.love.name)}"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         <FrameLayout
@@ -22,7 +22,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
-                binding:adapter="@{vm.adapter}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </FrameLayout>

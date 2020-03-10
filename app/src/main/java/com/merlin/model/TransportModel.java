@@ -6,6 +6,9 @@ import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
+import com.merlin.transport.Block;
 import com.merlin.transport.Download;
 import com.merlin.transport.OnStatusChange;
 import com.merlin.transport.AbsTransport;
@@ -13,14 +16,12 @@ import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
 import com.merlin.transport.Upload;
 
-import java.io.File;
-
 public final class TransportModel extends Model implements OnStatusChange {
     private final TransportAdapter mAdapter=new TransportAdapter();
     private TransportBinder mBinder;
 
     @Override
-    public void onStatusChanged(int status, AbsTransport transport) {
+    public void onStatusChanged(int status, AbsTransport transport,Object data) {
         TransportAdapter adapter=null!=transport?mAdapter:null;
         if (null!=adapter){
             switch (status){
@@ -44,6 +45,8 @@ public final class TransportModel extends Model implements OnStatusChange {
                     adapter.remove(transport, getText(R.string.error),"After status change."+status);break;
                 case TRANSPORT_REMOVE:
                     adapter.remove(transport, getText(R.string.remove),"After status change."+status);break;
+                case TRANSPORT_PREPARE_BLOCK:
+                    if (null!=data&&data instanceof Block){showTransportBlock((Block)data);}break;
                 case TRANSPORT_SUCCEED:
                     adapter.remove(transport, getText(R.string.succeed),"After status change."+status);
                     if (status==TRANSPORT_SUCCEED){
@@ -60,11 +63,18 @@ public final class TransportModel extends Model implements OnStatusChange {
         }
     }
 
+    private boolean showTransportBlock(Block block){
+        if (null!=block) {
+//            final Dialog dialog = new Dialog(getViewContext());
+//            return dialog.create().title(R.string.conflict).message("毒蛇啦").show();
+        }
+        return false;
+    }
 
     private void testDownload(){
         TransportBinder binder=mBinder;
         if (null!=binder) {
-            ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "","",File.pathSeparator);
+            ClientMeta client = new ClientMeta("林强设备", Address.URL, "", "","","\\");
             AbsTransport transport = new Download("../林强.mp4", "/sdcard/a",
 //                Transport transport=new Download("./test2.mp3","/sdcard/a",
                     "林强.mp4", client, null);
@@ -75,7 +85,7 @@ public final class TransportModel extends Model implements OnStatusChange {
     private void testUpload(){
         TransportBinder binder=mBinder;
         if (null!=binder) {
-                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".", "/");
+                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".","\\");
 //                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
                 AbsTransport transport=new Upload("/sdcard/Musics/",null,
                         "林强.mp3",client,null);
@@ -91,8 +101,7 @@ public final class TransportModel extends Model implements OnStatusChange {
                 binder.callback(TRANSPORT_ADD,this);
                 mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
                 //test begin
-                post(()->testUpload(),3000);
-
+//                testUpload();
 //                testDownload();
                 //test end
                 return true;

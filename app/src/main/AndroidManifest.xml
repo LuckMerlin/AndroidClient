@@ -61,6 +61,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.merlin.activity.LoveDetailActivity"/>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <service android:name="com.merlin.task.DownloadService"/>
