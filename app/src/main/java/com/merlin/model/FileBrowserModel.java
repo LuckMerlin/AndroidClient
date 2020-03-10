@@ -188,6 +188,9 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                 switch (resId){
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
+                    case R.string.upload:
+
+                        return true;
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
                     case R.drawable.selector_menu:

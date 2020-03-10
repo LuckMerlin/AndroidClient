@@ -14,19 +14,19 @@
         <import type="com.merlin.view.Clicker"/>
         <import type="com.merlin.model.BrowserModel" alias="Model"/>
         <import type="android.text.Html"/>
+        <import type="com.merlin.view.ContextMenu"/>
     </data>
     <LinearLayout
             binding:createModel="@{true}"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="1dp"
-            android:paddingTop="10dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp">
+            android:paddingTop="10dp">
         <RelativeLayout
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:layout_height="@dimen/listItemNormal"
             android:layout_marginTop="15dp">
             <LinearLayout
@@ -50,7 +50,7 @@
                         android:layout_height="@dimen/titleIconSize"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="15dp"
-                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
+                        android:visibility="@{vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                         android:src="@{R.drawable.cancel_selector}"/>
                     <LinearLayout
                         android:orientation="vertical"
@@ -141,6 +141,8 @@
             </LinearLayout>
         </RelativeLayout>
         <HorizontalScrollView
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:layout_marginLeft="5dp"
             android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
             android:scrollbars="none"
@@ -155,15 +157,41 @@
                 android:layout_height="wrap_content"/>
         </HorizontalScrollView>
         <View
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             style="@style/horizontalDividerLine"/>
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <androidx.recyclerview.widget.RecyclerView
+            <HorizontalScrollView
+                android:visibility="@{vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_UPLOAD?View.VISIBLE:View.GONE}"
+                android:id="@+id/activityFileBrowser_bottomHSV"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                binding:adapter="@{vm.currentAdapter}"
-                android:layout_height="match_parent"/>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
+                android:background="@drawable/round_corner_black"
+                android:layout_height="60dp">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{vm.mode==Model.MODE_UPLOAD?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.upload)}"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:layout_above="@id/activityFileBrowser_bottomHSV"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    binding:adapter="@{vm.currentAdapter}"
+                    android:layout_height="match_parent"/>
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </RelativeLayout>
         </LinearLayout>
 </layout>

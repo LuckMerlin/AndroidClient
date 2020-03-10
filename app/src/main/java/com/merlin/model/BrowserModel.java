@@ -48,21 +48,28 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     public final static int MODE_MULTI_CHOOSE=1213;
     public final static int MODE_COPY=1214;
     public final static int MODE_MOVE=1215;
+    public final static int MODE_UPLOAD=1216;
+    public final static int MODE_DOWNLOAD=1217;
     private ClientMeta mClientMeta;
     private int mMode=MODE_INVALID;
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
     private final ObservableField<String> mMultiChooseSummary=new ObservableField<>();
     private BrowserAdapter<T> mBrowserAdapter;
+    private final List<OnModeFinish> mModeFinish=new ArrayList<>();
     private WeakReference<Context> mContext;
     private Object mProcessing;
     private PopupWindow mPopWindow;
     private final ClientCallback mCallback;
 
+    protected interface OnModeFinish{
+        void onModeFinish(int last,int current);
+    }
+
     public BrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         mClientMeta=meta;
         mCallback=callback;
         mContext=null!=context?new WeakReference<>(context):null;
-        entryMode(MODE_NORMAL,"After model create.");
+        entryMode(MODE_UPLOAD,"After model create.");
     }
 
     protected final boolean setAdapter(BrowserAdapter<T> adapter){
@@ -214,10 +221,14 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     }
 
     protected final boolean entryMode(int mode,String debug){
+        return entryMode(mode,null,debug);
+    }
+
+    protected final boolean entryMode(int mode,Object processing,String debug){
         if (!isMode(mode)){
-            mProcessing=null;
             int last=mMode;
             mMode=mode;
+            mProcessing=null;
             ClientCallback callback=mCallback;
             if (null!=callback){
                 callback.onBrowserModeChange(this,last,mode);
@@ -230,6 +241,8 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                 case MODE_MULTI_CHOOSE:
                     return refreshMultiChooseCount();
                 case MODE_COPY:
+                case MODE_UPLOAD:
+                    mProcessing=processing;
                     break;
                 case MODE_MOVE:
                     break;
