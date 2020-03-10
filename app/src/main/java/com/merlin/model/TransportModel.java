@@ -6,8 +6,6 @@ import com.merlin.adapter.TransportAdapter;
 import com.merlin.api.Address;
 import com.merlin.bean.ClientMeta;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.dialog.Dialog;
 import com.merlin.transport.Block;
 import com.merlin.transport.Download;
 import com.merlin.transport.OnStatusChange;
@@ -16,14 +14,12 @@ import com.merlin.transport.TransportBinder;
 import com.merlin.transport.Transporter;
 import com.merlin.transport.Upload;
 
-import java.io.File;
-
 public final class TransportModel extends Model implements OnStatusChange {
     private final TransportAdapter mAdapter=new TransportAdapter();
     private TransportBinder mBinder;
 
     @Override
-    public void onStatusChanged(int status, AbsTransport transport, Object data) {
+    public void onStatusChanged(int status, AbsTransport transport, Object data){
         TransportAdapter adapter=null!=transport?mAdapter:null;
         if (null!=adapter){
             switch (status){
@@ -87,9 +83,9 @@ public final class TransportModel extends Model implements OnStatusChange {
     private void testUpload(){
         TransportBinder binder=mBinder;
         if (null!=binder) {
-                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".","\\");
+                ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".","/");
 //                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
-                AbsTransport transport=new Upload("/sdcard/Musics/",null,
+                AbsTransport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3",null,
                         "林强.mp3",client,null);
                 binder.run(TRANSPORT_ADD,transport,true,"Test.");
         }
@@ -103,7 +99,7 @@ public final class TransportModel extends Model implements OnStatusChange {
                 binder.callback(TRANSPORT_ADD,this);
                 mAdapter.setData(binder.getRunning(Transporter.TYPE_ALL));
                 //test begin
-//                testUpload();
+                testUpload();
 //                testDownload();
                 //test end
                 return true;

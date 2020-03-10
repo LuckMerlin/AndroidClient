@@ -85,30 +85,24 @@ public final class Upload extends AbsTransport<Canceler> {
             String targetPath=fromPath.replaceFirst(file.getParent(),folder);
             targetPath=null!=targetPath&&targetPath.length()>0?targetPath.replace(File.separator,pathSep):null;
             if (null!=targetPath&&targetPath.length()>0){
-                if (file.isFile()) {
-                    final Progress progress=new Progress();
-                    files.add(MultipartBody.Part.createFormData(URLEncoder.encode(targetPath, charset), URLEncoder.encode(file.getName(), charset), new UploadBody(file) {
-                        @Override
-                        protected void onTransportProgress(long uploaded, long total, float speed) {
-                            progress.setSpeed(speed);
-                            progress.setTotalSize(total);
-                            progress.setDoneSize(uploaded);
-                            if (null!=update){
-                                update.onTransportUpdate(false, TRANSPORT_PROGRESS,null,progress);
-                            }
+                final Progress progress=new Progress();
+                files.add(MultipartBody.Part.createFormData(URLEncoder.encode(targetPath, charset), URLEncoder.encode(file.getName(), charset), new UploadBody(file) {
+                    @Override
+                    protected void onTransportProgress(long uploaded, long total, float speed) {
+                        progress.setSpeed(speed);
+                        progress.setTotalSize(total);
+                        progress.setDoneSize(uploaded);
+                        if (null!=update){
+                            update.onTransportUpdate(false, TRANSPORT_PROGRESS,null,progress);
                         }
-                    }));
-                }
+                    }
+                }));
             }
             if (null!=files&&files.size()>0) {
                 files.add(MultipartBody.Part.createFormData(Label.LABEL_MODE, Integer.toString(getCoverMode())));
-                return retrofit.call(retrofit.prepare(Api.class, url).upload(files), new OnApiFinish<Reply<String>>() {
-                    @Override
-                    public void onApiFinish(int what, String note, Reply<String> data, Object arg) {
-                        boolean succeed=what==What.WHAT_SUCCEED;
-                        Debug.D(getClass(),"SSS "+succeed);
+                return retrofit.call(retrofit.prepare(Api.class, url).upload(files),  (Retrofit.OnApiFinish<Reply<String>>)( succeed,  what,  note,  data,  arg) ->{
+                        succeed=what==What.WHAT_SUCCEED;
                         notifyFinish(succeed,succeed?TRANSPORT_SUCCEED:TRANSPORT_FAIL,note,update,null);
-                    }
                 })?canceler:null;
             }
         } catch (Exception e) {
