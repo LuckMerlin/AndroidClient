@@ -100,5 +100,6 @@
     <string name="pause">暂停</string>
     <string name="conflict">处理冲突</string>
     <string name="love">Dear</string>
+    <string name="queuing">排队中</string>
     <string name="canNotOperateOnLocalDevice">本地在本地设备上操作</string>
 </resources>

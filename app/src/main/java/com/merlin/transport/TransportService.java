@@ -75,19 +75,19 @@ public class TransportService extends Service  implements Callback {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private boolean add(AbsTransport transport, boolean interactive, String debug){
-        Transporter transporter=null!=transport?mTransporter:null;
-        return null!=transporter&&transporter.add(transport,interactive,null,debug);
-    }
-
-    private boolean remove(AbsTransport transport, String debug){
-
-        return false;
-    }
+//    private boolean add(AbsTransport transport, boolean interactive, String debug){
+//        Transporter transporter=null!=transport?mTransporter:null;
+//        return null!=transporter&&transporter.add(transport,interactive,null,debug);
+//    }
+//
+//    private boolean remove(AbsTransport transport, String debug){
+//        Transporter transporter=null!=transport?mTransporter:null;
+//        return null!=transporter&&transporter.add(transport,interactive,null,debug);
+//    }
 
     private boolean upload(String filePath,String folder,String name,boolean interactive,int coverMode,ClientMeta client,String debug){
         if (null!=filePath&&filePath.length()>0&&null!=client){
-            return add(new Upload(filePath,folder,name,client,coverMode),interactive,debug);
+            return run(TRANSPORT_ADD,interactive,debug,new Upload(filePath,folder,name,client,coverMode));
         }
         return false;
     }
@@ -126,6 +126,11 @@ public class TransportService extends Service  implements Callback {
         return false;
     }
 
+    private final boolean run(int status,  boolean interactive, String debug, AbsTransport... transports) {
+        Transporter transporter=null!=transports&&transports.length>0?mTransporter:null;
+        return null!=transporter&&transporter.run(status,interactive,debug,transports);
+    }
+
     private class Binder extends android.os.Binder implements TransportBinder {
 
         @Override
@@ -138,14 +143,8 @@ public class TransportService extends Service  implements Callback {
         }
 
         @Override
-        public boolean run(int status, AbsTransport transport, boolean interactive, String debug) {
-            switch (status){
-                case TRANSPORT_ADD:
-                    return add(transport,interactive,debug);
-                case TRANSPORT_REMOVE:
-                    return remove(transport,debug);
-            }
-            return false;
+        public boolean run(int status, boolean interactive, String debug, AbsTransport... transports) {
+            return TransportService.this.run(status,interactive,debug,transports);
         }
 
         @Override

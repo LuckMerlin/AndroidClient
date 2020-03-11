@@ -39,7 +39,10 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.file.CoverMode;
 import com.merlin.protocol.Tag;
+import com.merlin.transport.AbsTransport;
 import com.merlin.transport.TransportService;
+import com.merlin.transport.Upload;
+import com.merlin.transport.litehttp.LiteHttpTransport;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
@@ -88,6 +91,13 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         super.onRootAttached(root);
         putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
         refreshClientMeta("After mode create.");
+        //
+//        if (null!=binder) {
+//            ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".","/");
+//                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
+//            AbsTransport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3",null,
+//                    "林强.mp3",client,null);
+        new LiteHttpTransport().upload("/sdcard/Musics/大壮 - 我们不一样.mp3", "林强.mp3",Address.URL+"/file/upload","linqiang");
     }
 
     private boolean putClientMeta(ClientMeta meta,String debug){

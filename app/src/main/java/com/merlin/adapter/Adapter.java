@@ -10,7 +10,9 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.client.databinding.ItemTransportBinding;
 import com.merlin.debug.Debug;
+import com.merlin.transport.AbsTransport;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -187,6 +189,18 @@ public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.View
     public final int getDataSize() {
         List<T> data=mData;
         return null!=data?data.size():-1;
+    }
+
+    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder,View view,ViewDataBinding binding){
+        //Do nothing
+    }
+
+    @Override
+    public final void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        View view=null!=holder?holder.itemView:null;
+        ViewDataBinding binding=null!=view? DataBindingUtil.getBinding(view):null;
+        onViewDetachedFromWindow(holder,view,binding);
     }
 
     @NonNull

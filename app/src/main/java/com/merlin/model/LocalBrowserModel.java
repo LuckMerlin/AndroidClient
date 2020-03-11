@@ -2,14 +2,17 @@ package com.merlin.model;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.view.View;
 
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.LocalBrowserAdapter;
 import com.merlin.api.ApiList;
+import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
@@ -20,6 +23,8 @@ import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
+import com.merlin.client.databinding.ItemClientBinding;
+import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.transport.TransportService;
@@ -67,8 +72,22 @@ public class LocalBrowserModel extends BrowserModel {
     }
 
     @Override
-    protected boolean onOpenFile(List meta, String debug) {
-        return false;
+    protected boolean onOpenFile(FileMeta meta, String debug) {
+        LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
+        String extension=localFile.getExtension();
+        String path=localFile.getPath();
+        if (null!=extension&&null!=path&&path.length()>0){
+            final File file=new File(path);
+            if (!file.exists()){
+                return toast(R.string.fileNotExist)&&false;
+            }
+            if (extension.equalsIgnoreCase(".png")|| extension.equalsIgnoreCase(".jpg")){
+                Intent intent=new Intent(getViewContext(), PhotoPreviewActivity.class);
+                intent.putExtra(Label.LABEL_DATA, Uri.fromFile(file));
+                return startActivity(intent);
+            }
+        }
+        return true;
     }
 
     @Override

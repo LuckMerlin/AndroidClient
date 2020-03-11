@@ -198,11 +198,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     }
 
     @Override
-    protected boolean onOpenFile(List<FileMeta> meta, String debug) {
-        if (null!=meta&&meta.size()>0){
-//            return  MediaPlayService.play(getViewContext(), meta, 0, false);
-            return false;
-        }
+    protected boolean onOpenFile(FileMeta meta, String debug) {
         toast(R.string.pathInvalid);
         return false;
     }

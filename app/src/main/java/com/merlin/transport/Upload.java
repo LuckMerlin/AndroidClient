@@ -25,7 +25,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 
-public final class Upload extends AbsTransport<Canceler> {
+public final class Upload extends AbsTransport<Retrofit.Canceler> {
 
     private interface Api{
         @Multipart
@@ -43,7 +43,7 @@ public final class Upload extends AbsTransport<Canceler> {
     }
 
     @Override
-    protected Canceler onStart(OnTransportUpdate update,Retrofit retrofit) {
+    protected Retrofit.Canceler onStart(OnTransportUpdate update, Retrofit retrofit) {
         if (null==retrofit){
             Debug.W(getClass(),"Can't upload file which retrofit is NULL.");
             notifyFinish(false,TRANSPORT_ERROR,"File is NULL .",update,null);
@@ -76,7 +76,6 @@ public final class Upload extends AbsTransport<Canceler> {
             return null;
         }
         final String name=getName();
-        final Canceler canceler=new Canceler();
         final String charset="UTF-8";
         final File file=new java.io.File(fromPath);
         Debug.D(getClass(),"Uploading file "+fromPath+" to "+url+" "+folder);
@@ -103,7 +102,7 @@ public final class Upload extends AbsTransport<Canceler> {
                 return retrofit.call(retrofit.prepare(Api.class, url).upload(files),  (Retrofit.OnApiFinish<Reply<String>>)( succeed,  what,  note,  data,  arg) ->{
                         succeed=what==What.WHAT_SUCCEED;
                         notifyFinish(succeed,succeed?TRANSPORT_SUCCEED:TRANSPORT_FAIL,note,update,null);
-                })?canceler:null;
+                });
             }
         } catch (Exception e) {
             e.printStackTrace();
