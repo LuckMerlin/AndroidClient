@@ -64,6 +64,8 @@
         <activity android:name="com.merlin.activity.LoveDetailActivity"/>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
+        <activity android:name="com.merlin.activity.PhotoPreviewActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"/>
         <activity android:name="com.merlin.activity.FileReceiveActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:label="linqiang">

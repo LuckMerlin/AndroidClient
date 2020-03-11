@@ -94,6 +94,15 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return null!=adapter&&adapter.reset(debug);
     }
 
+    protected final boolean startActivity(Intent intent){
+            Context context=getViewContext();
+            if (null!=context&&null!=intent){
+                context.startActivity(intent);
+                return true;
+            }
+            return false;
+    }
+
     public final FolderData getLastPage(){
         BrowserAdapter<T> adapter=mBrowserAdapter;
         FolderData meta=null!=adapter?adapter.getLastPage():null;
@@ -173,12 +182,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
             case R.string.detail:
                 return null!=data&&data instanceof FileMeta &&showFileDetail((FileMeta)data,"After detail tap click.");
             case R.string.open:
-                List<FileMeta> files=null;
-                if (null!=data&&data instanceof FileMeta){
-                    files=new ArrayList<>();
-                    files.add((FileMeta)data);
-                }
-                return null!=files&&files.size()>=0&&open(files,"After open tap click.");
+                return null!=data&&open(data,"After open tap click.");
             case R.string.createFile:
                 return createFile(false,"After create file tap click.");
             case R.string.createFolder:
@@ -204,8 +208,9 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                         return (null!=adapter&&adapter.multiChoose(file))||true;
                     }else if(file.isAccessible()){
                         if (file.isDirectory()) {
-                            browserPath(file.getPath(), "After directory click.");
+                            return browserPath(file.getPath(), "After directory click.");
                         } else{//Open file
+                            return open(data,"After item tap click.");
                         }
                     }else{
                         Toast.makeText(view.getContext(),R.string.nonePermission,Toast.LENGTH_SHORT).show();
@@ -414,7 +419,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     }
 
     protected abstract boolean onShowFileDetail(FileMeta meta,String debug);
-    protected abstract boolean onOpenFile(List<FileMeta> meta,String debug);
+    protected abstract boolean onOpenFile(FileMeta meta,String debug);
     protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
     protected abstract boolean onDeleteFile(List<String> files,OnApiFinish<Reply<ApiList<String>>> finish,String debug);
     protected abstract boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug);
@@ -521,8 +526,8 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return false;
     }
 
-    private boolean open(List<FileMeta> meta,String debug){
-        return onOpenFile(meta,debug);
+    private boolean open(Object data,String debug){
+        return null!=data&&data instanceof FileMeta&&onOpenFile((FileMeta)data,debug);
     }
     private boolean showFileDetail(FileMeta meta,String debug){
         String path=null!=meta?meta.getPath():null;
