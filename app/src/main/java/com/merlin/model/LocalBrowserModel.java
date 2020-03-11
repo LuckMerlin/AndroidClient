@@ -20,6 +20,8 @@ import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
+import com.merlin.client.databinding.ItemClientBinding;
+import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.transport.TransportService;

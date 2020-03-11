@@ -1,9 +1,11 @@
 package com.merlin.transport;
 
+import androidx.annotation.Nullable;
+
 import com.merlin.bean.ClientMeta;
 import com.merlin.server.Retrofit;
 
-public abstract class AbsTransport<T extends Canceler> extends Transport<T> {
+public abstract class AbsTransport<T extends Retrofit.Canceler> extends Transport<T> {
     private final ClientMeta mClient;
     private Transport mTransporting;
 
@@ -25,4 +27,12 @@ public abstract class AbsTransport<T extends Canceler> extends Transport<T> {
     }
 
     protected abstract T onStart(OnTransportUpdate update, Retrofit retrofit);
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (super.equals(obj)){
+            return true;
+        }
+        return false;
+    }
 }

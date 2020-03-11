@@ -13,7 +13,7 @@ import com.merlin.transport.AbsTransport;
 
 import java.util.List;
 
-public final class TransportAdapter<T extends AbsTransport> extends Adapter<T> implements OnItemTouchResolver {
+public class TransportAdapter<T extends AbsTransport> extends Adapter<T> implements OnItemTouchResolver {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -26,13 +26,6 @@ public final class TransportAdapter<T extends AbsTransport> extends Adapter<T> i
             return update(debug,data);
         }
         return false;
-    }
-
-    public final boolean remove(T data,Object anim,String debug){
-        if (null!=anim&&anim instanceof String){
-
-        }
-        return super.remove(data,debug);
     }
 
     @Override

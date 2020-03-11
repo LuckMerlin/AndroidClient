@@ -1,20 +1,33 @@
 package com.merlin.activity;
 
 import android.app.Activity;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
 import com.merlin.model.Model;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class ModelActivity <T extends Model>extends Activity {
 
@@ -37,7 +50,7 @@ public class ModelActivity <T extends Model>extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        onIntentChanged(intent);
+        notifyIntentChanged(intent);
     }
 
     protected final void setModelContentView(int layoutId){
@@ -56,6 +69,12 @@ public class ModelActivity <T extends Model>extends Activity {
         if (null!=model&&model instanceof Model.OnActivityResume) {
             ((Model.OnActivityResume)model).onActivityResume(this,getIntent());
         }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        notifyIntentChanged(getIntent());
     }
 
     @Override
@@ -94,7 +113,12 @@ public class ModelActivity <T extends Model>extends Activity {
         return null;
     }
 
-    private void onIntentChanged(Intent intent){
+    protected void onIntentChanged(Intent intent){
+        //DO nothing
+    }
+
+    private void notifyIntentChanged(Intent intent){
+        onIntentChanged(intent);
         Object vm=null!=intent?getModel():null;
         if (null!=vm&&vm instanceof Model.OnActivityIntentChange){
             ((Model.OnActivityIntentChange)vm).onActivityIntentChanged(this,intent);

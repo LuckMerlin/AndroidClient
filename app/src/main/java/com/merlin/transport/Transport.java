@@ -1,11 +1,18 @@
 package com.merlin.transport;
-import com.merlin.file.CoverMode;
+import androidx.annotation.Nullable;
 
-public abstract class Transport<T extends Canceler> implements CoverMode,Callback {
+import com.merlin.debug.Debug;
+import com.merlin.file.CoverMode;
+import com.merlin.server.Retrofit;
+import com.merlin.util.StringEquals;
+import com.xuhao.didi.socket.common.interfaces.common_interfacies.dispatcher.IRegister;
+
+public abstract class Transport<T extends Retrofit.Canceler> implements CoverMode,Callback {
     private final String mName;
     private long mTotal;
     private long mSize;
     private float mSpeed;
+    private boolean mCancel=false;
     private final int mCoverMode;
     private final String mFromPath;
     private final String mToFolder;
@@ -70,4 +77,31 @@ public abstract class Transport<T extends Canceler> implements CoverMode,Callbac
         this.mTotal = mTotal;
     }
 
+    protected void onCancelChanged(boolean cancel){
+        //DO nothing
+    }
+    public final boolean cancel(boolean cancel){
+        boolean curr=mCancel;
+        if (curr!=cancel) {
+            mCancel = cancel;
+            onCancelChanged(cancel);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean isCancel() {
+        return mCancel;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (null!=obj&&obj instanceof Transport){
+            StringEquals equals=new StringEquals();
+            Transport tp=(Transport)obj;
+            return equals.equals(mFromPath,tp.mFromPath)&&equals.equals(mToFolder,tp.mToFolder)
+                    &&equals.equals(mName,tp.mName);
+        }
+        return super.equals(obj);
+    }
 }

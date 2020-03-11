@@ -8,6 +8,7 @@ import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +25,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Retrofit {
     private final retrofit2.Retrofit.Builder mBuilder;
+
+    public static class Canceler{
+        Disposable mDisposable;
+        public boolean cancel(boolean cancel,String debug){
+            Disposable disposable=mDisposable;
+            if (null!=disposable){
+                if (cancel&&!disposable.isDisposed()){
+                    disposable.dispose();
+                    Debug.D(getClass(),"Cancel api call "+(null!=debug?debug:"."));
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
     public interface OnApiFinish<T> extends Callback{
         void onApiFinish(boolean succeed,int what,String note,T data, Object arg);
@@ -51,39 +67,43 @@ public class Retrofit {
         return null!=retrofit?retrofit.create(cls):null;
     }
 
-    public final<T> boolean call(Observable<T> observable, Callback ...callbacks){
+    public final<T> Canceler call(Observable<T> observable, Callback ...callbacks){
         return call(observable,null,callbacks);
     }
 
-    public final<T> boolean call(Observable<T> observable, Scheduler observeOn, Callback ...callbacks){
+    public final<T> Canceler call(Observable<T> observable, Scheduler observeOn, Callback ...callbacks){
         if (null!=observable){
-            observable.subscribeOn(Schedulers.io()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread()).subscribe(new InnerCallback<>(callbacks));
-            return true;
+            final Canceler canceler=new Canceler();
+            observable.subscribeOn(Schedulers.io()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread())
+                    .subscribe(new InnerCallback<T>(callbacks){
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            canceler.mDisposable=d;
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            canceler.mDisposable=null;
+                        }
+                    });
+            return canceler;
         }
         Debug.W(getClass(),"Can't call retrofit, Observable is NULL.");
-        return false;
+        return null;
     }
 
-    private static final class InnerCallback <T>implements Observer<T> {
+    private static abstract class InnerCallback <T>implements Observer<T> {
         private final Callback[] mCallbacks;
+        private Canceler mCanceler;
 
         private InnerCallback(Callback ...callbacks){
             mCallbacks=callbacks;
         }
 
-        @Override
-        public void onSubscribe(Disposable d) {
-//            Debug.D(getClass(),"SonSubscribeSS "+d);
-        }
 
         @Override
         public void onNext(T t) {
             finishCall(null,t,mCallbacks,null,"After next.");
-        }
-
-        @Override
-        public void onComplete() {
-
         }
 
         @Override

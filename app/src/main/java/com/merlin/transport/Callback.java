@@ -1,6 +1,7 @@
 package com.merlin.transport;
 
 public interface Callback {
+    int TRANSPORT_NONE=0; // 0000 0001
     int TRANSPORT_ADD=123; // 0000 0001
     int TRANSPORT_PROGRESS=124;// 0000 0011
     int TRANSPORT_REMOVE=125;//0000 0101
@@ -14,4 +15,5 @@ public interface Callback {
     int TRANSPORT_SUCCEED=133;//0000 1011
     int TRANSPORT_EMPTY=134;//0000 1011
     int TRANSPORT_PREPARE_BLOCK=135;//0000 1011
+    int TRANSPORT_QUEUING=136;//0000 1011
 }
