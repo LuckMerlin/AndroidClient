@@ -46,12 +46,15 @@ public final class UploadBody extends RequestBody  {
                 json.put(Label.LABEL_LENGTH,length);
                 String head=json.toString();
                 byte[] headBytes=null!=head?head.getBytes("utf-8"):null;
-                if (null==headBytes||headBytes.length<=0){
+                int headLength=null!=headBytes?headBytes.length:-1;
+                if (headLength<=0){
                     throw new Exception("Make file head fail "+headBytes);
                 }
-                sink.write(headBytes);
+                sink.writeInt(Integer.MAX_VALUE);
+//                sink.write(headBytes);
                 if (!isDirectory){
-                    FileInputStream fis=new FileInputStream(file);
+//                    FileInputStream fis=new FileInputStream(file);
+
                 }
             } catch (Exception e) {
                 Debug.E(getClass(),"Can't upload one file while exception."+e, e);
