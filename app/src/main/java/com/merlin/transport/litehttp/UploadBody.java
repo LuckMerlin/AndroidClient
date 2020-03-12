@@ -5,6 +5,7 @@ import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -30,31 +31,54 @@ public final class UploadBody extends RequestBody  {
 
     @Override
     public void writeTo(BufferedSink sink) throws IOException {
-         uploadFile(mFile,sink);
-         sink.flush();
+        uploadFile(mFile,What.WHAT_REPLACE,sink);
+        JSONObject json=new JSONObject();
+        try {
+            Debug.D(getClass(),"Sending upload terminal signal."+mFile);
+            json.put(Label.LABEL_LENGTH,-1);
+            writeHead(json.toString(),sink);
+        } catch (Exception e) {
+            Debug.E(getClass(),"Exception send file upload terminal signal.e="+e,e);
+            e.printStackTrace();
+        }
     }
 
-    private boolean uploadFile(File file,BufferedSink sink){
+    private boolean writeHead(String text,BufferedSink sink) throws Exception{
+        byte[] headBytes=null!=text?text.getBytes("utf-8"):null;
+        int headLength=null!=headBytes?headBytes.length:-1;
+        if (headLength<=0||null==sink){
+            throw new Exception("Make file head fail "+headBytes);
+        }
+        sink.write(intToByteArray(headLength));
+        sink.write(headBytes);
+        sink.flush();
+        Debug.D(getClass(),"Head length."+headLength);
+        return true;
+    }
+
+    private boolean uploadFile(File file,int coverMode,BufferedSink sink){
         if (null!=file&&null!=sink){
             final String name=file.getName();
             final boolean isDirectory=file.isDirectory();
             final long length=isDirectory?What.WHAT_NOT_FILE:file.length();
             try {
+                String folder=".\\linqiang";
                 JSONObject json=new JSONObject();
-                json.put(Label.LABEL_FOLDER,"/linqiang");
+                json.put(Label.LABEL_FOLDER,folder);
                 json.put(Label.LABEL_NAME,name);
                 json.put(Label.LABEL_LENGTH,length);
-                String head=json.toString();
-                byte[] headBytes=null!=head?head.getBytes("utf-8"):null;
-                int headLength=null!=headBytes?headBytes.length:-1;
-                if (headLength<=0){
-                    throw new Exception("Make file head fail "+headBytes);
-                }
-                sink.writeInt(Integer.MAX_VALUE);
-//                sink.write(headBytes);
-                if (!isDirectory){
-//                    FileInputStream fis=new FileInputStream(file);
-
+                json.put(Label.LABEL_MODE,coverMode);
+                writeHead(json.toString(),sink);
+                if (isDirectory){
+//                    for ()
+                }else{
+                    byte[] buffer=new byte[1024*1024*2];
+                    FileInputStream fis=new FileInputStream(file);
+                    int read;
+                    while (0<=(read=fis.read(buffer))){
+                        sink.write(buffer,0, read);
+                    }
+                    Debug.D(getClass(),"Finish send one file "+file+" to "+folder+" "+name);
                 }
             } catch (Exception e) {
                 Debug.E(getClass(),"Can't upload one file while exception."+e, e);
@@ -62,5 +86,14 @@ public final class UploadBody extends RequestBody  {
             }
         }
         return false;
+    }
+
+    private byte[] intToByteArray(int i) {
+        byte[] result = new byte[4];
+        result[0] = (byte)((i >> 24) & 0xFF);
+        result[1] = (byte)((i >> 16) & 0xFF);
+        result[2] = (byte)((i >> 8) & 0xFF);
+        result[3] = (byte)(i & 0xFF);
+        return result;
     }
 }
