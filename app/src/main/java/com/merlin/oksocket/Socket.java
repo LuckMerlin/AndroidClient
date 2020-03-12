@@ -37,17 +37,10 @@ public class Socket implements Tag {
    private final int mPort;
    private int mTimeout=10000;
 
-   public interface OnSocketConnectListener{
-       int CONNECT_SUCCEED =1110;
-       void onSocketConnectChanged(boolean connected,int what);
-   }
 
-   public interface SynchronizationCallback{
-
-   }
-
-   public interface OnRequestFinish extends Callback{
-        void onRequestFinish(boolean succeed,int what,String note,Frame frame);
+   public interface OnSocketConnectChange {
+       int CONNECT_SUCCEED = 1110;
+       void onSocketConnectChanged(boolean connected, int what);
    }
 
    public Socket(String ip, int port){
@@ -77,7 +70,7 @@ public class Socket implements Tag {
        mReceiveListener=listener;
    }
 
-   public final boolean connect(OnSocketConnectListener connectListener){
+   public final boolean connect(OnSocketConnectChange connectListener){
        IConnectionManager currManager=mManager;
        if (null!=currManager){
            Debug.D(getClass(),"Not need connect again while connected.");
@@ -89,7 +82,6 @@ public class Socket implements Tag {
            Debug.W(getClass(),"Can't connect server.Invalid address?ip="+ip+" port="+port);
            return false;
        }
-       Debug.D(getClass(),"Connect server.ip="+ip+" port="+port);
        final IConnectionManager manager= OkSocket.open(new ConnectionInfo(ip, port));
        if (null!=manager){
            ISocketActionListener innerListener=new ISocketActionListener(){
@@ -99,7 +91,7 @@ public class Socket implements Tag {
                    mManager=manager;
                    manager.getPulseManager().setPulseSendable(new Heartbeat()).pulse();
                    if (null!=connectListener){
-                       connectListener.onSocketConnectChanged(true,OnSocketConnectListener.CONNECT_SUCCEED);
+                       connectListener.onSocketConnectChanged(true,OnSocketConnectChange.CONNECT_SUCCEED);
                    }
                }
 
@@ -174,8 +166,8 @@ public class Socket implements Tag {
            builder.setPulseFrequency(heartbeat<=0?3000:heartbeat);
            builder.setPulseFeedLoseTimes(1);
            manager.option(builder.build());
+           Debug.D(getClass(),"Start connect socket server.ip="+ip+" port="+port);
            manager.connect();
-           Debug.D(getClass(),"Connected server.ip="+ip+" port="+port);
        }
        return null!=manager;
    }
@@ -376,5 +368,12 @@ public class Socket implements Tag {
        abstract void onResponse(Frame frame);
 
     }
+
+
+
+    public interface OnRequestFinish extends Callback{
+        void onRequestFinish(boolean succeed,int what,String note,Frame frame);
+    }
+
 
 }

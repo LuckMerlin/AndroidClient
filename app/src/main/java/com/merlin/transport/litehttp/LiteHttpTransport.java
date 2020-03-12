@@ -54,18 +54,18 @@ public class LiteHttpTransport implements What {
             if (null!=client){
 //                https://pypi.tuna.tsinghua.edu.cn/simple/
 //                Request request = new Request.Builder().url("http://172.16.20.210:2009/wechat").build();
-                Request request = new Request.Builder().url("http://192.168.0.6:2009/wechat").build();
-                client.newWebSocket(request,new WebSocketListener(){
-                    @Override
-                    public void onOpen(WebSocket webSocket, Response response) {
-                        super.onOpen(webSocket, response);
-                    }
-
-                    @Override
-                    public void onClosed(WebSocket webSocket, int code, String reason) {
-                        super.onClosed(webSocket, code, reason);
-                    }
-                });
+//                Request request = new Request.Builder().url("http://192.168.0.6:2009").build();
+//                client.newWebSocket(request,new WebSocketListener(){
+//                    @Override
+//                    public void onOpen(WebSocket webSocket, Response response) {
+//                        super.onOpen(webSocket, response);
+//                    }
+//
+//                    @Override
+//                    public void onClosed(WebSocket webSocket, int code, String reason) {
+//                        super.onClosed(webSocket, code, reason);
+//                    }
+//                });
 //                UploadBody uploadBody=new UploadBody(file);
 //                Call call = client.newCall(new Request.Builder().url(cloudUrl).post(uploadBody).build());
 //                call.enqueue(new okhttp3.Callback() {

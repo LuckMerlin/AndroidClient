@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.merlin.api.Address;
 import com.merlin.classes.ActivityLifecycle;
 import com.merlin.client.Client;
+import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
+import com.merlin.oksocket.Socket;
 
 import java.util.List;
 
@@ -15,20 +18,28 @@ public class Application extends android.app.Application implements ActivityLife
    private final Client mClient = new Client(
 //              "172.16.20.215",5005);
 //              "127.0.0.1",5006);
-           "www.luckmerlin.com", 5005);
+           "http://192.168.0.6", 2009);
+//           "www.luckmerlin.com", 5005);
    private final ActivityLifecycle mActivityLifecycle=new ActivityLifecycle(this);
    private final Invoker mInvoker=new Invoker();
+   private final Socket mSocket=new Socket(Address.HOST,Address.PORT+1);
 
     @Override
     public void onCreate() {
         super.onCreate();
-//        Database database = helper.getEncryptedWritableDb("123");
         registerActivityLifecycleCallbacks(mActivityLifecycle);
-        mClient.setOnFrameReceive(mOnFrameReceiveListener);
-        mClient.putListener(mStatusChange);
+        mSocket.connect(new Socket.OnSocketConnectChange() {
+            @Override
+            public void onSocketConnectChanged(boolean connected, int what) {
+                Debug.D(getClass(),"AAAA "+connected+" "+what);
+            }
+        });
+//        mClient.setOnFrameReceive(mOnFrameReceiveListener);
+//        mClient.putListener(mStatusChange);
 //        mClient.connect((connected,what)->{
+//            Debug.D(getClass(),"Connected ", mStatusChange);
 //             if (connected){
-//                 mClient.login("wuyue","123456");
+////                 mClient.login("wuyue","123456");
 //             }
 //        });
     }
