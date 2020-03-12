@@ -52,7 +52,9 @@ public class LiteHttpTransport implements What {
             }
             OkHttpClient client=mHttpLite;
             if (null!=client){
-                Request request = new Request.Builder().url("http://172.16.20.210:2009/wechat").build();
+//                https://pypi.tuna.tsinghua.edu.cn/simple/
+//                Request request = new Request.Builder().url("http://172.16.20.210:2009/wechat").build();
+                Request request = new Request.Builder().url("http://192.168.0.6:2009/wechat").build();
                 client.newWebSocket(request,new WebSocketListener(){
                     @Override
                     public void onOpen(WebSocket webSocket, Response response) {
