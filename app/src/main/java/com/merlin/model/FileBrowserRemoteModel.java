@@ -22,6 +22,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.media.MediaPlayService;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -175,7 +176,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
 
     private boolean scan(NasFile file, boolean recursive){
         String path=null!=file?file.getPath():null;
-        return null!=path&&path.length()>0&&null!=call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note)).scan(path,recursive);
+        return null!=path&&path.length()>0&&null!=call(prepare(Api.class).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
     }
 
     private boolean pasteFiles(int mode, List<FilePaste> processes, String debug){
@@ -215,13 +216,13 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         dialog.setContentView(null!=binding?binding.getRoot():null).show(( view, clickCount, resId, data)->{
             return true;
         },false);
-        return null!=call(Api.class,(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
+        return null!=call(prepare(Api.class).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
             NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
             if (null!=detail){
                 binding.setFile(detail);
             }
             binding.setLoadState(what);
-        }).getDetail(path);
+        });
     }
 
     private boolean downloadFile(NasFile meta, String debug){
@@ -408,7 +409,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
             if (resId==R.string.sure){
                 Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-                call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note)).rebootClient();
+                call(prepare(Api.class).rebootClient(),(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
             }
             dialog.dismiss();
             return true;
@@ -436,7 +437,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                         }
                     }
                     if (null!=paths&&paths.size()>0){
-                        return null!=call(Api.class,(OnApiFinish<Reply<ApiList<String>>>)(what, note, data3, arg)->{
+                        return null!=call(prepare(Api.class).deleteFile(paths),(OnApiFinish<Reply<ApiList<String>>>)(what, note, data3, arg)->{
                             toast(note);
                             if (what==WHAT_SUCCEED){
                                 List<String> deletedPaths=null!=data3?data3.getData():null;
@@ -453,7 +454,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                                     adapter.remove(deleted,debug);
                                 }
                             }
-                        }).deleteFile(paths);
+                        });
                     }
                 }
                 return true;
@@ -480,12 +481,12 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                             return true;
                         }else{
                             dialog.dismiss();
-                            return null!=call(Api.class,(OnApiFinish<Reply<FModify>>)(what, note, data2, arg)->{
+                            return null!=call(prepare(Api.class).createFile(parent,input,dir),(OnApiFinish<Reply<FModify>>)(what, note, data2, arg)->{
                                 if(what==WHAT_SUCCEED){
                                     resetBrowserCurrentFolder("After file create succeed.");
                                 }
                                 toast(note);
-                            }).createFile(parent,input,dir);
+                            });
                         }
                     }
                     dialog.dismiss();
@@ -506,7 +507,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                     if (null!=dlg){
                         dlg.dismiss();
                     }
-                    call(Api.class,(OnApiFinish<Reply<FModify>>)(what, note, data, arg)->{
+                    call(prepare(Api.class).renameFile(path,text),(OnApiFinish<Reply<FModify>>)(what, note, data, arg)->{
                         boolean succeed=what==WHAT_SUCCEED;
                         toast(succeed?R.string.succeed : what==WHAT_FILE_EXIST?R.string.fileAlreadyExist:R.string.fail);
                         BrowserAdapter adapter=mNasBrowserAdapter;
@@ -514,7 +515,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                         if (succeed&&null!=modify&&null!=adapter){
                             adapter.renamePath(meta,modify);
                         }
-                    }).renameFile(path,text);
+                    });
                 }
             });
         }

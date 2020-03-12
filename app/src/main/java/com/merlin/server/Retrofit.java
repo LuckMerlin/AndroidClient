@@ -7,8 +7,6 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -18,9 +16,7 @@ import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Response;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Retrofit {
@@ -39,10 +35,6 @@ public class Retrofit {
             }
             return false;
         }
-    }
-
-    public interface OnApiFinish<T> extends Callback{
-        void onApiFinish(boolean succeed,int what,String note,T data, Object arg);
     }
 
     public Retrofit(){
@@ -118,7 +110,7 @@ public class Retrofit {
                     if(null==callback||!(callback instanceof OnApiFinish)){
                         continue;
                     }
-                    String note=null;int childWhat=0;boolean succeed=false;
+                    String note=null;int childWhat=What.WHAT_FAIL_UNKNOWN;boolean succeed=false;
                     data=data!=null&&checkDataGeneric(data,callback)?data:null;
                     if (null!=data&&data instanceof Reply){
                         Reply reply=(Reply)data;
@@ -128,7 +120,7 @@ public class Retrofit {
                     }else{
                         data=null;
                     }
-                    ((OnApiFinish) callback).onApiFinish(succeed,childWhat,note,data,arg);
+                    ((OnApiFinish) callback).onApiFinish(childWhat,note,data,arg);
                 }
             }
         }

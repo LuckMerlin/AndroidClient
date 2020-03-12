@@ -4,54 +4,38 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
-import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.Adapter;
 import com.merlin.adapter.BrowserAdapter;
-import com.merlin.adapter.NasBrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FMode;
-import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
-import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ClientDetailBinding;
 import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
-import com.merlin.client.databinding.ItemClientBinding;
-import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
-import com.merlin.dialog.Dialog;
 import com.merlin.file.CoverMode;
 import com.merlin.protocol.Tag;
-import com.merlin.transport.AbsTransport;
+import com.merlin.server.Retrofit;
 import com.merlin.transport.TransportService;
-import com.merlin.transport.Upload;
 import com.merlin.transport.litehttp.LiteHttpTransport;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
-import com.merlin.view.PopupWindow;
 
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -188,7 +172,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
 
     private boolean refreshClientMeta(String debug){
         Debug.D(getClass(),"Refresh client meta "+(null!=debug?debug:"."));
-        return null!=call(Api.class,(OnApiFinish<Reply<ClientMeta>>)(what, note, data, arg)->{
+        return null!=call(prepare(Api.class).queryClientMeta(),(OnApiFinish<Reply<ClientMeta>>)(what, note, data, arg)->{
             ClientMeta meta=what==WHAT_SUCCEED&&null!=data?data.getData():null;
             if(null!=meta){
                 putClientMeta(meta,"After client meta response.");
@@ -199,7 +183,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
 //                TransportService.upload(getViewContext(),true,list,meta,"./data",FMode.MODE_COVER,debug);
 //                launchTransportList("ddd");
             }
-        }).queryClientMeta();
+        });
     }
 
     @Override

@@ -29,7 +29,7 @@ import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 import com.merlin.player.Time;
-import com.merlin.transport.TransportService;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
@@ -154,9 +154,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
                         dialog.dismiss();
                         String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
                         if (null!=sheetId&&sheetId.length()>0){
-                            return null!=call(AddToSheetApi.class,(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+                            return null!=call(prepare(AddToSheetApi.class).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
                                 toast(note);
-                            }).addIntoSheet(md5,sheetId)||true;
+                            })||true;
                         }
                         return false;},false);
         }
@@ -204,14 +204,14 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
             return false;
         }
         Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(FavoriteApi.class,(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
+        return null!=call(prepare(FavoriteApi.class).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED&&null!=data){
                 playing.setFavorite(favorite);
                 updatePlaying(playing,"After favorite succeed.");
             }else{
                 toast(note);
             }
-        }).makeFavorite(md5,favorite);
+        });
     }
 
     private boolean pause_play(String debug){

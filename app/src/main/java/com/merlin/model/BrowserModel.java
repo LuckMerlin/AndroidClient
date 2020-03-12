@@ -29,6 +29,7 @@ import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
@@ -421,7 +422,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     protected abstract boolean onShowFileDetail(FileMeta meta,String debug);
     protected abstract boolean onOpenFile(FileMeta meta,String debug);
     protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
-    protected abstract boolean onDeleteFile(List<String> files,OnApiFinish<Reply<ApiList<String>>> finish,String debug);
+    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
     protected abstract boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug);
     private boolean deleteFile(Collection files,String debug){
         final int length=null!=files?files.size():-1;

@@ -3,17 +3,16 @@ package com.merlin.model;
 import android.content.Context;
 import android.view.View;
 
-import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.NasBrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
+import com.merlin.api.Callback;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.File_;
 import com.merlin.bean.FModify;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
@@ -22,9 +21,7 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
-import com.merlin.dialog.SingleInputDialog;
-import com.merlin.media.MediaPlayService;
-import com.merlin.retrofit.Retrofit;
+import com.merlin.server.Retrofit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +31,6 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-import static com.merlin.api.What.WHAT_FILE_EXIST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
@@ -74,8 +70,8 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         super(context,meta,callback);
         setAdapter(new NasBrowserAdapter(){
             @Override
-            protected final boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
-                return null!=path&&null!=call(Api.class,(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
+            protected final Retrofit.Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
+                return null!=path?call(prepare(Api.class).queryFiles(path, from,from+50),(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
                     }
@@ -84,7 +80,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
                             callback.onPageDataLoad(NasBrowserModel.this,null!=data?data.getData():null);
                         }
                     }
-                }).queryFiles(path, from,from+50);
+                }):null;
             }
         });
 
@@ -184,17 +180,17 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     @Override
     protected boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug) {
-        return null!=call(NasBrowserModel.Api.class,finish).createFile(folder,name,dir);
+        return null!=call(prepare(Api.class).createFile(folder,name,dir),finish);
     }
 
     @Override
     protected boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug) {
-        return null!=call(Api.class,finish).renameFile(path,name);
+        return null!=call(prepare(Api.class).renameFile(path,name),finish);
     }
 
     @Override
     protected boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug) {
-        return null!=call(Api.class,finish).deleteFile(files);
+        return null!=call(prepare(Api.class).deleteFile(files),finish);
     }
 
     @Override
@@ -266,13 +262,13 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         dialog.setContentView(null!=binding?binding.getRoot():null).show(( view, clickCount, resId, data)->{
             return true;
         },false);
-        return null!=call(Api.class,(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
+        return null!=call(prepare(Api.class).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
             NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
             if (null!=detail){
                 binding.setFile(detail);
             }
             binding.setLoadState(what);
-        }).getDetail(path);
+        });
     }
 
     private boolean rebootClient(String debug){
@@ -280,7 +276,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
             if (resId==R.string.sure){
                 Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-                call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note)).rebootClient();
+                call(prepare(Api.class).rebootClient(),(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
             }
             dialog.dismiss();
             return true;
@@ -290,11 +286,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     private boolean scan(NasFile file, boolean recursive){
         String path=null!=file?file.getPath():null;
-        return null!=path&&path.length()>0&&null!=call(Api.class,(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note)).scan(path,recursive);
-    }
-
-    protected final <T> T call(Class<T> cls,  com.merlin.api.Callback...callbacks){
-        return call(cls,null,callbacks);
+        return null!=path&&path.length()>0&&null!=call(prepare(Api.class).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
     }
 
     protected final String getClientUrl(){
@@ -302,14 +294,19 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         return null!=meta?meta.getUrl():null;
     }
 
-    protected final <T> T call(Class<T> cls, Object dither, com.merlin.api.Callback...callbacks){
+    protected final<T> Retrofit.Canceler call(Observable<T> observable, Callback...callbacks){
+        Retrofit retrofit=null!=observable?mRetrofit:null;
+        return null!=retrofit?retrofit.call(observable,callbacks):null;
+    }
+
+    protected final <T> T prepare(Class<T> cls){
         String url=getClientUrl();
         if (null==url||url.length()<=0){
             Debug.W(getClass(),"Can't load nas folder with NULL url."+url);
             url="";
         }
         Retrofit retrofit=mRetrofit;
-        return null!=retrofit&&null!=cls?retrofit.call(url,cls,null,null,null,null,callbacks):null;
+        return retrofit.prepare(cls,url);
     }
 
 }

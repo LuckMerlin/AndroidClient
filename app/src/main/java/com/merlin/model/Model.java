@@ -11,18 +11,17 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.Callback;
 import com.merlin.binding.StatusBar;
-import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
-import com.merlin.retrofit.Retrofit;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 import com.merlin.view.Res;
@@ -33,6 +32,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.Executor;
+
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 
 public class Model {
     private WeakReference<View> mRootView=null;
@@ -372,16 +375,26 @@ public class Model {
 
     private final Retrofit mRetrofit=new Retrofit();
 
-    protected final <T> T call(Class<T> cls,  com.merlin.api.Callback...callbacks){
-        return call(cls,null,callbacks);
+    protected final <T> T prepare(Class<T>  cls){
+        return prepare(cls,null,null);
     }
 
-    protected final <T> T call(Class<T> cls, Object dither, com.merlin.api.Callback...callbacks){
+    protected final <T> T prepare(Class<T>  cls, Executor callbackExecutor){
+        return prepare(cls,null,callbackExecutor);
+    }
+
+    protected final <T> T prepare(Class<T>  cls, String url, Executor callbackExecutor){
         Retrofit retrofit=mRetrofit;
-        if (null!=cls){
-            return retrofit.call(cls,null,dither,callbacks);
-        }
-        return null;
+        return null!=retrofit&&null!=cls?retrofit.prepare(cls,url,callbackExecutor):null;
+    }
+
+    protected final<T> Retrofit.Canceler call(Observable<T> observable,Callback...callbacks){
+        return call(observable,null,callbacks);
+    }
+
+    protected final<T> Retrofit.Canceler call(Observable<T> observable, Scheduler observeOn, Callback...callbacks){
+        Retrofit retrofit=null!=observable?mRetrofit:null;
+        return null!=retrofit?retrofit.call(observable,callbacks):null;
     }
 
     private final StatusBarLayout getStatusBar(){

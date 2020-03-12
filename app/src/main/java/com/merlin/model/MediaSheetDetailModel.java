@@ -16,9 +16,9 @@ import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
 import com.merlin.client.databinding.SheetMediasMenusBinding;
-import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.player1.MPlayer;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;
 
 import java.util.ArrayList;
@@ -33,8 +33,8 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private final ObservableField<Sheet> mSheet=new ObservableField<>();
     private final SheetMediasAdapter mAdapter=new SheetMediasAdapter(){
         @Override
-        protected boolean onPageLoad(String title, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
-            return null!=call(Api.class,finish).queryMedias(title,from,from+20);
+        protected Retrofit.Canceler onPageLoad(String title, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
+            return call(prepare(Api.class).queryMedias(title,from,from+20),finish);
         }
     };
 

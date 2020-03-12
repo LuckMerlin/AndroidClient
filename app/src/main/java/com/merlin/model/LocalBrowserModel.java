@@ -17,7 +17,6 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FMode;
 import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
@@ -27,6 +26,7 @@ import com.merlin.client.databinding.ItemClientBinding;
 import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
+import com.merlin.server.Retrofit;
 import com.merlin.transport.TransportService;
 
 import java.io.File;
@@ -45,9 +45,10 @@ public class LocalBrowserModel extends BrowserModel {
 
     public LocalBrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         super(context,meta,callback);
+        Retrofit.Canceler canceler=new Retrofit.Canceler();
         setAdapter(new LocalBrowserAdapter() {
             @Override
-            protected boolean onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<LocalFile>>> finish) {
+            protected Retrofit.Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<LocalFile>>> finish) {
                 return null!=path&&browserFolder(path,from,from+50,(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
@@ -57,7 +58,7 @@ public class LocalBrowserModel extends BrowserModel {
                             callback.onPageDataLoad(LocalBrowserModel.this,null!=data?data.getData():null);
                         }
                     }
-                });
+                })?canceler:null;
             }
         });
     }

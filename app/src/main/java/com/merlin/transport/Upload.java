@@ -6,13 +6,11 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FileMeta;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,8 +97,8 @@ public final class Upload extends AbsTransport<Retrofit.Canceler> {
             }
             if (null!=files&&files.size()>0) {
                 files.add(MultipartBody.Part.createFormData(Label.LABEL_MODE, Integer.toString(getCoverMode())));
-                return retrofit.call(retrofit.prepare(Api.class, url).upload(files),  (Retrofit.OnApiFinish<Reply<String>>)( succeed,  what,  note,  data,  arg) ->{
-                        succeed=what==What.WHAT_SUCCEED;
+                return retrofit.call(retrofit.prepare(Api.class, url).upload(files),  (OnApiFinish<Reply<String>>)(what, note, data, arg) ->{
+                        boolean succeed=what==What.WHAT_SUCCEED;
                         notifyFinish(succeed,succeed?TRANSPORT_SUCCEED:TRANSPORT_FAIL,note,update,null);
                 });
             }

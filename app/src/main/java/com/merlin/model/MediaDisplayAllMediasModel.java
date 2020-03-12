@@ -24,6 +24,7 @@ import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
 import com.merlin.media.MediaPlayService;
 import com.merlin.player1.MPlayer;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
@@ -41,8 +42,8 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
 
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        protected boolean onPageLoad(String name, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
-            return null!=call(Api.class,finish).queryAllMedias(from,from+20,name);
+        protected Retrofit.Canceler onPageLoad(String name, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
+            return call(prepare(Api.class).queryAllMedias(from,from+20,name),finish);
         }
     };
 
@@ -125,9 +126,9 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
                         dialog.dismiss();
                         String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
                         if (null!=sheetId&&sheetId.length()>0){
-                            return null!=call(AddToSheetApi.class,(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+                            return null!=call(prepare(AddToSheetApi.class).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
                                 toast(note);
-                            }).addIntoSheet(md5,sheetId)||true;
+                            })||true;
                         }
                         return false;},false);
         }
@@ -150,14 +151,14 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         if (null==md5||md5.length()<=0){
             return false;
         }
-        return null!=call(FavoriteApi.class,(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
+        return null!=call(prepare(FavoriteApi.class).makeFavorite(md5,favorite),(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
             AllMediasAdapter adapter=mAdapter;
             if (what==WHAT_SUCCEED&&null!=data){
                 adapter.notifyFavoriteChange(md5, favorite);
             }else{
                 toast(note);
             }
-        }).makeFavorite(md5,favorite);
+        });
     }
 
     private boolean queryAllMedias(String name,String debug){

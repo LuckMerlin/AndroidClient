@@ -1,16 +1,19 @@
 package com.merlin.adapter;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.SectionData;
 import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaBinding;
 
 import java.util.List;
-
-public abstract class MediaAdapter extends PageAdapter<NasFile,ItemMediaBinding> implements OnMoreLoadable {
-
+//String,Sheet, SectionData<Sheet>
+public abstract class MediaAdapter extends MultiSectionAdapter<String,NasFile, SectionData<NasFile>> implements OnMoreLoadable {
 
     public final boolean notifyFavoriteChange(String md5, boolean favorite){
         if (null!=md5&&md5.length()>0){
@@ -30,17 +33,17 @@ public abstract class MediaAdapter extends PageAdapter<NasFile,ItemMediaBinding>
     }
 
     @Override
-    protected Integer onResolveNormalTypeLayoutId() {
+    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
         return R.layout.item_media;
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemMediaBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
-        super.onBindViewHolder(holder, binding, position, data, payloads);
-        if (null!=data&&null!=binding){
-            binding.setMediaFile(data);
-            binding.setPosition(position);
-            binding.setPlaying(false);
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
+        if (null!=binding&&binding instanceof ItemMediaBinding){
+            ItemMediaBinding itemBinding=(ItemMediaBinding)binding;
+            itemBinding.setMediaFile(data);
+            itemBinding.setPosition(position);
+            itemBinding.setPlaying(false);
         }
     }
 

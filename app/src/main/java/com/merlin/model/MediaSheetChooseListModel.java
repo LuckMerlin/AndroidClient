@@ -1,19 +1,13 @@
 package com.merlin.model;
 
-import android.view.View;
-
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
-
-import com.merlin.adapter.MediaSheetCategoryAdapter;
 import com.merlin.adapter.MediaSheetChooseListAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
 import com.merlin.bean.Sheet;
+import com.merlin.server.Retrofit;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -24,8 +18,8 @@ public class MediaSheetChooseListModel extends Model implements Label {
 
     private final MediaSheetChooseListAdapter mAdapter=new MediaSheetChooseListAdapter(){
         @Override
-        protected boolean onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Sheet>>> finish) {
-            return null!=call(MediaSheetChooseListModel.Api.class,finish).querySheets(arg,true,from,10);
+        protected Retrofit.Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Sheet>>> finish) {
+            return call(prepare(MediaSheetChooseListModel.Api.class).querySheets(arg,true,from,10),finish);
         }
     };
 

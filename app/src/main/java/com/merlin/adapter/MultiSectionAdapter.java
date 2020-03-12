@@ -1,24 +1,21 @@
 package com.merlin.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.server.Retrofit;
 
 import java.util.List;
 import java.util.Set;
@@ -36,7 +33,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         void onPageLoadUpdate(int state, boolean idle, Page page);
     }
 
-    protected abstract boolean onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
+    protected abstract Retrofit.Canceler onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
 
     private final boolean fillPage(M page){
         if (null==page){
@@ -179,7 +176,8 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
             mLoadingPage=page;
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
             Debug.D(getClass(),"Load page "+(null!=debug?debug:"."));
-            if(!onPageLoad(page.mArg,from,(what, note, data, arg)->{
+            Retrofit.Canceler canceler=null;
+            if(null!=(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
                 if (idle){
@@ -197,7 +195,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
                             onNoMoreData(null!=data?data.getData():null);
                             break;
                     }
-                } })){
+                } }))){
                 mLoadingPage=null;
                 return false;
             }

@@ -15,6 +15,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
+import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.MediaSheet;
@@ -74,9 +75,9 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
     }
 
     private boolean queryCategories(){
-        return null!= call(Api.class, (OnApiFinish<Reply<PageData<SheetTitle>>>)(what, note, data, arg)->{
+        return null!= call(Api.class, (OnApiFinish<Reply<SectionData<SheetTitle>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
-                mTitleAdapter.fillPage(null!=data?data.getData():null);
+//                mTitleAdapter.fillPage(null!=data?data.getData():null);
             }
         }).queryCategories(null,0,100);
     }

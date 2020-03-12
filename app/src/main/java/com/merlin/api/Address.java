@@ -13,6 +13,7 @@ public interface Address {
     String PREFIX_MEDIA="/media";
     String PREFIX_FILE="/file";
     String PREFIX_IMAGE="/image";
+    String PREFIX_LOVE="/love";
     String PREFIX_USER_REBOOT=PREFIX_USER+"/reboot";
     String PREFIX_FILE_BROWSER=PREFIX_FILE+"/directory/browser";
     String PREFIX_MEDIA_PLAY=PREFIX_MEDIA+"/play";

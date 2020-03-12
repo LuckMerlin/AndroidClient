@@ -106,7 +106,7 @@ public final class Retrofit implements What {
         return null;
     }
 
-    public final <M> boolean subscribe(Observable observable, Scheduler observeOn,OnApiFinish innerFinish, Callback ...callbacks) {
+    public final <M> boolean subscribe(Observable observable, Scheduler observeOn, OnApiFinish innerFinish, Callback ...callbacks) {
         return subscribe(observable,null,observeOn,innerFinish,callbacks);
     }
 

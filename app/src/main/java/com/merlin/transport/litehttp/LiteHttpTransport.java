@@ -52,19 +52,31 @@ public class LiteHttpTransport implements What {
             }
             OkHttpClient client=mHttpLite;
             if (null!=client){
-                UploadBody uploadBody=new UploadBody(file);
-                Call call = client.newCall(new Request.Builder().url(cloudUrl).post(uploadBody).build());
-                call.enqueue(new okhttp3.Callback() {
+                Request request = new Request.Builder().url("http://172.16.20.210:2009/wechat").build();
+                client.newWebSocket(request,new WebSocketListener(){
                     @Override
-                    public void onFailure(Call call, IOException e) {
-                        Debug.D(getClass(),"失败的 "+e+" call="+call);
+                    public void onOpen(WebSocket webSocket, Response response) {
+                        super.onOpen(webSocket, response);
                     }
 
                     @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        Debug.D(getClass(),"onResponse "+call+" response="+response);
+                    public void onClosed(WebSocket webSocket, int code, String reason) {
+                        super.onClosed(webSocket, code, reason);
                     }
                 });
+//                UploadBody uploadBody=new UploadBody(file);
+//                Call call = client.newCall(new Request.Builder().url(cloudUrl).post(uploadBody).build());
+//                call.enqueue(new okhttp3.Callback() {
+//                    @Override
+//                    public void onFailure(Call call, IOException e) {
+//                        Debug.D(getClass(),"失败的 "+e+" call="+call);
+//                    }
+//
+//                    @Override
+//                    public void onResponse(Call call, Response response) throws IOException {
+//                        Debug.D(getClass(),"onResponse "+call+" response="+response);
+//                    }
+//                });
 //                Request.Builder builder1=new Request.Builder();
 //                Debug.D(getClass(),"$$$$$$$aa$$$$$ 请求 "+cloudUrl);
 //                builder1.baseUrl(cloudUrl+"/file/upload").post();

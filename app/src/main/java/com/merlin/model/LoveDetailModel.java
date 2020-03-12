@@ -2,10 +2,6 @@ package com.merlin.model;
 
 import androidx.databinding.ObservableField;
 
-import com.merlin.adapter.LoveAdapter;
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.Reply;
-import com.merlin.api.SectionData;
 import com.merlin.bean.Love;
 
 public class LoveDetailModel extends Model {

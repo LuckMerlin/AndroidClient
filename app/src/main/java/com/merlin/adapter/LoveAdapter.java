@@ -4,11 +4,10 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
@@ -33,6 +32,9 @@ public abstract class LoveAdapter extends MultiSectionAdapter<String,Love,Sectio
 
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
-        return new LinearLayoutManager(rv.getContext(),LinearLayoutManager.VERTICAL,false);
+        LinearLayoutManager lm=new LinearLayoutManager(rv.getContext(),LinearLayoutManager.VERTICAL,false);
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(rv.getContext(),lm.getOrientation());
+        rv.addItemDecoration(itemDecoration);
+        return lm;
     }
 }

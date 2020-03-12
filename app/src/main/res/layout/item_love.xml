@@ -13,7 +13,9 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:background="#f00"
+        android:padding="@dimen/contentGap"
+        android:layout_height="@dimen/listItemSizeLessMedium">
         <TextView
             android:text="@{``+position}"
             style="@style/titleNormalTextView"/>

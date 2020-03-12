@@ -5,24 +5,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-import com.merlin.activity.MediaSheetActivity;
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaSheetCategoryAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Label;
-import com.merlin.api.Modify;
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
 import com.merlin.api.What;
-import com.merlin.bean.MediaSheet;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
+import com.merlin.server.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -34,8 +30,8 @@ import retrofit2.http.POST;
 public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTapClick, OnLongClick, MediaPlayDisplayAdapter.OnMediaPlayModelShow {
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
-        protected boolean onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Sheet>>> finish) {
-            return null!=call(Api.class,finish).queryCategory(arg,false,from,from+10);
+        protected Retrofit.Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Sheet>>> finish) {
+            return call(prepare(Api.class).queryCategory(arg,false,from,from+10),finish);
         }
     };
 
@@ -91,13 +87,13 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
         return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,(null!=title?title:"")+"("+sheet.getSize()+")")).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)->{
                 dialog.dismiss();
                 if (resId==R.string.sure){
-                    call(Api.class,(OnApiFinish<Reply<Sheet>>)(what, note, data2, arg)->{
+                    call(prepare(Api.class).deleteSheet(id),(OnApiFinish<Reply<Sheet>>)(what, note, data2, arg)->{
                         toast(note);
                         MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                         if (null!=adapter){
                             adapter.remove(sheet,"After sheet create succeed.");
                         }
-                    }).deleteSheet(id);
+                    });
                 }
                 return true;});
     }
@@ -113,13 +109,13 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
                    toast(R.string.inputNotNull);
                    return true;
                }
-               call(Api.class,(OnApiFinish<Reply<ApiList<Sheet>>>)(what, note, data2, arg)->{
+               call(prepare(Api.class).createSheet(text,null,null),(OnApiFinish<Reply<ApiList<Sheet>>>)(what, note, data2, arg)->{
                    toast(note);
                    MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                    if (null!=adapter){
                        adapter.reset("After sheet create succeed.");
                    }
-               }).createSheet(text,null,null);
+               });
            }
             dialog.dismiss();
             return true;
