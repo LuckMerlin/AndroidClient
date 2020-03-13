@@ -13,28 +13,30 @@ import java.util.Arrays;
 public final class Frame implements Label{
     public final static String FORMAT_TEXT="text";
     public final static String FORMAT_BYTES="bytes";
-    public final static String FORMAT_HEART_BEATER="heartBeater";
+    public final static String TERMINAL=LABEL_TERMINAL;
     private final String access;
     private final String format;
     private final String encoding;
     private final String version;
     private final String unique;
     private final String key;
-    private final byte[] body;
+    private byte[] body;
     private final String from;
     private final String to;
+    private String terminal;
     public final static int LENGTH_BYTES_SIZE=4;
 
     public Frame(){
         this(null);
     }
 
-    public Frame(String format){
-        this(null,null,format,null,null,null,null,null,null);
+    public Frame(String terminal){
+        this(terminal,null,null,null,null,null,null,null,null,null);
     }
 
-    public Frame(String from,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
+    public Frame(String terminal,String from,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
         this.from=from;
+        this.terminal=terminal;
         this.to=to;
         this.format=format;
         this.unique=unique;
@@ -59,6 +61,21 @@ public final class Frame implements Label{
 
     public String getTo() {
         return to;
+    }
+
+    public Frame setBody(byte[] body){
+        this.body=body;
+        return this;
+    }
+
+    public Frame setTerminal(boolean enableTerminal){
+        this.terminal=enableTerminal?TERMINAL:null;
+        return this;
+    }
+
+    public boolean isTerminal(){
+        String terminal=this.terminal;
+        return null!=terminal&&terminal.equals(TERMINAL);
     }
 
     public String getFormat() {
@@ -116,7 +133,7 @@ public final class Frame implements Label{
         JSONObject json=new JSONObject();
         put(json,LABEL_ACCESS,access).put(json,LABEL_FORMAT,format).put(json,LABEL_ENCODING,encoding).
         put(json,LABEL_VERSION,version).put(json,LABEL_UNIQUE,unique).put(json,LABEL_KEY,key)
-                .put(json,LABEL_FROM,from).put(json,LABEL_TO,to);
+                .put(json,LABEL_FROM,from).put(json,LABEL_TO,to).put(json,LABEL_TERMINAL, terminal);
         String headText=null!=json&&json.length()>0?json.toString():null;
         try {
             byte[] headBytes=null!=headText&&headText.length()>0?headText.getBytes("utf-8"):null;
@@ -158,7 +175,8 @@ public final class Frame implements Label{
                         byte[] body=Arrays.copyOfRange(buffer,headEndPoint,bodyEndPoint);
                         String headText=new String(buffer,lengthBytesEndPoint,headLength,"utf-8");
                         JSONObject json=null!=headText&&headText.length()>0?new JSONObject(headText):null;
-                        onReceive.OnFrameReceived(new Frame(json.optString(Label.LABEL_FROM),json.optString(Label.LABEL_TO),json.optString(LABEL_FORMAT),
+                        onReceive.OnFrameReceived(new Frame(json.optString(LABEL_TERMINAL),
+                                json.optString(LABEL_FROM),json.optString(LABEL_TO),json.optString(LABEL_FORMAT),
                                 json.optString(LABEL_UNIQUE),json.optString(LABEL_KEY),body,json.optString(LABEL_VERSION),
                                 json.optString(LABEL_ACCESS),null));
                     }

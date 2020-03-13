@@ -37,4 +37,5 @@ public interface Label{
    String  LABEL_VERSION="version";
    String  LABEL_ACCESS="access";
    String  LABEL_ENCODING="encoding";
+   String  LABEL_TERMINAL="terminal";
 }
