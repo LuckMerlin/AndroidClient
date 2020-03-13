@@ -32,4 +32,9 @@ public interface Label{
    String  LABEL_POSITION="position";
    String  LABEL_ENABLE="enable";
    String  LABEL_LENGTH="length";
+   String  LABEL_KEY="key";
+   String  LABEL_UNIQUE="unique";
+   String  LABEL_VERSION="version";
+   String  LABEL_ACCESS="access";
+   String  LABEL_ENCODING="encoding";
 }

@@ -10,7 +10,8 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
-import com.merlin.oksocket.Socket;
+import com.merlin.socket.OnConnectFinish;
+import com.merlin.socket.Socket;
 
 import java.util.List;
 
@@ -28,10 +29,10 @@ public class Application extends android.app.Application implements ActivityLife
     public void onCreate() {
         super.onCreate();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
-        mSocket.connect(new Socket.OnSocketConnectChange() {
+        mSocket.connect(new OnConnectFinish() {
             @Override
-            public void onSocketConnectChanged(boolean connected, int what) {
-                Debug.D(getClass(),"AAAA "+connected+" "+what);
+            public void OnConnectFinish(boolean succeed, int what, Socket socket) {
+                Debug.D(getClass(),"AA OnConnectFinish AA "+succeed+" "+what);
             }
         });
 //        mClient.setOnFrameReceive(mOnFrameReceiveListener);
