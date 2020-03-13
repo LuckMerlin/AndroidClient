@@ -1,11 +1,9 @@
 package com.merlin.socket;
 
 import com.merlin.debug.Debug;
-import com.merlin.oksocket.Heartbeat;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 import com.xuhao.didi.core.iocore.interfaces.ISendable;
 import com.xuhao.didi.core.pojo.OriginalData;
-import com.xuhao.didi.socket.client.impl.client.PulseManager;
 import com.xuhao.didi.socket.client.sdk.OkSocket;
 import com.xuhao.didi.socket.client.sdk.client.ConnectionInfo;
 import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
@@ -40,44 +38,48 @@ public class Socket {
             manager.registerReceiver(new ISocketActionListener(){
                 @Override
                 public void onPulseSend(ConnectionInfo connectionInfo, IPulseSendable iPulseSendable) {
-                    Debug.D(getClass(),"链接 onPulseSend "+iPulseSendable);
                     manager.getPulseManager().feed();
+                    Debug.D(getClass(),"发送心跳 "+System.currentTimeMillis());
                 }
 
                 @Override
                 public void onSocketConnectionFailed(ConnectionInfo connectionInfo, String s, Exception e) {
-                    Debug.D(getClass(),"链接 onSocketConnectionFailed "+e);
+                    Debug.D(getClass(),"Fail connect socket connect."+ip+" "+port+" "+s);
                 }
 
                 @Override
-                public void onSocketConnectionSuccess(ConnectionInfo connectionInfo, String s) {
-                    Debug.D(getClass(),"链接 成功 "+s+" "+connectionInfo);
+                public void onSocketConnectionSuccess(ConnectionInfo ci, String s) {
+                    Debug.D(getClass(),"Succeed connect socket."+ip+" "+port+" "+s);
                     manager.getPulseManager().setPulseSendable(new HeartBeater()).pulse();
+                    if (null==mManager){
+                        mManager=manager;
+                    }
                 }
 
                 @Override
                 public void onSocketDisconnection(ConnectionInfo connectionInfo, String s, Exception e) {
-                    Debug.D(getClass(),"链接 onSocketDisconnection "+s+" "+connectionInfo);
+                    Debug.D(getClass(),"Disconnected socket."+ip+" "+port+" "+s);
                 }
 
                 @Override
                 public void onSocketIOThreadShutdown(String s, Exception e) {
-                    Debug.D(getClass(),"链接 onSocketIOThreadShutdown "+s+" "+e);
+                    IConnectionManager curr=mManager;
+                    if(null!=curr&&curr==manager&&!manager.isConnect()){
+                        mManager=null;
+                    }
                 }
 
                 @Override
                 public void onSocketIOThreadStart(String s) {
-                    Debug.D(getClass(),"链接 onSocketIOThreadStart "+s);
+//                    Debug.D(getClass(),"链接 onSocketIOThreadStart "+s);
                 }
 
                 @Override
                 public void onSocketReadResponse(ConnectionInfo connectionInfo, String s, OriginalData originalData) {
-                    Debug.D(getClass(),"链接 onSocketReadResponse "+s);
                 }
 
                 @Override
                 public void onSocketWriteResponse(ConnectionInfo connectionInfo, String s, ISendable iSendable) {
-                    Debug.D(getClass(),"链接 onSocketWriteResponse "+s);
                 }
             });
             OkSocketOptions.Builder builder = new OkSocketOptions.Builder(manager.getOption());
@@ -121,7 +123,7 @@ public class Socket {
     public final boolean disconnect(String debug){
         IConnectionManager manager=mManager;
         if (null!=manager){
-            Debug.D(getClass(),"Disconnect socket server "+(null!=debug?debug:"."));
+            Debug.D(getClass(),"Disconnecting socket server "+(null!=debug?debug:"."));
             manager.disconnect();
             return true;
         }

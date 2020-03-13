@@ -3,6 +3,7 @@ package com.merlin.global;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 
 import com.merlin.api.Address;
 import com.merlin.classes.ActivityLifecycle;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class Application extends android.app.Application implements ActivityLifecycle.OnActivityCreate {
    private final ActivityLifecycle mActivityLifecycle=new ActivityLifecycle(this);
-   private final Socket mSocket=new Socket(Address.HOST,Address.PORT+1);
+   private final Socket mSocket=new Socket(Address.HOST.replace("http://",""),Address.PORT+1);
 
     @Override
     public void onCreate() {

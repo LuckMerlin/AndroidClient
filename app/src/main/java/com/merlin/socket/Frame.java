@@ -23,7 +23,7 @@ public final class Frame implements Label{
     private final byte[] body;
     private final String from;
     private final String to;
-    private final static int LENGTH_BYTES_SIZE=4;
+    public final static int LENGTH_BYTES_SIZE=4;
 
     public Frame(){
         this(null);
