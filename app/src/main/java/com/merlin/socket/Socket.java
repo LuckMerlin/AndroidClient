@@ -39,7 +39,7 @@ public class Socket {
                 @Override
                 public void onPulseSend(ConnectionInfo connectionInfo, IPulseSendable iPulseSendable) {
                     manager.getPulseManager().feed();
-                    Debug.D(getClass(),"发送心跳 "+System.currentTimeMillis());
+                    Debug.D(getClass(),"发送心跳 "+manager.getPulseManager().getPulseSendable());
                 }
 
                 @Override
