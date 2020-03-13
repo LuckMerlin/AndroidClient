@@ -15,9 +15,8 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
-import com.merlin.model.BaseModel;
 
-public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.OnModelViewClick {
+public class MediaPlayDisplayLayout extends RecyclerView implements OnTapClick {
 
     public MediaPlayDisplayLayout(@NonNull Context context) {
         this(context, null);
@@ -38,7 +37,12 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
     }
 
     @Override
-    public void onViewClick(View v, int id,Object obj) {
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        return false;
+    }
+
+    //    @Override
+//    public void onViewClick(View v, int id,Object obj) {
 //          int count=getChildCount();
 //          for (int i=0;i< count;i++){
 //              View child=getChildAt(i);
@@ -54,7 +58,7 @@ public class MediaPlayDisplayLayout extends RecyclerView implements BaseModel.On
 //                  }
 //              }
 //          }
-    }
+//    }
 
     private final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         private final int[] mLayoutIds=new int[]{

@@ -14,12 +14,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayService;
 import com.merlin.media.MediaPlayer;
 import com.merlin.model.ActivityMediaPlayModel;
-import com.merlin.model.BaseModel;
-import com.merlin.model.MediaPlayModel;
 import com.merlin.model.Model;
 import com.merlin.model.OnPlayerBindChange;
 

@@ -8,6 +8,5 @@
     </data>
     <TextView
         android:background="#f00"
-        binding:enableModelClick="@{true}"
         style="@style/sheetCategoryTitleStyle"/>
 </layout>

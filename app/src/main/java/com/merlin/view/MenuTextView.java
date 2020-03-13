@@ -13,10 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.merlin.debug.Debug;
-import com.merlin.model.DataListModel;
 
 
-public class MenuTextView extends TextView {
+public class MenuTextView extends androidx.appcompat.widget.AppCompatTextView {
 
 
     public MenuTextView(@NonNull Context context) {

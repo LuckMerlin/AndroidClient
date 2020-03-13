@@ -42,7 +42,6 @@ public class DownloadService extends Service {
     private WeakReference<Callback> mCallback;
     private BreakPointer mBreakPointer;
     private int mMaxDownloading=1;
-    private Client mClient;
     private final Binder mBinder=new Binder();
 
     public interface Callback extends Status{
@@ -140,7 +139,6 @@ public class DownloadService extends Service {
         Debug.D(getClass(),"Transport service onCreate.");
         android.app.Application app=getApplication();
         Application application=null!=app&&app instanceof Application?(Application)app:null;
-        mClient=null!=application?application.getClient():null;
         BreakPointer pointer=mBreakPointer=new ShBreakPointer(app);
         List<BreakPoint> list=pointer.getBreakpoints();//Init break list
         List<Transport> runningList=mRunningList;
@@ -214,7 +212,7 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download file.File_ already existed."+targetFile);
             return null;
         }
-        Client client=mClient;
+        Client client=null;
         if (null==client||!client.isLogined()){
             Debug.W(getClass(),"Can't download file.Not login."+client);
             return null;

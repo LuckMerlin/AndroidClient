@@ -19,7 +19,6 @@
                 style="@style/editTextNormal"/>
             <Button
                 android:text="@string/search"
-                binding:enableModelClick="@{true}"
                 style="@style/buttonStyle"
                 android:layout_marginRight="15dp"
                 android:layout_alignParentRight="true"

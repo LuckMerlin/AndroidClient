@@ -12,7 +12,6 @@
             name="playing"
             type="boolean" />
         <import type="android.view.View"/>
-        <import type="com.merlin.binding.ClickBinding"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.view.Clicker"/>
     </data>

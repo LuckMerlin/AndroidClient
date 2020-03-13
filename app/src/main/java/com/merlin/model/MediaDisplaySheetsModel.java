@@ -23,13 +23,14 @@ import com.merlin.bean.SheetTitle;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.SingleInputDialog;
+import com.merlin.view.OnTapClick;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.OnItemClickListener<MediaSheet>,What,BaseModel.OnModelViewClick,Label {
+public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItemClickListener<MediaSheet>,What, OnTapClick,Label {
     private final MediaSheetAdapter mSheetAdapter=new MediaSheetAdapter();
     private final SheetTitleAdapter mTitleAdapter=new SheetTitleAdapter();
     private final SheetMediaAdapter mSheetMediaAdapter=new SheetMediaAdapter();
@@ -51,18 +52,17 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
 
         @POST(Address.PREFIX_MEDIA+"/sheet/category")
         @FormUrlEncoded
-        Observable<Reply<PageData<SheetTitle>>> queryCategories(@Field(LABEL_NAME) String name, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
+        Observable<Reply<SectionData<SheetTitle>>> queryCategories(@Field(LABEL_NAME) String name, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
     }
 
-    public MediaDisplaySheetsModel(Context context){
-        super(context);
+    public MediaDisplaySheetsModel(){
         mSheetAdapter.setOnItemClickListener(this);
         queryAllSheets("全部");
     }
 
     @Override
-    public void onViewClick(View v, int id,Object obj) {
-
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        return false;
     }
 
     @Override
@@ -75,20 +75,20 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
     }
 
     private boolean queryCategories(){
-        return null!= call(Api.class, (OnApiFinish<Reply<SectionData<SheetTitle>>>)(what, note, data, arg)->{
+        return null!= call(prepare(Api.class).queryCategories(null,0,100), (OnApiFinish<Reply<SectionData<SheetTitle>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
 //                mTitleAdapter.fillPage(null!=data?data.getData():null);
             }
-        }).queryCategories(null,0,100);
+        });
     }
 
     private void queryAllSheets(String titleName){
-        call(Api.class, (OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, data, arg)->{
+        call(prepare(Api.class).queryAllSheets(titleName,0,10), (OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
                 ApiList<MediaSheet> list=null!=data?data.getData():null;
                 mSheetAdapter.setData(list);
             }
-        }).queryAllSheets(titleName,0,10);
+        });
     }
 
     private boolean querySheet(MediaSheet sheet,int page){
@@ -99,7 +99,7 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
        }
        final long sheetId=sheet.getId();
        mQueryDetailId=sheetId;
-       return null!=call(Api.class,(OnApiFinish<Reply<ApiList<NasMedia>>>)(what, note, data, arg)->{
+       return null!=call(prepare(Api.class).querySheetById(sheetId,page,50),(OnApiFinish<Reply<ApiList<NasMedia>>>)(what, note, data, arg)->{
            Long queryId=mQueryDetailId;
            if (null!=queryId&&queryId.equals(sheetId)){
                mQueryDetailId=null;
@@ -115,20 +115,20 @@ public class MediaDisplaySheetsModel extends BaseModel implements BaseAdapter.On
                    toast(R.string.requestFail,note);
                }
            }
-       }).querySheetById(sheetId,page,50);
+       });
     }
 
     private void createSheet(){
         new SingleInputDialog(getViewContext()).show(R.string.createSheet,(dlg, text)->{
             dlg.dismiss();
             if (null!=text&&text.length()>0){
-                call(Api.class,(OnApiFinish<Reply>)(what, note, data, arg)->{
+                call(prepare(Api.class).createSheet(text),(OnApiFinish<Reply>)(what, note, data, arg)->{
                     if (what== What.WHAT_SUCCEED){
                         toast(R.string.createSucceed);
                     }else{
                         toast(""+note);
                     }
-                }).createSheet(text);
+                });
             }
         });
     }

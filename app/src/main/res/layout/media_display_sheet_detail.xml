@@ -27,11 +27,9 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content">
                   <TextView
-                      enableModelClick="@{true}"
                       android:text="@string/all"
                       style="@style/sheetCategoryTitleStyle"/>
                   <TextView
-                      enableModelClick="@{true}"
                       android:text="@string/favorite"
                       style="@style/sheetCategoryTitleStyle"/>
                   <androidx.recyclerview.widget.RecyclerView

@@ -46,12 +46,12 @@ public class Socket {
 
                 @Override
                 public void onSocketConnectionFailed(ConnectionInfo connectionInfo, String s, Exception e) {
-                    Debug.D(getClass(),"链接 onSocketConnectionFailed "+s+" "+connectionInfo);
+                    Debug.D(getClass(),"链接 onSocketConnectionFailed "+e);
                 }
 
                 @Override
                 public void onSocketConnectionSuccess(ConnectionInfo connectionInfo, String s) {
-                       Debug.D(getClass(),"链接 成功 "+s+" "+connectionInfo);
+                    Debug.D(getClass(),"链接 成功 "+s+" "+connectionInfo);
                     manager.getPulseManager().setPulseSendable(new HeartBeater()).pulse();
                 }
 

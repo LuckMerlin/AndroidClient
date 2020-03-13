@@ -272,21 +272,6 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter(value = {"enableModelClick"})
-    public static void enableModelClick(View view, Object object) {
-        if (null!=object){
-            ClickBinding binding = null;
-            if (object instanceof Boolean){
-                binding=new ClickBinding((Boolean)object,null);
-            }else if (object instanceof ClickBinding){
-                binding=(ClickBinding)object;
-            }
-            if (null!=binding){
-                binding.bind(view);
-            }
-        }
-    }
-
     @BindingAdapter(value = {"statusBar"})
     public static void statusBar(View view, StatusBar statusBar) {
         if (null!=view &&null!=statusBar){
