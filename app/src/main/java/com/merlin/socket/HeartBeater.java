@@ -2,6 +2,7 @@ package com.merlin.socket;
 
 import androidx.annotation.NonNull;
 
+import com.merlin.util.Byte;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 
 public final class HeartBeater implements IPulseSendable {
@@ -15,6 +16,6 @@ public final class HeartBeater implements IPulseSendable {
     @NonNull
     @Override
     public String toString() {
-        return ""+(null!=mHeartbeatBytes?mHeartbeatBytes.length:-1)+" "+super.toString();
+        return ""+ Byte.dump(mHeartbeatBytes) +" "+super.toString();
     }
 }

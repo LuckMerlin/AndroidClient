@@ -114,10 +114,10 @@ public final class Frame implements Label{
 
     public byte[] toFrameBytes(){
         JSONObject json=new JSONObject();
-        put(json,LABEL_ACCESS,access).put(json,LABEL_FORMAT,from).put(json,LABEL_ENCODING,encoding).
+        put(json,LABEL_ACCESS,access).put(json,LABEL_FORMAT,format).put(json,LABEL_ENCODING,encoding).
         put(json,LABEL_VERSION,version).put(json,LABEL_UNIQUE,unique).put(json,LABEL_KEY,key)
                 .put(json,LABEL_FROM,from).put(json,LABEL_TO,to);
-        String headText=null!=json?json.toString():null;
+        String headText=null!=json&&json.length()>0?json.toString():null;
         try {
             byte[] headBytes=null!=headText&&headText.length()>0?headText.getBytes("utf-8"):null;
             int headLength=null!=headBytes?headBytes.length:0;
