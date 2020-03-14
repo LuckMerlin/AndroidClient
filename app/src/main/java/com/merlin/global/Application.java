@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.merlin.api.Address;
 import com.merlin.classes.ActivityLifecycle;
@@ -30,6 +31,13 @@ public class Application extends android.app.Application implements ActivityLife
                 Debug.D(getClass(),"AA OnConnectFinish AA "+succeed+" "+what);
             }
         });
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+//                mSocket.sendText("我爱中国操蛋",null,null);
+//                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
+            }
+        }, 5000);
 //        mClient.setOnFrameReceive(mOnFrameReceiveListener);
 //        mClient.putListener(mStatusChange);
 //        mClient.connect((connected,what)->{

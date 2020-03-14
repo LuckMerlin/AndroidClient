@@ -27,16 +27,16 @@ public final class Frame implements Label{
     public final static int LENGTH_BYTES_SIZE=4;
 
     public Frame(){
-        this(null);
+        this(true);
     }
 
-    public Frame(String terminal){
+    public Frame(boolean terminal){
         this(terminal,null,null,null,null,null,null,null,null,null);
     }
 
-    public Frame(String terminal,String from,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
+    public Frame(boolean terminal,String from,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
         this.from=from;
-        this.terminal=terminal;
+        this.terminal=terminal?TERMINAL:null;
         this.to=to;
         this.format=format;
         this.unique=unique;
@@ -175,7 +175,8 @@ public final class Frame implements Label{
                         byte[] body=Arrays.copyOfRange(buffer,headEndPoint,bodyEndPoint);
                         String headText=new String(buffer,lengthBytesEndPoint,headLength,"utf-8");
                         JSONObject json=null!=headText&&headText.length()>0?new JSONObject(headText):null;
-                        onReceive.OnFrameReceived(new Frame(json.optString(LABEL_TERMINAL),
+                        String terminal=json.optString(LABEL_TERMINAL);
+                        onReceive.OnFrameReceived(new Frame(null!=terminal&&terminal.equals(LABEL_TERMINAL),
                                 json.optString(LABEL_FROM),json.optString(LABEL_TO),json.optString(LABEL_FORMAT),
                                 json.optString(LABEL_UNIQUE),json.optString(LABEL_KEY),body,json.optString(LABEL_VERSION),
                                 json.optString(LABEL_ACCESS),null));
