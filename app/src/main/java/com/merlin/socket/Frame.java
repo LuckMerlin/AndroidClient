@@ -77,6 +77,10 @@ public final class Frame implements Label{
         return null==position||position.isEmpty();
     }
 
+    public String getPosition() {
+        return position;
+    }
+
     public String getFormat() {
         return format;
     }

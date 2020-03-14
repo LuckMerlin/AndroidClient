@@ -15,7 +15,6 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,9 +33,7 @@ public class Socket {
         mPort = port;
     }
 
-    private final OnFrameReceive mFrameReceive = new OnFrameReceive() {
-        @Override
-        public void OnFrameReceived(Frame frame) {
+    private final OnFrameReceive mFrameReceive = (frame)-> {
             if (null != frame) {
                 String unique = frame.getUnique();
                 Map<String, WaitingResponse> map = null != unique ? mResponseWaiting : null;
@@ -49,11 +46,10 @@ public class Socket {
                     Integer next=null!=onResponse?onResponse.onResponse(What.WHAT_SUCCEED,
                             "Response succeed.", waiting.mFrame, frame, null):null;
                     if (!terminal&&null!=next&&next==OnResponse.NEXT_FRAME){//If need request next frame
-                        callNextFrame(frame,waiting,"After pre frame handled.");
+                        callNextFrame(waiting,frame.getPosition(),"After pre frame handled.");
                     }
                 }
             }
-        }
     };
 
     public final synchronized boolean connect(OnConnectFinish change) {
@@ -143,11 +139,13 @@ public class Socket {
         return null != manager && manager.isConnect();
     }
 
-    private boolean callNextFrame(Frame frame,WaitingResponse waiting, String debug){
+    private boolean callNextFrame(WaitingResponse waiting,String position, String debug){
+        final Frame frame=null!=waiting?waiting.mFrame:null;
         if (null!=frame&&!frame.isTerminal()){
-            Frame nextFrame=new Frame();
-            return sendFrame(nextFrame,waiting,debug);
+            frame.setPosition(position);
+            return sendFrame(frame,waiting.mOnResponse,debug);// Call next frame
         }
+        Debug.D(getClass(),"Can't call next frame which if invalid or terminal "+(null!=debug?debug:"."));
         return false;
     }
 
@@ -178,7 +176,7 @@ public class Socket {
         }
     }
 
-    protected final boolean sendFrame(Frame frame,WaitingResponse waiting, OnResponse callback, String debug){
+    protected final boolean sendFrame(Frame frame, OnResponse callback, String debug){
             byte[] bytes=null!=frame?frame.toFrameBytes():null;
             int length=null!=bytes?bytes.length:-1;
             if (length>0){
