@@ -12,7 +12,9 @@ import com.merlin.client.Client;
 import com.merlin.debug.Debug;
 import com.merlin.oksocket.OnClientStatusChange;
 import com.merlin.oksocket.OnFrameReceive;
+import com.merlin.socket.Frame;
 import com.merlin.socket.OnConnectFinish;
+import com.merlin.socket.OnResponse;
 import com.merlin.socket.Socket;
 
 import java.util.List;
@@ -34,8 +36,13 @@ public class Application extends android.app.Application implements ActivityLife
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSocket.sendText("我爱中国操蛋",null,null);
-                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
+                mSocket.sendText("我爱中国操蛋", null, new OnResponse() {
+                    @Override
+                    public void onResponse(int what, String note,Frame frame, Frame response, Object arg) {
+                            Debug.D(getClass(),"SSS "+what+ " "+note+" "+response.getBodyText(null));
+                    }
+                },null);
+//                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
             }
         }, 5000);
 //        mClient.setOnFrameReceive(mOnFrameReceiveListener);

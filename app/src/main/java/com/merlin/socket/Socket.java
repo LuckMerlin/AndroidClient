@@ -1,8 +1,10 @@
 package com.merlin.socket;
 
-import com.merlin.bean.Love;
+import android.os.Handler;
+import android.os.Looper;
+
+import com.merlin.api.What;
 import com.merlin.debug.Debug;
-import com.merlin.util.Byte;
 import com.merlin.util.Int;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 import com.xuhao.didi.core.iocore.interfaces.ISendable;
@@ -13,13 +15,19 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Socket {
     private IConnectionManager mManager;
     private final String mIp;
     private final int mPort;
     private int mHeartbeat;
+    private int mTimeout;
+    private final Map<String,WaitingResponse> mResponseWaiting=new ConcurrentHashMap<>();
+    private final Handler mHandler=new Handler(Looper.getMainLooper());
 
     public Socket(String ip, int port){
         mIp=ip;
@@ -29,8 +37,22 @@ public class Socket {
     private final OnFrameReceive mFrameReceive=new OnFrameReceive() {
         @Override
         public void OnFrameReceived(Frame frame) {
-            Debug.D(getClass(),"收到针 "+frame.isTerminal() +" "+frame.getKey()+" "+frame.getBodyText(null));
-        }
+            if (null!=frame){
+                String unique=frame.getUnique();
+                Map<String,WaitingResponse> map=null!=unique?mResponseWaiting:null;
+                WaitingResponse waiting=null!=map?map.remove(unique):null;
+                if (null!=waiting){
+                    Handler handler=mHandler;
+                    if (null!=handler){
+                        handler.removeCallbacks(waiting);
+                    }
+                    OnResponse onResponse=waiting.mOnResponse;
+                    if (null!=onResponse){
+                        onResponse.onResponse(What.WHAT_SUCCEED,"Response succeed.",waiting.mFrame,frame,null);
+                    }
+                }
+            }
+          }
     };
 
     public final synchronized boolean connect(OnConnectFinish change){
@@ -120,7 +142,7 @@ public class Socket {
         return null!=manager&&manager.isConnect();
     }
 
-    public final boolean sendText(String text,String toAccount,String debug){
+    public final boolean sendText(String text, String toAccount, OnResponse callback, String debug){
         try {
             final String encoding="utf-8";
             byte[] bodyBytes=null!=text&&text.length()>0?text.getBytes(encoding):null;
@@ -129,15 +151,13 @@ public class Socket {
                 Debug.E(getClass(),"Can't send text to "+toAccount+" which body bytes invalid "+(null!=debug?debug:".")+" "+bodyBytesLength);
                 return false;
             }
-            String unique=generateUnique(Frame.FORMAT_TEXT);
+            String unique=generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+System.identityHashCode(callback));
             Frame frame=new Frame(true,null,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
-            byte[] frameBytes=null!=frame?frame.toFrameBytes():null;
-            int frameBytesLength=null!=frameBytes?frameBytes.length:-1;
-            if (frameBytesLength<=0){
-                Debug.E(getClass(),"Can't send text to "+toAccount+" which frame bytes invalid "+(null!=debug?debug:".")+" "+frameBytesLength);
+            if (null==frame){
+                Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
                 return false;
             }
-            return sendBytes(frameBytes);
+            return sendFrame(frame,callback,debug);
         } catch (Exception e) {
             Debug.E(getClass(),"Exception send text to "+toAccount+" "+(null!=debug?debug:".")+e,e);
             e.printStackTrace();
@@ -145,13 +165,44 @@ public class Socket {
         }
     }
 
-    protected final boolean sendFrame(Frame frame,String debug){
-        byte[] bytes=null!=frame?frame.toFrameBytes():null;
-        int length=null!=bytes?bytes.length:-1;
-        if (length>0){
-            return sendBytes(bytes);
-        }
-        Debug.W(getClass(),"Can't send frame with invalid bytes "+(null!=debug?debug:".")+" length="+length);
+    protected final boolean sendFrame(Frame frame, OnResponse callback, String debug){
+            byte[] bytes=null!=frame?frame.toFrameBytes():null;
+            int length=null!=bytes?bytes.length:-1;
+            if (length>0){
+                final String unique=frame.getUnique();
+                final Map<String,WaitingResponse> waiting=mResponseWaiting;
+                final Handler handler=mHandler;
+                WaitingResponse waitingResponse=null;
+                if (null!=callback){//Save callback for response
+                    if (null==waiting){
+                        Debug.W(getClass(),"Will not receive frame response while waiting queue NULL.");
+                    }else if (null==unique||unique.length()<=0){
+                        Debug.W(getClass(),"Will not receive frame response while unique EMPTY.");
+                    }else{
+                        waiting.put(unique,waitingResponse=new WaitingResponse(frame,callback){
+                            @Override
+                            public void run() {
+                                waiting.remove(unique);
+                                Debug.D(getClass(),"Wait frame response timeout.");
+                                handler.removeCallbacks(this);
+                                callback.onResponse(What.WHAT_TIMEOUT,"Response timeout.",frame,null,null);
+                            }
+                        });
+                    }
+                }
+                boolean sendSucceed=sendBytes(bytes);
+                if(null!=waitingResponse&&null!=unique){
+                    if (sendSucceed){
+                        int timeout=mTimeout;
+                        handler.postDelayed(waitingResponse, timeout <= 1000||timeout>60000 ? 10000 : timeout);
+                    }else {
+                        waiting.remove(unique);
+                        callback.onResponse(What.WHAT_FAIL_UNKNOWN,"Send fail.",frame,null,null);
+                    }
+                }
+                return sendSucceed;
+            }
+        Debug.W(getClass(),"Can't send invalid frame bytes "+(null!=debug?debug:".")+" length="+length);
         return false;
     }
 
@@ -193,7 +244,15 @@ public class Socket {
     }
 
     public final String generateUnique(String prefix){
-        return "Android"+(null!=prefix?prefix:"")+System.currentTimeMillis()+UUID.randomUUID();
+        return "Android"+(null!=prefix?prefix:"")+UUID.randomUUID();
     }
 
+    private static abstract class WaitingResponse implements Runnable{
+        private final OnResponse mOnResponse;
+        private final Frame mFrame;
+        private WaitingResponse(Frame frame,OnResponse response){
+            mOnResponse=response;
+            mFrame=frame;
+        }
+    }
 }
