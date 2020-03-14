@@ -26,51 +26,51 @@ public class Socket {
     private final int mPort;
     private int mHeartbeat;
     private int mTimeout;
-    private final Map<String,WaitingResponse> mResponseWaiting=new ConcurrentHashMap<>();
-    private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private final Map<String, WaitingResponse> mResponseWaiting = new ConcurrentHashMap<>();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    public Socket(String ip, int port){
-        mIp=ip;
-        mPort=port;
+    public Socket(String ip, int port) {
+        mIp = ip;
+        mPort = port;
     }
 
-    private final OnFrameReceive mFrameReceive=new OnFrameReceive() {
+    private final OnFrameReceive mFrameReceive = new OnFrameReceive() {
         @Override
         public void OnFrameReceived(Frame frame) {
-            if (null!=frame){
-                String unique=frame.getUnique();
-                Map<String,WaitingResponse> map=null!=unique?mResponseWaiting:null;
-                WaitingResponse waiting=null!=map?map.remove(unique):null;
-                if (null!=waiting){
-                    Handler handler=mHandler;
-                    if (null!=handler){
+            if (null != frame) {
+                String unique = frame.getUnique();
+                Map<String, WaitingResponse> map = null != unique ? mResponseWaiting : null;
+                WaitingResponse waiting = null != map ? map.remove(unique) : null;
+                if (null != waiting) {
+                    Handler handler = mHandler;
+                    if (null != handler) {
                         handler.removeCallbacks(waiting);
                     }
-                    OnResponse onResponse=waiting.mOnResponse;
-                    if (null!=onResponse){
-                        onResponse.onResponse(What.WHAT_SUCCEED,"Response succeed.",waiting.mFrame,frame,null);
+                    OnResponse onResponse = waiting.mOnResponse;
+                    if (null != onResponse) {
+                        onResponse.onResponse(What.WHAT_SUCCEED, "Response succeed.", waiting.mFrame, frame, null);
                     }
                 }
             }
-          }
+        }
     };
 
-    public final synchronized boolean connect(OnConnectFinish change){
-        IConnectionManager currManager=mManager;
-        if (null!=currManager){
-            Debug.D(getClass(),"Not need connect again while connected.");
+    public final synchronized boolean connect(OnConnectFinish change) {
+        IConnectionManager currManager = mManager;
+        if (null != currManager) {
+            Debug.D(getClass(), "Not need connect again while connected.");
             return false;
         }
-        final String ip=mIp;
-        final int port =mPort;
-        if (null==ip||port<=0){
-            Debug.W(getClass(),"Can't connect server.Invalid address?ip="+ip+" port="+port);
+        final String ip = mIp;
+        final int port = mPort;
+        if (null == ip || port <= 0) {
+            Debug.W(getClass(), "Can't connect server.Invalid address?ip=" + ip + " port=" + port);
             return false;
         }
-        final IConnectionManager manager= OkSocket.open(new ConnectionInfo(ip, port));
-        if (null!=manager){
-            final FrameReader frameReader=new FrameReader();
-            manager.registerReceiver(new ISocketActionListener(){
+        final IConnectionManager manager = OkSocket.open(new ConnectionInfo(ip, port));
+        if (null != manager) {
+            final FrameReader frameReader = new FrameReader();
+            manager.registerReceiver(new ISocketActionListener() {
                 @Override
                 public void onPulseSend(ConnectionInfo connectionInfo, IPulseSendable iPulseSendable) {
                     manager.getPulseManager().feed();
@@ -79,28 +79,28 @@ public class Socket {
 
                 @Override
                 public void onSocketConnectionFailed(ConnectionInfo connectionInfo, String s, Exception e) {
-                    Debug.D(getClass(),"Fail connect socket connect."+ip+" "+port+" "+s);
+                    Debug.D(getClass(), "Fail connect socket connect." + ip + " " + port + " " + s);
                 }
 
                 @Override
                 public void onSocketConnectionSuccess(ConnectionInfo ci, String s) {
-                    Debug.D(getClass(),"Succeed connect socket."+ip+" "+port+" "+s);
+                    Debug.D(getClass(), "Succeed connect socket." + ip + " " + port + " " + s);
                     manager.getPulseManager().setPulseSendable(new HeartBeater()).pulse();
-                    if (null==mManager){
-                        mManager=manager;
+                    if (null == mManager) {
+                        mManager = manager;
                     }
                 }
 
                 @Override
                 public void onSocketDisconnection(ConnectionInfo connectionInfo, String s, Exception e) {
-                    Debug.D(getClass(),"Disconnected socket."+ip+" "+port+" "+s);
+                    Debug.D(getClass(), "Disconnected socket." + ip + " " + port + " " + s);
                 }
 
                 @Override
                 public void onSocketIOThreadShutdown(String s, Exception e) {
-                    IConnectionManager curr=mManager;
-                    if(null!=curr&&curr==manager&&!manager.isConnect()){
-                        mManager=null;
+                    IConnectionManager curr = mManager;
+                    if (null != curr && curr == manager && !manager.isConnect()) {
+                        mManager = null;
                     }
                 }
 
@@ -111,10 +111,10 @@ public class Socket {
 
                 @Override
                 public void onSocketReadResponse(ConnectionInfo connectionInfo, String s, OriginalData originalData) {
-                    if (null!=originalData){
+                    if (null != originalData) {
                         Integer frameHeadLength = Int.toInt(originalData.getHeadBytes(), 0, null);
-                        byte[] bodyBytes=originalData.getBodyBytes();
-                        Frame.read(bodyBytes,frameHeadLength,mFrameReceive);
+                        byte[] bodyBytes = originalData.getBodyBytes();
+                        Frame.read(bodyBytes, frameHeadLength, mFrameReceive);
                     }
                 }
 
@@ -125,24 +125,28 @@ public class Socket {
             });
             OkSocketOptions.Builder builder = new OkSocketOptions.Builder(manager.getOption());
             builder.setReaderProtocol(frameReader);
-            int heartbeat=mHeartbeat;
-            builder.setPulseFrequency(heartbeat<=0?3000:heartbeat);
+            int heartbeat = mHeartbeat;
+            builder.setPulseFrequency(heartbeat <= 0 ? 3000 : heartbeat);
             builder.setPulseFeedLoseTimes(1);
             manager.option(builder.build());
-            Debug.D(getClass(),"Start connect socket server.ip="+ip+" port="+port);
+            Debug.D(getClass(), "Start connect socket server.ip=" + ip + " port=" + port);
             manager.connect();
-            mManager=manager;
+            mManager = manager;
             return true;
         }
         return false;
     }
 
-    public final boolean isOnline(){
-        IConnectionManager manager=mManager;
-        return null!=manager&&manager.isConnect();
+    public final boolean isOnline() {
+        IConnectionManager manager = mManager;
+        return null != manager && manager.isConnect();
     }
 
-    public final boolean sendText(String text, String toAccount, OnResponse callback, String debug){
+    public final boolean sendText(String text, String toAccount, OnResponse callback, String debug) {
+        return sendText(text,toAccount,null,callback,debug);
+    }
+
+    public final boolean sendText(String text, String toAccount,String unique, OnResponse callback, String debug){
         try {
             final String encoding="utf-8";
             byte[] bodyBytes=null!=text&&text.length()>0?text.getBytes(encoding):null;
@@ -151,7 +155,7 @@ public class Socket {
                 Debug.E(getClass(),"Can't send text to "+toAccount+" which body bytes invalid "+(null!=debug?debug:".")+" "+bodyBytesLength);
                 return false;
             }
-            String unique=generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+System.identityHashCode(callback));
+            unique=null!=unique&&unique.length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+System.identityHashCode(callback));
             Frame frame=new Frame(true,null,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
             if (null==frame){
                 Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");

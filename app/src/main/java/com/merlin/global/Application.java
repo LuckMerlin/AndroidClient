@@ -33,26 +33,24 @@ public class Application extends android.app.Application implements ActivityLife
                 Debug.D(getClass(),"AA OnConnectFinish AA "+succeed+" "+what);
             }
         });
+        test(null);
+    }
+
+
+    private void test(String unique){
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSocket.sendText("我爱中国操蛋", null, new OnResponse() {
+                mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
                     @Override
                     public void onResponse(int what, String note,Frame frame, Frame response, Object arg) {
-                            Debug.D(getClass(),"SSS "+what+ " "+note+" "+response.getBodyText(null));
+                        Debug.D(getClass(),"SSS "+what+ " "+note+" "+(null!=response?response.getBodyText(null):null));
+                        new Handler(Looper.getMainLooper()).postDelayed(()->{test(null!=response?response.getUnique():null);},4000);
                     }
                 },null);
 //                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
             }
         }, 5000);
-//        mClient.setOnFrameReceive(mOnFrameReceiveListener);
-//        mClient.putListener(mStatusChange);
-//        mClient.connect((connected,what)->{
-//            Debug.D(getClass(),"Connected ", mStatusChange);
-//             if (connected){
-////                 mClient.login("wuyue","123456");
-//             }
-//        });
     }
 
     @Override
