@@ -3,6 +3,7 @@ package com.merlin.socket;
 import com.merlin.bean.Love;
 import com.merlin.debug.Debug;
 import com.merlin.util.Byte;
+import com.merlin.util.Int;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
 import com.xuhao.didi.core.iocore.interfaces.ISendable;
 import com.xuhao.didi.core.pojo.OriginalData;
@@ -25,6 +26,13 @@ public class Socket {
         mPort=port;
     }
 
+    private final OnFrameReceive mFrameReceive=new OnFrameReceive() {
+        @Override
+        public void OnFrameReceived(Frame frame) {
+            Debug.D(getClass(),"收到针 "+frame.isTerminal() +" "+frame.getKey()+" "+frame.getBodyText(null));
+        }
+    };
+
     public final synchronized boolean connect(OnConnectFinish change){
         IConnectionManager currManager=mManager;
         if (null!=currManager){
@@ -39,6 +47,7 @@ public class Socket {
         }
         final IConnectionManager manager= OkSocket.open(new ConnectionInfo(ip, port));
         if (null!=manager){
+            final FrameReader frameReader=new FrameReader();
             manager.registerReceiver(new ISocketActionListener(){
                 @Override
                 public void onPulseSend(ConnectionInfo connectionInfo, IPulseSendable iPulseSendable) {
@@ -80,16 +89,20 @@ public class Socket {
 
                 @Override
                 public void onSocketReadResponse(ConnectionInfo connectionInfo, String s, OriginalData originalData) {
-                    Debug.D(getClass(),"onSocketReadResponse "+ Byte.dump(originalData.getHeadBytes()));
+                    if (null!=originalData){
+                        Integer frameHeadLength = Int.toInt(originalData.getHeadBytes(), 0, null);
+                        byte[] bodyBytes=originalData.getBodyBytes();
+                        Frame.read(bodyBytes,frameHeadLength,mFrameReceive);
+                    }
                 }
 
                 @Override
                 public void onSocketWriteResponse(ConnectionInfo connectionInfo, String s, ISendable iSendable) {
-                    Debug.D(getClass(),"onSocketWriteResponse "+ iSendable.getClass());
+//                    Debug.D(getClass(),"onSocketWriteResponse "+ iSendable.getClass());
                 }
             });
             OkSocketOptions.Builder builder = new OkSocketOptions.Builder(manager.getOption());
-            builder.setReaderProtocol(new FrameReader());
+            builder.setReaderProtocol(frameReader);
             int heartbeat=mHeartbeat;
             builder.setPulseFrequency(heartbeat<=0?3000:heartbeat);
             builder.setPulseFeedLoseTimes(1);

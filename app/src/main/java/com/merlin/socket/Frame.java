@@ -2,6 +2,7 @@ package com.merlin.socket;
 
 import com.merlin.api.Label;
 import com.merlin.debug.Debug;
+import com.merlin.util.Byte;
 import com.merlin.util.Int;
 
 import org.json.JSONException;
@@ -158,36 +159,36 @@ public final class Frame implements Label{
         return null;
     }
 
-    public static byte[] read(byte[] buffer,OnFrameReceive onReceive){
-        int length=null!=buffer?buffer.length:0;
-        int lengthBytesEndPoint=LENGTH_BYTES_SIZE<<1;
-        if (length>=lengthBytesEndPoint){
-            Integer headLength=Int.toInt(buffer,0,null);
-            Integer bodyLength=Int.toInt(buffer,LENGTH_BYTES_SIZE,null);
-            if (null==headLength||null==bodyLength||bodyLength<0||headLength<0){
-                throw new RuntimeException("Invalid frame.");
-            }
-            int headEndPoint=lengthBytesEndPoint+headLength;
-            int bodyEndPoint=headEndPoint+bodyLength;
-            if (length>=bodyEndPoint){
-                try {
-                    if (null!=onReceive){
-                        byte[] body=Arrays.copyOfRange(buffer,headEndPoint,bodyEndPoint);
-                        String headText=new String(buffer,lengthBytesEndPoint,headLength,"utf-8");
-                        JSONObject json=null!=headText&&headText.length()>0?new JSONObject(headText):null;
-                        String terminal=json.optString(LABEL_TERMINAL);
-                        onReceive.OnFrameReceived(new Frame(null!=terminal&&terminal.equals(LABEL_TERMINAL),
-                                json.optString(LABEL_FROM),json.optString(LABEL_TO),json.optString(LABEL_FORMAT),
-                                json.optString(LABEL_UNIQUE),json.optString(LABEL_KEY),body,json.optString(LABEL_VERSION),
-                                json.optString(LABEL_ACCESS),null));
+    public static Frame read(byte[] buffer,int bodyStartIndex,OnFrameReceive onReceive){
+        Frame frame=null;
+            final int length=null!=buffer?buffer.length:-1;
+            if (bodyStartIndex>=0){
+                if (bodyStartIndex>0){//Empty frame head
+                    JSONObject headJson=null;
+                    try {
+                        String headText=new String(buffer,0, bodyStartIndex,"utf-8");
+                        headJson=null!=headText&&headText.length()>0?new JSONObject(headText):null;
+                    } catch (Exception e) {
+                        Debug.E(Frame.class,"Exception read frame head text.e="+e,e);
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    Debug.E(Frame.class,"Exception read frame head text.e="+e,e);
-                    e.printStackTrace();
+                    byte[] body=bodyStartIndex<=length?Arrays.copyOfRange(buffer,bodyStartIndex,length):null;
+                    if (null!=headJson&&headJson.length()>0){
+                        String terminal=headJson.optString(LABEL_TERMINAL);
+                        frame=new Frame(null!=terminal&&terminal.equals(LABEL_TERMINAL),
+                                headJson.optString(LABEL_FROM),headJson.optString(LABEL_TO),headJson.optString(LABEL_FORMAT),
+                                headJson.optString(LABEL_UNIQUE),headJson.optString(LABEL_KEY),body,
+                                headJson.optString(LABEL_VERSION),headJson.optString(LABEL_ACCESS),null);
+                    }else{
+                        frame=new Frame().setBody(body);
+                    }
+                }else if (length==0&&bodyStartIndex==0){ //Empty Frame
+                    frame=new Frame();
                 }
-                buffer=length>bodyEndPoint?Arrays.copyOfRange(buffer,bodyEndPoint,length):null;
+                if (null!=frame&&null!=onReceive){
+                    onReceive.OnFrameReceived(frame);
+                }
             }
-        }
-        return buffer;
+            return frame;
     }
 }

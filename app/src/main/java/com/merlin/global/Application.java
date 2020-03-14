@@ -34,8 +34,8 @@ public class Application extends android.app.Application implements ActivityLife
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-//                mSocket.sendText("我爱中国操蛋",null,null);
-//                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
+                mSocket.sendText("我爱中国操蛋",null,null);
+                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
             }
         }, 5000);
 //        mClient.setOnFrameReceive(mOnFrameReceiveListener);

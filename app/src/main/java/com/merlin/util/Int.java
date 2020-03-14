@@ -16,11 +16,11 @@ public class Int {
     public static Integer toInt(byte[] bytes,int offset,Integer def) {
         int length=null!=bytes?bytes.length:0;
         if (length>0&&offset>=0&&offset<length-1){
-            int int1=bytes[offset]&0xff;
-            int int2=(bytes[offset+1]&0xff)<<8;
-            int int3=(bytes[offset+2]&0xff)<<16;
-            int int4=(bytes[offset+3]&0xff)<<24;
-            return int1|int2|int3|int4;
+            int result = bytes[offset+0] & 0xFF;
+            result = (result << 8) | (bytes[offset+1] & 0xff) ;
+            result = (result << 8) | (bytes[offset+2] & 0xff) ;
+            result = (result << 8) | (bytes[offset+3] & 0xff) ;
+            return result;
         }
         return def;
     }
