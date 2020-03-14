@@ -13,30 +13,29 @@ import java.util.Arrays;
 public final class Frame implements Label{
     public final static String FORMAT_TEXT="text";
     public final static String FORMAT_BYTES="bytes";
-    public final static String TERMINAL=LABEL_TERMINAL;
     private final String access;
     private final String format;
     private final String encoding;
     private final String version;
     private final String unique;
     private final String key;
-    private byte[] body;
     private final String from;
+    private byte[] body;
     private final String to;
-    private String terminal;
+    private String position;
     public final static int LENGTH_BYTES_SIZE=4;
 
     public Frame(){
-        this(true);
+        this(null);
     }
 
-    public Frame(boolean terminal){
-        this(terminal,null,null,null,null,null,null,null,null,null);
+    public Frame(String position){
+        this(position,null,null,null,null,null,null,null,null);
     }
 
-    public Frame(boolean terminal,String from,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
-        this.from=from;
-        this.terminal=terminal?TERMINAL:null;
+    public Frame(String position,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
+        this.from=null;
+        this.position=position;
         this.to=to;
         this.format=format;
         this.unique=unique;
@@ -55,10 +54,6 @@ public final class Frame implements Label{
         return key;
     }
 
-    public String getFrom() {
-        return from;
-    }
-
     public String getTo() {
         return to;
     }
@@ -68,14 +63,18 @@ public final class Frame implements Label{
         return this;
     }
 
-    public Frame setTerminal(boolean enableTerminal){
-        this.terminal=enableTerminal?TERMINAL:null;
+    public Frame setPosition(String position){
+        this.position=position;
         return this;
     }
 
+    public String getFrom() {
+        return from;
+    }
+
     public boolean isTerminal(){
-        String terminal=this.terminal;
-        return null!=terminal&&terminal.equals(TERMINAL);
+        String position=this.position;
+        return null==position||position.isEmpty();
     }
 
     public String getFormat() {
@@ -133,7 +132,7 @@ public final class Frame implements Label{
         JSONObject json=new JSONObject();
         put(json,LABEL_ACCESS,access).put(json,LABEL_FORMAT,format).put(json,LABEL_ENCODING,encoding).
         put(json,LABEL_VERSION,version).put(json,LABEL_UNIQUE,unique).put(json,LABEL_KEY,key)
-                .put(json,LABEL_FROM,from).put(json,LABEL_TO,to).put(json,LABEL_TERMINAL, terminal);
+                .put(json,LABEL_TO,to).put(json,LABEL_POSITION, position);
         String headText=null!=json&&json.length()>0?json.toString():null;
         try {
             byte[] headBytes=null!=headText&&headText.length()>0?headText.getBytes("utf-8"):null;
@@ -173,9 +172,7 @@ public final class Frame implements Label{
                     }
                     byte[] body=bodyStartIndex<=length?Arrays.copyOfRange(buffer,bodyStartIndex,length):null;
                     if (null!=headJson&&headJson.length()>0){
-                        String terminal=headJson.optString(LABEL_TERMINAL);
-                        frame=new Frame(null!=terminal&&terminal.equals(LABEL_TERMINAL),
-                                headJson.optString(LABEL_FROM),headJson.optString(LABEL_TO),headJson.optString(LABEL_FORMAT),
+                        frame=new Frame(headJson.optString(LABEL_POSITION),headJson.optString(LABEL_TO),headJson.optString(LABEL_FORMAT),
                                 headJson.optString(LABEL_UNIQUE),headJson.optString(LABEL_KEY),body,
                                 headJson.optString(LABEL_VERSION),headJson.optString(LABEL_ACCESS),null);
                     }else{

@@ -16,6 +16,7 @@ import com.merlin.socket.Frame;
 import com.merlin.socket.OnConnectFinish;
 import com.merlin.socket.OnResponse;
 import com.merlin.socket.Socket;
+import com.merlin.util.Int;
 
 import java.util.List;
 
@@ -43,9 +44,10 @@ public class Application extends android.app.Application implements ActivityLife
             public void run() {
                 mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
                     @Override
-                    public void onResponse(int what, String note,Frame frame, Frame response, Object arg) {
+                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
                         Debug.D(getClass(),"SSS "+what+ " "+note+" "+(null!=response?response.getBodyText(null):null));
                         new Handler(Looper.getMainLooper()).postDelayed(()->{test(null!=response?response.getUnique():null);},4000);
+                        return null;
                     }
                 },null);
 //                new Handler(Looper.getMainLooper()).postDelayed(this,4000);

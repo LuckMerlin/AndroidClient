@@ -41,18 +41,15 @@ public class Socket {
                 String unique = frame.getUnique();
                 Map<String, WaitingResponse> map = null != unique ? mResponseWaiting : null;
                 boolean terminal=frame.isTerminal();
-                WaitingResponse waiting = null != map ? terminal?map.remove(unique):map.get(unique) : null;
+                WaitingResponse waiting = null != map ? map.remove(unique) : null;
                 if (null != waiting) {
                     Handler handler = mHandler;
-                    if (null != handler) {
-                        handler.removeCallbacks(waiting);
-                    }
+                    handler.removeCallbacks(waiting);
                     OnResponse onResponse = waiting.mOnResponse;
-                    boolean next=null!=onResponse&&onResponse.onResponse(What.WHAT_SUCCEED, "Response succeed.", waiting.mFrame, frame, null);
-                    if (null != onResponse) {
-                    }
-                    if (!terminal){
-
+                    Integer next=null!=onResponse?onResponse.onResponse(What.WHAT_SUCCEED,
+                            "Response succeed.", waiting.mFrame, frame, null):null;
+                    if (!terminal&&null!=next&&next==OnResponse.NEXT_FRAME){//If need request next frame
+                        callNextFrame(frame,waiting,"After pre frame handled.");
                     }
                 }
             }
@@ -146,8 +143,11 @@ public class Socket {
         return null != manager && manager.isConnect();
     }
 
-    private boolean callNextFrame(Frame frame,String toAccount, String debug){
-
+    private boolean callNextFrame(Frame frame,WaitingResponse waiting, String debug){
+        if (null!=frame&&!frame.isTerminal()){
+            Frame nextFrame=new Frame();
+            return sendFrame(nextFrame,waiting,debug);
+        }
         return false;
     }
 
@@ -165,7 +165,7 @@ public class Socket {
                 return false;
             }
             unique=null!=unique&&unique.length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+System.identityHashCode(callback));
-            Frame frame=new Frame(true,null,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
+            Frame frame=new Frame(null,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
             if (null==frame){
                 Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
                 return false;
@@ -178,7 +178,7 @@ public class Socket {
         }
     }
 
-    protected final boolean sendFrame(Frame frame, OnResponse callback, String debug){
+    protected final boolean sendFrame(Frame frame,WaitingResponse waiting, OnResponse callback, String debug){
             byte[] bytes=null!=frame?frame.toFrameBytes():null;
             int length=null!=bytes?bytes.length:-1;
             if (length>0){
