@@ -2,7 +2,6 @@ package com.merlin.socket;
 
 import com.merlin.api.Label;
 import com.merlin.debug.Debug;
-import com.merlin.util.Byte;
 import com.merlin.util.Int;
 
 import org.json.JSONException;

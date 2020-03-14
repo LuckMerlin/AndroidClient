@@ -40,15 +40,19 @@ public class Socket {
             if (null != frame) {
                 String unique = frame.getUnique();
                 Map<String, WaitingResponse> map = null != unique ? mResponseWaiting : null;
-                WaitingResponse waiting = null != map ? map.remove(unique) : null;
+                boolean terminal=frame.isTerminal();
+                WaitingResponse waiting = null != map ? terminal?map.remove(unique):map.get(unique) : null;
                 if (null != waiting) {
                     Handler handler = mHandler;
                     if (null != handler) {
                         handler.removeCallbacks(waiting);
                     }
                     OnResponse onResponse = waiting.mOnResponse;
+                    boolean next=null!=onResponse&&onResponse.onResponse(What.WHAT_SUCCEED, "Response succeed.", waiting.mFrame, frame, null);
                     if (null != onResponse) {
-                        onResponse.onResponse(What.WHAT_SUCCEED, "Response succeed.", waiting.mFrame, frame, null);
+                    }
+                    if (!terminal){
+
                     }
                 }
             }
@@ -140,6 +144,11 @@ public class Socket {
     public final boolean isOnline() {
         IConnectionManager manager = mManager;
         return null != manager && manager.isConnect();
+    }
+
+    private boolean callNextFrame(Frame frame,String toAccount, String debug){
+
+        return false;
     }
 
     public final boolean sendText(String text, String toAccount, OnResponse callback, String debug) {
