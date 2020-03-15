@@ -75,6 +75,7 @@ public final class Frame implements Label{
     }
 
     public boolean isTerminal(){
+        Debug.D(getClass(),"aaa "+this.position+" "+this.length);
         return this.position==this.length;
     }
 

@@ -16,6 +16,7 @@ import com.merlin.socket.Frame;
 import com.merlin.socket.OnConnectFinish;
 import com.merlin.socket.OnResponse;
 import com.merlin.socket.Socket;
+import com.merlin.util.Byte;
 import com.merlin.util.Int;
 
 import java.util.List;
@@ -42,10 +43,16 @@ public class Application extends android.app.Application implements ActivityLife
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSocket.downloadFile("./生日歌.mp3", null, new OnResponse() {
+                mSocket.downloadFile("./生日歌.mp3", 0.5f,null, new OnResponse() {
                     @Override
                     public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-                        Debug.D(getClass(),"达到  "+(null!=response?""+response.getBodyText(null):" 达到 扯淡")+" "+note);
+                        Debug.D(getClass(),"达到  "+note);
+                        if (null!=response){
+                            byte[] body=response.getBody();
+                            Debug.D(getClass(),"%% "+response.isTerminal()+" "+(null!=body?body.length:-1)+" \n"+
+                                    Byte.dump(body));
+                            return NEXT_FRAME;
+                        }
                         return null;
                     }
                 },"test.");

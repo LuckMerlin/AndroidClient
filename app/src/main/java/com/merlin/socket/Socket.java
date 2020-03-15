@@ -151,14 +151,14 @@ public class Socket {
             frame.setPosition(position+1);
             return sendFrame(frame,waiting.mOnResponse,debug);// Call next frame
         }
-        Debug.D(getClass(),"Can't call next frame which if invalid or terminal "+(null!=debug?debug:"."));
+        Debug.D(getClass(),"Can't call next frame which is invalid or terminal "+(null!=debug?debug:".")+" "+frame);
         return false;
     }
 
-    public final boolean downloadFile(String path,String toAccount,OnResponse callback,String debug){
+    public final boolean downloadFile(String path,double position,String toAccount,OnResponse callback,String debug){
         if (null!=path&&path.length()>0){
             return sendText(new JsonObject().put(Label.LABEL_MODE,Label.LABEL_DOWNLOAD).put(Label.
-                    LABEL_PATH,path).put(Label.LABEL_POSITION,-1).toString(),
+                    LABEL_PATH,path).put(Label.LABEL_POSITION,position).toString(),
                     toAccount,callback,debug);
         }
         Debug.W(getClass(),"Can't download file which path is invalid "+(null!=debug?debug:"."));
