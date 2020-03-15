@@ -45,7 +45,7 @@ public class Application extends android.app.Application implements ActivityLife
                 mSocket.downloadFile("./生日歌.mp3", null, new OnResponse() {
                     @Override
                     public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-                        Debug.D(getClass(),"达到  "+(null!=response?""+response.isTerminal():" 达到 扯淡"));
+                        Debug.D(getClass(),"达到  "+(null!=response?""+response.getBodyText(null):" 达到 扯淡")+" "+note);
                         return null;
                     }
                 },"test.");
