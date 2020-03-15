@@ -3,6 +3,8 @@ package com.merlin.socket;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.merlin.api.JsonObject;
+import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 import com.merlin.util.Int;
@@ -15,9 +17,13 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import retrofit2.http.POST;
 
 public class Socket {
     private IConnectionManager mManager;
@@ -139,13 +145,23 @@ public class Socket {
         return null != manager && manager.isConnect();
     }
 
-    private boolean callNextFrame(WaitingResponse waiting,String position, String debug){
+    private boolean callNextFrame(WaitingResponse waiting,long position, String debug){
         final Frame frame=null!=waiting?waiting.mFrame:null;
         if (null!=frame&&!frame.isTerminal()){
-            frame.setPosition(position);
+            frame.setPosition(position+1);
             return sendFrame(frame,waiting.mOnResponse,debug);// Call next frame
         }
         Debug.D(getClass(),"Can't call next frame which if invalid or terminal "+(null!=debug?debug:"."));
+        return false;
+    }
+
+    public final boolean downloadFile(String path,String toAccount,OnResponse callback,String debug){
+        if (null!=path&&path.length()>0){
+            return sendText(new JsonObject().put(Label.LABEL_MODE,Label.LABEL_DOWNLOAD).put(Label.
+                    LABEL_PATH,path).put(Label.LABEL_POSITION,-1).toString(),
+                    toAccount,callback,debug);
+        }
+        Debug.W(getClass(),"Can't download file which path is invalid "+(null!=debug?debug:"."));
         return false;
     }
 
@@ -163,7 +179,7 @@ public class Socket {
                 return false;
             }
             unique=null!=unique&&unique.length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+System.identityHashCode(callback));
-            Frame frame=new Frame(null,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
+            Frame frame=new Frame(bodyBytesLength,bodyBytesLength,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
             if (null==frame){
                 Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
                 return false;

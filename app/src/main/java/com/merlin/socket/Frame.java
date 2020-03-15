@@ -22,20 +22,22 @@ public final class Frame implements Label{
     private final String from;
     private byte[] body;
     private final String to;
-    private String position;
+    private long position;
+    private final long length;
     public final static int LENGTH_BYTES_SIZE=4;
 
     public Frame(){
-        this(null);
+        this(0);
     }
 
-    public Frame(String position){
-        this(position,null,null,null,null,null,null,null,null);
+    public Frame(long length){
+        this(length,0,null,null,null,null,null,null,null,null);
     }
 
-    public Frame(String position,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
+    public Frame(long length,long position,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding){
         this.from=null;
         this.position=position;
+        this.length=length;
         this.to=to;
         this.format=format;
         this.unique=unique;
@@ -63,7 +65,7 @@ public final class Frame implements Label{
         return this;
     }
 
-    public Frame setPosition(String position){
+    public Frame setPosition(long position){
         this.position=position;
         return this;
     }
@@ -73,12 +75,15 @@ public final class Frame implements Label{
     }
 
     public boolean isTerminal(){
-        String position=this.position;
-        return null==position||position.isEmpty();
+        return this.position==this.length;
     }
 
-    public String getPosition() {
+    public long getPosition() {
         return position;
+    }
+
+    public long getLength() {
+        return length;
     }
 
     public String getFormat() {
@@ -120,7 +125,7 @@ public final class Frame implements Label{
         return def;
     }
 
-    private Frame put(JSONObject json,String key,String value){
+    private Frame put(JSONObject json,String key,Object value){
         if (null!=json&&null!=key&&null!=value){
             try {
                 json.put(key,value);
@@ -136,7 +141,7 @@ public final class Frame implements Label{
         JSONObject json=new JSONObject();
         put(json,LABEL_ACCESS,access).put(json,LABEL_FORMAT,format).put(json,LABEL_ENCODING,encoding).
         put(json,LABEL_VERSION,version).put(json,LABEL_UNIQUE,unique).put(json,LABEL_KEY,key)
-                .put(json,LABEL_TO,to).put(json,LABEL_POSITION, position);
+                .put(json,LABEL_TO,to).put(json,LABEL_POSITION, position).put(json,LABEL_LENGTH, length);
         String headText=null!=json&&json.length()>0?json.toString():null;
         try {
             byte[] headBytes=null!=headText&&headText.length()>0?headText.getBytes("utf-8"):null;
@@ -176,7 +181,7 @@ public final class Frame implements Label{
                     }
                     byte[] body=bodyStartIndex<=length?Arrays.copyOfRange(buffer,bodyStartIndex,length):null;
                     if (null!=headJson&&headJson.length()>0){
-                        frame=new Frame(headJson.optString(LABEL_POSITION),headJson.optString(LABEL_TO),headJson.optString(LABEL_FORMAT),
+                        frame=new Frame(headJson.optLong(LABEL_LENGTH),headJson.optLong(LABEL_POSITION),headJson.optString(LABEL_TO),headJson.optString(LABEL_FORMAT),
                                 headJson.optString(LABEL_UNIQUE),headJson.optString(LABEL_KEY),body,
                                 headJson.optString(LABEL_VERSION),headJson.optString(LABEL_ACCESS),null);
                     }else{

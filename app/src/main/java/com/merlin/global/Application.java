@@ -42,14 +42,21 @@ public class Application extends android.app.Application implements ActivityLife
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
+                mSocket.downloadFile("./生日歌.mp3", null, new OnResponse() {
                     @Override
                     public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-                        Debug.D(getClass(),"SSS "+what+ " "+note+" "+(null!=response?response.getBodyText(null):null));
-                        new Handler(Looper.getMainLooper()).postDelayed(()->{test(null!=response?response.getUnique():null);},4000);
+                        Debug.D(getClass(),"达到  "+(null!=response?""+response.isTerminal():" 达到 扯淡"));
                         return null;
                     }
-                },null);
+                },"test.");
+//                mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
+//                    @Override
+//                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+//                        Debug.D(getClass(),"SSS "+what+ " "+note+" "+(null!=response?response.getBodyText(null):null));
+//                        new Handler(Looper.getMainLooper()).postDelayed(()->{test(null!=response?response.getUnique():null);},4000);
+//                        return null;
+//                    }
+//                },null);
 //                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
             }
         }, 5000);
