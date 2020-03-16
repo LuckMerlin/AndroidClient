@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Socket {
@@ -176,21 +177,18 @@ public class Socket {
                 return null;
             }
             final boolean isDirectory=file.isDirectory();
-            final JsonObject json=new JsonObject().put(Label.LABEL_MODE,Label.LABEL_UPLOAD).put(Label.LABEL_PARENT,folder).put(Label.LABEL_NAME,name);
-//            long length,long position,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding
-            Frame frame=null;
-            if (isDirectory){
-                json.put(Label.LABEL_FOLDER, Label.LABEL_FOLDER);
-                frame=createTextFrame(json.toString(),toAccount,generateUnique("UploadFileFromAndroid"),debug);
-            }else{
-                frame=new Frame();
-            }
+            JsonObject json=new JsonObject().put(Label.LABEL_MODE,Label.LABEL_UPLOAD).put(Label.LABEL_PARENT,folder).put(Label.LABEL_NAME,name);
+            json=isDirectory?json.put(Label.LABEL_FOLDER, Label.LABEL_FOLDER):json;
+            Frame frame=createTextFrame(json.toString(),toAccount, generateUnique("UploadFileFromAndroid"),debug);
             if (null==frame){
                 Debug.W(getClass(),"Can't upload file which create frame failed "+(null!=debug?debug:"."));
                 return null;
             }
             return sendFrame(frame,( what, note, requestFrame, response, arg)->{
+                    if (what == What.WHAT_SUCCEED){
 
+                    }
+                    Debug.D(getClass(),"AAA "+(null!=response?response.getBodyText():null));
                     return null;
             },debug);
         }

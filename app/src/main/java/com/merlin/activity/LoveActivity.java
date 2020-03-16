@@ -13,6 +13,7 @@ public class LoveActivity extends ModelActivity<LoveModel> {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setModelContentView(R.layout.activity_love);
+        FileBrowserActivity.checkPermission(this);
     }
 
 }

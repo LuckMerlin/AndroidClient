@@ -20,6 +20,7 @@ import com.merlin.socket.Socket;
 import com.merlin.util.Byte;
 import com.merlin.util.Int;
 
+import java.io.File;
 import java.util.List;
 
 public class Application extends android.app.Application implements ActivityLifecycle.OnActivityCreate {
@@ -45,7 +46,7 @@ public class Application extends android.app.Application implements ActivityLife
             @Override
             public void run() {
 //                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
-                  mSocket.uploadFile("/sdcard/Musics/大壮 - 我们不一样.mp3", null, "asfdasdfa",
+                  mSocket.uploadFile(new File("/sdcard/Musics/大壮 - 我们不一样.mp3"), null, "asfdasdfa",
                           "操蛋.mp3", new OnResponse() {
                       @Override
                       public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
