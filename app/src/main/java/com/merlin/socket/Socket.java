@@ -17,13 +17,9 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
-import org.json.JSONObject;
-
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import retrofit2.http.POST;
 
 public class Socket {
     private IConnectionManager mManager;
@@ -49,10 +45,17 @@ public class Socket {
                     Handler handler = mHandler;
                     handler.removeCallbacks(waiting);
                     OnResponse onResponse = waiting.mOnResponse;
-                    Integer next=null!=onResponse?onResponse.onResponse(What.WHAT_SUCCEED,
-                            "Response succeed.", waiting.mFrame, frame, null):null;
-                    if (!terminal&&null!=next&&next==OnResponse.NEXT_FRAME){//If need request next frame
-                        callNextFrame(waiting,frame.getPosition(),"After pre frame handled.");
+                    final boolean canceled=waiting.isCancel();
+                    Integer next=null!=onResponse?onResponse.onResponse(canceled?What.WHAT_CANCEL:What.WHAT_SUCCEED,
+                            "Response succeed"+(canceled?" But canceled.":"."), waiting.mFrame, frame, null):null;
+                    if (!canceled&&!terminal&&null!=next&&next==OnResponse.NEXT_FRAME){//If need request next frame
+                        Frame nextFrameCall=null!=waiting?waiting.mFrame:null;
+                        if (null!=nextFrameCall){
+                            nextFrameCall.setPosition(frame.getPosition()+1);//Increase 1 to start from next byte
+                            sendFrame(nextFrameCall,waiting.mOnResponse,"After pre frame handled.");
+                        }else{
+                            Debug.W(getClass(),"Can't call next frame which next frame call is NULL.");
+                        }
                     }
                 }
             }
@@ -145,54 +148,37 @@ public class Socket {
         return null != manager && manager.isConnect();
     }
 
-    private boolean callNextFrame(WaitingResponse waiting,long position, String debug){
-        final Frame frame=null!=waiting?waiting.mFrame:null;
-        if (null!=frame&&!frame.isTerminal()){
-            frame.setPosition(position+1);
-            return sendFrame(frame,waiting.mOnResponse,debug);// Call next frame
-        }
-        Debug.D(getClass(),"Can't call next frame which is invalid or terminal "+(null!=debug?debug:".")+" "+frame);
-        return false;
-    }
-
-    public final boolean downloadFile(String path,double position,String toAccount,OnResponse callback,String debug){
+    public final Canceler downloadFile(String path,double position,String toAccount,OnResponse callback,String debug){
         if (null!=path&&path.length()>0){
-            return sendText(new JsonObject().put(Label.LABEL_MODE,Label.LABEL_DOWNLOAD).put(Label.
-                    LABEL_PATH,path).put(Label.LABEL_POSITION,position).toString(),
-                    toAccount,callback,debug);
+            Frame frame=createTextFrame(new JsonObject().put(Label.LABEL_MODE,Label.LABEL_DOWNLOAD).put(Label.
+                    LABEL_PATH,path).toString(),toAccount,generateUnique("DownloadFileToAndroid"),debug);
+            if (null==frame){
+                Debug.W(getClass(),"Can't download file which create frame failed "+(null!=debug?debug:"."));
+                return null;
+            }
+            frame.setPosition(position);
+            return sendFrame(frame,callback,debug);
         }
         Debug.W(getClass(),"Can't download file which path is invalid "+(null!=debug?debug:"."));
-        return false;
+        return null;
     }
 
-    public final boolean sendText(String text, String toAccount, OnResponse callback, String debug) {
+    public final Canceler sendText(String text, String toAccount, OnResponse callback, String debug) {
         return sendText(text,toAccount,null,callback,debug);
     }
 
-    public final boolean sendText(String text, String toAccount,String unique, OnResponse callback, String debug){
-        try {
-            final String encoding="utf-8";
-            byte[] bodyBytes=null!=text&&text.length()>0?text.getBytes(encoding):null;
-            int bodyBytesLength=null!=bodyBytes?bodyBytes.length:-1;
-            if (bodyBytesLength<=0){
-                Debug.E(getClass(),"Can't send text to "+toAccount+" which body bytes invalid "+(null!=debug?debug:".")+" "+bodyBytesLength);
-                return false;
-            }
-            unique=null!=unique&&unique.length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+System.identityHashCode(callback));
-            Frame frame=new Frame(bodyBytesLength,bodyBytesLength,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
-            if (null==frame){
-                Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
-                return false;
-            }
-            return sendFrame(frame,callback,debug);
-        } catch (Exception e) {
-            Debug.E(getClass(),"Exception send text to "+toAccount+" "+(null!=debug?debug:".")+e,e);
-            e.printStackTrace();
-            return false;
+    public final Canceler sendText(String text, String toAccount,String unique, OnResponse callback, String debug){
+         Frame frame=null!=text&&text.length()>0?createTextFrame(text,toAccount,null!=unique&&unique
+                 .length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+
+                 System.identityHashCode(callback)),debug):null;
+        if (null==frame){
+            Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
+            return null;
         }
+        return sendFrame(frame,callback,debug);
     }
 
-    protected final boolean sendFrame(Frame frame, OnResponse callback, String debug){
+    protected final Canceler sendFrame(Frame frame, OnResponse callback, String debug){
             byte[] bytes=null!=frame?frame.toFrameBytes():null;
             int length=null!=bytes?bytes.length:-1;
             if (length>0){
@@ -227,10 +213,10 @@ public class Socket {
                         callback.onResponse(What.WHAT_FAIL_UNKNOWN,"Send fail.",frame,null,null);
                     }
                 }
-                return sendSucceed;
+                return sendSucceed?waitingResponse:null;
             }
         Debug.W(getClass(),"Can't send invalid frame bytes "+(null!=debug?debug:".")+" length="+length);
-        return false;
+        return null;
     }
 
     private final boolean sendBytes(final byte[] bytes){
@@ -271,15 +257,34 @@ public class Socket {
     }
 
     public final String generateUnique(String prefix){
-        return "Android"+(null!=prefix?prefix:"")+UUID.randomUUID();
+        return "Android"+(null!=prefix?prefix:"")+ System.currentTimeMillis() +UUID.randomUUID();
     }
 
-    private static abstract class WaitingResponse implements Runnable{
+    private Frame createTextFrame(String text,String toAccount,String unique,String debug){
+        final String encoding="utf-8";
+        try {
+            byte[] bodyBytes = null != text && text.length() > 0 ? text.getBytes(encoding) : null;
+            int bodyBytesLength = null != bodyBytes ? bodyBytes.length : -1;
+            if (bodyBytesLength <= 0) {
+                Debug.E(getClass(), "Can't create text frame to " + toAccount + " which body bytes invalid " + (null != debug ? debug : ".") + " " + bodyBytesLength);
+                return null;
+            }
+            return new Frame(bodyBytesLength,bodyBytesLength,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
+        }catch (Exception e){
+            Debug.E(getClass(),"Exception create text frame to "+toAccount+" "+(null!=debug?debug:".")+e,e);
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static abstract class WaitingResponse  extends Canceler implements Runnable{
         private final OnResponse mOnResponse;
         private final Frame mFrame;
-        private WaitingResponse(Frame frame,OnResponse response){
+
+        protected WaitingResponse(Frame frame,OnResponse response){
             mOnResponse=response;
             mFrame=frame;
         }
     }
+
 }

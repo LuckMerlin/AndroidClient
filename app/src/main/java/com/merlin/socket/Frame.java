@@ -22,8 +22,8 @@ public final class Frame implements Label{
     private final String from;
     private byte[] body;
     private final String to;
-    private long position;
-    private final long length;
+    private double position;
+    private long length;
     public final static int LENGTH_BYTES_SIZE=4;
 
     public Frame(){
@@ -65,9 +65,19 @@ public final class Frame implements Label{
         return this;
     }
 
-    public Frame setPosition(long position){
+    public Frame setPosition(double position){
         this.position=position;
         return this;
+    }
+//
+//    protected Frame setLength(long length){
+//        this.length=length;
+//        return this;
+//    }
+
+    public boolean isFormat(String format){
+        String currFormat=this.format;
+        return null!=format&&null!=currFormat&&format.equals(currFormat);
     }
 
     public String getFrom() {
@@ -75,11 +85,10 @@ public final class Frame implements Label{
     }
 
     public boolean isTerminal(){
-        Debug.D(getClass(),"aaa "+this.position+" "+this.length);
         return this.position==this.length;
     }
 
-    public long getPosition() {
+    public double getPosition() {
         return position;
     }
 
@@ -105,6 +114,10 @@ public final class Frame implements Label{
 
     public String getAccess() {
         return access;
+    }
+
+    public String getBodyText(){
+        return getBodyText(null);
     }
 
     public String getBodyText(String def){
