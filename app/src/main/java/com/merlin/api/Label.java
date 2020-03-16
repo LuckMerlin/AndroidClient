@@ -39,4 +39,5 @@ public interface Label{
    String  LABEL_ENCODING="encoding";
    String  LABEL_TERMINAL="terminal";
    String  LABEL_DOWNLOAD="download";
+   String  LABEL_UPLOAD="upload";
 }

@@ -44,19 +44,34 @@ public class Application extends android.app.Application implements ActivityLife
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSocket.downloadFile("./生日歌.mp3", 0f,null, new OnResponse() {
-                    @Override
-                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-                        if (null!=response){
-                            byte[] body=response.getBody();
-                            Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
+//                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
+                  mSocket.uploadFile("/sdcard/Musics/大壮 - 我们不一样.mp3", null, "asfdasdfa",
+                          "操蛋.mp3", new OnResponse() {
+                      @Override
+                      public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+                          if (null!=response){
+                                byte[] body=response.getBody();
+                                Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
                                     (response.isFormat(Frame.FORMAT_TEXT)?response.getBodyText():"")
                                     +" "+(null!=body?body.length:-1)+" \n");
-                            return NEXT_FRAME;
-                        }
-                        return null;
-                    }
-                },"test.");
+                                return NEXT_FRAME;
+                            }
+                          return null;
+                      }
+                  }, null);
+//                mSocket.downloadFile("./生日歌.mp3", 0f,null, new OnResponse() {
+//                    @Override
+//                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+//                        if (null!=response){
+//                            byte[] body=response.getBody();
+//                            Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
+//                                    (response.isFormat(Frame.FORMAT_TEXT)?response.getBodyText():"")
+//                                    +" "+(null!=body?body.length:-1)+" \n");
+//                            return NEXT_FRAME;
+//                        }
+//                        return null;
+//                    }
+//                },"test.");
 //                mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
 //                    @Override
 //                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {

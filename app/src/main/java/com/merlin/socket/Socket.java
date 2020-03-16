@@ -17,6 +17,8 @@ import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions;
 import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -160,6 +162,34 @@ public class Socket {
             return sendFrame(frame,callback,debug);
         }
         Debug.W(getClass(),"Can't download file which path is invalid "+(null!=debug?debug:"."));
+        return null;
+    }
+
+    public final Canceler uploadFile(File file,String toAccount,String folder,String name,OnResponse callback,String debug){
+        if (null!=file&&null!=name&&name.length()>0){
+            if (!file.exists()){
+                Debug.W(getClass(),"Can't upload file which file not exist "+(null!=debug?debug:".")+" "+file);
+                return null;
+            }
+            final boolean isDirectory=file.isDirectory();
+            final JsonObject json=new JsonObject().put(Label.LABEL_MODE,Label.LABEL_UPLOAD).put(Label.LABEL_PARENT,folder).put(Label.LABEL_NAME,name);
+            Frame frame=null;
+            if (isDirectory){
+                json.put(Label.LABEL_FOLDER, Label.LABEL_FOLDER);
+                frame=createTextFrame(json.toString(),toAccount,generateUnique("UploadFileFromAndroid"),debug);
+            }else{
+                frame=new Frame();
+            }
+            if (null==frame){
+                Debug.W(getClass(),"Can't upload file which create frame failed "+(null!=debug?debug:"."));
+                return null;
+            }
+            return sendFrame(frame,( what, note, requestFrame, response, arg)->{
+
+                    return null;
+            },debug);
+        }
+        Debug.W(getClass(),"Can't upload file which path or name is invalid "+(null!=debug?debug:"."));
         return null;
     }
 
