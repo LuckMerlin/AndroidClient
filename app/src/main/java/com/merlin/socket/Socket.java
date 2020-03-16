@@ -171,8 +171,13 @@ public class Socket {
                 Debug.W(getClass(),"Can't upload file which file not exist "+(null!=debug?debug:".")+" "+file);
                 return null;
             }
+            if(!file.canRead()){
+                Debug.W(getClass(),"Can't upload file which file none permission "+(null!=debug?debug:"."));
+                return null;
+            }
             final boolean isDirectory=file.isDirectory();
             final JsonObject json=new JsonObject().put(Label.LABEL_MODE,Label.LABEL_UPLOAD).put(Label.LABEL_PARENT,folder).put(Label.LABEL_NAME,name);
+//            long length,long position,String to,String format,String unique,String key,byte[] body,String version,String access,String encoding
             Frame frame=null;
             if (isDirectory){
                 json.put(Label.LABEL_FOLDER, Label.LABEL_FOLDER);
