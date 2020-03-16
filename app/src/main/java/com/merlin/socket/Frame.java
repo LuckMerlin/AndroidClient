@@ -1,5 +1,6 @@
 package com.merlin.socket;
 
+import com.google.gson.Gson;
 import com.merlin.api.Label;
 import com.merlin.debug.Debug;
 import com.merlin.util.Int;
@@ -114,6 +115,19 @@ public final class Frame implements Label{
 
     public String getAccess() {
         return access;
+    }
+
+    public<T> T getBodyData(Class<T> cls,T def){
+        if (null!=cls&&!cls.isInterface()&&!cls.isArray()&&!cls.isEnum()&&!cls.isAnnotation()
+        &&!cls.isAnonymousClass()){
+            String bodyText=getBodyText();
+            bodyText=null!=bodyText&&bodyText.length()>0?bodyText.trim():null;
+            Object bodyJson=null!=bodyText&&bodyText.length()>2&&bodyText.startsWith("{")
+                    &&bodyText.endsWith("}")? bodyText:null;
+            Class currentClass=null!=bodyJson?bodyJson.getClass():null;
+            return null!=currentClass&&currentClass.isAssignableFrom(cls)?(T)bodyJson:null;
+        }
+        return def;
     }
 
     public String getBodyText(){

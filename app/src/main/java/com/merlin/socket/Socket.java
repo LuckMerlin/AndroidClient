@@ -6,6 +6,8 @@ import android.os.Looper;
 import com.merlin.api.JsonObject;
 import com.merlin.api.Label;
 import com.merlin.api.What;
+import com.merlin.bean.FileMeta;
+import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 import com.merlin.util.Int;
 import com.xuhao.didi.core.iocore.interfaces.IPulseSendable;
@@ -185,10 +187,7 @@ public class Socket {
                 return null;
             }
             return sendFrame(frame,( what, note, requestFrame, response, arg)->{
-                    if (what == What.WHAT_SUCCEED){
-
-                    }
-                    Debug.D(getClass(),"AAA "+(null!=response?response.getBodyText():null));
+                    Debug.D(getClass(),"AAA "+what+" "+(null!=response?response.getBodyData(NasFile.class,null):null));
                     return null;
             },debug);
         }
