@@ -1,6 +1,8 @@
 package com.merlin.socket;
 
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
+import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.NasFile;
@@ -14,43 +16,42 @@ import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
 public abstract class FileUploader implements OnResponse{
-    private final File mFile;
     private final Frame mFrame;
     private FileReader mFileReader;
     private final byte[] mBuffer=new byte[1024*1024];
+    private final OnResponse mCallback;
+    private Canceler mCanceler;
 
-    protected FileUploader(File file,Frame frame){
-        mFile=file;
+    protected FileUploader(File file,Frame frame,OnResponse callback){
         mFrame=frame;
+        mCallback=callback;
+        try {
+            mFileReader=new FileReader(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     protected abstract Canceler onFrameSend(Frame frame,String debug);
 
     @Override
     public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+        Debug.D(getClass(),"回应 "+what+" "+note);
         if (what == What.WHAT_SUCCEED){
-//            response.getData(new TypeToken<Reply<NasFile>>(){}.getType(),null);
-//            Object nasFile=null!=response?response.getData<NasFile>(Reply,null):null;
-            Debug.D(getClass(),"AAAAAAAAAAAAAAAAAAA "+response.getDataReply(NasFile.class,null));
-            long length=-1;//null!=nasFile?nasFile.getLength():-1;
-            if (length<=0){ //If empty or not exist,Just continue to upload it
-//                try {
-//                    mFileReader=new FileReader(mFile);
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                }
-//                FileReader fileReader=mFileReader;
-//                final Frame serverFrame=mFrame;
-//                long fileLength=fileReader.getSize();
-//                long offset=(long)frame.getPosition();
-//                byte[] bytes=null!=fileReader?fileReader.read(offset, mBuffer):null;
-//                int bytesLength=null!=bytes?bytes.length:0;
-//                if (bytesLength>0){
-//                    Frame responseFrame=new Frame(fileLength,offset+bytesLength,serverFrame.getTo(),
-//                            serverFrame.getUnique(),null,serverFrame.getData(),mBuffer,null,null,null);
-//                     Debug.D(getClass(),"读取到 "+offset+" "+bytesLength);
-//                     onFrameSend(responseFrame,null);
-//                 }
+            final Frame serverFrame=mFrame;
+            if (null!=serverFrame){
+                Reply reply=response.getDataReply();
+                Object object=null!=reply?reply.getData():null;
+                long currentPosition=((long)(null!=object&&object instanceof Double?(Double) object:0));
+                Debug.D(getClass(),"AAA "+currentPosition);
+                FileReader reader=mFileReader;
+                byte[] buffer=null!=reader?reader.read(currentPosition,mBuffer):null;
+                int readCount=null!=buffer?buffer.length:0;
+                Frame bytesFrame=readCount>0?new Frame(reader.getSize(),currentPosition+readCount,serverFrame.getTo(),
+                        serverFrame.getUnique(),null,serverFrame.getData(),buffer,null,null,null):null;
+                if (null!=bytesFrame&&null!=(mCanceler=onFrameSend(bytesFrame,null))){
+                    return NEXT_FRAME;
+                }
             }
         }
         return null;

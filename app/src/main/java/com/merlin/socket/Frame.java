@@ -1,6 +1,7 @@
 package com.merlin.socket;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
@@ -13,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public final class Frame implements Label{
@@ -106,16 +108,16 @@ public final class Frame implements Label{
         return access;
     }
 
-    public<T> T getDataReply(Class<T> cls, T def){
-        if (null!=cls&&!cls.isInterface()&&!cls.isArray()&&!cls.isEnum()&&!cls.isAnnotation() &&!cls.isAnonymousClass()){
+    public  Reply getDataReply(){
+        try {
             String dataText=getData();
             dataText=null!=dataText&&dataText.length()>0?dataText.trim():null;
-            if (null!=dataText&&dataText.length()>2&&dataText.startsWith("{")&&dataText.endsWith("}")){
-                Reply<T> dd=new Gson().fromJson(dataText, new TypeToken<Reply<NasFile>>(){}.getType());
-                Debug.D(getClass(),"AAA "+dd.getData().getClass());
-            }
+            return null!=dataText&&dataText.length()>2&&dataText.startsWith("{")&&dataText.endsWith("}")?
+                    new Gson().fromJson(dataText, Reply.class):null;
+        }catch (Exception e){
+            Debug.E(getClass(),"E"+e,e);
         }
-        return def;
+        return null;
     }
 
     public String getData(){

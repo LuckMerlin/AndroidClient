@@ -187,7 +187,7 @@ public class Socket {
                 Debug.W(getClass(),"Can't upload file which create frame failed "+(null!=debug?debug:"."));
                 return null;
             }
-            return sendFrame(frame,new FileUploader(file,frame){
+            return sendFrame(frame,new FileUploader(file,frame,callback){
                 @Override
                 protected Canceler onFrameSend(Frame frame,String debug) {
                     return sendFrame(frame,this,debug);
@@ -241,6 +241,7 @@ public class Socket {
                         });
                     }
                 }
+                Debug.D(getClass(),"************发送  "+frame.getData());
                 boolean sendSucceed=sendBytes(bytes);
                 if(null!=waitingResponse&&null!=unique){
                     if (sendSucceed){
