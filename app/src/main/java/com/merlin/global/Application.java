@@ -44,14 +44,14 @@ public class Application extends android.app.Application implements ActivityLife
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mSocket.downloadFile("./生日歌.mp3", 0f, null, new OnResponse() {
-                    @Override
-                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-                        Debug.D(getClass()," "+Thread.currentThread().getName()+" "+
-                                (null!=response?response.getBody():null)+" "+response.isTerminal());
-                        return NEXT_FRAME;
-                    }
-                },"");
+//                mSocket.downloadFile("./生日歌.mp3", 0f, null, new OnResponse() {
+//                    @Override
+//                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+//                        Debug.D(getClass()," "+Thread.currentThread().getName()+" "+
+//                                (null!=response?response.getBody():null)+" "+response.isTerminal());
+//                        return NEXT_FRAME;
+//                    }
+//                },"");
 ////                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
 //                  mSocket.uploadFile(new File("/sdcard/Musics/大壮 - 我们不一样.mp3"), null, "asfdasdfa",
 //                          "操蛋.mp3", new OnResponse() {
