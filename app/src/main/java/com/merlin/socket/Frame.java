@@ -1,28 +1,23 @@
 package com.merlin.socket;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.api.What;
+import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
+import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Int;
-import com.merlin.util.Text;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public final class Frame implements Label{
-    public final static String FORMAT_TEXT="text";
-    public final static String FORMAT_BYTES="bytes";
     private final String data;
     private final String access;
-    private final String format;
     private final String encoding;
     private final String version;
     private final String unique;
@@ -39,17 +34,16 @@ public final class Frame implements Label{
     }
 
     public Frame(long length){
-        this(length,0,null,null,null,null,null,null,null,null,null);
+        this(length,0,null,null,null,null,null,null,null,null);
     }
 
-    public Frame(long length,long position,String to,String format,String unique,String key,String
+    public Frame(long length,long position,String to,String unique,String key,String
             data,byte[] body,String version,String access,String encoding){
         this.from=null;
         this.data=data;
         this.position=position;
         this.length=length;
         this.to=to;
-        this.format=format;
         this.unique=unique;
         this.key=key;
         this.body=body;
@@ -75,19 +69,9 @@ public final class Frame implements Label{
         return this;
     }
 
-    public Frame setPosition(double position){
+    protected Frame setPosition(double position){
         this.position=position;
         return this;
-    }
-//
-//    protected Frame setLength(long length){
-//        this.length=length;
-//        return this;
-//    }
-
-    public boolean isFormat(String format){
-        String currFormat=this.format;
-        return null!=format&&null!=currFormat&&format.equals(currFormat);
     }
 
     public String getFrom() {
@@ -106,10 +90,6 @@ public final class Frame implements Label{
         return length;
     }
 
-    public String getFormat() {
-        return format;
-    }
-
     public String getUnique() {
         return unique;
     }
@@ -126,16 +106,13 @@ public final class Frame implements Label{
         return access;
     }
 
-    public<T> T getData(Class<T> cls, T def){
+    public<T> T getDataReply(Class<T> cls, T def){
         if (null!=cls&&!cls.isInterface()&&!cls.isArray()&&!cls.isEnum()&&!cls.isAnnotation() &&!cls.isAnonymousClass()){
             String dataText=getData();
             dataText=null!=dataText&&dataText.length()>0?dataText.trim():null;
             if (null!=dataText&&dataText.length()>2&&dataText.startsWith("{")&&dataText.endsWith("}")){
-//                Gson gson = new GsonBuilder()
-//                        .enableComplexMapKeySerialization() //支持Map的key为复杂对象的形式
-//                        .create();
-//                Reply reply=gson.fromJson(bodyText,new TypeToken<Reply<T>>() {}.getType());
-//                Object ddd=reply.getData();
+                Reply<T> dd=new Gson().fromJson(dataText, new TypeToken<Reply<NasFile>>(){}.getType());
+                Debug.D(getClass(),"AAA "+dd.getData().getClass());
             }
         }
         return def;
@@ -178,7 +155,7 @@ public final class Frame implements Label{
 
     public byte[] toFrameBytes(){
         JSONObject json=new JSONObject();
-        put(json,LABEL_ACCESS,access).put(json,LABEL_FORMAT,format).put(json,LABEL_ENCODING,encoding).
+        put(json,LABEL_ACCESS,access).put(json,LABEL_ENCODING,encoding).
         put(json,LABEL_VERSION,version).put(json,LABEL_UNIQUE,unique).put(json,LABEL_KEY,key).put(json,LABEL_DATA,data)
                 .put(json,LABEL_TO,to).put(json,LABEL_POSITION, position).put(json,LABEL_LENGTH, length);
         String headText=null!=json&&json.length()>0?json.toString():null;
@@ -221,8 +198,7 @@ public final class Frame implements Label{
                     byte[] body=bodyStartIndex<=length?Arrays.copyOfRange(buffer,bodyStartIndex,length):null;
                     if (null!=headJson&&headJson.length()>0){
                         frame=new Frame(headJson.optLong(LABEL_LENGTH),headJson.optLong(LABEL_POSITION),headJson.optString(LABEL_TO),
-                                headJson.optString(LABEL_FORMAT),headJson.optString(LABEL_UNIQUE),
-                                headJson.optString(LABEL_KEY),headJson.optString(LABEL_DATA),body,
+                                headJson.optString(LABEL_UNIQUE),headJson.optString(LABEL_KEY),headJson.optString(LABEL_DATA),body,
                                 headJson.optString(LABEL_VERSION),headJson.optString(LABEL_ACCESS),null);
                     }else{
                         frame=new Frame().setBody(body);

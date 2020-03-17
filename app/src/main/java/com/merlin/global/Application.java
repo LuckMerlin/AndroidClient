@@ -52,21 +52,20 @@ public class Application extends android.app.Application implements ActivityLife
 //                        return NEXT_FRAME;
 //                    }
 //                },"");
-////                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
-//                  mSocket.uploadFile(new File("/sdcard/Musics/大壮 - 我们不一样.mp3"), null, "asfdasdfa",
-//                          "操蛋.mp3", new OnResponse() {
-//                      @Override
-//                      public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-//                          if (null!=response){
-//                                byte[] body=response.getBody();
-//                                Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
-//                                    (response.isFormat(Frame.FORMAT_TEXT)?response.getBodyText():"")
-//                                    +" "+(null!=body?body.length:-1)+" \n");
-//                                return NEXT_FRAME;
-//                            }
-//                          return null;
-//                      }
-//                  }, null);
+//                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
+                  mSocket.uploadFile(new File("/sdcard/Musics/大壮 - 我们不一样.mp3"), null, "asfdasdfa",
+                          "操蛋.mp3", new OnResponse() {
+                      @Override
+                      public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+                          if (null!=response){
+                                byte[] body=response.getBody();
+                                Debug.D(getClass(),"%% "+response.isTerminal()+"\n"
+                                    +" "+(null!=body?body.length:-1)+" \n");
+                                return NEXT_FRAME;
+                            }
+                          return null;
+                      }
+                  }, null);
 ////                mSocket.downloadFile("./生日歌.mp3", 0f,null, new OnResponse() {
 ////                    @Override
 ////                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {

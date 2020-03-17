@@ -207,7 +207,7 @@ public class Socket {
         if (length<=0){
             return null;
         }
-        Frame frame=createTextFrame(text,toAccount,null!=unique&&unique.length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+
+        Frame frame=createTextFrame(text,toAccount,null!=unique&&unique.length()>0?unique:generateUnique("TextFromAndroid"+System.identityHashCode(text)+
                 System.identityHashCode(callback)),debug);
         if (null==frame){
             Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
@@ -304,7 +304,7 @@ public class Socket {
             Debug.W(getClass(),"Can't create text frame "+(null!=debug?debug:"."));
             return null;
         }
-        return new Frame(length,length,toAccount, Frame.FORMAT_TEXT,null!=unique&&unique.length()>0?unique:
+        return new Frame(length,length,toAccount,null!=unique&&unique.length()>0?unique:
                 generateUnique("TextFrameFromAndroid"),null,text,null,null,null,null);
     }
 
