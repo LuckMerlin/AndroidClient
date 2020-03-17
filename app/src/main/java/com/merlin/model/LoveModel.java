@@ -1,5 +1,6 @@
 package com.merlin.model;
 
+import android.os.Bundle;
 import android.view.View;
 
 import com.merlin.activity.LoveDetailActivity;
@@ -10,6 +11,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.SectionData;
+import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
 import com.merlin.server.Retrofit;
@@ -24,10 +26,15 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public class LoveModel  extends Model implements OnTapClick,Label {
+
     private interface Api{
         @POST(Address.PREFIX_LOVE+"/get")
         @FormUrlEncoded
-        Observable<Reply<ApiList<Love>>> getLoves(@Field(LABEL_NAME) String NAME);
+        Observable<Reply<ApiList<Love>>> getLoves(@Field(LABEL_NAME) String name);
+
+        @POST(Address.PREFIX_LOVE+"/delete")
+        @FormUrlEncoded
+        Observable<Reply> delete(@Field(LABEL_ID) String id);
     }
 
     private final LoveAdapter mAdapter=new LoveAdapter() {
@@ -35,15 +42,31 @@ public class LoveModel  extends Model implements OnTapClick,Label {
         protected Retrofit.Canceler onPageLoad(String arg, int page, OnApiFinish<Reply<SectionData<Love>>> finish) {
             return call(prepare(Api.class).getLoves(null),finish);
         }
+
+        @Override
+        public void onItemSlideRemoved(int position, Object data) {
+            Love love = null != data && data instanceof Love ? (Love) data : null;
+            if (null != love) {
+                long id=null!=data&&data instanceof Love?((Love)data).getId():null;
+                if (null==call(prepare(Api.class).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
+                     if (what!= What.WHAT_SUCCEED){
+                         add(position,love);
+                     }
+                })){
+                    add(position,love);
+                }
+            }
+        }
     };
 
     public LoveModel(){
-//        mAdapter.loadPage(null,"While model create.");
         Collection<Love> list=new ArrayList<>();
-        list.add(new Love());
-        list.add(new Love());
-        list.add(new Love());
-        list.add(new Love());
+        list.add(new Love(0,"我们","吴小花是一个美女"));
+        list.add(new Love(0,"我们","吴小花是一个美女"));
+        list.add(new Love(0,"我们","吴小花是一个美女"));
+        list.add(new Love(0,"我们","吴小花是一个美女"));
+        list.add(new Love(0,"我们","吴小花是一个美女"));
+        list.add(new Love(0,"我们","吴小花是一个美女"));
         mAdapter.setData(list);
     }
 
@@ -58,8 +81,11 @@ public class LoveModel  extends Model implements OnTapClick,Label {
 
     private boolean onSingleTap(View view,int resId,Object data){
         switch (resId){
+            case R.id.item_love:
+                Long id=null!=data&&data instanceof Love?((Love)data).getId():null;
+                return startActivityWithBundle(LoveDetailActivity.class,Label.LABEL_ID,null!=id?Long.toString(id):null);
             case R.string.add:
-                return startActivity(LoveDetailActivity.class);
+                return startActivityWithBundle(LoveDetailActivity.class,Label.LABEL_ID,null);
         }
         return false;
     }

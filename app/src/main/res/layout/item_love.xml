@@ -9,15 +9,39 @@
             name="position"
             type="int" />
         <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.bean.Love"/>
+        <import type="android.graphics.Color"/>
+        <import type="com.merlin.util.Time"/>
     </data>
     <LinearLayout
+        android:id="@+id/item_love"
+        binding:enableClick="@{Clicker.click(love)}"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:background="#f00"
-        android:padding="@dimen/contentGap"
+        android:background="@{love.mode==Love.MODE_CANCELED?Color.argb(150,0,0,0):Color.TRANSPARENT}"
+        android:layout_margin="3dp"
         android:layout_height="@dimen/listItemSizeLessMedium">
         <TextView
             android:text="@{``+position}"
+            android:layout_gravity="center_vertical"
             style="@style/titleNormalTextView"/>
+        <LinearLayout
+            android:layout_marginLeft="5dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{love.name}"
+                style="@style/titleNormalTextView"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_marginLeft="3dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+                <TextView
+                    android:text="@{Time.formatTime(love.time)}"
+                    style="@style/titleSmallTextView"/>
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 </layout>

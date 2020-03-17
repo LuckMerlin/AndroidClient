@@ -12,6 +12,8 @@
             binding:createModel="@{true}"
             android:orientation="vertical"
             binding:statusBar="@{StatusBar.statusBar(null,R.string.love,R.string.add)}"
+            android:background="@drawable/round_corner_gray"
+            android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         <FrameLayout

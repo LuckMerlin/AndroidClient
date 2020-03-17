@@ -75,16 +75,6 @@ public class TransportService extends Service  implements Callback {
         return super.onStartCommand(intent, flags, startId);
     }
 
-//    private boolean add(AbsTransport transport, boolean interactive, String debug){
-//        Transporter transporter=null!=transport?mTransporter:null;
-//        return null!=transporter&&transporter.add(transport,interactive,null,debug);
-//    }
-//
-//    private boolean remove(AbsTransport transport, String debug){
-//        Transporter transporter=null!=transport?mTransporter:null;
-//        return null!=transporter&&transporter.add(transport,interactive,null,debug);
-//    }
-
     private boolean upload(String filePath,String folder,String name,boolean interactive,int coverMode,ClientMeta client,String debug){
         if (null!=filePath&&filePath.length()>0&&null!=client){
             return run(TRANSPORT_ADD,interactive,debug,new Upload(filePath,folder,name,client,coverMode));
@@ -94,7 +84,6 @@ public class TransportService extends Service  implements Callback {
 
     private boolean download(CharSequence path,String folder,boolean interactive,int coverMode,ClientMeta client,String debug){
         if (null!=path&&path.length()>0){
-
             return false;
         }
         return false;

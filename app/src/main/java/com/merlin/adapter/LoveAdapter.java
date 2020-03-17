@@ -15,7 +15,8 @@ import com.merlin.client.databinding.ItemLoveBinding;
 
 import java.util.List;
 
-public abstract class LoveAdapter extends MultiSectionAdapter<String,Love,SectionData<Love>> {
+public abstract class LoveAdapter extends MultiSectionAdapter<String,Love,SectionData<Love>> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
+    private final ItemSlideRemover mItemSlideRemover=new ItemSlideRemover();
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
@@ -30,11 +31,18 @@ public abstract class LoveAdapter extends MultiSectionAdapter<String,Love,Sectio
         }
     }
 
+
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         LinearLayoutManager lm=new LinearLayoutManager(rv.getContext(),LinearLayoutManager.VERTICAL,false);
         DividerItemDecoration itemDecoration = new DividerItemDecoration(rv.getContext(),lm.getOrientation());
         rv.addItemDecoration(itemDecoration);
+        mItemSlideRemover.setOnItemSlideRemove(this);
         return lm;
+    }
+
+    @Override
+    public Object onResolveItemTouch(RecyclerView recyclerView) {
+        return mItemSlideRemover;
     }
 }

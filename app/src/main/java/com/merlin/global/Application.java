@@ -31,7 +31,7 @@ public class Application extends android.app.Application implements ActivityLife
    public void onCreate() {
         super.onCreate();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
-        mSocket.connect(null,"While application onCreate");
+//        mSocket.connect(null,"While application onCreate");
         test(null);
     }
 
