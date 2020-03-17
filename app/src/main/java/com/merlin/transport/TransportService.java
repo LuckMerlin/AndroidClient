@@ -92,9 +92,10 @@ public class TransportService extends Service  implements Callback {
         return false;
     }
 
-    private boolean download(ArrayList<CharSequence> paths,String folder,boolean interactive,int coverMode,ClientMeta client,String debug){
-        if (null!=paths&&paths.size()>0){
+    private boolean download(CharSequence path,String folder,boolean interactive,int coverMode,ClientMeta client,String debug){
+        if (null!=path&&path.length()>0){
 
+            return false;
         }
         return false;
     }
@@ -112,7 +113,7 @@ public class TransportService extends Service  implements Callback {
             String name=bundle.getString(LABEL_NAME);
             String debug=bundle.getString(LABEL_DEBUG,null);
             boolean interactive=bundle.getBoolean(LABEL_INTERACTIVE,false);
-            return upload(filePath,folder,name,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
+//            return upload(filePath,folder,name,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
         }else if (mode.equals(MODE_DOWNLOAD)){
             String filePath=bundle.getString(LABEL_FILES);
             int coverMode=bundle.getInt(LABEL_COVER_MODE,CoverMode.COVER_MODE_NONE);
@@ -120,8 +121,7 @@ public class TransportService extends Service  implements Callback {
             String folder=bundle.getString(LABEL_FOLDER);
             String debug=bundle.getString(LABEL_DEBUG,null);
             boolean interactive=bundle.getBoolean(LABEL_INTERACTIVE,false);
-//            return download(files,folder,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
-            return false;
+            return download(filePath,folder,interactive,coverMode, null!=client&&client instanceof ClientMeta?((ClientMeta)client):null,debug);
         }
         return false;
     }

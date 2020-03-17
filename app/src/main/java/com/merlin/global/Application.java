@@ -28,60 +28,67 @@ public class Application extends android.app.Application implements ActivityLife
    private final Socket mSocket=new Socket(Address.HOST.replace("http://",""),Address.PORT+1);
 
     @Override
-    public void onCreate() {
+   public void onCreate() {
         super.onCreate();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
-        mSocket.connect(new OnConnectFinish() {
-            @Override
-            public void OnConnectFinish(boolean succeed, int what, Socket socket) {
-                Debug.D(getClass(),"AA OnConnectFinish AA "+succeed+" "+what);
-            }
-        });
+        mSocket.connect(null,"While application onCreate");
         test(null);
     }
 
+   public final static Socket getSocket(Context context){
+       context=null!=context?context.getApplicationContext():null;
+        return null!=context&&context instanceof Application?((Application)context).mSocket:null;
+   }
 
     private void test(String unique){
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-//                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
-                  mSocket.uploadFile(new File("/sdcard/Musics/大壮 - 我们不一样.mp3"), null, "asfdasdfa",
-                          "操蛋.mp3", new OnResponse() {
-                      @Override
-                      public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-                          if (null!=response){
-                                byte[] body=response.getBody();
-                                Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
-                                    (response.isFormat(Frame.FORMAT_TEXT)?response.getBodyText():"")
-                                    +" "+(null!=body?body.length:-1)+" \n");
-                                return NEXT_FRAME;
-                            }
-                          return null;
-                      }
-                  }, null);
-//                mSocket.downloadFile("./生日歌.mp3", 0f,null, new OnResponse() {
-//                    @Override
-//                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-//                        if (null!=response){
-//                            byte[] body=response.getBody();
-//                            Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
+                mSocket.downloadFile("./生日歌.mp3", 0f, null, new OnResponse() {
+                    @Override
+                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+                        Debug.D(getClass()," "+Thread.currentThread().getName()+" "+
+                                (null!=response?response.getBody():null)+" "+response.isTerminal());
+                        return NEXT_FRAME;
+                    }
+                },"");
+////                String localPath,String toAccount,String folder,String name,OnResponse callback,String debug
+//                  mSocket.uploadFile(new File("/sdcard/Musics/大壮 - 我们不一样.mp3"), null, "asfdasdfa",
+//                          "操蛋.mp3", new OnResponse() {
+//                      @Override
+//                      public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+//                          if (null!=response){
+//                                byte[] body=response.getBody();
+//                                Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
 //                                    (response.isFormat(Frame.FORMAT_TEXT)?response.getBodyText():"")
 //                                    +" "+(null!=body?body.length:-1)+" \n");
-//                            return NEXT_FRAME;
-//                        }
-//                        return null;
-//                    }
-//                },"test.");
-//                mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
-//                    @Override
-//                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
-//                        Debug.D(getClass(),"SSS "+what+ " "+note+" "+(null!=response?response.getBodyText(null):null));
-//                        new Handler(Looper.getMainLooper()).postDelayed(()->{test(null!=response?response.getUnique():null);},4000);
-//                        return null;
-//                    }
-//                },null);
-//                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
+//                                return NEXT_FRAME;
+//                            }
+//                          return null;
+//                      }
+//                  }, null);
+////                mSocket.downloadFile("./生日歌.mp3", 0f,null, new OnResponse() {
+////                    @Override
+////                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+////                        if (null!=response){
+////                            byte[] body=response.getBody();
+////                            Debug.D(getClass(),"%% "+response.isTerminal()+"\n"+
+////                                    (response.isFormat(Frame.FORMAT_TEXT)?response.getBodyText():"")
+////                                    +" "+(null!=body?body.length:-1)+" \n");
+////                            return NEXT_FRAME;
+////                        }
+////                        return null;
+////                    }
+////                },"test.");
+////                mSocket.sendText("我爱中国操蛋", null,unique, new OnResponse() {
+////                    @Override
+////                    public Integer onResponse(int what, String note, Frame frame, Frame response, Object arg) {
+////                        Debug.D(getClass(),"SSS "+what+ " "+note+" "+(null!=response?response.getBodyText(null):null));
+////                        new Handler(Looper.getMainLooper()).postDelayed(()->{test(null!=response?response.getUnique():null);},4000);
+////                        return null;
+////                    }
+////                },null);
+////                new Handler(Looper.getMainLooper()).postDelayed(this,4000);
             }
         }, 5000);
     }
@@ -116,7 +123,5 @@ public class Application extends android.app.Application implements ActivityLife
         ActivityLifecycle lifecycle=mActivityLifecycle;
         return null!=lifecycle&&null!=activities&&activities.length>0?lifecycle.finishAllActivity(activities):null;
     }
-
-
 
 }

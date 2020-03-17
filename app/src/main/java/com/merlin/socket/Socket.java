@@ -3,8 +3,10 @@ package com.merlin.socket;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.gson.Gson;
 import com.merlin.api.JsonObject;
 import com.merlin.api.Label;
+import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.NasFile;
@@ -20,10 +22,8 @@ import com.xuhao.didi.socket.client.sdk.client.action.ISocketActionListener;
 import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Socket {
@@ -66,7 +66,7 @@ public class Socket {
             }
     };
 
-    public final synchronized boolean connect(OnConnectFinish change) {
+    public final synchronized boolean connect(OnConnectFinish change,String debug) {
         IConnectionManager currManager = mManager;
         if (null != currManager) {
             Debug.D(getClass(), "Not need connect again while connected.");
@@ -155,8 +155,8 @@ public class Socket {
 
     public final Canceler downloadFile(String path,double position,String toAccount,OnResponse callback,String debug){
         if (null!=path&&path.length()>0){
-            Frame frame=createTextFrame(new JsonObject().put(Label.LABEL_MODE,Label.LABEL_DOWNLOAD).put(Label.
-                    LABEL_PATH,path).toString(),toAccount,generateUnique("DownloadFileToAndroid"),debug);
+            String dataText=new JsonObject().put(Label.LABEL_MODE,Label.LABEL_DOWNLOAD).put(Label.LABEL_PATH,path).toString();
+            Frame frame=createTextFrame(dataText,toAccount,generateUnique("DownloadFileToAndroid"),debug);
             if (null==frame){
                 Debug.W(getClass(),"Can't download file which create frame failed "+(null!=debug?debug:"."));
                 return null;
@@ -181,14 +181,17 @@ public class Socket {
             final boolean isDirectory=file.isDirectory();
             JsonObject json=new JsonObject().put(Label.LABEL_MODE,Label.LABEL_UPLOAD).put(Label.LABEL_PARENT,folder).put(Label.LABEL_NAME,name);
             json=isDirectory?json.put(Label.LABEL_FOLDER, Label.LABEL_FOLDER):json;
-            Frame frame=createTextFrame(json.toString(),toAccount, generateUnique("UploadFileFromAndroid"),debug);
+            String dataText=null!=json?json.toString():null;
+            Frame frame=createTextFrame(dataText,toAccount,generateUnique("UploadFileFromAndroid"),debug);
             if (null==frame){
                 Debug.W(getClass(),"Can't upload file which create frame failed "+(null!=debug?debug:"."));
                 return null;
             }
-            return sendFrame(frame,( what, note, requestFrame, response, arg)->{
-                    Debug.D(getClass(),"AAA "+what+" "+(null!=response?response.getBodyData(NasFile.class,null):null));
-                    return null;
+            return sendFrame(frame,new FileUploader(file,frame){
+                @Override
+                protected Canceler onFrameSend(Frame frame,String debug) {
+                    return sendFrame(frame,this,debug);
+                }
             },debug);
         }
         Debug.W(getClass(),"Can't upload file which path or name is invalid "+(null!=debug?debug:"."));
@@ -200,9 +203,12 @@ public class Socket {
     }
 
     public final Canceler sendText(String text, String toAccount,String unique, OnResponse callback, String debug){
-         Frame frame=null!=text&&text.length()>0?createTextFrame(text,toAccount,null!=unique&&unique
-                 .length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+
-                 System.identityHashCode(callback)),debug):null;
+        int length=null!=text?text.length():0;
+        if (length<=0){
+            return null;
+        }
+        Frame frame=createTextFrame(text,toAccount,null!=unique&&unique.length()>0?unique:generateUnique(Frame.FORMAT_TEXT+System.identityHashCode(text)+
+                System.identityHashCode(callback)),debug);
         if (null==frame){
             Debug.E(getClass(),"Can't send text to "+toAccount+" which frame invalid "+(null!=debug?debug:".")+" ");
             return null;
@@ -293,21 +299,31 @@ public class Socket {
     }
 
     private Frame createTextFrame(String text,String toAccount,String unique,String debug){
-        final String encoding="utf-8";
-        try {
-            byte[] bodyBytes = null != text && text.length() > 0 ? text.getBytes(encoding) : null;
-            int bodyBytesLength = null != bodyBytes ? bodyBytes.length : -1;
-            if (bodyBytesLength <= 0) {
-                Debug.E(getClass(), "Can't create text frame to " + toAccount + " which body bytes invalid " + (null != debug ? debug : ".") + " " + bodyBytesLength);
-                return null;
-            }
-            return new Frame(bodyBytesLength,bodyBytesLength,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,encoding);
-        }catch (Exception e){
-            Debug.E(getClass(),"Exception create text frame to "+toAccount+" "+(null!=debug?debug:".")+e,e);
-            e.printStackTrace();
+        int length=null!=text?text.length():0;
+        if (length<=0){
+            Debug.W(getClass(),"Can't create text frame "+(null!=debug?debug:"."));
+            return null;
         }
-        return null;
+        return new Frame(length,length,toAccount, Frame.FORMAT_TEXT,null!=unique&&unique.length()>0?unique:
+                generateUnique("TextFrameFromAndroid"),null,text,null,null,null,null);
     }
+
+//    private Frame createTextFrame(String text,String toAccount,String unique,String debug){
+//        final String encoding="utf-8";
+//        try {
+//            byte[] bodyBytes = null != text && text.length() > 0 ? text.getBytes(encoding) : null;
+//            int bodyBytesLength = null != bodyBytes ? bodyBytes.length : -1;
+//            if (bodyBytesLength <= 0) {
+//                Debug.E(getClass(), "Can't create text frame to " + toAccount + " which body bytes invalid " + (null != debug ? debug : ".") + " " + bodyBytesLength);
+//                return null;
+//            }
+//            return new Frame(bodyBytesLength,bodyBytesLength,toAccount,Frame.FORMAT_TEXT,unique,null,bodyBytes,null,null,null,encoding);
+//        }catch (Exception e){
+//            Debug.E(getClass(),"Exception create text frame to "+toAccount+" "+(null!=debug?debug:".")+e,e);
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     private static abstract class WaitingResponse  extends Canceler implements Runnable{
         private final OnResponse mOnResponse;
