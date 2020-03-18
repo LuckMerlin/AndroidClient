@@ -1,12 +1,10 @@
 package com.merlin.model;
 
-import android.os.Bundle;
 import android.view.View;
 
 import com.merlin.activity.LoveDetailActivity;
 import com.merlin.adapter.LoveAdapter;
 import com.merlin.api.Address;
-import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -16,9 +14,6 @@ import com.merlin.bean.Love;
 import com.merlin.client.R;
 import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -30,7 +25,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private interface Api{
         @POST(Address.PREFIX_LOVE+"/get")
         @FormUrlEncoded
-        Observable<Reply<ApiList<Love>>> getLoves(@Field(LABEL_NAME) String name);
+        Observable<Reply<SectionData<Love>>> getLoves(@Field(LABEL_NAME) String name);
 
         @POST(Address.PREFIX_LOVE+"/delete")
         @FormUrlEncoded
@@ -40,7 +35,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private final LoveAdapter mAdapter=new LoveAdapter() {
         @Override
         protected Retrofit.Canceler onPageLoad(String arg, int page, OnApiFinish<Reply<SectionData<Love>>> finish) {
-            return call(prepare(Api.class).getLoves(null),finish);
+            return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg),finish);
         }
 
         @Override
@@ -48,7 +43,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
             Love love = null != data && data instanceof Love ? (Love) data : null;
             if (null != love) {
                 long id=null!=data&&data instanceof Love?((Love)data).getId():null;
-                if (null==call(prepare(Api.class).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
+                if (null==call(prepare(Api.class,Address.LOVE_ADDRESS,null).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
                      if (what!= What.WHAT_SUCCEED){
                          add(position,love);
                      }
@@ -60,14 +55,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     };
 
     public LoveModel(){
-        Collection<Love> list=new ArrayList<>();
-        list.add(new Love(0,"我们","吴小花是一个美女"));
-        list.add(new Love(0,"我们","吴小花是一个美女"));
-        list.add(new Love(0,"我们","吴小花是一个美女"));
-        list.add(new Love(0,"我们","吴小花是一个美女"));
-        list.add(new Love(0,"我们","吴小花是一个美女"));
-        list.add(new Love(0,"我们","吴小花是一个美女"));
-        mAdapter.setData(list);
+        mAdapter.loadPage(null,"While model create.");
     }
 
     @Override

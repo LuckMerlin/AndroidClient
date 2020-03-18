@@ -23,10 +23,6 @@ public class SectionData<T> {
     public void setLength(int length) {
         this.length = length;
     }
-//
-//    public void setTo(int to) {
-//        this.to = to;
-//    }
 
     public final void setData(List<T> data) {
         this.data = data;

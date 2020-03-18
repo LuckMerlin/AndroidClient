@@ -80,6 +80,7 @@ public abstract class Transport<T extends Retrofit.Canceler> implements CoverMod
     protected void onCancelChanged(boolean cancel){
         //DO nothing
     }
+
     public final boolean cancel(boolean cancel){
         boolean curr=mCancel;
         if (curr!=cancel) {
