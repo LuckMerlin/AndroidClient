@@ -30,6 +30,11 @@ public class LoveModel  extends Model implements OnTapClick,Label {
         @POST(Address.PREFIX_LOVE+"/delete")
         @FormUrlEncoded
         Observable<Reply> delete(@Field(LABEL_ID) String id);
+
+        @POST(Address.PREFIX_LOVE+"/save")
+        @FormUrlEncoded
+        Observable<Reply> save(@Field(LABEL_ID) Love love);
+
     }
 
     private final LoveAdapter mAdapter=new LoveAdapter() {

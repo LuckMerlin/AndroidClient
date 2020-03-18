@@ -245,10 +245,17 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
         return null!=data?data.size():0;
     }
 
+    protected int onIncreaseItemCount(int dataCount){
+        //DO nothing
+        return -1;
+    }
+
     @Override
     public final int getItemCount() {
         List<T> data=mData;
-        return 1+(null!=data?data.size():0);
+        int count=null!=data?data.size():0;
+        int increase=onIncreaseItemCount(count);
+        return 1+count+(increase>0?increase:0);
     }
 
     public final List<T> getData() {

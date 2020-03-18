@@ -4,23 +4,24 @@ import java.util.List;
 
 public final class Love {
     public final static int MODE_CANCELED=1232;
-    private final String name;
-    private final String data;
+    private String name;
+    private String data;
     private List<Photo> image;
-    private final long id;
+    private long id;
     private int mode=0;
     private String account;
     private long createTime;
     private long time;
 
     public Love(){
-        this(0,null,null);
+        this(null,0,null,null);
     }
 
-    public Love(long id,String name,String data){
+    public Love(String name,long time,String content,List<Photo> photos){
         this.name=name;
-        this.id=id;
-        this.data=data;
+        this.time=time;
+        this.data=content;
+        this.image=photos;
     }
 
     public String getName() {

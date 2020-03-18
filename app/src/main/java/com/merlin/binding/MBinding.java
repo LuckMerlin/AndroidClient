@@ -77,7 +77,7 @@ import java.util.List;
 public class MBinding {
 
     @BindingAdapter(value = {"enableBarPadding"})
-    public static void enableBarPadding(View view, int enable) {
+    public static void enableBarPadding(View view, Object enable) {
         if (null!=view){
             StatusBar.enableStatusBarHeight(view,true);
         }
@@ -254,11 +254,6 @@ public class MBinding {
     @BindingAdapter(value = {"createModel"})
     public static void createModel(View view, Object modeClass) {
         new ModelBinder().bind(view,modeClass);
-    }
-
-    @BindingAdapter(value = {"enableMultiClick"})
-    public static void enableMultiClick(View view, Object obj) {
-
     }
 
     @BindingAdapter(value = {"enableClick"})

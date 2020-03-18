@@ -33,13 +33,15 @@ public final class StatusBar {
     private StatusBinding createContent(final View view){
         Object parent=null!=view?view.getParent():null;
         if (null!=parent&&parent instanceof ViewParent){
-            if (parent instanceof RecyclerView){
-                if (view instanceof ViewGroup){ //Use self to create
-                    parent=view;
-                }else{ //Use parent to create
-                    parent = ((ViewParent)parent).getParent();
-                }
-            }
+            parent= view;
+            Debug.D(getClass(),"AAAAA "+view+" \n "+parent);
+//            if (parent instanceof RecyclerView){
+//                if (view instanceof ViewGroup){ //Use self to create
+//                    parent=view;
+//                }else{ //Use parent to create
+//                    parent = ((ViewParent)parent).getParent();
+//                }
+//            }
         }
         ViewGroup vg=null!=parent&&parent instanceof ViewGroup?(ViewGroup)parent:null;
         if (null!=vg){
@@ -53,7 +55,6 @@ public final class StatusBar {
                     }
                 }
             }
-
             StatusBinding binding=DataBindingUtil.inflate(LayoutInflater.from(vg.getContext()), R.layout.status,vg,true);
             View root=null!=binding?binding.getRoot():null;
             if (null != root){

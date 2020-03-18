@@ -102,4 +102,11 @@
     <string name="love">Dear</string>
     <string name="queuing">排队中</string>
     <string name="canNotOperateOnLocalDevice">本地在本地设备上操作</string>
+    <string name="planTime">计划时间</string>
+    <string name="id">ID</string>
+    <string name="content">内容</string>
+    <string name="photo">图片</string>
+    <string name="none">无</string>
+    <string name="save">保存</string>
+    <string name="title">标题</string>
 </resources>

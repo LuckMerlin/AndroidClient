@@ -5,25 +5,169 @@
         <variable
             name="vm"
             type="com.merlin.model.LoveDetailModel" />
-        <import type="com.merlin.binding.StatusBar"/>
         <import type="com.merlin.client.R"/>
+        <import type="com.merlin.util.Time"/>
+        <import type="android.view.View"/>
     </data>
-    <FrameLayout
-            binding:createModel="@{true}"
-            android:orientation="vertical"
-            binding:statusBar="@{StatusBar.statusBar(null,vm.love.name)}"
+    <LinearLayout
+        binding:createModel="@{true}"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="30dp"
+        android:background="#22000000"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        <FrameLayout
-            android:paddingBottom="1dp"
-            android:paddingTop="10dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:gravity="left"
+                style="@style/titleNormalTextView"/>
+            <EditText
+                android:id="@+id/loveDetail_titleET"
+                android:singleLine="true"
+                android:layout_weight="5"
+                android:gravity="center"
+                android:minWidth="50dp"
+                binding:onTextChange="@{vm}"
+                android:background="@android:color/transparent"
+                android:layout_marginTop="@dimen/contentGap"
+                style="@style/titleNormalTextView"/>
+            <TextView
+                android:id="@+id/loveDetail_saveTV"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:gravity="right"
+                binding:enableClick="@{true}"
+                android:visibility="@{null==vm.love?View.VISIBLE:View.INVISIBLE}"
+                android:text="@{R.string.save}"
+                style="@style/titleNormalTextView"/>
+        </LinearLayout>
+        <LinearLayout
+            android:visibility="@{null==vm.love?View.GONE:View.VISIBLE}"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{R.string.id}"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:text=":"
+                android:layout_marginRight="5dp"
+                style="@style/itemLoveKeyTextView"/>
+            <EditText
+                android:text="@{``+vm.love.id}"
+                android:gravity="left"
+                android:minWidth="50dp"
+                android:background="@android:color/transparent"
+                style="@style/itemLoveKeyTextView"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="@{null==vm.love?View.GONE:View.VISIBLE}"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{R.string.account}"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:text=":"
+                android:layout_marginRight="5dp"
+                style="@style/itemLoveKeyTextView"/>
+            <EditText
+                android:text="@{``+vm.love.account}"
+                android:gravity="left"
+                android:minWidth="50dp"
+                android:background="@android:color/transparent"
+                style="@style/itemLoveKeyTextView"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{R.string.planTime}"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:text=":"
+                android:layout_marginRight="5dp"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:id="@+id/loveDetail_valueTimeTV"
+                binding:enableClick="@{true}"
+                android:singleLine="true"
+                android:gravity="left"
+                android:minWidth="50dp"
+                style="@style/itemLoveKeyTextView"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="@{null==vm.love?View.GONE:View.VISIBLE}"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{R.string.createTime}"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:text=":"
+                android:layout_marginRight="5dp"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:text="@{Time.formatTime(vm.love.createTime)}"
+                android:singleLine="true"
+                android:gravity="left"
+                android:minWidth="50dp"
+                style="@style/itemLoveKeyTextView"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{R.string.content}"
+                style="@style/itemLoveKeyTextView"/>
+            <TextView
+                android:text=":"
+                android:layout_marginRight="5dp"
+                style="@style/itemLoveKeyTextView"/>
+            <EditText
+                android:id="@+id/loveDetail_contentET"
+                android:singleLine="true"
+                android:gravity="left"
+                android:minWidth="50dp"
+                binding:onTextChange="@{vm}"
+                android:background="@android:color/transparent"
+                style="@style/itemLoveKeyTextView"/>
+        </LinearLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:layout_marginTop="@dimen/contentGap"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
+                binding:adapter="@{vm.photoAdapter}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
-        </FrameLayout>
-    </FrameLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
 </layout>

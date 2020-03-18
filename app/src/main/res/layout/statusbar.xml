@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="left"
+            type="Object" />
+        <variable
+            name="center"
+            type="Object" />
+        <variable
+            name="right"
+            type="Object" />
+    </data>
+
+    <RelativeLayout
+        android:paddingLeft="@dimen/contentGap"
+        android:paddingRight="@dimen/contentGap"
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+    </RelativeLayout>
+</layout>
