@@ -27,6 +27,7 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
     public final static int TYPE_TAIL=-1;
     public final static int TYPE_HEAD=-2;
     public final static int TYPE_EMPTY=-3;
+    public final static int TYPE_DATA=-4;
 
     public final void setData(List<T> data){
          setData(data,true);
@@ -104,8 +105,12 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
     }
 
     protected int getItemViewType(int position,int size) {
-
-        return TYPE_NONE;
+        if (position ==0){
+            return TYPE_HEAD;
+        }else if (position == size){
+            return TYPE_TAIL;
+        }
+        return size==0?TYPE_EMPTY:TYPE_DATA;
     }
 
    @Override
