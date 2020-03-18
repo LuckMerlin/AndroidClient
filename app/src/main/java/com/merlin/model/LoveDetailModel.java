@@ -12,15 +12,24 @@ import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
+import com.merlin.api.UploadFileApi;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.OnTextChanged;
 
+import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
 
 import io.reactivex.Observable;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -43,9 +52,31 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        findViewById(R.id.loveDetail_titleET);
-        findViewById(R.id.loveDetail_valueTimeTV);
-        findViewById(R.id.loveDetail_contentET);
+        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+        RequestBody fileBody = RequestBody.create(MediaType.parse("application/otcet-stream"),file);
+        HashMap<String, RequestBody> map = new HashMap<>();
+        map.put("linqiang",fileBody);
+        Call ddd=prepare(UploadFileApi.class,Address.LOVE_ADDRESS).save(map);
+        ddd.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+
+            }
+        });
+
+        // 执行请求 serviceApi.uploadSingleImg(description, body).
+        // enqueue(new BaseViewModel.HttpRequestCallback<List<PicResultData>>()
+        // { @Override public void onSuccess(List<PicResultData> result) { super.onSuccess(result); }
+        // @Override public void onFailure(int status, String message) { super.onFailure(status, message); } });
+
+//        findViewById(R.id.loveDetail_titleET);
+//        findViewById(R.id.loveDetail_valueTimeTV);
+//        findViewById(R.id.loveDetail_contentET);
     }
 
     @Override

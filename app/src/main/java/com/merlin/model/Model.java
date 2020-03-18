@@ -383,6 +383,10 @@ public class Model {
         return prepare(cls,null,callbackExecutor);
     }
 
+    protected final <T> T prepare(Class<T>  cls, String url){
+        return prepare(cls,url,null);
+    }
+
     protected final <T> T prepare(Class<T>  cls, String url, Executor callbackExecutor){
         Retrofit retrofit=mRetrofit;
         return null!=retrofit&&null!=cls?retrofit.prepare(cls,url,callbackExecutor):null;

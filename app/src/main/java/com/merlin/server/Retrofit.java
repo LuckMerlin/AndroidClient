@@ -50,6 +50,10 @@ public class Retrofit {
     }
 
     public final <T>T prepare(Class<T>  cls,String url,Executor callbackExecutor){
+        if (null==url||url.length()<=0){
+            Debug.E(getClass(),"None url to prepare.");
+            throw new RuntimeException("None url to prepare.");
+        }
         retrofit2.Retrofit.Builder builder=mBuilder;
         builder=null!=builder?builder.baseUrl(url):null;
         if (null!=callbackExecutor&&null!=builder){
