@@ -1,5 +1,6 @@
 package com.merlin.adapter;
 
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -8,11 +9,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -20,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnLayoutManagerResolve {
+public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnLayoutManagerResolve {
     private List<T> mData;
     private Handler mHandler;
     public final static int TYPE_NONE=0;
@@ -29,11 +32,113 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
     public final static int TYPE_EMPTY=-3;
     public final static int TYPE_DATA=-4;
 
-    public final void setData(List<T> data){
-         setData(data,true);
+    protected Integer onResolveViewTypeLayoutId(int viewType){
+        return null;
     }
 
-    public final void addAll(List<T> data,boolean notify){
+    protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater in,int viewType){
+        return null;
+    }
+
+    @Override
+  public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+      final LayoutInflater in=LayoutInflater.from(parent.getContext());
+        RecyclerView.ViewHolder viewHolder=onCreateViewHolder(in,viewType);
+        if (viewHolder ==null){
+           Integer integer= onResolveViewTypeLayoutId(viewType);
+           ViewDataBinding binding=null!=integer&&integer!= Resources.ID_NULL?DataBindingUtil.inflate(in,integer,parent,false):null;
+           viewHolder= null!=binding?new ViewHolder(binding):null;
+        }
+        if (null==viewHolder){
+            switch (viewType){
+                case TYPE_TAIL:
+                    viewHolder= new BaseViewHolder(in.inflate(R.layout.list_tail, parent, false));
+                    break;
+                case TYPE_EMPTY:
+                    viewHolder= new BaseViewHolder(in.inflate(R.layout.list_empty, parent, false));
+                    break;
+                default:
+                    viewHolder= new BaseViewHolder(new View(parent.getContext()));
+                    break;
+            }
+        }
+       return viewHolder;
+    }
+
+  protected void onBindViewHolder(RecyclerView.ViewHolder holder,int viewType,ViewDataBinding binding,int position,T data, @NonNull List<Object> payloads){
+        //Do nothing
+    }
+
+   @Override
+  public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+      super.onBindViewHolder(holder, position, payloads);
+      ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
+      T data=getItemData(position);
+      onBindViewHolder(holder,null!=holder?holder.getItemViewType():TYPE_NONE,binding,position,data,payloads);
+   }
+
+    @Override
+  public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        //Do nothing
+    }
+
+  public final T getItemData(int position){
+        List<T> data=mData;
+        return position>=0&&null!=data&&position<data.size()?data.get(position):null;
+    }
+
+  protected int onIncreaseItemCount(int dataCount){
+        return 0;
+  }
+
+    @Override
+  public final int getItemCount() {
+        int dataCount=getDataCount();
+        int count=onIncreaseItemCount(dataCount);
+        return (dataCount>0?2:1)+(count>=0?count:0);
+    }
+
+  protected int getItemViewType(int position,int size) {
+        //Do nothing
+        return TYPE_DATA;
+    }
+
+   @Override
+  public final int getItemViewType(int position) {
+       List<T> data=mData;
+       int size=null!=data?data.size():0;
+       if (size==0){
+           return TYPE_EMPTY;
+       }
+       if (position ==0){
+           return TYPE_HEAD;
+       }else if (position == size){
+           return TYPE_TAIL;
+       }
+       return getItemViewType(position,size);
+    }
+
+  public final int getDataCount(){
+        List<T> data=mData;
+        return null!=data?data.size():0;
+    }
+
+  public final boolean clean(){
+        List<T> data=mData;
+        int size=null!=data?data.size():0;
+        if (size>0){
+            data.clear();
+            notifyItemRangeRemoved(0,size);
+            return true;
+        }
+        return false;
+  }
+
+  public final void setData(List<T> data){
+        setData(data,true);
+    }
+
+  public final void addAll(List<T> data,boolean notify){
         if (null!=data&&data.size()>0){
             List<T> datas=mData=null!=mData?mData:new ArrayList<>();
             datas.addAll(data);
@@ -48,7 +153,7 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
     }
 
-    public final void setData(List<T> data,boolean notify){
+  public final void setData(List<T> data,boolean notify){
         List<T> datas=mData=null!=mData?mData:new ArrayList<>();
         datas.clear();
         if (null!=data&&data.size()>0){
@@ -64,68 +169,7 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
     }
 
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-      final LayoutInflater in=LayoutInflater.from(parent.getContext());
-//      switch (viewType){
-//          case TYPE_NORMAL:
-//              return new ViewHolder(DataBindingUtil.inflate(in,onResolveNormalTypeLayoutId(), parent, false));
-//          case TYPE_TAIL:
-//              return new BaseViewHolder(in.inflate(R.layout.list_tail, parent, false));
-//        }
-       return new BaseViewHolder(in.inflate(R.layout.list_empty, parent, false));
-    }
-
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder,V binding,int position,T data, @NonNull List<Object> payloads){
-        //Do nothing
-    }
-
-   @Override
-   public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
-      super.onBindViewHolder(holder, position, payloads);
-      ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
-      T data=getItemData(position);
-      onBindViewHolder(holder,(V)binding,position,data,payloads);
-   }
-
-    @Override
-  public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        //Do nothing
-    }
-
-  public final T getItemData(int position){
-        List<T> data=mData;
-        return position>=0&&null!=data&&position<data.size()?data.get(position):null;
-    }
-
-    @Override
-    public int getItemCount() {
-        return getDataCount()+2;
-    }
-
-    protected int getItemViewType(int position,int size) {
-        if (position ==0){
-            return TYPE_HEAD;
-        }else if (position == size){
-            return TYPE_TAIL;
-        }
-        return size==0?TYPE_EMPTY:TYPE_DATA;
-    }
-
-   @Override
-  public final int getItemViewType(int position) {
-        List<T> data=mData;
-        int size=null!=data?data.size():0;
-        return getItemViewType(position,size);
-    }
-
-  public final int getDataCount(){
-        List<T> data=mData;
-        return null!=data?data.size():0;
-    }
-
-  public final List<T> getData() {
+  private final List<T> getData() {
         return mData;
     }
 
@@ -154,7 +198,7 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
   }
 
-  public void reset(T ...datas){
+  public final void reset(T ...datas){
         List<T> list=mData;
         if (null==list){
             mData=list=new ArrayList<>();
@@ -167,7 +211,7 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
         }
     }
 
-    public void reset(List<T> datas){
+  public final void reset(List<T> datas){
         List<T> list=mData;
         if (null==list){
             mData=list=new ArrayList<>();
@@ -204,15 +248,12 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
       return false;
   }
 
-  protected final boolean replace(T data,int index){
+  public final boolean replace(int from,List<T> data){
         List<T> list=null!=data?mData:null;
         int size=null!=list?list.size():-1;
-        if (null!=data&&index>=0&&index<=size){
-            if (index<size){
-                list.remove(index);
-            }
-            list.add(index,data);
-            notifyItemChanged(index);
+        if (null!=data&&from>=0&&from<=size){
+//            list.add(index,data);
+//            notifyItemChanged(index);
             return true;
         }
         return false;
@@ -241,7 +282,7 @@ public abstract class ListAdapter<T,V extends ViewDataBinding> extends RecyclerV
         return null;
     }
 
-  protected final int index(T data){
+  public final int index(T data){
         List<T> list=null!=data?mData:null;
         return null!=list?list.indexOf(data):-1;
    }

@@ -55,6 +55,10 @@ public class Model {
         return null!=reference?reference.get():null;
     }
 
+    public interface OnActivityResult{
+        void onActivityResult(Activity activity,int requestCode, int resultCode, Intent data);
+    }
+
     public interface OnActivityIntentChange{
         void onActivityIntentChanged(Activity activity,Intent intent);
     }
@@ -340,14 +344,32 @@ public class Model {
             if (null!=bundle){
                 intent.putExtras(bundle);
             }
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                context.startActivity(intent);
-                return true;
-            }catch (Exception e){
-                Debug.E(getClass(),"Fail start activity.e="+e+" "+cls,e);
-            }
+            return startActivity(intent,null);
+        }
+        return false;
+    }
+
+    protected final boolean startActivity(Intent intent,Integer forResultCode){
+        Context context=null!=intent?null!=forResultCode?getViewContext():getContext():null;
+        if (null==context){
+            Debug.W(getClass(),"Can't start activity with NULL intent."+intent+" "+context);
             return false;
+        }
+        try {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if(null!=forResultCode){
+                if ((context instanceof Activity)){
+                    Debug.D(getClass(),"Start activity for result."+forResultCode);
+                     ((Activity)context).startActivityForResult(intent, forResultCode);
+                     return true;
+                }else{
+                    Debug.W(getClass(),"Will not receive activity result while context is not instanceof activity.");
+                }
+            }
+            context.startActivity(intent);
+            return true;
+        }catch (Exception e){
+            Debug.E(getClass(),"Fail start activity.e="+e+" "+intent,e);
         }
         return false;
     }

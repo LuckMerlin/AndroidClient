@@ -1,8 +1,7 @@
 package com.merlin.adapter;
 
-import android.widget.GridLayout;
-
 import androidx.annotation.NonNull;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,30 +11,30 @@ import com.merlin.client.databinding.ItemPhotoBinding;
 
 import java.util.List;
 
-public class PhotoAdapter extends ListAdapter<Photo,ItemPhotoBinding> {
+public class PhotoAdapter extends ListAdapter<Photo> {
     private final int mSpanCount;
+    private final boolean mEnableAdd;
 
-    public PhotoAdapter(int spanCount){
+    public PhotoAdapter(int spanCount,boolean add){
         mSpanCount=spanCount;
+        this.mEnableAdd=add;
     }
 
-//    @Override
-//    protected Integer onResolveNormalTypeLayoutId() {
-//        return R.layout.item_photo;
-//    }
+    private boolean isAddPhotoViewType(int viewType){
+        return mEnableAdd?viewType==TYPE_TAIL||viewType==TYPE_EMPTY:false;
+    }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemPhotoBinding binding, int position, Photo data, @NonNull List<Object> payloads) {
-        if (null!=binding){
-            binding.setPhoto(data);
-        }
+    protected Integer onResolveViewTypeLayoutId(int viewType) {
+        return viewType==TYPE_DATA||isAddPhotoViewType(viewType)?R.layout.item_photo:null;
     }
 
-//    @Override
-//    protected int onIncreaseItemCount(int dataCount) {
-//        return 1;
-//    }
-
+    @Override
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder,int viewType, ViewDataBinding binding, int position, Photo data, @NonNull List<Object> payloads) {
+        if (null!=binding&&binding instanceof ItemPhotoBinding){
+            ((ItemPhotoBinding)binding).setPhoto(isAddPhotoViewType(viewType)?new Photo(null,R.drawable.selector_photo_add):data);
+        }
+    }
 
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {

@@ -21,10 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-/**
- * @deprecated
- */
-public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends  Adapter<T>  implements OnMoreLoadable{
+public abstract class SectionsAdapter<D,T,M extends SectionData<T>> extends  ListAdapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
@@ -49,12 +46,11 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
             return false;
         }
         mLastPage=page;
-        return replace(list,from);
+        return replace(from,list);
     }
 
-    @Override
     public final boolean empty() {
-        boolean succeed=super.empty();
+        boolean succeed=super.clean();
         mCurrentPage=null;
         mLastPage=null;
         return succeed;
@@ -141,7 +137,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         Page<D> page=mCurrentPage;
         Integer total=null!=page?page.mTotal:null;
         if (null!=total){
-            if(getDataSize()>=total){
+            if(getDataCount()>=total){
                 return true;
             }
         }
@@ -150,7 +146,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
 
     public final boolean loadNextPage(String debug){
         Page<D> current=mCurrentPage;
-        int size=getDataSize();
+        int size=getDataCount();
         return !isLoading()&&null!=current&&loadPage(new Page<>(current.mArg,size,null),debug);
     }
 

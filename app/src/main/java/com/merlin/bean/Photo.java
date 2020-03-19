@@ -2,7 +2,7 @@ package com.merlin.bean;
 
 public final class Photo {
     private String title;
-    private String imageUrl;
+    private Object imageUrl;
     private long createTime;
     private long time;
     private String account;
@@ -10,6 +10,13 @@ public final class Photo {
     private String note;
     private float longitude;
     private float latitude;
+    public Photo(){
+        this(null,null);
+    }
+    public Photo(String title,Object imageUrl){
+        this.title=title;
+        this.imageUrl=imageUrl;
+    }
 
     public String getTitle() {
         return title;
@@ -39,7 +46,7 @@ public final class Photo {
         return address;
     }
 
-    public String getImageUrl() {
+    public Object getImageUrl() {
         return imageUrl;
     }
 

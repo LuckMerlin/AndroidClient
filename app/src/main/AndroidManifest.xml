@@ -60,11 +60,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.merlin.activity.LoveDetailActivity">
+        <activity android:name="com.merlin.activity.LoveDetailActivity" android:launchMode="standard">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="aeeeeee" />
 
-                <category android:name="android.intent.category.APP_GALLERY" />
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>
@@ -88,6 +87,9 @@
         <service android:name="com.merlin.task.DownloadService"/>
         <service android:name="com.merlin.media.MediaPlayService"/>
         <service android:name="com.merlin.transport.TransportService"/>
+        <activity
+            android:configChanges="orientation|screenSize"
+            android:name="me.nereo.multi_image_selector.MultiImageSelectorActivity" />
     </application>
 
 </manifest>

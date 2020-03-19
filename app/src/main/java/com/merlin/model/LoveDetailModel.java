@@ -1,11 +1,17 @@
 package com.merlin.model;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.databinding.ObservableField;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
@@ -14,16 +20,21 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.UploadFileApi;
 import com.merlin.bean.Love;
+import com.merlin.bean.Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.OnTextChanged;
+import com.merlin.view.Res;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Set;
 
 import io.reactivex.Observable;
+import me.nereo.multi_image_selector.MultiImageSelector;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -34,8 +45,9 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged {
+public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
+    private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20243242;
 
     private interface Api {
         @POST(Address.PREFIX_LOVE + "/detail")
@@ -47,7 +59,7 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged 
         Observable<Reply> save(@Field(Label.LABEL_DATA) Love love);
     }
 
-    private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3);
+    private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
 
     @Override
     protected void onRootAttached(View root) {
@@ -56,18 +68,18 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged 
         RequestBody fileBody = RequestBody.create(MediaType.parse("application/otcet-stream"),file);
         HashMap<String, RequestBody> map = new HashMap<>();
         map.put("linqiang",fileBody);
-        Call ddd=prepare(UploadFileApi.class,Address.LOVE_ADDRESS).save(map);
-        ddd.enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-
-            }
-
-            @Override
-            public void onFailure(Call call, Throwable t) {
-
-            }
-        });
+//        Call ddd=prepare(UploadFileApi.class,Address.LOVE_ADDRESS).save(map);
+//        ddd.enqueue(new Callback() {
+//            @Override
+//            public void onResponse(Call call, Response response) {
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call call, Throwable t) {
+//
+//            }
+//        });
 
         // 执行请求 serviceApi.uploadSingleImg(description, body).
         // enqueue(new BaseViewModel.HttpRequestCallback<List<PicResultData>>()
@@ -77,6 +89,8 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged 
 //        findViewById(R.id.loveDetail_titleET);
 //        findViewById(R.id.loveDetail_valueTimeTV);
 //        findViewById(R.id.loveDetail_contentET);
+
+//        mPhotoAdapter.add(new Photo());
     }
 
     @Override
@@ -92,6 +106,12 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged 
         switch (resId){
             case  R.id.loveDetail_saveTV:
                 return save("After save tap.");
+            case R.drawable.selector_photo_add:
+                Context context=getViewContext();
+                if (null!=context&&context instanceof Activity){
+                    MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+                }
+                return true;
             case R.id.loveDetail_valueTimeTV:
                 DatePickerDialog dialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
                     Date date=new Date(year-1900,month-1,dayOfMonth);
@@ -142,5 +162,22 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged 
 
     public PhotoAdapter getPhotoAdapter() {
         return mPhotoAdapter;
+    }
+
+    @Override
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case PHOTO_CHOOSE_ACTIVITY_RESULT_CODE:
+                Bundle bundle=null!=data?data.getExtras():null;
+                Object object=null!=bundle?bundle.get("select_result"):null;
+                if (null!=object&&object instanceof ArrayList){
+                    for (Object child:(ArrayList)object) {
+                        if (null!=child&& child instanceof String){
+                            mPhotoAdapter.add(new Photo(null,child));
+                        }
+                    }
+                }
+                break;
+        }
     }
 }

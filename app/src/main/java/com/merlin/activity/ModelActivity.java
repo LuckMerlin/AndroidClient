@@ -23,6 +23,7 @@ import androidx.annotation.RequiresApi;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 
 import java.io.File;
@@ -34,6 +35,7 @@ public class ModelActivity <T extends Model>extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Debug.D(getClass(),"Activity onCreate."+this);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
@@ -45,6 +47,7 @@ public class ModelActivity <T extends Model>extends Activity {
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
         }
+        FileBrowserActivity.checkPermission(this);
     }
 
     @Override
@@ -125,4 +128,18 @@ public class ModelActivity <T extends Model>extends Activity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Object vm=getModel();
+        if (null!=vm&&vm instanceof Model.OnActivityResult){
+            ((Model.OnActivityResult)vm).onActivityResult(this,requestCode,resultCode,data);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Debug.D(getClass(),"Activity onDestroy."+this);
+    }
 }

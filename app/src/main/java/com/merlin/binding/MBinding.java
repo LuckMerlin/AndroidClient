@@ -42,6 +42,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.merlin.adapter.Adapter;
 import com.merlin.adapter.LinearItemDecoration;
+import com.merlin.adapter.ListAdapter;
 import com.merlin.adapter.LoadMoreInterceptor;
 import com.merlin.adapter.MultiPageAdapter;
 import com.merlin.adapter.MultiSectionAdapter;
@@ -49,6 +50,7 @@ import com.merlin.adapter.OnItemTouchResolver;
 import com.merlin.adapter.OnMoreLoadable;
 import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
+import com.merlin.adapter.SectionsAdapter;
 import com.merlin.api.Address;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -63,6 +65,7 @@ import com.merlin.view.OnSeekBarChangeListener;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTextChanged;
 import com.merlin.view.Res;
+import com.merlin.view.SectionAdapterRefreshBridge;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -333,7 +336,7 @@ public class MBinding {
     }
 
     @BindingAdapter("adapter")
-    public static void adapter(RecyclerView view, Adapter adapter) {
+    public static void adapter(RecyclerView view, ListAdapter adapter) {
         if (null!=view){
             if (null!=adapter){
                 Object helper=adapter instanceof OnItemTouchResolver?((OnItemTouchResolver)adapter).onResolveItemTouch(view):null;
@@ -369,13 +372,13 @@ public class MBinding {
                         }
                     });
                 }
-                final ViewParent parent=adapter instanceof MultiSectionAdapter ?view.getParent():null;
+                final ViewParent parent=adapter instanceof SectionsAdapter ?view.getParent():null;
                 if (null!=parent&&parent instanceof SwipeRefreshLayout){
                     final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
-                    final MultiSectionAdapter multiPageAdapter=(MultiSectionAdapter)adapter;
-                    final MultiPageAdapterRefreshBridge refresh=new MultiPageAdapterRefreshBridge(){
+                    final SectionsAdapter multiPageAdapter=(SectionsAdapter)adapter;
+                    final SectionAdapterRefreshBridge refresh=new SectionAdapterRefreshBridge(){
                         @Override
-                        public void onPageLoadUpdate(int state, boolean idle, MultiSectionAdapter.Page page) {
+                        public void onPageLoadUpdate(int state, boolean idle, SectionsAdapter.Page page) {
                             switch (state){
                                 case UPDATE_PAGE_START:
                                     refreshLayout.setRefreshing(true);

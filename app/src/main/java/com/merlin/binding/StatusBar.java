@@ -16,7 +16,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.client.BR;
 import com.merlin.client.R;
 import com.merlin.client.databinding.StatusBinding;
 import com.merlin.debug.Debug;
