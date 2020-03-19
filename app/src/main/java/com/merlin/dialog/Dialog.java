@@ -50,6 +50,7 @@ public class Dialog implements View.OnClickListener{
                 Clicker.setInterrupterTag(root,null);
                 binding.unbind();
             }
+            onDismiss();
         });
         params.dimAmount = 0f;
         window.setAttributes(params);
@@ -228,7 +229,6 @@ public class Dialog implements View.OnClickListener{
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&dialog.isShowing()){
             dialog.dismiss();
-            onDismiss();
         }
         return this;
     }

@@ -47,7 +47,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityResult {
+public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityIntentChange, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
     private final ObservableField<String> mContent=new ObservableField<>("测试内容");
     private final ObservableField<String> mTitle=new ObservableField<>("测试i标题");
@@ -99,12 +99,11 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                     Date date=new Date(year-1900,month-1,dayOfMonth);
                     mPlanTime.set(date.getTime());
                     }, 2020, 02, 22);
-                dialog.show();
+                 dialog.show();
                  return true;
         }
         return false;
     }
-
 
     private boolean save(String debug){
         final String title=mTitle.get();
@@ -150,6 +149,19 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     }
 
     @Override
+    public void onActivityIntentChanged(Activity activity, Intent intent) {
+        String id=null!=intent?intent.getStringExtra(Label.LABEL_ID):null;
+        if (null!=id&&id.length()>0){
+            call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love>>)( what,  note,  data,  arg)-> {
+                Love love=what == What.WHAT_SUCCEED&&null!=data?data.getData():null;
+                if (null!=love){
+                    mLove.set(love);
+                }
+            });
+        }
+    }
+
+    @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case PHOTO_CHOOSE_ACTIVITY_RESULT_CODE:
@@ -158,7 +170,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                 if (null!=object&&object instanceof ArrayList){
                     for (Object child:(ArrayList)object) {
                         if (null!=child&& child instanceof String){
-                            mPhotoAdapter.add(new Photo(null,child));
+                            mPhotoAdapter.add(-1,new Photo(null,child));
                         }
                     }
                 }

@@ -211,7 +211,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             notifyDataSetChanged();
         }
         if (null!=datas&&datas.length>0){
-           add(datas);
+            append(datas);
         }
     }
 
@@ -228,7 +228,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         notifyDataSetChanged();
     }
 
-  public final boolean add(T ...datas){
+  public final boolean append(T ...datas){
         if (null!=datas&&datas.length>0){
             List<T> list=mData;
             if (null==list){
@@ -238,7 +238,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                 if (data instanceof Collection){
                     for (Object child:(Collection)data){
                         if (null!=child){
-                            add((T)child);
+                            append((T)child);
                         }
                     }
                     continue;
@@ -252,18 +252,49 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
       return false;
   }
 
+  public final boolean add(int index,T data){
+      List<T> list=null!=data?mData:null;
+      int size=null!=list?list.size():-1;
+      if (size>=0){
+          index=index<=0||index>=size?size:index;
+          if (null!=data&&!list.contains(data)){
+              list.add(index,data);
+              notifyItemChanged(index);
+              return true;
+          }
+      }
+      Debug.W(getClass(),"Can't add item into list adapter."+size);
+      return false;
+  }
+
   public final boolean replace(int from,List<T> data){
-        List<T> list=null!=data?mData:null;
-        int size=null!=list?list.size():-1;
-        if (null!=data&&from>=0&&from<=size){
-//            list.add(index,data);
-//            notifyItemChanged(index);
+        final int size=null!=data?data.size():0;
+        if (size>0){
+            List<T> list=null!=data?mData:null;
+            list=null!=list?list:new ArrayList<>(size);
+            final int length=list.size();
+            if(from<0||from>length){
+                Debug.W(getClass(),"Can't replace list adapter data, Args invalid."+from+" "+length);
+                return false;
+            }
+            mData=list;
+            for (int i = from; i < size; i++) {
+                T child=data.get(i-from);
+                 if (i<length){
+                    list.remove(i);
+                    list.add(i,child);
+                    notifyItemChanged(i);
+                 }else{
+                     list.add(i,child);
+                     notifyItemInserted(i);
+                 }
+            }
             return true;
         }
         return false;
   }
 
-  public final boolean remove(T data){
+  public final boolean remove(T data,String deubg){
         List<T> list=mData;
         int index=null!=list&&null!=data?list.indexOf(data):-1;
         if (index>=0&&list.remove(data)){

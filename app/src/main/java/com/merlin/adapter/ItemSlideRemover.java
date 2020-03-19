@@ -3,15 +3,9 @@ package com.merlin.adapter;
 import android.view.View;
 import android.view.ViewParent;
 
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.debug.Debug;
-
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.List;
 
 public final class ItemSlideRemover extends ItemSlideMover {
     public interface OnItemSlideRemove{
@@ -37,11 +31,11 @@ public final class ItemSlideRemover extends ItemSlideMover {
         View view=null!=viewHolder?viewHolder.itemView:null;
         ViewParent parent =null!=view?view.getParent():null;
         RecyclerView.Adapter adapter=null!=parent&&parent instanceof RecyclerView?((RecyclerView)parent).getAdapter():null;
-        if (null!=adapter&&adapter instanceof Adapter){
+        if (null!=adapter&&adapter instanceof ListAdapter){
             int position = viewHolder.getAdapterPosition();
-            Object data=((Adapter)adapter).getItem(position);
+            Object data=((ListAdapter)adapter).getItemData(position);
             if (null!=data) {
-                ((Adapter) adapter).remove(data, "After slide remover call.");
+                ((ListAdapter) adapter).remove(data, "After slide remover call.");
                 WeakReference<OnItemSlideRemove> reference=mSlideRemove;
                 OnItemSlideRemove remove=null!=reference?reference.get():null;
                 if (null!=remove){

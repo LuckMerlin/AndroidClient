@@ -1,15 +1,9 @@
 package com.merlin.adapter;
 
-import android.graphics.Color;
-import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.merlin.debug.Debug;
-
 import java.util.Collections;
 import java.util.List;
 

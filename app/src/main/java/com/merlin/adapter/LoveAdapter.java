@@ -1,7 +1,5 @@
 package com.merlin.adapter;
 
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -15,22 +13,21 @@ import com.merlin.client.databinding.ItemLoveBinding;
 
 import java.util.List;
 
-public abstract class LoveAdapter extends MultiSectionAdapter<String,Love,SectionData<Love>> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
+public abstract class LoveAdapter extends SectionsAdapter<String,Love,SectionData<Love>> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
     private final ItemSlideRemover mItemSlideRemover=new ItemSlideRemover();
 
     @Override
-    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
-        return R.layout.item_love;
+    protected Integer onResolveViewTypeLayoutId(int viewType) {
+        return viewType==TYPE_DATA?R.layout.item_love:null;
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Love data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Love data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemLoveBinding){
             ((ItemLoveBinding)binding).setPosition(position+1);
             ((ItemLoveBinding)binding).setLove(data);
         }
     }
-
 
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {

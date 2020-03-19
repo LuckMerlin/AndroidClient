@@ -12,6 +12,8 @@ import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
 import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;
 
@@ -25,36 +27,49 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private interface Api{
         @POST(Address.PREFIX_LOVE+"/get")
         @FormUrlEncoded
-        Observable<Reply<SectionData<Love>>> getLoves(@Field(LABEL_NAME) String name);
+        Observable<Reply<SectionData<Love>>> getLoves(@Field(LABEL_NAME) String name,
+                                                      @Field(LABEL_FROM) int from,@Field(LABEL_TO) int to);
 
         @POST(Address.PREFIX_LOVE+"/delete")
         @FormUrlEncoded
         Observable<Reply> delete(@Field(LABEL_ID) String id);
-
-        @POST(Address.PREFIX_LOVE+"/save")
-        @FormUrlEncoded
-        Observable<Reply> save(@Field(LABEL_ID) Love love);
-
     }
 
     private final LoveAdapter mAdapter=new LoveAdapter() {
         @Override
-        protected Retrofit.Canceler onPageLoad(String arg, int page, OnApiFinish<Reply<SectionData<Love>>> finish) {
-            return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg),finish);
+        protected Retrofit.Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Love>>> finish) {
+            return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg,from,from+10),finish);
         }
 
         @Override
         public void onItemSlideRemoved(int position, Object data) {
             Love love = null != data && data instanceof Love ? (Love) data : null;
             if (null != love) {
-                long id=null!=data&&data instanceof Love?((Love)data).getId():null;
-                if (null==call(prepare(Api.class,Address.LOVE_ADDRESS,null).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
-                     if (what!= What.WHAT_SUCCEED){
-                         add(position,love);
-                     }
-                })){
-                    add(position,love);
-                }
+                final boolean[] deleted=new boolean[]{false};
+                Dialog dialog=new Dialog(getViewContext()){
+                    @Override
+                    protected void onDismiss() {
+                        super.onDismiss();
+                        if (!deleted[0]){
+                            add(position,love);
+                        }
+                    }
+                };
+                dialog.create().title(R.string.deleteSure).left(R.string.sure).right(R.string.cancel)
+                        .show(( view,  clickCount,  resId, data2)-> {
+                              dialog.dismiss();
+                              if (resId ==R.string.sure){
+                                  long id=null!=data&&data instanceof Love?((Love)data).getId():null;
+                                  if (null==call(prepare(Api.class,Address.LOVE_ADDRESS,null).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
+                                      if (what!= What.WHAT_SUCCEED){
+                                          deleted[0] =true;
+                                          add(position,love);
+                                      } })){
+                                      add(position,love);
+                                  }
+                              }
+                            return true;
+                        });
             }
         }
     };
@@ -62,6 +77,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     public LoveModel(){
         mAdapter.loadPage(null,"While model create.");
     }
+
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {

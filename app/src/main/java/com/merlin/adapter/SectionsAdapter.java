@@ -33,7 +33,7 @@ public abstract class SectionsAdapter<D,T,M extends SectionData<T>> extends  Lis
         void onPageLoadUpdate(int state, boolean idle, Page page);
     }
 
-    protected abstract Retrofit.Canceler onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
+    protected abstract Retrofit.Canceler onPageLoad(D arg,int from, OnApiFinish<Reply<M>> finish);
 
     private final boolean fillPage(M page){
         if (null==page){
@@ -43,6 +43,7 @@ public abstract class SectionsAdapter<D,T,M extends SectionData<T>> extends  Lis
         int from=page.getFrom();
         int to=page.getTo();
         if (from<0||to<from){
+            Debug.D(getClass(),"Can't fill page into section adapter."+from+" "+to );
             return false;
         }
         mLastPage=page;
@@ -176,7 +177,7 @@ public abstract class SectionsAdapter<D,T,M extends SectionData<T>> extends  Lis
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
             Debug.D(getClass(),"Load page "+(null!=debug?debug:"."));
             Retrofit.Canceler canceler=null;
-            if(null!=(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
+            if(null==(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
                 if (idle){
@@ -194,7 +195,7 @@ public abstract class SectionsAdapter<D,T,M extends SectionData<T>> extends  Lis
                             onNoMoreData(null!=data?data.getData():null);
                             break;
                     }
-                } }))){
+                } }))&&isPageEquals(mLoadingPage,page)){
                 mLoadingPage=null;
                 return false;
             }
