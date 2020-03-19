@@ -12,7 +12,6 @@ import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;

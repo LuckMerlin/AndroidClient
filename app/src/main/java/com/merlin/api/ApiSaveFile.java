@@ -8,7 +8,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PartMap;
 
-public interface UploadFileApi {
+public interface ApiSaveFile {
     @POST(Address.PREFIX_FILE + "/save")
     @Multipart
     Call<Reply> save(@PartMap HashMap<String, RequestBody> map);
