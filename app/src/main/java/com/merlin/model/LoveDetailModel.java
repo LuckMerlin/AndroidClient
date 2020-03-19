@@ -65,8 +65,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
         File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-
-        new Conveyor().convey(Conveyor.MODE_ADDED,new FileUpload(file));
+        new Conveyor().convey(Conveyor.MODE_ADDED,new FileUpload(file,null));
         RequestBody fileBody = new FileSaveRequestBody(file){
             @Override
             protected void onTransportProgress(long upload, long total, double speed) {
@@ -104,7 +103,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             case R.drawable.selector_photo_add:
                 Context context=getViewContext();
                 if (null!=context&&context instanceof Activity){
-                    MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+//                    MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
                 }
                 return true;
             case R.id.loveDetail_valueTimeTV:
