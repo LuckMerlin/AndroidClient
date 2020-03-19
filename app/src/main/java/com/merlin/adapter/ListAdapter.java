@@ -20,6 +20,7 @@ import com.merlin.debug.Debug;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,7 +29,6 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     private Handler mHandler;
     public final static int TYPE_NONE=0;
     public final static int TYPE_TAIL=-1;
-    public final static int TYPE_HEAD=-2;
     public final static int TYPE_EMPTY=-3;
     public final static int TYPE_DATA=-4;
 
@@ -75,6 +75,14 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
       ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
       T data=getItemData(position);
       onBindViewHolder(holder,null!=holder?holder.getItemViewType():TYPE_NONE,binding,position,data,payloads);
+       if (null==payloads||payloads.isEmpty()) {
+//           onBindViewHolder(holder, position);
+       } else {
+//           View itemView=holder.itemView;
+//           if (null!=itemView){
+//               itemView.setVisibility(((Item)payloads.get(0)).disabled ? View.VISIBLE : View.INVISIBLE);
+//           }
+       }
    }
 
     @Override
@@ -87,15 +95,10 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return position>=0&&null!=data&&position<data.size()?data.get(position):null;
     }
 
-  protected int onIncreaseItemCount(int dataCount){
-        return 0;
-  }
-
     @Override
   public final int getItemCount() {
         int dataCount=getDataCount();
-        int count=onIncreaseItemCount(dataCount);
-        return (dataCount>0?2:1)+(count>=0?count:0);
+        return (dataCount<=0?0:dataCount)+1;
     }
 
   protected int getItemViewType(int position,int size) {
@@ -110,9 +113,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
        if (size==0){
            return TYPE_EMPTY;
        }
-       if (position ==0){
-           return TYPE_HEAD;
-       }else if (position == size){
+       if (position == size){
            return TYPE_TAIL;
        }
        return getItemViewType(position,size);
@@ -169,8 +170,11 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-  private final List<T> getData() {
-        return mData;
+  public final List<T> getData() {
+      List<T> data=mData;
+      int length=null!=data?data.size():0;
+      List<T> result=length>0?new ArrayList<>(length):null;
+      return null!=result&&result.addAll(data)?result:null;
     }
 
   protected final static class BaseViewHolder extends RecyclerView.ViewHolder{

@@ -41,6 +41,7 @@ public class PhotoAdapter extends ListAdapter<Photo> {
         int spanCount=mSpanCount;
         GridLayoutManager gridLayoutManager = new GridLayoutManager(rv.getContext(), spanCount<=0?1:spanCount);
         gridLayoutManager.setOrientation(RecyclerView.VERTICAL);
+        rv.addItemDecoration(new GridSpacingItemDecoration(spanCount, 10, true));
         return gridLayoutManager;
     }
 }

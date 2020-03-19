@@ -13,12 +13,14 @@ import android.widget.TextView;
 import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.UploadFileApi;
+import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.bean.Photo;
 import com.merlin.client.R;
@@ -45,8 +47,12 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged, Model.OnActivityResult {
+public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
+    private final ObservableField<String> mContent=new ObservableField<>("测试内容");
+    private final ObservableField<String> mTitle=new ObservableField<>("测试i标题");
+    private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
+    private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
     private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20243242;
 
     private interface Api {
@@ -56,10 +62,9 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged,
 
         @POST(Address.PREFIX_LOVE + "/save")
         @FormUrlEncoded
-        Observable<Reply> save(@Field(Label.LABEL_DATA) Love love);
+        Observable<Reply> save(@Field(Label.LABEL_DATA) String love);
     }
 
-    private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
 
     @Override
     protected void onRootAttached(View root) {
@@ -68,29 +73,6 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged,
         RequestBody fileBody = RequestBody.create(MediaType.parse("application/otcet-stream"),file);
         HashMap<String, RequestBody> map = new HashMap<>();
         map.put("linqiang",fileBody);
-//        Call ddd=prepare(UploadFileApi.class,Address.LOVE_ADDRESS).save(map);
-//        ddd.enqueue(new Callback() {
-//            @Override
-//            public void onResponse(Call call, Response response) {
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call call, Throwable t) {
-//
-//            }
-//        });
-
-        // 执行请求 serviceApi.uploadSingleImg(description, body).
-        // enqueue(new BaseViewModel.HttpRequestCallback<List<PicResultData>>()
-        // { @Override public void onSuccess(List<PicResultData> result) { super.onSuccess(result); }
-        // @Override public void onFailure(int status, String message) { super.onFailure(status, message); } });
-
-//        findViewById(R.id.loveDetail_titleET);
-//        findViewById(R.id.loveDetail_valueTimeTV);
-//        findViewById(R.id.loveDetail_contentET);
-
-//        mPhotoAdapter.add(new Photo());
     }
 
     @Override
@@ -115,7 +97,7 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged,
             case R.id.loveDetail_valueTimeTV:
                 DatePickerDialog dialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
                     Date date=new Date(year-1900,month-1,dayOfMonth);
-//                    mPlanTime.set(date.getTime());
+                    mPlanTime.set(date.getTime());
                     }, 2020, 02, 22);
                 dialog.show();
                  return true;
@@ -123,45 +105,48 @@ public class LoveDetailModel extends Model implements OnTapClick, OnTextChanged,
         return false;
     }
 
-    @Override
-    public void onTextChanged(TextView tv, int state, CharSequence text) {
-            switch (tv.getId()){
-                case R.id.loveDetail_titleET:
-//                    String current=mTitle.get();
-//                    if (!((null==text&&null==current)||(null!=text&&null!=current&&text.equals(current)))){
-//                        mTitle.set((String) text);
-//                    }
-                    break;
-            }
-    }
 
     private boolean save(String debug){
-        final String title=((EditText)findViewById(R.id.loveDetail_titleET)).getText().toString();
+        final String title=mTitle.get();
         if (null==title||title.length()<=0){
             return toast(R.string.title,getText(R.string.inputNotNull));
         }
-        final String content=((EditText)findViewById(R.id.loveDetail_contentET)).getText().toString();
+        final String content=mContent.get();
         if (null==content||content.length()<=0){
             return toast(R.string.content,getText(R.string.inputNotNull));
         }
-        final Long planTime=(Long.parseLong(String.valueOf(((TextView)findViewById(R.id.loveDetail_valueTimeTV)).getText())));
+        final Long planTime=mPlanTime.get();
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
         }
+        final Love love=new Love(title, planTime, content,mPhotoAdapter.getData());
         Debug.D(getClass(),"Save love "+title+" "+(null!=debug?debug:"."));
-        final Love love=new Love(title, planTime, content,null);
-        return null!=call(prepare(Api.class, Address.LOVE_ADDRESS, null).save(love), (OnApiFinish)( what,  note,  data,  arg)-> {
+        return null!=call(prepare(Api.class, Address.LOVE_ADDRESS, null).save(new Gson().toJson(love)), (OnApiFinish)( what,  note,  data,  arg)-> {
             toast(note);
+            if (what== What.WHAT_SUCCEED){
+                finishActivity();
+            }
         });
     }
-
 
     public ObservableField<Love> getLove() {
         return mLove;
     }
 
+    public ObservableField<String> getContent() {
+        return mContent;
+    }
+
     public PhotoAdapter getPhotoAdapter() {
         return mPhotoAdapter;
+    }
+
+    public ObservableField<String> getTitle() {
+        return mTitle;
+    }
+
+    public ObservableField<Long> getPlanTime() {
+        return mPlanTime;
     }
 
     @Override

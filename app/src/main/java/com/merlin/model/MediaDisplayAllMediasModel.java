@@ -14,20 +14,13 @@ import com.merlin.api.SectionData;
 import com.merlin.api.What;
 import com.merlin.bean.File_;
 import com.merlin.bean.NasMedia;
-import com.merlin.bean.Sheet;
-import com.merlin.client.BR;
 import com.merlin.client.R;
-import com.merlin.client.databinding.MediasAllContextMenuBinding;
-import com.merlin.client.databinding.MediasAllMenusBinding;
-import com.merlin.dialog.Dialog;
-import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
 import com.merlin.media.MediaPlayService;
 import com.merlin.player1.MPlayer;
 import com.merlin.server.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
-import com.merlin.view.Res;
 
 import java.util.ArrayList;
 
@@ -94,12 +87,12 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     }
 
     private boolean showContextMenu(View view){
-        MediasAllMenusBinding binding=null!=view?inflate(R.layout.medias_all_menus):null;
-        if (null!=binding){
-            AllMediasAdapter adapter=mAdapter;
-            binding.setMediaCount(null!=adapter?adapter.getDataCount():0);
-            return showAtLocationAsContext(view,binding);
-        }
+//        MediasAllMenusBinding binding=null!=view?inflate(R.layout.medias_all_menus):null;
+//        if (null!=binding){
+//            AllMediasAdapter adapter=mAdapter;
+//            binding.setMediaCount(null!=adapter?adapter.getDataCount():0);
+//            return showAtLocationAsContext(view,binding);
+//        }
         return false;
     }
 
@@ -119,18 +112,18 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     private boolean addToSheet(NasMedia media){
         final String md5=null!=media?media.getMd5():null;
         if (null!=md5&&md5.length()>0){
-            Dialog dialog=new Dialog(getViewContext());
-            ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(BR.media,media));
-           return dialog.setContentView(binding).title(R.string.addToSheet).left(R.string.createSheet).right(R.string.cancel).
-                    show((view,clickCount,resId,data)->{
-                        dialog.dismiss();
-                        String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
-                        if (null!=sheetId&&sheetId.length()>0){
-                            return null!=call(prepare(AddToSheetApi.class).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
-                                toast(note);
-                            })||true;
-                        }
-                        return false;},false);
+//            Dialog dialog=new Dialog(getViewContext());
+//            ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(BR.media,media));
+//           return dialog.setContentView(binding).title(R.string.addToSheet).left(R.string.createSheet).right(R.string.cancel).
+//                    show((view,clickCount,resId,data)->{
+//                        dialog.dismiss();
+//                        String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
+//                        if (null!=sheetId&&sheetId.length()>0){
+//                            return null!=call(prepare(AddToSheetApi.class).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+//                                toast(note);
+//                            })||true;
+//                        }
+//                        return false;},false);
         }
         return false;
     }
@@ -138,9 +131,9 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     @Override
     public boolean onLongClick(View view, int clickCount, int resId, Object data) {
         if (null!=data&&data instanceof NasMedia){
-            MediasAllContextMenuBinding binding=inflate(R.layout.medias_all_context_menu);
-            binding.setMedia((NasMedia)data);
-            showAtLocationAsContext(view,binding);
+//            MediasAllContextMenuBinding binding=inflate(R.layout.medias_all_context_menu);
+//            binding.setMedia((NasMedia)data);
+//            showAtLocationAsContext(view,binding);
             return true;
         }
         return true;

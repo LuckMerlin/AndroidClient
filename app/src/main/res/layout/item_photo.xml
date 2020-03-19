@@ -11,6 +11,7 @@
     <ImageView
         binding:enableClick="@{true}"
         android:src="@{photo.imageUrl}"
+        android:scaleType="fitXY"
         android:layout_width="@dimen/gridListChildSize"
         android:layout_height="@dimen/gridListChildSize"/>
 </layout>

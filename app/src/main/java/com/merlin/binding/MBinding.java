@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
