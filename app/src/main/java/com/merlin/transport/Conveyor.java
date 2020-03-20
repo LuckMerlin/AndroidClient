@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -98,27 +100,36 @@ public final class Conveyor {
                 final Conveying conveying=new Conveying(callback);
                 conveyingMap.put(child,conveying);
                 notifyStatusChange(MODE_ADDED,child,null,callback);
-                triggerNext("After convey add.");
+                triggerNext(child,callback,"After convey add.");
             }
             return true;
         }
         return false;
     }
 
-    private boolean triggerNext(OnConveyStatusChange callback,String debug){
+    private boolean triggerNext(Convey convey,OnConveyStatusChange callback,String debug){
+
         return false;
     }
 
     public final boolean start(Convey convey,OnConveyStatusChange callback,String debug){
         if (null==convey){
-            Map<Convey, Conveying> conveyingMap=mConveying;
-        }
-        final ExecutorService service =mService;
-        if (null==service){
-            Debug.W(getClass(),"Can't trigger next convey while service is NONE "+(null!=debug?debug:"."));
+            Debug.W(getClass(),"Can't start convey while convey is NULL "+(null!=debug?debug:"."));
             return false;
         }
-        service.submit();
+        final Map<Convey, Conveying> conveyingMap=mConveying;
+        final ExecutorService service =mService;
+        if (null==conveyingMap||null==service){
+            Debug.W(getClass(),"Can't start convey while arg is NONE "+(null!=debug?debug:".")+" "+convey+" "+conveyingMap+" "+service);
+            notifyStatusChange(MODE_REMOVE,convey,null,callback);
+            return false;
+        }
+        service.submit(new Runnable() {
+            @Override
+            public void run() {
+                convey.start(null,debug);
+            }
+        });
         return false;
     }
 
