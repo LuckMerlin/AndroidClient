@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 
 import androidx.databinding.ObservableField;
@@ -15,29 +16,21 @@ import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
-import com.merlin.api.ApiSaveFile;
 import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.bean.Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.server.Retrofit;
 import com.merlin.transport.Conveyor;
-import com.merlin.transport.FileSaveRequestBody;
-import com.merlin.transport.FileUpload;
+import com.merlin.transport.FileUploadConvey;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import io.reactivex.Observable;
-import me.nereo.multi_image_selector.MultiImageSelector;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -65,15 +58,17 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
         File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-        new Conveyor().convey(Conveyor.MODE_ADDED,new FileUpload(file,null));
-        RequestBody fileBody = new FileSaveRequestBody(file){
-            @Override
-            protected void onTransportProgress(long upload, long total, double speed) {
-                Debug.D(getClass(),"进度 "+upload+" "+total);
-            }
-        };
-        HashMap<String, RequestBody> map = new HashMap<>();
-        map.put("linqiang",fileBody);
+        new Conveyor(getViewContext(), Looper.getMainLooper()).convey(Conveyor.MODE_ADDED,null,null,
+                new FileUploadConvey(new Retrofit(),file,"linqiangUpload",null));
+
+//        RequestBody fileBody = new FileSaveRequestBody(file){
+//            @Override
+//            protected void onTransportProgress(long upload, long total, double speed) {
+//                Debug.D(getClass(),"进度 "+upload+" "+total);
+//            }
+//        };
+//        HashMap<String, RequestBody> map = new HashMap<>();
+//        map.put("linqiang",fileBody);
 //        prepare(ApiSaveFile.class,Address.LOVE_ADDRESS).save(map).enqueue(new Callback<Reply>() {
 //            @Override
 //            public void onResponse(Call<Reply> call, Response<Reply> response) {

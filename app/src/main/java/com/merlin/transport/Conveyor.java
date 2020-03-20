@@ -105,8 +105,20 @@ public final class Conveyor {
         return false;
     }
 
-    private boolean triggerNext(String debug){
+    private boolean triggerNext(OnConveyStatusChange callback,String debug){
+        return false;
+    }
 
+    public final boolean start(Convey convey,OnConveyStatusChange callback,String debug){
+        if (null==convey){
+            Map<Convey, Conveying> conveyingMap=mConveying;
+        }
+        final ExecutorService service =mService;
+        if (null==service){
+            Debug.W(getClass(),"Can't trigger next convey while service is NONE "+(null!=debug?debug:"."));
+            return false;
+        }
+        service.submit();
         return false;
     }
 

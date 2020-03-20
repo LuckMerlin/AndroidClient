@@ -1,53 +1,67 @@
 package com.merlin.transport;
+
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
-import java.util.List;
-
-public abstract class Convey<T extends Convey> implements What {
-   private Canceler mCanceler=null;
-   private final long mTotal;
-   private long mConveyed;
-   private List<T> mChildren;
+public abstract class Convey implements What {
+   public final static int IDLE=12313;
+   public final static int PREPARING=12314;
+   public final static int PREPARED=12315;
+   public final static int STARTED=12316;
+   public final static int PAUSED=12317;
+   public final static int CANCELED=12318;
+   public final static int FINISHED=12319;
    private final String mName;
-   private Reply mReply;
+   private Status mStatus;
 
-   public Convey(String name,long total,long conveyed){
+   public Convey(String name){
        mName=name;
-       mTotal=total;
-       mConveyed=conveyed;
    }
 
-   protected boolean onPrepare(String debug){
-        return false;
+   protected Reply onPrepare(String debug){
+        return null;
    }
 
    public final boolean cancel(boolean cancel,String debug){
        return false;
    }
 
-   protected abstract Canceler onStart(Finish finish,String debug);
+   protected abstract Reply onStart(Finish finish,String debug);
 
-   public final Canceler start(String debug){
-       if (!onPrepare(debug)){
-           finish(WHAT_ARGS_INVALID,"Prepare fail.",null);
+   public final Reply start(Finish finish,String debug){
+       Status statusObj=getStatus();
+       int status=null!=statusObj?statusObj.mStatus:IDLE;
+       if (status!=IDLE&&status!=FINISHED&&status!=CANCELED&&status!=PAUSED){
+           Debug.W(getClass(),"Can't start convey again while in status "+(null!=debug?debug:".")+" status="+status);
+            return null;
+       }
+       notifyChangeStatus(PREPARING,null);
+       Reply reply=onPrepare(debug);
+       notifyChangeStatus(PREPARED,null);
+       if (null!=reply&&!reply.isSuccess()){ //Prepare fail
+           notifyChangeStatus(FINISHED,reply);
            return null;
        }
-       Finish finish=new Finish();
-       return onStart(finish,debug);
+       final Finish innerFinish= (innerReply)->{
+           mStatus=new Status(FINISHED,innerReply);
+           if (null!=finish){
+               finish.onFinish(innerReply);
+           }
+       };
+       final Reply startReply= onStart(innerFinish,debug);
+       if (null!=startReply&&!startReply.isSuccess()){
+           innerFinish.onFinish(startReply);
+       }
+       return startReply;
    }
 
-   public boolean addChild(T convey,String debug){
-        if (null==convey){
-            Debug.W(getClass(),"Can't add NULL as child convey "+(null!=debug?debug:"."));
-            return false;
-        }
-        if (isExistChild(convey)){
-            Debug.W(getClass(),"Can't add already exist child convey "+(null!=debug?debug:"."));
-            return false;
-        }
-        return false;
+   private void notifyChangeStatus(int status,Object arg){
+       mStatus=new Status(status,arg);
+   }
+
+   protected void notifyProgress(){
+
    }
 
    protected final boolean finish(int what,String note,Object data){
@@ -56,44 +70,51 @@ public abstract class Convey<T extends Convey> implements What {
    }
 
    public final boolean isFinished(){
-       return null!=mReply;
+       return isStatus(FINISHED);
    }
 
    public final Reply getReply(){
-       return mReply;
+       Object finished=getStatusObject(FINISHED);
+       return null!=finished&&finished instanceof Reply?(Reply)finished:null;
    }
 
-   public boolean remove(T convey,String debug){
-       List<T> children=null!=convey?mChildren:null;
-       if (null!=children&&children.remove(convey)){
-           Debug.D(getClass(),"Remove convey child "+(null!=debug?debug:"."));
-           return true;
-       }
-       return false;
+    public final String getName() {
+        return mName;
+    }
+
+    public final Object getStatusObject(int status){
+        Status statusObj=getStatus();
+        return null!=statusObj&&statusObj.mStatus==status?statusObj.mObject:null;
+    }
+
+   public final boolean isStatus(int status){
+       Status statusObj=mStatus;
+       return null!=statusObj&&statusObj.mStatus==status;
    }
 
-    public final int childCount(){
-        List<T> children=mChildren;
-        return null!=children?children.size():-1;
-    }
-
-    public final T findChild(Object obj){
-        List<T> children=null!=obj?mChildren:null;
-        int index=null!=children&&children.size()>0?children.indexOf(obj):-1;
-        return index>=0?children.get(index):null;
-    }
-
-   public final boolean isExistChild(Object data){
-       return null!=data&&null!=findChild(data);
+   public final Status getStatus(){
+       return mStatus;
    }
 
    public final boolean isCanceled() {
-        Canceler canceler=mCanceler=null;
-        return null!=canceler&&canceler.isCanceled();
+        return isStatus(CANCELED);
     }
 
-    public static class Finish{
+    public interface Finish{
+        void onFinish(Reply reply);
+    }
 
+   //mTotal=total;
+   //mConveyed=conveyed;
+
+    private static final class Status {
+        private final int mStatus;
+        private final Object mObject;
+
+        public Status(int status,Object object){
+            mStatus=status;
+            mObject=object;
+        }
     }
 
 }
