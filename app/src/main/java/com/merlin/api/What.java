@@ -31,5 +31,7 @@ public interface What {
     int WHAT_MATCH_FAIL = - 1026;
     int WHAT_NONE_NETWORK = - 1027;
     int WHAT_EXIST = - 1028;
+    int WHAT_EMPTY = - 1029;
+    int WHAT_EXCEPTION = - 1030;
 }
 

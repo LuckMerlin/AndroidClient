@@ -57,11 +57,11 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-        new Conveyor(getViewContext(), Looper.getMainLooper()).convey(Conveyor.MODE_ADDED,null,null,
-                new FileUploadConvey(new Retrofit(),file,"linqiangUpload",null));
-
-//        RequestBody fileBody = new FileSaveRequestBody(file){
+        File file=new File("/sdcard/Musics");
+//        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+        new Conveyor(getViewContext(), Looper.getMainLooper()).start(new FileUploadConvey(new
+                Retrofit(),file,"linqiangUpload",null),null,null);
+//      RequestBody fileBody = new FileSaveRequestBody(file){
 //            @Override
 //            protected void onTransportProgress(long upload, long total, double speed) {
 //                Debug.D(getClass(),"进度 "+upload+" "+total);

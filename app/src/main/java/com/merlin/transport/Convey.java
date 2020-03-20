@@ -5,15 +5,8 @@ import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
 public abstract class Convey implements What {
-   public final static int IDLE=12313;
-   public final static int PREPARING=12314;
-   public final static int PREPARED=12315;
-   public final static int STARTED=12316;
-   public final static int PAUSED=12317;
-   public final static int CANCELED=12318;
-   public final static int FINISHED=12319;
    private final String mName;
-   private Status mStatus;
+   private ConveyStatus mStatus;
 
    public Convey(String name){
        mName=name;
@@ -30,25 +23,27 @@ public abstract class Convey implements What {
    protected abstract Reply onStart(Finish finish,String debug);
 
    public final Reply start(Finish finish,String debug){
-       Status statusObj=getStatus();
-       int status=null!=statusObj?statusObj.mStatus:IDLE;
-       if (status!=IDLE&&status!=FINISHED&&status!=CANCELED&&status!=PAUSED){
+       ConveyStatus statusObj=getStatus();
+       int status=null!=statusObj?statusObj.getStatus():ConveyStatus.IDLE;
+       if (status!=ConveyStatus.IDLE&&status!=ConveyStatus.FINISHED&&status!=ConveyStatus.CANCELED&&status!=ConveyStatus.PAUSED){
            Debug.W(getClass(),"Can't start convey again while in status "+(null!=debug?debug:".")+" status="+status);
             return null;
        }
-       notifyChangeStatus(PREPARING,null);
+       notifyChangeStatus(ConveyStatus.PREPARING,null);
        Reply reply=onPrepare(debug);
-       notifyChangeStatus(PREPARED,null);
+       notifyChangeStatus(ConveyStatus.PREPARED,null);
        if (null!=reply&&!reply.isSuccess()){ //Prepare fail
-           notifyChangeStatus(FINISHED,reply);
+           notifyChangeStatus(ConveyStatus.FINISHED,reply);
            return null;
        }
        final Finish innerFinish= (innerReply)->{
-           mStatus=new Status(FINISHED,innerReply);
+           mStatus=new ConveyStatus(ConveyStatus.FINISHED,innerReply);
+           notifyChangeStatus(ConveyStatus.FINISHED,mStatus);
            if (null!=finish){
                finish.onFinish(innerReply);
            }
        };
+       notifyChangeStatus(ConveyStatus.STARTED,null);
        final Reply startReply= onStart(innerFinish,debug);
        if (null!=startReply&&!startReply.isSuccess()){
            innerFinish.onFinish(startReply);
@@ -57,7 +52,8 @@ public abstract class Convey implements What {
    }
 
    private void notifyChangeStatus(int status,Object arg){
-       mStatus=new Status(status,arg);
+       mStatus=new ConveyStatus(status,arg);
+       Debug.D(getClass(),"notifyChangeStatus "+status);
    }
 
    protected void notifyProgress(){
@@ -70,11 +66,11 @@ public abstract class Convey implements What {
    }
 
    public final boolean isFinished(){
-       return isStatus(FINISHED);
+       return isStatus(ConveyStatus.FINISHED);
    }
 
    public final Reply getReply(){
-       Object finished=getStatusObject(FINISHED);
+       Object finished=getStatusObject(ConveyStatus.FINISHED);
        return null!=finished&&finished instanceof Reply?(Reply)finished:null;
    }
 
@@ -83,38 +79,26 @@ public abstract class Convey implements What {
     }
 
     public final Object getStatusObject(int status){
-        Status statusObj=getStatus();
-        return null!=statusObj&&statusObj.mStatus==status?statusObj.mObject:null;
+        ConveyStatus statusObj=getStatus();
+        return null!=statusObj&&statusObj.getStatus()==status?statusObj.getObject():null;
     }
 
    public final boolean isStatus(int status){
-       Status statusObj=mStatus;
-       return null!=statusObj&&statusObj.mStatus==status;
+       ConveyStatus statusObj=mStatus;
+       return null!=statusObj&&statusObj.getStatus()==status;
    }
 
-   public final Status getStatus(){
+   public final ConveyStatus getStatus(){
        return mStatus;
    }
 
    public final boolean isCanceled() {
-        return isStatus(CANCELED);
+        return isStatus(ConveyStatus.CANCELED);
     }
 
     public interface Finish{
         void onFinish(Reply reply);
     }
 
-   //mTotal=total;
-   //mConveyed=conveyed;
-
-    private static final class Status {
-        private final int mStatus;
-        private final Object mObject;
-
-        public Status(int status,Object object){
-            mStatus=status;
-            mObject=object;
-        }
-    }
 
 }

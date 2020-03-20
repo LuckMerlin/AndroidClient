@@ -19,11 +19,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class Conveyor {
-    public final static int MODE_REMOVE=123145;
-    public final static int MODE_ADDED=123146;
     private final Map<Convey,Conveying> mConveying=new ConcurrentHashMap<>();
     private final ExecutorService mService = Executors.newCachedThreadPool();
     private final Map<OnConveyStatusChange,Long> mListeners=new WeakHashMap<>();
+    private int mLimit;
     private final Handler mHandler;
 
     public interface Callback{
@@ -43,7 +42,7 @@ public final class Conveyor {
         if (null!=listener){
             Map<OnConveyStatusChange,Long> reference=mListeners;
             synchronized (reference){
-                if (status==MODE_ADDED){
+                if (status==ConveyStatus.ADD){
                     reference.put(listener,System.currentTimeMillis());
                     Debug.D(getClass(),"Add conveyor listener "+(null!=debug?debug:"."));
                     return true;
@@ -58,28 +57,12 @@ public final class Conveyor {
     public boolean convey(int mode,OnConveyStatusChange callback, String debug, Convey ... conveys){
         if (null!=conveys&&conveys.length>0){
             switch (mode){
-                case MODE_ADDED:
+                case ConveyStatus.ADD:
                     return add(callback,debug,conveys);
-                case MODE_REMOVE:
-                    return remove(debug,conveys);
+                case ConveyStatus.CANCELED:
+                    return cancel(debug,conveys);
             }
         }
-        return false;
-    }
-
-
-    public final synchronized boolean cancel(boolean cancel, String debug,AbsTransport ...transports){
-//        Map<AbsTransport, Transporter.Transporting<Retrofit.Canceler>> map=null!=transports&&transports.length>0?mTransporting:null;
-//        if (null!=map){
-//            for (AbsTransport child:transports) {
-//                Transporter.Transporting<Retrofit.Canceler> transporting=null!=child?map.get(child):null;
-//                Retrofit.Canceler canceler=null!=transporting?transporting.mCanceler:null;
-//                if (null!=canceler&&canceler.cancel(cancel,debug)&&null!=map.remove(child)){
-////            notifyStatusChange(TRANSPORT_CANCEL, transport,debug);
-//                }
-//            }
-//            return true;
-//        }
         return false;
     }
 
@@ -92,48 +75,62 @@ public final class Conveyor {
                 }
                 if (exist(child)){
                     Debug.W(getClass(), "Skip add convey which already conveying." + child);
-                    notifyStatusChange(MODE_REMOVE,child,null,callback);
+                    notifyStatus(ConveyStatus.CANCELED,"Skip add convey which already conveying.",child,null,null,callback);
                     continue;
                 }
                 Map<Convey, Conveying> conveyingMap=mConveying;
                 Debug.D(getClass(),"Transport add "+" "+child);
-                final Conveying conveying=new Conveying(callback);
+                final Conveying conveying=new Conveying(ConveyStatus.ADD,null,callback);
                 conveyingMap.put(child,conveying);
-                notifyStatusChange(MODE_ADDED,child,null,callback);
-                triggerNext(child,callback,"After convey add.");
+                notifyStatus(ConveyStatus.ADD,"Transport add.",child,null,mListeners,callback);
+                triggerNext(callback,"After convey add.");
             }
             return true;
         }
         return false;
     }
 
-    private boolean triggerNext(Convey convey,OnConveyStatusChange callback,String debug){
+    private boolean triggerNext(OnConveyStatusChange callback,String debug){
 
         return false;
     }
 
-    public final boolean start(Convey convey,OnConveyStatusChange callback,String debug){
+    public synchronized final boolean start(Convey convey,OnConveyStatusChange callback,String debug){
         if (null==convey){
             Debug.W(getClass(),"Can't start convey while convey is NULL "+(null!=debug?debug:"."));
             return false;
         }
-        final Map<Convey, Conveying> conveyingMap=mConveying;
         final ExecutorService service =mService;
-        if (null==conveyingMap||null==service){
-            Debug.W(getClass(),"Can't start convey while arg is NONE "+(null!=debug?debug:".")+" "+convey+" "+conveyingMap+" "+service);
-            notifyStatusChange(MODE_REMOVE,convey,null,callback);
+        if (null==service){
+            Debug.W(getClass(),"Can't start convey while service is NULL "+(null!=debug?debug:".")+" "+convey);
+            notifyStatus(ConveyStatus.CANCELED,"Convey service is NULL.",convey,null,mListeners,callback);
             return false;
         }
-        service.submit(new Runnable() {
-            @Override
-            public void run() {
-                convey.start(null,debug);
-            }
-        });
+        final Map<Convey, Conveying> conveyingMap=mConveying;
+        if (null==conveyingMap){
+            Debug.W(getClass(),"Can't start convey while convey map is NULL "+(null!=debug?debug:".")+" "+convey);
+            notifyStatus(ConveyStatus.CANCELED,"Convey map is NULL.",convey,null,mListeners,callback);
+            return false;
+        }
+        synchronized (conveyingMap){
+           Conveying conveying= conveyingMap.get(convey);
+           if (null==conveying){
+               conveying=new Conveying(ConveyStatus.IDLE,null,callback);
+               conveyingMap.put(convey,conveying);
+           }
+           int status=conveying.getStatus();
+           if (status!=ConveyStatus.IDLE){
+               Debug.W(getClass(),"Can't start convey while status not idle "+(null!=debug?debug:".")+" "+status+" "+convey);
+               notifyStatus(ConveyStatus.CANCELED,"Status not idle.",null,null,null,callback);
+               return false;
+           }
+        }
+        Debug.D(getClass(),"Start convey "+convey+(null!=debug?debug:"."));
+        convey.start(null,debug);
         return false;
     }
 
-    public boolean remove(String debug,Convey... conveys){
+    public boolean cancel(String debug,Convey... conveys){
         if (null!=conveys&&conveys.length>0){
             for(Convey convey:conveys){
                 if (null!=convey){
@@ -177,16 +174,16 @@ public final class Conveyor {
         return false;
     }
 
-    private static class Conveying{
+    private static class Conveying extends ConveyStatus{
         private final OnConveyStatusChange mCallback;
-        private Conveying(OnConveyStatusChange callback){
+
+        private Conveying(int status,Object object,OnConveyStatusChange callback){
+            super(status,object);
             mCallback=callback;
         }
     }
 
-
-    private final void notifyStatusChange(int status, Convey transport,Object data, OnConveyStatusChange change){
-        Map<OnConveyStatusChange,Long> reference=mListeners;
+    private final void notifyStatus(int status,String note, Convey transport,Object data,Map<OnConveyStatusChange,Long> reference, OnConveyStatusChange change){
         final Handler handler=mHandler;
         if (null!=reference&&null!=handler){
             synchronized (reference){

@@ -3,17 +3,23 @@ package com.merlin.transport;
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ConveyGroup<T extends Convey> extends Convey {
-    private List<T> mChildren;
+public class ConveyGroup<T extends Convey> extends Convey {
+    private final List<T> mChildren;
     private T mConveying;
 
     public ConveyGroup(String name){
-        super(name);
+        this(0,name);
     }
 
-    public boolean remove(T convey,String debug){
+    public ConveyGroup(int initialCapacity,String name){
+        super(name);
+        mChildren=new ArrayList<>(initialCapacity<=0?1:initialCapacity);
+    }
+
+    public final boolean remove(T convey,String debug){
         List<T> children=null!=convey?mChildren:null;
         if (null!=children&&children.remove(convey)){
             Debug.D(getClass(),"Remove convey child "+(null!=debug?debug:"."));
@@ -23,8 +29,18 @@ public abstract class ConveyGroup<T extends Convey> extends Convey {
     }
 
     @Override
-    protected Reply onStart(Finish finish, String debug) {
-        return next(null,debug);
+    protected final Reply onStart(Finish finish, String debug) {
+        T conveying=mConveying;
+        if (null!=conveying){
+            Debug.W(getClass(),"Can't start convey group while exist conveying child."+conveying);
+            return new Reply(false,WHAT_EXIST,"Exist conveying convey.",conveying);
+        }
+        final T convey=indexNext(null,"While start convey "+(null!=debug?debug:"."));
+        if (null==convey){
+            Debug.W(getClass(),"Can't start convey group while next index NULL.");
+            return new Reply(false,WHAT_EMPTY,"Not index first convey.",null);
+        }
+        return startChild(convey,debug);
     }
 
     public final int childCount(){
@@ -42,7 +58,7 @@ public abstract class ConveyGroup<T extends Convey> extends Convey {
         return null!=data&&null!=findChild(data);
     }
 
-    private synchronized Reply next(T convey,String debug){
+    private synchronized Reply startChild(T convey,String debug){
         if (null==convey){
             Debug.W(getClass(),"Can't convey while arg NULL "+(null!=debug?debug:"."));
             return new Reply(false,WHAT_ARGS_INVALID,"Convey in NULL.",null);
@@ -62,7 +78,8 @@ public abstract class ConveyGroup<T extends Convey> extends Convey {
         };
         notifyProgress();
         mConveying=convey;
-        final Reply startReply= convey.onStart(innerFinish,debug);
+        Debug.D(getClass(),"Start child convey of group "+getName()+" "+(null!=debug?debug:"."));
+        final Reply startReply= convey.start(innerFinish,debug);
         if (null!=startReply&&!startReply.isSuccess()){
             Convey currentConveying=mConveying;
             if (null!=currentConveying&&convey==currentConveying){
@@ -73,17 +90,17 @@ public abstract class ConveyGroup<T extends Convey> extends Convey {
         return startReply;
     }
 
-    public final Convey indexNext(T convey,String debug){
+    public final T indexNext(T convey,String debug){
         List<T> children=mChildren;
         int length=null!=children?children.size():-1;
         if (length>0){
-            int index=(null!=convey?children.indexOf(convey):-1)+1;
+            int index=null!=convey?children.indexOf(convey)+1:0;
             return index<0||index>=length?null:children.get(index);
         }
         return null;
     }
 
-    public boolean addChild(T convey,String debug){
+    public final boolean addChild(T convey,String debug){
         if (null==convey){
             Debug.W(getClass(),"Can't add NULL as child convey "+(null!=debug?debug:"."));
             return false;
@@ -91,6 +108,16 @@ public abstract class ConveyGroup<T extends Convey> extends Convey {
         if (isExistChild(convey)){
             Debug.W(getClass(),"Can't add already exist child convey "+(null!=debug?debug:"."));
             return false;
+        }
+        List<T> children=mChildren;
+        if (null==convey){
+            Debug.W(getClass(),"Can't add child convey into NULL list "+(null!=debug?debug:"."));
+            return false;
+        }
+        synchronized (children){
+            if (!children.contains(convey)&&children.add(convey)){
+                return true;
+            }
         }
         return false;
     }
