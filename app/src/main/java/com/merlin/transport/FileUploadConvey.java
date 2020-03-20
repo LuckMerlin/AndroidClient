@@ -1,5 +1,7 @@
 package com.merlin.transport;
 
+import com.merlin.api.Address;
+import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
@@ -12,18 +14,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
- public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
+public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
     private final File mFile;
     private final Retrofit mRetrofit;
     private final String mFolder;
-    private final String mDividerHint=".Lin"+ (System.currentTimeMillis()*new Random().nextFloat()) +".";
 
     public FileUploadConvey(Retrofit retrofit,File file,String folder, String name){
         super(null!=name&&name.length()>0?name:null!=file?file.getName():null);
@@ -44,23 +47,26 @@ import okio.BufferedSink;
         }else if (!file.canRead()){
             return new Reply(false,WHAT_NONE_PERMISSION,"File none read permission.",file);
         }
-        return iteratorAddAllFileInDirectory(file.getAbsolutePath(),file,debug);
+        String name=getName();
+        return iteratorAddAllFileInDirectory(file.getAbsolutePath(),name,file,debug);
     }
 
-    private Reply iteratorAddAllFileInDirectory(String root,File file, String debug){
+    private Reply iteratorAddAllFileInDirectory(String root,String name,File file, String debug){
         if (null!=file&&null!=root&&root.length()>0){
             String fileName=file.getName();
-            String path=file.getAbsolutePath();
-            String dividerHint=mDividerHint;
-            Debug.D(getClass(),"AAAAAAAAAAA sdfasdfa "+root+" "+path);
-//            addChild(new FileConvey(mRetrofit,file,mFolder,fileName,fileName),debug);
-            if (file.isDirectory()){
-                File[] files=file.listFiles();
-                if (null!=files){
-                    for (File child:files) {
-                        if (null!=child){
-                            iteratorAddAllFileInDirectory(root,child,debug);
-                        }
+            String parent=file.getParent();
+            if (null==parent||parent.length()<=0){
+                Debug.W(getClass(),"Can't iterator add all file while parent is NULL."+file);
+                return null;
+            }
+            String targetFolderName=parent.replaceAll(root,"");
+            targetFolderName=null!=name&&name.length()>0?File.separator+name+targetFolderName:targetFolderName;
+            addChild(new FileConvey(mRetrofit,file,targetFolderName,fileName,fileName),debug);
+            File[] files=file.isDirectory()?file.listFiles():null;;
+            if (null!=files){
+                for (File child:files) {
+                    if (null!=child){
+                        iteratorAddAllFileInDirectory(root,name, child,debug);
                     }
                 }
             }
@@ -129,23 +135,23 @@ import okio.BufferedSink;
             String name=getName();
             addParams(LABEL_PARENT,folder,params);
             addParams(LABEL_NAME,name,params);
+            addParams(LABEL_HINT,File.separator,params);
             addParams(LABEL_FOLDER,file.isDirectory()?LABEL_FOLDER:null,params);
-//            params.put(LABEL_DATA,requestBody);
             Debug.D(getClass(),"Upload file "+fileName+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
-//            retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(body,params).enqueue(new Callback<Reply>() {
-//                @Override
-//                public void onResponse(Call<Reply> call, Response<Reply> response) {
-//                    Debug.D(getClass(),"AAAAAAonRes  ponseAAAAAAAA "+Thread.currentThread().getName()+" "+response);
-//                }
-//
-//                @Override
-//                public void onFailure(Call<Reply> call, Throwable t) {
-//                    if (null!=finish){
-//
-//                    }
-//                    Debug.D(getClass(),"onFailure "+t);
-//                }
-//            });
+            retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(body,params).enqueue(new Callback<Reply>() {
+                @Override
+                public void onResponse(Call<Reply> call, Response<Reply> response) {
+                    Debug.D(getClass(),"AAAAAAonRes  ponseAAAAAAAA "+Thread.currentThread().getName()+" "+response);
+                }
+
+                @Override
+                public void onFailure(Call<Reply> call, Throwable t) {
+                    if (null!=finish){
+
+                    }
+                    Debug.D(getClass(),"onFailure "+t);
+                }
+            });
             return null;
         }
 

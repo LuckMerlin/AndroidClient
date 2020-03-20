@@ -149,14 +149,14 @@ public final class Transporter implements Callback{
         Set<AbsTransport> set=transportingMap.keySet();
         final int size=null!=set?set.size():-1;
         if (size>=0){
-                for (AbsTransport child:set) {
-                    if (null!=child&&child.equals(transport)) {
-                        Debug.W(getClass(), "Skip add transport file which already transporting." + transport);
-                        notifyStatusChange(TRANSPORT_REMOVE, transport, progress, null);
-                        return false;
-                    }
+            for (AbsTransport child:set) {
+                if (null!=child&&child.equals(transport)) {
+                    Debug.W(getClass(), "Skip add transport file which already transporting." + transport);
+                    notifyStatusChange(TRANSPORT_REMOVE, transport, progress, null);
+                    return false;
                 }
             }
+        }
         Debug.D(getClass(),"Transport add "+" "+transport);
         final Transporting<Retrofit.Canceler> transporting=new Transporting<>();
         transportingMap.put(transport,transporting);
