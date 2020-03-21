@@ -126,7 +126,13 @@ public final class Conveyor {
            }
         }
         Debug.D(getClass(),"Start convey "+convey+(null!=debug?debug:"."));
-        convey.start(null,debug);
+        service.submit(new Runnable() {
+            @Override
+            public void run() {
+//             Debug.D(getClass(),"  "+Thread.currentThread().getName());
+                convey.start(null,debug);
+            }
+        });
         return false;
     }
 

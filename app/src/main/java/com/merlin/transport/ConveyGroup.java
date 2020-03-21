@@ -74,7 +74,10 @@ public class ConveyGroup<T extends Convey> extends Convey {
             if (null!=currentConveying&&convey==currentConveying){
                 mConveying=null;
             }
-            indexNext(convey,debug);
+           T next= indexNext(convey,debug);
+            if (null!=next) {
+                startChild(next, "After one child finish." + convey);
+            }
         };
         notifyProgress();
         mConveying=convey;

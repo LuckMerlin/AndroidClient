@@ -14,7 +14,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -47,11 +50,10 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         }else if (!file.canRead()){
             return new Reply(false,WHAT_NONE_PERMISSION,"File none read permission.",file);
         }
-        String name=getName();
-        return iteratorAddAllFileInDirectory(file.getAbsolutePath(),name,file,debug);
+        return iteratorAddAllFileInDirectory(file.getParent(),file,debug);
     }
 
-    private Reply iteratorAddAllFileInDirectory(String root,String name,File file, String debug){
+    private Reply iteratorAddAllFileInDirectory(String root,File file, String debug){
         if (null!=file&&null!=root&&root.length()>0){
             String fileName=file.getName();
             String parent=file.getParent();
@@ -60,13 +62,12 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 return null;
             }
             String targetFolderName=parent.replaceAll(root,"");
-            targetFolderName=null!=name&&name.length()>0?File.separator+name+targetFolderName:targetFolderName;
             addChild(new FileConvey(mRetrofit,file,targetFolderName,fileName,fileName),debug);
             File[] files=file.isDirectory()?file.listFiles():null;;
             if (null!=files){
                 for (File child:files) {
                     if (null!=child){
-                        iteratorAddAllFileInDirectory(root,name, child,debug);
+                        iteratorAddAllFileInDirectory(root, child,debug);
                     }
                 }
             }
@@ -128,30 +129,34 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     Debug.D(getClass(),"进度 "+uploaded+" "+total);
                 }
             };
-            MultipartBody.Part body = MultipartBody.Part.createFormData(LABEL_DATA, file.getName(), requestBody);
+            String name=file.getName();
+            String folder=mFolder;
+            String targetFile=(null!=folder?folder:"")+(null!=name?name:"");
+            MultipartBody.Part body = MultipartBody.Part.createFormData(LABEL_PATH, targetFile, requestBody);
             String fileName=file.getName();
             HashMap<String,RequestBody> params = new HashMap<>();
-            String folder=mFolder;
-            String name=getName();
-            addParams(LABEL_PARENT,folder,params);
-            addParams(LABEL_NAME,name,params);
+            final boolean isDirectory=file.isDirectory();
+//            String name=getName();
+//            addParams(LABEL_PARENT,folder,params);
+//            addParams(LABEL_NAME,name,params);
             addParams(LABEL_HINT,File.separator,params);
-            addParams(LABEL_FOLDER,file.isDirectory()?LABEL_FOLDER:null,params);
+            addParams(LABEL_FOLDER,isDirectory?LABEL_FOLDER:null,params);
             Debug.D(getClass(),"Upload file "+fileName+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
-            retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(body,params).enqueue(new Callback<Reply>() {
-                @Override
-                public void onResponse(Call<Reply> call, Response<Reply> response) {
-                    Debug.D(getClass(),"AAAAAAonRes  ponseAAAAAAAA "+Thread.currentThread().getName()+" "+response);
-                }
-
-                @Override
-                public void onFailure(Call<Reply> call, Throwable t) {
-                    if (null!=finish){
-
-                    }
-                    Debug.D(getClass(),"onFailure "+t);
-                }
-            });
+            Reply responseReply;
+            try {
+                Response<Reply> response=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(body,params).execute();
+                responseReply=null!=response?response.body():null;
+//                if (isDirectory&&null!=responseReply&&responseReply.getWhat()==WHAT_EXIST){//Fix
+//                    responseReply=new Reply(true,responseReply.getWhat(),responseReply.getNote(),responseReply.getData());
+//                }
+            } catch (IOException e) {
+                Debug.E(getClass(),"Exception call file upload api."+e,e);
+                responseReply=new Reply(false,WHAT_ERROR_UNKNOWN,"Exception call file upload api."+e,e);
+                e.printStackTrace();
+            }
+            if (null!=finish){
+                finish.onFinish(responseReply);
+            }
             return null;
         }
 
