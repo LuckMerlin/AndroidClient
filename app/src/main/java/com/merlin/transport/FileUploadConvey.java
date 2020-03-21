@@ -18,6 +18,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -129,22 +130,34 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     Debug.D(getClass(),"进度 "+uploaded+" "+total);
                 }
             };
+
             String name=file.getName();
             String folder=mFolder;
-            String targetFile=(null!=folder?folder:"")+(null!=name?name:"");
-            MultipartBody.Part body = MultipartBody.Part.createFormData(LABEL_PATH, targetFile, requestBody);
-            String fileName=file.getName();
-            HashMap<String,RequestBody> params = new HashMap<>();
+            final Headers.Builder headers=new Headers.Builder();
+            headers.add(LABEL_NAME,name);
+            headers.add(LABEL_HINT,File.separator);
+            MultipartBody.Part part=MultipartBody.Part.create(headers.build(),requestBody);
+//            String targetFile=(null!=folder?folder:"")+(null!=name?name:"");
+//            new MultipartBody.Builder().addPart()
+//            final MultipartBody.Builder builder = new MultipartBody.Builder();
+//           builder.setType(MultipartBody.FORM);
+//            builder.addFormDataPart(LABEL_PATH, targetFile, requestBody);
+//            builder.addPart(headers.build(),requestBody);
+//            builder.addPart();
+//            MultipartBody.Part body = MultipartBody.Part.createFormData(LABEL_PATH, targetFile, requestBody);
+//            body.headers().newBuilder().add(LABEL_HINT,File.separator).build();
+//            String fileName=file.getName();
+//            HashMap<String,RequestBody> params = new HashMap<>();
             final boolean isDirectory=file.isDirectory();
 //            String name=getName();
 //            addParams(LABEL_PARENT,folder,params);
 //            addParams(LABEL_NAME,name,params);
-            addParams(LABEL_HINT,File.separator,params);
-            addParams(LABEL_FOLDER,isDirectory?LABEL_FOLDER:null,params);
-            Debug.D(getClass(),"Upload file "+fileName+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
+//            addParams(LABEL_HINT,File.separator,params);
+//            addParams(LABEL_FOLDER,isDirectory?LABEL_FOLDER:null,params);
+            Debug.D(getClass(),"Upload file "+name+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
             Reply responseReply;
             try {
-                Response<Reply> response=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(body,params).execute();
+                Response<Reply> response=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(part).execute();
                 responseReply=null!=response?response.body():null;
 //                if (isDirectory&&null!=responseReply&&responseReply.getWhat()==WHAT_EXIST){//Fix
 //                    responseReply=new Reply(true,responseReply.getWhat(),responseReply.getNote(),responseReply.getData());

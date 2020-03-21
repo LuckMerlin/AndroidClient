@@ -13,6 +13,6 @@ import retrofit2.http.PartMap;
 public interface ApiSaveFile {
     @POST(Address.PREFIX_FILE + "/save")
     @Multipart
-    Call<Reply> save(@Part MultipartBody.Part file, @PartMap HashMap<String, RequestBody> map);
+    Call<Reply> save(@Part MultipartBody.Part file);
 }
 
