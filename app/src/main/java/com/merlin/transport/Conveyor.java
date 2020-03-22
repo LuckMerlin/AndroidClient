@@ -25,17 +25,6 @@ public final class Conveyor {
     private final Map<OnConveyStatusChange,Long> mListeners=new WeakHashMap<>();
     private int mLimit;
     private final Handler mHandler;
-//    private final Convey.Finisher mFinisher=new Convey.Finisher() {
-//        @Override
-//        public void onFinish(Reply reply) {
-//            conveying1.update(ConveyStatus.FINISHED,reply);
-//        }
-//
-//        @Override
-//        public void onProgress(long conveyed, long total, float speed, Convey convey) {
-//
-//        }
-//    };
     public interface Callback{
 
     }
