@@ -63,10 +63,11 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         File file=new File("/sdcard/youku");
 //        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
         new Conveyor(getViewContext(), Looper.getMainLooper()).start(new FileUploadConvey(new
-                Retrofit(), file), new OnConveyStatusChange() {
+                Retrofit(), file,null), new OnConveyStatusChange() {
             @Override
             public void onConveyStatusChanged(int status, Convey transport, Object data) {
-                Debug.D(getClass(),"AAAAAAAAA "+status+" "+transport);
+                Debug.D(getClass(),
+                        "AAAAAAAAA "+status+" "+transport);
             }
         }, null);
 

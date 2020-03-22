@@ -23,11 +23,13 @@ import retrofit2.Response;
 public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
     private final File mFile;
     private final Retrofit mRetrofit;
+    private final String mFolder;
 
-    public FileUploadConvey(Retrofit retrofit,File file){
+    public FileUploadConvey(Retrofit retrofit,File file,String folder){
         super(null!=file?file.getName():null);
         mRetrofit=retrofit;
         mFile=file;
+        mFolder=folder;
     }
 
     @Override
@@ -42,10 +44,10 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         }else if (!file.canRead()){
             return new Reply(false,WHAT_NONE_PERMISSION,"File none read permission.",file);
         }
-        return iteratorAddAllFileInDirectory(file.getParent(),file,debug);
+        return iteratorAddAllFileInDirectory(file.getParent(),file,mFolder,debug);
     }
 
-    private Reply iteratorAddAllFileInDirectory(String root,File file, String debug){
+    private Reply iteratorAddAllFileInDirectory(String root,File file,String folder, String debug){
         if (null!=file&&null!=root&&root.length()>0){
             String fileName=file.getName();
             String parent=file.getParent();
@@ -54,12 +56,20 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 return null;
             }
             String targetFolderName=parent.replaceAll(root,"");
+            if (null!=folder&&folder.length()>0){
+                folder= folder.endsWith(File.separator)?folder:folder+File.separator;
+                if(null!=targetFolderName&&targetFolderName.length()>0){
+                    targetFolderName= targetFolderName.startsWith(File.separator)?
+                            targetFolderName.replaceFirst(File.separator,""): targetFolderName;
+                }
+                targetFolderName=folder+targetFolderName;
+            }
             addChild(new FileConvey(mRetrofit,file,targetFolderName,fileName,fileName),debug);
             File[] files=file.isDirectory()?file.listFiles():null;;
             if (null!=files){
                 for (File child:files) {
                     if (null!=child){
-                        iteratorAddAllFileInDirectory(root, child,debug);
+                        iteratorAddAllFileInDirectory(root, child,folder,debug);
                     }
                 }
             }
