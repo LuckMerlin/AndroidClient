@@ -29,7 +29,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
     }
 
     @Override
-    protected final Reply onStart(Finish finish, String debug) {
+    protected final Reply onStart(Finisher finish, String debug) {
         T conveying=mConveying;
         if (null!=conveying){
             Debug.W(getClass(),"Can't start convey group while exist conveying child."+conveying);
@@ -40,7 +40,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
             Debug.W(getClass(),"Can't start convey group while next index NULL.");
             return new Reply(false,WHAT_EMPTY,"Not index first convey.",null);
         }
-        return startChild(convey,debug);
+        return startChild(finish,convey,debug);
     }
 
     public final int childCount(){
@@ -58,7 +58,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null!=data&&null!=findChild(data);
     }
 
-    private synchronized Reply startChild(T convey,String debug){
+    private synchronized Reply startChild(Finisher finisher,T convey,String debug){
         if (null==convey){
             Debug.W(getClass(),"Can't convey while arg NULL "+(null!=debug?debug:"."));
             return new Reply(false,WHAT_ARGS_INVALID,"Convey in NULL.",null);
@@ -68,21 +68,32 @@ public class ConveyGroup<T extends Convey> extends Convey {
             Debug.W(getClass(),"Can't convey while exist conveying child "+(null!=debug?debug:"."));
             return new Reply(false,WHAT_EXIST,"Exist conveying child.",conveying);
         }
-        final Finish innerFinish= (innerReply)->{
-            Debug.D(getClass(),"Child 结束 "+innerReply);
-            Convey currentConveying=mConveying;
-            if (null!=currentConveying&&convey==currentConveying){
-                mConveying=null;
+        final Finisher innerFinish= new Finisher() {
+            @Override
+            public void onFinish(Reply innerReply) {
+                Debug.D(getClass(),"Child 结束 "+innerReply);
+                Convey currentConveying=mConveying;
+                if (null!=currentConveying&&convey==currentConveying){
+                    mConveying=null;
+                }
+                T next= indexNext(convey,debug);
+                if (null!=next) {
+                    startChild(this,next, "After one child finish." + convey);
+                }else if (null!=finisher){
+                    finisher.onFinish(new Reply(true,WHAT_SUCCEED,"Group finish.",null));
+                }
             }
-           T next= indexNext(convey,debug);
-            if (null!=next) {
-                startChild(next, "After one child finish." + convey);
+
+            @Override
+            public void onProgress(long conveyed, long total, float speed, Convey convey) {
+                if (null!=finisher){
+                    finisher.onProgress(conveyed,total,speed,convey);
+                }
             }
         };
-        notifyProgress();
         mConveying=convey;
         Debug.D(getClass(),"Start child convey of group "+getName()+" "+(null!=debug?debug:"."));
-        final Reply startReply= convey.start(innerFinish,debug);
+        final Reply startReply= convey.start(innerFinish,getStatusChange(),debug);
         if (null!=startReply&&!startReply.isSuccess()){
             Convey currentConveying=mConveying;
             if (null!=currentConveying&&convey==currentConveying){

@@ -1,16 +1,21 @@
 package com.merlin.transport;
-
-import androidx.annotation.NonNull;
-
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
 public abstract class Convey implements What {
+   private OnConveyStatusChange mStatusChange;
+   private long mTotal,mConveyed;
+   private float mSpeed;
    private final String mName;
    private ConveyStatus mStatus;
 
-   public Convey(String name){
+    public Convey(String name){
+        this(name,null);
+    }
+
+   public Convey(String name,OnConveyStatusChange change){
+       mStatusChange=change;
        mName=name;
    }
 
@@ -22,52 +27,69 @@ public abstract class Convey implements What {
        return false;
    }
 
-   protected abstract Reply onStart(Finish finish,String debug);
+   protected abstract Reply onStart(Finisher finish,String debug);
 
-   public final Reply start(Finish finish,String debug){
+   public final Reply start(Finisher finish,OnConveyStatusChange change,String debug){
        ConveyStatus statusObj=getStatus();
        int status=null!=statusObj?statusObj.getStatus():ConveyStatus.IDLE;
        if (status!=ConveyStatus.IDLE&&status!=ConveyStatus.FINISHED&&status!=ConveyStatus.CANCELED&&status!=ConveyStatus.PAUSED){
            Debug.W(getClass(),"Can't start convey again while in status "+(null!=debug?debug:".")+" status="+status);
             return null;
        }
-       notifyChangeStatus(ConveyStatus.PREPARING,null);
+       notifyChangeStatus(ConveyStatus.PREPARING,null,change);
        Reply reply=onPrepare(debug);
-       notifyChangeStatus(ConveyStatus.PREPARED,null);
+       notifyChangeStatus(ConveyStatus.PREPARED,null,change);
        if (null!=reply&&!reply.isSuccess()){ //Prepare fail
-           notifyChangeStatus(ConveyStatus.FINISHED,reply);
+           notifyChangeStatus(ConveyStatus.FINISHED,reply,change);
            return null;
        }
-       final Finish innerFinish= (innerReply)->{
-           mStatus=new ConveyStatus(ConveyStatus.FINISHED,innerReply);
-           notifyChangeStatus(ConveyStatus.FINISHED,mStatus);
-           if (null!=finish){
-               finish.onFinish(innerReply);
+       final Finisher innerFinish=new Finisher() {
+           @Override
+           public void onFinish(Reply innerReply) {
+               mStatus=new ConveyStatus(ConveyStatus.FINISHED,innerReply);
+               notifyChangeStatus(ConveyStatus.FINISHED,mStatus,change);
+               if (null!=finish){
+                   finish.onFinish(innerReply);
+               }
+           }
+
+           @Override
+           public void onProgress(long conveyed, long total, float speed,Convey convey) {
+               mConveyed=conveyed;mTotal=total;mSpeed=speed;
+               notifyChangeStatus(ConveyStatus.PROGRESS,convey,change);
            }
        };
-       notifyChangeStatus(ConveyStatus.STARTED,null);
+       notifyChangeStatus(ConveyStatus.STARTED,null,change);
        final Reply startReply= onStart(innerFinish,debug);
        if (null!=startReply&&!startReply.isSuccess()){
            innerFinish.onFinish(startReply);
+           notifyChangeStatus(ConveyStatus.FINISHED,startReply,change);
        }
        return startReply;
    }
 
-   private void notifyChangeStatus(int status,Object arg){
-       mStatus=new ConveyStatus(status,arg);
-       Debug.D(getClass(),"notifyChangeStatus "+status);
+   private void notifyChangeStatus(int status,Object arg,OnConveyStatusChange change){
+       if (status!=ConveyStatus.PROGRESS){
+           mStatus=new ConveyStatus(status,arg);
+       }
+       if (null!=change){
+           change.onConveyStatusChanged(status,this,arg);
+       }
+       OnConveyStatusChange globalChange=mStatusChange;
+       if (null!=globalChange){
+           globalChange.onConveyStatusChanged(status,this,arg);
+       }
    }
 
-   protected void notifyProgress(){
-
+   public final void setStatusChange(OnConveyStatusChange statusChange){
+       mStatusChange=statusChange;
    }
 
-   protected final boolean finish(int what,String note,Object data){
+    public final OnConveyStatusChange getStatusChange() {
+        return mStatusChange;
+    }
 
-       return false;
-   }
-
-   public final boolean isFinished(){
+    public final boolean isFinished(){
        return isStatus(ConveyStatus.FINISHED);
    }
 
@@ -78,6 +100,18 @@ public abstract class Convey implements What {
 
     public final String getName() {
         return mName;
+    }
+
+    public float getSpeed() {
+        return mSpeed;
+    }
+
+    public long getConveyed() {
+        return mConveyed;
+    }
+
+    public long getTotal() {
+        return mTotal;
     }
 
     public final Object getStatusObject(int status){
@@ -98,11 +132,11 @@ public abstract class Convey implements What {
         return isStatus(ConveyStatus.CANCELED);
     }
 
-    public interface Finish{
+    public interface Finisher{
         void onFinish(Reply reply);
+        void onProgress(long conveyed,long total,float speed, Convey convey);
     }
 
-    @NonNull
     @Override
     public String toString() {
         return ""+getName()+" " +

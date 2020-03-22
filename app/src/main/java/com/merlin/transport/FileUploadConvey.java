@@ -12,6 +12,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -49,7 +51,6 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
 
     private Reply iteratorAddAllFileInDirectory(String root,File file,String folder, String debug){
         if (null!=file&&null!=root&&root.length()>0){
-            String fileName=file.getName();
             String parent=file.getParent();
             if (null==parent||parent.length()<=0){
                 Debug.W(getClass(),"Can't iterator add all file while parent is NULL."+file);
@@ -64,7 +65,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 }
                 targetFolderName=folder+targetFolderName;
             }
-            addChild(new FileConvey(mRetrofit,file,targetFolderName,fileName,fileName),debug);
+            addChild(new FileConvey(mRetrofit,file,targetFolderName),debug);
             File[] files=file.isDirectory()?file.listFiles():null;;
             if (null!=files){
                 for (File child:files) {
@@ -84,15 +85,13 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
     protected final static class FileConvey extends Convey{
         private final File mFile;
         private final String mFolder;
-        private final String mName;
         private final Retrofit mRetrofit;
 
-        private FileConvey(Retrofit retrofit,File file,String folder,String name,String conveyName){
-            super(conveyName);
+        private FileConvey(Retrofit retrofit,File file,String folder){
+            super(null!=file?file.getName():null);
             mRetrofit=retrofit;
             mFile=file;
             mFolder=folder;
-            mName=name;
         }
 
         @Override
@@ -111,7 +110,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         }
 
         @Override
-        protected Reply onStart(Finish finish, String debug) {
+        protected Reply onStart(Finisher finish, String debug) {
             final Retrofit retrofit=mRetrofit;
             if (null==retrofit){
                 Debug.W(getClass(),"Can't upload file with NULL retrofit."+(null!=debug?debug:"."));
@@ -128,20 +127,20 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             final FileUploadBody requestBody = new FileUploadBody(file){
                 @Override
                 protected void onTransportProgress(long uploaded, long total, float speed) {
-                    Debug.D(getClass(),"进度 "+uploaded+" "+total);
+                    if (null!=finish){
+                        finish.onProgress(uploaded,total,speed,FileConvey.this);
+                    }
                 }
             };
-
             String name=file.getName();
             String folder=mFolder;
-            StringBuilder disposition = new StringBuilder("form-data; name=");
-            appendQuotedString(disposition, name);
-            disposition.append("; filename=");
-            appendQuotedString(disposition, name);
-            Headers.Builder headersBuilder = new Headers.Builder().addUnsafeNonAscii("Content-Disposition", disposition.toString());
-            headersBuilder.add(LABEL_NAME,name);
-            headersBuilder.add(LABEL_PARENT,folder);
-            headersBuilder.add(LABEL_PATH_SEP,File.separator);
+            name= null!=name?name:"";
+            StringBuilder disposition = new StringBuilder("form-data; name=luckmerlin;filename=luckmerlin");
+            Headers.Builder headersBuilder = new Headers.Builder().addUnsafeNonAscii(
+                    "Content-Disposition", disposition.toString());
+            headersBuilder.add(LABEL_NAME,encode(name,""));
+            headersBuilder.add(LABEL_PARENT,encode(folder,""));
+            headersBuilder.add(LABEL_PATH_SEP,encode(File.separator,""));
             if (file.isDirectory()){
                 headersBuilder.add(LABEL_FOLDER,LABEL_FOLDER);
             }
@@ -161,38 +160,15 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             }
             return null;
         }
-
-//        private boolean addParams(String key,String value,Map<String, RequestBody> map){
-//            RequestBody requestBody = null!=key&&null!=value&&null!=map?RequestBody.
-//                    create(MediaType.parse("multipart/form-data"), value):null;
-//            if (null!=requestBody){
-//                map.put(key,requestBody);
-//                return true;
-//            }
-//            return false;
-//        }
-
-        void appendQuotedString(StringBuilder target, String key) {
-            target.append('"');
-            for (int i = 0, len = key.length(); i < len; i++) {
-                char ch = key.charAt(i);
-                switch (ch) {
-                    case '\n':
-                        target.append("%0A");
-                        break;
-                    case '\r':
-                        target.append("%0D");
-                        break;
-                    case '"':
-                        target.append("%22");
-                        break;
-                    default:
-                        target.append(ch);
-                        break;
-                }
+        private String encode(String name,String def){
+            try {
+                return null!=name&&name.length()>0?URLEncoder.encode(name, "UTF-8"):def;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
-            target.append('"');
+            return def;
         }
+
     }
 
     private static abstract class FileUploadBody extends RequestBody {

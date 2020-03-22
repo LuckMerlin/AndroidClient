@@ -9,6 +9,9 @@ public class ConveyStatus {
     public final static int PAUSED=12318;
     public final static int CANCELED=12319;
     public final static int FINISHED=12320;
+    public final static int PROGRESS=12321;
+    public final static int CREATE=12322;
+    public final static int DESTROY=12323;
     private int mStatus=IDLE;
     private Object mObject;
 

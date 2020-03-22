@@ -9,6 +9,7 @@ import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,17 @@ public final class Conveyor {
     private final Map<OnConveyStatusChange,Long> mListeners=new WeakHashMap<>();
     private int mLimit;
     private final Handler mHandler;
-
+//    private final Convey.Finisher mFinisher=new Convey.Finisher() {
+//        @Override
+//        public void onFinish(Reply reply) {
+//            conveying1.update(ConveyStatus.FINISHED,reply);
+//        }
+//
+//        @Override
+//        public void onProgress(long conveyed, long total, float speed, Convey convey) {
+//
+//        }
+//    };
     public interface Callback{
 
     }
@@ -34,7 +45,6 @@ public final class Conveyor {
     }
 
     public Conveyor(Context context, Handler handler){
-//        mContext=null!=context?new WeakReference<>(context):null;
         mHandler=null!=handler?handler:new Handler(Looper.getMainLooper());
     }
 
@@ -112,27 +122,47 @@ public final class Conveyor {
             notifyStatus(ConveyStatus.CANCELED,"Convey map is NULL.",convey,null,mListeners,callback);
             return false;
         }
+        Conveying conveying;
         synchronized (conveyingMap){
-           Conveying conveying= conveyingMap.get(convey);
+            conveying= conveyingMap.get(convey);
            if (null==conveying){
                conveying=new Conveying(ConveyStatus.IDLE,null,callback);
                conveyingMap.put(convey,conveying);
+               notifyStatus(ConveyStatus.ADD,"While convey start.",convey,null,mListeners,callback);
            }
            int status=conveying.getStatus();
            if (status!=ConveyStatus.IDLE){
                Debug.W(getClass(),"Can't start convey while status not idle "+(null!=debug?debug:".")+" "+status+" "+convey);
-               notifyStatus(ConveyStatus.CANCELED,"Status not idle.",null,null,null,callback);
+               notifyStatus(ConveyStatus.CANCELED,"Status not idle.",convey,null,mListeners,callback);
                return false;
            }
         }
         Debug.D(getClass(),"Start convey "+convey+(null!=debug?debug:"."));
-        service.submit(new Runnable() {
+        final Conveying conveying1=conveying;
+        final OnConveyStatusChange innerChange=( status, innerConvey, data)-> {
+                if (null!=callback){
+                    callback.onConveyStatusChanged(status,innerConvey,data);
+                }
+            };
+        final Convey.Finisher finisher=new Convey.Finisher() {
             @Override
-            public void run() {
-//             Debug.D(getClass(),"  "+Thread.currentThread().getName());
-                convey.start(null,debug);
+            public void onFinish(Reply reply) {
+                Debug.D(Conveyor.this.getClass(),"完成 "+convey+" "+reply);
             }
-        });
+
+            @Override
+            public void onProgress(long conveyed, long total, float speed, Convey convey) {
+                Debug.D(Conveyor.this.getClass(),"进度 "+convey);
+            }
+        };
+        service.submit(()->{
+            notifyStatus(ConveyStatus.CREATE,"Convey create.",convey,null,mListeners,callback);
+            Reply reply=convey.start(finisher,innerChange,debug);
+            if (null!=reply&&null!=conveying1){//Save reply
+                conveying1.update(ConveyStatus.FINISHED,reply);
+            }
+
+            notifyStatus(ConveyStatus.DESTROY,"Convey destroy.",convey,null,mListeners,callback);});
         return false;
     }
 
