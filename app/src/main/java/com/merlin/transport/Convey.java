@@ -3,18 +3,18 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
-public abstract class Convey implements What {
+public abstract class Convey extends ConveyStatus implements What {
    private OnConveyStatusChange mStatusChange;
    private long mTotal,mConveyed;
    private float mSpeed;
    private final String mName;
-   private ConveyStatus mStatus;
 
     public Convey(String name){
         this(name,null);
     }
 
    public Convey(String name,OnConveyStatusChange change){
+        super(IDLE,null);
        mStatusChange=change;
        mName=name;
    }
@@ -30,8 +30,7 @@ public abstract class Convey implements What {
    protected abstract Reply onStart(Finisher finish,String debug);
 
    public final Reply start(Finisher finisher,OnConveyStatusChange change,String debug){
-       ConveyStatus statusObj=getStatus();
-       int status=null!=statusObj?statusObj.getStatus():ConveyStatus.IDLE;
+       int status=getStatus();
        if (status!=ConveyStatus.IDLE&&status!=ConveyStatus.FINISHED&&status!=ConveyStatus.CANCELED&&status!=ConveyStatus.PAUSED){
            Debug.W(getClass(),"Can't start convey again while in status "+(null!=debug?debug:".")+" status="+status);
             return null;
@@ -46,11 +45,10 @@ public abstract class Convey implements What {
        final Finisher innerFinish=new Finisher() {
            @Override
            public void onFinish(Reply innerReply) {
-               mStatus=new ConveyStatus(ConveyStatus.FINISHED,innerReply);
+               notifyChangeStatus(ConveyStatus.FINISHED,innerReply,change);
                if (null!=finisher){
                    finisher.onFinish(innerReply);
                }
-               notifyChangeStatus(ConveyStatus.FINISHED,mStatus,change);
            }
 
            @Override
@@ -73,7 +71,7 @@ public abstract class Convey implements What {
 
    private void notifyChangeStatus(int status,Object arg,OnConveyStatusChange change){
        if (status!=ConveyStatus.PROGRESS){
-           mStatus=new ConveyStatus(status,arg);
+           updateStatus(status,arg);
        }
        if (null!=change){
            change.onConveyStatusChanged(status,this,arg);
@@ -116,20 +114,6 @@ public abstract class Convey implements What {
     public long getTotal() {
         return mTotal;
     }
-
-    public final Object getStatusObject(int status){
-        ConveyStatus statusObj=getStatus();
-        return null!=statusObj&&statusObj.getStatus()==status?statusObj.getObject():null;
-    }
-
-   public final boolean isStatus(int status){
-       ConveyStatus statusObj=mStatus;
-       return null!=statusObj&&statusObj.getStatus()==status;
-   }
-
-   public final ConveyStatus getStatus(){
-       return mStatus;
-   }
 
    public final boolean isCanceled() {
         return isStatus(ConveyStatus.CANCELED);

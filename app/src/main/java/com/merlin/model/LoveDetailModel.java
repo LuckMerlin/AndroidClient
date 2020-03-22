@@ -23,6 +23,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.Convey;
+import com.merlin.transport.ConveyStatus;
 import com.merlin.transport.Conveyor;
 import com.merlin.transport.FileUploadConvey;
 import com.merlin.transport.OnConveyStatusChange;
@@ -54,16 +55,24 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         @FormUrlEncoded
         Observable<Reply> save(@Field(Label.LABEL_DATA) String love);
     }
-
+    private OnConveyStatusChange mChange=new OnConveyStatusChange() {
+        @Override
+        public void onConveyStatusChanged(int status, Convey convey, Object data) {
+            Debug.D(getClass(),"AAAAAAAAA "+status+" "+convey.getName());
+        }
+    };
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-//        File file=new File("/sdcard/Musics");
+        File file=new File("/sdcard/Musics");
 //        File file=new File("/sdcard/youku");
-        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-        new Conveyor(getViewContext(), Looper.getMainLooper()).start(new FileUploadConvey(new
-                Retrofit(), file,"林强"), null, null);
+        //        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
+        conveyor.listener(mChange, ConveyStatus.ADD,"");
+        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");
+//        new Conveyor(getViewContext(), Looper.getMainLooper()).start(, null, null);
+        conveyor.add(null,"",convey);
 
 //      RequestBody fileBody = new FileSaveRequestBody(file){
 //            @Override
