@@ -12,29 +12,20 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
     private final File mFile;
     private final Retrofit mRetrofit;
-    private final String mFolder;
 
-    public FileUploadConvey(Retrofit retrofit,File file,String folder, String name){
-        super(null!=name&&name.length()>0?name:null!=file?file.getName():null);
-        mFolder=folder;
+    public FileUploadConvey(Retrofit retrofit,File file){
+        super(null!=file?file.getName():null);
         mRetrofit=retrofit;
         mFile=file;
     }
@@ -133,35 +124,23 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
 
             String name=file.getName();
             String folder=mFolder;
-            final Headers.Builder headers=new Headers.Builder();
-            headers.add(LABEL_NAME,name);
-            headers.add(LABEL_HINT,File.separator);
-            MultipartBody.Part part=MultipartBody.Part.create(headers.build(),requestBody);
-//            String targetFile=(null!=folder?folder:"")+(null!=name?name:"");
-//            new MultipartBody.Builder().addPart()
-//            final MultipartBody.Builder builder = new MultipartBody.Builder();
-//           builder.setType(MultipartBody.FORM);
-//            builder.addFormDataPart(LABEL_PATH, targetFile, requestBody);
-//            builder.addPart(headers.build(),requestBody);
-//            builder.addPart();
-//            MultipartBody.Part body = MultipartBody.Part.createFormData(LABEL_PATH, targetFile, requestBody);
-//            body.headers().newBuilder().add(LABEL_HINT,File.separator).build();
-//            String fileName=file.getName();
-//            HashMap<String,RequestBody> params = new HashMap<>();
-            final boolean isDirectory=file.isDirectory();
-//            String name=getName();
-//            addParams(LABEL_PARENT,folder,params);
-//            addParams(LABEL_NAME,name,params);
-//            addParams(LABEL_HINT,File.separator,params);
-//            addParams(LABEL_FOLDER,isDirectory?LABEL_FOLDER:null,params);
+            StringBuilder disposition = new StringBuilder("form-data; name=");
+            appendQuotedString(disposition, name);
+            disposition.append("; filename=");
+            appendQuotedString(disposition, name);
+            Headers.Builder headersBuilder = new Headers.Builder().addUnsafeNonAscii("Content-Disposition", disposition.toString());
+            headersBuilder.add(LABEL_NAME,name);
+            headersBuilder.add(LABEL_PARENT,folder);
+            headersBuilder.add(LABEL_PATH_SEP,File.separator);
+            if (file.isDirectory()){
+                headersBuilder.add(LABEL_FOLDER,LABEL_FOLDER);
+            }
+            MultipartBody.Part part= MultipartBody.Part.create(headersBuilder.build(),requestBody);
             Debug.D(getClass(),"Upload file "+name+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
             Reply responseReply;
             try {
                 Response<Reply> response=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(part).execute();
                 responseReply=null!=response?response.body():null;
-//                if (isDirectory&&null!=responseReply&&responseReply.getWhat()==WHAT_EXIST){//Fix
-//                    responseReply=new Reply(true,responseReply.getWhat(),responseReply.getNote(),responseReply.getData());
-//                }
             } catch (IOException e) {
                 Debug.E(getClass(),"Exception call file upload api."+e,e);
                 responseReply=new Reply(false,WHAT_ERROR_UNKNOWN,"Exception call file upload api."+e,e);
@@ -173,14 +152,36 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             return null;
         }
 
-        private boolean addParams(String key,String value,Map<String, RequestBody> map){
-            RequestBody requestBody = null!=key&&null!=value&&null!=map?RequestBody.
-                    create(MediaType.parse("multipart/form-data"), value):null;
-            if (null!=requestBody){
-                map.put(key,requestBody);
-                return true;
+//        private boolean addParams(String key,String value,Map<String, RequestBody> map){
+//            RequestBody requestBody = null!=key&&null!=value&&null!=map?RequestBody.
+//                    create(MediaType.parse("multipart/form-data"), value):null;
+//            if (null!=requestBody){
+//                map.put(key,requestBody);
+//                return true;
+//            }
+//            return false;
+//        }
+
+        void appendQuotedString(StringBuilder target, String key) {
+            target.append('"');
+            for (int i = 0, len = key.length(); i < len; i++) {
+                char ch = key.charAt(i);
+                switch (ch) {
+                    case '\n':
+                        target.append("%0A");
+                        break;
+                    case '\r':
+                        target.append("%0D");
+                        break;
+                    case '"':
+                        target.append("%22");
+                        break;
+                    default:
+                        target.append(ch);
+                        break;
+                }
             }
-            return false;
+            target.append('"');
         }
     }
 

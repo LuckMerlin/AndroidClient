@@ -1,5 +1,7 @@
 package com.merlin.transport;
 
+import androidx.annotation.NonNull;
+
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
@@ -100,5 +102,10 @@ public abstract class Convey implements What {
         void onFinish(Reply reply);
     }
 
-
+    @NonNull
+    @Override
+    public String toString() {
+        return ""+getName()+" " +
+                ""+super.toString();
+    }
 }

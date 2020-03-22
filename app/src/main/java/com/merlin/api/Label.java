@@ -40,4 +40,5 @@ public interface Label{
    String  LABEL_TERMINAL="terminal";
    String  LABEL_DOWNLOAD="download";
    String  LABEL_UPLOAD="upload";
+   String  LABEL_PATH_SEP = "pathSep";
 }
