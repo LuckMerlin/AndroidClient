@@ -29,7 +29,7 @@ public abstract class Convey implements What {
 
    protected abstract Reply onStart(Finisher finish,String debug);
 
-   public final Reply start(Finisher finish,OnConveyStatusChange change,String debug){
+   public final Reply start(Finisher finisher,OnConveyStatusChange change,String debug){
        ConveyStatus statusObj=getStatus();
        int status=null!=statusObj?statusObj.getStatus():ConveyStatus.IDLE;
        if (status!=ConveyStatus.IDLE&&status!=ConveyStatus.FINISHED&&status!=ConveyStatus.CANCELED&&status!=ConveyStatus.PAUSED){
@@ -47,15 +47,18 @@ public abstract class Convey implements What {
            @Override
            public void onFinish(Reply innerReply) {
                mStatus=new ConveyStatus(ConveyStatus.FINISHED,innerReply);
-               notifyChangeStatus(ConveyStatus.FINISHED,mStatus,change);
-               if (null!=finish){
-                   finish.onFinish(innerReply);
+               if (null!=finisher){
+                   finisher.onFinish(innerReply);
                }
+               notifyChangeStatus(ConveyStatus.FINISHED,mStatus,change);
            }
 
            @Override
            public void onProgress(long conveyed, long total, float speed,Convey convey) {
                mConveyed=conveyed;mTotal=total;mSpeed=speed;
+               if (null!=finisher){
+                   finisher.onProgress(conveyed,total,speed,convey);
+               }
                notifyChangeStatus(ConveyStatus.PROGRESS,convey,change);
            }
        };

@@ -147,12 +147,17 @@ public final class Conveyor {
         final Convey.Finisher finisher=new Convey.Finisher() {
             @Override
             public void onFinish(Reply reply) {
+                if (null!=reply&&null!=conveying1){//Save reply
+                    conveying1.update(ConveyStatus.FINISHED,reply);
+                }
                 Debug.D(Conveyor.this.getClass(),"完成 "+convey+" "+reply);
+                notifyStatus(ConveyStatus.FINISHED,"Finished.",convey,reply,mListeners,callback);
             }
 
             @Override
-            public void onProgress(long conveyed, long total, float speed, Convey convey) {
+            public void onProgress(long conveyed, long total, float speed, Convey c) {
                 Debug.D(Conveyor.this.getClass(),"进度 "+convey);
+                notifyStatus(ConveyStatus.PROGRESS,"Progress.",convey,c,mListeners,callback);
             }
         };
         service.submit(()->{
@@ -161,7 +166,6 @@ public final class Conveyor {
             if (null!=reply&&null!=conveying1){//Save reply
                 conveying1.update(ConveyStatus.FINISHED,reply);
             }
-
             notifyStatus(ConveyStatus.DESTROY,"Convey destroy.",convey,null,mListeners,callback);});
         return false;
     }
