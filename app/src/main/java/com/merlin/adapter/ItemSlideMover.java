@@ -12,15 +12,24 @@ public class ItemSlideMover extends ItemTouchHelper.Callback {
     @Override
     public final int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         if (null!=viewHolder&&null!=recyclerView){
-            int swiped = ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
-            int dragFlags = 0;
-            if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
-                dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
-            }else {
-                dragFlags= ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+            RecyclerView.Adapter adapter=recyclerView.getAdapter();
+            Boolean drag=null!=adapter&&adapter instanceof OnItemTouchResolver.onItemDragResolver?
+                    ((OnItemTouchResolver.onItemDragResolver)adapter).onResolveItemDrag(viewHolder,0):null;
+            if (null==drag){
+                int type=viewHolder.getItemViewType();
+                drag=type!=ListAdapter.TYPE_EMPTY&&type!=ListAdapter.TYPE_TAIL;
             }
-            //第一个参数拖动，第二个删除侧滑
-            return makeMovementFlags(dragFlags, swiped);
+            if (null==drag||drag){
+                int swiped = ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
+                int dragFlags = 0;
+                if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
+                    dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
+                }else {
+                    dragFlags= ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                }
+                //第一个参数拖动，第二个删除侧滑
+                return makeMovementFlags(dragFlags, swiped);
+            }
         }
         return 0;
     }

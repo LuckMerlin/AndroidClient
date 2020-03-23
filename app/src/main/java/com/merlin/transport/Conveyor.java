@@ -216,7 +216,7 @@ public final class Conveyor {
         return null;
     }
 
-    public Collection<Convey> get(Class<? extends Convey> cls, int... status){
+    public List<Convey> get(Class<? extends Convey> cls, int... status){
         Map<Convey, Conveying> conveyingMap=mConveying;
         if(null!=conveyingMap){
             final List<Convey> result=new ArrayList<>();

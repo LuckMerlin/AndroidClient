@@ -46,4 +46,6 @@ public class TransportAdapter<T extends AbsTransport> extends Adapter<T> impleme
     public Object onResolveItemTouch(RecyclerView recyclerView) {
         return new ItemSlideRemover();
     }
+
+
 }

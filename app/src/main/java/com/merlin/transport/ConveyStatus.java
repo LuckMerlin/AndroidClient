@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 public class ConveyStatus implements Status {
     private int mStatus=IDLE;
     private Object mObject;
-
     protected ConveyStatus(){
         this(IDLE,null);
     }

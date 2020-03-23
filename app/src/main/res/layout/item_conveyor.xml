@@ -8,18 +8,21 @@
         <variable
             name="position"
             type="int" />
+        <variable
+            name="status"
+            type="String" />
         <import type="com.merlin.util.FileSize"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.util.Speed"/>
         <import type="android.view.View"/>
-        <import type="com.merlin.transport.Status" alias="Status"/>
     </data>
     <LinearLayout
         android:orientation="horizontal"
         binding:enableClick="@{true}"
         android:background="@drawable/selector_round_dark_corner_small"
         android:gravity="center_vertical"
-        android:layout_marginBottom="2dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="8dp"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
         android:paddingBottom="5dp"
@@ -27,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="@{``+position}"
+            android:text="@{``+position+`.`}"
             style="@style/titleSubNormalTextView"/>
         <TextView
             android:gravity="left"
@@ -42,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content">
             <TextView
-                android:text="@{``+data.status}"
+                android:text="@{status}"
                 android:layout_margin="1dp"
                 android:textSize="10sp"
                 style="@style/titleSubNormalTextView"/>

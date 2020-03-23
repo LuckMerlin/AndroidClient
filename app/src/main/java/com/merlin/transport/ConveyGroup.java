@@ -1,5 +1,7 @@
 package com.merlin.transport;
 
+import android.icu.text.Replaceable;
+
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 
@@ -134,6 +136,10 @@ public class ConveyGroup<T extends Convey> extends Convey {
             }
         }
         return false;
+    }
+
+    public final Reply collectChildsReply(){
+        return null;
     }
 
 }

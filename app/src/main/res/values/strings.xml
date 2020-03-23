@@ -110,4 +110,10 @@
     <string name="none">无</string>
     <string name="save">保存</string>
     <string name="title">标题</string>
+    <string name="preparing">准备中</string>
+    <string name="prepared">准备完成</string>
+    <string name="canceled">已取消</string>
+    <string name="started">已启动</string>
+    <string name="paused">已暂停</string>
+    <string name="finished">已完成</string>
 </resources>

@@ -47,7 +47,7 @@ public abstract class SectionsAdapter<D,T,M extends SectionData<T>> extends  Lis
             return false;
         }
         mLastPage=page;
-        return replace(from,list);
+        return replace(from,list,"");
     }
 
     public final boolean empty() {

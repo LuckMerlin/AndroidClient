@@ -139,9 +139,9 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         setData(data,true);
     }
 
-  public final void addAll(List<T> data,boolean notify){
+  public final void addAll(Collection<T> data,boolean notify){
         if (null!=data&&data.size()>0){
-            List<T> datas=mData=null!=mData?mData:new ArrayList<>();
+            Collection<T> datas=mData=null!=mData?mData:new ArrayList<>();
             datas.addAll(data);
         }
         if (notify){
@@ -267,7 +267,17 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
       return false;
   }
 
-  public final boolean replace(int from,List<T> data){
+  public final boolean replace(T data,String debug){
+        int index=null!=data?index(data):-1;
+        if (index>=0){
+           List<T> list= new ArrayList<>(1);
+           list.add(data);
+           return replace(index,list,debug);
+        }
+        return false;
+  }
+
+  public final boolean replace(int from,List<T> data,String debug){
         final int size=null!=data?data.size():0;
         if (size>0){
             List<T> list=null!=data?mData:null;
@@ -289,6 +299,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                      notifyItemInserted(i);
                  }
             }
+//            Debug.D(getClass(),"Repl");
             return true;
         }
         return false;
@@ -321,5 +332,18 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         List<T> list=null!=data?mData:null;
         return null!=list?list.indexOf(data):-1;
    }
+
+    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder,View view,ViewDataBinding binding){
+        //Do nothing
+    }
+
+    @Override
+    public final void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        View view=null!=holder?holder.itemView:null;
+        ViewDataBinding binding=null!=view? DataBindingUtil.getBinding(view):null;
+        onViewDetachedFromWindow(holder,view,binding);
+    }
+
 
 }

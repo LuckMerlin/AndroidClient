@@ -112,7 +112,7 @@ public class ConveyorService extends Service implements Label,OnConveyStatusChan
 
     private class Binder extends android.os.Binder implements ConveyorBinder {
         @Override
-        public Collection<Convey> get(Class<? extends Convey> cls, int... status) {
+        public List<Convey> get(Class<? extends Convey> cls, int... status) {
             Conveyor conveyor=mConveyor;
             return null!=conveyor?conveyor.get(cls,status):null;
         }

@@ -19,6 +19,7 @@ import com.merlin.debug.Debug;
 import com.merlin.model.ConveyorModel;
 import com.merlin.model.Model;
 import com.merlin.transport.ConveyorBinder;
+import com.merlin.transport.ConveyorService;
 import com.merlin.transport.TransportService;
 
 public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {
@@ -59,7 +60,7 @@ public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {
         checkPermission();
         DataBindingUtil.setContentView(this, R.layout.activity_conveyor);
         if (null==mConnection) {
-            Intent intent = new Intent(this, TransportService.class);
+            Intent intent = new Intent(this, ConveyorService.class);
             startService(intent);
             bindService(intent, mConnection = new ServiceConnection() {
                 @Override
