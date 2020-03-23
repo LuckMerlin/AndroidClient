@@ -7,6 +7,7 @@ import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,7 @@ public final class Conveyor {
         mHandler=null!=handler?handler:new Handler(Looper.getMainLooper());
     }
 
-    public final boolean listener(OnConveyStatusChange listener,int status,String debug){
+    public final boolean listener(int status,OnConveyStatusChange listener,String debug){
         if (null!=listener){
             Map<OnConveyStatusChange,Long> reference=mListeners;
             synchronized (reference){
@@ -211,6 +212,26 @@ public final class Conveyor {
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    public Collection<Convey> get(Class<? extends Convey> cls, int... status){
+        Map<Convey, Conveying> conveyingMap=mConveying;
+        if(null!=conveyingMap){
+            final List<Convey> result=new ArrayList<>();
+            synchronized (conveyingMap){
+                Set<Convey> set= conveyingMap.keySet();
+                if (null!=set){
+                    for (Convey child:set) {
+                        if (null!=child&&((null==cls||child.getClass().isAssignableFrom(cls))&&
+                                (null==status||status.length<=0||child.isStatus(status)))){
+                            result.add(child);
+                        }
+                    }
+                }
+            }
+            return null!=result&&result.size()>0?result:null;
         }
         return null;
     }

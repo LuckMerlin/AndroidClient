@@ -15,21 +15,23 @@ import com.merlin.server.Retrofit;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ConveyorService extends Service implements Label,OnConveyStatusChange{
     private final Conveyor mConveyor=new Conveyor(Looper.getMainLooper());
     private final Retrofit mRetrofit=new Retrofit();
+    private final Binder mBinder=new Binder();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mConveyor.listener(this,ConveyStatus.ADD,"While conveyor service onCreate.");
+        mConveyor.listener(ConveyStatus.ADD,this,"While conveyor service onCreate.");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -109,9 +111,29 @@ public class ConveyorService extends Service implements Label,OnConveyStatusChan
         return false;
     }
 
+    private class Binder extends android.os.Binder implements ConveyorBinder {
+        @Override
+        public Collection<Convey> get(Class<? extends Convey> cls, int... status) {
+            Conveyor conveyor=mConveyor;
+            return null!=conveyor?conveyor.get(cls,status):null;
+        }
+
+        @Override
+        public boolean listener(int status, OnConveyStatusChange listener, String debug) {
+            Conveyor conveyor=null!=listener?mConveyor:null;
+            return null!=conveyor&&conveyor.listener(status,listener,debug);
+        }
+
+        @Override
+        public boolean run(int status, String debug, Convey... conveys) {
+            Conveyor conveyor=null!=conveys&&conveys.length>0?mConveyor:null;
+            return null!=conveyor&&conveyor.convey(status,null,debug,conveys);
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mConveyor.listener(this,ConveyStatus.CANCELED,"While conveyor service onDestroy.");
+        mConveyor.listener(ConveyStatus.CANCELED,this,"While conveyor service onDestroy.");
     }
 }
