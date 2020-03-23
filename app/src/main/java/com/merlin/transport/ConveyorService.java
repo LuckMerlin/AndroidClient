@@ -36,7 +36,6 @@ public class ConveyorService extends Service implements Label,OnConveyStatusChan
 
     @Override
     public void onConveyStatusChanged(int status, Convey convey, Object data) {
-
     }
 
     @Override

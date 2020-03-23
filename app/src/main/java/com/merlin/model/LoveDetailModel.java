@@ -10,6 +10,7 @@ import android.view.View;
 import androidx.databinding.ObservableField;
 
 import com.google.gson.Gson;
+import com.merlin.activity.ConveyorActivity;
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Client;
@@ -65,8 +66,10 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         Client meta=new Client("",Address.LOVE_ADDRESS,null,null,null,null);
 //        File file=new File("/sdcard/Musics");
 //        File file=new File("/sdcard/youku");
+
         File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-        ConveyorService.upload(getViewContext(),file,meta,"操蛋d ",0,null);
+        ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
+        startActivity(ConveyorActivity.class);
 //        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
 //        conveyor.listener(mChange, ConveyStatus.ADD,"");
 //        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");

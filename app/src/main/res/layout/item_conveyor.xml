@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="data"
+            type="com.merlin.transport.Convey" />
+        <variable
+            name="position"
+            type="int" />
+        <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.util.Speed"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.transport.Status" alias="Status"/>
+    </data>
+    <LinearLayout
+        android:orientation="horizontal"
+        binding:enableClick="@{true}"
+        android:background="@drawable/selector_round_dark_corner_small"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="2dp"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@{``+position}"
+            style="@style/titleSubNormalTextView"/>
+        <TextView
+            android:gravity="left"
+            android:layout_marginLeft="3dp"
+            android:layout_weight="6"
+            android:text="@{data.name}"
+            style="@style/titleSubNormalTextView"/>
+        <LinearLayout
+            android:layout_weight="2"
+            android:orientation="horizontal"
+            android:gravity="right"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content">
+            <TextView
+                android:text="@{``+data.status}"
+                android:layout_margin="1dp"
+                android:textSize="10sp"
+                style="@style/titleSubNormalTextView"/>
+            <TextView
+                android:text="@{data.speed>=0?Speed.formatNetworkSpeed(data.speed):``}"
+                android:layout_margin="1dp"
+                android:visibility="@{data.speed>0?View.VISIBLE:View.GONE}"
+                android:textSize="10sp"
+                style="@style/titleSubNormalTextView"/>
+            <TextView
+                android:text="@{FileSize.formatSizeText(data.conveyed)+`/`+FileSize.formatSizeText(data.total)}"
+                android:layout_margin="1dp"
+                style="@style/titleSubNormalTextView"/>
+            <ImageView
+                android:layout_marginLeft="3dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</layout>

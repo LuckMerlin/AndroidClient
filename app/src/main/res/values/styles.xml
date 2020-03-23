@@ -65,7 +65,7 @@
             <item name="android:layout_margin">3dp</item>
     </style>
 
-    <style name="activityTransportStyle">
+    <style name="activityConveyorStyle">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
@@ -88,6 +88,8 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
+    <style name="activityTransportStyle" parent="activityConveyorStyle">
+    </style>
     <style name="horizontalDividerLine">
         <item name="android:background">#34ffffff</item>
         <item name="android:layout_marginTop">3dp</item>

@@ -67,6 +67,16 @@
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>
+        <activity android:name="com.merlin.activity.ConveyorActivity"
+            android:theme="@style/activityConveyorStyle"
+            android:launchMode="singleInstance"
+            android:label="@string/conveyor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <activity android:name="com.merlin.activity.PhotoPreviewActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"/>
