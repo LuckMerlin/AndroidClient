@@ -1,7 +1,5 @@
 package com.merlin.transport;
 
-import android.icu.text.Replaceable;
-
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 
