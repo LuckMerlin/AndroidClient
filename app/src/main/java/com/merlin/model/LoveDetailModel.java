@@ -75,7 +75,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 //        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");
 ////        new Conveyor(getViewContext(), Looper.getMainLooper()).start(, null, null);
 //        conveyor.add(null,"",convey);
-
 //      RequestBody fileBody = new FileSaveRequestBody(file){
 //            @Override
 //            protected void onTransportProgress(long upload, long total, double speed) {

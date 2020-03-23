@@ -8,6 +8,7 @@ public abstract class Convey extends ConveyStatus implements What {
    private long mTotal,mConveyed;
    private float mSpeed;
    private final String mName;
+   private boolean mCancel=false;
 
    public Convey(String name){
         this(name,null);
@@ -19,11 +20,21 @@ public abstract class Convey extends ConveyStatus implements What {
        mName=name;
    }
 
-   protected Reply onPrepare(String debug){
-        return null;
-   }
+   protected abstract Reply onPrepare(String debug);
+
+   protected  abstract Boolean onCancel(boolean cancel,String debug);
 
    public final boolean cancel(boolean cancel,String debug){
+       boolean canceled=isStatus(CANCELED);
+       if ((cancel&&canceled)||(!cancel&&!canceled)){
+            return false;
+       }
+       mCancel=cancel;
+       Boolean onCancel=onCancel(cancel,debug);
+       if (null!=onCancel&&onCancel){
+            updateStatus(CANCELED,null);
+            return true;
+       }
        return false;
    }
 
@@ -94,6 +105,18 @@ public abstract class Convey extends ConveyStatus implements What {
        return isStatus(ConveyStatus.FINISHED);
    }
 
+    public boolean isSuccessFinished(){
+        return isReply(true,What.WHAT_SUCCEED);
+    }
+
+    public final boolean isReply(Boolean succeed,Integer what){
+        Reply reply=getReply();
+        if (null!=reply){
+            return (null==succeed||succeed==reply.isSuccess())&&(null==what||what==reply.getWhat());
+        }
+        return false;
+    }
+
    public final Reply getReply(){
        Object finished=getStatusObject(ConveyStatus.FINISHED);
        return null!=finished&&finished instanceof Reply?(Reply)finished:null;
@@ -113,6 +136,10 @@ public abstract class Convey extends ConveyStatus implements What {
 
    public long getTotal() {
         return mTotal;
+    }
+
+    protected final boolean isCancel(){
+       return mCancel;
     }
 
    public final boolean isCanceled() {

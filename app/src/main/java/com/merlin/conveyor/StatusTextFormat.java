@@ -11,24 +11,27 @@ import com.merlin.transport.Status;
 
 public class StatusTextFormat implements Status {
 
-    public String format(Context context, Convey status, String def){
-        if (null!=context&&null!=status){
+    public Integer format(Convey status){
+        if (null!=status){
             switch (status.getStatus()){
                 case CANCELED:
-                    return context.getString(R.string.canceled);
+                    return R.string.canceled;
                 case PREPARING:
-                    return context.getString(R.string.preparing);
+                    return R.string.preparing;
                 case PREPARED:
-                    return context.getString(R.string.prepared);
+                    return R.string.prepared;
                 case STARTED:
-                    return context.getString(R.string.started);
+                    return R.string.started;
                 case PAUSED:
-                    return context.getString(R.string.paused);
+                    return R.string.paused;
                 case FINISHED:
-                    Reply reply=status instanceof ConveyGroup?status.getReply():status.getReply();
-                    return context.getString(R.string.finished);
+                    if (status instanceof ConveyGroup){
+                       Convey convey= ((ConveyGroup)status).getFirstUnSucceedReply();
+                    }
+                    status.getReply();
+                    return R.string.finished;
             }
         }
-        return def;
+        return null;
     }
 }

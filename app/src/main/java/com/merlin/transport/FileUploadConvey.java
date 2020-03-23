@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import okhttp3.Headers;
@@ -132,6 +131,11 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                         finish.onProgress(uploaded,total,speed,FileConvey.this);
                     }
                 }
+
+                @Override
+                protected boolean isCancel() {
+                    return FileConvey.this.isCancel();
+                }
             };
             String name=file.getName();
             String folder=mFolder;
@@ -161,7 +165,14 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             }
             return null;
         }
-        private String encode(String name,String def){
+
+        @Override
+        protected Boolean onCancel(boolean cancel, String debug) {
+            final Retrofit retrofit=mRetrofit;
+            return null!=retrofit;
+        }
+
+        private String encode(String name, String def){
             try {
                 return null!=name&&name.length()>0?URLEncoder.encode(name, "UTF-8"):def;
             } catch (UnsupportedEncodingException e) {
@@ -169,14 +180,14 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             }
             return def;
         }
-
     }
 
     private static abstract class FileUploadBody extends RequestBody {
         private final File mFile;
-        private boolean mCancel=false;
 
         protected abstract void onTransportProgress(long uploaded,long total,float speed);
+
+        protected abstract boolean isCancel();
 
         private FileUploadBody(File file){
             mFile=file;
@@ -209,11 +220,12 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                         byte[] buffer = new byte[bufferSize];
                         in = new FileInputStream(file);
                         long uploaded = 0;
-                        if (!mCancel) {
+                        if (!isCancel()) {
                             int read;
                             succeed = true;
                             while ((read = in.read(buffer)) != -1) {
-                                if (mCancel) {
+                                if (isCancel()) {
+                                    Debug.D(getClass(),"Cancel file upload convey.");
                                     break;
                                 }
                                 uploaded += read;

@@ -7,6 +7,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.ConveyorAdapter;
+import com.merlin.client.databinding.ItemConveyorBinding;
 import com.merlin.transport.Convey;
 import com.merlin.transport.ConveyorBinder;
 import com.merlin.transport.OnConveyStatusChange;
@@ -19,11 +20,11 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange {
     private final ConveyorAdapter mAdapter=new ConveyorAdapter(){
         @Override
         public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding) {
-//            AbsTransport transport=null!=binding&&binding instanceof ItemTransportBinding ?((ItemTransportBinding)binding).getData():null;
-//            TransportBinder binder=mBinder;
-//            if (null!=binder){
-//                binder.run(Callback.TRANSPORT_CANCEL,false,"After remove from view.",transport);
-//            }
+            Convey convey=null!=binding&&binding instanceof ItemConveyorBinding ?((ItemConveyorBinding)binding).getData():null;
+            ConveyorBinder binder=mBinder;
+            if (null!=binder){
+                binder.run(CANCELED,"After remove from view.",convey);
+            }
         }
     };
 
@@ -32,6 +33,10 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange {
         switch (status){
             case ADD:
                 break;
+            case FINISHED:// Get through
+                if (null!=convey&&convey.isSuccessFinished()){//Remove succeed
+                    mAdapter.remove(convey,"While finished with succeed.");
+                }
             default:
                 if (null!=convey) {
                     mAdapter.replace(convey, "While status changed." + status);

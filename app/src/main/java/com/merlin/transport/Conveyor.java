@@ -245,8 +245,8 @@ public final class Conveyor {
                        Set<Convey> set= conveyingMap.keySet();
                        if (null!=set){
                            for (Convey child:set) {
-                                if (null!=child&&child.equals(convey)){
-                                    child.cancel(true,"Before remove convey "+(null!=debug?debug:"."));
+                                if (null!=child&&child.equals(convey)&&child.cancel(true,
+                                        "Before remove convey "+(null!=debug?debug:"."))){
                                     conveyingMap.remove(child);
                                 }
                            }
