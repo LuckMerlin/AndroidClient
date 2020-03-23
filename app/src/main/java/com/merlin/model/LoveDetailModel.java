@@ -5,7 +5,6 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.View;
 
 import androidx.databinding.ObservableField;
@@ -13,20 +12,17 @@ import androidx.databinding.ObservableField;
 import com.google.gson.Gson;
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.Client;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Love;
 import com.merlin.bean.Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.server.Retrofit;
-import com.merlin.transport.Convey;
-import com.merlin.transport.ConveyStatus;
-import com.merlin.transport.Conveyor;
-import com.merlin.transport.FileUploadConvey;
-import com.merlin.transport.OnConveyStatusChange;
+import com.merlin.transport.ConveyorService;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
@@ -55,24 +51,27 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         @FormUrlEncoded
         Observable<Reply> save(@Field(Label.LABEL_DATA) String love);
     }
-    private OnConveyStatusChange mChange=new OnConveyStatusChange() {
-        @Override
-        public void onConveyStatusChanged(int status, Convey convey, Object data) {
-            Debug.D(getClass(),"AAAAAAAAA "+status+" "+convey.getName());
-        }
-    };
+//    private OnConveyStatusChange mChange=new OnConveyStatusChange() {
+//        @Override
+//        public void onConveyStatusChanged(int status, Convey convey, Object data) {
+//            Debug.D(getClass(),"AAAAAAAAA "+status+" "+convey.getName());
+//        }
+//    };
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        File file=new File("/sdcard/Musics");
+//        String name,String url,String account,String imageUrl,String folder,String pathSep
+        Client meta=new Client("",Address.LOVE_ADDRESS,null,null,null,null);
+//        File file=new File("/sdcard/Musics");
 //        File file=new File("/sdcard/youku");
-        //        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
-        conveyor.listener(mChange, ConveyStatus.ADD,"");
-        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");
-//        new Conveyor(getViewContext(), Looper.getMainLooper()).start(, null, null);
-        conveyor.add(null,"",convey);
+        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+        ConveyorService.upload(getViewContext(),file,meta,"操蛋d ",0,null);
+//        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
+//        conveyor.listener(mChange, ConveyStatus.ADD,"");
+//        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");
+////        new Conveyor(getViewContext(), Looper.getMainLooper()).start(, null, null);
+//        conveyor.add(null,"",convey);
 
 //      RequestBody fileBody = new FileSaveRequestBody(file){
 //            @Override

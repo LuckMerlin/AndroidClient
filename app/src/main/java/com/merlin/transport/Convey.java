@@ -9,7 +9,7 @@ public abstract class Convey extends ConveyStatus implements What {
    private float mSpeed;
    private final String mName;
 
-    public Convey(String name){
+   public Convey(String name){
         this(name,null);
     }
 
@@ -86,11 +86,11 @@ public abstract class Convey extends ConveyStatus implements What {
        mStatusChange=statusChange;
    }
 
-    public final OnConveyStatusChange getStatusChange() {
+   public final OnConveyStatusChange getStatusChange() {
         return mStatusChange;
     }
 
-    public final boolean isFinished(){
+   public final boolean isFinished(){
        return isStatus(ConveyStatus.FINISHED);
    }
 
@@ -99,19 +99,19 @@ public abstract class Convey extends ConveyStatus implements What {
        return null!=finished&&finished instanceof Reply?(Reply)finished:null;
    }
 
-    public final String getName() {
+   public final String getName() {
         return mName;
     }
 
-    public float getSpeed() {
+   public float getSpeed() {
         return mSpeed;
     }
 
-    public long getConveyed() {
+   public long getConveyed() {
         return mConveyed;
     }
 
-    public long getTotal() {
+   public long getTotal() {
         return mTotal;
     }
 
@@ -119,13 +119,13 @@ public abstract class Convey extends ConveyStatus implements What {
         return isStatus(ConveyStatus.CANCELED);
     }
 
-    public interface Finisher{
+   public interface Finisher{
         void onFinish(Reply reply);
         void onProgress(long conveyed,long total,float speed, Convey convey);
     }
 
-    @Override
-    public String toString() {
+   @Override
+   public String toString() {
         return ""+getName()+" " +
                 ""+super.toString();
     }

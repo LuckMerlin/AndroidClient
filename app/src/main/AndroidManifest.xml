@@ -86,6 +86,7 @@
         </activity>
         <service android:name="com.merlin.task.DownloadService"/>
         <service android:name="com.merlin.media.MediaPlayService"/>
+        <service android:name="com.merlin.transport.ConveyorService"/>
         <service android:name="com.merlin.transport.TransportService"/>
         <activity
             android:configChanges="orientation|screenSize"

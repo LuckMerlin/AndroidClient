@@ -139,13 +139,11 @@ public final class Conveyor {
                 if (null!=reply&&null!=conveying1){//Save reply
                     conveying1.updateStatus(ConveyStatus.FINISHED,reply);
                 }
-//                Debug.D(Conveyor.this.getClass(),"完成 "+convey+" "+reply);
                 notifyStatus(ConveyStatus.FINISHED,"Finished.",convey,reply,mListeners,callback);
             }
 
             @Override
             public void onProgress(long conveyed, long total, float speed, Convey c) {
-//                Debug.D(Conveyor.this.getClass(),"进度 "+convey);
                 notifyStatus(ConveyStatus.PROGRESS,"Progress.",convey,c,mListeners,callback);
             }
         };
@@ -205,7 +203,6 @@ public final class Conveyor {
                         Set<Convey> set = map.keySet();
                         if (null != set) {
                             for (Convey convey : set) {
-                                Debug.D(getClass(),"AAAA "+convey+" "+convey.getStatus());
                                 if (null != convey && convey.isStatus(child)) {
                                     return convey;
                                 }
@@ -218,7 +215,7 @@ public final class Conveyor {
         return null;
     }
 
-    public boolean cancel(String debug,Convey... conveys){
+    public boolean cancel(String debug,Convey ...conveys){
         if (null!=conveys&&conveys.length>0){
             for(Convey convey:conveys){
                 if (null!=convey){

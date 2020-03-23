@@ -27,7 +27,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
     private final Retrofit mRetrofit;
     private final String mFolder;
 
-    public FileUploadConvey(Retrofit retrofit,File file,String folder){
+    public FileUploadConvey(Retrofit retrofit,File file,String url,String folder){
         super(null!=file?file.getName():null);
         mRetrofit=retrofit;
         mFile=file;
