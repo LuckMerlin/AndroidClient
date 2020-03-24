@@ -19,8 +19,7 @@ import com.merlin.debug.Debug;
 import com.merlin.model.ConveyorModel;
 import com.merlin.model.Model;
 import com.merlin.transport.ConveyorBinder;
-import com.merlin.transport.ConveyorService;
-import com.merlin.transport.TransportService;
+import com.merlin.conveyor.ConveyorService;
 
 public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {
     private static ServiceConnection mConnection;

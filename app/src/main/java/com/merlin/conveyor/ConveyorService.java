@@ -1,4 +1,4 @@
-package com.merlin.transport;
+package com.merlin.conveyor;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,14 +11,19 @@ import com.merlin.api.Label;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
 import com.merlin.server.Retrofit;
+import com.merlin.transport.Convey;
+import com.merlin.transport.ConveyStatus;
+import com.merlin.transport.Conveyor;
+import com.merlin.transport.ConveyorBinder;
+import com.merlin.transport.FileUploadConvey;
+import com.merlin.transport.OnConveyStatusChange;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public class ConveyorService extends Service implements Label,OnConveyStatusChange{
+public class ConveyorService extends Service implements Label, OnConveyStatusChange {
     private final Conveyor mConveyor=new Conveyor(Looper.getMainLooper());
     private final Retrofit mRetrofit=new Retrofit();
     private final Binder mBinder=new Binder();

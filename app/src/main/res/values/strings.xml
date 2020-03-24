@@ -116,4 +116,8 @@
     <string name="started">已启动</string>
     <string name="paused">已暂停</string>
     <string name="finished">已完成</string>
+    <string name="timeout">超时</string>
+    <string name="conveying">传输中</string>
+    <string name="exception">异常</string>
+    <string name="networkException">网络异常</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.merlin.transport;
 
+import androidx.annotation.Nullable;
+
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
@@ -155,7 +157,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return false;
     }
 
-    public final T getFirstUnSucceedReply(){
+    public final T getFirstUnSucceedChild(){
         List<T> children=mChildren;
         if (null!=children){
             synchronized (children){
@@ -170,11 +172,26 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null;
     }
 
+    public final Reply getFirstUnSucceedChildReply(){
+        T child=getFirstUnSucceedChild();
+        return null!=child?child.getReply():null;
+    }
+
     @Override
     public boolean isSuccessFinished() {
-        if (super.isSuccessFinished()){
-            return null==getFirstUnSucceedReply();
-        }
-        return false;
+        return super.isSuccessFinished()&&null==getFirstUnSucceedChild();
     }
+
+//    @Override
+//    public boolean equals(@Nullable Object obj) {
+//        if (null!=obj&&obj instanceof ConveyGroup){
+//            List<T> children=((ConveyGroup)obj).mChildren;
+//            List<T> currChildren=mChildren;
+//            if (null!=children&&null!=currChildren&&children.size()==currChildren.size()
+//            &&children.containsAll(currChildren)){
+//                return true;
+//            }
+//        }
+//        return super.equals(obj);
+//    }
 }

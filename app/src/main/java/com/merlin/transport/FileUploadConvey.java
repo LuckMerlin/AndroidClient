@@ -1,18 +1,22 @@
 package com.merlin.transport;
 
+import androidx.annotation.Nullable;
+
 import com.merlin.api.Address;
 import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
+import com.merlin.api.What;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
-
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
+import java.net.ProtocolException;
+import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 
 import okhttp3.Headers;
@@ -20,6 +24,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
+import retrofit2.Call;
 import retrofit2.Response;
 
 public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
@@ -82,10 +87,28 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         return mFile;
     }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (null!=obj&&obj instanceof FileUploadConvey){
+            FileUploadConvey convey=((FileUploadConvey)obj);
+            String folder=convey.mFolder;
+            File file=convey.mFile;
+            String filePath=null!=file?file.getAbsolutePath():null;
+            File currFile=mFile;
+            String currFilePath=null!=currFile?currFile.getAbsolutePath():null;
+            if (((null==folder&&null==mFolder)||(null!=folder&&null!=mFolder&&folder.equals(mFolder)))&&
+                    (null==filePath&&null==currFilePath)||(null!=filePath&&null!=currFilePath&&filePath.equals(currFilePath))){
+                return true;
+            }
+        }
+        return super.equals(obj);
+    }
+
     protected final static class FileConvey extends Convey{
         private final File mFile;
         private final String mFolder;
         private final Retrofit mRetrofit;
+        private Call<Reply> mUploadingCall;
 
         private FileConvey(Retrofit retrofit,File file,String folder){
             super(null!=file?file.getName():null);
@@ -123,7 +146,11 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             }else if (!file.canRead()){
                 Debug.W(getClass(),"Can't upload file which none read permission."+(null!=debug?debug:"."));
                 return new Reply(false,WHAT_NONE_PERMISSION,"File none read permission.",null);
+            }else if (null!=mUploadingCall){
+                Debug.W(getClass(),"Can't upload file which is already uploading."+(null!=debug?debug:"."));
+                return new Reply(false,WHAT_ALREADY_DOING,"File already uploading.",null);
             }
+
             final FileUploadBody requestBody = new FileUploadBody(file){
                 @Override
                 protected void onTransportProgress(long uploaded, long total, float speed) {
@@ -151,14 +178,37 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             }
             MultipartBody.Part part= MultipartBody.Part.create(headersBuilder.build(),requestBody);
             Debug.D(getClass(),"Upload file "+name+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
-            Reply responseReply;
+            Reply responseReply=null;
+            Call<Reply> call=null;
             try {
-                Response<Reply> response=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(part).execute();
+                call=mUploadingCall=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(part);
+                if (null==call){
+                    Debug.W(getClass(),"Can't upload file which upload call is NULL."+(null!=debug?debug:"."));
+                    return new Reply(false,WHAT_ERROR_UNKNOWN,"Error on NULL file upload call.",null);
+                }
+                Response<Reply> response=call.execute();
                 responseReply=null!=response?response.body():null;
             } catch (IOException e) {
+                if (e instanceof SocketTimeoutException){
+                    responseReply=new Reply(false,WHAT_TIMEOUT,"Timeout call file upload api."+e,e);
+                }else if (e instanceof ConnectException){
+                    responseReply=new Reply(false,WHAT_NONE_NETWORK,"Network exception call file upload api."+e,e);
+                }else if(e instanceof ProtocolException){
+                    String message=e.getMessage();
+                    if (null!=message&&message.equals(Integer.toString(What.WHAT_CANCEL))){
+                        responseReply=new Reply(false,WHAT_CANCEL,"Canceled call file upload api."+e,e);
+                    }else{
+                        responseReply=new Reply(false,WHAT_EXCEPTION,"Exception call file upload api."+e,e);
+                    }
+                }else{
+                    responseReply=new Reply(false,WHAT_EXCEPTION,"Exception call file upload api."+e,e);
+                }
                 Debug.E(getClass(),"Exception call file upload api."+e,e);
-                responseReply=new Reply(false,WHAT_ERROR_UNKNOWN,"Exception call file upload api."+e,e);
                 e.printStackTrace();
+            }
+            Call<Reply> curr=mUploadingCall;
+            if (null!=curr&&null!=call&&curr==call){
+                mUploadingCall=null;
             }
             if (null!=finish){
                 finish.onFinish(responseReply);
@@ -169,7 +219,15 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         @Override
         protected Boolean onCancel(boolean cancel, String debug) {
             final Retrofit retrofit=mRetrofit;
-            return null!=retrofit;
+            Call<Reply> curr=mUploadingCall;
+            if (null!=retrofit&&null!=curr){
+                if (cancel&&!curr.isCanceled()){
+                    Debug.D(getClass(),"Canceling file upload "+mFile+" "+(null!=debug?debug:"."));
+                    curr.cancel();
+                    return true;
+                }
+            }
+            return false;
         }
 
         private String encode(String name, String def){
@@ -205,28 +263,23 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         }
 
         @Override
-        public void writeTo(BufferedSink sink) throws IOException {
+        public void writeTo(BufferedSink sink) {
             final File file = mFile;
-            boolean succeed = false;
             if (null != file && file.exists()) {
                 if (file.isFile()) {
                     FileInputStream in = null;
+                    long fileLength = file.length();
+                    int bufferSize = 1024;
+                    byte[] buffer = new byte[bufferSize];
                     try {
-                        long fileLength = file.length();
-                        JSONObject json = new JSONObject();
-                        json.put(Label.LABEL_NAME, file.getName());
-                        json.put(Label.LABEL_LENGTH, fileLength);
-                        int bufferSize = 1024;
-                        byte[] buffer = new byte[bufferSize];
                         in = new FileInputStream(file);
                         long uploaded = 0;
                         if (!isCancel()) {
                             int read;
-                            succeed = true;
                             while ((read = in.read(buffer)) != -1) {
                                 if (isCancel()) {
                                     Debug.D(getClass(),"Cancel file upload convey.");
-                                    break;
+                                    throw new IOException(Integer.toString(What.WHAT_CANCEL));
                                 }
                                 uploaded += read;
                                 sink.write(buffer, 0, read);
@@ -234,16 +287,18 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                             }
                         }
                     } catch (Exception e) {
-                        succeed = false;
-                    } finally {
-                        if (null != in) {
-                            in.close();
+                        e.printStackTrace();
+                    }finally {
+                        if (null!=in){
+                            try {
+                                in.close();
+                            } catch (IOException e) {
+                            }
                         }
                     }
                 }
             }
         }
-
     }
 
 }

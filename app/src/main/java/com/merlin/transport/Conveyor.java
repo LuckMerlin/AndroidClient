@@ -88,7 +88,7 @@ public final class Conveyor {
 
     private boolean triggerNext(String debug){
         if (isLimitTouched()){//Not need trigger next NOW
-            Debug.D(getClass(),"Not need trigget next convey while limit touched "+(null!=debug?debug:".")+mLimit);
+            Debug.D(getClass(),"Not need trigger next convey while limit touched "+(null!=debug?debug:".")+mLimit);
             return false;
         }
         Convey convey=findNextInStatus(ConveyStatus.IDLE);

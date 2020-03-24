@@ -8,9 +8,11 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.Reply;
+import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemConveyorBinding;
-import com.merlin.conveyor.StatusTextFormat;
+import com.merlin.debug.Debug;
 import com.merlin.transport.Convey;
 import com.merlin.transport.ConveyGroup;
 import com.merlin.transport.Status;
@@ -18,12 +20,12 @@ import com.merlin.transport.Status;
 import java.util.List;
 
 public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements OnItemTouchResolver, Status {
-//    private final StatusTextFormat mFormat=new StatusTextFormat();
-
 
     private Integer formatStatus(Convey convey){
         if (null!=convey){
             switch (convey.getStatus()){
+                case PROGRESS:
+                    return R.string.conveying;
                 case CANCELED:
                     return R.string.canceled;
                 case PREPARING:
@@ -35,11 +37,27 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
                 case PAUSED:
                     return R.string.paused;
                 case FINISHED:
-                    if (convey instanceof ConveyGroup){
-                        Convey unSucceedReply= ((ConveyGroup)convey).getFirstUnSucceedReply();
-//                        return unSucceedReply.getReply()
-                    }
-                    return R.string.finished;
+                    Reply reply=convey instanceof ConveyGroup?((ConveyGroup)convey).getFirstUnSucceedChildReply():convey.getReply();
+                    Integer replyText=null!=convey?getReplyText(reply):null;
+                    return null==replyText?R.string.finished:replyText;
+            }
+        }
+        return null;
+    }
+
+    private Integer getReplyText(Reply reply){
+        if (null!=reply){
+            switch (reply.getWhat()){
+                case What.WHAT_EXCEPTION:
+                    return R.string.exception;
+                case What.WHAT_TIMEOUT:
+                    return R.string.timeout;
+                case What.WHAT_NONE_NETWORK:
+                    return R.string.networkException;
+                case What.WHAT_CANCEL:
+                    return R.string.canceled;
+                default:
+                    return reply.isSuccess()?R.string.finished:R.string.error;
             }
         }
         return null;

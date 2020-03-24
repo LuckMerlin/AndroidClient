@@ -333,16 +333,18 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null!=list?list.indexOf(data):-1;
    }
 
-    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder,View view,ViewDataBinding binding){
+  public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder,View view,ViewDataBinding binding){
         //Do nothing
     }
 
-    @Override
-    public final void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+  @Override
+  public final void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
-        View view=null!=holder?holder.itemView:null;
-        ViewDataBinding binding=null!=view? DataBindingUtil.getBinding(view):null;
-        onViewDetachedFromWindow(holder,view,binding);
+        if (null!=holder){
+            View view=holder.itemView;
+            ViewDataBinding binding=null!=view? DataBindingUtil.getBinding(view):null;
+            onViewDetachedFromWindow(holder,view,binding);
+        }
     }
 
 

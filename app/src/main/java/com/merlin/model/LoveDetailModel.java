@@ -18,12 +18,11 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Love;
 import com.merlin.bean.Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.transport.ConveyorService;
+import com.merlin.conveyor.ConveyorService;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
@@ -70,6 +69,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
         ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
         startActivity(ConveyorActivity.class);
+//        post(()->{mBinder.run();},5000);
 //        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
 //        conveyor.listener(mChange, ConveyStatus.ADD,"");
 //        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");
