@@ -263,17 +263,18 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
   }
 
   public final boolean add(int index,T data){
-      List<T> list=null!=data?mData:null;
-      int size=null!=list?list.size():-1;
-      if (size>=0){
-          index=index<=0||index>=size?size:index;
-          if (null!=data&&!list.contains(data)){
-              list.add(index,data);
-              notifyItemChanged(index);
-              return true;
-          }
-      }
-      Debug.W(getClass(),"Can't add item into list adapter."+size);
+        if (null!=data){
+            List<T> list=mData;
+            list=null!=list?list:(mData=new ArrayList<>(1));
+            int size= list.size();
+            index=index<=0||index>=size?size:index;
+            if (null!=data&&!list.contains(data)){
+                list.add(index,data);
+                notifyItemChanged(index);
+                return true;
+            }
+        }
+      Debug.W(getClass(),"Can't add item into list adapter."+data);
       return false;
   }
 

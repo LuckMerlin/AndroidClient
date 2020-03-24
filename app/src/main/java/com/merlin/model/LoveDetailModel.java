@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TimePicker;
@@ -12,9 +13,10 @@ import android.widget.TimePicker;
 import androidx.databinding.ObservableField;
 
 import com.google.gson.Gson;
-import com.merlin.activity.ConveyorActivity;
+import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Client;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
@@ -23,17 +25,29 @@ import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.bean.Photo;
 import com.merlin.client.R;
+import com.merlin.conveyor.FileUploadConvey;
 import com.merlin.debug.Debug;
-import com.merlin.conveyor.ConveyorService;
+import com.merlin.file.FileSaveBuilder;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import me.nereo.multi_image_selector.MultiImageSelector;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -99,7 +113,26 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
             case 1:
-                return onSingleTap(view,resId,data);
+                switch (resId){
+                    case  R.id.loveDetail_saveTV:
+                        return save("After save tap.");
+                    case R.drawable.selector_photo_add:
+                        Context context=getViewContext();
+                        if (null!=context&&context instanceof Activity){
+                            MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+                        }
+                        return true;
+                    case R.id.loveDetail_planDateTV:
+                        Calendar curr=Calendar.getInstance();
+                        curr.setTime(new Date(mPlanTime.get()));
+                        DatePickerDialog dpDialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
+                            curr.set(year,month,dayOfMonth);
+                            mPlanTime.set(curr.getTimeInMillis());
+                        }, curr.get(Calendar.YEAR), curr.get(Calendar.MONTH), curr.get(Calendar.DAY_OF_MONTH));
+                        dpDialog.show();
+                        return true;
+                }
+                break;
             case 2:
                 if (resId == R.id.loveDetail_planDateTV){
                     Calendar curr=Calendar.getInstance();
@@ -112,29 +145,18 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                     tpD.show();
                     return true;
                 }
+                break;
         }
-        return false;
-    }
-
-    private boolean onSingleTap(View view, int resId, Object data){
-        switch (resId){
-            case  R.id.loveDetail_saveTV:
-                return save("After save tap.");
-            case R.drawable.selector_photo_add:
-                Context context=getViewContext();
-                if (null!=context&&context instanceof Activity){
-                    MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
-                }
-                return true;
-            case R.id.loveDetail_planDateTV:
-                Calendar curr=Calendar.getInstance();
-                curr.setTime(new Date(mPlanTime.get()));
-                DatePickerDialog dpDialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
-                    curr.set(year,month,dayOfMonth);
-                    mPlanTime.set(curr.getTimeInMillis());
-                    }, curr.get(Calendar.YEAR), curr.get(Calendar.MONTH), curr.get(Calendar.DAY_OF_MONTH));
-                 dpDialog.show();
-                 return true;
+        if (null!=data&&data instanceof Photo){
+            Object imageUrlObj=((Photo)data).getImageUrl();
+            String imageUrl=null!=imageUrlObj&&imageUrlObj instanceof String?(String)imageUrlObj:null;
+            Uri uri=null!=imageUrl?Uri.fromFile(new File(imageUrl)):null;
+            if (null!=uri){
+                Bundle bundle=new Bundle();
+                bundle.putParcelable(Label.LABEL_DATA,uri);
+                startActivity(PhotoPreviewActivity.class,bundle);
+            }
+            return true;
         }
         return false;
     }
@@ -152,14 +174,47 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
         }
-        final Love love=new Love(title, planTime, content,mPhotoAdapter.getData());
+        List<Photo> photos=mPhotoAdapter.getData();
+        final Love love=new Love(title, planTime, content,photos);
         Debug.D(getClass(),"Save love "+title+" "+(null!=debug?debug:"."));
-        return null!=call(prepare(Api.class, Address.LOVE_ADDRESS, null).save(new Gson().toJson(love)), (OnApiFinish)( what,  note,  data,  arg)-> {
-            toast(note);
-            if (what== What.WHAT_SUCCEED){
-                finishActivity();
+        final Callback<Reply> photoUpload=new Callback<Reply>(){
+            @Override
+            public void onFailure(Call<Reply> call, Throwable t) {
+
             }
-        });
+
+            @Override
+            public void onResponse(Call<Reply> call, Response<Reply> response) {
+
+            }
+        };
+        Map<String,MultipartBody.Part> parts=null;
+        if (null!=photos&&photos.size()>0){
+            FileSaveBuilder builder=new FileSaveBuilder();
+            parts=new HashMap<>();
+            for (Photo photo:photos){
+                Object imageUrlObj=null!=photo?photo.getImageUrl():null;
+                String imageUrl=null!=imageUrlObj&&imageUrlObj instanceof String?((String)imageUrlObj):null;
+                File file=null!=imageUrl&&imageUrl.length()>0?new File(imageUrl):null;
+                MultipartBody.Part part=null!=file&&file.isFile()&&file.exists()?builder.createFilePart(file,
+                        "love"+File.separator+"images", RequestBody.create(MediaType.parse("multipart/form-data"), file)):null;
+                if (null!=part){
+                    parts.put(file.getName(),part);
+                }
+            }
+        }
+        if (null!=parts&&parts.size()>0){
+            prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(parts).enqueue(photoUpload);
+        }else{
+            photoUpload.onResponse(null,null);
+        }
+//        return null!=call(prepare(Api.class, Address.LOVE_ADDRESS, null).save(new Gson().toJson(love)), (OnApiFinish)( what,  note,  data,  arg)-> {
+//            toast(note);
+//            if (what== What.WHAT_SUCCEED){
+//                finishActivity();
+//            }
+//        });
+        return false;
     }
 
     public ObservableField<Love> getLove() {
@@ -204,7 +259,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                 if (null!=object&&object instanceof ArrayList){
                     for (Object child:(ArrayList)object) {
                         if (null!=child&& child instanceof String){
-                            mPhotoAdapter.add(-1,new Photo(null,child));
+                            mPhotoAdapter.add(0,new Photo(null,child));
                         }
                     }
                 }

@@ -328,7 +328,14 @@ public class Model {
         return startActivityWithBundle(cls,null);
     }
 
-    protected final boolean startActivityWithBundle(Class<? extends Activity> cls, String key,String value){
+    /**
+     * @deprecated
+     */
+    protected final boolean startActivityWithBundle(Class<? extends Activity> cls, String key,String value) {
+        return startActivity(cls,key,value);
+    }
+
+    protected final boolean startActivity(Class<? extends Activity> cls, String key,String value){
         Bundle bundle=null;
         if (null!=key&&null!=value){
             bundle=new Bundle();
@@ -337,7 +344,14 @@ public class Model {
         return startActivityWithBundle(cls,bundle);
     }
 
+    /**
+     * @deprecated
+     */
     protected final boolean startActivityWithBundle(Class<? extends Activity> cls, Bundle bundle){
+        return startActivity(cls,bundle);
+    }
+
+    protected final boolean startActivity(Class<? extends Activity> cls, Bundle bundle){
         Context context=getContext();
         if (null!=context&&null!=cls){
             Intent intent=new Intent(context,cls);

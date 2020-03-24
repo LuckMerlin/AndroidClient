@@ -8,6 +8,7 @@ import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
+import com.merlin.file.FileSaveBuilder;
 import com.merlin.server.Retrofit;
 import com.merlin.util.Closer;
 
@@ -19,6 +20,10 @@ import java.net.ConnectException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -165,24 +170,14 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     return FileConvey.this.isCancel();
                 }
             };
-            String name=file.getName();
-            String folder=mFolder;
-            name= null!=name?name:"";
-            StringBuilder disposition = new StringBuilder("form-data; name=luckmerlin;filename=luckmerlin");
-            Headers.Builder headersBuilder = new Headers.Builder().addUnsafeNonAscii(
-                    "Content-Disposition", disposition.toString());
-            headersBuilder.add(LABEL_NAME,encode(name,""));
-            headersBuilder.add(LABEL_PARENT,encode(folder,""));
-            headersBuilder.add(LABEL_PATH_SEP,encode(File.separator,""));
-            if (file.isDirectory()){
-                headersBuilder.add(LABEL_FOLDER,LABEL_FOLDER);
-            }
-            MultipartBody.Part part= MultipartBody.Part.create(headersBuilder.build(),requestBody);
-            Debug.D(getClass(),"Upload file "+name+" to "+folder+" "+name+" "+(null!=debug?debug:"."));
+            MultipartBody.Part part=new FileSaveBuilder().createFilePart(file,mFolder,requestBody);
+            Debug.D(getClass(),"Upload file "+file.getName()+" to "+mFolder+" "+(null!=debug?debug:"."));
             Reply responseReply=null;
             Call<Reply> call=null;
             try {
-                call=mUploadingCall=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(part);
+                Map<String,MultipartBody.Part> list=new HashMap<>();
+                list.put("ddd",part);
+                call=mUploadingCall=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(list);
                 if (null==call){
                     Debug.W(getClass(),"Can't upload file which upload call is NULL."+(null!=debug?debug:"."));
                     return new Reply(false,WHAT_ERROR_UNKNOWN,"Error on NULL file upload call.",null);
@@ -229,15 +224,6 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 }
             }
             return false;
-        }
-
-        private String encode(String name, String def){
-            try {
-                return null!=name&&name.length()>0?URLEncoder.encode(name, "UTF-8"):def;
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            return def;
         }
     }
 
