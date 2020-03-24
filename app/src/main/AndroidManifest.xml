@@ -36,11 +36,6 @@
             android:theme="@style/activityTransportStyle"
             android:launchMode="singleInstance"
             android:label="@string/fileTransport">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.MediaPlayActivity"
             android:launchMode="singleInstance"

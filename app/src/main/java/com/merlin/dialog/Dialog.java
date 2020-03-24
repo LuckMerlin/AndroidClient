@@ -238,6 +238,15 @@ public class Dialog implements View.OnClickListener{
         return null!=dialog?dialog.getContext():null;
     }
 
+    public final View getRootView() {
+        ViewDataBinding binding=mBinding;
+        return null!=binding?binding.getRoot():null;
+    }
+
+    public final DialogLayoutBinding getBinding() {
+        return mBinding;
+    }
+
     @Override
     public void onClick(View v) {
         //DO nothing

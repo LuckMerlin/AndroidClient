@@ -1,10 +1,9 @@
-package com.merlin.transport;
-
-import androidx.annotation.Nullable;
+package com.merlin.conveyor;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
+import com.merlin.transport.Status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,13 +92,15 @@ public class ConveyGroup<T extends Convey> extends Convey {
                 }
                 if (isCancel()){
                     Debug.D(getClass(),"Canceled convey "+ConveyGroup.this);
-                }else{
+                }else if(null==innerReply||innerReply.getWhat()!=WHAT_NONE_NETWORK){//
                     T next= indexNext(convey,debug);
                     if (null!=next) {
                         startChild(this,next, "After one child finish." + convey);
                     }else if (null!=finisher){
                         finisher.onFinish(new Reply(true,WHAT_SUCCEED,"Group finish.",null));
                     }
+                }else{
+                    Debug.D(getClass(),"Give up to convey next child "+ConveyGroup.this);
                 }
             }
 
@@ -112,7 +113,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         };
         mConveying=convey;
         Debug.D(getClass(),"Start child convey of group "+getName()+" "+(null!=debug?debug:"."));
-        final Reply startReply= convey.start(innerFinish,getStatusChange(),debug);
+        final Reply startReply= convey.start(innerFinish,null,debug);
         if (null!=startReply&&!startReply.isSuccess()){
             Convey currentConveying=mConveying;
             if (null!=currentConveying&&convey==currentConveying){
@@ -162,7 +163,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         if (null!=children){
             synchronized (children){
                 for (T child:children) {
-                    if (null!=child&&(!child.isStatus(FINISHED)||!child.isReply(true,
+                    if (null!=child&&(!child.isStatus(Status.FINISHED)||!child.isReply(true,
                             What.WHAT_SUCCEED))){
                         return child;
                     }
@@ -177,10 +178,27 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null!=child?child.getReply():null;
     }
 
+    public final T getConveying() {
+        return mConveying;
+    }
+
+    public final int index(T convey){
+        List<T> children=null!=convey?mChildren:null;
+        int length=null!=children?children.size():-1;
+        return length>0?children.indexOf(convey):-1;
+    }
+
+    public final int getChildCount(){
+        List<T> children=mChildren;
+        return null!=children?children.size():0;
+    }
+
     @Override
     public boolean isSuccessFinished() {
         return super.isSuccessFinished()&&null==getFirstUnSucceedChild();
     }
+
+
 
 //    @Override
 //    public boolean equals(@Nullable Object obj) {

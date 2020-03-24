@@ -1,13 +1,14 @@
-package com.merlin.transport;
+package com.merlin.conveyor;
 
 import android.os.Handler;
 import android.os.Looper;
 
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
+import com.merlin.transport.OnConveyStatusChange;
+import com.merlin.transport.Status;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -284,7 +285,7 @@ public final class Conveyor {
         private final OnConveyStatusChange mCallback;
 
         private Conveying(OnConveyStatusChange callback){
-            this(IDLE,null,callback);
+            this(Status.IDLE,null,callback);
         }
 
         private Conveying(int status,Object object,OnConveyStatusChange callback){

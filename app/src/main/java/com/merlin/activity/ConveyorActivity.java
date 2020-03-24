@@ -18,7 +18,7 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.model.ConveyorModel;
 import com.merlin.model.Model;
-import com.merlin.transport.ConveyorBinder;
+import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.conveyor.ConveyorService;
 
 public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {

@@ -1,10 +1,16 @@
-package com.merlin.transport;
+package com.merlin.conveyor;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
+import com.merlin.transport.OnConveyStatusChange;
+import com.merlin.transport.Status;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 public abstract class Convey extends ConveyStatus implements What {
-   private OnConveyStatusChange mStatusChange;
+   private Map<OnConveyStatusChange,Long> mStatusChange;
    private long mTotal,mConveyed;
    private float mSpeed;
    private final String mName;
@@ -15,9 +21,9 @@ public abstract class Convey extends ConveyStatus implements What {
     }
 
    public Convey(String name,OnConveyStatusChange change){
-        super(IDLE,null);
-       mStatusChange=change;
+        super(Status.IDLE,null);
        mName=name;
+       addListener(change,"While new instance.");
    }
 
    protected abstract Reply onPrepare(String debug);
@@ -25,14 +31,14 @@ public abstract class Convey extends ConveyStatus implements What {
    protected  abstract Boolean onCancel(boolean cancel,String debug);
 
    public final boolean cancel(boolean cancel,String debug){
-       boolean canceled=isStatus(CANCELED);
+       boolean canceled=isStatus(Status.CANCELED);
        if ((cancel&&canceled)||(!cancel&&!canceled)){
             return false;
        }
        mCancel=cancel;
        Boolean onCancel=onCancel(cancel,debug);
        if (null!=onCancel&&onCancel){
-            updateStatus(CANCELED,null);
+            updateStatus(Status.CANCELED,null);
             return true;
        }
        return false;
@@ -87,18 +93,42 @@ public abstract class Convey extends ConveyStatus implements What {
        if (null!=change){
            change.onConveyStatusChanged(status,this,arg);
        }
-       OnConveyStatusChange globalChange=mStatusChange;
-       if (null!=globalChange){
-           globalChange.onConveyStatusChanged(status,this,arg);
+       Map<OnConveyStatusChange,Long> map=mStatusChange;
+       if (null!=map){
+           synchronized (map){
+               Set<OnConveyStatusChange> set=map.keySet();
+               if (null!=set){
+                   for (OnConveyStatusChange child:set) {
+                        if (null!=child){
+                            child.onConveyStatusChanged(status,this,arg);
+                        }
+                   }
+               }
+           }
        }
    }
 
-   public final void setStatusChange(OnConveyStatusChange statusChange){
-       mStatusChange=statusChange;
+   public final boolean addListener(OnConveyStatusChange statusChange,String debug){
+       if (null!=statusChange){
+           Map<OnConveyStatusChange,Long> map=null!=statusChange?mStatusChange:null;
+           map=null!=map?map:(mStatusChange=new WeakHashMap<>());
+           if (null!=map){
+               synchronized (map){
+                   return !map.containsKey(statusChange)&&null==map.put(statusChange,System.currentTimeMillis());
+               }
+           }
+       }
+       return false;
    }
 
-   public final OnConveyStatusChange getStatusChange() {
-        return mStatusChange;
+    public final boolean removeListener(OnConveyStatusChange statusChange,String debug){
+        Map<OnConveyStatusChange,Long> map=null!=statusChange?mStatusChange:null;
+        if (null!=map){
+            synchronized (map){
+                return null!=map.remove(statusChange);
+            }
+        }
+        return false;
     }
 
    public final boolean isFinished(){
@@ -145,6 +175,12 @@ public abstract class Convey extends ConveyStatus implements What {
    public final boolean isCanceled() {
         return isStatus(ConveyStatus.CANCELED);
     }
+
+   public final float getProgress(){
+        long conveyed=mConveyed;
+        long total=mTotal;
+        return (float)(conveyed>=0&&total>0?((double)conveyed/total):0);
+   }
 
    public interface Finisher{
         void onFinish(Reply reply);

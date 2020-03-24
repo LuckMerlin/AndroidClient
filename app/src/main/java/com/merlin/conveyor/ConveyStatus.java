@@ -1,6 +1,8 @@
-package com.merlin.transport;
+package com.merlin.conveyor;
 
 import androidx.annotation.NonNull;
+
+import com.merlin.transport.Status;
 
 public class ConveyStatus implements Status {
     private int mStatus=IDLE;
@@ -8,6 +10,7 @@ public class ConveyStatus implements Status {
     protected ConveyStatus(){
         this(IDLE,null);
     }
+
     protected ConveyStatus(int status,Object object){
         mStatus=status;
         mObject=object;

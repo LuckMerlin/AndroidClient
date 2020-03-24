@@ -2,6 +2,7 @@ package com.merlin.adapter;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
@@ -12,9 +13,8 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemConveyorBinding;
-import com.merlin.debug.Debug;
-import com.merlin.transport.Convey;
-import com.merlin.transport.ConveyGroup;
+import com.merlin.conveyor.Convey;
+import com.merlin.conveyor.ConveyGroup;
 import com.merlin.transport.Status;
 
 import java.util.List;
@@ -72,16 +72,27 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemConveyorBinding){
             ItemConveyorBinding itb=(ItemConveyorBinding)binding;
-            Integer textId=formatStatus(data);
             String status=null;
-            if (null!=textId){
-                View view=null!=holder?holder.itemView:null;
-                Context context=null!=view?view.getContext():null;
-                status=null!=context?context.getString(textId):null;
+            String title=null;
+            if (null!=data){
+                Integer textId=formatStatus(data);
+                if (null!=textId){
+                    View view=null!=holder?holder.itemView:null;
+                    Context context=null!=view?view.getContext():null;
+                    status=null!=context?context.getString(textId):null;
+                }
+                if (data instanceof ConveyGroup){
+                    title=""+data.getName()+"("+((ConveyGroup) data).index(((ConveyGroup) data)
+                            .getConveying())+"/"+((ConveyGroup) data).getChildCount()+")";
+                    itb.setData(((ConveyGroup)data).getConveying());
+                }else{
+                    title=data.getName();
+                    itb.setData(data);
+                }
             }
+            itb.setTitle(title);
             itb.setStatus(null!=status&&status.length()>0?status:"");
             itb.setPosition(position+1);
-            itb.setData(data);
         }
     }
 

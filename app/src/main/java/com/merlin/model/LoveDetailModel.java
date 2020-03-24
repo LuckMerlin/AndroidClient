@@ -63,10 +63,10 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         super.onRootAttached(root);
 //        String name,String url,String account,String imageUrl,String folder,String pathSep
         Client meta=new Client("",Address.LOVE_ADDRESS,null,null,null,null);
-//        File file=new File("/sdcard/Musics");
+        File file=new File("/sdcard/Musics");
 //        File file=new File("/sdcard/youku");
 
-        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+//        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
         ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
         startActivity(ConveyorActivity.class);
 //        post(()->{mBinder.run();},5000);

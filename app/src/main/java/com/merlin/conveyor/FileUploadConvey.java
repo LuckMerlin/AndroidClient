@@ -1,4 +1,4 @@
-package com.merlin.transport;
+package com.merlin.conveyor;
 
 import androidx.annotation.Nullable;
 
@@ -9,6 +9,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
+import com.merlin.util.Closer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -104,7 +105,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         return super.equals(obj);
     }
 
-    protected final static class FileConvey extends Convey{
+    protected final static class FileConvey extends Convey {
         private final File mFile;
         private final String mFolder;
         private final Retrofit mRetrofit;
@@ -289,12 +290,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     } catch (Exception e) {
                         e.printStackTrace();
                     }finally {
-                        if (null!=in){
-                            try {
-                                in.close();
-                            } catch (IOException e) {
-                            }
-                        }
+                        new Closer().close(in);
                     }
                 }
             }
