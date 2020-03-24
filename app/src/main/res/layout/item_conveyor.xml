@@ -58,6 +58,7 @@
                 android:gravity="left"
                 android:layout_marginLeft="3dp"
                 android:layout_weight="6"
+                android:singleLine="true"
                 android:text="@{title}"
                 style="@style/titleSubNormalTextView"/>
             <LinearLayout
@@ -78,6 +79,7 @@
                     android:textSize="10sp"
                     style="@style/titleSubNormalTextView"/>
                 <TextView
+                    android:singleLine="true"
                     android:text="@{FileSize.formatSizeText(conveyedSize)+`/`+FileSize.formatSizeText(totalSize)}"
                     android:layout_margin="1dp"
                     style="@style/titleSubNormalTextView"/>

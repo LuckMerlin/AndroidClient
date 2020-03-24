@@ -66,8 +66,9 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         File file=new File("/sdcard/Musics");
 //        File file=new File("/sdcard/youku");
 
-//        File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+        File file2=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
         ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
+        ConveyorService.upload(getViewContext(),file2,meta,"操蛋 d算法 ",0,null);
         startActivity(ConveyorActivity.class);
 //        post(()->{mBinder.run();},5000);
 //        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
