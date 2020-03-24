@@ -100,32 +100,8 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/loveDetail_planDateTV"
             binding:enableClick="@{true}"
-            android:id="@+id/loveDetail_valueDateTV"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:text="@{R.string.date}"
-                style="@style/itemLoveKeyTextView"/>
-            <TextView
-                android:text=":"
-                android:layout_marginRight="5dp"
-                style="@style/itemLoveKeyTextView"/>
-            <TextView
-                android:text="@{``}"
-                android:singleLine="true"
-                android:gravity="left"
-                android:minWidth="50dp"
-                style="@style/itemLoveKeyTextView"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/loveDetail_valueTimeTV"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
             android:paddingTop="5dp"
@@ -141,8 +117,7 @@
                 android:layout_marginRight="5dp"
                 style="@style/itemLoveKeyTextView"/>
             <TextView
-                binding:enableClick="@{true}"
-                android:text="@{``}"
+                android:text="@{Time.formatTime(vm.planTime)}"
                 android:singleLine="true"
                 android:gravity="left"
                 android:minWidth="50dp"

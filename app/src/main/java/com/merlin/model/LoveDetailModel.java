@@ -2,10 +2,12 @@ package com.merlin.model;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TimePicker;
 
 import androidx.databinding.ObservableField;
 
@@ -27,6 +29,7 @@ import com.merlin.view.OnTapClick;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import io.reactivex.Observable;
@@ -39,7 +42,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     private final ObservableField<Love> mLove=new ObservableField<>();
     private final ObservableField<String> mContent=new ObservableField<>("测试内容");
     private final ObservableField<String> mTitle=new ObservableField<>("测试i标题");
-    private final ObservableField<Long> mPlanDate=new ObservableField<>(System.currentTimeMillis());
     private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
     private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
     private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20243242;
@@ -98,6 +100,18 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         switch (clickCount){
             case 1:
                 return onSingleTap(view,resId,data);
+            case 2:
+                if (resId == R.id.loveDetail_planDateTV){
+                    Calendar curr=Calendar.getInstance();
+                    curr.setTime(new Date(mPlanTime.get()));
+                    TimePickerDialog tpD=new TimePickerDialog(view.getContext(), (TimePicker v, int hourOfDay, int minute)-> {
+                        curr.set(Calendar.HOUR_OF_DAY,hourOfDay);
+                        curr.set(Calendar.MINUTE,minute);
+                        mPlanTime.set(curr.getTimeInMillis());
+                    },curr.get(Calendar.HOUR_OF_DAY),curr.get(Calendar.MINUTE),true);
+                    tpD.show();
+                    return true;
+                }
         }
         return false;
     }
@@ -112,12 +126,14 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                     MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
                 }
                 return true;
-            case R.id.loveDetail_valueDateTV:
-                DatePickerDialog dialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
-                    Date date=new Date(year-1900,month-1,dayOfMonth);
-                    mPlanDate.set(date.getTime());
-                    }, 2020, 02, 22);
-                 dialog.show();
+            case R.id.loveDetail_planDateTV:
+                Calendar curr=Calendar.getInstance();
+                curr.setTime(new Date(mPlanTime.get()));
+                DatePickerDialog dpDialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
+                    curr.set(year,month,dayOfMonth);
+                    mPlanTime.set(curr.getTimeInMillis());
+                    }, curr.get(Calendar.YEAR), curr.get(Calendar.MONTH), curr.get(Calendar.DAY_OF_MONTH));
+                 dpDialog.show();
                  return true;
         }
         return false;
@@ -132,7 +148,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==content||content.length()<=0){
             return toast(R.string.content,getText(R.string.inputNotNull));
         }
-        final Long planDate=mPlanDate.get();
         final Long planTime=mPlanTime.get();
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
@@ -165,10 +180,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 
     public ObservableField<Long> getPlanTime() {
         return mPlanTime;
-    }
-
-    public ObservableField<Long> getPlanDate() {
-        return mPlanDate;
     }
 
     @Override
