@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import io.reactivex.Observable;
+import me.nereo.multi_image_selector.MultiImageSelector;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -38,6 +39,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     private final ObservableField<Love> mLove=new ObservableField<>();
     private final ObservableField<String> mContent=new ObservableField<>("测试内容");
     private final ObservableField<String> mTitle=new ObservableField<>("测试i标题");
+    private final ObservableField<Long> mPlanDate=new ObservableField<>(System.currentTimeMillis());
     private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
     private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
     private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20243242;
@@ -51,25 +53,19 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         @FormUrlEncoded
         Observable<Reply> save(@Field(Label.LABEL_DATA) String love);
     }
-//    private OnConveyStatusChange mChange=new OnConveyStatusChange() {
-//        @Override
-//        public void onConveyStatusChanged(int status, Convey convey, Object data) {
-//            Debug.D(getClass(),"AAAAAAAAA "+status+" "+convey.getName());
-//        }
-//    };
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
 //        String name,String url,String account,String imageUrl,String folder,String pathSep
-        Client meta=new Client("",Address.LOVE_ADDRESS,null,null,null,null);
-        File file=new File("/sdcard/Musics");
+//        Client meta=new Client("",Address.LOVE_ADDRESS,null,null,null,null);
+//        File file=new File("/sdcard/Musics");
 //        File file=new File("/sdcard/youku");
 
-        File file2=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-        ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
-        ConveyorService.upload(getViewContext(),file2,meta,"操蛋 d算法 ",0,null);
-        startActivity(ConveyorActivity.class);
+//        File file2=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+//        ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
+//        ConveyorService.upload(getViewContext(),file2,meta,"操蛋 d算法 ",0,null);
+//        startActivity(ConveyorActivity.class);
 //        post(()->{mBinder.run();},5000);
 //        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
 //        conveyor.listener(mChange, ConveyStatus.ADD,"");
@@ -113,13 +109,13 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             case R.drawable.selector_photo_add:
                 Context context=getViewContext();
                 if (null!=context&&context instanceof Activity){
-//                    MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+                    MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
                 }
                 return true;
-            case R.id.loveDetail_valueTimeTV:
+            case R.id.loveDetail_valueDateTV:
                 DatePickerDialog dialog= new DatePickerDialog(view.getContext(),(child,  year,  month,  dayOfMonth)-> {
                     Date date=new Date(year-1900,month-1,dayOfMonth);
-                    mPlanTime.set(date.getTime());
+                    mPlanDate.set(date.getTime());
                     }, 2020, 02, 22);
                  dialog.show();
                  return true;
@@ -136,6 +132,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==content||content.length()<=0){
             return toast(R.string.content,getText(R.string.inputNotNull));
         }
+        final Long planDate=mPlanDate.get();
         final Long planTime=mPlanTime.get();
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
@@ -168,6 +165,10 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 
     public ObservableField<Long> getPlanTime() {
         return mPlanTime;
+    }
+
+    public ObservableField<Long> getPlanDate() {
+        return mPlanDate;
     }
 
     @Override
