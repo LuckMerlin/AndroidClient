@@ -14,6 +14,21 @@
         <variable
             name="status"
             type="String" />
+        <variable
+            name="conveyingName"
+            type="String" />
+        <variable
+            name="conveyingProgress"
+            type="int" />
+        <variable
+            name="conveyingSpeed"
+            type="float" />
+        <variable
+            name="conveyedSize"
+            type="long" />
+        <variable
+            name="totalSize"
+            type="long" />
         <import type="com.merlin.util.FileSize"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.util.Speed"/>
@@ -57,13 +72,13 @@
                     android:textSize="10sp"
                     style="@style/titleSubNormalTextView"/>
                 <TextView
-                    android:text="@{data.speed>=0?Speed.formatNetworkSpeed(data.speed):``}"
+                    android:text="@{conveyingSpeed>=0?Speed.formatNetworkSpeed(conveyingSpeed):``}"
                     android:layout_margin="1dp"
-                    android:visibility="@{data.speed>0?View.VISIBLE:View.GONE}"
+                    android:visibility="@{conveyingSpeed>0?View.VISIBLE:View.GONE}"
                     android:textSize="10sp"
                     style="@style/titleSubNormalTextView"/>
                 <TextView
-                    android:text="@{FileSize.formatSizeText(data.conveyed)+`/`+FileSize.formatSizeText(data.total)}"
+                    android:text="@{FileSize.formatSizeText(conveyedSize)+`/`+FileSize.formatSizeText(totalSize)}"
                     android:layout_margin="1dp"
                     style="@style/titleSubNormalTextView"/>
             </LinearLayout>
@@ -73,13 +88,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="@{data.name}"
+            android:text="@{conveyingName}"
             android:layout_margin="1dp"
             android:singleLine="true"
             style="@style/titleSubNormalTextView"/>
     </LinearLayout>
         <ProgressBar
-            android:progress="@{(int)(data.progress*100)}"
+            android:progress="@{conveyingProgress}"
             style="@style/itemProgressBar" />
     </LinearLayout>
 </layout>

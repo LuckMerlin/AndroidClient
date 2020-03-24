@@ -1,15 +1,18 @@
 package com.merlin.model;
 
+import android.content.Context;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.adapter.ConveyingAdapter;
 import com.merlin.adapter.ConveyorAdapter;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ConveyDetailBinding;
 import com.merlin.client.databinding.ItemConveyorBinding;
+import com.merlin.conveyor.ConveyGroup;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.conveyor.Convey;
@@ -17,7 +20,6 @@ import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.transport.OnConveyStatusChange;
 import com.merlin.view.OnTapClick;
 
-import java.sql.RowId;
 import java.util.List;
 
 public final class ConveyorModel extends Model implements OnConveyStatusChange, OnTapClick {
@@ -66,27 +68,21 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
     public boolean showConvey(Convey convey,String debug){
         if (null!=convey){
             ConveyDetailBinding binding=inflate(R.layout.convey_detail);
-            final OnConveyStatusChange change=(status, c,  data)->{
-                binding.setConvey(c);
+            final OnConveyStatusChange change=(int status, Convey c, Object data)-> {
+                binding.setConvey(null!=data&&data instanceof Convey?(Convey)data:c);
             };
-            final int id=R.id.resourceId;
             final Dialog dialog=new Dialog(getViewContext()){
                 @Override
+
                 protected void onDismiss() {super.onDismiss();
-                    convey.removeListener(change,"While dialog dismiss.");
-                    View view=getRootView();
-                    Object tagObject=null!=view?view.getTag(id):null;
-                    if (null!=tagObject&&tagObject == change){
-                        view.setTag(id,null);
-                    }
+                    convey.setListener(null,"While dialog dismiss.");
                 }
             };
             dialog.setContentView(binding);
-            View root=dialog.getRootView();
             if (null!=binding){
-                root.setTag(id,change);
+                binding.setChildAdapter(convey instanceof ConveyGroup?new ConveyingAdapter(((ConveyGroup)convey).getChildren()) :null);
                 binding.setConvey(convey);
-                convey.addListener(change,"While show convey detail dialog.");
+                convey.setListener(change,"While show convey detail dialog.");
             }
             return dialog.title(convey.getName()).left(R.string.sure).show(
                     (View view, int clickCount, int resId, Object data)-> {

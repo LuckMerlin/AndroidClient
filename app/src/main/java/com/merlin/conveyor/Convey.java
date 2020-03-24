@@ -5,12 +5,15 @@ import com.merlin.debug.Debug;
 import com.merlin.transport.OnConveyStatusChange;
 import com.merlin.transport.Status;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 public abstract class Convey extends ConveyStatus implements What {
-   private Map<OnConveyStatusChange,Long> mStatusChange;
+   private OnConveyStatusChange mStatusChange;
    private long mTotal,mConveyed;
    private float mSpeed;
    private final String mName;
@@ -23,7 +26,7 @@ public abstract class Convey extends ConveyStatus implements What {
    public Convey(String name,OnConveyStatusChange change){
         super(Status.IDLE,null);
        mName=name;
-       addListener(change,"While new instance.");
+       setListener(change,"While new instance.");
    }
 
    protected abstract Reply onPrepare(String debug);
@@ -93,43 +96,26 @@ public abstract class Convey extends ConveyStatus implements What {
        if (null!=change){
            change.onConveyStatusChanged(status,this,arg);
        }
-       Map<OnConveyStatusChange,Long> map=mStatusChange;
-       if (null!=map){
-           synchronized (map){
-               Set<OnConveyStatusChange> set=map.keySet();
-               if (null!=set){
-                   for (OnConveyStatusChange child:set) {
-                        if (null!=child){
-                            child.onConveyStatusChanged(status,this,arg);
-                        }
-                   }
-               }
-           }
+       OnConveyStatusChange globalChange=mStatusChange;
+       if (null!=globalChange){
+           globalChange.onConveyStatusChanged(status,this,arg);
        }
    }
 
-   public final boolean addListener(OnConveyStatusChange statusChange,String debug){
-       if (null!=statusChange){
-           Map<OnConveyStatusChange,Long> map=null!=statusChange?mStatusChange:null;
-           map=null!=map?map:(mStatusChange=new WeakHashMap<>());
-           if (null!=map){
-               synchronized (map){
-                   return !map.containsKey(statusChange)&&null==map.put(statusChange,System.currentTimeMillis());
-               }
-           }
-       }
+   public final boolean setListener(OnConveyStatusChange statusChange,String debug){
+       mStatusChange=statusChange;
        return false;
    }
 
-    public final boolean removeListener(OnConveyStatusChange statusChange,String debug){
-        Map<OnConveyStatusChange,Long> map=null!=statusChange?mStatusChange:null;
-        if (null!=map){
-            synchronized (map){
-                return null!=map.remove(statusChange);
-            }
-        }
-        return false;
-    }
+//    public final boolean removeListener(OnConveyStatusChange statusChange,String debug){
+//        List<OnConveyStatusChange> list=null!=statusChange?mStatusChange:null;
+//        if (null!=list){
+//            synchronized (list){
+//                return list.remove(statusChange);
+//            }
+//        }
+//        return false;
+//    }
 
    public final boolean isFinished(){
        return isStatus(ConveyStatus.FINISHED);
@@ -182,7 +168,11 @@ public abstract class Convey extends ConveyStatus implements What {
         return (float)(conveyed>=0&&total>0?((double)conveyed/total):0);
    }
 
-   public interface Finisher{
+    public final OnConveyStatusChange getStatusChange() {
+        return mStatusChange;
+    }
+
+    public interface Finisher{
         void onFinish(Reply reply);
         void onProgress(long conveyed,long total,float speed, Convey convey);
     }

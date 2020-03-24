@@ -2,7 +2,6 @@ package com.merlin.adapter;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
@@ -74,6 +73,7 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
             ItemConveyorBinding itb=(ItemConveyorBinding)binding;
             String status=null;
             String title=null;
+            Convey conveying=null;
             if (null!=data){
                 Integer textId=formatStatus(data);
                 if (null!=textId){
@@ -81,15 +81,21 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
                     Context context=null!=view?view.getContext():null;
                     status=null!=context?context.getString(textId):null;
                 }
+                itb.setData(data);
                 if (data instanceof ConveyGroup){
                     title=""+data.getName()+"("+((ConveyGroup) data).index(((ConveyGroup) data)
                             .getConveying())+"/"+((ConveyGroup) data).getChildCount()+")";
-                    itb.setData(((ConveyGroup)data).getConveying());
+                    conveying=((ConveyGroup)data).getConveying();
                 }else{
+                    conveying=data;
                     title=data.getName();
-                    itb.setData(data);
                 }
             }
+            itb.setConveyedSize(null!=conveying?conveying.getConveyed():0);
+            itb.setTotalSize(null!=conveying?conveying.getTotal():0);
+            itb.setConveyingSpeed(null!=conveying?conveying.getSpeed():-1);
+            itb.setConveyingName(null!=conveying?conveying.getName():null);
+            itb.setConveyingProgress(null!=conveying?(int)(conveying.getProgress()*100):0);
             itb.setTitle(title);
             itb.setStatus(null!=status&&status.length()>0?status:"");
             itb.setPosition(position+1);

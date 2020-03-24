@@ -32,6 +32,16 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     public final static int TYPE_EMPTY=-3;
     public final static int TYPE_DATA=-4;
 
+    public ListAdapter(){
+        this(null);
+    }
+
+    public ListAdapter(List<T>  list){
+        if (null!=list&&list.size()>0) {
+            addAll(list,false);
+        }
+    }
+
     protected Integer onResolveViewTypeLayoutId(int viewType){
         return null;
     }

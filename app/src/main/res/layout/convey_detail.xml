@@ -5,24 +5,30 @@
         <variable
             name="convey"
             type="com.merlin.conveyor.Convey" />
+        <variable
+            name="childAdapter"
+            type="com.merlin.adapter.ConveyingAdapter" />
         <import type="android.view.View"/>
         <import type="com.merlin.api.What"/>
         <import type="com.merlin.util.FileSize"/>
         <import type="com.merlin.client.R"/>
     </data>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
         <LinearLayout
             android:padding="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="10dp"
             android:orientation="vertical"
             android:layout_width="250dp"
             android:layout_height="wrap_content">
+            <TextView
+                android:singleLine="true"
+                android:layout_gravity="center"
+                style="@style/titleNormalTextView"
+                android:text="@{convey.name}" />
             <include binding:key="@{R.string.status}" binding:value="@{``+convey.status}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.size}" binding:value="@{FileSize.formatSizeText((double)convey.conveyed)+`/`+FileSize.formatSizeText((double)convey.total)}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.speed}" binding:value="@{``+convey.speed}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.speed}" binding:value="@{``+convey.speed}" android:visibility="@{convey.speed>0?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>
+            <androidx.recyclerview.widget.RecyclerView
+                binding:adapter="@{childAdapter}"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"/>
         </LinearLayout>
-    </ScrollView>
 </layout>

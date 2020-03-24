@@ -113,7 +113,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         };
         mConveying=convey;
         Debug.D(getClass(),"Start child convey of group "+getName()+" "+(null!=debug?debug:"."));
-        final Reply startReply= convey.start(innerFinish,null,debug);
+        final Reply startReply= convey.start(innerFinish,getStatusChange(),debug);
         if (null!=startReply&&!startReply.isSuccess()){
             Convey currentConveying=mConveying;
             if (null!=currentConveying&&convey==currentConveying){
@@ -173,6 +173,13 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null;
     }
 
+    public final List<T> getChildren() {
+        List<T> children=mChildren;
+        int size=null!=children?children.size():-1;
+        List<T> result=size>0?new ArrayList<>(size):null;
+        return null!=result&&result.addAll(children)?result:null;
+    }
+
     public final Reply getFirstUnSucceedChildReply(){
         T child=getFirstUnSucceedChild();
         return null!=child?child.getReply():null;
@@ -193,23 +200,9 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null!=children?children.size():0;
     }
 
+
     @Override
     public boolean isSuccessFinished() {
         return super.isSuccessFinished()&&null==getFirstUnSucceedChild();
     }
-
-
-
-//    @Override
-//    public boolean equals(@Nullable Object obj) {
-//        if (null!=obj&&obj instanceof ConveyGroup){
-//            List<T> children=((ConveyGroup)obj).mChildren;
-//            List<T> currChildren=mChildren;
-//            if (null!=children&&null!=currChildren&&children.size()==currChildren.size()
-//            &&children.containsAll(currChildren)){
-//                return true;
-//            }
-//        }
-//        return super.equals(obj);
-//    }
 }
