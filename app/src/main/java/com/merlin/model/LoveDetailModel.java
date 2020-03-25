@@ -2,6 +2,7 @@ package com.merlin.model;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.TaskInfo;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +25,8 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.bean.FileMeta;
+import com.merlin.bean.LocalFile;
 import com.merlin.bean.Love;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.Photo;
@@ -60,7 +63,10 @@ import retrofit2.Response;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 
 public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityIntentChange, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
@@ -76,47 +82,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         Observable<Reply<Love>> getLovesDetail(@Field(Label.LABEL_ID) String id);
 
         @POST(Address.PREFIX_LOVE + "/save")
-        @FormUrlEncoded
-        Observable<Reply> save(@Field(Label.LABEL_DATA) String love);
-    }
-
-    @Override
-    protected void onRootAttached(View root) {
-        super.onRootAttached(root);
-//        String name,String url,String account,String imageUrl,String folder,String pathSep
-        Client meta=new Client("",Address.LOVE_ADDRESS,null,null,null,null);
-        File file=new File("/sdcard/Musics");
-//        File file=new File("/sdcard/youku");
-
-        File file2=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
-//        ConveyorService.upload(getViewContext(),file2,meta,"操蛋 d算法 ",0,null);
-//        ConveyorService.upload(getViewContext(),file,meta,"操蛋 d算法 ",0,null);
-//        startActivity(ConveyorActivity.class);
-//        post(()->{mBinder.run();},5000);
-//        Conveyor conveyor=new Conveyor(Looper.getMainLooper());
-//        conveyor.listener(mChange, ConveyStatus.ADD,"");
-//        FileUploadConvey convey=new FileUploadConvey(new Retrofit(), file,"林强");
-////        new Conveyor(getViewContext(), Looper.getMainLooper()).start(, null, null);
-//        conveyor.add(null,"",convey);
-//      RequestBody fileBody = new FileSaveRequestBody(file){
-//            @Override
-//            protected void onTransportProgress(long upload, long total, double speed) {
-//                Debug.D(getClass(),"进度 "+upload+" "+total);
-//            }
-//        };
-//        HashMap<String, RequestBody> map = new HashMap<>();
-//        map.put("linqiang",fileBody);
-//        prepare(ApiSaveFile.class,Address.LOVE_ADDRESS).save(map).enqueue(new Callback<Reply>() {
-//            @Override
-//            public void onResponse(Call<Reply> call, Response<Reply> response) {
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Reply> call, Throwable t) {
-//
-//            }
-//        });
+        @Multipart
+        Observable<Reply<Love>> save(@PartMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
     }
 
     @Override
@@ -171,6 +138,14 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         return false;
     }
 
+    private void applyLove(Love love){
+        mLove.set(love);
+        mContent.set(null!=love?love.getData():null);
+        mTitle.set(null!=love?love.getName():null);
+        mPlanTime.set(null!=love?love.getTime():null);
+        mPhotoAdapter.setData(null!=love?love.getImage():null);
+    }
+
     private boolean save(String debug){
         final String title=mTitle.get();
         if (null==title||title.length()<=0){
@@ -184,73 +159,40 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
         }
-        final Map<String,Photo> uploadingMap=new HashMap<>();
-        final List<Photo> photos=new ArrayList<>();
-        final Love love=new Love(title, planTime, content,photos);
+        final List<FileMeta> photos=new ArrayList<>();
+        Map<String,String> loveTextMap=new HashMap<>();
+        loveTextMap.put(Label.LABEL_NAME, title);
+        loveTextMap.put(Label.LABEL_TIME, Long.toString(planTime));
+        loveTextMap.put(Label.LABEL_DATA, content);
+        loveTextMap.put(Label.LABEL_MODE, "");
         Debug.D(getClass(),"Save love "+title+" "+(null!=debug?debug:"."));
         final String dialogKey=showLoading(R.string.loading);
-        final Callback<Reply<ApiList<Reply<NasFile>>>> photoUpload=new Callback<Reply<ApiList<Reply<NasFile>>>>(){
-            @Override
-            public void onResponse(Call<Reply<ApiList<Reply<NasFile>>>> call, Response<Reply<ApiList<Reply<NasFile>>>> response) {
-                Reply<ApiList<Reply<NasFile>>> reply=null!=response?response.body():null;
-                ApiList<Reply<NasFile>> replyList=null!=reply?reply.getData():null;
-                if (null!=replyList&&replyList.size()>0){
-                    for (Reply<NasFile> fileReply:replyList) {
-                        NasFile nasFile=null!=fileReply?fileReply.getData():null;
-                        String name=null!=nasFile?nasFile.getName(true):null;
-                        Photo photo=null!=name?uploadingMap.get(name):null;
-                        String cloudPath=null!=photo?nasFile.getPath():null;
-                        if (null!=cloudPath&&cloudPath.length()>0){
-                            photo.setImageUrl(cloudPath);
-                            photos.add(photo);
-                        }
-                    }
-                }
-                String loveJson=new Gson().toJson(love);
-                LoveDetailModel.this.call(prepare(Api.class,Address.LOVE_ADDRESS).save(loveJson), Schedulers.single(), null,(OnApiFinish)(what, note, data,arg)-> {
-                    dismissLoading(dialogKey);
-                    toast(note);
-                });
-            }
-
-            @Override
-            public void onFailure(Call<Reply<ApiList<Reply<NasFile>>>> call, Throwable t) {
-                Debug.E(getClass(),"Exception upload love photos.",t);
-                dismissLoading(dialogKey);
-                toast(R.string.fail);
-            }
-        };
-        final List<Photo> adapterPhotos=mPhotoAdapter.getData();
+        final List<FileMeta> adapterPhotos=mPhotoAdapter.getData();
+        List<MultipartBody.Part> parts=null;
         if (null!=adapterPhotos&&adapterPhotos.size()>0){
             FileSaveBuilder builder=new FileSaveBuilder();
-            List<MultipartBody.Part> parts = new ArrayList<>();
-            for (Photo photo:adapterPhotos){
-                Object imageUrlObj=null!=photo?photo.getImageUrl():null;
-                String imageUrl=null!=imageUrlObj&&imageUrlObj instanceof String?((String)imageUrlObj):null;
-                if (null!=imageUrl&&imageUrl.length()>0) {
-                    if (imageUrl.startsWith(Label.LABEL_CLOUD_URL_PREFIX)){
+            parts = new ArrayList<>();
+            for (FileMeta photo:adapterPhotos) {
+                Object imageUrlObj = null != photo ? photo.getPath() : null;
+                String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
+                if (null != imageUrl && imageUrl.length() > 0) {
+                    if (photo instanceof NasFile) {
                         photos.add(photo);
-                    }else{
-                        File file=new File(imageUrl);
-                        String name=""+title+"_"+planTime+"_"+file.getName();
-                        MultipartBody.Part part=null!=file&&file.exists()?builder.createFilePart(file,name,"loves"):null;
-                        if (null==part||!parts.add(part)){
+                    } else {
+                        File file = new File(imageUrl);
+                        String name = "" + title + "_" + planTime + "_" + file.getName();
+                        MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "loves") : null;
+                        if (null == part || !parts.add(part)) {
                             continue;
                         }
-                        uploadingMap.put(name,photo);
                     }
                 }
-            }
-            if (null!=parts&&parts.size()>0){
-                prepare(ApiSaveFile.class, Address.LOVE_ADDRESS, Executors.newSingleThreadExecutor())
-                        .saves(parts).enqueue(photoUpload);
-            }else{
-                photoUpload.onResponse(null,null);
-            }
-        }else{
-            photoUpload.onResponse(null,null);
-        }
-        return true;
+            }};
+        return null!=LoveDetailModel.this.call(prepare(Api.class,Address.LOVE_ADDRESS).save(loveTextMap,parts), null,(OnApiFinish<Reply<Love>>)(what, note, data,arg)-> {
+            dismissLoading(dialogKey);
+            toast(note);
+            applyLove(null!=data?data.getData():null);
+        });
     }
 
     public ObservableField<Love> getLove() {
@@ -280,7 +222,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love>>)( what,  note,  data,  arg)-> {
                 Love love=what == What.WHAT_SUCCEED&&null!=data?data.getData():null;
                 if (null!=love){
-                    mLove.set(love);
+                    applyLove(love);
                 }
             });
         }
@@ -294,8 +236,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                 Object object=null!=bundle?bundle.get("select_result"):null;
                 if (null!=object&&object instanceof ArrayList){
                     for (Object child:(ArrayList)object) {
-                        if (null!=child&& child instanceof String){
-                            mPhotoAdapter.add(0,new Photo(null,child));
+                        if (null!=child&& child instanceof String&&((String)child).length()>0){
+                            mPhotoAdapter.add(0,LocalFile.create(new File((String)child),null));
                         }
                     }
                 }

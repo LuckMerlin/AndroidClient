@@ -41,6 +41,10 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
         return length;
     }
 
+    public NasFile(String parent,String name,String extension){
+
+    }
+
     public boolean applyModify(FModify modify){
         if (null!=modify){
 //            String path=modify.getPath();
@@ -228,5 +232,28 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
         }
     };
 
-
+    @Override
+    public String toString() {
+        return "NasFile{" +
+                "id=" + id +
+                ", md5='" + md5 + '\'' +
+                ", mime='" + mime + '\'' +
+                ", mode=" + mode +
+                ", createTime=" + createTime +
+                ", permissions=" + permissions +
+                ", length=" + length +
+                ", insertTime=" + insertTime +
+                ", favorite=" + favorite +
+                ", extra='" + extra + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", meta=" + meta +
+                ", accessTime=" + accessTime +
+                ", parent='" + parent + '\'' +
+                ", name='" + name + '\'' +
+                ", title='" + title + '\'' +
+                ", extension='" + extension + '\'' +
+                ", size=" + size +
+                ", modifyTime=" + modifyTime +
+                '}';
+    }
 }

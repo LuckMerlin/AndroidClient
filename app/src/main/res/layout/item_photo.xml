@@ -5,13 +5,13 @@
     <data>
         <variable
             name="photo"
-            type="com.merlin.bean.Photo" />
+            type="Object" />
         <import type="com.merlin.view.Clicker"/>
     </data>
 
     <ImageView
         binding:enableClick="@{Clicker.multiClick(photo,true)}"
-        android:src="@{photo.imageUrl}"
+        android:src="@{photo}"
         android:scaleType="fitXY"
         android:layout_width="@dimen/gridListChildSize"
         android:layout_height="@dimen/gridListChildSize"/>

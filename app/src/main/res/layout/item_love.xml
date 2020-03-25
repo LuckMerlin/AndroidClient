@@ -12,13 +12,14 @@
         <import type="com.merlin.bean.Love"/>
         <import type="android.graphics.Color"/>
         <import type="com.merlin.util.Time"/>
+        <import type="com.merlin.api.What"/>
     </data>
     <LinearLayout
         android:id="@+id/item_love"
         binding:enableClick="@{Clicker.click(love)}"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:background="@{love.mode==Love.MODE_CANCELED?Color.argb(150,0,0,0):Color.TRANSPARENT}"
+        android:background="@{love.mode.equals(``+What.WHAT_CANCEL)?Color.argb(150,0,0,0):Color.TRANSPARENT}"
         android:layout_margin="3dp"
         android:layout_height="@dimen/listItemSizeLessMedium">
         <TextView

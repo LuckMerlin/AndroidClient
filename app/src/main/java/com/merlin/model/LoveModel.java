@@ -37,7 +37,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private final LoveAdapter mAdapter=new LoveAdapter() {
         @Override
         protected Retrofit.Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Love>>> finish) {
-            return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg,from,from+10),finish);
+            return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg,from,from+2000),finish);
         }
 
         @Override
@@ -91,9 +91,9 @@ public class LoveModel  extends Model implements OnTapClick,Label {
         switch (resId){
             case R.id.item_love:
                 Long id=null!=data&&data instanceof Love?((Love)data).getId():null;
-                return startActivityWithBundle(LoveDetailActivity.class,Label.LABEL_ID,null!=id?Long.toString(id):null);
+                return startActivity(LoveDetailActivity.class,Label.LABEL_ID,null!=id?Long.toString(id):null);
             case R.string.add:
-                return startActivityWithBundle(LoveDetailActivity.class,Label.LABEL_ID,null);
+                return startActivity(LoveDetailActivity.class,Label.LABEL_ID,null);
         }
         return false;
     }

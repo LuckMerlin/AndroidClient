@@ -3,12 +3,11 @@ package com.merlin.bean;
 import java.util.List;
 
 public final class Love {
-    public final static int MODE_CANCELED=1232;
     private String name;
     private String data;
-    private List<Photo> image;
+    private List<NasFile> image;
     private long id;
-    private int mode=0;
+    private String mode;
     private String account;
     private long createTime;
     private long time;
@@ -17,7 +16,7 @@ public final class Love {
         this(null,0,null,null);
     }
 
-    public Love(String name,long time,String content,List<Photo> photos){
+    public Love(String name,long time,String content,List<NasFile> photos){
         this.name=name;
         this.time=time;
         this.data=content;
@@ -32,7 +31,7 @@ public final class Love {
         return data;
     }
 
-    public int getMode() {
+    public String getMode() {
         return mode;
     }
 
@@ -52,7 +51,7 @@ public final class Love {
         return id;
     }
 
-    public List<Photo> getImage() {
+    public List<NasFile> getImage() {
         return image;
     }
 }

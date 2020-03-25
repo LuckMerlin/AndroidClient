@@ -23,4 +23,5 @@ public interface Address {
     String PREFIX_FILE_BROWSER=PREFIX_FILE+"/directory/browser";
     String PREFIX_MEDIA_PLAY=PREFIX_MEDIA+"/play";
     String PREFIX_THUMB=PREFIX_IMAGE+"/thumbs";
+    String  LABEL_CLOUD_URL_PREFIX="cloudUrlPrefix";
 }

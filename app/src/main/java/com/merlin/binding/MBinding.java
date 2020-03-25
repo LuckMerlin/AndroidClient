@@ -198,20 +198,21 @@ public class MBinding {
                     }
                 } else if (img instanceof String&&((String)img).length()>0) {
                     String path = (String) img;
-                    path=null!=path&&path.startsWith(Label.LABEL_CLOUD_URL_PREFIX)?path.replaceFirst(path,""):path;
                     RoundedCorners roundedCorners = new RoundedCorners(10);
                     RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
                     RequestBuilder<Drawable> builder=null;
-                    if (null!=path){
-                        if (!path.startsWith("http")) {
-                            if (path.startsWith(Address.PREFIX_THUMB)){
-                                builder= Glide.with(view.getContext()).load(Address.URL +path);
-                            }else{
-                                builder=Glide.with(view.getContext()).load(new File(path));
-                            }
-                        }else {
-                            builder=Glide.with(view.getContext()).load(path);
+                    if (!path.startsWith("http")) {
+                        if (path.startsWith(Address.LABEL_CLOUD_URL_PREFIX)){
+                            path=path.replaceFirst(Address.LABEL_CLOUD_URL_PREFIX,
+                                    Address.PREFIX_THUMB+"?"+Label.LABEL_PATH+"=");
                         }
+                        if (path.startsWith(Address.PREFIX_THUMB)){
+                            builder= Glide.with(view.getContext()).load(Address.URL +path);
+                        }else{
+                            builder=Glide.with(view.getContext()).load(new File(path));
+                        }
+                    }else {
+                        builder=Glide.with(view.getContext()).load((String)img);
                     }
                     if (null!=builder) {
                         builder.centerCrop()
