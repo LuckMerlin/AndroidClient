@@ -42,4 +42,5 @@ public interface Label{
    String  LABEL_UPLOAD="upload";
    String  LABEL_PATH_SEP = "pathSep";
    String  LABEL_CLIENT = "client";
+   String  LABEL_CLOUD_URL_PREFIX="cloudUrlPrefix";
 }

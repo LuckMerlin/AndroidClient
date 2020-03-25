@@ -53,6 +53,7 @@ import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.adapter.SectionsAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.Label;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.model.Callback;
@@ -197,17 +198,20 @@ public class MBinding {
                     }
                 } else if (img instanceof String&&((String)img).length()>0) {
                     String path = (String) img;
+                    path=null!=path&&path.startsWith(Label.LABEL_CLOUD_URL_PREFIX)?path.replaceFirst(path,""):path;
                     RoundedCorners roundedCorners = new RoundedCorners(10);
                     RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-                    RequestBuilder<Drawable> builder;
-                    if (!path.startsWith("http")) {
-                        if (path.startsWith(Address.PREFIX_THUMB)){
-                            builder= Glide.with(view.getContext()).load(Address.URL +path);
-                        }else{
-                            builder=Glide.with(view.getContext()).load(new File(path));
+                    RequestBuilder<Drawable> builder=null;
+                    if (null!=path){
+                        if (!path.startsWith("http")) {
+                            if (path.startsWith(Address.PREFIX_THUMB)){
+                                builder= Glide.with(view.getContext()).load(Address.URL +path);
+                            }else{
+                                builder=Glide.with(view.getContext()).load(new File(path));
+                            }
+                        }else {
+                            builder=Glide.with(view.getContext()).load(path);
                         }
-                    }else {
-                        builder=Glide.with(view.getContext()).load((String)img);
                     }
                     if (null!=builder) {
                         builder.centerCrop()

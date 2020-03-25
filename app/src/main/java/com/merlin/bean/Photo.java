@@ -13,6 +13,7 @@ public final class Photo {
     public Photo(){
         this(null,null);
     }
+
     public Photo(String title,Object imageUrl){
         this.title=title;
         this.imageUrl=imageUrl;
@@ -48,6 +49,10 @@ public final class Photo {
 
     public Object getImageUrl() {
         return imageUrl;
+    }
+
+    public void setImageUrl(Object imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getNote() {

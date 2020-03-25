@@ -9,6 +9,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 import com.merlin.file.FileSaveBuilder;
+import com.merlin.file.FileUploadBody;
 import com.merlin.server.Retrofit;
 import com.merlin.util.Closer;
 
@@ -170,14 +171,18 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     return FileConvey.this.isCancel();
                 }
             };
-            MultipartBody.Part part=new FileSaveBuilder().createFilePart(file,mFolder,requestBody);
+            FileSaveBuilder builder=new FileSaveBuilder();
+            MultipartBody.Part part=builder.createFilePart(builder.createFileHeadersBuilder(file.getName()
+                    ,mFolder,file.isDirectory()),requestBody);
             Debug.D(getClass(),"Upload file "+file.getName()+" to "+mFolder+" "+(null!=debug?debug:"."));
             Reply responseReply=null;
             Call<Reply> call=null;
             try {
-                Map<String,MultipartBody.Part> list=new HashMap<>();
-                list.put("ddd",part);
-                call=mUploadingCall=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(list);
+                if (null==part){
+                    Debug.W(getClass(),"Can't upload file which part is NULL."+(null!=debug?debug:"."));
+                    return new Reply(false,WHAT_ERROR_UNKNOWN,"Error on part NULL while file upload.",null);
+                }
+                call=mUploadingCall=retrofit.prepare(ApiSaveFile.class, Address.LOVE_ADDRESS).save(part);
                 if (null==call){
                     Debug.W(getClass(),"Can't upload file which upload call is NULL."+(null!=debug?debug:"."));
                     return new Reply(false,WHAT_ERROR_UNKNOWN,"Error on NULL file upload call.",null);
@@ -226,61 +231,4 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             return false;
         }
     }
-
-    private static abstract class FileUploadBody extends RequestBody {
-        private final File mFile;
-
-        protected abstract void onTransportProgress(long uploaded,long total,float speed);
-
-        protected abstract boolean isCancel();
-
-        private FileUploadBody(File file){
-            mFile=file;
-        }
-
-        @Override
-        public long contentLength() {
-            File file = mFile;
-            return null != file && file.exists() && file.isFile() ? file.length() : 0;
-        }
-
-        @Override
-        public MediaType contentType() {
-            return MediaType.parse("application/otcet-stream");
-        }
-
-        @Override
-        public void writeTo(BufferedSink sink) {
-            final File file = mFile;
-            if (null != file && file.exists()) {
-                if (file.isFile()) {
-                    FileInputStream in = null;
-                    long fileLength = file.length();
-                    int bufferSize = 1024;
-                    byte[] buffer = new byte[bufferSize];
-                    try {
-                        in = new FileInputStream(file);
-                        long uploaded = 0;
-                        if (!isCancel()) {
-                            int read;
-                            while ((read = in.read(buffer)) != -1) {
-                                if (isCancel()) {
-                                    Debug.D(getClass(),"Cancel file upload convey.");
-                                    throw new IOException(Integer.toString(What.WHAT_CANCEL));
-                                }
-                                uploaded += read;
-                                sink.write(buffer, 0, read);
-                                onTransportProgress(uploaded, fileLength, -1);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }finally {
-                        new Closer().close(in);
-                    }
-                }
-            }
-        }
-    }
-
 }

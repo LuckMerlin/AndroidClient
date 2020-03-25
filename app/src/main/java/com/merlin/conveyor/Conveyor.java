@@ -159,7 +159,7 @@ public final class Conveyor {
         return false;
     }
 
-    public boolean isLimitTouched(){
+    public synchronized boolean isLimitTouched(){
        int limit=getLimit();
        if (limit<=0){
            return true;

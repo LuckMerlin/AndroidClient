@@ -73,7 +73,6 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
             };
             final Dialog dialog=new Dialog(getViewContext()){
                 @Override
-
                 protected void onDismiss() {super.onDismiss();
                     convey.setListener(null,"While dialog dismiss.");
                 }

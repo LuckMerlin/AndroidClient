@@ -19,7 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.Callback;
 import com.merlin.binding.StatusBar;
+import com.merlin.client.R;
+import com.merlin.conveyor.Convey;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
 import com.merlin.global.Application;
 import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;
@@ -40,6 +43,7 @@ import io.reactivex.Scheduler;
 public class Model {
     private WeakReference<View> mRootView=null;
     private final static String LABEL_ACTIVITY_DATA="activityData";
+    private Dialog mLoadingDialog;
     private PopupWindow mPopWindow;
 
     public interface OnModelAttachedToWindow{
@@ -429,12 +433,12 @@ public class Model {
     }
 
     protected final<T> Retrofit.Canceler call(Observable<T> observable,Callback...callbacks){
-        return call(observable,null,callbacks);
+        return call(observable,null,null,callbacks);
     }
 
-    protected final<T> Retrofit.Canceler call(Observable<T> observable, Scheduler observeOn, Callback...callbacks){
+    public final<T> Retrofit.Canceler call(Observable<T> observable, Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks) {
         Retrofit retrofit=null!=observable?mRetrofit:null;
-        return null!=retrofit?retrofit.call(observable,callbacks):null;
+        return null!=retrofit?retrofit.call(observable,subscribeOn, observeOn,callbacks):null;
     }
 
     private final StatusBarLayout getStatusBar(){
@@ -466,6 +470,33 @@ public class Model {
     protected final ViewDataBinding getBiniding(){
         View root=getRoot();
         return null!=root?DataBindingUtil.getBinding(root):null;
+    }
+
+    protected final String showLoading(Object messageText){
+        return showLoading(getViewContext(),messageText);
+    }
+
+    protected final String showLoading(Context context,Object messageText){
+        if (null!=context){
+            Dialog dialog=mLoadingDialog;
+            dialog=null!=dialog?dialog:(mLoadingDialog=new Dialog(context));
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+             dialog.setContentView(R.layout.dialog_loading).title(messageText).show();
+            return Long.toString(System.currentTimeMillis());
+        }
+        return null;
+    }
+
+    protected final boolean dismissLoading(String key){
+        Dialog dialog=mLoadingDialog;
+        if (null!=dialog){
+            mLoadingDialog=null;
+            dialog.dismiss();
+            return true;
+        }
+        return false;
     }
 
 }
