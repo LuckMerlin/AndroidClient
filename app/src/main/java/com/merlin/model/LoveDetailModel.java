@@ -37,6 +37,8 @@ import com.merlin.conveyor.FileUploadConvey;
 import com.merlin.debug.Debug;
 import com.merlin.file.FileSaveBuilder;
 import com.merlin.file.FileUploadBody;
+import com.merlin.photo.LocalPhoto;
+import com.merlin.photo.LocalPhotoLoader;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
@@ -87,6 +89,17 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     }
 
     @Override
+    protected void onRootAttached(View root) {
+        super.onRootAttached(root);
+        new LocalPhotoLoader().load(getViewContext(), new LocalPhotoLoader.OnLocalPhotoLoad() {
+            @Override
+            public void onLocalPhotoLoaded(LocalPhoto photo) {
+
+            }
+        });
+    }
+
+    @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
             case 1:
@@ -96,7 +109,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                     case R.drawable.selector_photo_add:
                         Context context=getViewContext();
                         if (null!=context&&context instanceof Activity){
-                            MultiImageSelector.create().showCamera(true).count(-1) .multi() .start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+                            MultiImageSelector.create().showCamera(true).count(-1) .multi() .
+                                    start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
                         }
                         return true;
                     case R.id.loveDetail_planDateTV:
