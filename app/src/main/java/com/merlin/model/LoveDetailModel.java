@@ -2,7 +2,6 @@ package com.merlin.model;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.TaskInfo;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,14 +12,9 @@ import android.widget.TimePicker;
 
 import androidx.databinding.ObservableField;
 
-import com.google.gson.Gson;
-import com.merlin.activity.ConveyorActivity;
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
-import com.merlin.api.ApiList;
-import com.merlin.api.ApiSaveFile;
-import com.merlin.api.Client;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -31,38 +25,22 @@ import com.merlin.bean.Love;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.Photo;
 import com.merlin.client.R;
-import com.merlin.conveyor.ConveyGroup;
-import com.merlin.conveyor.ConveyorService;
-import com.merlin.conveyor.FileUploadConvey;
 import com.merlin.debug.Debug;
 import com.merlin.file.FileSaveBuilder;
-import com.merlin.file.FileUploadBody;
-import com.merlin.photo.LocalPhoto;
 import com.merlin.photo.LocalPhotoLoader;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
-import io.reactivex.schedulers.Schedulers;
 import me.nereo.multi_image_selector.MultiImageSelector;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Multipart;
@@ -88,13 +66,16 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         Observable<Reply<Love>> save(@PartMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
     }
 
+int aa;
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
+
         new LocalPhotoLoader().load(getViewContext(), new LocalPhotoLoader.OnLocalPhotoLoad() {
             @Override
-            public void onLocalPhotoLoaded(LocalPhoto photo) {
-
+            public boolean onLocalPhotoLoaded(int what, com.merlin.photo.Photo photo) {
+                Debug.D(getClass(),"加载 "+(++aa)+" "+photo);
+                return false;
             }
         });
     }

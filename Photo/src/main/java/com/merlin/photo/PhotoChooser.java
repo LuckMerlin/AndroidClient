@@ -1,10 +1,15 @@
 package com.merlin.photo;
 
-public class PhotoChooser {
+public final class PhotoChooser {
+    private final Display mDisplay;
 
-    public boolean setContext(){
+    public PhotoChooser(Display display){
+        mDisplay=display;
+    }
 
-        return false;
+    public PhotoChooser setAdapter(DefaultPhotoAdapter adapter){
+
+        return this;
     }
 
     public final boolean choose(){
