@@ -1,6 +1,6 @@
 package com.merlin.bean;
 
-public final class Photo {
+public final class _Photo {
     private String title;
     private Object imageUrl;
     private long createTime;
@@ -10,11 +10,11 @@ public final class Photo {
     private String note;
     private float longitude;
     private float latitude;
-    public Photo(){
+    public _Photo(){
         this(null,null);
     }
 
-    public Photo(String title,Object imageUrl){
+    public _Photo(String title, Object imageUrl){
         this.title=title;
         this.imageUrl=imageUrl;
     }

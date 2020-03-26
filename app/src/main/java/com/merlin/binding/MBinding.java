@@ -2,20 +2,14 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.media.audiofx.DynamicsProcessing;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
 import android.text.Editable;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,7 +18,6 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
@@ -41,17 +34,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.merlin.adapter.Adapter;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.adapter.LoadMoreInterceptor;
-import com.merlin.adapter.MultiPageAdapter;
-import com.merlin.adapter.MultiSectionAdapter;
 import com.merlin.adapter.OnItemTouchResolver;
 import com.merlin.adapter.OnMoreLoadable;
 import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
-import com.merlin.adapter.SectionsAdapter;
+import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.client.R;
@@ -62,7 +52,6 @@ import com.merlin.model.OnBeforeTextChange;
 import com.merlin.model.OnTextChange;
 import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
-import com.merlin.view.MultiPageAdapterRefreshBridge;
 import com.merlin.view.OnSeekBarChangeListener;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTextChanged;
@@ -378,13 +367,13 @@ public class MBinding {
                         }
                     });
                 }
-                final ViewParent parent=adapter instanceof SectionsAdapter ?view.getParent():null;
+                final ViewParent parent=adapter instanceof PageAdapter ?view.getParent():null;
                 if (null!=parent&&parent instanceof SwipeRefreshLayout){
                     final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
-                    final SectionsAdapter multiPageAdapter=(SectionsAdapter)adapter;
+                    final PageAdapter multiPageAdapter=(PageAdapter)adapter;
                     final SectionAdapterRefreshBridge refresh=new SectionAdapterRefreshBridge(){
                         @Override
-                        public void onPageLoadUpdate(int state, boolean idle, SectionsAdapter.Page page) {
+                        public void onPageLoadUpdate(int state, boolean idle, PageAdapter.Page page) {
                             switch (state){
                                 case UPDATE_PAGE_START:
                                     refreshLayout.setRefreshing(true);

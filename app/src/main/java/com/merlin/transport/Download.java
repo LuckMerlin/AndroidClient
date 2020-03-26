@@ -73,6 +73,11 @@ public final class Download extends AbsTransport<DownloadBody> {
         if (null!=call){
             final  DownloadBody downloadBody=new DownloadBody() {
                 @Override
+                public boolean cancel(boolean cancel, String debug) {
+                    return false;
+                }
+
+                @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     String note=null;Integer what=null;
                     ResponseBody responseBody=null!=response?response.body():null;

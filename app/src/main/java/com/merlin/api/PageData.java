@@ -1,30 +1,45 @@
 package com.merlin.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @deprecated
- */
 public class PageData<T> {
-    private int length;
-    private int page;
-    private int limit;
-    private List<T> data;
+    private long length=-1;
+    private int from;
+    private ArrayList<T> data;
 
-    public final int getLimit() {
-        return limit;
+    public PageData(){
+        this(0,null,-1);
     }
 
-    public final int getPage() {
-        return page;
+    public PageData(int from,ArrayList<T> data,long length){
+        this.from=from;
+        this.length=from;
+        this.data=data;
     }
 
-    public final void setData(List<T> data) {
+    public int getFrom() {
+        return from;
+    }
+
+    public int getTo() {
+        List<T>  list=from>=0?data:null;
+        return from+(null!=list?list.size():0);
+    }
+
+    public void setFrom(int from) {
+        this.from = from;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public final void setData(ArrayList<T> data) {
         this.data = data;
     }
 
-    public final List<T> getData() {
+    public final ArrayList<T> getData() {
         return data;
     }
 
@@ -32,7 +47,7 @@ public class PageData<T> {
         return null!=data?data.size():0;
     }
 
-    public int getLength() {
+    public long getLength() {
         return length;
     }
 }

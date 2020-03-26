@@ -6,10 +6,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.SectionData;
-import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
-import com.merlin.client.databinding.ItemMediaAllBinding;
 import com.merlin.client.databinding.ItemMediaPlayingBinding;
 import com.merlin.player.Playable;
 

@@ -10,7 +10,7 @@ import com.merlin.client.databinding.ItemSheetTitleBinding;
 
 import java.util.List;
 
-public class SheetTitleAdapter extends PageAdapter<SheetTitle, ItemSheetTitleBinding> {
+public class SheetTitleAdapter extends _PageAdapter<SheetTitle, ItemSheetTitleBinding> {
 
     @Override
     protected Integer onResolveNormalTypeLayoutId() {

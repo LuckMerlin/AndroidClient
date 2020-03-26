@@ -5,10 +5,11 @@ import android.view.View;
 import com.merlin.activity.LoveDetailActivity;
 import com.merlin.adapter.LoveAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
@@ -26,8 +27,8 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private interface Api{
         @POST(Address.PREFIX_LOVE+"/get")
         @FormUrlEncoded
-        Observable<Reply<SectionData<Love>>> getLoves(@Field(LABEL_NAME) String name,
-                                                      @Field(LABEL_FROM) int from,@Field(LABEL_TO) int to);
+        Observable<Reply<PageData<Love>>> getLoves(@Field(LABEL_NAME) String name,
+                                                   @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
 
         @POST(Address.PREFIX_LOVE+"/delete")
         @FormUrlEncoded
@@ -36,7 +37,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
 
     private final LoveAdapter mAdapter=new LoveAdapter() {
         @Override
-        protected Retrofit.Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<SectionData<Love>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Love>>> finish) {
             return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg,from,from+2000),finish);
         }
 
@@ -50,7 +51,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
                     protected void onDismiss() {
                         super.onDismiss();
                         if (!deleted[0]){
-                            add(position,love);
+                            replace(position,love,"After delete fail.");
                         }
                     }
                 };
@@ -62,9 +63,9 @@ public class LoveModel  extends Model implements OnTapClick,Label {
                                   if (null==call(prepare(Api.class,Address.LOVE_ADDRESS,null).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
                                       if (what!= What.WHAT_SUCCEED){
                                           deleted[0] =true;
-                                          add(position,love);
+                                          replace(position,love,"After delete fail.");
                                       } })){
-                                      add(position,love);
+                                      replace(position,love,"After delete fail.");
                                   }
                               }
                             return true;

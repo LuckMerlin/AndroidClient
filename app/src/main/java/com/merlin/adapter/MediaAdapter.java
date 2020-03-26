@@ -6,14 +6,14 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaBinding;
 
 import java.util.List;
 //String,Sheet, SectionData<Sheet>
-public abstract class MediaAdapter extends MultiSectionAdapter<String,NasFile, SectionData<NasFile>> implements OnMoreLoadable {
+public abstract class MediaAdapter extends MultiSectionAdapter<String,NasFile, PageData<NasFile>> implements OnMoreLoadable {
 
     public final boolean notifyFavoriteChange(String md5, boolean favorite){
         if (null!=md5&&md5.length()>0){

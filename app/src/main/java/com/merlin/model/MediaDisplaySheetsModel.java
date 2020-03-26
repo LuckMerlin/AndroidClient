@@ -1,6 +1,5 @@
 package com.merlin.model;
 
-import android.content.Context;
 import android.view.View;
 
 import androidx.databinding.ObservableField;
@@ -13,9 +12,8 @@ import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
 import com.merlin.api.Reply;
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.MediaSheet;
@@ -52,7 +50,7 @@ public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItem
 
         @POST(Address.PREFIX_MEDIA+"/sheet/category")
         @FormUrlEncoded
-        Observable<Reply<SectionData<SheetTitle>>> queryCategories(@Field(LABEL_NAME) String name, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
+        Observable<Reply<PageData<SheetTitle>>> queryCategories(@Field(LABEL_NAME) String name, @Field(LABEL_PAGE) int page, @Field(LABEL_LIMIT) int limit);
     }
 
     public MediaDisplaySheetsModel(){
@@ -75,7 +73,7 @@ public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItem
     }
 
     private boolean queryCategories(){
-        return null!= call(prepare(Api.class).queryCategories(null,0,100), (OnApiFinish<Reply<SectionData<SheetTitle>>>)(what, note, data, arg)->{
+        return null!= call(prepare(Api.class).queryCategories(null,0,100), (OnApiFinish<Reply<PageData<SheetTitle>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
 //                mTitleAdapter.fillPage(null!=data?data.getData():null);
             }

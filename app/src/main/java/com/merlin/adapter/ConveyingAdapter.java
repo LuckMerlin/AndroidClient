@@ -9,11 +9,12 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.ItemConveyingBinding;
 import com.merlin.conveyor.Convey;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConveyingAdapter extends ListAdapter<Convey> {
 
-    public ConveyingAdapter(List<Convey> list){
+    public ConveyingAdapter(ArrayList<Convey> list){
         super(list);
     }
 

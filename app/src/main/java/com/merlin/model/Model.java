@@ -1,6 +1,7 @@
 package com.merlin.model;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.Callback;
+import com.merlin.api.Canceler;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.conveyor.Convey;
@@ -432,11 +434,11 @@ public class Model {
         return null!=retrofit&&null!=cls?retrofit.prepare(cls,url,callbackExecutor):null;
     }
 
-    protected final<T> Retrofit.Canceler call(Observable<T> observable,Callback...callbacks){
+    protected final<T> Canceler call(Observable<T> observable, Callback...callbacks){
         return call(observable,null,null,callbacks);
     }
 
-    public final<T> Retrofit.Canceler call(Observable<T> observable, Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks) {
+    public final<T> Canceler call(Observable<T> observable, Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks) {
         Retrofit retrofit=null!=observable?mRetrofit:null;
         return null!=retrofit?retrofit.call(observable,subscribeOn, observeOn,callbacks):null;
     }
@@ -487,6 +489,16 @@ public class Model {
             return Long.toString(System.currentTimeMillis());
         }
         return null;
+    }
+
+    protected final ContentResolver getContentResolver(){
+        return getContentResolver(null);
+    }
+
+    protected final ContentResolver getContentResolver(Context context){
+        context=null!=context?context:getContext();
+        context=null!=context?context:getViewContext();
+        return null!=context?context.getContentResolver():null;
     }
 
     protected final boolean dismissLoading(String key){

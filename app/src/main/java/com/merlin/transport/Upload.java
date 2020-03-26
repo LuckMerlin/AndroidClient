@@ -22,8 +22,9 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import com.merlin.api.Canceler;
 
-public final class Upload extends AbsTransport<Retrofit.Canceler> {
+public final class Upload extends AbsTransport<Canceler> {
 
     private interface Api{
         @Multipart
@@ -41,7 +42,7 @@ public final class Upload extends AbsTransport<Retrofit.Canceler> {
     }
 
     @Override
-    protected Retrofit.Canceler onStart(OnTransportUpdate update, Retrofit retrofit) {
+    protected Canceler onStart(OnTransportUpdate update, Retrofit retrofit) {
         if (null==retrofit){
             Debug.W(getClass(),"Can't upload file which retrofit is NULL.");
             notifyFinish(false,TRANSPORT_ERROR,"File is NULL .",update,null);

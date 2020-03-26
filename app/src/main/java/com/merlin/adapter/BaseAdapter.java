@@ -12,7 +12,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.PageData;
 import com.merlin.client.R;
 
 import java.lang.ref.WeakReference;

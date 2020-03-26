@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.merlin.model.LocalPhotoChooseModel" />
+    </data>
+    <LinearLayout
+            android:orientation="vertical"
+            binding:createModel="@{true}"
+            android:paddingTop="30dp"
+            android:background="@drawable/round_corner_gray"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            binding:adapter="@{vm.adapter}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+</layout>

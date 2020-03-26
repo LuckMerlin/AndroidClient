@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.merlin.api.Label;
-import com.merlin.debug.Debug;
+import com.merlin.bean.LocalPhoto;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import java.util.List;
 public class PhotoPreViewModel extends Model implements Model.OnActivityIntentChange {
     private PhotoView mPhotoView;
     private PhotoViewAttacher mAttacher;
-    private Collection mCollection;
+    private List mCollection;
     private Object mShowing;
 
     public PhotoPreViewModel(Context context){
@@ -44,15 +44,23 @@ public class PhotoPreViewModel extends Model implements Model.OnActivityIntentCh
     @Override
     public void onActivityIntentChanged(Activity activity, Intent intent) {
         Bundle bundle=null!=intent?intent.getExtras():null;
-        Object extra=null!=bundle?bundle.get(Label.LABEL_DATA):null;
-        if (null!=extra&&extra instanceof Uri){
-            List list=new ArrayList<>(1);
-            list.add(extra);
-            extra=list;
-        }
-        if (null!=extra&&extra instanceof Collection){
-            mCollection=(Collection)extra;
-            showNext("After activity intent changed.");
+        if (null!=bundle){
+            Object extra=bundle.get(Label.LABEL_DATA);
+            int index=bundle.getInt(Label.LABEL_POSITION);
+            if (null!=extra&&extra instanceof Uri){
+                List list=new ArrayList<>(1);
+                list.add(extra);
+                extra=list;
+            }
+            if (null!=extra&&extra instanceof List){
+                mCollection=(List)extra;
+                Object initPhoto=index>=0&&index<((List)extra).size()?((List)extra).get(index):null;
+                if (null!=initPhoto){
+                    show(initPhoto,"After activity intent changed.");
+                }else {
+                    showNext("After activity intent changed.");
+                }
+            }
         }
     }
 
@@ -74,20 +82,31 @@ public class PhotoPreViewModel extends Model implements Model.OnActivityIntentCh
                 }
             }
             next=null!=next&&!(next instanceof Boolean)?next:collection.iterator().next();
-            if (null!=next){
-                if (next instanceof String){
-                    File file=new File((String)next);
-                    if (file.exists()){
-                        photoView.setImageURI(Uri.fromFile(file));
-                        attacher.update();
-                    }
-                }else if (next instanceof Integer){
-                    photoView.setImageResource((Integer)next);
+            return null!=next&&show(next,debug);
+        }
+        return false;
+    }
+
+    private boolean show(Object photo,String debug){
+        PhotoView photoView=mPhotoView;
+        PhotoViewAttacher attacher=mAttacher;
+        if (null!=photo&&null!=photoView&&null!=attacher){
+            photo= photo instanceof LocalPhoto ?((LocalPhoto)photo).getPath():photo;
+            if (photo instanceof String){
+                File file=new File((String)photo);
+                if (file.exists()){
+                    photoView.setImageURI(Uri.fromFile(file));
                     attacher.update();
-                }else if (next instanceof Uri){
-                    photoView.setImageURI((Uri)next);
-                    attacher.update();
+                    return true;
                 }
+            }else if (photo instanceof Integer){
+                photoView.setImageResource((Integer)photo);
+                attacher.update();
+                return true;
+            }else if (photo instanceof Uri){
+                photoView.setImageURI((Uri)photo);
+                attacher.update();
+                return true;
             }
         }
         return false;

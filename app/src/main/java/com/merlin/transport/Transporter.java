@@ -18,14 +18,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import com.merlin.api.Canceler;
 
 public final class Transporter implements Callback{
     public final static int TYPE_NONE =0x00;//0000 0000
     public final static int TYPE_DOWNLOAD =0x01;//0000 0001
     public final static int TYPE_UPLOAD =0x02;//0000 0010
     public final static int TYPE_ALL =TYPE_DOWNLOAD&TYPE_UPLOAD;
-    private Map<AbsTransport, Transporting<Retrofit.Canceler>> mTransporting;
+    private Map<AbsTransport, Transporting<Canceler>> mTransporting;
     private final Handler mHandler;
     private WeakReference<Context> mContext;
     private final Map<OnStatusChange,Long> mListeners=new WeakHashMap<>();
@@ -116,11 +116,11 @@ public final class Transporter implements Callback{
     }
 
     public final synchronized boolean cancel(boolean cancel, String debug,AbsTransport ...transports){
-        Map<AbsTransport, Transporting<Retrofit.Canceler>> map=null!=transports&&transports.length>0?mTransporting:null;
+        Map<AbsTransport, Transporting<Canceler>> map=null!=transports&&transports.length>0?mTransporting:null;
         if (null!=map){
             for (AbsTransport child:transports) {
-                Transporting<Retrofit.Canceler> transporting=null!=child?map.get(child):null;
-                Retrofit.Canceler canceler=null!=transporting?transporting.mCanceler:null;
+                Transporting<Canceler> transporting=null!=child?map.get(child):null;
+                Canceler canceler=null!=transporting?transporting.mCanceler:null;
                 if (null!=canceler&&canceler.cancel(cancel,debug)&&null!=map.remove(child)){
 //            notifyStatusChange(TRANSPORT_CANCEL, transport,debug);
                 }
@@ -144,7 +144,7 @@ public final class Transporter implements Callback{
             Debug.W(getClass(),"Skip add transport file which is NULL.");
             return false;
         }
-        Map<AbsTransport, Transporting<Retrofit.Canceler>> transportingMap=mTransporting;
+        Map<AbsTransport, Transporting<Canceler>> transportingMap=mTransporting;
         transportingMap=null!=transportingMap?transportingMap:(mTransporting=new ConcurrentHashMap<>());
         Set<AbsTransport> set=transportingMap.keySet();
         final int size=null!=set?set.size():-1;
@@ -158,7 +158,7 @@ public final class Transporter implements Callback{
             }
         }
         Debug.D(getClass(),"Transport add "+" "+transport);
-        final Transporting<Retrofit.Canceler> transporting=new Transporting<>();
+        final Transporting<Canceler> transporting=new Transporting<>();
         transportingMap.put(transport,transporting);
         notifyStatusChange(TRANSPORT_ADD,transport,null,progress);
         int maxVolume=mMaxVolume;
@@ -173,7 +173,7 @@ public final class Transporter implements Callback{
     }
 
     public boolean transportNext(String debug){
-        Map<AbsTransport, Transporting<Retrofit.Canceler>> map=mTransporting;
+        Map<AbsTransport, Transporting<Canceler>> map=mTransporting;
         if (null!=map){
             int maxVolume=mMaxVolume;
             maxVolume=maxVolume<=0?1:maxVolume;
@@ -182,7 +182,7 @@ public final class Transporter implements Callback{
                 Debug.D(getClass(),"Try switch next queuing transport "+(null!=debug?debug:"."));
                 if (null!=set&&set.size()>0){
                     for (AbsTransport child:set) {
-                        Transporting<Retrofit.Canceler> canceler= null!=child?map.get(child):null;
+                        Transporting<Canceler> canceler= null!=child?map.get(child):null;
                         if (null!=canceler&&canceler.mState==TRANSPORT_QUEUING){
                             return transport(child,canceler.mChange,debug);
                         }
@@ -195,8 +195,8 @@ public final class Transporter implements Callback{
 
     private boolean transport(AbsTransport transport,OnStatusChange change,String debug){
         if (null!=transport){
-            Map<AbsTransport, Transporting<Retrofit.Canceler>> map=mTransporting;
-            final Transporting<Retrofit.Canceler> transporting=null!=map?map.get(transport):null;
+            Map<AbsTransport, Transporting<Canceler>> map=mTransporting;
+            final Transporting<Canceler> transporting=null!=map?map.get(transport):null;
             if (null!=transporting){
                 final OnTransportUpdate update=(finish,what,  note,  data)->{
                     if (null!=data&&data instanceof Progress){
@@ -234,12 +234,12 @@ public final class Transporter implements Callback{
     }
 
     public final Collection<AbsTransport> getTransporting(String name){
-        Map<AbsTransport, Transporting<Retrofit.Canceler>> transporting=mTransporting;
+        Map<AbsTransport, Transporting<Canceler>> transporting=mTransporting;
         return null!=transporting?transporting.keySet():null;
     }
 
     public final boolean isTransporting(Object ...objects){
-        Map<AbsTransport, Transporting<Retrofit.Canceler>> transporting=null!=objects&&objects.length>0?mTransporting:null;
+        Map<AbsTransport, Transporting<Canceler>> transporting=null!=objects&&objects.length>0?mTransporting:null;
         if (null!=transporting){
             synchronized (transporting){
                 for (Object object:objects) {

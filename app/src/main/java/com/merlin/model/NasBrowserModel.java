@@ -7,6 +7,7 @@ import com.merlin.adapter.NasBrowserAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.Callback;
+import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -70,7 +71,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         super(context,meta,callback);
         setAdapter(new NasBrowserAdapter(){
             @Override
-            protected final Retrofit.Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
+            protected final Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<NasFile>>> finish) {
                 return null!=path?call(prepare(Api.class).queryFiles(path, from,from+50),(OnApiFinish<Reply<FolderData<NasFile>>>)(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
@@ -294,7 +295,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         return null!=meta?meta.getUrl():null;
     }
 
-    protected final<T> Retrofit.Canceler call(Observable<T> observable, Callback...callbacks){
+    protected final<T> Canceler call(Observable<T> observable, Callback...callbacks){
         Retrofit retrofit=null!=observable?mRetrofit:null;
         return null!=retrofit?retrofit.call(observable,callbacks):null;
     }

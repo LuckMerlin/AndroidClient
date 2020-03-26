@@ -8,10 +8,11 @@ import androidx.databinding.ObservableField;
 
 import com.merlin.adapter.SheetMediasAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
@@ -33,7 +34,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private final ObservableField<Sheet> mSheet=new ObservableField<>();
     private final SheetMediasAdapter mAdapter=new SheetMediasAdapter(){
         @Override
-        protected Retrofit.Canceler onPageLoad(String title, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
+        protected Canceler onPageLoad(String title, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
             return call(prepare(Api.class).queryMedias(title,from,from+20),finish);
         }
     };
@@ -41,7 +42,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/medias")
         @FormUrlEncoded
-        Observable<Reply<SectionData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+        Observable<Reply<PageData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
     }
 
     @Override

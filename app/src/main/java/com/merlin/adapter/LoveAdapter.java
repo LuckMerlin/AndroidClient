@@ -6,14 +6,14 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.bean.Love;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemLoveBinding;
 
 import java.util.List;
 
-public abstract class LoveAdapter extends SectionsAdapter<String,Love,SectionData<Love>> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
+public abstract class LoveAdapter extends PageAdapter<String,Love> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
     private final ItemSlideRemover mItemSlideRemover=new ItemSlideRemover();
 
     @Override

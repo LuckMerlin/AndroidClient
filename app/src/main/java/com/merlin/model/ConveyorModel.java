@@ -100,7 +100,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
                 binder.listener(ADD,this,debug);
                 List<Convey> conveys=binder.get(null);
                 Debug.D(getClass(),"AAA setBinder AAAAAAAAA "+(null!=conveys?conveys.size():-1));
-                mAdapter.setData(conveys);
+                mAdapter.set(conveys,"After conveyor bind.");
                 return true;
             }
         }else if (null!=current){

@@ -173,10 +173,10 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null;
     }
 
-    public final List<T> getChildren() {
+    public final ArrayList<T> getChildren() {
         List<T> children=mChildren;
         int size=null!=children?children.size():-1;
-        List<T> result=size>0?new ArrayList<>(size):null;
+        ArrayList<T> result=size>0?new ArrayList<>(size):null;
         return null!=result&&result.addAll(children)?result:null;
     }
 

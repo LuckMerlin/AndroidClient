@@ -1,8 +1,8 @@
 package com.merlin.bean;
 
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 
-public class FolderData<T extends FileMeta> extends SectionData<T> {
+public class FolderData<T extends FileMeta> extends PageData<T> {
     private String path;
     private String parent;
 

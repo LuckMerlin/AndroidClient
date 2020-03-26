@@ -22,21 +22,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Retrofit {
     private final retrofit2.Retrofit.Builder mBuilder;
 
-    public static class Canceler{
-        Disposable mDisposable;
-        public boolean cancel(boolean cancel,String debug){
-            Disposable disposable=mDisposable;
-            if (null!=disposable){
-                if (cancel&&!disposable.isDisposed()){
-                    disposable.dispose();
-                    Debug.D(getClass(),"Cancel api call "+(null!=debug?debug:"."));
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
     public Retrofit(){
         OkHttpClient.Builder okHttp = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS).addInterceptor(new LogInterceptor());
@@ -63,13 +48,13 @@ public class Retrofit {
         return null!=retrofit?retrofit.create(cls):null;
     }
 
-    public final<T> Canceler call(Observable<T> observable, Callback ...callbacks){
+    public final<T> RetrofitCanceler call(Observable<T> observable, Callback ...callbacks){
         return call(observable,null,null,callbacks);
     }
 
-    public final<T> Canceler call(Observable<T> observable,Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks){
+    public final<T> RetrofitCanceler call(Observable<T> observable,Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks){
         if (null!=observable){
-            final Canceler canceler=new Canceler();
+            final RetrofitCanceler canceler=new RetrofitCanceler();
             observable.subscribeOn(null!=subscribeOn?subscribeOn:Schedulers.io()).observeOn(null!=observeOn?observeOn:AndroidSchedulers.mainThread())
                     .subscribe(new InnerCallback<T>(callbacks){
                         @Override
@@ -90,7 +75,7 @@ public class Retrofit {
 
     private static abstract class InnerCallback <T>implements Observer<T> {
         private final Callback[] mCallbacks;
-        private Canceler mCanceler;
+        private RetrofitCanceler mCanceler;
 
         private InnerCallback(Callback ...callbacks){
             mCallbacks=callbacks;

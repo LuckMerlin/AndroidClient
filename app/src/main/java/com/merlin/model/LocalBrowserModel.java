@@ -12,6 +12,7 @@ import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.LocalBrowserAdapter;
 import com.merlin.api.ApiList;
+import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -45,10 +46,15 @@ public class LocalBrowserModel extends BrowserModel {
 
     public LocalBrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         super(context,meta,callback);
-        Retrofit.Canceler canceler=new Retrofit.Canceler();
+        Canceler canceler=new Canceler(){
+            @Override
+            public boolean cancel(boolean cancel, String debug) {
+                return false;
+            }
+        };
         setAdapter(new LocalBrowserAdapter() {
             @Override
-            protected Retrofit.Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<LocalFile>>> finish) {
+            protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<LocalFile>>> finish) {
                 return null!=path&&browserFolder(path,from,from+50,(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
@@ -267,7 +273,7 @@ public class LocalBrowserModel extends BrowserModel {
                 what=What.WHAT_SUCCEED;
                 succeed=true;
                 to = Math.min(to,length);
-                List<LocalFile> list=new ArrayList();
+                ArrayList<LocalFile> list=new ArrayList();
                 for (int i = from; i < to; i++) {
                     File child=files[i];
                     if (null!=child){

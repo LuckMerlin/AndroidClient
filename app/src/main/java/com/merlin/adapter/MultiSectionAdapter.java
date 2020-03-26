@@ -9,9 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.merlin.api.Canceler;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -24,7 +25,7 @@ import java.util.WeakHashMap;
 /**
  * @deprecated
  */
-public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends  Adapter<T>  implements OnMoreLoadable{
+public abstract class MultiSectionAdapter<D,T,M extends PageData<T>> extends  Adapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
@@ -36,7 +37,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
         void onPageLoadUpdate(int state, boolean idle, Page page);
     }
 
-    protected abstract Retrofit.Canceler onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
+    protected abstract Canceler onPageLoad(D arg, int page, OnApiFinish<Reply<M>> finish);
 
     private final boolean fillPage(M page){
         if (null==page){
@@ -139,7 +140,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
 
     public final boolean isAllLoaded(){
         Page<D> page=mCurrentPage;
-        Integer total=null!=page?page.mTotal:null;
+        Long total=null!=page?page.mTotal:null;
         if (null!=total){
             if(getDataSize()>=total){
                 return true;
@@ -179,7 +180,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
             mLoadingPage=page;
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
             Debug.D(getClass(),"Load page "+(null!=debug?debug:"."));
-            Retrofit.Canceler canceler=null;
+            Canceler canceler=null;
             if(null!=(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
@@ -188,7 +189,7 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
                     switch (what){
                         case What.WHAT_SUCCEED:
                             M m=null!=data?data.getData():null;
-                            int total=null!=m?m.getLength():-1;
+                            long total=null!=m?m.getLength():-1;
                             if (total>=0){
                                 mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
                                 fillPage(m);
@@ -214,10 +215,10 @@ public abstract class MultiSectionAdapter<D,T,M extends SectionData<T>> extends 
 
     public final static class Page<T> {
         private final int mFrom;
-        private final Integer mTotal;
+        private final Long mTotal;
         private final T mArg;
 
-        private Page(T arg,int from, Integer total){
+        private Page(T arg,int from, Long total){
             mArg=arg;
             mFrom=from;
             mTotal=total;

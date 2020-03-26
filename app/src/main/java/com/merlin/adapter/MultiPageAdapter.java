@@ -4,7 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.OnApiFinish;
-import com.merlin.api.PageData;
+import com.merlin.api._PageData;
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
 import java.util.List;
@@ -16,7 +16,7 @@ import static com.merlin.api.What.WHAT_SUCCEED;
 /**
  * @deprecated
  */
-public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapter<T>  implements OnMoreLoadable{
+public abstract class MultiPageAdapter<D,T,M extends _PageData<T>> extends  Adapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
@@ -29,7 +29,7 @@ public abstract class MultiPageAdapter<D,T,M extends PageData<T>> extends  Adapt
 
     protected abstract boolean onPageLoad(D arg,int page, OnApiFinish<Reply<M>> finish);
 
-    private final boolean fillPage(PageData<T> page){
+    private final boolean fillPage(_PageData<T> page){
         if (null==page){
             return false;
         }

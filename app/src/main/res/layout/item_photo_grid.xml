@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="photo"
+            type="com.merlin.photo.Photo" />
+        <variable
+            name="chooseEnable"
+            type="boolean" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.view.Clicker"/>
+    </data>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="130dp">
+        <ImageView
+            android:src="@{photo.loadUrl}"
+            binding:enableClick="@{Clicker.multiClick(photo,true)}"
+            android:scaleType="centerCrop"
+            android:alpha="0.85"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <CheckBox
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:enabled="@{chooseEnable}"
+            android:visibility="@{chooseEnable?View.VISIBLE:View.GONE}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+</layout>

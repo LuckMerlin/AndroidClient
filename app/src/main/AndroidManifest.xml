@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.merlin.client">
-
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!--        android:theme="@android:style/Theme.Translucent.NoTitleBar"-->
     <application
         android:requestLegacyExternalStorage="true"
@@ -58,6 +60,11 @@
         <activity android:name="com.merlin.activity.LoveDetailActivity" android:launchMode="standard">
             <intent-filter>
                 <action android:name="dddd"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="com.merlin.activity.LocalPhotoChooseActivity" android:launchMode="standard">
+            <intent-filter>
+                <action android:name="dddsfasdd"/>
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.MediaSheetActivity"/>

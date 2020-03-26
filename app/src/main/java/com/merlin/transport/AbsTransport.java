@@ -4,8 +4,9 @@ import androidx.annotation.Nullable;
 
 import com.merlin.bean.ClientMeta;
 import com.merlin.server.Retrofit;
+import com.merlin.api.Canceler;
 
-public abstract class AbsTransport<T extends Retrofit.Canceler> extends Transport<T> {
+public abstract class AbsTransport<T extends Canceler> extends Transport<T> {
     private final ClientMeta mClient;
     private Transport mTransporting;
 

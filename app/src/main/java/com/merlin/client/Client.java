@@ -35,6 +35,9 @@ public final class Client extends Socket {
         void onFileDownloadUpdate(boolean finish, int what, String account,String url, String to,byte[] data);
     }
 
+    /**
+     * @deprecated
+     */
     public static final class Canceler{
         private boolean mCanceled=false;
 

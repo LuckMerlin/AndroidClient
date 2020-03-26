@@ -23,11 +23,10 @@ import com.merlin.bean.FileMeta;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.Love;
 import com.merlin.bean.NasFile;
-import com.merlin.bean.Photo;
+import com.merlin.bean._Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.file.FileSaveBuilder;
-import com.merlin.photo.LocalPhotoLoader;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
@@ -70,14 +69,6 @@ int aa;
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-
-        new LocalPhotoLoader().load(getViewContext(), new LocalPhotoLoader.OnLocalPhotoLoad() {
-            @Override
-            public boolean onLocalPhotoLoaded(int what, com.merlin.photo.Photo photo) {
-                Debug.D(getClass(),"加载 "+(++aa)+" "+photo);
-                return false;
-            }
-        });
     }
 
     @Override
@@ -119,8 +110,8 @@ int aa;
                 }
                 break;
         }
-        if (null!=data&&data instanceof Photo){
-            Object imageUrlObj=((Photo)data).getImageUrl();
+        if (null!=data&&data instanceof _Photo){
+            Object imageUrlObj=((_Photo)data).getImageUrl();
             String imageUrl=null!=imageUrlObj&&imageUrlObj instanceof String?(String)imageUrlObj:null;
             Uri uri=null!=imageUrl?Uri.fromFile(new File(imageUrl)):null;
             if (null!=uri){
@@ -138,7 +129,7 @@ int aa;
         mContent.set(null!=love?love.getData():null);
         mTitle.set(null!=love?love.getName():null);
         mPlanTime.set(null!=love?love.getTime():null);
-        mPhotoAdapter.setData(null!=love?love.getImage():null);
+        mPhotoAdapter.set(null!=love?love.getImage():null,"After love apply.");
     }
 
     private boolean save(String debug){
@@ -232,7 +223,7 @@ int aa;
                 if (null!=object&&object instanceof ArrayList){
                     for (Object child:(ArrayList)object) {
                         if (null!=child&& child instanceof String&&((String)child).length()>0){
-                            mPhotoAdapter.add(0,LocalFile.create(new File((String)child),null));
+                            mPhotoAdapter.add(LocalFile.create(new File((String)child),null),true,"");
                         }
                     }
                 }

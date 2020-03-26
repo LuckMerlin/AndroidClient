@@ -7,14 +7,14 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemSheetMediaBinding;
 
 import java.util.List;
 
-public abstract class SheetMediasAdapter extends MultiSectionAdapter<String, NasMedia, SectionData<NasMedia>> {
+public abstract class SheetMediasAdapter extends MultiSectionAdapter<String, NasMedia, PageData<NasMedia>> {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

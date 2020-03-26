@@ -272,7 +272,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
 
     private boolean refreshMultiChooseCount() {
         FolderData folder=getLastPage();
-        int length=null!=folder?folder.getLength():0;
+        long length=null!=folder?folder.getLength():0;
         BrowserAdapter adapter=mBrowserAdapter;
         int count=null!=adapter?adapter.getChooseCount():0;
         mMultiChooseSummary.set(count<=0?"None selected(0/"+length+")":"Selected("+count+"/"+length+")");

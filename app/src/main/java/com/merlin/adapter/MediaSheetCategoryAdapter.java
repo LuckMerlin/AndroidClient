@@ -8,15 +8,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
-import com.merlin.api.SectionData;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaSheetBinding;
 import com.merlin.bean.Sheet;
-import com.merlin.view.OnTapClick;
 
 import java.util.List;
 
-public abstract class MediaSheetCategoryAdapter extends MultiSectionAdapter<String,Sheet, SectionData<Sheet>>  {
+public abstract class MediaSheetCategoryAdapter extends MultiSectionAdapter<String,Sheet, PageData<Sheet>>  {
 
     @Override
     protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

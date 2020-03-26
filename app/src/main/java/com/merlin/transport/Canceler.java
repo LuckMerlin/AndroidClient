@@ -2,6 +2,9 @@ package com.merlin.transport;
 
 import com.merlin.debug.Debug;
 
+/**
+ * @deprecated
+ */
 public class Canceler {
     private boolean mCanceled;
     public Canceler(){

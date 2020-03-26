@@ -2,15 +2,14 @@ package com.merlin.model;
 import android.view.View;
 import android.widget.EditText;
 
-import androidx.databinding.ViewDataBinding;
-
 import com.merlin.adapter.AllMediasAdapter;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
-import com.merlin.api.SectionData;
+import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.bean.File_;
 import com.merlin.bean.NasMedia;
@@ -35,7 +34,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
 
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        protected Retrofit.Canceler onPageLoad(String name, int from, OnApiFinish<Reply<SectionData<NasMedia>>> finish) {
+        protected Canceler onPageLoad(String name, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
             return call(prepare(Api.class).queryAllMedias(from,from+20,name),finish);
         }
     };
@@ -43,9 +42,9 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<SectionData<NasMedia>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
-                                                                @Field(LABEL_NAME) String name,
-                                                                @Field(LABEL_FORMAT) String... formats);
+        Observable<Reply<PageData<NasMedia>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
+                                                             @Field(LABEL_NAME) String name,
+                                                             @Field(LABEL_FORMAT) String... formats);
     }
 
     public MediaDisplayAllMediasModel(){

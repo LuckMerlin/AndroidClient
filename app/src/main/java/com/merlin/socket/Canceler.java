@@ -2,6 +2,9 @@ package com.merlin.socket;
 
 import com.merlin.debug.Debug;
 
+/**
+ * @deprecated
+ */
 public class Canceler {
     private boolean mCancel;
 

@@ -1,13 +1,11 @@
 package com.merlin.transport;
 import androidx.annotation.Nullable;
 
-import com.merlin.debug.Debug;
 import com.merlin.file.CoverMode;
-import com.merlin.server.Retrofit;
 import com.merlin.util.StringEquals;
-import com.xuhao.didi.socket.common.interfaces.common_interfacies.dispatcher.IRegister;
+import com.merlin.api.Canceler;
 
-public abstract class Transport<T extends Retrofit.Canceler> implements CoverMode,Callback {
+public abstract class Transport<T extends Canceler> implements CoverMode,Callback {
     private final String mName;
     private long mTotal;
     private long mSize;
