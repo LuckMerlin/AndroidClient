@@ -12,7 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -31,6 +34,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     public final static int TYPE_TAIL=-1;
     public final static int TYPE_EMPTY=-3;
     public final static int TYPE_DATA=-4;
+    private WeakReference<RecyclerView> mRecyclerView;
 
     public ListAdapter(){
         this(null);
@@ -300,5 +304,82 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             ViewDataBinding binding=null!=view? DataBindingUtil.getBinding(view):null;
             onViewDetachedFromWindow(holder,view,binding);
         }
+    }
+
+
+  public void onAttachedRecyclerView(RecyclerView recyclerView) {
+        //Do nothing
+  }
+
+  public final boolean updateVisibleItems(String debug){
+      RecyclerView.LayoutManager manager=getLayoutManager();
+      if (null!=manager){
+            if (manager instanceof LinearLayoutManager){
+                LinearLayoutManager lm=(LinearLayoutManager)manager;
+                int first=lm.findFirstVisibleItemPosition();
+                int last=lm.findLastVisibleItemPosition();
+                Debug.D(getClass(),"Update visible linear items from "+first+" to "+last+" "+(null!=debug?debug:"."));
+                return last>=first&&updateItems(first,last-first);
+            }else if (manager instanceof GridLayoutManager){
+                GridLayoutManager glm=(GridLayoutManager)manager;
+                int first=glm.findFirstVisibleItemPosition();
+                int last=glm.findLastVisibleItemPosition();
+                Debug.D(getClass(),"Update visible grid items from "+first+" to "+last+" "+(null!=debug?debug:"."));
+                return last>=first&&updateItems(first,last-first);
+            }else if (manager instanceof StaggeredGridLayoutManager){
+//                StaggeredGridLayoutManager glm=(StaggeredGridLayoutManager)manager;
+//                int first=glm.fin();
+//                int last=glm.findLastVisibleItemPosition();
+//                return last>=first&&updateItems(first,last-first);
+            }
+      }
+      return false;
+  }
+
+  public final boolean updateItems(int from,int to){
+        if (to>from&&from>=0&&from<getDataCount()){
+            notifyItemRangeChanged(from,to-from);
+            return true;
+        }
+        return false;
+  }
+
+  public final  RecyclerView.LayoutManager getLayoutManager(){
+      RecyclerView rv=getRecyclerView();
+      return null!=rv?rv.getLayoutManager():null;
+  }
+
+  public void onDetachedRecyclerView(RecyclerView recyclerView) {
+     //Do nothing
+  }
+
+  public final RecyclerView getRecyclerView(){
+        WeakReference<RecyclerView> reference = mRecyclerView;
+        return null!=reference?reference.get():null;
+  }
+
+  @Override
+  public final void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+     super.onAttachedToRecyclerView(recyclerView);
+     WeakReference<RecyclerView> view=mRecyclerView;
+     if (null!=view){
+         mRecyclerView=null;
+         view.clear();
+     }
+     if (null!=recyclerView){
+         mRecyclerView=new WeakReference<>(recyclerView);
+     }
+      onAttachedRecyclerView(recyclerView);
+  }
+
+    @Override
+    public final void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        WeakReference<RecyclerView> view=mRecyclerView;
+        if (null!=view){
+            mRecyclerView=null;
+            view.clear();
+        }
+        onDetachedRecyclerView(recyclerView);
     }
 }

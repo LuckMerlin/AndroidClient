@@ -135,12 +135,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
     public final boolean isAllLoaded(){
         Page<D> page=mCurrentPage;
         Long total=null!=page?page.mTotal:null;
-        if (null!=total){
-            if(getDataCount()>=total){
-                return true;
-            }
-        }
-        return false;
+        return null!=total&&getDataCount()>=total;
     }
 
     public final boolean loadNextPage(String debug){
@@ -160,7 +155,6 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
     }
 
     protected void onNoMoreData(PageData<T> data){
-        Debug.D(getClass(),"没有更多内容了");
     }
 
     private boolean loadPage(Page<D> page,String debug){

@@ -1,5 +1,7 @@
 package com.merlin.photo;
 
-public interface Photo {
+import android.os.Parcelable;
+
+public interface Photo extends Parcelable {
     Object getLoadUrl();
 }

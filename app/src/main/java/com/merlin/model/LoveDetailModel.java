@@ -12,6 +12,7 @@ import android.widget.TimePicker;
 
 import androidx.databinding.ObservableField;
 
+import com.merlin.activity.LocalPhotoChooseActivity;
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.adapter.PhotoAdapter;
 import com.merlin.api.Address;
@@ -53,7 +54,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     private final ObservableField<String> mTitle=new ObservableField<>("测试i标题");
     private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
     private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
-    private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20243242;
+    private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20242;
 
     private interface Api {
         @POST(Address.PREFIX_LOVE + "/detail")
@@ -65,7 +66,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         Observable<Reply<Love>> save(@PartMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
     }
 
-int aa;
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
@@ -81,8 +81,9 @@ int aa;
                     case R.drawable.selector_photo_add:
                         Context context=getViewContext();
                         if (null!=context&&context instanceof Activity){
-                            MultiImageSelector.create().showCamera(true).count(-1) .multi() .
-                                    start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+                            startActivity(new Intent(context, LocalPhotoChooseActivity.class),PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
+//                            MultiImageSelector.create().showCamera(true).count(-1) .multi() .
+//                                    start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
                         }
                         return true;
                     case R.id.loveDetail_planDateTV:
@@ -219,14 +220,17 @@ int aa;
         switch (requestCode){
             case PHOTO_CHOOSE_ACTIVITY_RESULT_CODE:
                 Bundle bundle=null!=data?data.getExtras():null;
-                Object object=null!=bundle?bundle.get("select_result"):null;
-                if (null!=object&&object instanceof ArrayList){
-                    for (Object child:(ArrayList)object) {
-                        if (null!=child&& child instanceof String&&((String)child).length()>0){
-                            mPhotoAdapter.add(LocalFile.create(new File((String)child),null),true,"");
-                        }
-                    }
-                }
+                Object object=null!=bundle?bundle.get(Label.LABEL_DATA):null;
+                Debug.D(getClass(),"阀手动阀   "+object);
+//                Bundle bundle=null!=data?data.getExtras():null;
+//                Object object=null!=bundle?bundle.get("select_result"):null;
+//                if (null!=object&&object instanceof ArrayList){
+//                    for (Object child:(ArrayList)object) {
+//                        if (null!=child&& child instanceof String&&((String)child).length()>0){
+//                            mPhotoAdapter.add(LocalFile.create(new File((String)child),null),true,"");
+//                        }
+//                    }
+//                }
                 break;
         }
     }

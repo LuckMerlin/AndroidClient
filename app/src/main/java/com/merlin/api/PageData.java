@@ -14,7 +14,7 @@ public class PageData<T> {
 
     public PageData(int from,ArrayList<T> data,long length){
         this.from=from;
-        this.length=from;
+        this.length=length;
         this.data=data;
     }
 

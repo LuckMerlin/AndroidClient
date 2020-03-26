@@ -8,6 +8,9 @@
         <variable
             name="chooseEnable"
             type="boolean" />
+        <variable
+            name="existChoose"
+            type="boolean" />
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>
     </data>
@@ -23,9 +26,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
         <CheckBox
+            binding:enableClick="@{Clicker.multiClick(photo,true)}"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:enabled="@{chooseEnable}"
+            android:checked="@{existChoose}"
             android:visibility="@{chooseEnable?View.VISIBLE:View.GONE}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

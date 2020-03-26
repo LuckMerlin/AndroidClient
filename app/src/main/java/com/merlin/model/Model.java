@@ -379,8 +379,8 @@ public class Model {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             if(null!=forResultCode){
                 if ((context instanceof Activity)){
-                    Debug.D(getClass(),"Start activity for result."+forResultCode);
-                     ((Activity)context).startActivityForResult(intent, forResultCode);
+                     Debug.D(getClass(),"Start activity for result."+forResultCode);
+                     ((Activity)context).startActivityForResult(intent,forResultCode);
                      return true;
                 }else{
                     Debug.W(getClass(),"Will not receive activity result while context is not instanceof activity.");

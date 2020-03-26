@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.binding.IDs;
 import com.merlin.binding.MBinding;
@@ -280,6 +281,10 @@ public final class Clicker {
             }
             Object modelBind=view.getTag(R.id.modelBind);
             if (null!=modelBind&& modelBind instanceof Model&&dispatcher.onDispatch(view,root,modelBind,binding)){
+                return true;
+            }
+            RecyclerView.Adapter adapter=view instanceof RecyclerView?((RecyclerView)view).getAdapter():null;
+            if (dispatcher.onDispatch(view,root,adapter,binding)){
                 return true;
             }
             ViewParent parent=view.getParent();

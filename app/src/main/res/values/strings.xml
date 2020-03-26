@@ -125,4 +125,5 @@
     <string name="date">日期</string>
     <string name="time">时间</string>
     <string name="loading">加载中</string>
+    <string name="alreadyMax">已经最大值了</string>
 </resources>

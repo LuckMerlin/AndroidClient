@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.merlin.photo.Photo;
 
-public final class LocalPhoto implements Parcelable, Photo {
+public final class LocalPhoto implements Photo {
     private String mTitle;
     private String mPath;
     private String mNote;
