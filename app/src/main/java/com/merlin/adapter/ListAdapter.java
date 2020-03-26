@@ -1,5 +1,6 @@
 package com.merlin.adapter;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;
@@ -351,6 +353,26 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
 
   public void onDetachedRecyclerView(RecyclerView recyclerView) {
      //Do nothing
+  }
+
+  public final Context getContext(){
+        RecyclerView rv=getRecyclerView();
+        return null!=rv?rv.getContext():null;
+  }
+
+    public final boolean toast(int textId){
+        Context context=getContext();
+        String text=null!=context&&textId!=Resources.ID_NULL?context.getString(textId):null;
+        return null!=text&&toast(text);
+    }
+
+  public final boolean toast(String text){
+        Context context=getContext();
+        if (null!=context){
+            Toast.makeText(context,text,Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return false;
   }
 
   public final RecyclerView getRecyclerView(){

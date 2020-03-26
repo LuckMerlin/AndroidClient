@@ -18,6 +18,7 @@
     </data>
     <LinearLayout
             binding:createModel="@{true}"
+            android:background="@drawable/round_corner_gray"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -74,7 +75,7 @@
                                 android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
                             <TextView
                                 android:text="@{` (`+vm.currentFolder.length+')'}"
-                                android:textSize="@dimen/textTitle"
+                                style="@style/titleNormalTextView"
                                 android:textStyle="bold"
                                 android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
                                 android:layout_width="wrap_content"
@@ -92,8 +93,8 @@
                                 android:layout_height="10dp"/>
                             <TextView
                                 android:text='@{""+FileSize.formatSizeText(vm.currentMeta.free)+"/"+FileSize.formatSizeText(vm.currentMeta.total)}'
+                                style="@style/titleSubNormalTextView"
                                 android:layout_width="wrap_content"
-                                android:textSize="@dimen/textSmall"
                                 android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
                                 android:singleLine="true"
                                 android:layout_height="wrap_content"/>
@@ -120,24 +121,6 @@
                     binding:enableClick="@{true}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
-
-<!--                <ImageView-->
-<!--                    binding:enableClick="@{true}"-->
-<!--                    android:layout_alignParentRight="true"-->
-<!--                    android:layout_centerVertical="true"-->
-<!--                    android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;!vm.isAllChoose()?View.VISIBLE:View.GONE}"-->
-<!--                    android:src="@{R.drawable.choose_all_selector}"-->
-<!--                    android:layout_width="@dimen/titleIconSize"-->
-<!--                    android:layout_height="@dimen/titleIconSize"/>-->
-<!--                <ImageView-->
-<!--                    android:layout_alignParentRight="true"-->
-<!--                    android:layout_centerVertical="true"-->
-<!--                    binding:enableClick="@{true}"-->
-<!--                    android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE&amp;&amp;vm.current.isAllChoose()?View.VISIBLE:View.GONE}"-->
-<!--                    android:src="@{R.drawable.ic_menu_alls}"-->
-<!--                    android:layout_width="@dimen/titleIconSize"-->
-<!--                    android:layout_height="@dimen/titleIconSize"/>-->
-
             </LinearLayout>
         </RelativeLayout>
         <HorizontalScrollView

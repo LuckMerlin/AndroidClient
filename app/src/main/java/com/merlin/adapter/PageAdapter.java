@@ -141,23 +141,22 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
     public final boolean loadNextPage(String debug){
         Page<D> current=mCurrentPage;
         int size=getDataCount();
-        return !isLoading()&&null!=current&&loadPage(new Page<>(current.mArg,size,null),debug);
+        return !isLoading()&&null!=current&&loadPage(new Page<>(current.mArg,size,null),false,debug);
     }
 
     public final boolean loadPage(D arg,String debug){
         Page<D> current=mCurrentPage;
         D currArg=null!=current?current.mArg:null;
         if ((null==arg&&null==currArg)||(null!=currArg&&null!=arg&&currArg.equals(arg))){
-            return loadPage(new Page<>(arg,(null==current?0:current.mFrom+1),null),debug);
+            return loadPage(new Page<>(arg,(null==current?0:current.mFrom+1),null),false,debug);
         }
-        empty();
-        return loadPage(new Page<>(arg,0,null),debug);
+        return loadPage(new Page<>(arg,0,null),true,debug);
     }
 
     protected void onNoMoreData(PageData<T> data){
     }
 
-    private boolean loadPage(Page<D> page,String debug){
+    private boolean loadPage(Page<D> page,boolean reset,String debug){
         if (null!=page){
             final int from=page.mFrom;
             Page<D> loading=mLoadingPage;
@@ -168,29 +167,38 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
             mLoadingPage=page;
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
             Debug.D(getClass(),"Load page "+(null!=debug?debug:"."));
-            Canceler canceler=null;
+            Canceler canceler;
             if(null==(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
                 if (idle){
+                    page.mCanceler=null;
                     mLoadingPage=null;
+                    PageData<T> pageData=null!=data?data.getData():null;
                     switch (what){
                         case What.WHAT_SUCCEED:
-                            PageData<T> m=null!=data?data.getData():null;
-                            long total=null!=m?m.getLength():-1;
+                            long total=null!=pageData?pageData.getLength():-1;
                             if (total>=0){
                                 mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
-                                fillPage(m);
+                                if (reset){
+                                    empty();
+                                }
+                                fillPage(pageData);
                             }
                             break;
                         case What.WHAT_OUT_OF_BOUNDS:
-                            onNoMoreData(null!=data?data.getData():null);
+                            onNoMoreData(pageData);
+                            break;
+                        default:
+                            toast(note);
                             break;
                     }
                 } }))&&isPageEquals(mLoadingPage,page)){
+                page.mCanceler=null;
                 mLoadingPage=null;
                 return false;
             }
+            page.mCanceler=canceler;
             return true;
         }
         Debug.W(getClass(),"Can't load page data.page="+page);
@@ -205,6 +213,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
         private final int mFrom;
         private final Long mTotal;
         private final T mArg;
+        private Canceler mCanceler;
 
         private Page(T arg,int from, Long total){
             mArg=arg;

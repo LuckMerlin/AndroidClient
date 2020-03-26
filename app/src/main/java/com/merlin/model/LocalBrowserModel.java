@@ -15,6 +15,7 @@ import com.merlin.api.ApiList;
 import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
@@ -54,7 +55,7 @@ public class LocalBrowserModel extends BrowserModel {
         };
         setAdapter(new LocalBrowserAdapter() {
             @Override
-            protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<FolderData<LocalFile>>> finish) {
+            protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<PageData<LocalFile>>> finish) {
                 return null!=path&&browserFolder(path,from,from+50,(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
@@ -229,9 +230,9 @@ public class LocalBrowserModel extends BrowserModel {
         return file.exists()?file:Environment.getRootDirectory();
     }
 
-    private boolean browserFolder(String path,int from,int to,OnApiFinish<Reply<FolderData<LocalFile>>> finish){
+    private boolean browserFolder(String path,int from,int to,OnApiFinish<Reply<PageData<LocalFile>>> finish){
         File folder=null!=path&&path.length()>0?new File(path):getDefaultRoot();
-        final Reply<FolderData<LocalFile>>  reply=new Reply<>();
+        final Reply<PageData<LocalFile>>  reply=new Reply<>();
         Integer what=null;
         boolean succeed=false;
         String note=null;

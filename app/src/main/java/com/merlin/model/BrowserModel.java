@@ -15,8 +15,10 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
+import com.merlin.adapter.PageAdapter;
 import com.merlin.api.ApiList;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
@@ -52,7 +54,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     public final static int MODE_UPLOAD=1216;
     public final static int MODE_DOWNLOAD=1217;
     private ClientMeta mClientMeta;
-    private int mMode=MODE_INVALID;
+    private int mMode=MODE_NORMAL;
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>();
     private final ObservableField<String> mMultiChooseSummary=new ObservableField<>();
     private BrowserAdapter<T> mBrowserAdapter;
@@ -70,7 +72,6 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         mClientMeta=meta;
         mCallback=callback;
         mContext=null!=context?new WeakReference<>(context):null;
-        entryMode(MODE_UPLOAD,"After model create.");
     }
 
     protected final boolean setAdapter(BrowserAdapter<T> adapter){
@@ -106,8 +107,8 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
 
     public final FolderData getLastPage(){
         BrowserAdapter<T> adapter=mBrowserAdapter;
-        FolderData meta=null!=adapter?adapter.getLastPage():null;
-        return meta;
+        PageData meta=null!=adapter?adapter.getLastPage():null;
+        return null!=meta&&meta instanceof FolderData?(FolderData)meta:null;
     }
 
     private final boolean refreshCurrentPath(String debug){

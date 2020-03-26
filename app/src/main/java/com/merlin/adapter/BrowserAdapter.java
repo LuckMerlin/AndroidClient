@@ -1,14 +1,11 @@
 package com.merlin.adapter;
 
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.FolderData;
 import com.merlin.bean.FModify;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
@@ -17,7 +14,7 @@ import com.merlin.model.BrowserModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BrowserAdapter<T extends FileMeta> extends MultiSectionAdapter<String, T, FolderData<T>> implements OnMoreLoadable{
+public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<String, T> implements OnMoreLoadable{
     private List<T> mMultiChoose;
 
     public final List<T> getMultiChoose() {
@@ -37,12 +34,13 @@ public abstract class BrowserAdapter<T extends FileMeta> extends MultiSectionAda
     }
 
     @Override
-    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
-        return R.layout.item_list_file;
+    protected Integer onResolveViewTypeLayoutId(int viewType) {
+        return viewType==TYPE_DATA?R.layout.item_list_file:null;
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
+        super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
         if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             boolean multiChoose=isMultiChoose();

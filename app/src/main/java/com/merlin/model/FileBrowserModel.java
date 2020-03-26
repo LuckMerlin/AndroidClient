@@ -10,12 +10,15 @@ import android.widget.TextView;
 
 import androidx.databinding.ObservableField;
 
+import com.merlin.activity.ConveyorActivity;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.Adapter;
 import com.merlin.adapter.BrowserAdapter;
+import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
@@ -51,7 +54,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     private final ObservableField<BrowserModel> mCurrent=new ObservableField<>();
     private final ObservableField<FolderData> mCurrentFolder=new ObservableField<>();
     private final ObservableField<Integer> mCurrentMode=new ObservableField<>();
-    private final ObservableField<Adapter> mCurrentAdapter=new ObservableField<>();
+    private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
     private Object mProcessing;
     private final ObservableField<String> mCurrentMultiChooseSummary=new ObservableField<>();
@@ -74,14 +77,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
         putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-        refreshClientMeta("After mode create.");
-        //
-//        if (null!=binder) {
-//            ClientMeta client=new ClientMeta("林强设备", Address.URL,"","",".","/");
-//                Transport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3","./data",
-//            AbsTransport transport=new Upload("/sdcard/Musics/大壮 - 我们不一样.mp3",null,
-//                    "林强.mp3",client,null);
-        new LiteHttpTransport().upload("/sdcard/Musics/大壮 - 我们不一样.mp3", "林强.mp3",Address.URL+"/file/upload","linqiang");
+//        refreshClientMeta("After mode create.");
     }
 
     private boolean putClientMeta(ClientMeta meta,String debug){
@@ -115,9 +111,9 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     }
 
     @Override
-    public void onPageDataLoad(BrowserModel model, FolderData folder) {
-        if (isCurrentModel(model)){
-            mCurrentFolder.set(folder);
+    public void onPageDataLoad(BrowserModel model, PageData folder) {
+        if (isCurrentModel(model)&&(null==folder||folder instanceof FolderData)){
+            mCurrentFolder.set((FolderData)folder);
         }
     }
 
@@ -154,7 +150,8 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                          BrowserModel curr=mCurrent.get();
                          BrowserAdapter<FileMeta> adapter=model.getBrowserAdapter();
                          mCurrentAdapter.set(adapter);
-                         mCurrentFolder.set(null!=adapter?adapter.getLastPage():null);
+                         PageData pageData=null!=adapter?adapter.getLastPage():null;
+                         mCurrentFolder.set(null!=pageData&&pageData instanceof FolderData?(FolderData)pageData:null);
                          mCurrentMeta.set(model.getClientMeta());
                          mCurrent.set(model);
                          mCurrentMode.set(model.getMode());
@@ -296,7 +293,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     private boolean launchTransportList(String debug){
         Context context=getContext();
         if (null!=context){
-            Intent intent=new Intent(context, TransportActivity.class);
+            Intent intent=new Intent(context, ConveyorActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
             return true;
@@ -352,7 +349,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         return mCurrentFolder;
     }
 
-    public ObservableField<Adapter> getCurrentAdapter() {
+    public ObservableField<ListAdapter> getCurrentAdapter() {
         return mCurrentAdapter;
     }
 
