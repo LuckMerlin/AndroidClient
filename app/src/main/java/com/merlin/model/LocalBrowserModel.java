@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 
 import androidx.databinding.ViewDataBinding;
 
@@ -30,6 +31,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.TransportService;
+import com.merlin.util.MimeType;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,18 +83,29 @@ public class LocalBrowserModel extends BrowserModel {
 
     @Override
     protected boolean onOpenFile(FileMeta meta, String debug) {
+        Debug.D(getClass(),"ASDFSDFAS "+meta);
         LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
-        String extension=localFile.getExtension();
         String path=localFile.getPath();
-        if (null!=extension&&null!=path&&path.length()>0){
+        if (null!=path&&path.length()>0){
+
             final File file=new File(path);
             if (!file.exists()){
                 return toast(R.string.fileNotExist)&&false;
             }
-            if (extension.equalsIgnoreCase(".png")|| extension.equalsIgnoreCase(".jpg")){
-                Intent intent=new Intent(getViewContext(), PhotoPreviewActivity.class);
-                intent.putExtra(Label.LABEL_DATA, Uri.fromFile(file));
-                return startActivity(intent);
+//            if (extension.equalsIgnoreCase(".png")|| extension.equalsIgnoreCase(".jpg")){
+//                Intent intent=new Intent(getViewContext(), PhotoPreviewActivity.class);
+//                intent.putExtra(Label.LABEL_DATA, Uri.fromFile(file));
+//                return startActivity(intent);
+//            }
+            MimeType mimeType=new MimeType();
+            String mt=mimeType.getFileMimeType(file);
+            toast(""+mt);
+            if(null!=mt&&mt.length()>0){
+                Intent intent = new Intent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setAction(android.content.Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(file), mt);
+                startActivity(intent);
             }
         }
         return true;

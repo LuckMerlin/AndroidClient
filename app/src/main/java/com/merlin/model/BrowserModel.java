@@ -64,10 +64,6 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     private PopupWindow mPopWindow;
     private final ClientCallback mCallback;
 
-//    protected interface OnModeFinish{
-//        void onModeFinish(int last,int current);
-//    }
-
     public BrowserModel(Context context,ClientMeta meta,ClientCallback callback){
         mClientMeta=meta;
         mCallback=callback;
@@ -499,6 +495,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                     return true;
                 });
     }
+
     private boolean renameFile(FileMeta meta,int mode,String debug){
         final String path=null!=meta?meta.getPath():null;
         if (null!=path&&path.length()>0){
@@ -531,6 +528,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     private boolean open(Object data,String debug){
         return null!=data&&data instanceof FileMeta&&onOpenFile((FileMeta)data,debug);
     }
+
     private boolean showFileDetail(FileMeta meta,String debug){
         String path=null!=meta?meta.getPath():null;
         if (null==path||path.length()<=0){
