@@ -56,7 +56,7 @@ public class LocalBrowserModel extends BrowserModel {
         setAdapter(new LocalBrowserAdapter() {
             @Override
             protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<PageData<LocalFile>>> finish) {
-                return null!=path&&browserFolder(path,from,from+50,(what, note, data, arg)->{
+                return browserFolder(path,from,from+50,(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
                     }

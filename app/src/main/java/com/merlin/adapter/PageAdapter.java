@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +38,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
 
     protected abstract Canceler onPageLoad(D arg, int from, OnApiFinish<Reply<PageData<T>>> finish);
 
-    private final boolean fillPage(PageData<T> page){
+    private final boolean fillPage(PageData<T> page,boolean reset){
         if (null==page){
             return false;
         }
@@ -48,9 +49,9 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
             Debug.D(getClass(),"Can't fill page into section adapter."+from+" "+to );
             return false;
         }
-        Debug.D(getClass(),"Fill page from "+from+" to "+to+" "+this);
+        Debug.D(getClass(),"Fill page from "+from+" to "+to+" with reset "+reset+" "+this);
         mLastPage=page;
-        return replace(from,list,"");
+        return reset?set(list,"While fill page."):replace(from,list,"While fill page.");
     }
 
     public final boolean empty() {
@@ -62,9 +63,9 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
 
     public boolean reset(String debug){
         Page<D> page=mCurrentPage;
+        Debug.D(getClass(),"Reset current page "+page+" "+(null!=debug?debug:"."));
         D arg=null!=page?page.mArg:null;
-        empty();
-        return loadPage(arg,debug);
+        return loadPage(new Page<>(arg,0,null),true,debug);
     }
 
     public final PageData<T> getLastPage() {
@@ -166,7 +167,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
             }
             mLoadingPage=page;
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
-            Debug.D(getClass(),"Load page "+(null!=debug?debug:"."));
+            Debug.D(getClass(),"Load page "+ page.mArg+" from "+from+" "+(null!=debug?debug:"."));
             Canceler canceler;
             if(null==(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
@@ -180,10 +181,8 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                             long total=null!=pageData?pageData.getLength():-1;
                             if (total>=0){
                                 mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
-                                if (reset){
-                                    empty();
-                                }
-                                fillPage(pageData);
+                                Debug.D(getClass()," "+pageData.getLength()+" "+pageData.size());
+                                fillPage(pageData,reset);
                             }
                             break;
                         case What.WHAT_OUT_OF_BOUNDS:
@@ -194,6 +193,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                             break;
                     }
                 } }))&&isPageEquals(mLoadingPage,page)){
+                Debug.W(getClass(),"Fail load page "+page.mArg+" from "+from+" "+(null!=debug?debug:".")+" "+this);
                 page.mCanceler=null;
                 mLoadingPage=null;
                 return false;
@@ -229,6 +229,12 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                         mArg.equals(page.mArg)));
             }
             return super.equals(obj);
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return ""+mArg+" "+mFrom+" "+super.toString();
         }
     }
 

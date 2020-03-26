@@ -211,8 +211,10 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 
   public boolean set(List<T> data,String debug){
-        final List<T> list=mData;
-        if (null!=data&&data.size()>0){
+        List<T> list=mData;
+        int size=null!=data?data.size():0;
+        if (size>0){
+            list=null!=list?list:(mData=new ArrayList<>(size));
             list.clear();
             list.addAll(data);
             notifyDataSetChanged();
@@ -253,7 +255,8 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
        return index>=0&&replace(index,data,debug);
    }
 
-  public final boolean replace(int index,T data,String debug){
+  public final boolean replace(int index,T data,String debug)
+  {
         if (null!=data&&index>=0){
             ArrayList<T> list= new ArrayList<>(1);
             list.add(data);
@@ -262,7 +265,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return false;
     }
 
-    public final boolean replace(int from,ArrayList<T> data,String debug){
+  public final boolean replace(int from,ArrayList<T> data,String debug){
         int length=null!=data?data.size():-1;
         if (length>0){
             ArrayList<T> list=mData;
@@ -271,6 +274,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                 int size=list.size();
                 from=from<0||from>size?size:from;
                 synchronized (list){
+
                     for (int i = 0; i < length; i++) {
                         int index=i+from;
                         T child=data.get(i);
@@ -285,6 +289,23 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                     }
                 }
                 return true;
+            }
+        }
+        return false;
+    }
+
+    public final boolean remove(int from,int to,String debug){
+        ArrayList<T> list=from>=0&&to>from?mData:null;
+        if (null!=list){
+            synchronized (list){
+                int size=list.size();
+                if (size>0&&from<size){
+                    to=to>size?size:to;
+                    list.removeAll(list.subList(from,to));
+                    notifyItemRangeRemoved(from,to-from);
+                    Debug.D(getClass(),"Remove items from "+from+" to "+to+" "+(null!=debug?debug:"."));
+                    return true;
+                }
             }
         }
         return false;
