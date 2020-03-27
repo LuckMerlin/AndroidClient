@@ -4,11 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.debug.Debug;
+
 public abstract class LoadMoreInterceptor extends RecyclerView.OnScrollListener  {
     public final static int TAIL =121;
     public final static int IDLE =122;
     private boolean mScrolling=false;
-
 
     private boolean isNeedLoadMore(RecyclerView recyclerView){
         RecyclerView.LayoutManager manager=null!=recyclerView?recyclerView.getLayoutManager():null;

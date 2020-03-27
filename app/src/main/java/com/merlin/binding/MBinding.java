@@ -46,6 +46,7 @@ import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.list.RecycleViewScrollQuantize;
 import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;
 import com.merlin.model.OnBeforeTextChange;
@@ -344,6 +345,7 @@ public class MBinding {
                     view.setLayoutManager(manager);
                 }
                 if (adapter instanceof OnMoreLoadable || adapter instanceof OnRecyclerScroll||adapter instanceof OnRecyclerScrollStateChange){
+                    view.addOnScrollListener(new RecycleViewScrollQuantize());
                     view.addOnScrollListener(new LoadMoreInterceptor(){
                         @Override
                         protected void onLoadMore(RecyclerView recyclerView,int state, String debug) {

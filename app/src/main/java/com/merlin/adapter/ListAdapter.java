@@ -91,7 +91,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
       ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
       T data=getItemData(position);
       onBindViewHolder(holder,null!=holder?holder.getItemViewType():TYPE_NONE,binding,position,data,payloads);
-       if (null==payloads||payloads.isEmpty()) {
+       if (null==payloads||payloads.isEmpty()){
 //           onBindViewHolder(holder, position);
        } else {
 //           View itemView=holder.itemView;
@@ -163,10 +163,10 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
    }
 
-  protected final static class ViewHolder<V extends ViewDataBinding> extends RecyclerView.ViewHolder{
+    public final static class ViewHolder<V extends ViewDataBinding> extends RecyclerView.ViewHolder{
     private V mBinding;
 
-    protected ViewHolder(V binding){
+        protected ViewHolder(V binding){
         super(null!=binding?binding.getRoot():null);
         mBinding=binding;
     }
