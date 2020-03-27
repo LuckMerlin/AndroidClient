@@ -73,7 +73,6 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     protected final boolean setAdapter(BrowserAdapter<T> adapter){
         if (null!=adapter){
             mBrowserAdapter=adapter;
-//            return browserPath("","After model adapter set.");
             return true;
         }
         return false;
@@ -109,7 +108,8 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
 
     private final boolean refreshCurrentPath(String debug){
         FolderData meta=getLastPage();
-        return browserPath(null!=meta?meta.getPath():null,debug);
+        ClientMeta clientMeta=mClientMeta;
+        return browserPath(null!=meta?meta.getPath():null!=clientMeta?clientMeta.getRoot():null,debug);
     }
 
     protected boolean onBackIconPressed(View view,String debug){
@@ -181,6 +181,8 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                 return null!=data&&data instanceof FileMeta &&showFileDetail((FileMeta)data,"After detail tap click.");
             case R.string.open:
                 return null!=data&&open(data,"After open tap click.");
+            case R.string.setAsHome:
+                return null!=data&&setAsHome(data,"After set as home tap click.");
             case R.string.createFile:
                 return createFile(false,"After create file tap click.");
             case R.string.createFolder:
@@ -418,6 +420,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
 
     protected abstract boolean onShowFileDetail(FileMeta meta,String debug);
     protected abstract boolean onOpenFile(FileMeta meta,String debug);
+    protected abstract boolean onSetHome(FileMeta meta,String debug);
     protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
     protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
     protected abstract boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug);
@@ -527,6 +530,10 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
 
     private boolean open(Object data,String debug){
         return null!=data&&data instanceof FileMeta&&onOpenFile((FileMeta)data,debug);
+    }
+
+    private boolean setAsHome(Object data,String debug){
+        return null!=data&&data instanceof FileMeta&&onSetHome((FileMeta)data,debug);
     }
 
     private boolean showFileDetail(FileMeta meta,String debug){

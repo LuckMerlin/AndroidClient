@@ -1,6 +1,7 @@
 package com.merlin.bean;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,8 +9,10 @@ import android.os.StatFs;
 
 import androidx.annotation.NonNull;
 
+import com.merlin.api.Label;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.file.LocalBrowserHome;
 
 import java.io.File;
 import java.io.Serializable;
@@ -32,6 +35,7 @@ public final class ClientMeta implements Parcelable {
     private String imageUrl;
     private String platform;
     private String folder;
+    private String root;
     private String pathSep;
     private long free;
     private long total;
@@ -57,6 +61,7 @@ public final class ClientMeta implements Parcelable {
         meta.name=null!=context?context.getString(R.string.local):"Local";
         meta.account="Local";
         meta.pathSep= File.pathSeparator;
+        meta.root=new LocalBrowserHome().get(context,null);
         String path = Environment.getDataDirectory().getPath();
         if (null!=path&&path.length()>0){
             StatFs statFs = new StatFs(path);
@@ -77,6 +82,10 @@ public final class ClientMeta implements Parcelable {
     public boolean isLocalClient(){
         String urlValue=url;
         return null!=urlValue&&urlValue.equals(LOCAL_URL);
+    }
+
+    public String getRoot() {
+        return root;
     }
 
     public String getDeviceType() {

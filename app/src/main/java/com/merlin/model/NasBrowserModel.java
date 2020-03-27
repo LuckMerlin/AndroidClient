@@ -181,6 +181,12 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
     }
 
     @Override
+    protected boolean onSetHome(FileMeta meta, String debug) {
+
+        return false;
+    }
+
+    @Override
     protected boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug) {
         return null!=call(prepare(Api.class).createFile(folder,name,dir),finish);
     }

@@ -181,7 +181,6 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                             long total=null!=pageData?pageData.getLength():-1;
                             if (total>=0){
                                 mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
-                                Debug.D(getClass()," "+pageData.getLength()+" "+pageData.size());
                                 fillPage(pageData,reset);
                             }
                             break;

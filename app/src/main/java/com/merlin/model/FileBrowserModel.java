@@ -68,7 +68,6 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         Observable<Reply<ClientMeta>> queryClientMeta();
     }
 
-
     public FileBrowserModel(){
         mCurrentMode.set(BrowserModel.MODE_NORMAL);
     }

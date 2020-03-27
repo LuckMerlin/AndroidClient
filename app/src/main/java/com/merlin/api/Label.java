@@ -43,4 +43,5 @@ public interface Label{
    String  LABEL_PATH_SEP = "pathSep";
    String  LABEL_CLIENT = "client";
    String  LABEL_TIME="time";
+   String  LABEL_ROOT="root";
 }

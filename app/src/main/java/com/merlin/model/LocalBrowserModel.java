@@ -24,11 +24,13 @@ import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
+import com.merlin.bean.LocalFolder;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemClientBinding;
 import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
+import com.merlin.file.LocalBrowserHome;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.TransportService;
 import com.merlin.util.MimeType;
@@ -81,6 +83,7 @@ public class LocalBrowserModel extends BrowserModel {
         return super.onTapClick(view,clickCount,resId,data);
     }
 
+
     @Override
     protected boolean onOpenFile(FileMeta meta, String debug) {
         Debug.D(getClass(),"ASDFSDFAS "+meta);
@@ -114,6 +117,18 @@ public class LocalBrowserModel extends BrowserModel {
     @Override
     protected boolean onShowFileDetail(FileMeta meta, String debug) {
 
+        return false;
+    }
+
+    @Override
+    protected boolean onSetHome(FileMeta meta, String debug) {
+        String path=null!=meta?meta.getPath():null;
+        File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
+        if (null!=file&&file.exists()&&file.isDirectory()){
+            boolean set=new LocalBrowserHome().set(getViewContext(),path);
+            toast(set?R.string.succeed:R.string.fail);
+            return set;
+        }
         return false;
     }
 
