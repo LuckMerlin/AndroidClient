@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="file"
+            type="java.io.File" />
+        <variable
+            name="imageUrl"
+            type="Object" />
+        <variable
+            name="title"
+            type="String" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.api.What"/>
+        <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.client.R"/>
+        <import type="com.merlin.util.Time"/>
+    </data>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:padding="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp"
+            android:orientation="vertical"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@{imageUrl}"
+                android:visibility="@{(null==imageUrl)?View.GONE:View.VISIBLE}"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+            <include binding:key="@{R.string.title}" binding:value="@{title}"  layout="@layout/item_key_value"/>
+            <LinearLayout
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@string/address"
+                    style="@style/smallNormalTextView"/>
+                <TextView
+                    android:text=": "
+                    style="@style/smallNormalTextView"/>
+                <TextView
+                    android:text="@{file.absolutePath}"
+                    android:singleLine="false"
+                    android:textIsSelectable="true"
+                    android:gravity="left"
+                    style="@style/smallNormalTextView"/>
+            </LinearLayout>
+            <include binding:key="@{R.string.type}" binding:value="@{file.directory?R.string.folder:R.string.file}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.permission}" binding:value="@{(file.canWrite()?`w`:``)+(file.canRead()?`r`:``)+(file.canExecute()?`x`:``)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.size}" binding:value="@{FileSize.formatSizeText(file.length())}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.accessTime}" binding:value="@{Time.formatTime(file.lastModified)}" layout="@layout/item_key_value"/>
+<!--            <include binding:key="@{R.string.size}" binding:value="@{client.account}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>-->
+<!--            <include binding:key="@{R.string.modifyTime}" binding:value="@{client.deviceType}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>-->
+        </LinearLayout>
+    </ScrollView>
+</layout>

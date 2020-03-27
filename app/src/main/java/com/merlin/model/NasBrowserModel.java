@@ -256,7 +256,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
 
     @Override
-    protected boolean onShowFileDetail(FileMeta file, String debug) {
+    protected boolean onShowFileDetail(View root,FileMeta file, String debug) {
         NasFile meta=null!=file&&file instanceof FileMeta?((NasFile)file):null;
         String path=null!=meta?meta.getPath():null;
         FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);

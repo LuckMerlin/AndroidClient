@@ -177,6 +177,8 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                     mLoadingPage=null;
                     PageData<T> pageData=null!=data?data.getData():null;
                     switch (what){
+                        case What.WHAT_OUT_OF_BOUNDS://Get through
+                            onNoMoreData(pageData);
                         case What.WHAT_SUCCEED:
                             long total=null!=pageData?pageData.getLength():-1;
                             if (total>=0){
@@ -184,10 +186,8 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                                 fillPage(pageData,reset);
                             }
                             break;
-                        case What.WHAT_OUT_OF_BOUNDS:
-                            onNoMoreData(pageData);
-                            break;
                         default:
+                            Debug.D(getClass(),"Fail load page "+page.mArg+" from "+from+" "+(null!=debug?debug:".")+" "+this);
                             toast(note);
                             break;
                     }

@@ -11,6 +11,7 @@
             name="client"
             type="com.merlin.bean.ClientMeta" />
         <import type="android.view.View"/>
+        <import type="com.merlin.bean.LocalFolder"/>
     </data>
     <LinearLayout
         android:orientation="vertical"
@@ -18,6 +19,9 @@
         android:layout_height="wrap_content">
         <include layout="@layout/item_context_menu"
             binding:menu="@{ContextMenu.create(R.string.transportList,folder)}"/>
+<!--        <include layout="@layout/item_context_menu"-->
+<!--            android:visibility="@{folder instanceof LocalFolder&amp;&amp;((LocalFolder)folder).file.?View.VISIBLE:View.GONE}"-->
+<!--            binding:menu="@{ContextMenu.create(R.string.setAsHome,folder)}"/>-->
         <include layout="@layout/item_context_menu"
             android:visibility="@{null!=folder?View.VISIBLE:View.GONE}"
             binding:menu="@{ContextMenu.create(R.string.createFolder,folder)}"/>

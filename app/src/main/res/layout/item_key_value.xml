@@ -19,11 +19,7 @@
             android:text="@{key}"
             style="@style/smallNormalTextView"/>
         <TextView
-            android:text=":"
-            android:layout_marginRight="5dp"
-            style="@style/smallNormalTextView"/>
-        <TextView
-            android:text="@{value}"
+            android:text="@{`: `+value}"
             android:singleLine="false"
             android:gravity="left"
             style="@style/smallNormalTextView"/>

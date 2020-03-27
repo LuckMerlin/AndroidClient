@@ -3,37 +3,34 @@ package com.merlin.model;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 
 import androidx.databinding.ViewDataBinding;
 
-import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.activity.TransportActivity;
 import com.merlin.adapter.LocalBrowserAdapter;
 import com.merlin.api.ApiList;
 import com.merlin.api.Canceler;
-import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FModify;
-import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.LocalFolder;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemClientBinding;
+import com.merlin.client.databinding.LocalFileDetailBinding;
 import com.merlin.client.databinding.ServerChooseLayoutBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.file.LocalBrowserHome;
-import com.merlin.server.Retrofit;
 import com.merlin.transport.TransportService;
-import com.merlin.util.MimeType;
+import com.merlin.util.FileMeta;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,43 +82,53 @@ public class LocalBrowserModel extends BrowserModel {
 
 
     @Override
-    protected boolean onOpenFile(FileMeta meta, String debug) {
+    protected boolean onOpenFile(com.merlin.bean.FileMeta meta, String debug) {
         Debug.D(getClass(),"ASDFSDFAS "+meta);
         LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
         String path=localFile.getPath();
         if (null!=path&&path.length()>0){
-
             final File file=new File(path);
             if (!file.exists()){
                 return toast(R.string.fileNotExist)&&false;
             }
-//            if (extension.equalsIgnoreCase(".png")|| extension.equalsIgnoreCase(".jpg")){
-//                Intent intent=new Intent(getViewContext(), PhotoPreviewActivity.class);
-//                intent.putExtra(Label.LABEL_DATA, Uri.fromFile(file));
-//                return startActivity(intent);
-//            }
-            MimeType mimeType=new MimeType();
-            String mt=mimeType.getFileMimeType(file);
-            toast(""+mt);
-            if(null!=mt&&mt.length()>0){
-                Intent intent = new Intent();
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setAction(android.content.Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.fromFile(file), mt);
-                startActivity(intent);
+            String mimeType=new FileMeta().getMimeType(file);
+            Intent intent = new Intent();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                StrictMode.setVmPolicy(builder.build());
             }
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setAction(Intent.ACTION_VIEW);//动作，查看
+            intent.setDataAndType(Uri.fromFile(file), mimeType);//设置类型
+            startActivity(intent);
+            return true;
         }
         return true;
     }
 
     @Override
-    protected boolean onShowFileDetail(FileMeta meta, String debug) {
-
+    protected final boolean onShowFileDetail(View view, com.merlin.bean.FileMeta meta, String debug) {
+        if (null!=view){
+            String path=null!=meta&&meta instanceof LocalFile?meta.getPath():null;
+            File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
+            if (null!=file&&file.exists()){
+                LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
+                binding.setFile(((LocalFile)meta).getFile());
+                String title=meta.getTitle();
+                binding.setTitle(null!=title?title:file.getName());
+                Dialog dialog=new Dialog(view.getContext());
+                return dialog.setContentView(binding).title(file.getName()).show();
+            }
+            Debug.W(getClass(),"Can't show local file detail which not exist "+path+" "+(null!=debug?debug:"."));
+            toast(R.string.fileNotExist);
+            return false;
+        }
+        Debug.W(getClass(),"Can't show local file detail view arg is NULL "+(null!=debug?debug:"."));
         return false;
     }
 
     @Override
-    protected boolean onSetHome(FileMeta meta, String debug) {
+    protected boolean onSetHome(com.merlin.bean.FileMeta meta, String debug) {
         String path=null!=meta?meta.getPath():null;
         File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
         if (null!=file&&file.exists()&&file.isDirectory()){

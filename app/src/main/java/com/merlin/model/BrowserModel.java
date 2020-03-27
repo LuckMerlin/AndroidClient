@@ -107,9 +107,9 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     }
 
     private final boolean refreshCurrentPath(String debug){
-        FolderData meta=getLastPage();
+        FolderData lastPage=getLastPage();
         ClientMeta clientMeta=mClientMeta;
-        return browserPath(null!=meta?meta.getPath():null!=clientMeta?clientMeta.getRoot():null,debug);
+        return browserPath(null!=lastPage?lastPage.getPath():null!=clientMeta?clientMeta.getRoot():null,debug);
     }
 
     protected boolean onBackIconPressed(View view,String debug){
@@ -178,7 +178,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     protected boolean onSingleTapClick(View view, int resId, Object data) {
         switch (resId){
             case R.string.detail:
-                return null!=data&&data instanceof FileMeta &&showFileDetail((FileMeta)data,"After detail tap click.");
+                return null!=data&&data instanceof FileMeta &&showFileDetail(view,(FileMeta)data,"After detail tap click.");
             case R.string.open:
                 return null!=data&&open(data,"After open tap click.");
             case R.string.setAsHome:
@@ -358,6 +358,9 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return showAtLocation(parent,root,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
     }
 
+    /**
+     * @deprecated
+     */
     protected final boolean showAtLocation(View parent,View root,Integer dismissFlag) {
         return showAtLocation(parent,root, Gravity.CENTER,0,0,dismissFlag);
     }
@@ -418,7 +421,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return false;
     }
 
-    protected abstract boolean onShowFileDetail(FileMeta meta,String debug);
+    protected abstract boolean onShowFileDetail(View view,FileMeta meta,String debug);
     protected abstract boolean onOpenFile(FileMeta meta,String debug);
     protected abstract boolean onSetHome(FileMeta meta,String debug);
     protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
@@ -536,12 +539,12 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return null!=data&&data instanceof FileMeta&&onSetHome((FileMeta)data,debug);
     }
 
-    private boolean showFileDetail(FileMeta meta,String debug){
+    private boolean showFileDetail(View view,FileMeta meta,String debug){
         String path=null!=meta?meta.getPath():null;
         if (null==path||path.length()<=0){
             toast(R.string.pathInvalid);
             return false;
         }
-        return onShowFileDetail(meta,debug);
+        return onShowFileDetail(view,meta,debug);
     }
 }
