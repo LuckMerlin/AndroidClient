@@ -2,6 +2,7 @@ package com.merlin.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 
@@ -56,6 +57,11 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
 //            }
         }
         return false;
+    }
+
+    @Override
+    public Object onViewData(int what, View view, String debug) {
+        return null;
     }
 
     public double getAccessTime() {

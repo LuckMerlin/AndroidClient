@@ -1,6 +1,8 @@
 package com.merlin.bean;
 
-public interface FileMeta {
+import com.merlin.binding.ViewDataLoadable;
+
+public interface FileMeta extends ViewDataLoadable {
 
      Object getImageUrl();
 

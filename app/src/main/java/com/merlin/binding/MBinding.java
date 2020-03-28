@@ -2,8 +2,12 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Looper;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,6 +22,8 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
@@ -33,7 +39,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.adapter.LoadMoreInterceptor;
@@ -44,8 +55,10 @@ import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
+import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.file.FileSync;
 import com.merlin.list.RecycleViewScrollQuantize;
 import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;
@@ -53,6 +66,7 @@ import com.merlin.model.OnBeforeTextChange;
 import com.merlin.model.OnTextChange;
 import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
+import com.merlin.view.CustomViewTarget;
 import com.merlin.view.OnSeekBarChangeListener;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTextChanged;
@@ -177,6 +191,22 @@ public class MBinding {
         }
     }
 
+    @BindingAdapter("loadViewData")
+    public static void autoLoadViewData(View view, ViewDataLoadable loadable) {
+        if (null!=view&&null!=loadable&& loadable instanceof LocalFile){
+            Glide.with(view).as(FileSync.class).load(loadable);
+//            Glide.with(view).load(loadable).into(new CustomViewTarget(view){
+//                @Override
+//                public void onResourceReady(@NonNull Object resource, @Nullable Transition transition) {
+//                    super.onResourceReady(resource, transition);
+//                    Debug.D(getClass(),"AAAAAAAAA "+resource);
+//                }
+//            });
+//            Debug.D(MBinding.class,"AAAAAAAAAAA "+view.hashCode()+" "+loadable+" "+
+//                    (Looper.getMainLooper()==Looper.myLooper()));
+        }
+    }
+
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, Object img) {
         if (null!=view) {
@@ -197,6 +227,8 @@ public class MBinding {
                                     Address.PREFIX_THUMB+"?"+Label.LABEL_PATH+"=");
                         }
                         if (path.startsWith(Address.PREFIX_THUMB)){
+//                            Glide.get(view.getContext()).getRegistry().append();
+//                            Glide.with(view.getContext()).as();
                             builder= Glide.with(view.getContext()).load(Address.URL +path);
                         }else{
                             builder=Glide.with(view.getContext()).load(new File(path));
@@ -205,9 +237,17 @@ public class MBinding {
                         builder=Glide.with(view.getContext()).load((String)img);
                     }
                     if (null!=builder) {
+//                        DrawableRequestBuilder<String> thumbnailRequest = Glide
+//                                .with(context)
+//                                .load(picture.getSmall())
+//                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
+//                                        new TopCropTransformation(context));
                         builder.centerCrop()
                                 .apply(options)
                                 .thumbnail(1f)
+//                                .transform(new BlurMaskFilter)
+//                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
+//                                new TopCropTransformation(context))
                                 .placeholder(R.drawable.ic_picture_default)
                                 .error(R.drawable.ic_picture_default)
                                 .into(view);

@@ -10,12 +10,14 @@ import com.merlin.bean.FModify;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.model.BrowserModel;
+import com.merlin.util.Thumbs;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<String, T> implements OnMoreLoadable{
     private List<T> mMultiChoose;
+    private final Thumbs mThumbs=new Thumbs();
 
     public final List<T> getMultiChoose() {
         return mMultiChoose;
@@ -41,12 +43,13 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
-        if (null!=binding&&null!=data&&binding instanceof ItemListFileBinding){
+        if (null!=binding&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             boolean multiChoose=isMultiChoose();
             itemBinding.setIsChoose(isChoose(data));
             itemBinding.setIsMultiChoose(multiChoose);
             itemBinding.setMeta(data);
+            itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath()):null);
             itemBinding.setPosition(position);
         }
     }

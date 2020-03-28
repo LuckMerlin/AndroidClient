@@ -8,24 +8,9 @@ import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import alexclin.httplite.HttpLite;
-import alexclin.httplite.HttpLiteBuilder;
-import alexclin.httplite.LiteClient;
-import alexclin.httplite.okhttp3.Ok3Lite;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
-import okio.BufferedSink;
-
 public class LiteHttpTransport implements What {
     private final OkHttpClient mHttpLite;
 

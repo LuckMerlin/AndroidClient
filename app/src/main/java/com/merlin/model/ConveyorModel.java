@@ -43,7 +43,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
                 break;
             case FINISHED:// Get through
                 if (null!=convey&&convey.isSuccessFinished()){//Remove succeed
-                    mAdapter.remove(convey,"While finished with succeed.");
+                    mAdapter.removeData(convey,"While finished with succeed.");
                 }
             default:
                 if (null!=convey) {

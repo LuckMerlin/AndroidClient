@@ -149,7 +149,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
         Page<D> current=mCurrentPage;
         D currArg=null!=current?current.mArg:null;
         if ((null==arg&&null==currArg)||(null!=currArg&&null!=arg&&currArg.equals(arg))){
-            return loadPage(new Page<>(arg,(null==current?0:current.mFrom+1),null),false,debug);
+            return loadPage(new Page<>(arg,(null==current?0:current.mFrom),null),false,debug);
         }
         return loadPage(new Page<>(arg,0,null),true,debug);
     }

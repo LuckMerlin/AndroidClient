@@ -44,6 +44,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 import static com.merlin.api.What.WHAT_SUCCEED;
@@ -66,6 +68,10 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     private interface Api{
         @POST(Address.PREFIX_USER+"/client/meta")
         Observable<Reply<ClientMeta>> queryClientMeta();
+
+        @POST(Address.PREFIX_FILE+"/sync/check")
+        @FormUrlEncoded
+        Observable<Reply> checkFileSync(@Field(Label.LABEL_MD5) String md5s);
     }
 
     public FileBrowserModel(){
@@ -75,8 +81,14 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
 //        refreshClientMeta("After mode create.");
+        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
+            @Override
+            public void onApiFinish(int what, String note, Void data, Object arg) {
+                Debug.D(getClass(),"AAAAAAAA "+what+" "+note+" "+arg );
+            }
+        });
     }
 
     private boolean putClientMeta(ClientMeta meta,String debug){

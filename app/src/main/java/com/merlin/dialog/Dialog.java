@@ -4,10 +4,16 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,15 +22,18 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.transition.Transition;
 import com.merlin.client.R;
 import com.merlin.client.databinding.DialogLayoutBinding;
-import com.merlin.debug.Debug;
 import com.merlin.model.Model;
 import com.merlin.view.Clicker;
+import com.merlin.view.CustomViewTarget;
 import com.merlin.view.OnTapClick;
 
 public class Dialog implements View.OnClickListener{
@@ -74,15 +83,6 @@ public class Dialog implements View.OnClickListener{
         return null!=view?setContentView(view):this;
     }
 
-//    public final Dialog setVariable(int variableId, @Nullable Object value){
-//        DialogLayoutBinding binding = mBinding;
-//        null!=binding?binding.getContentLayout()
-//        if (null!=binding){
-//             binding.setVariable(variableId,value);
-//        }
-//        return this;
-//    }
-
     public final Dialog create(){
         final android.app.Dialog dialog=mDialog;
         final Context context=null!=dialog?dialog.getContext():null;
@@ -98,6 +98,34 @@ public class Dialog implements View.OnClickListener{
                 int width=null!=dm?dm.widthPixels:800;
                 dialog.getWindow().setLayout((int)((width<=0?800:width)*0.75), ViewGroup.LayoutParams.WRAP_CONTENT);
             }
+        }
+        return this;
+    }
+
+    public final Dialog cleanBackground(){
+        DialogLayoutBinding binding=mBinding;
+        View root=null!=binding?binding.getRoot():null;
+        if (null!=root){
+            root.setBackgroundColor(Color.TRANSPARENT);
+        }
+        return this;
+    }
+
+    public final Dialog setBackground(String path){
+        DialogLayoutBinding binding=mBinding;
+        View root=null!=binding?binding.getRoot():null;
+        if (null!=root&&null!=path&&path.length()>0){
+            Glide.with(root).load(path).into(new CustomViewTarget<View,Drawable>(root) {
+                @Override
+                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                    super.onResourceReady(resource, transition);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        root.setBackground(resource);
+                    }else{
+                        root.setBackgroundDrawable(resource);
+                    }
+                }
+            });
         }
         return this;
     }

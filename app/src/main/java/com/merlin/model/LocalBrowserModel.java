@@ -7,19 +7,24 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 
 import androidx.databinding.ViewDataBinding;
 
+import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.activity.TransportActivity;
+import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.LocalBrowserAdapter;
 import com.merlin.api.ApiList;
 import com.merlin.api.Canceler;
+import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FModify;
+import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
@@ -30,7 +35,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.file.LocalBrowserHome;
 import com.merlin.transport.TransportService;
-import com.merlin.util.FileMeta;
+import com.merlin.util.Thumbs;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,10 +85,8 @@ public class LocalBrowserModel extends BrowserModel {
         return super.onTapClick(view,clickCount,resId,data);
     }
 
-
     @Override
-    protected boolean onOpenFile(com.merlin.bean.FileMeta meta, String debug) {
-        Debug.D(getClass(),"ASDFSDFAS "+meta);
+    protected boolean onOpenFile(FileMeta meta, String debug) {
         LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
         String path=localFile.getPath();
         if (null!=path&&path.length()>0){
@@ -91,7 +94,15 @@ public class LocalBrowserModel extends BrowserModel {
             if (!file.exists()){
                 return toast(R.string.fileNotExist)&&false;
             }
-            String mimeType=new FileMeta().getMimeType(file);
+            Thumbs thumbs=new Thumbs();
+            String extension=thumbs.getExtension(path);
+            if (thumbs.isImageExtension(extension)){
+                Intent intent=new Intent(getViewContext(), PhotoPreviewActivity.class);
+                intent.putExtra(Label.LABEL_DATA,Uri.fromFile(file));
+                return startActivity(intent);
+            }
+            String mimeType=null!=extension&&extension.length()>0?MimeTypeMap.getSingleton().
+                    getMimeTypeFromExtension(extension):null;
             Intent intent = new Intent();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -107,7 +118,7 @@ public class LocalBrowserModel extends BrowserModel {
     }
 
     @Override
-    protected final boolean onShowFileDetail(View view, com.merlin.bean.FileMeta meta, String debug) {
+    protected final boolean onShowFileDetail(View view, FileMeta meta, String debug) {
         if (null!=view){
             String path=null!=meta&&meta instanceof LocalFile?meta.getPath():null;
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
@@ -117,7 +128,7 @@ public class LocalBrowserModel extends BrowserModel {
                 String title=meta.getTitle();
                 binding.setTitle(null!=title?title:file.getName());
                 Dialog dialog=new Dialog(view.getContext());
-                return dialog.setContentView(binding).title(file.getName()).show();
+                return dialog.setContentView(binding).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
             }
             Debug.W(getClass(),"Can't show local file detail which not exist "+path+" "+(null!=debug?debug:"."));
             toast(R.string.fileNotExist);
@@ -128,7 +139,7 @@ public class LocalBrowserModel extends BrowserModel {
     }
 
     @Override
-    protected boolean onSetHome(com.merlin.bean.FileMeta meta, String debug) {
+    protected boolean onSetHome(FileMeta meta, String debug) {
         String path=null!=meta?meta.getPath():null;
         File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
         if (null!=file&&file.exists()&&file.isDirectory()){
@@ -309,6 +320,7 @@ public class LocalBrowserModel extends BrowserModel {
                 what=What.WHAT_SUCCEED;
                 succeed=true;
                 to = Math.min(to,length);
+                Debug.D(getClass(),"Browsing local folder from "+from+" to "+to+" "+path);
                 ArrayList<LocalFile> list=new ArrayList();
                 for (int i = from; i < to; i++) {
                     File child=files[i];

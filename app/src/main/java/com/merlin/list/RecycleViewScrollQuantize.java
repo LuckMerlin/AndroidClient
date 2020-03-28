@@ -28,9 +28,9 @@ public class RecycleViewScrollQuantize extends RecyclerView.OnScrollListener {
 //            recyclerView.getLayoutManager().get
 
 //            ItemListFileBindingImpl dd;
-            Debug.D(getClass(),"AAAAAAa sdfas "+dx+" "+dy+" "+ (null!=holder&&holder instanceof ListAdapter.ViewHolder?
-                    ((ListAdapter.ViewHolder)holder).getItemId():null)
-            );
+//            Debug.D(getClass(),"AAAAAAa sdfas "+dx+" "+dy+" "+ (null!=holder&&holder instanceof ListAdapter.ViewHolder?
+//                    ((ListAdapter.ViewHolder)holder).getItemId():null)
+//            );
         }
 //        recyclerView.findChildViewUnder();}
     }
@@ -54,7 +54,7 @@ public class RecycleViewScrollQuantize extends RecyclerView.OnScrollListener {
                 break;
         }
 //        mTop=recyclerView.getTop();
-        Debug.D(getClass(),"AAAA "+newState+" ");
+//        Debug.D(getClass(),"AAAA "+newState+" ");
 //        public static final int SCROLL_STATE_IDLE = 0;
 //
 //        /**

@@ -2,11 +2,13 @@ package com.merlin.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 
 import com.merlin.api.What;
+import com.merlin.debug.Debug;
 
 public final class LocalFile implements Parcelable,FileMeta {
     private String parent;
@@ -132,6 +134,17 @@ public final class LocalFile implements Parcelable,FileMeta {
 
     public String permission() {
         return "";
+    }
+
+    @Override
+    public Object onViewData(int what, View view, String debug) {
+        switch (what){
+            case DATA_LOADED:
+                Debug.D(getClass(),"AAAAAAAAAAAA "+view+" "+debug);
+
+                break;
+        }
+        return null;
     }
 
     @Override

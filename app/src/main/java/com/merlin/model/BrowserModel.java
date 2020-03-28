@@ -86,6 +86,11 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
         return false;
     }
 
+    protected final boolean browserFolder(String folder,String debug){
+        BrowserAdapter<T> adapter=mBrowserAdapter;
+        return null!=adapter&&adapter.loadPage(folder,debug);
+    }
+
     protected final boolean resetBrowserCurrentFolder(String debug){
         BrowserAdapter<T> adapter=mBrowserAdapter;
         return null!=adapter&&adapter.reset(debug);
@@ -118,14 +123,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
 
     private boolean browserPath(String pathValue, String debug){
         BrowserAdapter adapter=mBrowserAdapter;
-        if (null==adapter){
-            return false;
-        }
-        if (null==pathValue){
-            pathValue="";
-            adapter.empty();
-        }
-        return adapter.loadPage(pathValue,debug);
+        return null!=adapter&&adapter.loadPage(null!=pathValue?pathValue:"",debug);
     }
 
     private boolean browserParent(View view,String debug){
@@ -461,6 +459,7 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
                                         deleted.add(child);
                                     }
                                 }
+                                Debug.D(getClass(),"SD deleted ADAA "+deleted+" "+debug);
                                 adapter.remove(deleted,debug);
                             }
                         }
@@ -532,7 +531,11 @@ public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivi
     }
 
     private boolean open(Object data,String debug){
-        return null!=data&&data instanceof FileMeta&&onOpenFile((FileMeta)data,debug);
+        if (null!=data&&data instanceof FileMeta){
+            return ((FileMeta)data).isDirectory()?browserFolder(((FileMeta)data).getPath(),
+                    "After open tap click."):onOpenFile((FileMeta)data,debug);
+        }
+        return false;
     }
 
     private boolean setAsHome(Object data,String debug){

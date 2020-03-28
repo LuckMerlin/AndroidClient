@@ -91,7 +91,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
       ViewDataBinding binding=null!=holder&&holder instanceof ViewHolder?((ViewHolder)holder).getBinding():null;
       T data=getItemData(position);
       onBindViewHolder(holder,null!=holder?holder.getItemViewType():TYPE_NONE,binding,position,data,payloads);
-       if (null==payloads||payloads.isEmpty()){
+      if (null==payloads||payloads.isEmpty()){
 //           onBindViewHolder(holder, position);
        } else {
 //           View itemView=holder.itemView;
@@ -176,7 +176,21 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 }
 
-    public final T remove(Object data,String debug){
+    public final ArrayList<T> remove(List<?> list,String debug){
+        if (null!=list&&list.size()>0){
+            ArrayList<T> removed=new ArrayList<>(list.size());
+            T data=null;
+            for (Object obj:list) {
+                if (null!=(data=null!=obj?removeData(obj,debug):null)){
+                    removed.add(data);
+                }
+            }
+            return null!=removed&&removed.size()>0?removed:null;
+        }
+        return null;
+    }
+
+    public final T removeData(Object data,String debug){
         List<T> list=null!=data?mData:null;
         if (null!=list){
             synchronized (list){
@@ -274,13 +288,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                 int size=list.size();
                 from=from<0||from>size?size:from;
                 synchronized (list){
-
                     for (int i = 0; i < length; i++) {
                         int index=i+from;
                         T child=data.get(i);
                         if (index<list.size()){
-                            list.remove(index);
-                            list.add(child);
+                            list.remove(list.get(index));
+                            list.add(index,child);
                             notifyItemChanged(index);
                         }else{
                             list.add(child);

@@ -1,9 +1,5 @@
 package com.merlin.transport.litehttp;
 
-import java.util.concurrent.TimeUnit;
-
-import alexclin.httplite.HttpLiteBuilder;
-import alexclin.httplite.okhttp3.Ok3Lite;
 
 public class LiteHttp {
 

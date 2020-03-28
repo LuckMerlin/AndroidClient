@@ -35,7 +35,7 @@ public final class ItemSlideRemover extends ItemSlideMover {
             int position = viewHolder.getAdapterPosition();
             Object data=((ListAdapter)adapter).getItemData(position);
             if (null!=data) {
-                ((ListAdapter) adapter).remove(data, "After slide remover call.");
+                ((ListAdapter) adapter).removeData(data, "After slide remover call.");
                 WeakReference<OnItemSlideRemove> reference=mSlideRemove;
                 OnItemSlideRemove remove=null!=reference?reference.get():null;
                 if (null!=remove){
