@@ -197,23 +197,6 @@ public abstract class BrowserModel<T extends FileMeta>  extends Retrofit impleme
                     }
                 }
                 return null!=list&&list.size()>0&&deleteFile(list,"After delete tap click.");
-            default:
-                if (null!=data&&data instanceof FileMeta){
-                    FileMeta file=(FileMeta)data;
-                    if (isMode(MODE_MULTI_CHOOSE)) {
-                        BrowserAdapter adapter=getBrowserAdapter();
-                        adapter.multiChoose(file);
-                        return (null!=adapter&&adapter.multiChoose(file))||true;
-                    }else if(file.isAccessible()){
-                        if (file.isDirectory()) {
-                            return browserPath(file.getPath(), "After directory click.");
-                        } else{//Open file
-                            return open(data,"After item tap click.");
-                        }
-                    }else{
-                        Toast.makeText(view.getContext(),R.string.nonePermission,Toast.LENGTH_SHORT).show();
-                    }
-                }
         }
         return false;
     }
