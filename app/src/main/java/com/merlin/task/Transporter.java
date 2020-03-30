@@ -1,6 +1,6 @@
 package com.merlin.task;
 
-import com.merlin.client.Client;
+import com.merlin.client.__Client;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ public interface Transporter {
 
     public List<Transport> getDownloadList();
 
-    public Client.Canceler download(Transport transport);
+    public __Client.Canceler download(Transport transport);
 
     public boolean isRunning(Transport transport);
 

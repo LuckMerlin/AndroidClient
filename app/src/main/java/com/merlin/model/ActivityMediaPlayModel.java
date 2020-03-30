@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding;
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaPlayingQueueAdapter;
+import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -154,7 +155,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
                         dialog.dismiss();
                         String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
                         if (null!=sheetId&&sheetId.length()>0){
-                            return null!=call(prepare(AddToSheetApi.class).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+                            return null!=call(prepare(AddToSheetApi.class, Address.HOST).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
                                 toast(note);
                             })||true;
                         }
@@ -204,7 +205,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
             return false;
         }
         Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(prepare(FavoriteApi.class).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
+        return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED&&null!=data){
                 playing.setFavorite(favorite);
                 updatePlaying(playing,"After favorite succeed.");

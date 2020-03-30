@@ -1,7 +1,7 @@
 package com.merlin.media;
 
 import com.merlin.api.What;
-import com.merlin.client.Client;
+import com.merlin.client.__Client;
 import com.merlin.debug.Debug;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.Playable;
@@ -175,7 +175,7 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
         private Long mContentLength=null;
         private long mNextStart=0;
         private final Boolean mMutex=true;
-        private Client.Canceler mCanceler;
+        private __Client.Canceler mCanceler;
 
         public Reader(){
             mNextStart=0;
@@ -297,14 +297,14 @@ public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T>
             }
         }
 
-        private void setCanceler(Client.Canceler canceler){
+        private void setCanceler(__Client.Canceler canceler){
             this.mCanceler=canceler;
         }
 
         private boolean recycle(String debug){
             Reader reader=mReader;
             if (null!=reader&&reader==this){
-                Client.Canceler canceler=mCanceler;
+                __Client.Canceler canceler=mCanceler;
                 Debug.D(getClass(),"Recycle media reader "+(null!=debug?debug:"."));
                 mReader=null;
                 reader.mCanceler=null;

@@ -35,7 +35,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private final SheetMediasAdapter mAdapter=new SheetMediasAdapter(){
         @Override
         protected Canceler onPageLoad(String title, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
-            return call(prepare(Api.class).queryMedias(title,from,from+20),finish);
+            return call(prepare(Api.class,Address.HOST).queryMedias(title,from,from+20),finish);
         }
     };
 

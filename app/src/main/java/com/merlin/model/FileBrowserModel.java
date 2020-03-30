@@ -24,6 +24,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
+import com.merlin.client.Client;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ClientDetailBinding;
 import com.merlin.client.databinding.DeviceTextBinding;
@@ -82,13 +83,16 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
 //        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+//        String name,String url,String account,String imageUrl,String folder,String pathSep
+        ClientMeta testClient=new ClientMeta("算法",Address.HOST,"none","",null,"///");
+        putClientMeta(testClient, "After mode create.");
 //        refreshClientMeta("After mode create.");
-        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
-            @Override
-            public void onApiFinish(int what, String note, Void data, Object arg) {
-                Debug.D(getClass(),"AAAAAAAA "+what+" "+note+" "+arg );
-            }
-        });
+//        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
+//            @Override
+//            public void onApiFinish(int what, String note, Void data, Object arg) {
+//                Debug.D(getClass(),"AAAAAAAA "+what+" "+note+" "+arg );
+//            }
+//        });
     }
 
     private boolean putClientMeta(ClientMeta meta,String debug){
@@ -180,7 +184,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
 
     private boolean refreshClientMeta(String debug){
         Debug.D(getClass(),"Refresh client meta "+(null!=debug?debug:"."));
-        return null!=call(prepare(Api.class).queryClientMeta(),(OnApiFinish<Reply<ClientMeta>>)(what, note, data, arg)->{
+        return null!=call(prepare(Api.class,Address.HOST).queryClientMeta(),(OnApiFinish<Reply<ClientMeta>>)(what, note, data, arg)->{
             ClientMeta meta=what==WHAT_SUCCEED&&null!=data?data.getData():null;
             if(null!=meta){
                 putClientMeta(meta,"After client meta response.");
@@ -264,31 +268,32 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         Context context=null!=tv?tv.getContext():null;
         Set<String> set=null!=map?map.keySet():null;
         final int size=null!=context&&null!=set?set.size():0;
-        if (size>0){
-            LinearLayout ll=new LinearLayout(context);
-            ll.setOrientation(LinearLayout.VERTICAL);
-            final OnTapClick click=( view, clickCount, resId, data)-> {
-                return (null!=data&&data instanceof ClientMeta&&changeDevice((ClientMeta)data,true,"After device choose."))||true;
-            };
-            BrowserModel currentModel=mCurrent.get();
-            ClientMeta current=null!=currentModel?currentModel.getClientMeta():null;
-            for (String child:set) {
-                Object object= null!=child?map.get(child):null;
-                object=null!=object?object instanceof BrowserModel?((BrowserModel)object).getClientMeta():object:null;
-                ClientMeta meta=null!=object&&object instanceof ClientMeta?(ClientMeta)object:null;
-                if (null!=meta&&(null==current||!current.equals(meta))){
-                    DeviceTextBinding binding=inflate(R.layout.device_text);
-                    View root=null!=binding?binding.getRoot():null;
-                    if (null!=root){
-                        binding.setDevice(meta);
-                        ll.addView(root);
-                    }
-                    continue;
-                }
-            }
-            return showAsDropDown(tv,ll,0,0,click,null);
+        if (size<=1){
+            toast(R.string.canNotSwitch);
+            return false;
         }
-        return false;
+        LinearLayout ll=new LinearLayout(context);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        final OnTapClick click=( view, clickCount, resId, data)-> {
+            return (null!=data&&data instanceof ClientMeta&&changeDevice((ClientMeta)data,true,"After device choose."))||true;
+        };
+        BrowserModel currentModel=mCurrent.get();
+        ClientMeta current=null!=currentModel?currentModel.getClientMeta():null;
+        for (String child:set) {
+            Object object= null!=child?map.get(child):null;
+            object=null!=object?object instanceof BrowserModel?((BrowserModel)object).getClientMeta():object:null;
+            ClientMeta meta=null!=object&&object instanceof ClientMeta?(ClientMeta)object:null;
+            if (null!=meta&&(null==current||!current.equals(meta))){
+                DeviceTextBinding binding=inflate(R.layout.device_text);
+                View root=null!=binding?binding.getRoot():null;
+                if (null!=root){
+                    binding.setDevice(meta);
+                    ll.addView(root);
+                }
+                continue;
+            }
+        }
+        return showAsDropDown(tv,ll,0,0,click,null);
     }
 
     private boolean showBrowserMenu(View view,String debug){

@@ -42,7 +42,7 @@ import java.util.concurrent.Executor;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 
-public class Model {
+public class Model extends Retrofit{
     private WeakReference<View> mRootView=null;
     private final static String LABEL_ACTIVITY_DATA="activityData";
     private Dialog mLoadingDialog;
@@ -415,33 +415,33 @@ public class Model {
         return false;
     }
 
-    private final Retrofit mRetrofit=new Retrofit();
-
-    protected final <T> T prepare(Class<T>  cls){
-        return prepare(cls,null,null);
-    }
-
-    protected final <T> T prepare(Class<T>  cls, Executor callbackExecutor){
-        return prepare(cls,null,callbackExecutor);
-    }
-
-    protected final <T> T prepare(Class<T>  cls, String url){
-        return prepare(cls,url,null);
-    }
-
-    protected final <T> T prepare(Class<T>  cls, String url, Executor callbackExecutor){
-        Retrofit retrofit=mRetrofit;
-        return null!=retrofit&&null!=cls?retrofit.prepare(cls,url,callbackExecutor):null;
-    }
-
-    protected final<T> Canceler call(Observable<T> observable, Callback...callbacks){
-        return call(observable,null,null,callbacks);
-    }
-
-    public final<T> Canceler call(Observable<T> observable, Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks) {
-        Retrofit retrofit=null!=observable?mRetrofit:null;
-        return null!=retrofit?retrofit.call(observable,subscribeOn, observeOn,callbacks):null;
-    }
+//    private final Retrofit mRetrofit=new Retrofit();
+//
+//    protected final <T> T prepare(Class<T>  cls){
+//        return prepare(cls,null,null);
+//    }
+//
+//    protected final <T> T prepare(Class<T>  cls, Executor callbackExecutor){
+//        return prepare(cls,null,callbackExecutor);
+//    }
+//
+//    protected final <T> T prepare(Class<T>  cls, String url){
+//        return prepare(cls,url,null);
+//    }
+//
+//    protected final <T> T prepare(Class<T>  cls, String url, Executor callbackExecutor){
+//        Retrofit retrofit=mRetrofit;
+//        return null!=retrofit&&null!=cls?retrofit.prepare(cls,url,callbackExecutor):null;
+//    }
+//
+//    protected final<T> Canceler call(Observable<T> observable, Callback...callbacks){
+//        return call(observable,null,null,callbacks);
+//    }
+//
+//    public final<T> Canceler call(Observable<T> observable, Scheduler subscribeOn, Scheduler observeOn, Callback ...callbacks) {
+//        Retrofit retrofit=null!=observable?mRetrofit:null;
+//        return null!=retrofit?retrofit.call(observable,subscribeOn, observeOn,callbacks):null;
+//    }
 
     private final StatusBarLayout getStatusBar(){
         View root=getRoot();

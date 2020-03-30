@@ -20,7 +20,7 @@ public class MediaSheetChooseListModel extends Model implements Label {
     private final MediaSheetChooseListAdapter mAdapter=new MediaSheetChooseListAdapter(){
         @Override
         protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Sheet>>> finish) {
-            return call(prepare(MediaSheetChooseListModel.Api.class).querySheets(arg,true,from,10),finish);
+            return call(prepare(MediaSheetChooseListModel.Api.class,Address.HOST).querySheets(arg,true,from,10),finish);
         }
     };
 

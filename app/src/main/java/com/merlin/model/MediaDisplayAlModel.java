@@ -31,7 +31,7 @@ public final class MediaDisplayAlModel extends Model implements Label,What, Base
     private final MediaAdapter mAdapter=new MediaAdapter(){
         @Override
         protected Canceler onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<NasFile>>> finish) {
-            return call(prepare(Api.class).queryAllMedias(arg,page,page+20));
+            return call(prepare(Api.class,Address.HOST).queryAllMedias(arg,page,page+20));
         }
     };
 

@@ -32,7 +32,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
         protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Sheet>>> finish) {
-            return call(prepare(Api.class).queryCategory(arg,false,from,from+10),finish);
+            return call(prepare(Api.class,Address.HOST).queryCategory(arg,false,from,from+10),finish);
         }
     };
 
@@ -88,7 +88,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
         return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,(null!=title?title:"")+"("+sheet.getSize()+")")).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)->{
                 dialog.dismiss();
                 if (resId==R.string.sure){
-                    call(prepare(Api.class).deleteSheet(id),(OnApiFinish<Reply<Sheet>>)(what, note, data2, arg)->{
+                    call(prepare(Api.class,Address.HOST).deleteSheet(id),(OnApiFinish<Reply<Sheet>>)(what, note, data2, arg)->{
                         toast(note);
                         MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                         if (null!=adapter){
@@ -110,7 +110,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
                    toast(R.string.inputNotNull);
                    return true;
                }
-               call(prepare(Api.class).createSheet(text,null,null),(OnApiFinish<Reply<ApiList<Sheet>>>)(what, note, data2, arg)->{
+               call(prepare(Api.class,Address.HOST).createSheet(text,null,null),(OnApiFinish<Reply<ApiList<Sheet>>>)(what, note, data2, arg)->{
                    toast(note);
                    MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                    if (null!=adapter){

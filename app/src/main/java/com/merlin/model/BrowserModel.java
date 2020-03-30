@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class BrowserModel<T extends FileMeta> implements Model.OnActivityResume, FileBrowserModel.OnBrowserClientChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
+public abstract class BrowserModel<T extends FileMeta>  extends Retrofit implements Model.OnActivityResume, FileBrowserModel.OnBrowserClientChange, OnTapClick, OnLongClick, Model.OnActivityBackPress {
     public final static int MODE_INVALID=1211;
     public final static int MODE_NORMAL=1212;
     public final static int MODE_MULTI_CHOOSE=1213;

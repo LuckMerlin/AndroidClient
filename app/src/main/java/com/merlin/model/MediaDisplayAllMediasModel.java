@@ -35,7 +35,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
         protected Canceler onPageLoad(String name, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
-            return call(prepare(Api.class).queryAllMedias(from,from+20,name),finish);
+            return call(prepare(Api.class,Address.HOST).queryAllMedias(from,from+20,name),finish);
         }
     };
 
@@ -143,7 +143,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         if (null==md5||md5.length()<=0){
             return false;
         }
-        return null!=call(prepare(FavoriteApi.class).makeFavorite(md5,favorite),(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
+        return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
             AllMediasAdapter adapter=mAdapter;
             if (what==WHAT_SUCCEED&&null!=data){
                 adapter.notifyFavoriteChange(md5, favorite);

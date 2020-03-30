@@ -17,7 +17,7 @@ import com.merlin.bean.FileMeta_BK;
 import com.merlin.breakpoint.BreakPoint;
 import com.merlin.breakpoint.BreakPointer;
 import com.merlin.breakpoint.ShBreakPointer;
-import com.merlin.client.Client;
+import com.merlin.client.__Client;
 import com.merlin.debug.Debug;
 import com.merlin.global.Application;
 import com.merlin.protocol.Tag;
@@ -38,7 +38,7 @@ public class DownloadService extends Service {
     private static final String LABEL_DOWNLOAD ="download";
     private final List<Transport> mRunningList=new ArrayList<>();
     private final Handler mHandler=new Handler(Looper.getMainLooper());
-    private final Map<Transport, Client.Canceler> mDownloading=new HashMap<>();
+    private final Map<Transport, __Client.Canceler> mDownloading=new HashMap<>();
     private WeakReference<Callback> mCallback;
     private BreakPointer mBreakPointer;
     private int mMaxDownloading=1;
@@ -58,7 +58,7 @@ public class DownloadService extends Service {
         }
 
         public int getDownloadingSize(){
-            Map<Transport, Client.Canceler> downloading=mDownloading;
+            Map<Transport, __Client.Canceler> downloading=mDownloading;
             if (null!=downloading){
                 synchronized (downloading){
                     return downloading.size();
@@ -67,7 +67,7 @@ public class DownloadService extends Service {
            return -1;
         }
 
-        public Client.Canceler download(Transport download){
+        public __Client.Canceler download(Transport download){
            return null!=download?DownloadService.this.download(download):null;
         }
 
@@ -94,10 +94,10 @@ public class DownloadService extends Service {
         }
 
         public boolean pause(Transport task){
-            Map<Transport, Client.Canceler> downloading=mDownloading;
+            Map<Transport, __Client.Canceler> downloading=mDownloading;
             if (null!=task&&null!=downloading){
                 synchronized (downloading){
-                    Client.Canceler canceler=downloading.get(task);
+                    __Client.Canceler canceler=downloading.get(task);
                     return null!=canceler&&canceler.cancel(true);
                 }
             }
@@ -184,7 +184,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private Client.Canceler download(final Transport download){
+    private __Client.Canceler download(final Transport download){
         String fromAccount=null!=download?download.getFromAccount():null;
         String name=null!=download?download.getTargetName():null;
         String srcPath=null!=download?download.getSrc():null;
@@ -212,13 +212,13 @@ public class DownloadService extends Service {
             Debug.W(getClass(),"Can't download file.File_ already existed."+targetFile);
             return null;
         }
-        Client client=null;
+        __Client client=null;
         if (null==client||!client.isLogined()){
             Debug.W(getClass(),"Can't download file.Not login."+client);
             return null;
         }
         final List<Transport> runningList=mRunningList;
-        final Map<Transport, Client.Canceler> downloading=mDownloading;
+        final Map<Transport, __Client.Canceler> downloading=mDownloading;
         if (null==runningList){
             Debug.W(getClass(),"Can't download file.runningList="+runningList+" "+download);
             return null;
@@ -266,7 +266,7 @@ public class DownloadService extends Service {
         final long seek=0;//download.getType()== Transport.TYPE_REPLACE?0:targetFile.length();
         Debug.D(getClass(),"Downloading file."+download.getType()+" "+fromAccount+" "+seek+" \n from:"+srcPath+"\n to:"+targetFile);
         FileOutputStream os=null;
-        Client.Canceler canceler=null;
+        __Client.Canceler canceler=null;
         try {
             final FileOutputStream fos=os=new FileOutputStream(targetFile,seek<=0?false:true);
             long startTime=System.currentTimeMillis();
@@ -401,7 +401,7 @@ public class DownloadService extends Service {
     }
 
     private boolean removeDownloadingTask(Transport task){
-        Map<Transport, Client.Canceler> downloading=mDownloading;
+        Map<Transport, __Client.Canceler> downloading=mDownloading;
         if (null!=downloading){
             Set<Transport> set;
             synchronized (downloading){

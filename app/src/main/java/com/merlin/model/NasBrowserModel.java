@@ -36,9 +36,8 @@ import retrofit2.http.POST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
-    private final Retrofit mRetrofit=new Retrofit();
     private interface Api {
-        @POST(Address.PREFIX_FILE_BROWSER)
+        @POST(Address.PREFIX_FILE+"/directory/browser")
         @FormUrlEncoded
         Observable<Reply<NasFolder>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FROM) int from,
                                                 @Field(LABEL_TO) int to);
@@ -73,7 +72,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         setAdapter(new NasBrowserAdapter(){
             @Override
             protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<PageData<NasFile>>> finish) {
-                return null!=path?call(prepare(Api.class).queryFiles(path, from,from+50),(OnApiFinish<Reply<PageData<NasFile>>>)(what, note, data, arg)->{
+                return null!=path?call(prepare(Api.class,Address.URL).queryFiles(path, from,from+50),(OnApiFinish<Reply<PageData<NasFile>>>)(what, note, data, arg)->{
                     if (null!=finish){
                         finish.onApiFinish(what,note,data,arg);
                     }
@@ -146,7 +145,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     private boolean copyFile(NasFile meta, String debug){
         if (null!=meta&&isMode(MODE_COPY)||entryMode(MODE_COPY,debug)){
-            setProcessing(meta,"While start copyx file "+(null!=debug?debug:"."));
+            setProcessing(meta,"While start copy file "+(null!=debug?debug:"."));
             return true;
         }
         return false;
@@ -188,17 +187,17 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     @Override
     protected boolean onCreateFile(boolean dir, int mode, String folder, String name, OnApiFinish<Reply<FModify>> finish, String debug) {
-        return null!=call(prepare(Api.class).createFile(folder,name,dir),finish);
+        return null!=call(prepare(Api.class,Address.URL).createFile(folder,name,dir),finish);
     }
 
     @Override
     protected boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug) {
-        return null!=call(prepare(Api.class).renameFile(path,name),finish);
+        return null!=call(prepare(Api.class,Address.URL).renameFile(path,name),finish);
     }
 
     @Override
     protected boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug) {
-        return null!=call(prepare(Api.class).deleteFile(files),finish);
+        return null!=call(prepare(Api.class,Address.URL).deleteFile(files),finish);
     }
 
     @Override
@@ -270,7 +269,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         dialog.setContentView(null!=binding?binding.getRoot():null).show(( view, clickCount, resId, data)->{
             return true;
         },false);
-        return null!=call(prepare(Api.class).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
+        return null!=call(prepare(Api.class,Address.HOST).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
             NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
             if (null!=detail){
                 binding.setFile(detail);
@@ -284,7 +283,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
             if (resId==R.string.sure){
                 Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-                call(prepare(Api.class).rebootClient(),(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
+                call(prepare(Api.class,Address.HOST).rebootClient(),(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
             }
             dialog.dismiss();
             return true;
@@ -294,27 +293,12 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     private boolean scan(NasFile file, boolean recursive){
         String path=null!=file?file.getPath():null;
-        return null!=path&&path.length()>0&&null!=call(prepare(Api.class).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
+        return null!=path&&path.length()>0&&null!=call(prepare(Api.class,Address.URL).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
     }
 
     protected final String getClientUrl(){
         ClientMeta meta=getClientMeta();
         return null!=meta?meta.getUrl():null;
-    }
-
-    protected final<T> Canceler call(Observable<T> observable, Callback...callbacks){
-        Retrofit retrofit=null!=observable?mRetrofit:null;
-        return null!=retrofit?retrofit.call(observable,callbacks):null;
-    }
-
-    protected final <T> T prepare(Class<T> cls){
-        String url=getClientUrl();
-        if (null==url||url.length()<=0){
-            Debug.W(getClass(),"Can't load nas folder with NULL url."+url);
-            url="";
-        }
-        Retrofit retrofit=mRetrofit;
-        return retrofit.prepare(cls,url);
     }
 
 }

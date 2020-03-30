@@ -2,7 +2,7 @@ package com.merlin.media;
 
 import com.merlin.api.Address;
 import com.merlin.bean.File_;
-import com.merlin.client.Client;
+import com.merlin.client.__Client;
 import com.merlin.debug.Debug;
 import com.merlin.file.DownloadApi;
 import com.merlin.player.MediaBuffer;
@@ -170,7 +170,7 @@ public final class __NetMediaBuffer extends MediaBuffer<File_> {
         private RandomAccessFile mAccess;
         private long mNextStart=0;
         private final Boolean mMutex=true;
-        private Client.Canceler mCanceler;
+        private __Client.Canceler mCanceler;
 
         public Reader(String cacheFile){
             mCacheFile=cacheFile;
@@ -294,14 +294,14 @@ public final class __NetMediaBuffer extends MediaBuffer<File_> {
             }
         }
 
-        private void setCanceler(Client.Canceler canceler){
+        private void setCanceler(__Client.Canceler canceler){
             this.mCanceler=canceler;
         }
 
         private boolean recycle(String debug){
             Reader reader=mReader;
             if (null!=reader&&reader==this){
-                Client.Canceler canceler=mCanceler;
+                __Client.Canceler canceler=mCanceler;
                 Debug.D(getClass(),"Recycle media reader "+(null!=debug?debug:"."));
                 mReader=null;
                 reader.mCanceler=null;

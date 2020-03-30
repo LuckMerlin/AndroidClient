@@ -73,7 +73,7 @@ public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItem
     }
 
     private boolean queryCategories(){
-        return null!= call(prepare(Api.class).queryCategories(null,0,100), (OnApiFinish<Reply<PageData<SheetTitle>>>)(what, note, data, arg)->{
+        return null!= call(prepare(Api.class,Address.HOST).queryCategories(null,0,100), (OnApiFinish<Reply<PageData<SheetTitle>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
 //                mTitleAdapter.fillPage(null!=data?data.getData():null);
             }
@@ -81,7 +81,7 @@ public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItem
     }
 
     private void queryAllSheets(String titleName){
-        call(prepare(Api.class).queryAllSheets(titleName,0,10), (OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, data, arg)->{
+        call(prepare(Api.class,Address.HOST).queryAllSheets(titleName,0,10), (OnApiFinish<Reply<ApiList<MediaSheet>>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED){
                 ApiList<MediaSheet> list=null!=data?data.getData():null;
                 mSheetAdapter.setData(list);
@@ -97,7 +97,7 @@ public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItem
        }
        final long sheetId=sheet.getId();
        mQueryDetailId=sheetId;
-       return null!=call(prepare(Api.class).querySheetById(sheetId,page,50),(OnApiFinish<Reply<ApiList<NasMedia>>>)(what, note, data, arg)->{
+       return null!=call(prepare(Api.class,Address.HOST).querySheetById(sheetId,page,50),(OnApiFinish<Reply<ApiList<NasMedia>>>)(what, note, data, arg)->{
            Long queryId=mQueryDetailId;
            if (null!=queryId&&queryId.equals(sheetId)){
                mQueryDetailId=null;
@@ -120,7 +120,7 @@ public class MediaDisplaySheetsModel extends Model implements BaseAdapter.OnItem
         new SingleInputDialog(getViewContext()).show(R.string.createSheet,(dlg, text)->{
             dlg.dismiss();
             if (null!=text&&text.length()>0){
-                call(prepare(Api.class).createSheet(text),(OnApiFinish<Reply>)(what, note, data, arg)->{
+                call(prepare(Api.class,Address.HOST).createSheet(text),(OnApiFinish<Reply>)(what, note, data, arg)->{
                     if (what== What.WHAT_SUCCEED){
                         toast(R.string.createSucceed);
                     }else{

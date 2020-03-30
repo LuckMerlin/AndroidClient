@@ -2,7 +2,7 @@ package com.merlin.oksocket;
 
 import android.os.Handler;
 
-import com.merlin.client.Client;
+import com.merlin.client.__Client;
 import com.merlin.protocol.Protocol;
 import com.merlin.protocol.Tag;
 import com.merlin.debug.Debug;
@@ -144,7 +144,7 @@ public class Socket implements Tag {
                    if (!frame.isFrameType(Frame.TAG_FRAME_BYTE_DATA)){
                        OnFrameReceive receiveListener=mReceiveListener;
                        if (null!=receiveListener){
-                           receiveListener.onFrameReceived(frame,(Client) Socket.this);
+                           receiveListener.onFrameReceived(frame,(__Client) Socket.this);
                        }
                    }
                }
@@ -343,7 +343,7 @@ public class Socket implements Tag {
                Set<OnClientStatusChange> set=reference.keySet();
                for (OnClientStatusChange change:set) {
                     if (null!=change){
-                        change.onClientStatusChanged(autoNotify,what,data,(Client)this);
+                        change.onClientStatusChanged(autoNotify,what,data,(__Client)this);
                     }
                }
            }
