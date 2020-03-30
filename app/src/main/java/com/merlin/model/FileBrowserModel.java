@@ -82,7 +82,7 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
 //        String name,String url,String account,String imageUrl,String folder,String pathSep
         ClientMeta testClient=new ClientMeta("算法",Address.HOST,"none","",null,"///");
         putClientMeta(testClient, "After mode create.");
