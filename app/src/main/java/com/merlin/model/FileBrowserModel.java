@@ -19,6 +19,8 @@ import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
+import com.merlin.bean.LocalFile;
+import com.merlin.bean.NasFile;
 import com.merlin.browser.Collector;
 import com.merlin.browser.LocalFileCollector;
 import com.merlin.browser.NasFileCollector;
@@ -150,10 +152,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,
                                 "After tap click."))||true;
                     case R.string.upload:
-                        return (isMode(FileBrowser.MODE_UPLOAD)?conveyFile(FileBrowser.MODE_UPLOAD,mProcessing,"After tap click.")
+                        Collector collector=mProcessing;
+                        return (isMode(FileBrowser.MODE_UPLOAD)?upload(null!=collector&&collector instanceof LocalFileCollector?
+                                        ((LocalFileCollector)collector).getFiles():null,"After tap click.")
                         :prepareConveyFile(FileBrowser.MODE_UPLOAD,data,"After tap click."));
                     case R.string.download:
-                        return (isMode(FileBrowser.MODE_DOWNLOAD)?conveyFile(FileBrowser.MODE_DOWNLOAD,mProcessing,"After tap click.")
+                        collector=mProcessing;
+                        return (isMode(FileBrowser.MODE_DOWNLOAD)?download(null!=collector&&collector instanceof NasFileCollector?
+                                ((NasFileCollector)collector).getFiles():null,"After tap click.")
                                 :prepareConveyFile(FileBrowser.MODE_DOWNLOAD,data,"After tap click."));
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
@@ -183,7 +189,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
     }
 
-    private boolean addConveyFile(int mode,FileMeta meta,String debug){
+//    private boolean addConveyFile(int mode,FileMeta meta,String debug){
 //        switch (mode){
 //            case FileBrowser.MODE_UPLOAD:
 //                return meta.isLocalClient()&&!(collector instanceof LocalFileCollector)?
@@ -193,43 +199,67 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 //                return !meta.isLocalClient()&&!(collector instanceof NasFileCollector)?(toast(R.string.canNotOperateHere)||false):
 //                        ConveyorService.download(getViewContext(),((NasFileCollector)collector).getFiles(),meta,folderPath,null,debug);
 //        }
+//        return false;
+//    }
+
+    private boolean upload(ArrayList<LocalFile> files,String debug){
+//        ConveyorService.upload
+//                (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug)
         return false;
     }
 
-    private boolean conveyFile(int model, Collector collector, String debug){
-        FolderData folder=mCurrentFolder.get();
-        String folderPath=null!=folder?folder.getPath():null;
-        ClientMeta meta=mCurrentMeta.get();
-        if (null==collector||null==folderPath||folderPath.length()<=0||null==meta){
-            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
-            return false;
-        }
-        switch (model){
-            case FileBrowser.MODE_UPLOAD:
-                return meta.isLocalClient()&&!(collector instanceof LocalFileCollector)?
-                        (toast(R.string.canNotOperateHere)||false):ConveyorService.upload
-                        (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug);
-            case FileBrowser.MODE_DOWNLOAD:
-                return !meta.isLocalClient()&&!(collector instanceof NasFileCollector)?(toast(R.string.canNotOperateHere)||false):
-                        ConveyorService.download(getViewContext(),((NasFileCollector)collector).getFiles(),meta,folderPath,null,debug);
-        }
-        Debug.D(getClass(),"Start model file "+model+" "+collector);
+    private boolean download(ArrayList<NasFile> files,String debug){
+//        ConveyorService.upload
+//                (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug)
         return false;
     }
+//    private boolean conveyFile(int model, Collector collector, String debug){
+//        FolderData folder=mCurrentFolder.get();
+//        String folderPath=null!=folder?folder.getPath():null;
+//        ClientMeta meta=mCurrentMeta.get();
+//        if (null==collector||null==folderPath||folderPath.length()<=0||null==meta){
+//            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
+//            return false;
+//        }
+//        switch (model){
+//            case FileBrowser.MODE_UPLOAD:
+//                return meta.isLocalClient()&&!(collector instanceof LocalFileCollector)?
+//                        (toast(R.string.canNotOperateHere)||false):ConveyorService.upload
+//                        (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug);
+//            case FileBrowser.MODE_DOWNLOAD:
+//                return !meta.isLocalClient()&&!(collector instanceof NasFileCollector)?(toast(R.string.canNotOperateHere)||false):
+//                        ConveyorService.download(getViewContext(),((NasFileCollector)collector).getFiles(),meta,folderPath,null,debug);
+//        }
+//        Debug.D(getClass(),"Start model file "+model+" "+collector);
+//        return false;
+//    }
 
     private boolean prepareConveyFile(int mode,Object obj,String debug){
-        if (null!=obj&&obj instanceof FileMeta){
-            if (isMode(mode)||entryMode(mode,debug)){
-                return addConveyFile(mode,(FileMeta) obj,"While start mode file "+mode+" "+(null!=debug?debug:"."));
-            }
+        Collector collector=mProcessing;
+        switch (mode){
+            case FileBrowser.MODE_DOWNLOAD:
+                if (null!=obj&& obj instanceof LocalFile){
+                    if (null!=collector&&collector instanceof LocalFileCollector){
+                        return collector.add((LocalFile) obj)&&(!isMode(mode)||entryMode(mode,debug));
+                    }else{
+                        mProcessing=new LocalFileCollector((LocalFile)obj);
+                        return !isMode(mode)||entryMode(mode,debug);
+                    }
+                }
+                return false;
+            case FileBrowser.MODE_UPLOAD:
+                if (null!=obj&& obj instanceof NasFile){
+                    if (null!=collector&&collector instanceof NasFileCollector){
+                        return collector.add((NasFile) obj)&&(!isMode(mode)||entryMode(mode,debug));
+                    }else{
+                        mProcessing=new NasFileCollector((NasFile)obj);
+                        return !isMode(mode)||entryMode(mode,debug);
+                    }
+                }
+                return false;
         }
         toast(R.string.fail);
         return false;
-    }
-
-    private boolean setProcessing(Collector process,String debug){
-        mProcessing=process;
-        return true;
     }
 
     private boolean chooseAll(boolean choose,String debug){
