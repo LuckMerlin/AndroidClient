@@ -269,7 +269,7 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         dialog.setContentView(null!=binding?binding.getRoot():null).show(( view, clickCount, resId, data)->{
             return true;
         },false);
-        return null!=call(prepare(Api.class,Address.HOST).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
+        return null!=call(prepare(Api.class,Address.URL).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
             NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
             if (null!=detail){
                 binding.setFile(detail);
@@ -283,7 +283,8 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
         dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
             if (resId==R.string.sure){
                 Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-                call(prepare(Api.class,Address.HOST).rebootClient(),(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
+                call(prepare(Api.class,Address.URL
+                ).rebootClient(),(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
             }
             dialog.dismiss();
             return true;
@@ -293,7 +294,9 @@ public class NasBrowserModel extends BrowserModel<NasFile> implements Label {
 
     private boolean scan(NasFile file, boolean recursive){
         String path=null!=file?file.getPath():null;
-        return null!=path&&path.length()>0&&null!=call(prepare(Api.class,Address.URL).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
+        return null!=path&&path.length()>0&&null!=call(prepare(Api.class,Address.URL).scan(path,recursive),
+                (OnApiFinish<Reply>)(what, note, data2, arg)->toast(note))
+                ;
     }
 
     protected final String getClientUrl(){

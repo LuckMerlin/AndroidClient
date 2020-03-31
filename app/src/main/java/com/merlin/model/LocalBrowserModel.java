@@ -78,11 +78,12 @@ public class LocalBrowserModel extends BrowserModel {
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        switch (resId){
-            case R.string.upload:
-                return (null!=data&&data instanceof LocalFile&&entryMode(MODE_UPLOAD,"After upload tap click.")
-                        &&setProcessing(data,"After upload tap click."))||true;
-        }
+//        switch (resId){
+//            case R.string.upload:
+//                return (null!=data&&data instanceof LocalFile&&entryMode(MODE_UPLOAD,
+//                        "After upload tap click.")&&setProcessing(data,
+//                        "After upload tap click."))||true;
+//        }
         return super.onTapClick(view,clickCount,resId,data);
     }
 

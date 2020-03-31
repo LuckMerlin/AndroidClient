@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.databinding.ObservableField;
 
@@ -206,7 +207,9 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,"After tap click."))||true;
                     case R.string.upload:
-                        return upload(data,"After tap click.");
+                        Debug.D(getClass(),"撒大声地发  "+clickCount);
+                        return true;
+//                        return upload(data,"After tap click.");
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
                     case R.drawable.selector_menu:
@@ -225,6 +228,22 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
                         adapter=null!=model&&model.isMode(BrowserModel.MODE_MULTI_CHOOSE)?model.getBrowserAdapter():null;
                         return null!=adapter&&adapter.chooseAll(false);
                     default:
+                        if (null!=data&&data instanceof FileMeta){
+                            FileMeta file=(FileMeta)data;
+                            if (isMode(BrowserModel.MODE_MULTI_CHOOSE)) {
+                                BrowserAdapter adapter=getBrowserAdapter();
+                                adapter.multiChoose(file);
+                                return (null!=adapter&&adapter.multiChoose(file))||true;
+                            }else if(file.isAccessible()){
+                                if (file.isDirectory()) {
+                                    return browserPath(file.getPath(), "After directory click.");
+                                } else{//Open file
+                                    return open(data,"After item tap click.");
+                                }
+                            }else{
+                                Toast.makeText(view.getContext(),R.string.nonePermission,Toast.LENGTH_SHORT).show();
+                            }
+                        }
                         break;
                 }
                 break;
@@ -236,6 +255,11 @@ public class FileBrowserModel extends Model implements Label, ClientCallback, Ta
         }
         BrowserModel model=getCurrentModel();
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
+    }
+
+    private boolean isMode(int mode){
+//        BrowserAdapter adapter=mCurrentAdapter.get();
+        return false;
     }
 
     private boolean upload(Object obj,String debug){

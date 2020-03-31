@@ -11,7 +11,8 @@
         binding:enableClick="@{Clicker.click(device,true)}"
         android:text="@{device.name}"
         android:textSize="@dimen/textTitle"
-        android:padding="3dp"
+        android:padding="5dp"
+        android:minWidth="40dp"
         android:textStyle="bold"
         style="@style/titleNormalTextView"/>
 </layout>
