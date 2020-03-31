@@ -21,8 +21,8 @@ import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
+import com.merlin.browser.FileBrowser;
 import com.merlin.media.MediaPlayService;
-import com.merlin.server.Retrofit;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -39,15 +39,18 @@ import retrofit2.http.POST;
 import static com.merlin.api.What.WHAT_FILE_EXIST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
+/**
+ * @deprecated
+ */
 public final class FileBrowserRemoteModel extends Model implements Label, OnTapClick, OnLongClick {
     private final ObservableField<Boolean> mAllChoose=new ObservableField<>(false);
     private final ObservableField<Integer> mMode=new ObservableField<>();
     private final ObservableField<NasFolder> mCurrent=new ObservableField<>();
     private final ObservableField<String> mMultiCount=new ObservableField<>();
-    private final static int MODE_NORMAL=BrowserModel.MODE_NORMAL;
-    private final static int MODE_MULTI_CHOOSE=BrowserModel.MODE_MULTI_CHOOSE;
-    private final static int MODE_COPY=BrowserModel.MODE_COPY;
-    private final static int MODE_MOVE=BrowserModel.MODE_MOVE;
+    private final static int MODE_NORMAL= FileBrowser.MODE_NORMAL;
+    private final static int MODE_MULTI_CHOOSE= FileBrowser.MODE_MULTI_CHOOSE;
+    private final static int MODE_COPY= FileBrowser.MODE_COPY;
+    private final static int MODE_MOVE= FileBrowser.MODE_MOVE;
 
     private Object mProcessing;
     private interface Api {

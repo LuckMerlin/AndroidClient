@@ -6,13 +6,13 @@
             name="vm"
             type="com.merlin.model.FileBrowserModel" />
         <variable
-            name="meta"
-            type="com.merlin.bean.ClientMeta" />
+            name="client"
+            type="com.merlin.api.Client" />
         <import type="com.merlin.util.FileSize"/>
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.view.Clicker"/>
-        <import type="com.merlin.model.BrowserModel" alias="Model"/>
+        <import type="com.merlin.browser.FileBrowser" alias="Model"/>
         <import type="android.text.Html"/>
         <import type="com.merlin.view.ContextMenu"/>
     </data>
@@ -152,7 +152,6 @@
                 android:layout_alignParentBottom="true"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:background="@drawable/round_corner_black"
                 android:layout_height="60dp">
                 <LinearLayout
                     android:orientation="horizontal"

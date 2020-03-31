@@ -1,7 +1,7 @@
 package com.merlin.transport;
 import androidx.annotation.Nullable;
 
-import com.merlin.file.CoverMode;
+import com.merlin.browser.CoverMode;
 import com.merlin.util.StringEquals;
 import com.merlin.api.Canceler;
 

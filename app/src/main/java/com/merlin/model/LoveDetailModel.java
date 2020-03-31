@@ -21,13 +21,12 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.LocalFile;
 import com.merlin.bean.Love;
 import com.merlin.bean.NasFile;
 import com.merlin.bean._Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.file.FileSaveBuilder;
+import com.merlin.browser.FileSaveBuilder;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import me.nereo.multi_image_selector.MultiImageSelector;
 import okhttp3.MultipartBody;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;

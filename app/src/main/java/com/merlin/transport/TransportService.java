@@ -12,9 +12,8 @@ import androidx.annotation.Nullable;
 
 import com.merlin.bean.ClientMeta;
 import com.merlin.debug.Debug;
-import com.merlin.file.CoverMode;
+import com.merlin.browser.CoverMode;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;

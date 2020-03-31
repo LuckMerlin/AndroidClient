@@ -1,10 +1,9 @@
-package com.merlin.file;
+package com.merlin.browser;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.merlin.api.Label;
-import com.merlin.debug.Debug;
 
 public class LocalBrowserHome {
     private final String homeShName="localRoot";

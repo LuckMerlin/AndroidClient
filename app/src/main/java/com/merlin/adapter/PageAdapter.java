@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMoreLoadable{
+public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
@@ -185,6 +185,7 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
                                 mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
                                 fillPage(pageData,reset);
                             }
+                            onPageLoadSucceed(pageData,debug);
                             break;
                         default:
                             Debug.D(getClass(),"Fail load page "+page.mArg+" from "+from+" "+(null!=debug?debug:".")+" "+this);
@@ -202,6 +203,10 @@ public abstract class PageAdapter<D,T> extends  ListAdapter<T>  implements OnMor
         }
         Debug.W(getClass(),"Can't load page data.page="+page);
         return false;
+    }
+
+    protected void onPageLoadSucceed(PageData<T> page,String debug){
+        //Do nothing
     }
 
     private boolean isPageEquals(Page<D> page1,Page<D>  page2){

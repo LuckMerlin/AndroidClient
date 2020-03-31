@@ -1,4 +1,4 @@
-package com.merlin.file;
+package com.merlin.browser;
 
 public interface CoverMode {
     int COVER_MODE_NONE=0;

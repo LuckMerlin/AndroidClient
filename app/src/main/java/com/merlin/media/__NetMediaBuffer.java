@@ -4,7 +4,7 @@ import com.merlin.api.Address;
 import com.merlin.bean.File_;
 import com.merlin.client.__Client;
 import com.merlin.debug.Debug;
-import com.merlin.file.DownloadApi;
+import com.merlin.browser.DownloadApi;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.Playable;
 import com.merlin.retrofit.Retrofit;

@@ -8,29 +8,17 @@ import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
-import com.merlin.file.FileSaveBuilder;
-import com.merlin.file.FileUploadBody;
+import com.merlin.browser.FileSaveBuilder;
+import com.merlin.browser.FileUploadBody;
 import com.merlin.server.Retrofit;
-import com.merlin.util.Closer;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import okhttp3.Headers;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
 import retrofit2.Call;
 import retrofit2.Response;
 

@@ -1,4 +1,4 @@
-package com.merlin.file;
+package com.merlin.browser;
 
 import com.merlin.api.Label;
 

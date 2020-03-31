@@ -1,7 +1,4 @@
-package com.merlin.file;
-
-import com.merlin.binding.MBinding;
-import com.merlin.debug.Debug;
+package com.merlin.browser;
 
 public final class Permissions {
     private static final int FILE_TYPE_MASK = 0170000 ;//文件类型屏蔽字

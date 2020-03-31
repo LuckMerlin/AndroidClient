@@ -7,8 +7,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.merlin.api.What;
-import com.merlin.debug.Debug;
-import com.merlin.file.Permissions;
+import com.merlin.browser.Permissions;
 import com.merlin.player.Playable;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;

@@ -6,13 +6,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.module.AppGlideModule;
-import com.merlin.debug.Debug;
-import com.merlin.file.FileSync;
-import com.merlin.file.LocalFileSyncDecoder;
+import com.merlin.browser.FileSync;
+import com.merlin.browser.LocalFileSyncDecoder;
 
-import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 @GlideModule
 public class TestGlidle extends AppGlideModule {

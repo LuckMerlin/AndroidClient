@@ -1,4 +1,4 @@
-package com.merlin.file;
+package com.merlin.browser;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

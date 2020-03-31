@@ -4,7 +4,7 @@ import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.bean.ClientMeta;
 import com.merlin.debug.Debug;
-import com.merlin.file.CoverMode;
+import com.merlin.browser.CoverMode;
 import com.merlin.server.Retrofit;
 import com.merlin.util.Closer;
 

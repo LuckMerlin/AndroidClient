@@ -8,7 +8,7 @@
         <import type="com.merlin.view.ContextMenu"/>
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
-        <import type="com.merlin.file.Permissions"/>
+        <import type="com.merlin.browser.Permissions"/>
     </data>
     <LinearLayout
         android:orientation="vertical"

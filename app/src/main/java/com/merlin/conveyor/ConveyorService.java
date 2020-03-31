@@ -8,6 +8,10 @@ import android.os.Looper;
 
 import com.merlin.api.Client;
 import com.merlin.api.Label;
+import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FileMeta;
+import com.merlin.bean.LocalFile;
+import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
 import com.merlin.server.Retrofit;
@@ -80,9 +84,9 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
         return false;
     }
 
-    public static boolean upload(Context context, File file, Client meta, String folder, int mode, String debug) {
+    public static boolean upload(Context context, LocalFile file, ClientMeta meta, String folder, Integer mode, String debug) {
         if (null!=file&&null!=context){
-            ArrayList<File> list=new ArrayList<>();
+            ArrayList<LocalFile> list=new ArrayList<>();
             list.add(file);
             return upload(context,list,meta,folder,mode,debug);
         }
@@ -90,7 +94,12 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
         return false;
     }
 
-    public static boolean upload(Context context, ArrayList<File> files, Client meta, String folder, int mode, String debug){
+    public static boolean download(Context context, List<NasFile> files, ClientMeta meta, String folder, Integer mode, String debug) {
+
+        return false;
+    }
+
+    public static boolean upload(Context context, ArrayList<LocalFile> files, ClientMeta meta, String folder, Integer mode, String debug){
         if (null!=files&&files.size()>0&&null!=context){
             final String url=null!=meta?meta.getUrl():null;
             if (null==url||url.length()<=0){

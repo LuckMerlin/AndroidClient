@@ -1,4 +1,4 @@
-package com.merlin.file;
+package com.merlin.browser;
 
 public class FileSync {
     private String md5;

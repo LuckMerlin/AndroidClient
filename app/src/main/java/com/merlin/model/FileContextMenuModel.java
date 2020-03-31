@@ -7,7 +7,6 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.bean.NasFile;
 import com.merlin.client.R;
-import com.merlin.file.Permissions;
 import com.merlin.view.OnTapClick;
 
 public class FileContextMenuModel extends Model implements OnTapClick {

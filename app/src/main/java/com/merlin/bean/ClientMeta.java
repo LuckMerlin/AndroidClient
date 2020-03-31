@@ -1,7 +1,6 @@
 package com.merlin.bean;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,13 +8,10 @@ import android.os.StatFs;
 
 import androidx.annotation.NonNull;
 
-import com.merlin.api.Label;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.file.LocalBrowserHome;
+import com.merlin.browser.LocalBrowserHome;
 
 import java.io.File;
-import java.io.Serializable;
 
 public final class ClientMeta implements Parcelable {
     /**
@@ -61,7 +57,8 @@ public final class ClientMeta implements Parcelable {
         meta.name=null!=context?context.getString(R.string.local):"Local";
         meta.account="Local";
         meta.pathSep= File.pathSeparator;
-        meta.root=new LocalBrowserHome().get(context,null);
+        File file=context.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+        meta.root=new LocalBrowserHome().get(context,null!=file?file.getAbsolutePath():"./");
         String path = Environment.getDataDirectory().getPath();
         if (null!=path&&path.length()>0){
             StatFs statFs = new StatFs(path);
