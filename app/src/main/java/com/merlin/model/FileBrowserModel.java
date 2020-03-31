@@ -3,6 +3,7 @@ package com.merlin.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.DatabaseErrorHandler;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -54,7 +55,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
     private final ObservableField<FileBrowser> mCurrent=new ObservableField<>();
     private final ObservableField<FolderData> mCurrentFolder=new ObservableField<>();
-    private final ObservableField<Integer> mCurrentMode=new ObservableField<>();
+    private final ObservableField<Integer> mCurrentMode=new ObservableField<>(FileBrowser.MODE_NORMAL);
     private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
     private final ObservableField<String> mCurrentMultiChooseSummary=new ObservableField<>();
@@ -68,6 +69,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         @Override
         public boolean onTapClick(View view, int clickCount, int resId, Object data) {
             return FileBrowserModel.this.onTapClick(view,clickCount,resId,data);
+        }
+
+        @Override
+        public int getMode() {
+            return mCurrentMode.get();
         }
     };
     private Collector mProcessing;
@@ -84,10 +90,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-//        String name,String url,String account,String imageUrl,String folder,String pathSep
-        ClientMeta testClient=new ClientMeta("算法",Address.HOST,"none","",null,"///");
-//        putClientMeta(testClient, "After mode create.");
+//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+        ClientMeta testClient=new ClientMeta("算法",Address.URL,"none","",null,"///");
+        putClientMeta(testClient, "After mode create.");
 //        refreshClientMeta("After mode create.");
 //        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
 //            @Override
@@ -132,7 +137,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                          }
                          mCurrentMeta.set(browser.getMeta());
                          mCurrent.set(browser);
-                         mCurrentMode.set(browser.getMode());
                          return true;
                     }
                 }
@@ -144,7 +148,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data)  {
-        Debug.D(getClass(),"ss "+clickCount+" "+resId+" "+data);
         switch (clickCount){
             case 1:
                 switch (resId){
@@ -189,114 +192,77 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
     }
 
-//    private boolean addConveyFile(int mode,FileMeta meta,String debug){
-//        switch (mode){
-//            case FileBrowser.MODE_UPLOAD:
-//                return meta.isLocalClient()&&!(collector instanceof LocalFileCollector)?
-//                        (toast(R.string.canNotOperateHere)||false):ConveyorService.upload
-//                        (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug);
-//            case FileBrowser.MODE_DOWNLOAD:
-//                return !meta.isLocalClient()&&!(collector instanceof NasFileCollector)?(toast(R.string.canNotOperateHere)||false):
-//                        ConveyorService.download(getViewContext(),((NasFileCollector)collector).getFiles(),meta,folderPath,null,debug);
-//        }
-//        return false;
-//    }
-
     private boolean upload(ArrayList<LocalFile> files,String debug){
-//        ConveyorService.upload
-//                (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug)
-        return false;
+        if (null==files||files.size()<=0){
+            toast(R.string.noneDataToOperate);
+            return false;
+        }
+        FolderData folder=mCurrentFolder.get();
+        String folderPath=null!=folder?folder.getPath():null;
+        ClientMeta meta=mCurrentMeta.get();
+        if (null==folderPath||folderPath.length()<=0||null==meta||meta.isLocalClient()){
+            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
+            return false;
+        }
+        return ConveyorService.upload(getViewContext(),files,meta,folderPath,null,debug);
     }
 
     private boolean download(ArrayList<NasFile> files,String debug){
-//        ConveyorService.upload
-//                (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug)
-        return false;
+        if (null==files||files.size()<=0){
+            toast(R.string.noneDataToOperate);
+            return false;
+        }
+        FolderData folder=mCurrentFolder.get();
+        String folderPath=null!=folder?folder.getPath():null;
+        ClientMeta meta=mCurrentMeta.get();
+        if (null==folderPath||folderPath.length()<=0||null==meta||!meta.isLocalClient()){
+            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
+            return false;
+        }
+        return ConveyorService.download(getViewContext(),files,meta,folderPath,null,debug);
     }
-//    private boolean conveyFile(int model, Collector collector, String debug){
-//        FolderData folder=mCurrentFolder.get();
-//        String folderPath=null!=folder?folder.getPath():null;
-//        ClientMeta meta=mCurrentMeta.get();
-//        if (null==collector||null==folderPath||folderPath.length()<=0||null==meta){
-//            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
-//            return false;
-//        }
-//        switch (model){
-//            case FileBrowser.MODE_UPLOAD:
-//                return meta.isLocalClient()&&!(collector instanceof LocalFileCollector)?
-//                        (toast(R.string.canNotOperateHere)||false):ConveyorService.upload
-//                        (getViewContext(),((LocalFileCollector)collector).getFiles(),meta,folderPath,null,debug);
-//            case FileBrowser.MODE_DOWNLOAD:
-//                return !meta.isLocalClient()&&!(collector instanceof NasFileCollector)?(toast(R.string.canNotOperateHere)||false):
-//                        ConveyorService.download(getViewContext(),((NasFileCollector)collector).getFiles(),meta,folderPath,null,debug);
-//        }
-//        Debug.D(getClass(),"Start model file "+model+" "+collector);
-//        return false;
-//    }
 
     private boolean prepareConveyFile(int mode,Object obj,String debug){
         Collector collector=mProcessing;
+        boolean succeed=false;
         switch (mode){
-            case FileBrowser.MODE_DOWNLOAD:
-                if (null!=obj&& obj instanceof LocalFile){
-                    if (null!=collector&&collector instanceof LocalFileCollector){
-                        return collector.add((LocalFile) obj)&&(!isMode(mode)||entryMode(mode,debug));
-                    }else{
-                        mProcessing=new LocalFileCollector((LocalFile)obj);
-                        return !isMode(mode)||entryMode(mode,debug);
-                    }
-                }
-                return false;
             case FileBrowser.MODE_UPLOAD:
-                if (null!=obj&& obj instanceof NasFile){
-                    if (null!=collector&&collector instanceof NasFileCollector){
-                        return collector.add((NasFile) obj)&&(!isMode(mode)||entryMode(mode,debug));
-                    }else{
-                        mProcessing=new NasFileCollector((NasFile)obj);
-                        return !isMode(mode)||entryMode(mode,debug);
-                    }
-                }
-                return false;
+                succeed=(null!=obj&& obj instanceof LocalFile&&(null!=collector&&collector instanceof
+                        LocalFileCollector?collector: (mProcessing=new LocalFileCollector(null))).add((LocalFile)obj));
+                break;
+            case FileBrowser.MODE_DOWNLOAD:
+                succeed=(null!=obj&& obj instanceof NasFile&&(null!=collector&&collector instanceof
+                        NasFileCollector?collector: (mProcessing=new NasFileCollector(null)))
+                        .add((NasFile)obj));
+                break;
         }
-        toast(R.string.fail);
-        return false;
+        return succeed&&(isMode(mode)||entryMode(mode,debug));
     }
 
     private boolean chooseAll(boolean choose,String debug){
         FileBrowser browser=getCurrentModel();
-        return null!=browser&&browser.isMode(FileBrowser.MODE_MULTI_CHOOSE)&&
-                browser.chooseAll(choose,debug);
+        return null!=browser&&isMode(FileBrowser.MODE_MULTI_CHOOSE)&& browser.chooseAll(choose,debug);
     }
 
-    private boolean isMode(int ...modes){
-        FileBrowser browser=getCurrentModel();
-        return null!=browser&&browser.isMode(modes);
+    public final boolean isMode(int ...models){
+        if (null!=models&&models.length>0){
+            int curr=mCurrentMode.get();
+            for (int mode:models) {
+                if (mode==curr){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    private boolean entryMode(int mode,String debug){
-        FileBrowser browser=getCurrentModel();
-        if (null!=browser&&(browser.isMode(mode)||browser.entryMode(mode,debug))){
+    public final boolean entryMode(int mode,String debug){
+        if (!isMode(mode)){
             mCurrentMode.set(mode);
             return true;
         }
         return false;
     }
-
-//    private boolean upload(Object obj,String debug){
-//        Object processing=mProcessing;
-//        LocalFile localFile=null!=processing&&processing instanceof LocalFile?(LocalFile)processing:null;
-//        String localFilePath=null!=localFile?localFile.getPath():null;
-//        FolderData folderData=mCurrentFolder.get();
-//        String folder=null!=folderData?folderData.getPath():null;
-//        ClientMeta client=getCurrentModelMeta();
-//        if (null!=folder&&null!=localFile&&null!=client){
-//            if (client.isLocalClient()){
-//                return toast(R.string.canNotOperateOnLocalDevice);
-//            }
-//            return TransportService.upload(getContext(),true,localFilePath,client,folder,null, CoverMode.COVER_MODE_NONE,debug);
-//        }
-//        return true;
-//    }
 
     private boolean showClientDetail(View view,ClientMeta meta,String debug){
         ClientDetailBinding binding=null!=view&&null!=meta?inflate(R.layout.client_detail):null;

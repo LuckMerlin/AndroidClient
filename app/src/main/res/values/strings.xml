@@ -129,4 +129,5 @@
     <string name="canNotSwitch">不能切换</string>
     <string name="canNotOperateHere">当前位置不能执行此操作</string>
     <string name="targetFolderInvalid">目标目录不合法</string>
+    <string name="noneDataToOperate">没有可操作的数据</string>
 </resources>

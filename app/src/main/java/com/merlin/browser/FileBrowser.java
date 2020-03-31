@@ -11,14 +11,22 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
+import com.merlin.api.Callback;
 import com.merlin.api.PageData;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
+import com.merlin.server.Retrofit;
+import com.merlin.server.RetrofitCanceler;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
+
+import java.util.concurrent.Executor;
+
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 
 public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
     private final ClientMeta mMeta;
@@ -31,6 +39,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
     private final Context mContext;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
+    private Retrofit mRetrofit;
 
     public FileBrowser(Context context, ClientMeta meta,Callback callback){
         mCallback=callback;
@@ -40,6 +49,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
 
     public interface Callback extends OnTapClick{
         void onFolderPageLoaded(PageData page, String debug);
+        int getMode();
     }
 
     public final ClientMeta getMeta() {
@@ -90,6 +100,23 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
         return false;
     }
 
+    protected final boolean isMode(int ... modes){
+        if (null!=modes&&modes.length>0){
+            int curr=getMode();
+            for (int mode:modes){
+                if (mode==curr){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected final int getMode(){
+        Callback callback= mCallback;
+        return null!=callback?callback.getMode():MODE_NORMAL;
+    }
+
     protected boolean openFile(FileMeta file,String debug){
         //Do nothing
         return false;
@@ -106,7 +133,6 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
         }
         return false;
     }
-
 
     public  final boolean browserParent(String debug){
         PageData current=getLastPage();
@@ -224,6 +250,17 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
                 return true;
             }
             return false;
+    }
+
+    protected final  <T> T prepare(Class<T>  cls, String url, Executor callbackExecutor){
+        Retrofit retrofit=mRetrofit;
+        return (null!=retrofit?retrofit:(mRetrofit=new Retrofit())).prepare(cls,url,callbackExecutor);
+    }
+
+    protected final  <T> RetrofitCanceler call(Observable<T> observable, Scheduler subscribeOn,
+                                               Scheduler observeOn, com.merlin.api.Callback...callbacks){
+        Retrofit retrofit=mRetrofit;
+        return (null!=retrofit?retrofit:(mRetrofit=new Retrofit())).call(observable,subscribeOn,observeOn,callbacks);
     }
 
 }

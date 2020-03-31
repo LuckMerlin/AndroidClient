@@ -17,11 +17,6 @@ import java.util.List;
 public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<String, T> implements OnMoreLoadable{
     private List<T> mMultiChoose;
     private final Thumbs mThumbs=new Thumbs();
-    private int mMode;
-
-    public BrowserAdapter(){
-        mMode= FileBrowser.MODE_NORMAL;
-    }
 
     public final List<T> getMultiChoose() {
         return mMultiChoose;
@@ -69,40 +64,6 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
 
     protected void onBrowserModeChanged(int last,int mode,String debug){
         //Do nothing
-    }
-
-    public final boolean entryMode(int mode,String debug){
-        if (!isMode(mode)){
-            int last=mMode;
-            mMode=mode;
-            onBrowserModeChanged(last,mode,debug);
-            switch (mode){
-                case FileBrowser.MODE_MULTI_CHOOSE:
-//                    return refreshMultiChooseCount();
-//                case FileBrowser.MODE_COPY:
-//                case FileBrowser.MODE_UPLOAD:
-//                    break;
-//                case FileBrowser.MODE_MOVE:
-//                    break;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public final boolean isMode(int ...models){
-        if (null!=models&&models.length>0){
-            for (int model:models) {
-                if (model==mMode){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public final int getMode() {
-        return mMode;
     }
 
     public final boolean multiChoose(FileMeta file,String debug){
