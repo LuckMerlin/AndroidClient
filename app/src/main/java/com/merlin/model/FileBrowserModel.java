@@ -91,7 +91,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
 //        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-        ClientMeta testClient=new ClientMeta("算法",Address.URL,"none","",null,"///");
+//        ClientMeta testClient=new ClientMeta("算法",Address.URL,"none","",null,"///");
+        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
 //        refreshClientMeta("After mode create.");
 //        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {

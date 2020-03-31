@@ -30,7 +30,6 @@ public final class ClientMeta implements Parcelable {
     private String name;
     private String imageUrl;
     private String platform;
-    private String folder;
     private String root;
     private String pathSep;
     private long free;
@@ -40,12 +39,12 @@ public final class ClientMeta implements Parcelable {
     /**
      * @deprecated
      */
-    public ClientMeta(String name,String url,String account,String imageUrl,String folder,String pathSep){
+    public ClientMeta(String name,String root,String url,String account,String imageUrl,String pathSep){
         this.name=name;
         this.url=url;
         this.account=account;
+        this.root=root;
         this.imageUrl=imageUrl;
-        this.folder=folder;
         this.pathSep=pathSep;
     }
 
@@ -118,10 +117,6 @@ public final class ClientMeta implements Parcelable {
         return null!=pathSep&&pathSep.equals("\\")?"\\":pathSep;
     }
 
-    public String getFolder() {
-        return folder;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -142,7 +137,7 @@ public final class ClientMeta implements Parcelable {
             this.platform = in.readString();
             this.free = in.readLong();
             this.total = in.readLong();
-            this.folder=in.readString();
+            this.root=in.readString();
             this.pathSep=in.readString();
         }
     }
@@ -157,7 +152,7 @@ public final class ClientMeta implements Parcelable {
         dest.writeString(platform);
         dest.writeLong(free);
         dest.writeLong(total);
-        dest.writeString(folder);
+        dest.writeString(root);
         dest.writeString(pathSep);
     }
 

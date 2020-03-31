@@ -68,7 +68,7 @@ public final class Upload extends AbsTransport<Canceler> {
             return null;
         }
         final String toFolder=getToFolder();
-        final String folder=null!=toFolder&&toFolder.length()>0?toFolder:client.getFolder();
+        final String folder=null!=toFolder&&toFolder.length()>0?toFolder:client.getRoot();
         if (null==folder||folder.length()<=0){
             Debug.W(getClass(),"Can't add upload file which folder invalid."+folder);
             notifyFinish(false,TRANSPORT_ERROR,"Folder is invalid.",update,null);
