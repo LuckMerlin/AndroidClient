@@ -58,9 +58,12 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
     private final boolean handCommand(Bundle bundle) {
         final Object what = null != bundle ? bundle.get(LABEL_WHAT) : null;
         final Conveyor conveyor=mConveyor;
-        if (null == what) {
+        if (null == what||null==conveyor) {
+            Debug.W(getClass(),"Can't handle convey intent "+what+" "+conveyor);
             return false;
         }
+        Object debugObj = bundle.get(LABEL_HINT);
+        String debug=null!=debugObj&&debugObj instanceof String?(String)debugObj:null;
         if (what.equals(LABEL_UPLOAD)) {
             String folder = bundle.getString(LABEL_FOLDER);
             Object client = bundle.get(LABEL_CLIENT);
@@ -69,8 +72,6 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
                 Debug.D(CoverMode.class,"Can't handle upload intent which client url is NONE.");
                 return false;
             }
-            Object debugObj = bundle.get(LABEL_HINT);
-            String debug=null!=debugObj&&debugObj instanceof String?(String)debugObj:null;
             Serializable filesObject = bundle.getSerializable(LABEL_DATA);
             ArrayList list=null!=filesObject&&filesObject instanceof ArrayList?(ArrayList)filesObject:null;
             if (null!=list){
@@ -85,13 +86,27 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
             }
             return false;
         } else if (what.equals(LABEL_DOWNLOAD)) {
-//            String filePath = bundle.getString(LABEL_FILES);
-//            int coverMode = bundle.getInt(LABEL_COVER_MODE, CoverMode.COVER_MODE_NONE);
-//            Object client = bundle.get(LABEL_CLIENT);
-//            String folder = bundle.getString(LABEL_FOLDER);
-//            String debug = bundle.getString(LABEL_DEBUG, null);
-//            boolean interactive = bundle.getBoolean(LABEL_INTERACTIVE, false);
-//            return download(filePath, folder, interactive, coverMode, null != client && client instanceof ClientMeta ? ((ClientMeta) client) : null, debug);
+            String folder = bundle.getString(LABEL_FOLDER);
+            Object client = bundle.get(LABEL_CLIENT);
+            String url=null!=client&&client instanceof ClientMeta?((ClientMeta)client).getUrl():null;
+            if (null==url||url.length()<=0){
+                Debug.D(CoverMode.class,"Can't handle download intent which client url is NULL.");
+                return false;
+            }else if (null==folder||folder.length()<=0){
+                Debug.D(CoverMode.class,"Can't handle download intent which folder is NULL.");
+                return false;
+            }
+            Serializable filesObject = bundle.getSerializable(LABEL_DATA);
+            ArrayList list=null!=filesObject&&filesObject instanceof ArrayList?(ArrayList)filesObject:null;
+            if (null!=list){
+                File folderFile=new File(folder);
+                for (Object file:list){
+                    if (null!=file&&file instanceof NasFile){
+                        conveyor.add(null, debug,new FileDownloadConvey(mRetrofit,(NasFile)file,url, folderFile));
+                    }
+                }
+                return true;
+            }
         }
         return false;
     }
@@ -107,29 +122,36 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
         return false;
     }
 
-    public static boolean download(Context context, List<NasFile> files, ClientMeta meta, String folder, Integer mode, String debug) {
-
-        return false;
+    public static boolean download(Context context, ArrayList<NasFile> files, ClientMeta meta, String folder,CoverMode coverMode, String debug) {
+        return conveyFiles(context,Label.LABEL_DOWNLOAD,files,meta,folder,coverMode,debug);
     }
 
     public static boolean upload(Context context, ArrayList<LocalFile> files, ClientMeta meta, String folder, CoverMode coverMode, String debug){
+        return conveyFiles(context,Label.LABEL_UPLOAD,files,meta,folder,coverMode,debug);
+    }
+
+    private static boolean conveyFiles(Context context, String what,  ArrayList files, ClientMeta meta, String folder, CoverMode coverMode, String debug){
         if (null!=files&&files.size()>0&&null!=context){
-            final String url=null!=meta?meta.getUrl():null;
-            if (null==url||url.length()<=0){
-                Debug.W(ConveyorService.class,"Can't upload file with invalid server "+(null!=debug?debug:".")+" url="+url);
+            if (null==what||what.length()<=0){
+                Debug.W(ConveyorService.class,"Can't convey files with invalid what "+(null!=debug?debug:".")+" what="+what);
                 return false;
             }
-            Debug.D(ConveyorService.class,"Post upload to service "+url+" "+coverMode+" "+" "+folder+" "+(null!=debug?debug:"."));
+            final String url=null!=meta?meta.getUrl():null;
+            if (null==url||url.length()<=0){
+                Debug.W(ConveyorService.class,"Can't convey files with invalid server "+(null!=debug?debug:".")+" url="+url);
+                return false;
+            }
+            Debug.D(ConveyorService.class,"Post convey files to service "+url+" "+coverMode+" "+" "+folder+" "+(null!=debug?debug:"."));
             Intent intent=new Intent(context,ConveyorService.class);
             intent.putExtra(LABEL_DATA,files);
             intent.putExtra(LABEL_CLIENT,meta);
             intent.putExtra(LABEL_MODE,coverMode);
             intent.putExtra(LABEL_HINT,null!=debug?debug:"");
-            intent.putExtra(LABEL_WHAT,LABEL_UPLOAD);
+            intent.putExtra(LABEL_WHAT,what);
             intent.putExtra(LABEL_FOLDER,folder);
             return null!=context.startService(intent);
         }
-        Debug.W(ConveyorService.class,"Can't upload file with EMPTY list "+(null!=debug?debug:"."));
+        Debug.W(ConveyorService.class,"Can't convey files with EMPTY list "+(null!=debug?debug:"."));
         return false;
     }
 

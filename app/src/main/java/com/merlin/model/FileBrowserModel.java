@@ -227,7 +227,12 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
             return false;
         }
-        return ConveyorService.download(getViewContext(),files,meta,folderPath,null,debug);
+        if (ConveyorService.download(getViewContext(),files,meta,folderPath,coverMode,debug)){
+            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
+            launchTransportList("");
+            return toast(R.string.succeed)||true;
+        }
+        return toast(R.string.fail);
     }
 
     private boolean prepareConveyFile(int mode,Object obj,String debug){

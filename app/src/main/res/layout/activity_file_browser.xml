@@ -146,7 +146,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <HorizontalScrollView
-                android:visibility="@{vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_UPLOAD?View.VISIBLE:View.GONE}"
+                android:visibility="@{vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_DOWNLOAD?View.VISIBLE:View.GONE}"
                 android:id="@+id/activityFileBrowser_bottomHSV"
                 android:layout_alignParentBottom="true"
                 android:orientation="horizontal"
@@ -160,6 +160,9 @@
                     <include layout="@layout/item_browser_bottom_menu"
                         android:visibility="@{vm.mode==Model.MODE_UPLOAD?View.VISIBLE:View.GONE}"
                         binding:menu="@{ContextMenu.create(R.string.upload)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{vm.mode==Model.MODE_DOWNLOAD?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.download)}"/>
                 </LinearLayout>
             </HorizontalScrollView>
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
