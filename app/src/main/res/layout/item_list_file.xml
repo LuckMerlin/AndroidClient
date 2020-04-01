@@ -54,20 +54,30 @@
                 android:text="@{meta.getName(true)}"
                 android:textColor="@color/textTitle"
                 android:layout_height="wrap_content"/>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <TextView
-                    style="@style/titleSmallTextView"
-                    android:text="@{meta.directory?`(`+(meta.childCount)+`)`:(meta.extension??``)}"/>
-                <TextView
-                style="@style/titleSmallTextView"
-                android:text="@{Time.formatTime((long)meta.modifyTime)}"/>
-                <TextView
-                    style="@style/titleSmallTextView"
-                    android:text="@{``+meta.permission()}"/>
-            </LinearLayout>
+           <LinearLayout
+               android:orientation="vertical"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
+               <LinearLayout
+                   android:orientation="horizontal"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content">
+                   <TextView
+                       style="@style/titleSmallTextView"
+                       android:text="@{meta.directory?`(`+(meta.childCount)+`)`:(meta.extension??``)}"/>
+                   <TextView
+                       style="@style/titleSmallTextView"
+                       android:text="@{Time.formatTime((long)meta.modifyTime)}"/>
+                   <TextView
+                       style="@style/titleSmallTextView"
+                       android:text="@{``+meta.permission()}"/>
+               </LinearLayout>
+               <View
+                   android:background="#0f0"
+                   android:alpha="0.7"
+                   android:layout_width="match_parent"
+                   android:layout_height="1dp"/>
+           </LinearLayout>
         </LinearLayout>
         <CheckBox
             android:id="@+id/itemListFile_selectCB"
