@@ -1,6 +1,5 @@
 package com.merlin.model;
 
-import android.content.Context;
 import android.view.View;
 
 import androidx.annotation.NonNull;

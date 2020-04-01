@@ -10,17 +10,28 @@
             type="int" />
     </data>
     <LinearLayout
-        android:orientation="horizontal"
         android:padding="5dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="@{Integer.toString(position)+`.`}"
+            android:text="@{Integer.toString(position)+`. `}"
             android:singleLine="true"
             style="@style/titleNormalTextView"/>
-        <TextView
-            android:text="@{convey.name}"
-            android:singleLine="true"
-            style="@style/titleNormalTextView"/>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{convey.name}"
+                android:singleLine="true"
+                style="@style/titleNormalTextView"/>
+
+            <TextView
+                android:text="@{convey.reply.note}"
+                android:singleLine="true"
+                style="@style/titleNormalTextView"/>
+        </LinearLayout>
     </LinearLayout>
 </layout>

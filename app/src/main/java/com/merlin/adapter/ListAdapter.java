@@ -269,8 +269,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
        return index>=0&&replace(index,data,debug);
    }
 
-  public final boolean replace(int index,T data,String debug)
-  {
+  public final boolean replace(int index,T data,String debug) {
         if (null!=data&&index>=0){
             ArrayList<T> list= new ArrayList<>(1);
             list.add(data);

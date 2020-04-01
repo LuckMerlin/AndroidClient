@@ -83,8 +83,8 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
                 }
                 itb.setData(data);
                 if (data instanceof ConveyGroup){
-                    title=""+data.getName()+"("+((ConveyGroup) data).index(((ConveyGroup) data)
-                            .getConveying())+"/"+((ConveyGroup) data).getChildCount()+")";
+                    title=""+data.getName()+"("+(((ConveyGroup) data).getRepliedChildrenSize())+"/"
+                            +((ConveyGroup) data).getChildCount()+")";
                     conveying=((ConveyGroup)data).getConveying();
                 }else{
                     conveying=data;

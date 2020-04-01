@@ -1,6 +1,7 @@
 package com.merlin.conveyor;
 
 import android.app.IntentService;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -16,26 +17,22 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
-import com.merlin.global.Service;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
 
 import java.io.File;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConveyorService extends IntentService implements Label, OnConveyStatusChange {
+public class ConveyorService extends Service implements Label, OnConveyStatusChange {
     private final Conveyor mConveyor=new Conveyor(Looper.getMainLooper());
     private final Retrofit mRetrofit=new Retrofit();
     private final Binder mBinder=new Binder();
 
-    public ConveyorService(){
-        super("Conveyor service.");
-    }
+//    public ConveyorService(){
+//        super("Conveyor service.");
+//    }
 
     @Override
     public void onCreate() {
@@ -53,8 +50,9 @@ public class ConveyorService extends IntentService implements Label, OnConveySta
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        handCommand(null!=intent?intent.getExtras():null);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        handCommand(null != intent ? intent.getExtras() : null);
+        return super.onStartCommand(intent, flags, startId);
     }
 
     private final boolean handCommand(Bundle bundle) {
@@ -79,7 +77,7 @@ public class ConveyorService extends IntentService implements Label, OnConveySta
                 for (Object file:list){
                     String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath():null;
                     File child=null!=path&&path.length()>0?new File(path):null;
-                    if (null!=child){
+                    if (null!=child&&child.exists()){
                         conveyor.add(null, debug,new FileUploadConvey(mRetrofit,child,url,folder));
                     }
                 }

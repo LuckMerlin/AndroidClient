@@ -85,7 +85,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         final Finisher innerFinish= new Finisher() {
             @Override
             public void onFinish(Reply innerReply) {
-                Debug.D(getClass(),"Child 结束 "+innerReply);
+                Debug.D(getClass(),"A Child 结束 "+innerReply+" "+convey.getName());
                 Convey currentConveying=mConveying;
                 if (null!=currentConveying&&convey==currentConveying){
                     mConveying=null;
@@ -93,9 +93,9 @@ public class ConveyGroup<T extends Convey> extends Convey {
                 if (isCancel()){
                     Debug.D(getClass(),"Canceled convey "+ConveyGroup.this);
                 }else if(null==innerReply||innerReply.getWhat()!=WHAT_NONE_NETWORK){//
-                    T next= indexNext(convey,debug);
+                    T next= getFirstUnReplyChild();
                     if (null!=next) {
-                        startChild(this,next, "After one child finish." + convey);
+                        startChild(finisher,next, "After one child finish." + convey);
                     }else if (null!=finisher){
                         finisher.onFinish(new Reply(true,WHAT_SUCCEED,"Group finish.",null));
                     }
@@ -158,13 +158,47 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return false;
     }
 
+    public final int getRepliedChildrenSize(){
+        List<T> list=getRepliedChildren();
+        return null!=list?list.size():0;
+    }
+
+    public final List<T> getRepliedChildren(){
+        List<T> children=mChildren;
+        List<T> list=null;
+        if (null!=children){
+            list=new ArrayList<>();
+            synchronized (children){
+                for (T child:children) {
+                    if (null!=child&&null!=child.getReply()){
+                        list.add(child);
+                    }
+                }
+            }
+        }
+        return null!=list&&list.size()>0?list:null;
+    }
+
+    public final T getFirstUnReplyChild(){
+        List<T> children=mChildren;
+        if (null!=children){
+            synchronized (children){
+                for (T child:children) {
+                    if (null!=child&&null==child.getReply()){
+                        return child;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public final T getFirstUnSucceedChild(){
         List<T> children=mChildren;
         if (null!=children){
             synchronized (children){
                 for (T child:children) {
-                    if (null!=child&&(!child.isStatus(Status.FINISHED)||!child.isReply(true,
-                            What.WHAT_SUCCEED))){
+                    if (null!=child&&(!child.isReply(true,What.WHAT_SUCCEED))){
                         return child;
                     }
                 }

@@ -160,7 +160,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.drawable.selector_back:
                         return onBackIconPressed(view,"After back pressed.");
                     case R.drawable.cancel_selector:
-                        return !isMode(FileBrowser.MODE_NORMAL)&&entryMode(FileBrowser.MODE_NORMAL,
+                        return !isMode(FileBrowser.MODE_NORMAL)&&entryMode(FileBrowser.MODE_NORMAL,null,
                                 "After cancel tap click.");
                     case R.drawable.choose_all_selector:
                         return chooseAll(true,"After tap click.");
@@ -208,7 +208,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             return false;
         }
         if (ConveyorService.upload(getViewContext(),files,meta,folderPath,coverMode,debug)){
-            entryMode(FileBrowser.MODE_NORMAL,"After upload start succeed.");
+            entryMode(FileBrowser.MODE_NORMAL,null,"After upload start succeed.");
+            launchTransportList("");
             return toast(R.string.succeed)||true;
         }
         return toast(R.string.fail);
@@ -235,15 +236,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         switch (mode){
             case FileBrowser.MODE_UPLOAD:
                 succeed=(null!=obj&& obj instanceof LocalFile&&(null!=collector&&collector instanceof
-                        LocalFileCollector?collector: (mProcessing=new LocalFileCollector(null))).add((LocalFile)obj));
+                        LocalFileCollector?collector: (collector=new LocalFileCollector(null))).add((LocalFile)obj));
                 break;
             case FileBrowser.MODE_DOWNLOAD:
                 succeed=(null!=obj&& obj instanceof NasFile&&(null!=collector&&collector instanceof
-                        NasFileCollector?collector: (mProcessing=new NasFileCollector(null)))
-                        .add((NasFile)obj));
+                        NasFileCollector?collector: (collector=new NasFileCollector(null))).add((NasFile)obj));
                 break;
         }
-        return succeed&&(isMode(mode)||entryMode(mode,debug));
+        return succeed&&(isMode(mode)||entryMode(mode,collector,debug));
     }
 
     private boolean chooseAll(boolean choose,String debug){
@@ -263,7 +263,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return false;
     }
 
-    public final boolean entryMode(int mode,String debug){
+    public final boolean entryMode(int mode,Collector collector,String debug){
+        mProcessing=collector;//Clean processing while each mode change
         if (!isMode(mode)){
             mCurrentMode.set(mode);
             return true;
@@ -343,7 +344,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     @Override
     public boolean onActivityBackPressed(Activity activity) {
         return !isMode(FileBrowser.MODE_NORMAL,FileBrowser.MODE_UPLOAD,FileBrowser.MODE_DOWNLOAD)?
-                entryMode(FileBrowser.MODE_NORMAL,"After activity  back press."):
+                entryMode(FileBrowser.MODE_NORMAL,null,"After activity  back press."):
                 browserParent("After back pressed called.");
     }
 

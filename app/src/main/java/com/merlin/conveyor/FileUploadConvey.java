@@ -3,10 +3,12 @@ package com.merlin.conveyor;
 import androidx.annotation.Nullable;
 
 import com.merlin.api.Address;
+import com.merlin.api.ApiList;
 import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileSaveBuilder;
 import com.merlin.browser.FileUploadBody;
@@ -103,7 +105,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         private final File mFile;
         private final String mFolder;
         private final Retrofit mRetrofit;
-        private Call<Reply> mUploadingCall;
+        private Call<Reply<ApiList<Reply<NasFile>>>> mUploadingCall;
 
         private FileConvey(Retrofit retrofit,File file,String folder){
             super(null!=file?file.getName():null);
@@ -163,8 +165,8 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             MultipartBody.Part part=builder.createFilePart(builder.createFileHeadersBuilder(file.getName()
                     ,mFolder,file.isDirectory()),requestBody);
             Debug.D(getClass(),"Upload file "+file.getName()+" to "+mFolder+" "+(null!=debug?debug:"."));
-            Reply responseReply=null;
-            Call<Reply> call=null;
+            Reply<ApiList<Reply<NasFile>>> responseReply=null;
+            Call<Reply<ApiList<Reply<NasFile>>>> call=null;
             try {
                 if (null==part){
                     Debug.W(getClass(),"Can't upload file which part is NULL."+(null!=debug?debug:"."));
@@ -175,7 +177,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     Debug.W(getClass(),"Can't upload file which upload call is NULL."+(null!=debug?debug:"."));
                     return new Reply(false,WHAT_ERROR_UNKNOWN,"Error on NULL file upload call.",null);
                 }
-                Response<Reply> response=call.execute();
+                Response<Reply<ApiList<Reply<NasFile>>>> response=call.execute();
                 responseReply=null!=response?response.body():null;
             } catch (IOException e) {
                 if (e instanceof SocketTimeoutException){
@@ -193,14 +195,15 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                     responseReply=new Reply(false,WHAT_EXCEPTION,"Exception call file upload api."+e,e);
                 }
                 Debug.E(getClass(),"Exception call file upload api."+e,e);
-                e.printStackTrace();
             }
-            Call<Reply> curr=mUploadingCall;
+            Call<Reply<ApiList<Reply<NasFile>>>> curr=mUploadingCall;
             if (null!=curr&&null!=call&&curr==call){
                 mUploadingCall=null;
             }
             if (null!=finish){
-                finish.onFinish(responseReply);
+                ApiList<Reply<NasFile>> list=responseReply.getData();
+                finish.onFinish(null!=list&&list.size()==1?list.get(0):new Reply<>(true,
+                        What.WHAT_ERROR_UNKNOWN,"Unknown reply error.",null));
             }
             return null;
         }
@@ -208,7 +211,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         @Override
         protected Boolean onCancel(boolean cancel, String debug) {
             final Retrofit retrofit=mRetrofit;
-            Call<Reply> curr=mUploadingCall;
+            Call<Reply<ApiList<Reply<NasFile>>>> curr=mUploadingCall;
             if (null!=retrofit&&null!=curr){
                 if (cancel&&!curr.isCanceled()){
                     Debug.D(getClass(),"Canceling file upload "+mFile+" "+(null!=debug?debug:"."));

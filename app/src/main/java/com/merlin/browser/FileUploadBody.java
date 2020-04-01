@@ -57,8 +57,8 @@ public class FileUploadBody extends RequestBody {
                                 Debug.D(getClass(),"Cancel file upload convey.");
                                 throw new IOException(Integer.toString(What.WHAT_CANCEL));
                             }
-                            uploaded += read;
                             sink.write(buffer, 0, read);
+                            uploaded += read;
                             onTransportProgress(uploaded, fileLength, -1);
                         }
                     }

@@ -15,7 +15,7 @@ import retrofit2.http.Part;
 public interface ApiSaveFile {
     @POST(Address.PREFIX_FILE + "/save")
     @Multipart
-    Call<Reply> save(@Part MultipartBody.Part file);
+    Call<Reply<ApiList<Reply<NasFile>>>> save(@Part MultipartBody.Part file);
 
     @POST(Address.PREFIX_FILE + "/save")
     @Multipart

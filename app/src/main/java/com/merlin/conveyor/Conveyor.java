@@ -117,8 +117,7 @@ public final class Conveyor {
         synchronized (conveyingMap){
             conveying= conveyingMap.get(convey);
            if (null==conveying){
-               conveying=new Conveying(callback);
-               conveyingMap.put(convey,conveying);
+               conveyingMap.put(convey,conveying=new Conveying(callback));
                notifyStatus(ConveyStatus.ADD,"While convey start.",convey,null,mListeners,callback);
            }
            int status=conveying.getStatus();
