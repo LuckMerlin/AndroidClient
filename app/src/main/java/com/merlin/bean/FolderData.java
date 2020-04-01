@@ -5,15 +5,12 @@ import com.merlin.api.PageData;
 import java.io.File;
 
 public class FolderData<T extends FileMeta> extends PageData<T> {
-    private String path;
+    private String name;
     private String parent;
+    private String pathSep;
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getParent() {
@@ -24,4 +21,22 @@ public class FolderData<T extends FileMeta> extends PageData<T> {
         this.parent = parent;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getPath(){
+         String name=this.name;
+         String parent=this.parent;
+         String sep=this.pathSep;
+         return null!=sep&&null!=parent&&null!=name?parent+(parent.endsWith(sep)?"":sep)+name:null;
+    }
+
+    public String getPathSep() {
+        return pathSep;
+    }
+
+    public void setPathSep(String pathSep) {
+        this.pathSep = pathSep;
+    }
 }

@@ -3,7 +3,6 @@ package com.merlin.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.DatabaseErrorHandler;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -14,11 +13,11 @@ import androidx.databinding.ObservableField;
 import com.merlin.activity.ConveyorActivity;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
@@ -41,7 +40,6 @@ import com.merlin.view.OnTapClick;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,9 +88,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-//        ClientMeta testClient=new ClientMeta("算法",Address.URL,"none","",null,"///");
-        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
+        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+        ClientMeta testClient=new ClientMeta("算法","./",Address.URL,"",null,"///");
+//        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
 //        refreshClientMeta("After mode create.");
 //        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
@@ -155,16 +153,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.id.fileBrowser_deviceNameTV:
                         return (null!=view&&view instanceof TextView&&showClientMenu((TextView)view,
                                 "After tap click."))||true;
-                    case R.string.upload:
-                        Collector collector=mProcessing;
-                        return (isMode(FileBrowser.MODE_UPLOAD)?upload(null!=collector&&collector instanceof LocalFileCollector?
-                                        ((LocalFileCollector)collector).getFiles():null,"After tap click.")
-                        :prepareConveyFile(FileBrowser.MODE_UPLOAD,data,"After tap click."));
-                    case R.string.download:
-                        collector=mProcessing;
-                        return (isMode(FileBrowser.MODE_DOWNLOAD)?download(null!=collector&&collector instanceof NasFileCollector?
-                                ((NasFileCollector)collector).getFiles():null,"After tap click.")
-                                :prepareConveyFile(FileBrowser.MODE_DOWNLOAD,data,"After tap click."));
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
                     case R.drawable.selector_menu:
@@ -183,17 +171,31 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                 }
                 break;
             case 2:
-                switch (resId){
-                    case R.id.fileBrowser_deviceNameTV:
-                        return (null!=view&&null!=data&&data instanceof ClientMeta&&showClientDetail
-                                (view,(ClientMeta)data,"After tap click."))||true;
-                }
+                 switch (resId){
+                     case R.id.fileBrowser_deviceNameTV:
+                         return (null != view && null != data && data instanceof ClientMeta &&
+                                 showClientDetail(view, (ClientMeta) data, "After tap click.")) || true;
+                 }
+        }
+        switch (resId){
+            case R.string.upload:
+                Collector collector = mProcessing;
+                return (isMode(FileBrowser.MODE_UPLOAD) ? upload(null != collector && collector
+                        instanceof LocalFileCollector ? ((LocalFileCollector) collector).getFiles()
+                        : null,CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                        : prepareConveyFile(FileBrowser.MODE_UPLOAD, data, "After tap click."));
+            case R.string.download:
+                collector = mProcessing;
+                return (isMode(FileBrowser.MODE_DOWNLOAD) ? download(null != collector && collector
+                        instanceof NasFileCollector ? ((NasFileCollector) collector).getFiles()
+                        : null,CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                        : prepareConveyFile(FileBrowser.MODE_DOWNLOAD, data, "After tap click."));
         }
         FileBrowser model=getCurrentModel();
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
     }
 
-    private boolean upload(ArrayList<LocalFile> files,String debug){
+    private boolean upload(ArrayList<LocalFile> files,CoverMode coverMode,String debug){
         if (null==files||files.size()<=0){
             toast(R.string.noneDataToOperate);
             return false;
@@ -205,10 +207,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
             return false;
         }
-        return ConveyorService.upload(getViewContext(),files,meta,folderPath,null,debug);
+        if (ConveyorService.upload(getViewContext(),files,meta,folderPath,coverMode,debug)){
+            entryMode(FileBrowser.MODE_NORMAL,"After upload start succeed.");
+            return toast(R.string.succeed)||true;
+        }
+        return toast(R.string.fail);
     }
 
-    private boolean download(ArrayList<NasFile> files,String debug){
+    private boolean download(ArrayList<NasFile> files,CoverMode coverMode,String debug){
         if (null==files||files.size()<=0){
             toast(R.string.noneDataToOperate);
             return false;
@@ -336,7 +342,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     @Override
     public boolean onActivityBackPressed(Activity activity) {
-        return !isMode(FileBrowser.MODE_NORMAL)? entryMode(FileBrowser.MODE_NORMAL,"After activity  back press."):
+        return !isMode(FileBrowser.MODE_NORMAL,FileBrowser.MODE_UPLOAD,FileBrowser.MODE_DOWNLOAD)?
+                entryMode(FileBrowser.MODE_NORMAL,"After activity  back press."):
                 browserParent("After back pressed called.");
     }
 

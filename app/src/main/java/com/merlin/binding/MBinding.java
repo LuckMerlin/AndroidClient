@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
@@ -199,52 +200,55 @@ public class MBinding {
     public static void setSrc(ImageView view, Object img) {
         if (null!=view) {
             if (null != img) {
-                if (img instanceof Integer) {
+                if (img instanceof Integer){
                     if (!img.equals(Resources.ID_NULL)) {
                         view.setImageResource((Integer) img);
                         Clicker.putRes(view, new Res((Integer) img, null));
+                        return;
                     }
-                } else if (img instanceof String&&((String)img).length()>0) {
-                    String path = (String) img;
-                    RoundedCorners roundedCorners = new RoundedCorners(10);
-                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-                    RequestBuilder<Drawable> builder=null;
-                    if (!path.startsWith("http")) {
-                        if (path.startsWith(Address.LABEL_CLOUD_URL_PREFIX)){
-                            path=path.replaceFirst(Address.LABEL_CLOUD_URL_PREFIX,
-                                    Address.PREFIX_THUMB+"?"+Label.LABEL_PATH+"=");
-                        }
-                        if (path.startsWith(Address.PREFIX_THUMB)){
+                }else if (img instanceof String){
+                    String value=(String)img;
+                    if (null!=value&&value.length()>0){
+                            RoundedCorners roundedCorners = new RoundedCorners(10);
+                            RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+                            RequestBuilder<Drawable> builder=null;
+                            if (!value.startsWith("http")) {
+                                if (value.startsWith(Address.LABEL_CLOUD_URL_PREFIX)){
+                                    value=value.replaceFirst(Address.LABEL_CLOUD_URL_PREFIX,
+                                            Address.PREFIX_THUMB+"?"+Label.LABEL_PATH+"=");
+                                }
+                                if (value.startsWith(Address.PREFIX_THUMB)){
 //                            Glide.get(view.getContext()).getRegistry().append();
 //                            Glide.with(view.getContext()).as();
-                            builder= Glide.with(view.getContext()).load(Address.URL +path);
-                        }else{
-                            builder=Glide.with(view.getContext()).load(new File(path));
-                        }
-                    }else {
-                        builder=Glide.with(view.getContext()).load((String)img);
-                    }
-                    if (null!=builder) {
+                                    builder= Glide.with(view.getContext()).load(Address.URL +value);
+                                }else{
+                                    builder=Glide.with(view.getContext()).load(new File(value));
+                                }
+                            }else {
+                                builder=Glide.with(view.getContext()).load((String)img);
+                            }
+                            if (null!=builder) {
 //                        DrawableRequestBuilder<String> thumbnailRequest = Glide
 //                                .with(context)
 //                                .load(picture.getSmall())
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
 //                                        new TopCropTransformation(context));
-                        builder.centerCrop()
-                                .apply(options)
-                                .thumbnail(1f)
+                                builder.centerCrop()
+                                        .apply(options)
+                                        .thumbnail(1f)
 //                                .transform(new BlurMaskFilter)
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
 //                                new TopCropTransformation(context))
-                                .placeholder(R.drawable.ic_picture_default)
-                                .error(R.drawable.ic_picture_default)
-                                .into(view);
-                    }
+                                        .placeholder(R.drawable.ic_picture_default)
+                                        .error(R.drawable.ic_picture_default)
+                                        .into(view);
+                                return;
+                            }
+                        }
                 }
-            }else{
-                view.setImageDrawable(null);//Clean
-                Clicker.putRes(view,new Res(null,null));
             }
+            view.setImageDrawable(null);//Clean
+            Clicker.putRes(view,new Res(null,null));
         }
     }
 

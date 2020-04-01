@@ -87,7 +87,8 @@ public class LocalFileBrowser extends FileBrowser{
 //            }
             FolderData<LocalFile> folderData=new FolderData<>();
             folderData.setParent(folder.getParent());
-            folderData.setPath(folder.getAbsolutePath());
+            folderData.setPathSep(File.separator);
+            folderData.setName(folder.getName());
             if (from>=length){
                 what=What.WHAT_OUT_OF_BOUNDS;
                 note=getText(R.string.outOfBounds);

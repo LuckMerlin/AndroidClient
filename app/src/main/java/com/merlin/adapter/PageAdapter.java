@@ -88,10 +88,10 @@ public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMore
     @Override
     public final boolean onLoadMore(RecyclerView rv, int state, String debug) {
         if (isAllLoaded()){
-            Context context=null!=rv?rv.getContext():null;
-            if (null!=context){
-                Toast.makeText(context, R.string.noMoreData,Toast.LENGTH_SHORT).show();
-            }
+//            Context context=null!=rv?rv.getContext():null;
+//            if (null!=context){
+//                Toast.makeText(context, R.string.noMoreData,Toast.LENGTH_SHORT).show();
+//            }
             return false;
         }
         if (state==LoadMoreInterceptor.TAIL){

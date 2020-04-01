@@ -34,5 +34,6 @@ public interface What {
     int WHAT_EMPTY = - 1029;
     int WHAT_EXCEPTION = - 1030;
     int WHAT_ALREADY_DOING = - 1031;
+    int WHAT_KEEP = - 1032;
 }
 

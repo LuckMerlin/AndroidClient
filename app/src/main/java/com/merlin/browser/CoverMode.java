@@ -1,5 +1,8 @@
 package com.merlin.browser;
 
+/**
+ * @deprecated
+ */
 public interface CoverMode {
     int COVER_MODE_NONE=0;
     int COVER_MODE_REPLACE=1;

@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RestrictTo;
 
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
@@ -15,7 +14,7 @@ public final class LocalFile implements Parcelable,FileMeta {
     private String name;
     private String title;
     private String extension;
-    private Object imageUrl;
+    private String imageUrl;
     private long size;
     private int childCount;
     private double modifyTime;
@@ -23,7 +22,8 @@ public final class LocalFile implements Parcelable,FileMeta {
     private boolean accessible;
 
     public LocalFile(String parent,String title,String name,String extension,
-                     String imageUrl,int childCount,long size,long modifyTime, boolean directory, boolean accessible){
+                     String imageUrl,int childCount,long size,long modifyTime, boolean directory,
+                     boolean accessible){
         this.parent=parent;
         this.title=title;
         this.name=name;
@@ -76,6 +76,9 @@ public final class LocalFile implements Parcelable,FileMeta {
         return result;
     }
 
+    /**
+     * @deprecated
+     */
     public boolean applyModify(FModify modify) {
         if (null!=modify){
             String name=modify.getName();
@@ -91,7 +94,7 @@ public final class LocalFile implements Parcelable,FileMeta {
         return false;
     }
 
-    public Object getImageUrl() {
+    public String getImageUrl() {
         return imageUrl;
     }
 
@@ -172,27 +175,29 @@ public final class LocalFile implements Parcelable,FileMeta {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        parent=dest.readString();
-//        name=dest.readString();
-//        title=dest.readString();
-//        extension=dest.readString();
-//        imageUrl=dest.readString();
-//        size=dest.readLong();
-//        modifyTime=dest.readDouble();
-//        directory=dest.readInt()==1;
-//        accessible=dest.readInt()==1;
+        dest.writeString(parent);
+        dest.writeString(name);
+        dest.writeString(title);
+        dest.writeString(extension);
+        dest.writeString(imageUrl);
+        dest.writeLong(size);
+        dest.writeInt(childCount);
+        dest.writeDouble(modifyTime);
+        dest.writeBoolean(directory);
+        dest.writeBoolean(accessible);
     }
 
     private LocalFile(Parcel in){
-        in.writeString(parent);
-//        in.writeString(name);
-//        in.writeString(title);
-//        in.writeString(extension);
-//        in.writeString(null!=imageUrl&&imageUrl instanceof String?(String)imageUrl:"");
-//        in.writeLong(size);
-//        in.writeDouble(modifyTime);
-//        in.writeInt(directory?1:0);
-//        in.writeInt(accessible?1:0);
+        parent=in.readString();
+        name=in.readString();
+        title=in.readString();
+        extension=in.readString();
+        imageUrl=in.readString();
+        size=in.readLong();
+        childCount=in.readInt();
+        modifyTime=in.readDouble();
+        directory=in.readBoolean();
+        accessible=in.readBoolean();
     }
 
     public static final Creator<LocalFile> CREATOR = new Creator<LocalFile>() {
@@ -205,6 +210,5 @@ public final class LocalFile implements Parcelable,FileMeta {
             return new LocalFile[size];
         }
     };
-
 
 }
