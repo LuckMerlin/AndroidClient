@@ -74,7 +74,7 @@
                </LinearLayout>
                <View
                    android:background="#0f0"
-                   android:alpha="0.7"
+                   android:alpha="0.4"
                    android:layout_width="match_parent"
                    android:layout_height="1dp"/>
            </LinearLayout>
