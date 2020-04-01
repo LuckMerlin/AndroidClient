@@ -95,7 +95,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
                 }else if(null==innerReply||innerReply.getWhat()!=WHAT_NONE_NETWORK){//
                     T next= getFirstUnReplyChild();
                     if (null!=next) {
-                        startChild(finisher,next, "After one child finish." + convey);
+                        startChild(finisher,next, "After one child finish." + convey.getName());
                     }else if (null!=finisher){
                         finisher.onFinish(new Reply(true,WHAT_SUCCEED,"Group finish.",null));
                     }

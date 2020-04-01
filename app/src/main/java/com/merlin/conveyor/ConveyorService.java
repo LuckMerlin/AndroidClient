@@ -1,16 +1,11 @@
 package com.merlin.conveyor;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-
-import androidx.annotation.Nullable;
-
 import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
 import com.merlin.bean.ClientMeta;
@@ -29,10 +24,6 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
     private final Conveyor mConveyor=new Conveyor(Looper.getMainLooper());
     private final Retrofit mRetrofit=new Retrofit();
     private final Binder mBinder=new Binder();
-
-//    public ConveyorService(){
-//        super("Conveyor service.");
-//    }
 
     @Override
     public void onCreate() {

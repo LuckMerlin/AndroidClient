@@ -13,7 +13,7 @@ import okhttp3.RequestBody;
 import okio.BufferedSink;
 
 public class FileUploadBody extends RequestBody {
-    private final File mFile;
+    private final String mFilePath;
 
     protected void onTransportProgress(long uploaded,long total,float speed){
         //Do nothing
@@ -23,13 +23,14 @@ public class FileUploadBody extends RequestBody {
         return false;
     }
 
-    public FileUploadBody(File file){
-        mFile=file;
+    public FileUploadBody(String filePath){
+        mFilePath=filePath;
     }
 
     @Override
     public final long contentLength() {
-        File file = mFile;
+        String filePath=mFilePath;
+        File file = null!=filePath&&filePath.length()>0?new File(filePath):null;
         return null != file && file.exists() && file.isFile() ? file.length() : 0;
     }
 
@@ -40,7 +41,8 @@ public class FileUploadBody extends RequestBody {
 
     @Override
     public final void writeTo(BufferedSink sink) {
-        final File file = mFile;
+        String filePath=mFilePath;
+        final File file = null!=filePath&&filePath.length()>0?new File(filePath):null;
         if (null != file && file.exists()) {
             if (file.isFile()) {
                 FileInputStream in = null;

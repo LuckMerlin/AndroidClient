@@ -15,7 +15,7 @@ public class FileSaveBuilder implements Label {
     public MultipartBody.Part createFilePart(File file,String name,String toFolder){
         if (null!=file){
             name=null!=name&&name.length()>0?name:file.getName();
-            RequestBody body=null!=file?new FileUploadBody(file):null;
+            RequestBody body=null!=file?new FileUploadBody(file.getAbsolutePath()):null;
             Headers.Builder builder=null!=body?createFileHeadersBuilder(name,toFolder,file.isDirectory()):null;
             return createFilePart(builder,body);
         }

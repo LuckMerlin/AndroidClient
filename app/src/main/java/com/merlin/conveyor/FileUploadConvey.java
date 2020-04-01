@@ -102,7 +102,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
     }
 
     protected final static class FileConvey extends Convey {
-        private final File mFile;
+        private final String mFilePath;
         private final String mFolder;
         private final Retrofit mRetrofit;
         private Call<Reply<ApiList<Reply<NasFile>>>> mUploadingCall;
@@ -110,7 +110,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         private FileConvey(Retrofit retrofit,File file,String folder){
             super(null!=file?file.getName():null);
             mRetrofit=retrofit;
-            mFile=file;
+            mFilePath= null!=file?file.getAbsolutePath():null;
             mFolder=folder;
         }
 
@@ -120,7 +120,8 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             if (null==retrofit){
                 return new Reply(false,WHAT_ARGS_INVALID,"None retrofit.",null);
             }
-            final File file=mFile;
+            String filePath=mFilePath;
+            final File file=null!=filePath&&filePath.length()>0?new File(filePath):null;
             if (null==file||!file.exists()){
                 return new Reply(false,WHAT_FILE_EXIST,"File not exist.",null);
             }else if (!file.canRead()){
@@ -136,7 +137,8 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 Debug.W(getClass(),"Can't upload file with NULL retrofit."+(null!=debug?debug:"."));
                 return new Reply(false,WHAT_ARGS_INVALID,"None retrofit.",null);
             }
-            final File file=mFile;
+            String filePath=mFilePath;
+            final File file=null!=filePath&&filePath.length()>0?new File(filePath):null;
             if (null==file||!file.exists()){
                 Debug.W(getClass(),"Can't upload file which not exist."+(null!=debug?debug:"."));
                 return new Reply(false,WHAT_FILE_EXIST,"File not exist.",null);
@@ -148,7 +150,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 return new Reply(false,WHAT_ALREADY_DOING,"File already uploading.",null);
             }
 
-            final FileUploadBody requestBody = new FileUploadBody(file){
+            final FileUploadBody requestBody = new FileUploadBody(file.getAbsolutePath()){
                 @Override
                 protected void onTransportProgress(long uploaded, long total, float speed) {
                     if (null!=finish){
@@ -214,7 +216,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
             Call<Reply<ApiList<Reply<NasFile>>>> curr=mUploadingCall;
             if (null!=retrofit&&null!=curr){
                 if (cancel&&!curr.isCanceled()){
-                    Debug.D(getClass(),"Canceling file upload "+mFile+" "+(null!=debug?debug:"."));
+                    Debug.D(getClass(),"Canceling file upload "+mFilePath+" "+(null!=debug?debug:"."));
                     curr.cancel();
                     return true;
                 }
