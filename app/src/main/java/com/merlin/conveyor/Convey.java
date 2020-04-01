@@ -34,6 +34,9 @@ public abstract class Convey extends ConveyStatus implements What {
    protected  abstract Boolean onCancel(boolean cancel,String debug);
 
    public final boolean cancel(boolean cancel,String debug){
+       if (isStatus(Status.FINISHED)){
+           return false;
+       }
        boolean canceled=isStatus(Status.CANCELED);
        if ((cancel&&canceled)||(!cancel&&!canceled)){
             return false;

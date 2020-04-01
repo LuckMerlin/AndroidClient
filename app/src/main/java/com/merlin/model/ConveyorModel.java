@@ -29,7 +29,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
         public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding) {
             Convey convey=null!=binding&&binding instanceof ItemConveyorBinding ?((ItemConveyorBinding)binding).getData():null;
             ConveyorBinder binder=mBinder;
-            if (null!=binder&&(null==convey||index(convey)<0)){
+            if (null!=binder&&(null!=convey&&index(convey)<0)){
                 binder.run(CANCELED,"After remove from view.",convey);
             }
         }
