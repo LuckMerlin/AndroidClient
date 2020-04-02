@@ -44,9 +44,6 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
         super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
         if (null!=binding&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
-//            boolean multiChoose=isMultiChoose();
-//            itemBinding.setIsChoose(isChoose(data));
-//            itemBinding.setIsMultiChoose(multiChoose);
             itemBinding.setMeta(data);
             itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath()):null);
             itemBinding.setPosition(position);
