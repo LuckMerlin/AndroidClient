@@ -59,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <View
-                    android:background="#0f0"
+                    android:background="@{meta instanceof LocalFile&amp;&amp;null!=((LocalFile)meta).sync?(((LocalFile)meta).sync.isSynced?R.color.synced:R.color.syncNone):R.color.syncNull}"
                     android:layout_width="1dp"
                     android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"
                     android:alpha="0.4"

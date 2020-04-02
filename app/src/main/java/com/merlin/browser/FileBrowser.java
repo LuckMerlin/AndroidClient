@@ -196,7 +196,6 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
 //    protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
 //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 
-
     protected final <T extends ViewDataBinding> T inflate(int layoutId){
         return inflate(getViewContext(),layoutId);
     }
@@ -262,5 +261,4 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
         Retrofit retrofit=mRetrofit;
         return (null!=retrofit?retrofit:(mRetrofit=new Retrofit())).call(observable,subscribeOn,observeOn,callbacks);
     }
-
 }

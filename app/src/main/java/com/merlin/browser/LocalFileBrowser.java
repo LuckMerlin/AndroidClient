@@ -9,6 +9,7 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.merlin.activity.PhotoPreviewActivity;
+import com.merlin.api.Address;
 import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
@@ -19,6 +20,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
+import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;
 import com.merlin.debug.Debug;
@@ -28,7 +30,19 @@ import com.merlin.util.Thumbs;
 import java.io.File;
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+
 public class LocalFileBrowser extends FileBrowser{
+    private final Md5Reader mMd5Reader=new Md5Reader();
+
+    public interface Api{
+        @POST(Address.PREFIX_FILE+"/sync/check")
+        @FormUrlEncoded
+        Observable<Reply> checkSync(@Field(Label.LABEL_MD5) String ...md5);
+    }
 
     public LocalFileBrowser(Context context, ClientMeta meta,Callback callback){
         super(context,meta,callback);
@@ -102,6 +116,8 @@ public class LocalFileBrowser extends FileBrowser{
                 for (int i = from; i < to; i++) {
                     File child=files[i];
                     if (null!=child){
+                        String md5=mMd5Reader.load(child);
+                        Debug.D(getClass(),""+md5+" "+child);
                         list.add(LocalFile.create(child,null));
                     }
                 }

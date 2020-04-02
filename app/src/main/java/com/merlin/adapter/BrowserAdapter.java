@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FModify;
+import com.merlin.browser.Md5Reader;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.browser.FileBrowser;
