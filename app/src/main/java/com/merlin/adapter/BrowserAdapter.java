@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FModify;
+import com.merlin.browser.Md5Reader;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 import com.merlin.browser.FileBrowser;
@@ -44,9 +45,6 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
         super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
         if (null!=binding&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
-//            boolean multiChoose=isMultiChoose();
-//            itemBinding.setIsChoose(isChoose(data));
-//            itemBinding.setIsMultiChoose(multiChoose);
             itemBinding.setMeta(data);
             itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath()):null);
             itemBinding.setPosition(position);

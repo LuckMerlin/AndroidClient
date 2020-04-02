@@ -9,9 +9,7 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.merlin.activity.PhotoPreviewActivity;
-import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Address;
-import com.merlin.api.ApiList;
 import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
@@ -37,14 +35,13 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-import static com.merlin.api.Label.LABEL_PATH;
-
 public class LocalFileBrowser extends FileBrowser{
+    private final Md5Reader mMd5Reader=new Md5Reader();
 
     public interface Api{
         @POST(Address.PREFIX_FILE+"/sync/check")
         @FormUrlEncoded
-        Observable<Reply<ApiList<String>>> checkSync(@Field(LABEL_PATH) String ...paths);
+        Observable<Reply> checkSync(@Field(Label.LABEL_MD5) String ...md5);
     }
 
     public LocalFileBrowser(Context context, ClientMeta meta,Callback callback){
@@ -56,7 +53,8 @@ public class LocalFileBrowser extends FileBrowser{
         final Canceler canceler=(boolean cancel, String debug)->{
             return false;
         };
-        return browserFolder(null!=path&&path instanceof String?(String)path:null, from,from+50,finish)?canceler:null;
+        return browserFolder(null!=path&&path instanceof String?(String)path:null,
+                from,from+50,finish)?canceler:null;
     }
 
     @Override
@@ -98,6 +96,9 @@ public class LocalFileBrowser extends FileBrowser{
             succeed=true;
             final File[] files=folder.listFiles();
             final int length=null!=files?files.length:0;
+//            if (length>0){
+//                Arrays.sort(files,mComparator);
+//            }
             FolderData<LocalFile> folderData=new FolderData<>();
             folderData.setParent(folder.getParent());
             folderData.setPathSep(File.separator);
@@ -115,6 +116,8 @@ public class LocalFileBrowser extends FileBrowser{
                 for (int i = from; i < to; i++) {
                     File child=files[i];
                     if (null!=child){
+                        String md5=mMd5Reader.load(child);
+                        Debug.D(getClass(),""+md5+" "+child);
                         list.add(LocalFile.create(child,null));
                     }
                 }

@@ -161,14 +161,22 @@ public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMore
         if (null!=page){
             final int from=page.mFrom;
             Page<D> loading=mLoadingPage;
-            if (isPageEquals(loading,page)){
-                Debug.W(getClass(),"Not need load page while exist loading."+loading);
-                return false;
+            Canceler canceler=null;
+            if (null!=loading){
+                if (isPageEquals(loading,page)) {
+                    Debug.W(getClass(), "Not need load page while exist loading." + loading);
+                    return false;
+                }
+                D args=loading.mArg;
+                D pageArgs=page.mArg;
+                if (null!=(canceler=!(null==pageArgs&&null==args)&&(null==pageArgs||null==args||
+                        !pageArgs.equals(args))?loading.mCanceler:null)){
+                    canceler.cancel(true,"Before load new arg page "+args+" new="+pageArgs);
+                }
             }
             mLoadingPage=page;
             notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
             Debug.D(getClass(),"Load page "+ page.mArg+" from "+from+" "+(null!=debug?debug:"."));
-            Canceler canceler;
             if(null==(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
                 boolean idle=isPageEquals(mLoadingPage,page);
                 notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);

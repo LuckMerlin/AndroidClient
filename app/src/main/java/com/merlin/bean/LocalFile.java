@@ -6,9 +6,11 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.browser.FileSync;
 import com.merlin.debug.Debug;
+
+import java.io.File;
 
 public final class LocalFile implements Parcelable,FileMeta {
     private String parent;
@@ -17,7 +19,7 @@ public final class LocalFile implements Parcelable,FileMeta {
     private String extension;
     private String imageUrl;
     private long size;
-    private Boolean upload;
+    private FileSync sync;
     private int childCount;
     private double modifyTime;
     private boolean directory;
@@ -78,7 +80,7 @@ public final class LocalFile implements Parcelable,FileMeta {
         return result;
     }
 
-    public boolean applySync(Reply<Boolean> reply){
+    public static boolean apply(FileSync sync){
 
         return false;
     }
@@ -144,6 +146,10 @@ public final class LocalFile implements Parcelable,FileMeta {
 
     public String permission() {
         return "";
+    }
+
+    public FileSync getSync() {
+        return sync;
     }
 
     @Override
