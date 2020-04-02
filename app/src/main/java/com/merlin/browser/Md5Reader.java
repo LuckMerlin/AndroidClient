@@ -20,7 +20,9 @@ public class Md5Reader {
                 MessageDigest  digest = MessageDigest.getInstance("MD5");
                 in=null!=digest?new FileInputStream(file):null;
                 if (null!=in){
-                    byte buffer[] = new byte[1024*1024];
+                    int bufferSize=1024*1024;
+                    long length=file.length();
+                    byte buffer[] = new byte[length<=bufferSize?(int)length:bufferSize];
                     while ((len = in.read(buffer)) != -1) {
                         digest.update(buffer, 0, len);
                     }
