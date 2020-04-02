@@ -20,6 +20,7 @@ public class Application extends android.app.Application implements ActivityLife
     @Override
    public void onCreate() {
         super.onCreate();
+        Database.init(this);
         new Clients().init(this,"");
         registerActivityLifecycleCallbacks(mActivityLifecycle);
     }

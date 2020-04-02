@@ -104,7 +104,7 @@ abstract class BaseAdapter<T,VH extends BaseAdapter.ViewHolder>extends RecyclerV
 
     public static class ViewDataBindingHolder extends RecyclerView.ViewHolder{
         public ViewDataBindingHolder(ViewDataBinding binding){
-            super(null!=binding?binding.get);
+            super(null!=binding?binding.getRoot():null);
         }
     }
 
