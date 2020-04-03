@@ -68,6 +68,22 @@ public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMore
         return loadPage(new Page<>(arg,0,null),true,debug);
     }
 
+    public final boolean isCurrentArgEquals(D arg){
+        Page<D> page=mCurrentPage;
+        D currArg=null!=page?page.mArg:null;
+        return (null==currArg&&null==arg)||(null!=currArg&&null!=arg&&currArg.equals(arg));
+    }
+
+    public final boolean isLoadingArgEquals(D arg){
+        Page<D> page=mLoadingPage;
+        D loadingArg=null!=page?page.mArg:null;
+        return (null==loadingArg&&null==arg)||(null!=loadingArg&&null!=arg&&loadingArg.equals(arg));
+    }
+
+    public final Page<D> getCurrentPage() {
+        return mCurrentPage;
+    }
+
     public final PageData<T> getLastPage() {
         return mLastPage;
     }

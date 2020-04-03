@@ -25,7 +25,7 @@ public final class LocalFile implements Parcelable,FileMeta {
     private boolean directory;
     private boolean accessible;
     private String md5;
-    private Reply<String> sync;
+    private Reply<Path> sync;
 
     public LocalFile(String parent,String title,String name,String extension,
                      String imageUrl,int childCount,long size,long modifyTime, boolean directory,
@@ -92,6 +92,10 @@ public final class LocalFile implements Parcelable,FileMeta {
         return result;
     }
 
+    public Reply<Path> getSync() {
+        return sync;
+    }
+
     public int syncColor(){
         int color=R.color.syncNull;
         if (null!=md5&&md5.length()>0){
@@ -99,12 +103,18 @@ public final class LocalFile implements Parcelable,FileMeta {
             if (null!=sync){
                 color=R.color.syncFail;
                 if (sync.isSuccess()&&sync.getWhat()==What.WHAT_SUCCEED){
-                    String syncUrl=sync.getData();
-                    color=null!=syncUrl&&syncUrl.length()>=0?R.color.synced:R.color.syncedNone;
+                    Path syncUrl=sync.getData();
+                    String path=null!=syncUrl?syncUrl.getPath():null;
+                    color=null!=path&&path.length()>=0?R.color.synced:R.color.syncedNone;
                 }
             }
         }
         return color;
+    }
+
+    public boolean applySync(Reply<Path> sync){
+        this.sync=sync;
+        return true;
     }
 
     /**

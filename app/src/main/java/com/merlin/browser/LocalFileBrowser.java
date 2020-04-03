@@ -22,9 +22,9 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
+import com.merlin.bean.Path;
 import com.merlin.client.R;
-import com.merlin.client.databinding.LocalFileDetailBinding;
-import com.merlin.database.FileDB;
+import com.merlin.client.databinding.LocalFileDetailBindingImpl;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.util.Thumbs;
@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -45,7 +46,7 @@ public class LocalFileBrowser extends FileBrowser{
     public interface Api{
         @POST(Address.PREFIX_FILE+"/sync/check")
         @FormUrlEncoded
-        Observable<ApiMap<String,Reply<String>>> checkSync(@Field(Label.LABEL_MD5) String ...md5);
+        Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Set<String> md5s);
     }
 
     public LocalFileBrowser(Context context, ClientMeta meta,Callback callback){
@@ -54,22 +55,58 @@ public class LocalFileBrowser extends FileBrowser{
 
     @Override
     protected Canceler onPageLoad(Object path, int from, OnApiFinish finish) {
-        final Canceler canceler=(boolean cancel, String debug)->{
-            return false;
-        };
-        return browserFolder(null!=path&&path instanceof String?(String)path:null,
-                from,from+50,finish)?canceler:null;
+        final Map<String,LocalFile> md5Map=new HashMap<>();
+        if (browserFolder(null!=path&&path instanceof String?(String)path:null, from,from+50,md5Map,finish)){
+            final Set<String> md5s=null!=md5Map&&md5Map.size()>0?md5Map.keySet():null;
+            Canceler canceler=null;
+            if (null!=md5s&&md5s.size()>0){
+                canceler=call(prepare(Api.class, Address.URL, null).checkSync(md5s), null, null, (OnApiFinish<Reply<ApiMap<String,
+                        Reply<Path>>>>)(int what, String note, Reply<ApiMap<String, Reply<Path>>> data, Object arg)-> {
+                    if (null!=data&&isCurrentArgEquals(path)){
+                        ApiMap<String, Reply<Path>> resultMap=data.getData();
+                        if (null!=resultMap&&resultMap.size()>0){
+                            LocalFile localFile;Reply<Path> reply;
+                            for (String md5:md5s) {
+                                if (null!=md5&&isCurrentArgEquals(path)){
+                                    if (null!=(localFile=md5Map.get(md5))){
+                                        reply=resultMap.get(md5);
+                                        if (localFile.applySync(null!=reply?reply:new Reply<>(false,
+                                                What.WHAT_ERROR_UNKNOWN,"None result.",null))){
+                                            replace(localFile,"After sync finish.");
+                                        }
+                                    }
+                                    continue;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+            return null!=canceler?canceler:(boolean cancel, String debug)->{return true;};
+        }
+        return null;
     }
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
-
+            case R.string.sync:
+                syncFile(data,"After tap click.");
+                return true;
         }
         return super.onTapClick(view, clickCount, resId, data);
     }
 
-    private boolean browserFolder(String path, int from, int to, OnApiFinish<Reply<PageData<LocalFile>>> finish){
+    private Canceler syncFile(Object data,String debug){
+
+        return call(prepare(Api.class, Address.URL, null).checkSync(), null, null,(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>)
+                (int what, String note, Reply<ApiMap<String, Reply<Path>>> data1, Object arg)-> {
+
+                });
+    }
+
+    private boolean browserFolder(String path, int from, int to,Map<String,LocalFile> md5Map, OnApiFinish<Reply<PageData<LocalFile>>> finish){
         path=null!=path&&path.length()>0?path:getClientRoot();
         File folder=null!=path&&path.length()>0?new File(path):null;
         final Reply<PageData<LocalFile>>  reply=new Reply<>();
@@ -117,12 +154,17 @@ public class LocalFileBrowser extends FileBrowser{
                 final int maxAutoLoadMd5=1024*1024*50;
                 final Md5Reader md5Reader=mMd5Reader;
                 LocalFile localFile;
-                final Map<String,LocalFile> md5Map=new HashMap<>();
                 for (int i = from; i < to; i++) {
                     File child=files[i];
                     localFile=null!=child?LocalFile.create(child,null,child.length()<=maxAutoLoadMd5?md5Reader:null):null;
                     if (null!=localFile){
                         list.add(localFile);
+                        if (null!=md5Map){
+                            String md5=localFile.getMd5();
+                            if (null!=md5&&md5.length()>0&&null==localFile.getSync()){
+                                md5Map.put(md5,localFile);
+                            }
+                        }
                     }
                 }
                 folderData.setData(list);
@@ -149,12 +191,12 @@ public class LocalFileBrowser extends FileBrowser{
             String path=null!=meta&&meta instanceof LocalFile?meta.getPath():null;
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
             if (null!=file&&file.exists()){
-                LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
-                binding.setFile(((LocalFile)meta).getFile());
-                String title=meta.getTitle();
-                binding.setTitle(null!=title?title:file.getName());
-                Dialog dialog=new Dialog(view.getContext());
-                return dialog.setContentView(binding).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
+//                LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
+//                binding.setFile(((LocalFile)meta).getFile());
+//                String title=meta.getTitle();
+//                binding.setTitle(null!=title?title:file.getName());
+//                Dialog dialog=new Dialog(view.getContext());
+//                return dialog.setContentView(binding).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
             }
             Debug.W(getClass(),"Can't show local file detail which not exist "+path+" "+(null!=debug?debug:"."));
             toast(R.string.fileNotExist);
