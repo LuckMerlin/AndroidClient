@@ -3,7 +3,6 @@ import com.merlin.database.FileDB;
 import com.merlin.database.FileDBDao;
 import com.merlin.debug.Debug;
 import com.merlin.global.Database;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,8 +12,8 @@ import java.security.MessageDigest;
 public class Md5Reader {
     private final FileDBDao mFileDao;
 
-    public Md5Reader(FileDBDao fileDao){
-        mFileDao=null!=fileDao?fileDao:new Database().master().newSession().getFileDBDao();
+    public Md5Reader( ){
+        mFileDao=new Database().master().newSession().getFileDBDao();
     }
 
     public FileDB load(File file, boolean force){

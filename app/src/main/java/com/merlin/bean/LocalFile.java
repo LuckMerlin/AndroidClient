@@ -6,11 +6,12 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.browser.FileSync;
+import com.merlin.browser.Md5Reader;
+import com.merlin.client.R;
+import com.merlin.database.FileDB;
 import com.merlin.debug.Debug;
-
-import java.io.File;
 
 public final class LocalFile implements Parcelable,FileMeta {
     private String parent;
@@ -19,15 +20,16 @@ public final class LocalFile implements Parcelable,FileMeta {
     private String extension;
     private String imageUrl;
     private long size;
-    private FileSync sync;
     private int childCount;
     private double modifyTime;
     private boolean directory;
     private boolean accessible;
+    private String md5;
+    private Reply<String> sync;
 
     public LocalFile(String parent,String title,String name,String extension,
                      String imageUrl,int childCount,long size,long modifyTime, boolean directory,
-                     boolean accessible){
+                     boolean accessible,String md5){
         this.parent=parent;
         this.title=title;
         this.name=name;
@@ -38,9 +40,14 @@ public final class LocalFile implements Parcelable,FileMeta {
         this.modifyTime=modifyTime;
         this.directory=directory;
         this.accessible=accessible;
+        this.md5=md5;
     }
 
     public static LocalFile create(java.io.File file, String imageUrl){
+            return create(file,imageUrl,null);
+    }
+
+    public static LocalFile create(java.io.File file, String imageUrl, Md5Reader reader){
         if (null!=file){
             String parent=file.getParent();
             parent=null!=parent?parent+ java.io.File.separator:null;
@@ -48,16 +55,21 @@ public final class LocalFile implements Parcelable,FileMeta {
             String name=fix[0];
             String extension=fix[1];
             String title=file.getName();
+            String md5=null;
             boolean directory=file.isDirectory();
             long size=file.length();
             int childCount= What.WHAT_NOT_DIRECTORY;
             if (directory){
                 String[] names=file.list();
                 childCount=null!=names?names.length:0;
+            }else if(null!=reader){
+                FileDB fileDB=reader.load(file,false);
+                md5=null!=fileDB?fileDB.getMd5():null;
             }
             long modifyTime=file.lastModified();
             boolean accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
-            return new LocalFile(parent,title,name,extension,imageUrl,childCount,size,modifyTime,directory,accessible);
+            return new LocalFile(parent,title,name,extension,imageUrl,childCount,size,modifyTime,
+                    directory,accessible,md5);
         }
         return null;
     }
@@ -80,9 +92,19 @@ public final class LocalFile implements Parcelable,FileMeta {
         return result;
     }
 
-    public static boolean apply(FileSync sync){
-
-        return false;
+    public int syncColor(){
+        int color=R.color.syncNull;
+        if (null!=md5&&md5.length()>0){
+            color=R.color.syncNeed;
+            if (null!=sync){
+                color=R.color.syncFail;
+                if (sync.isSuccess()&&sync.getWhat()==What.WHAT_SUCCEED){
+                    String syncUrl=sync.getData();
+                    color=null!=syncUrl&&syncUrl.length()>=0?R.color.synced:R.color.syncedNone;
+                }
+            }
+        }
+        return color;
     }
 
     /**
@@ -148,8 +170,8 @@ public final class LocalFile implements Parcelable,FileMeta {
         return "";
     }
 
-    public FileSync getSync() {
-        return sync;
+    public String getMd5() {
+        return md5;
     }
 
     @Override

@@ -59,12 +59,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <View
-                    android:background="@{meta instanceof LocalFile&amp;&amp;null!=((LocalFile)meta).sync?(((LocalFile)meta).sync.isSynced?R.color.synced:R.color.syncNone):R.color.syncNull}"
+                    android:background="@{meta instanceof LocalFile?((LocalFile)meta).syncColor():R.color.syncNull}"
                     android:layout_width="1dp"
                     android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"
-                    android:alpha="0.4"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
+                    android:alpha="0.9"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginBottom="3dp"
                     android:layout_height="match_parent"/>
                 <TextView
                     style="@style/titleSmallTextView"

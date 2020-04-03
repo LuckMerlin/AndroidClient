@@ -10,6 +10,8 @@ import android.webkit.MimeTypeMap;
 
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.api.Address;
+import com.merlin.api.ApiList;
+import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
@@ -20,7 +22,6 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;
 import com.merlin.database.FileDB;
@@ -30,6 +31,8 @@ import com.merlin.util.Thumbs;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -37,12 +40,12 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public class LocalFileBrowser extends FileBrowser{
-    private final Md5Reader mMd5Reader=new Md5Reader(null);
+    private final Md5Reader mMd5Reader=new Md5Reader();
 
     public interface Api{
         @POST(Address.PREFIX_FILE+"/sync/check")
         @FormUrlEncoded
-        Observable<Reply> checkSync(@Field(Label.LABEL_MD5) String ...md5);
+        Observable<ApiMap<String,Reply<String>>> checkSync(@Field(Label.LABEL_MD5) String ...md5);
     }
 
     public LocalFileBrowser(Context context, ClientMeta meta,Callback callback){
@@ -97,9 +100,6 @@ public class LocalFileBrowser extends FileBrowser{
             succeed=true;
             final File[] files=folder.listFiles();
             final int length=null!=files?files.length:0;
-//            if (length>0){
-//                Arrays.sort(files,mComparator);
-//            }
             FolderData<LocalFile> folderData=new FolderData<>();
             folderData.setParent(folder.getParent());
             folderData.setPathSep(File.separator);
@@ -116,14 +116,13 @@ public class LocalFileBrowser extends FileBrowser{
                 ArrayList<LocalFile> list=new ArrayList();
                 final int maxAutoLoadMd5=1024*1024*50;
                 final Md5Reader md5Reader=mMd5Reader;
+                LocalFile localFile;
+                final Map<String,LocalFile> md5Map=new HashMap<>();
                 for (int i = from; i < to; i++) {
                     File child=files[i];
-                    if (null!=child){
-                        list.add(LocalFile.create(child,null));
-                        if (child.length()<=maxAutoLoadMd5){
-                            FileDB db=md5Reader.load(child,false);
-                            Debug.D(getClass(),""+db+" "+child);
-                        }
+                    localFile=null!=child?LocalFile.create(child,null,child.length()<=maxAutoLoadMd5?md5Reader:null):null;
+                    if (null!=localFile){
+                        list.add(localFile);
                     }
                 }
                 folderData.setData(list);

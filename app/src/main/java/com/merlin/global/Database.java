@@ -1,14 +1,14 @@
 package com.merlin.global;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.merlin.database.DaoMaster;
 import com.merlin.database.DaoSession;
 
 public final class Database {
-    private final String DB_NAME = "merlin.db";
+    private final String DB_NAME = "merlin1.db";
     private DaoMaster daoMaster;
-    private DaoSession daoSession;
     private static Context mContext;
 
     protected static void init(Context context){

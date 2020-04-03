@@ -9,7 +9,7 @@ import org.greenrobot.greendao.annotation.Unique;
 @Entity
 public class FileDB {
     @Id(autoincrement = true)
-    private long id;
+    private Long id;
     @NotNull
     @Unique
     private String path;
@@ -17,8 +17,9 @@ public class FileDB {
     private String md5;
     private long createTime;
     private byte[] image;
-    @Generated(hash = 1146313522)
-    public FileDB(long id, @NotNull String path, @NotNull String md5,
+
+    @Generated(hash = 2083376745)
+    public FileDB(Long id, @NotNull String path, @NotNull String md5,
             long createTime, byte[] image) {
         this.id = id;
         this.path = path;
@@ -29,7 +30,8 @@ public class FileDB {
     @Generated(hash = 1254237660)
     public FileDB() {
     }
-    public long getId() {
+
+    public Long getId() {
         return this.id;
     }
     public void setId(long id) {
@@ -58,6 +60,9 @@ public class FileDB {
     }
     public void setImage(byte[] image) {
         this.image = image;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

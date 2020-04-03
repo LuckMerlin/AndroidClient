@@ -47,7 +47,6 @@ import com.merlin.api.Label;
 import com.merlin.bean.LocalFile;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.browser.FileSync;
 import com.merlin.list.RecycleViewScrollQuantize;
 import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;
@@ -66,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @BindingMethods({
         @BindingMethod(type = RecyclerView.class,attribute = "itemDecoration",method ="addItemDecoration" )
@@ -183,7 +181,7 @@ public class MBinding {
     @BindingAdapter("loadViewData")
     public static void autoLoadViewData(View view, ViewDataLoadable loadable) {
         if (null!=view&&null!=loadable&& loadable instanceof LocalFile){
-            Glide.with(view).as(FileSync.class).load(loadable);
+//            Glide.with(view).as(FileSync.class).load(loadable);
 //            Glide.with(view).load(loadable).into(new CustomViewTarget(view){
 //                @Override
 //                public void onResourceReady(@NonNull Object resource, @Nullable Transition transition) {
