@@ -23,6 +23,7 @@ import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;
+import com.merlin.database.FileDB;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.util.Thumbs;
@@ -36,7 +37,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public class LocalFileBrowser extends FileBrowser{
-    private final Md5Reader mMd5Reader=new Md5Reader();
+    private final Md5Reader mMd5Reader=new Md5Reader(null);
 
     public interface Api{
         @POST(Address.PREFIX_FILE+"/sync/check")
@@ -113,12 +114,16 @@ public class LocalFileBrowser extends FileBrowser{
                 to = Math.min(to,length);
                 Debug.D(getClass(),"Browsing local folder from "+from+" to "+to+" "+path);
                 ArrayList<LocalFile> list=new ArrayList();
+                final int maxAutoLoadMd5=1024*1024*50;
+                final Md5Reader md5Reader=mMd5Reader;
                 for (int i = from; i < to; i++) {
                     File child=files[i];
                     if (null!=child){
-                        String md5=mMd5Reader.load(child);
-                        Debug.D(getClass(),""+md5+" "+child);
                         list.add(LocalFile.create(child,null));
+                        if (child.length()<=maxAutoLoadMd5){
+                            FileDB db=md5Reader.load(child,false);
+                            Debug.D(getClass(),""+db+" "+child);
+                        }
                     }
                 }
                 folderData.setData(list);

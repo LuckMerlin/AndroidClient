@@ -4,28 +4,30 @@ import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.NotNull;
+import org.greenrobot.greendao.annotation.Unique;
 
 @Entity
-public class File {
+public class FileDB {
     @Id(autoincrement = true)
     private long id;
     @NotNull
+    @Unique
     private String path;
     @NotNull
     private String md5;
     private long createTime;
     private byte[] image;
-    @Generated(hash = 970265715)
-    public File(long id, @NotNull String path, @NotNull String md5, long createTime,
-            byte[] image) {
+    @Generated(hash = 1146313522)
+    public FileDB(long id, @NotNull String path, @NotNull String md5,
+            long createTime, byte[] image) {
         this.id = id;
         this.path = path;
         this.md5 = md5;
         this.createTime = createTime;
         this.image = image;
     }
-    @Generated(hash = 375897388)
-    public File() {
+    @Generated(hash = 1254237660)
+    public FileDB() {
     }
     public long getId() {
         return this.id;
@@ -57,7 +59,5 @@ public class File {
     public void setImage(byte[] image) {
         this.image = image;
     }
-    public void setId(Long id) {
-        this.id = id;
-    }
+
 }
