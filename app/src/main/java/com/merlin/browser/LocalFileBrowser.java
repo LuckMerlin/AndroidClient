@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Looper;
 import android.os.StrictMode;
+import android.util.ArraySet;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
@@ -31,11 +33,21 @@ import com.merlin.util.Thumbs;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -46,7 +58,7 @@ public class LocalFileBrowser extends FileBrowser{
     public interface Api{
         @POST(Address.PREFIX_FILE+"/sync/check")
         @FormUrlEncoded
-        Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Set<String> md5s);
+        Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Collection<String> md5s);
     }
 
     public LocalFileBrowser(Context context, ClientMeta meta,Callback callback){
@@ -59,30 +71,7 @@ public class LocalFileBrowser extends FileBrowser{
         if (browserFolder(null!=path&&path instanceof String?(String)path:null, from,from+50,md5Map,finish)){
             final Set<String> md5s=null!=md5Map&&md5Map.size()>0?md5Map.keySet():null;
             Canceler canceler=null;
-            if (null!=md5s&&md5s.size()>0){
-                canceler=call(prepare(Api.class, Address.URL, null).checkSync(md5s), null, null, (OnApiFinish<Reply<ApiMap<String,
-                        Reply<Path>>>>)(int what, String note, Reply<ApiMap<String, Reply<Path>>> data, Object arg)-> {
-                    if (null!=data&&isCurrentArgEquals(path)){
-                        ApiMap<String, Reply<Path>> resultMap=data.getData();
-                        if (null!=resultMap&&resultMap.size()>0){
-                            LocalFile localFile;Reply<Path> reply;
-                            for (String md5:md5s) {
-                                if (null!=md5&&isCurrentArgEquals(path)){
-                                    if (null!=(localFile=md5Map.get(md5))){
-                                        reply=resultMap.get(md5);
-                                        if (localFile.applySync(null!=reply?reply:new Reply<>(false,
-                                                What.WHAT_ERROR_UNKNOWN,"None result.",null))){
-                                            replace(localFile,"After sync finish.");
-                                        }
-                                    }
-                                    continue;
-                                }
-                                break;
-                            }
-                        }
-                    }
-                });
-            }
+//
             return null!=canceler?canceler:(boolean cancel, String debug)->{return true;};
         }
         return null;
@@ -99,11 +88,21 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     private Canceler syncFile(Object data,String debug){
-
-        return call(prepare(Api.class, Address.URL, null).checkSync(), null, null,(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>)
-                (int what, String note, Reply<ApiMap<String, Reply<Path>>> data1, Object arg)-> {
-
-                });
+        String path=null!=data&&data instanceof LocalFile?((LocalFile)data).getPath():null;
+        if (null==path||path.length()<=0){
+            toast(R.string.pathInvalid);
+            return null;
+        }
+        List<String> md5s=new ArrayList<>();
+        md5s.add(path);
+        return call(prepare(Api.class, Address.URL, null).checkSync(md5s).doOnSubscribe(new Consumer<Disposable>() {
+            @Override
+            public void accept(Disposable disposable) throws Exception {
+                Debug.D(getClass(),"AAAAAAAAAAa "+Thread.currentThread().getName());
+            }
+        }),null,null,(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>) (int what, String note, Reply<ApiMap<String, Reply<Path>>> data1, Object arg)-> {
+            Debug.D(getClass(),"AAAAAAA结束AAAa ");
+        });
     }
 
     private boolean browserFolder(String path, int from, int to,Map<String,LocalFile> md5Map, OnApiFinish<Reply<PageData<LocalFile>>> finish){
@@ -141,6 +140,9 @@ public class LocalFileBrowser extends FileBrowser{
             folderData.setParent(folder.getParent());
             folderData.setPathSep(File.separator);
             folderData.setName(folder.getName());
+            folderData.setFrom(from);
+            folderData.setLength(length);
+            reply.setData(folderData);
             if (from>=length){
                 what=What.WHAT_OUT_OF_BOUNDS;
                 note=getText(R.string.outOfBounds);
@@ -148,30 +150,35 @@ public class LocalFileBrowser extends FileBrowser{
             if (what==null){
                 what=What.WHAT_SUCCEED;
                 succeed=true;
-                to = Math.min(to,length);
-                Debug.D(getClass(),"Browsing local folder from "+from+" to "+to+" "+path);
-                ArrayList<LocalFile> list=new ArrayList();
-                final int maxAutoLoadMd5=1024*1024*50;
-                final Md5Reader md5Reader=mMd5Reader;
-                LocalFile localFile;
-                for (int i = from; i < to; i++) {
-                    File child=files[i];
-                    localFile=null!=child?LocalFile.create(child,null,child.length()<=maxAutoLoadMd5?md5Reader:null):null;
-                    if (null!=localFile){
-                        list.add(localFile);
-                        if (null!=md5Map){
-                            String md5=localFile.getMd5();
-                            if (null!=md5&&md5.length()>0&&null==localFile.getSync()){
-                                md5Map.put(md5,localFile);
+                final int toIndex = Math.min(to,length);
+                Debug.D(getClass(),"Browsing local folder from "+from+" to "+toIndex+" "+path);
+                int volume=toIndex-from;
+                ArrayList<LocalFile> list=new ArrayList(volume<=0?0:volume>1000?10:volume);
+                if (volume>0){
+                    call(prepare(Api.class, Address.URL, null).checkSync(null)
+                            .subscribeOn(Schedulers.io()).doOnSubscribe((Disposable disposable) ->{
+                        final int maxAutoLoadMd5=1024*1024*50;
+                        final Md5Reader md5Reader=mMd5Reader;
+                        LocalFile localFile;
+                        for (int i = from; i < toIndex; i++) {
+                            File child=files[i];
+                            localFile=null!=child?LocalFile.create(child,null,child.length()
+                                    <=maxAutoLoadMd5?md5Reader:null):null;
+                            if (null!=localFile){
+                                list.add(localFile);
+                                if (null!=md5Map){
+                                    String md5=localFile.getMd5();
+                                    if (null!=md5&&md5.length()>0&&null==localFile.getSync()){
+                                        md5Map.put(md5,localFile);
+                                    }
+                                }
                             }
                         }
-                    }
+                        folderData.setData(list);
+                    }),null,null,null);
                 }
-                folderData.setData(list);
+//                syncFile(list.get(0),"");
             }
-            folderData.setFrom(from);
-            folderData.setLength(length);
-            reply.setData(folderData);
         }
         if (!succeed){
             Debug.D(getClass(),"Fail browser local folder."+note+" "+folder);
