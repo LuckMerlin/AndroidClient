@@ -5,8 +5,10 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.PageData;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FModify;
+import com.merlin.bean.FolderData;
 import com.merlin.browser.Md5Reader;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
@@ -54,6 +56,11 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         return new LinearLayoutManager(rv.getContext());
+    }
+
+    public final FolderData getLastFolder(){
+        PageData pageData=getLastPage();
+        return null!=pageData&&pageData instanceof FolderData?(FolderData)pageData:null;
     }
 
     public final boolean chooseAll(boolean choose,String debug){

@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.ConveyorActivity;
 import com.merlin.adapter.ListAdapter;
@@ -28,11 +30,14 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.ClientDetailBinding;
 import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
+import com.merlin.client.databinding.SingleEditTextBinding;
 import com.merlin.conveyor.ConveyorService;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileBrowser;
 import com.merlin.browser.LocalFileBrowser;
 import com.merlin.browser.NasFileBrowser;
+import com.merlin.dialog.Dialog;
+import com.merlin.dialog.SingleInputDialog;
 import com.merlin.protocol.Tag;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
@@ -155,6 +160,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                                 "After tap click."))||true;
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
+                    case R.string.goTo:
+                        return launchGoTo("After tap click");
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -254,6 +261,24 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean chooseAll(boolean choose,String debug){
         FileBrowser browser=getCurrentModel();
         return null!=browser&&isMode(FileBrowser.MODE_MULTI_CHOOSE)&& browser.chooseAll(choose,debug);
+    }
+
+    private boolean launchGoTo(String debug){
+        final Dialog dialog=new Dialog(getViewContext());
+        SingleEditTextBinding binding=inflate(R.layout.single_edit_text);
+        return dialog.setContentView(binding).title(R.string.goTo).left(R.string.sure).right(R.string.cancel).show(
+                (View view, int clickCount, int resId, Object data) ->{
+                    switch (resId){
+                        case R.string.sure:
+                            String text=binding.singleET.getText().toString();
+                            if (null==text||text.length()<=0){
+                                return toast(R.string.pathInvalid)||true;
+                            }
+                            return browserPath(text,"While from go to "+(null!=debug?debug:"."));
+                    }
+                    dialog.dismiss();
+                return true;
+        });
     }
 
     public final boolean isMode(int ...models){
@@ -364,6 +389,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
 
     public final boolean onBackIconPressed(View view, String debug){
         return browserParent(debug);
+    }
+
+    private boolean browserPath(String path,String debug){
+        FileBrowser browser=getCurrentModel();
+        return null!=browser&&browser.browserPath(path,debug);
     }
 
     private boolean browserParent(String debug){

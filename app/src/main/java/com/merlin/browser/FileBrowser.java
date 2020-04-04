@@ -27,6 +27,7 @@ import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.server.Retrofit;
 import com.merlin.server.RetrofitCanceler;
@@ -76,6 +77,10 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 switch (resId) {
                     case R.string.detail:
                         return showFileDetail(view,data,"After detail tap click.");
+                    case R.string.createFile:
+                        return createPath(false,"After create file tap click.");
+                    case R.string.createFolder:
+                        return createPath(true,"After create folder tap click.");
                     case R.string.setAsHome:
                         return setAsHome(view,data,"After set as home tap click.");
                     case R.string.rename:
@@ -154,7 +159,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return false;
     }
 
-    private boolean browserPath(String pathValue, String debug){
+    public boolean browserPath(String pathValue, String debug){
         return loadPage(null!=pathValue?pathValue:"",debug);
     }
 
@@ -224,8 +229,36 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return false;
     }
 
+    private boolean createPath(boolean dir,String debug){
+        FolderData folderData=getLastFolder();
+        final String parent=null!=folderData?folderData.getPath():null;
+        if (null==parent||parent.length()<=0){
+            toast(R.string.pathNotExist);
+            return false;
+        }
+        final Dialog dialog=new Dialog(getViewContext());
+        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
+                .right(R.string.cancel).show(( view, clickCount,  resId, data)->{
+                    if (resId==R.string.sure){
+                        String input=dialog.getViewText(R.id.edit_text,null);
+                        if (null==input||input.length()<=0){
+                            toast(R.string.inputNotNull);
+                            return true;
+                        }else{
+                            dialog.dismiss();
+                            return onCreatePath(dir,CoverMode.NONE,parent,input,(what, note, data2, arg)->{
+                                toast(note);
+                            },debug);
+                        }
+                    }
+                    dialog.dismiss();
+                    return true;
+                });
+    }
+
     protected abstract boolean onShowFileDetail(View view,FileMeta meta,String debug);
     protected abstract boolean onSetAsHome(View view,String path,String debug);
+    protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenameFile(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
 //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 

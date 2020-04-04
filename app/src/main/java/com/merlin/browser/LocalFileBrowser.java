@@ -37,6 +37,7 @@ import com.merlin.server.RetrofitCanceler;
 import com.merlin.util.Thumbs;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -304,7 +305,48 @@ public class LocalFileBrowser extends FileBrowser{
         return invokeFinish(succeed,what,note,finish,data,arg);
     }
 
-    private boolean invokeFinish(boolean succeed,Integer what,String note,OnApiFinish finish,Object data,Object arg){
+    @Override
+    protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
+       Integer what=null;String note=null;boolean succeed=false;
+        Path modify=null;Object arg=null;
+        if (null==folder||name==null||folder.length()<=0||name.length()<=0){
+            what=What.WHAT_ARGS_INVALID;
+            note=getText(R.string.inputNotNull);
+        }else{
+            final File file=new File(folder,name);
+            final File parent=file.getParentFile();
+            if (file.exists()&&(coverMode& CoverMode.REPLACE)==0){
+                what=What.WHAT_FILE_EXIST;
+                note=getText(R.string.fileAlreadyExist);
+            }else if(null==parent||(!parent.exists()&&(!parent.mkdirs())||!parent.exists())){
+                what=What.WHAT_ERROR_UNKNOWN;
+                note=getText(R.string.createFail);
+            }else if (!parent.canWrite()&&!parent.canExecute()){
+                what=What.WHAT_NONE_PERMISSION;
+                note=getText(R.string.nonePermission);
+            }else if (file.exists()&&(!file.delete()||file.exists())){
+                what=What.WHAT_ERROR_UNKNOWN;
+                note=getText(R.string.deleteFail);
+            }else{
+                try {
+                    succeed=dir?file.mkdir():file.createNewFile();
+                    if (file.exists()) {
+                        note=getText(R.string.createSucceed);
+                        what=What.WHAT_SUCCEED;
+                        String[] fix=LocalFile.getPostfix(file);
+                        modify = new Path(folder, fix[0],fix[1]);
+                        arg = LocalFile.create(file,null);
+                    }
+                } catch (IOException e) {
+                    what=What.WHAT_ERROR_UNKNOWN;
+                    note=getText(R.string.createFail);
+                }
+            }
+        }
+        return invokeFinish(succeed,what,note,finish,modify,arg);
+    }
+
+    private boolean invokeFinish(boolean succeed, Integer what, String note, OnApiFinish finish, Object data, Object arg){
         if (null!=finish){
             what=null!=what?what:What.WHAT_ERROR_UNKNOWN;
             Reply reply=null;

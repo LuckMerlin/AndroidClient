@@ -40,6 +40,10 @@ public class NasFileBrowser extends FileBrowser implements Label {
         @POST(Address.PREFIX_FILE+"/home")
         @FormUrlEncoded
         Observable<Reply<String>> setHome(@Field(LABEL_PATH) String path);
+
+        @POST(Address.PREFIX_FILE+"/rename")
+        @FormUrlEncoded
+        Observable<Reply<Path>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
     }
 
     public NasFileBrowser(Context context, ClientMeta meta,Callback callback){
@@ -74,7 +78,11 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onRenameFile(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
+        return null!=call(prepare(Api.class,Address.URL,null).renameFile(path,name, coverMode),null,null,finish);
+    }
 
+    @Override
+    protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
         return false;
     }
 
