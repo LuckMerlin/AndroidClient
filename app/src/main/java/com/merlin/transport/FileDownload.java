@@ -12,7 +12,7 @@ public class FileDownload {
     }
 
     public void onDownload() {
-        String path=null!=mFile?mFile.getPath():null;
+        String path=null!=mFile?mFile.getPath(false):null;
 //        HttpURLConnection connection=new H
 //        Class<T> cls,Scheduler subscribeOn, io.reactivex.Scheduler
 //        observeOn,Object dither, com.merlin.api.Callback...callbacks

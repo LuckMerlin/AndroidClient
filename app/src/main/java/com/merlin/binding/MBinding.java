@@ -211,19 +211,10 @@ public class MBinding {
                             RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
                             RequestBuilder<Drawable> builder=null;
                             if (!value.startsWith("http")) {
-                                if (value.startsWith(Address.LABEL_CLOUD_URL_PREFIX)){
-                                    value=value.replaceFirst(Address.LABEL_CLOUD_URL_PREFIX,
-                                            Address.PREFIX_THUMB+"?"+Label.LABEL_PATH+"=");
-                                }
-                                if (value.startsWith(Address.PREFIX_THUMB)){
-//                            Glide.get(view.getContext()).getRegistry().append();
-//                            Glide.with(view.getContext()).as();
-                                    builder= Glide.with(view.getContext()).load(Address.URL +value);
-                                }else{
-                                    builder=Glide.with(view.getContext()).load(new File(value));
-                                }
+                                builder=Glide.with(view.getContext()).load(new File(value));
                             }else {
-                                builder=Glide.with(view.getContext()).load((String)img);
+//                                Debug.D(MBinding.class,"ddd "+value);
+                                builder=Glide.with(view.getContext()).load(value);
                             }
                             if (null!=builder) {
 //                        DrawableRequestBuilder<String> thumbnailRequest = Glide

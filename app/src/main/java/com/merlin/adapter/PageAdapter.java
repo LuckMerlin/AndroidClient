@@ -284,7 +284,6 @@ public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMore
     private void notifyPageUpdate(int state,boolean idle,Page page){
         WeakHashMap<OnPageLoadUpdate,Object> reference=mUpdateListeners;
         Set<OnPageLoadUpdate> set=null!=reference?reference.keySet():null;
-        Debug.D(getClass(),"AAnotifyPageUpdateAAA "+state+" "+(null!=set?set.size():-1));
         if (null!=set){
             synchronized (set){
                 for (OnPageLoadUpdate update:set) {

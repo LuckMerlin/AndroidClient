@@ -6,7 +6,7 @@ public interface FileMeta extends ViewDataLoadable {
 
      Object getImageUrl();
 
-     String getPath();
+     String getPath(boolean host);
 
      boolean applyModify(FModify modify);
 
@@ -19,10 +19,13 @@ public interface FileMeta extends ViewDataLoadable {
      String getName(boolean extension);
 
      String getParent();
+     long getLength();
      int getChildCount();
 
      boolean isDirectory();
+
      boolean isAccessible();
+
      String permission();
 
 }

@@ -88,8 +88,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-        ClientMeta testClient=new ClientMeta("算法","./",Address.URL,"",null,"///");
+//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+        ClientMeta testClient=new ClientMeta("算法","",Address.URL,"",null,"///");
 //        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
 //        refreshClientMeta("After mode create.");
@@ -323,6 +323,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         FileBrowserMenuBinding binding=null!=view?inflate(R.layout.file_browser_menu):null;
         if (null!=binding){
             binding.setFolder(mCurrentFolder.get());
+            binding.setMode(getMode().get());
             binding.setClient(getCurrentModelMeta());
             return showAtLocationAsContext(view,binding);
         }

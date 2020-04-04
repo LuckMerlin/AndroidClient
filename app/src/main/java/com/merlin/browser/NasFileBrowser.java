@@ -34,6 +34,10 @@ public class NasFileBrowser extends FileBrowser implements Label {
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
         Observable<Reply<NasFile>> getDetail(@Field(LABEL_PATH) String path);
+
+        @POST(Address.PREFIX_FILE+"/home")
+        @FormUrlEncoded
+        Observable<Reply<String>> setHome(@Field(LABEL_PATH) String path);
     }
 
     public NasFileBrowser(Context context, ClientMeta meta,Callback callback){
@@ -48,7 +52,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onShowFileDetail(View view, FileMeta meta, String debug) {
-        String path=null!=meta&&meta instanceof NasFile?meta.getPath():null;
+        String path=null!=meta&&meta instanceof NasFile?meta.getPath(false):null;
         FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
         if (null==binding){
             return toast(R.string.pathInvalid)&&false;
@@ -68,7 +72,8 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onSetAsHome(View view, String path, String debug) {
-
-        return false;
+        return null!=call(prepare(Api.class,Address.URL,null).setHome(path),null,null,null,(OnApiFinish<Reply<String>>)(what, note, data2, arg)->{
+           toast(what==WHAT_SUCCEED?R.string.succeed:(null!=note&&note.length()>0?note:getText(R.string.fail)));
+        });
     }
 }

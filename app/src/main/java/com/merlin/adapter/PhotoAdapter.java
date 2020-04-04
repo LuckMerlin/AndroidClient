@@ -32,7 +32,7 @@ public class  PhotoAdapter <T extends FileMeta> extends ListAdapter<T> {
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemPhotoBinding){
-            ((ItemPhotoBinding)binding).setPhoto(isAddPhotoViewType(viewType)?R.drawable.selector_photo_add:(null!=data?data.getPath():null));
+            ((ItemPhotoBinding)binding).setPhoto(isAddPhotoViewType(viewType)?R.drawable.selector_photo_add:(null!=data?data.getPath(true):null));
         }
     }
 

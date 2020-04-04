@@ -6,6 +6,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.browser.Permissions;
 import com.merlin.player.Playable;
@@ -30,6 +31,7 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     private String name;
     private String title;
     private String extension;
+    private String host;
     private int size;
     private double modifyTime;
 
@@ -134,9 +136,10 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     }
 
     @Override
-    public String getPath() {
+    public String getPath(boolean addHost) {
         String value=getName(true);
-        return null!=parent&&null!=value?parent+value:null;
+        String host=this.host;
+        return (!addHost||null!=host)&&null!=parent&&null!=value?(addHost?host+"?"+ Label.LABEL_PATH+"=" :"")+parent+value:null;
     }
 
     @Override
@@ -152,6 +155,10 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
         int permission=permissions;
         Permissions permissions=new Permissions();
         return permissions.isOtherReadable(permission)&&(!isDirectory()||permissions.isOtherExecutable(permission));
+    }
+
+    public String getHost() {
+        return host;
     }
 
     public final int getPermissions() {
@@ -171,7 +178,7 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     public boolean equals(@Nullable Object obj) {
         if (null!=obj){
             if (obj instanceof String){
-                String path=getPath();
+                String path=getPath(true);
                 return null!=path&&path.equals(obj);
             }
         }
@@ -182,7 +189,6 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
     public int describeContents() {
         return 0;
     }
-
 
     private NasFile(Parcel in){
         id=in.readLong();

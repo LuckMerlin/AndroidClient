@@ -30,14 +30,8 @@ import java.util.concurrent.Executor;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 
-public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
+public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,Mode {
     private final ClientMeta mMeta;
-    public final static int MODE_NORMAL=0x001;
-    public final static int MODE_MULTI_CHOOSE=0x002;
-    public final static int MODE_DOWNLOAD=0x003;
-    public final static int MODE_UPLOAD=0x004;
-    public final static int MODE_COPY=0x005;
-    public final static int MODE_MOVE=0x006;
     private final Context mContext;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
@@ -82,7 +76,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
                             if (isMode(MODE_MULTI_CHOOSE)) {
                                 return multiChoose(file, "After tap click.") || true;
                             } else if (file.isAccessible()) {
-                                return file.isDirectory()? browserPath(file.getPath(),
+                                return file.isDirectory()? browserPath(file.getPath(false),
                                         "After directory click."):openFile(file, "After item tap click.");
                             } else {
                                 toast(R.string.nonePermission);
@@ -180,7 +174,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
 
     private boolean showFileDetail(View view,Object data,String debug){
         FileMeta meta=null!=data&&data instanceof FileMeta?(FileMeta)data:null;
-        String path=null!=meta?meta.getPath():null;
+        String path=null!=meta?meta.getPath(false):null;
         if (null==path||path.length()<=0){
             toast(R.string.pathInvalid);
             return false;

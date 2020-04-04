@@ -12,7 +12,7 @@
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.view.Clicker"/>
-        <import type="com.merlin.browser.FileBrowser" alias="Model"/>
+        <import type="com.merlin.browser.Mode" alias="Model"/>
         <import type="android.text.Html"/>
         <import type="com.merlin.view.ContextMenu"/>
     </data>
@@ -107,12 +107,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <ImageView
-                    android:src="@{R.drawable.selector_menu}"
-                    android:visibility="@{vm.mode==Model.MODE_NORMAL?View.VISIBLE:View.GONE}"
-                    binding:enableClick="@{true}"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"/>
-                <ImageView
                     binding:enableClick="@{true}"
                     android:layout_width="@dimen/titleIconSize"
                     android:layout_height="@dimen/titleIconSize"
@@ -120,6 +114,12 @@
                     android:layout_marginRight="15dp"
                     android:visibility="@{vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
                     android:src="@{R.drawable.cancel_selector}"/>
+                <ImageView
+                    android:src="@{R.drawable.selector_menu}"
+                    android:visibility="@{(vm.mode==Model.MODE_NORMAL||vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE)?View.VISIBLE:View.GONE}"
+                    binding:enableClick="@{true}"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"/>
             </LinearLayout>
         </RelativeLayout>
         <HorizontalScrollView

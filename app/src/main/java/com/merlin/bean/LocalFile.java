@@ -19,7 +19,7 @@ public final class LocalFile implements Parcelable,FileMeta {
     private String title;
     private String extension;
     private String imageUrl;
-    private long size;
+    private long length;
     private int childCount;
     private double modifyTime;
     private boolean directory;
@@ -28,7 +28,7 @@ public final class LocalFile implements Parcelable,FileMeta {
     private Reply<Path> sync;
 
     public LocalFile(String parent,String title,String name,String extension,
-                     String imageUrl,int childCount,long size,long modifyTime, boolean directory,
+                     String imageUrl,int childCount,long length,long modifyTime, boolean directory,
                      boolean accessible,String md5){
         this.parent=parent;
         this.title=title;
@@ -36,7 +36,7 @@ public final class LocalFile implements Parcelable,FileMeta {
         this.childCount=childCount;
         this.extension=extension;
         this.imageUrl=imageUrl;
-        this.size=size;
+        this.length=length;
         this.modifyTime=modifyTime;
         this.directory=directory;
         this.accessible=accessible;
@@ -75,7 +75,7 @@ public final class LocalFile implements Parcelable,FileMeta {
     }
 
     public java.io.File getFile(){
-        String path= getPath();
+        String path= getPath(false);
         return null!=path&&path.length()>0?new java.io.File(path):null;
     }
 
@@ -155,15 +155,17 @@ public final class LocalFile implements Parcelable,FileMeta {
         return extension;
     }
 
-    public long getSize() {
-        return size;
+    @Override
+    public long getLength() {
+        return length;
     }
 
     public double getModifyTime() {
         return modifyTime;
     }
 
-    public String getPath() {
+    @Override
+    public String getPath(boolean host) {
         String value=getName(true);
         return null!=parent&&null!=value?parent+value:null;
     }
@@ -225,7 +227,7 @@ public final class LocalFile implements Parcelable,FileMeta {
         dest.writeString(title);
         dest.writeString(extension);
         dest.writeString(imageUrl);
-        dest.writeLong(size);
+        dest.writeLong(length);
         dest.writeInt(childCount);
         dest.writeDouble(modifyTime);
         dest.writeBoolean(directory);
@@ -238,7 +240,7 @@ public final class LocalFile implements Parcelable,FileMeta {
         title=in.readString();
         extension=in.readString();
         imageUrl=in.readString();
-        size=in.readLong();
+        length=in.readLong();
         childCount=in.readInt();
         modifyTime=in.readDouble();
         directory=in.readBoolean();

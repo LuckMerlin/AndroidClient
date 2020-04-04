@@ -27,6 +27,7 @@ import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
+import com.merlin.client.databinding.LocalFileDetailBinding;
 import com.merlin.client.databinding.LocalFileDetailBindingImpl;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
@@ -75,8 +76,6 @@ public class LocalFileBrowser extends FileBrowser{
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        switch (clickCount){
-        }
         return super.onTapClick(view, clickCount, resId, data);
     }
 
@@ -201,15 +200,15 @@ public class LocalFileBrowser extends FileBrowser{
     @Override
     protected boolean onShowFileDetail(View view, FileMeta meta, String debug) {
         if (null!=view){
-            String path=null!=meta&&meta instanceof LocalFile?meta.getPath():null;
+            String path=null!=meta&&meta instanceof LocalFile?meta.getPath(false):null;
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
             if (null!=file&&file.exists()){
-//                LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
-//                binding.setFile(((LocalFile)meta).getFile());
-//                String title=meta.getTitle();
-//                binding.setTitle(null!=title?title:file.getName());
-//                Dialog dialog=new Dialog(view.getContext());
-//                return dialog.setContentView(binding).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
+                LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
+                binding.setFile(((LocalFile)meta).getFile());
+                String title=meta.getTitle();
+                binding.setTitle(null!=title?title:file.getName());
+                Dialog dialog=new Dialog(view.getContext());
+                return dialog.setContentView(binding).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
             }
             Debug.W(getClass(),"Can't show local file detail which not exist "+path+" "+(null!=debug?debug:"."));
             toast(R.string.fileNotExist);
@@ -231,7 +230,7 @@ public class LocalFileBrowser extends FileBrowser{
     @Override
     protected boolean openFile(FileMeta meta, String debug) {
         LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
-        String path=localFile.getPath();
+        String path=localFile.getPath(false);
         if (null!=path&&path.length()>0){
             final File file=new File(path);
             if (!file.exists()){

@@ -158,7 +158,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             FileSaveBuilder builder=new FileSaveBuilder();
             parts = new ArrayList<>();
             for (FileMeta photo:adapterPhotos) {
-                Object imageUrlObj = null != photo ? photo.getPath() : null;
+                Object imageUrlObj = null != photo ? photo.getPath(true) : null;
                 String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
                 if (null != imageUrl && imageUrl.length() > 0) {
                     if (photo instanceof NasFile) {

@@ -23,6 +23,7 @@
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.util.Thumbs"/>
         <import type="com.merlin.bean.LocalFile"/>
+        <import type="com.merlin.util.FileSize"/>
     </data>
     <RelativeLayout
         binding:enableClick="@{Clicker.multiClick(meta,true)}"
@@ -60,12 +61,16 @@
                 android:layout_height="wrap_content">
                 <View
                     android:background="@{meta instanceof LocalFile?((LocalFile)meta).syncColor():R.color.syncNull}"
-                    android:layout_width="1dp"
                     android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"
                     android:alpha="0.9"
                     android:layout_marginTop="3dp"
                     android:layout_marginBottom="3dp"
-                    android:layout_height="match_parent"/>
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"/>
+                <TextView
+                    style="@style/titleSmallTextView"
+                    android:visibility="@{meta.directory?View.GONE:View.VISIBLE}"
+                    android:text="@{meta.directory?``:FileSize.formatSizeText((double)meta.length)}"/>
                 <TextView
                     style="@style/titleSmallTextView"
                     android:text="@{meta.directory?`(`+(meta.childCount)+`)`:(meta.extension??``)}"/>

@@ -46,7 +46,7 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
         if (null!=binding&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             itemBinding.setMeta(data);
-            itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath()):null);
+            itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath(true)):null);
             itemBinding.setPosition(position);
         }
     }

@@ -178,7 +178,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean scan(NasFile file, boolean recursive){
-        String path=null!=file?file.getPath():null;
+        String path=null!=file?file.getPath(false):null;
         return null!=path&&path.length()>0&&null!=call(prepare(Api.class,Address.HOST).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
     }
 
@@ -207,7 +207,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean showFileDetail(NasFile meta){
-        String path=null!=meta?meta.getPath():null;
+        String path=null!=meta?meta.getPath(false):null;
         FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
         if (null==binding){
             toast(R.string.pathInvalid);
@@ -229,7 +229,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean downloadFile(NasFile meta, String debug){
-        String path=null!=meta?meta.getPath():null;
+        String path=null!=meta?meta.getPath(false):null;
         if (null!=path&&path.length()>0){
             ArrayList<NasFile> list=new ArrayList<>();
             list.add(meta);
@@ -248,7 +248,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean uploadFile(NasFile meta){
-        String path=null!=meta?meta.getPath():null;
+        String path=null!=meta?meta.getPath(false):null;
         if (null==path||path.length()<=0 ||!meta.isDirectory()){
             toast(R.string.pathInvalid);
             return false;
@@ -433,7 +433,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                     List<String> paths=new ArrayList<>();
                     Map<String, NasFile> map=new HashMap<>(length);
                     for (NasFile meta:files) {
-                        String path=null!=meta?meta.getPath():null;
+                        String path=null!=meta?meta.getPath(false):null;
                         if (null!=path&&path.length()>0){
                             paths.add(path);
                             map.put(path,meta);
@@ -498,7 +498,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean renameFile(NasFile meta){
-        final String path=null!=meta?meta.getPath():null;
+        final String path=null!=meta?meta.getPath(false):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(false);
             return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
