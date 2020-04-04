@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.merlin.api.Label;
+import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.browser.Permissions;
 import com.merlin.player.Playable;
@@ -45,6 +46,18 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
 
     public NasFile(String parent,String name,String extension){
 
+    }
+
+    @Override
+    public boolean applyChange(Reply<Path> reply) {
+        Path path=null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?reply.getData():null;
+        if (null!=path){
+            parent=path.getParent();
+            name=path.getName(false);
+            extension=path.getExtension();
+            return true;
+        }
+        return false;
     }
 
     public boolean applyModify(FModify modify){

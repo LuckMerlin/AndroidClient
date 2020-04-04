@@ -516,7 +516,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                         BrowserAdapter adapter=mNasBrowserAdapter;
                         FModify modify=succeed&&null!=data&&null!=adapter?data.getData():null;
                         if (succeed&&null!=modify&&null!=adapter){
-                            adapter.renamePath(meta,modify);
+//                            adapter.renamePath(meta,modify);
                         }
                     });
                 }

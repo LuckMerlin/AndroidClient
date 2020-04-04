@@ -14,12 +14,20 @@ import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.Callback;
+import com.merlin.api.CoverMode;
+import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
+import com.merlin.api.Reply;
+import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
+import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
+import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
+import com.merlin.debug.Debug;
+import com.merlin.dialog.SingleInputDialog;
 import com.merlin.server.Retrofit;
 import com.merlin.server.RetrofitCanceler;
 import com.merlin.view.OnTapClick;
@@ -70,6 +78,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                         return showFileDetail(view,data,"After detail tap click.");
                     case R.string.setAsHome:
                         return setAsHome(view,data,"After set as home tap click.");
+                    case R.string.rename:
+                        return null!=data&&data instanceof FileMeta &&renameFile((FileMeta)data, CoverMode.NONE,"After rename tap click.");
                     default:
                         if (null != data && data instanceof FileMeta) {
                             FileMeta file = (FileMeta) data;
@@ -187,9 +197,36 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(view,path,debug);
     }
 
+    private boolean renameFile(FileMeta meta,int coverMode,String debug){
+        final String path=null!=meta?meta.getPath(false):null;
+        if (null!=path&&path.length()>0){
+            final String name=meta.getName(true);
+            return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
+                if (null==text||text.length()<=0){
+                    toast(R.string.inputNotNull);
+                }else if (null!=name&&text.equals(name)){
+                    toast(R.string.noneChanged);
+                }else{
+                    if (null!=dlg){
+                        dlg.dismiss();
+                    }
+                    onRenameFile(path,text,coverMode,(what, note, data, arg)->{
+                        boolean succeed=what== What.WHAT_SUCCEED;
+                        toast(note);
+                        if (succeed&&null!=data&&meta.applyChange(data)){
+                            replace(meta,"After rename succeed.");
+                        }
+                    },debug);
+                }
+            });
+        }
+        Debug.W(getClass(),"Can't rename file.path="+path);
+        return false;
+    }
+
     protected abstract boolean onShowFileDetail(View view,FileMeta meta,String debug);
     protected abstract boolean onSetAsHome(View view,String path,String debug);
-//    protected abstract boolean onRenameFile(String path, String name, int mode, OnApiFinish<Reply<FModify>> finish, String debug);
+    protected abstract boolean onRenameFile(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
 //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 
     protected final <T extends ViewDataBinding> T inflate(int layoutId){

@@ -16,6 +16,7 @@ import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
+import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
@@ -261,5 +262,62 @@ public class LocalFileBrowser extends FileBrowser{
             return true;
         }
         return super.openFile(meta, debug);
+    }
+
+    @Override
+    protected boolean onRenameFile(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
+        Integer what=null;String note=null;boolean succeed=false;Path data=null;Object arg=null;
+        if (null==path||null==name||path.length()<=0||name.length()<=0){
+            what=What.WHAT_ARGS_INVALID;
+            note=getText(R.string.inputNotNull);
+        }else{
+           succeed=true;
+           File file=new File(path);
+           String currName=file.getName();
+           int postfixIndex=null!=currName&&file.isFile()&&(coverMode&CoverMode.POSTFIX)==0?currName.lastIndexOf("."):-1;
+           String postfix=postfixIndex>0?currName.substring(postfixIndex):null;
+           name=null!=postfix&&postfix.length()>0?name+postfix:name;
+           File folder=null!=name&&name.length()>0?file.getParentFile():null;
+           File target=null!=folder?new File(folder,name):null;
+           if (null==target){
+               what=What.WHAT_ARGS_INVALID;
+               note=getText(R.string.inputNotNull);
+           }else if (!file.exists()){
+               what=What.WHAT_FILE_NOT_EXIST;
+               note=getText(R.string.fileNotExist);
+           }else if (!file.canWrite()){
+               what=What.WHAT_NONE_PERMISSION;
+               note=getText(R.string.nonePermission);
+           }else if (target.exists()&&(coverMode&CoverMode.REPLACE)==0){
+               what=What.WHAT_FILE_EXIST;
+               note=getText(R.string.fileAlreadyExist);
+           }else if (target.exists()&&(target.delete()||target.exists())){
+               what=What.WHAT_ERROR_UNKNOWN;
+               note=getText(R.string.deleteFail);
+           }else if(file.renameTo(target)&&target.exists()) {
+               String[] fix=LocalFile.getPostfix(target);
+               data=new Path(folder.getAbsolutePath(),fix[0],fix[1]);
+               what=What.WHAT_SUCCEED;
+               note=getText(R.string.succeed);
+           }
+        }
+        return invokeFinish(succeed,what,note,finish,data,arg);
+    }
+
+    private boolean invokeFinish(boolean succeed,Integer what,String note,OnApiFinish finish,Object data,Object arg){
+        if (null!=finish){
+            what=null!=what?what:What.WHAT_ERROR_UNKNOWN;
+            Reply reply=null;
+            if (null!=data){
+                reply=new Reply<>();
+                reply.setSuccess(succeed);
+                reply.setWhat(what);
+                reply.setNote(note);
+                reply.setData(data);
+            }
+            finish.onApiFinish(what,note,reply,arg);
+            return true;
+        }
+        return false;
     }
 }

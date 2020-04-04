@@ -5,6 +5,7 @@ import android.view.View;
 
 import com.merlin.api.Address;
 import com.merlin.api.Canceler;
+import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -13,6 +14,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
+import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.dialog.Dialog;
@@ -68,6 +70,12 @@ public class NasFileBrowser extends FileBrowser implements Label {
             binding.setFile(detail);
             binding.setLoadState(what);
         });
+    }
+
+    @Override
+    protected boolean onRenameFile(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
+
+        return false;
     }
 
     @Override

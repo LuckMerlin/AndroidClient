@@ -102,8 +102,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
         return false;
     }
 
-    public static boolean upload(Context context, LocalFile file, ClientMeta meta, String folder,
-                                 CoverMode coverMode, String debug) {
+    public static boolean upload(Context context, LocalFile file, ClientMeta meta, String folder,int coverMode, String debug) {
         if (null!=file&&null!=context){
             ArrayList<LocalFile> list=new ArrayList<>();
             list.add(file);
@@ -113,15 +112,15 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
         return false;
     }
 
-    public static boolean download(Context context, ArrayList<NasFile> files, ClientMeta meta, String folder,CoverMode coverMode, String debug) {
+    public static boolean download(Context context, ArrayList<NasFile> files, ClientMeta meta, String folder,int coverMode, String debug) {
         return conveyFiles(context,Label.LABEL_DOWNLOAD,files,meta,folder,coverMode,debug);
     }
 
-    public static boolean upload(Context context, ArrayList<LocalFile> files, ClientMeta meta, String folder, CoverMode coverMode, String debug){
+    public static boolean upload(Context context, ArrayList<LocalFile> files, ClientMeta meta, String folder, int coverMode, String debug){
         return conveyFiles(context,Label.LABEL_UPLOAD,files,meta,folder,coverMode,debug);
     }
 
-    private static boolean conveyFiles(Context context, String what,  ArrayList files, ClientMeta meta, String folder, CoverMode coverMode, String debug){
+    private static boolean conveyFiles(Context context, String what,  ArrayList files, ClientMeta meta, String folder, int coverMode, String debug){
         if (null!=files&&files.size()>0&&null!=context){
             if (null==what||what.length()<=0){
                 Debug.W(ConveyorService.class,"Can't convey files with invalid what "+(null!=debug?debug:".")+" what="+what);

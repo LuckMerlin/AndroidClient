@@ -1,5 +1,6 @@
 package com.merlin.bean;
 
+import com.merlin.api.Reply;
 import com.merlin.binding.ViewDataLoadable;
 
 public interface FileMeta extends ViewDataLoadable {
@@ -8,7 +9,7 @@ public interface FileMeta extends ViewDataLoadable {
 
      String getPath(boolean host);
 
-     boolean applyModify(FModify modify);
+     boolean applyChange(Reply<Path> reply);
 
      String getExtension();
 

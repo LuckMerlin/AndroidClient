@@ -117,6 +117,19 @@ public final class LocalFile implements Parcelable,FileMeta {
         return true;
     }
 
+
+    @Override
+    public boolean applyChange(Reply<Path> reply) {
+        Path path=null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?reply.getData():null;
+        if (null!=path){
+            parent=path.getParent();
+            name=path.getName(false);
+            extension=path.getExtension();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @deprecated
      */

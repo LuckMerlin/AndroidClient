@@ -195,7 +195,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
     }
 
-    private boolean upload(ArrayList<LocalFile> files,CoverMode coverMode,String debug){
+    private boolean upload(ArrayList<LocalFile> files,int coverMode,String debug){
         if (null==files||files.size()<=0){
             toast(R.string.noneDataToOperate);
             return false;
@@ -215,7 +215,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return toast(R.string.fail);
     }
 
-    private boolean download(ArrayList<NasFile> files,CoverMode coverMode,String debug){
+    private boolean download(ArrayList<NasFile> files,int coverMode,String debug){
         if (null==files||files.size()<=0){
             toast(R.string.noneDataToOperate);
             return false;

@@ -23,17 +23,17 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
         return mMultiChoose;
     }
 
-    public final boolean renamePath(T meta, FModify modify){
-        List<T> list=null!=meta&&null!=modify?getData():null;
-        int size=null!=list?list.size():-1;
-        int index=size>0?list.indexOf(meta):-1;
-        meta=index>=0&&index<size?list.get(index):null;
-        if (null!=meta&&meta.applyModify(modify)){
-            notifyItemChanged(index);
-            return true;
-        }
-        return false;
-    }
+//    public final boolean renamePath(T meta, FModify modify){
+//        List<T> list=null!=meta&&null!=modify?getData():null;
+//        int size=null!=list?list.size():-1;
+//        int index=size>0?list.indexOf(meta):-1;
+//        meta=index>=0&&index<size?list.get(index):null;
+//        if (null!=meta&&meta.applyModify(modify)){
+//            notifyItemChanged(index);
+//            return true;
+//        }
+//        return false;
+//    }
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
