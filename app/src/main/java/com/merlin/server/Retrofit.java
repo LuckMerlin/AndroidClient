@@ -7,6 +7,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
+import java.net.ConnectException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -92,7 +93,15 @@ public class Retrofit {
         @Override
         public void onError(Throwable e) {
             Debug.E(getClass(),"Error on api "+e,e);
-            finishCall(What.WHAT_ERROR_UNKNOWN,null,mCallbacks,e,"After error.");
+            int what=What.WHAT_ERROR_UNKNOWN;
+            String note="After error.";
+            if (null!=e){
+                if (e instanceof ConnectException){
+                    what=What.WHAT_NONE_NETWORK;
+                    note="None network";
+                }
+            }
+            finishCall(what,null,mCallbacks,e,note);
         }
 
         private void finishCall(Integer what,Object data,Callback[] callbacks,Object arg,String debug){

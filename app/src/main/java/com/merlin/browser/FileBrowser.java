@@ -2,6 +2,8 @@ package com.merlin.browser;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -240,6 +242,19 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick {
             }
         }));
         return popupWindow;
+    }
+
+    protected final boolean post(Runnable runnable,int delay){
+        if (null!=runnable){
+            delay=delay<=0?0:delay;
+            View view=getRecyclerView();
+            if (null!=view){
+                return view.postDelayed(runnable,delay);
+            }else{
+                new Handler(Looper.getMainLooper()).postDelayed(runnable,delay);
+            }
+        }
+        return false;
     }
 
     protected final boolean startActivity(Intent intent){

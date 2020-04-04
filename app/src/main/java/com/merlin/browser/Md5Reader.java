@@ -53,7 +53,7 @@ public class Md5Reader {
                         try {
                             in.close();
                         } catch (IOException e) {
-                            //Do nothi22ng
+                            //Do nothing
                         }
                     }
                 }

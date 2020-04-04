@@ -402,7 +402,8 @@ public class MBinding {
                 final ViewParent parent=adapter instanceof PageAdapter ?view.getParent():null;
                 if (null!=parent&&parent instanceof SwipeRefreshLayout){
                     final SwipeRefreshLayout refreshLayout=(SwipeRefreshLayout)parent;
-                    final PageAdapter multiPageAdapter=(PageAdapter)adapter;
+                    final PageAdapter pageAdapter=(PageAdapter)adapter;
+                    refreshLayout.setRefreshing(pageAdapter.isLoading());
                     final SectionAdapterRefreshBridge refresh=new SectionAdapterRefreshBridge(){
                         @Override
                         public void onPageLoadUpdate(int state, boolean idle, PageAdapter.Page page) {
@@ -420,13 +421,13 @@ public class MBinding {
 
                         @Override
                         public void onRefresh() {
-                            if (!multiPageAdapter.reset("After refresh.")&&!multiPageAdapter.isLoading()){
+                            if (!pageAdapter.reset("After refresh.")&&!pageAdapter.isLoading()){
                                 refreshLayout.setRefreshing(false);
                             }
                         }
                     };
                     ((SwipeRefreshLayout)parent).setOnRefreshListener(refresh);
-                    multiPageAdapter.add(refresh);
+                    pageAdapter.add(refresh);
                 }
             }
             view.setAdapter(adapter);

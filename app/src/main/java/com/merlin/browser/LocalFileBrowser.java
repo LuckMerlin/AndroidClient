@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
 import android.util.ArraySet;
@@ -29,6 +30,8 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBindingImpl;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
+import com.merlin.server.Retrofit;
+import com.merlin.server.RetrofitCanceler;
 import com.merlin.util.Thumbs;
 
 import java.io.File;
@@ -67,50 +70,21 @@ public class LocalFileBrowser extends FileBrowser{
 
     @Override
     protected Canceler onPageLoad(Object path, int from, OnApiFinish finish) {
-        final Map<String,LocalFile> md5Map=new HashMap<>();
-        if (browserFolder(null!=path&&path instanceof String?(String)path:null, from,from+50,md5Map,finish)){
-            final Set<String> md5s=null!=md5Map&&md5Map.size()>0?md5Map.keySet():null;
-            Canceler canceler=null;
-//
-            return null!=canceler?canceler:(boolean cancel, String debug)->{return true;};
-        }
-        return null;
+        return null!=path&&path instanceof String?browserFolder((String)path,from,from+50,finish):null;
     }
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
-            case R.string.sync:
-                syncFile(data,"After tap click.");
-                return true;
         }
         return super.onTapClick(view, clickCount, resId, data);
     }
 
-    private Canceler syncFile(Object data,String debug){
-        String path=null!=data&&data instanceof LocalFile?((LocalFile)data).getPath():null;
-        if (null==path||path.length()<=0){
-            toast(R.string.pathInvalid);
-            return null;
-        }
-        List<String> md5s=new ArrayList<>();
-        md5s.add(path);
-        return call(prepare(Api.class, Address.URL, null).checkSync(md5s).doOnSubscribe(new Consumer<Disposable>() {
-            @Override
-            public void accept(Disposable disposable) throws Exception {
-                Debug.D(getClass(),"AAAAAAAAAAa "+Thread.currentThread().getName());
-            }
-        }),null,null,(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>) (int what, String note, Reply<ApiMap<String, Reply<Path>>> data1, Object arg)-> {
-            Debug.D(getClass(),"AAAAAAA结束AAAa ");
-        });
-    }
-
-    private boolean browserFolder(String path, int from, int to,Map<String,LocalFile> md5Map, OnApiFinish<Reply<PageData<LocalFile>>> finish){
+    private Canceler browserFolder(String path, int from, int to, OnApiFinish<Reply<PageData<LocalFile>>> finish){
         path=null!=path&&path.length()>0?path:getClientRoot();
         File folder=null!=path&&path.length()>0?new File(path):null;
         final Reply<PageData<LocalFile>>  reply=new Reply<>();
         Integer what=null;
-        boolean succeed=false;
         String note=null;
         Object arg=null;
         if (null==folder||folder.length()<=0){
@@ -133,7 +107,6 @@ public class LocalFileBrowser extends FileBrowser{
             what=What.WHAT_NONE_PERMISSION;
         }
         if (null==what){
-            succeed=true;
             final File[] files=folder.listFiles();
             final int length=null!=files?files.length:0;
             FolderData<LocalFile> folderData=new FolderData<>();
@@ -148,48 +121,81 @@ public class LocalFileBrowser extends FileBrowser{
                 note=getText(R.string.outOfBounds);
             }
             if (what==null){
-                what=What.WHAT_SUCCEED;
-                succeed=true;
                 final int toIndex = Math.min(to,length);
-                Debug.D(getClass(),"Browsing local folder from "+from+" to "+toIndex+" "+path);
-                int volume=toIndex-from;
-                ArrayList<LocalFile> list=new ArrayList(volume<=0?0:volume>1000?10:volume);
+                final int volume=toIndex-from;
+                reply.setSuccess(true);
+                reply.setWhat(What.WHAT_SUCCEED);
+                Debug.D(getClass(),"Browsing local folders "+volume+" from "+from+" to "+toIndex+" "+path);
                 if (volume>0){
-                    call(prepare(Api.class, Address.URL, null).checkSync(null)
-                            .subscribeOn(Schedulers.io()).doOnSubscribe((Disposable disposable) ->{
+                    final ArrayList<LocalFile> list=new ArrayList(volume>1000?100:volume);
+                    final Map<String,List<LocalFile>> fileMaps=new HashMap<>();
+                    Api api=prepare(Api.class, Address.URL, null);
+                    final List<String> md5s=new ArrayList<>();
+                    final String pathArg=path;
+                    return call(api.checkSync(md5s).subscribeOn(Schedulers.io()).doOnSubscribe((Disposable disposable) ->{
                         final int maxAutoLoadMd5=1024*1024*50;
                         final Md5Reader md5Reader=mMd5Reader;
-                        LocalFile localFile;
+                        LocalFile localFile;File child;String md5;
                         for (int i = from; i < toIndex; i++) {
-                            File child=files[i];
-                            localFile=null!=child?LocalFile.create(child,null,child.length()
-                                    <=maxAutoLoadMd5?md5Reader:null):null;
-                            if (null!=localFile){
-                                list.add(localFile);
-                                if (null!=md5Map){
-                                    String md5=localFile.getMd5();
-                                    if (null!=md5&&md5.length()>0&&null==localFile.getSync()){
-                                        md5Map.put(md5,localFile);
+                            if (null!=(localFile=null!=(child=files[i])?LocalFile.create(child, null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
+                                if (list.add(localFile)&&null!=(md5=(null==localFile.getSync()?localFile.getMd5():null))&& md5.length()>0&&!md5s.contains(md5)&&md5s.add(md5)){
+                                    List<LocalFile> fileList=fileMaps.get(md5);
+                                    if (null!=fileList){
+                                        fileList.add(localFile);
+                                    }else{
+                                        fileList=new ArrayList<>();
+                                        fileList.add(localFile);
+                                        fileMaps.put(md5,fileList);
                                     }
                                 }
                             }
                         }
                         folderData.setData(list);
-                    }),null,null,null);
+                        reply.setSuccess(true);
+                        reply.setWhat(What.WHAT_SUCCEED);
+                        reply.setData(folderData);
+                        if (null!=finish){
+                            post(()->finish.onApiFinish(reply.getWhat(),"Empty",reply, "List succeed."),0);
+                        }
+                        if (null==list||list.size()<=0){
+                            disposable.dispose(); //Cancel to check file with server
+                        }else{//Check file sync with server
+                            //Do nothing
+                        }
+                    }),null,Schedulers.trampoline(),(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>) (int serverWhat, String serverNote, Reply<ApiMap<String, Reply<Path>>> serverData, Object serverArg)->{
+                        ApiMap<String,Reply<Path>> map=null!=serverData?serverData.getData():null;
+                        Set<String> serverSet=null!=map&&map.size()>0?map.keySet():null;
+                        if (null!=serverSet&&serverSet.size()>0){
+                            for (String childMd5:serverSet){
+                                if (!isCurrentArgEquals(pathArg)){//If folder change
+                                    break;
+                                }
+                                Reply<Path> serverReply=map.get(childMd5);
+                                List<LocalFile> localFiles=null!=childMd5?fileMaps.get(childMd5):null;
+                                if (null!=localFiles&&localFiles.size()>0){
+                                    for (LocalFile file:localFiles) {
+                                        if (null!=file&&file.applySync(serverReply)){
+                                            post(()->replace(file,"After sync check finish."),0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
-//                syncFile(list.get(0),"");
+                if (null!=finish){
+                    finish.onApiFinish(reply.getWhat(),"None files matched.",reply,arg);
+                }
+                return (boolean cancel, String debug)-> false;
             }
         }
-        if (!succeed){
-            Debug.D(getClass(),"Fail browser local folder."+note+" "+folder);
-        }
-        reply.setSuccess(succeed);
+        reply.setSuccess(true);
         reply.setNote(note);
         reply.setWhat(null!=what?what:What.WHAT_INVALID);
         if (null!=finish){
             finish.onApiFinish(reply.getWhat(),note,reply,arg);
         }
-        return true;
+        return null;
     }
 
     @Override
