@@ -127,6 +127,7 @@
     <string name="loading">加载中</string>
     <string name="alreadyMax">已经最大值了</string>
     <string name="canNotSwitch">不能切换</string>
+    <string name="sync">同步</string>
     <string name="canNotOperateHere">当前位置不能执行此操作</string>
     <string name="targetFolderInvalid">目标目录不合法</string>
     <string name="noneDataToOperate">没有可操作的数据</string>

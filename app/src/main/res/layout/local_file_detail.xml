@@ -6,6 +6,9 @@
             name="file"
             type="java.io.File" />
         <variable
+            name="meta"
+            type="com.merlin.bean.LocalFile" />
+        <variable
             name="imageUrl"
             type="Object" />
         <variable
@@ -33,6 +36,11 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_width="50dp"
                 android:layout_height="50dp"/>
+            <View
+                android:background="@{meta.syncColor()}"
+                android:layout_width="match_parent"
+                android:alpha="0.5"
+                android:layout_height="3dp"/>
             <include binding:key="@{R.string.title}" binding:value="@{title}"  layout="@layout/item_key_value"/>
             <LinearLayout
                 android:layout_marginTop="1dp"
@@ -57,7 +65,8 @@
             <include binding:key="@{R.string.permission}" binding:value="@{(file.canWrite()?`w`:``)+(file.canRead()?`r`:``)+(file.canExecute()?`x`:``)}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.size}" binding:value="@{FileSize.formatSizeText(file.length())}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.accessTime}" binding:value="@{Time.formatTime(file.lastModified)}" layout="@layout/item_key_value"/>
-<!--            <include binding:key="@{R.string.sync}" binding:value="@{file?R.string.folder:R.string.file}" layout="@layout/item_key_value"/>-->
+            <include binding:key="@{R.string.md5}" binding:value="@{meta.md5}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.sync}" binding:value="@{meta.sync.data.path}" android:visibility="@{(null!=meta.sync.data.path)?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>
             <!--            <include binding:key="@{R.string.size}" binding:value="@{client.account}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>-->
 <!--            <include binding:key="@{R.string.modifyTime}" binding:value="@{client.deviceType}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>-->
         </LinearLayout>

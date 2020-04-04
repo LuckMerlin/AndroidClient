@@ -169,14 +169,17 @@ public class LocalFileBrowser extends FileBrowser{
                                 if (!isCurrentArgEquals(pathArg)){//If folder change
                                     break;
                                 }
-                                Reply<Path> serverReply=map.get(childMd5);
-                                List<LocalFile> localFiles=null!=childMd5?fileMaps.get(childMd5):null;
-                                if (null!=localFiles&&localFiles.size()>0){
-                                    for (LocalFile file:localFiles) {
-                                        if (null!=file&&file.applySync(serverReply)){
-                                            post(()->replace(file,"After sync check finish."),0);
+                                if (null!=childMd5){
+                                    Reply<Path> serverReply=map.get(childMd5);
+                                    List<LocalFile> localFiles=null!=childMd5?fileMaps.get(childMd5):null;
+                                    if (null!=localFiles&&localFiles.size()>0){
+                                        for (LocalFile file:localFiles) {
+                                            if (null!=file&&file.applySync(serverReply)){
+                                                post(()->replace(file,"After sync check finish."),0);
+                                            }
                                         }
                                     }
+
                                 }
                             }
                         }
@@ -199,12 +202,13 @@ public class LocalFileBrowser extends FileBrowser{
 
     @Override
     protected boolean onShowFileDetail(View view, FileMeta meta, String debug) {
-        if (null!=view){
-            String path=null!=meta&&meta instanceof LocalFile?meta.getPath(false):null;
+        if (null!=view&&null!=meta&&meta instanceof LocalFile){
+            String path=meta.getPath(false);
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
             if (null!=file&&file.exists()){
                 LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
                 binding.setFile(((LocalFile)meta).getFile());
+                binding.setMeta((LocalFile) meta);
                 String title=meta.getTitle();
                 binding.setTitle(null!=title?title:file.getName());
                 Dialog dialog=new Dialog(view.getContext());

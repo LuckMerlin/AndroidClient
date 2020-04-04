@@ -88,7 +88,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
         ClientMeta testClient=new ClientMeta("算法","",Address.URL,"",null,"///");
 //        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
