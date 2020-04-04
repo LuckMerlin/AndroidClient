@@ -112,6 +112,11 @@ public final class Clicker {
         return false;
     }
 
+    public static Object getInterrupterTag(View view,Object def){
+        Object tag=null!=view?view.getTag(R.id.interruptClick):def;
+        return null!=tag?tag:def;
+    }
+
     public static Res getRes(View view,Res def){
         Object object=view.getTag(R.id.viewResource);
         return null!=object&&object instanceof Res?(Res)object:def;

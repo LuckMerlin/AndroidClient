@@ -266,7 +266,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean launchGoTo(String debug){
         final Dialog dialog=new Dialog(getViewContext());
         SingleEditTextBinding binding=inflate(R.layout.single_edit_text);
-        return dialog.setContentView(binding).title(R.string.goTo).left(R.string.sure).right(R.string.cancel).show(
+        return dialog.setContentView(binding,true).title(R.string.goTo).left(R.string.sure).right(R.string.cancel).show(
                 (View view, int clickCount, int resId, Object data) ->{
                     switch (resId){
                         case R.string.sure:

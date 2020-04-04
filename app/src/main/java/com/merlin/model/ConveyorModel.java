@@ -76,7 +76,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
                     convey.setListener(null,"While dialog dismiss.");
                 }
             };
-            dialog.setContentView(binding);
+            dialog.setContentView(binding,true);
             if (null!=binding){
                 binding.setChildAdapter(convey instanceof ConveyGroup?new ConveyingAdapter(((ConveyGroup)convey).getChildren()) :null);
                 binding.setConvey(convey);

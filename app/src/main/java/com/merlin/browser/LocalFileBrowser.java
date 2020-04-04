@@ -4,16 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.StrictMode;
-import android.util.ArraySet;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.api.Address;
-import com.merlin.api.ApiList;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
@@ -29,11 +25,8 @@ import com.merlin.bean.LocalFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;
-import com.merlin.client.databinding.LocalFileDetailBindingImpl;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
-import com.merlin.server.Retrofit;
-import com.merlin.server.RetrofitCanceler;
 import com.merlin.util.Thumbs;
 
 import java.io.File;
@@ -46,13 +39,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Scheduler;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -138,8 +125,10 @@ public class LocalFileBrowser extends FileBrowser{
                         final Md5Reader md5Reader=mMd5Reader;
                         LocalFile localFile;File child;String md5;
                         for (int i = from; i < toIndex; i++) {
-                            if (null!=(localFile=null!=(child=files[i])?LocalFile.create(child, null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
-                                if (list.add(localFile)&&null!=(md5=(null==localFile.getSync()?localFile.getMd5():null))&& md5.length()>0&&!md5s.contains(md5)&&md5s.add(md5)){
+                            if (null!=(localFile=null!=(child=files[i])?LocalFile.create(child,
+                                    null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
+                                if (list.add(localFile)&&null!=(md5=(null==localFile.getSync()?localFile.getMd5():
+                                        null))&& md5.length()>0&&!md5s.contains(md5)&&md5s.add(md5)){
                                     List<LocalFile> fileList=fileMaps.get(md5);
                                     if (null!=fileList){
                                         fileList.add(localFile);
@@ -163,7 +152,8 @@ public class LocalFileBrowser extends FileBrowser{
                         }else{//Check file sync with server
                             //Do nothing
                         }
-                    }),null,Schedulers.trampoline(),(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>) (int serverWhat, String serverNote, Reply<ApiMap<String, Reply<Path>>> serverData, Object serverArg)->{
+                    }),null,Schedulers.trampoline(),(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>)
+                            (int serverWhat, String serverNote, Reply<ApiMap<String, Reply<Path>>> serverData, Object serverArg)->{
                         ApiMap<String,Reply<Path>> map=null!=serverData?serverData.getData():null;
                         Set<String> serverSet=null!=map&&map.size()>0?map.keySet():null;
                         if (null!=serverSet&&serverSet.size()>0){
@@ -214,7 +204,7 @@ public class LocalFileBrowser extends FileBrowser{
                 String title=meta.getTitle();
                 binding.setTitle(null!=title?title:file.getName());
                 Dialog dialog=new Dialog(view.getContext());
-                return dialog.setContentView(binding).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
+                return dialog.setContentView(binding,true).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
             }
             Debug.W(getClass(),"Can't show local file detail which not exist "+path+" "+(null!=debug?debug:"."));
             toast(R.string.fileNotExist);
@@ -344,6 +334,12 @@ public class LocalFileBrowser extends FileBrowser{
             }
         }
         return invokeFinish(succeed,what,note,finish,modify,arg);
+    }
+
+    @Override
+    protected boolean onDeletePath(List<FileMeta> paths, OnPathModify delete, OnApiFinish<Reply<String>> finish, String debug) {
+
+        return false;
     }
 
     private boolean invokeFinish(boolean succeed, Integer what, String note, OnApiFinish finish, Object data, Object arg){

@@ -103,7 +103,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
         Context context=getViewContext();
         final Dialog dialog=new Dialog(context);
         final EditText et=(EditText)LayoutInflater.from(context).inflate(R.layout.edit_text,null,false);
-        return dialog.setContentView(et).title(R.string.createSheet).left(R.string.sure).right(R.string.cancel).show((view, clickCount, resId, data)->{
+        return dialog.setContentView(et,true).title(R.string.createSheet).left(R.string.sure).right(R.string.cancel).show((view, clickCount, resId, data)->{
            if (resId == R.string.sure){
                String text=et.getText().toString();
                if (null==text||text.length()<=0){

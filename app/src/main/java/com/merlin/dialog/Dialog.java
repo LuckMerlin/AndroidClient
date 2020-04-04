@@ -65,22 +65,22 @@ public class Dialog implements View.OnClickListener{
         window.setAttributes(params);
     }
 
-    public final Dialog setContentView(int layoutId){
+    public final Dialog setContentView(int layoutId,boolean recreate){
         Context context=getContext();
         if (null!=context){
             LayoutInflater inflater=LayoutInflater.from(context);
             ViewDataBinding binding=DataBindingUtil.inflate(inflater,layoutId,null,false);
             if (null!=binding){
-                return setContentView(binding);
+                return setContentView(binding,recreate);
             }
-            return setContentView(inflater.inflate(layoutId,null,false));
+            return setContentView(inflater.inflate(layoutId,null,false),recreate);
         }
         return this;
     }
 
-    public final Dialog setContentView(ViewDataBinding binding){
+    public final Dialog setContentView(ViewDataBinding binding, boolean recreate){
         View view=null!=binding?binding.getRoot():null;
-        return null!=view?setContentView(view):this;
+        return null!=view?setContentView(view,recreate):this;
     }
 
     public final Dialog create(){
@@ -100,6 +100,10 @@ public class Dialog implements View.OnClickListener{
             }
         }
         return this;
+    }
+
+    public final boolean isCreated(){
+        return null!=mBinding;
     }
 
     public final Dialog cleanBackground(){
@@ -130,10 +134,12 @@ public class Dialog implements View.OnClickListener{
         return this;
     }
 
-    public final Dialog setContentView(View view){
+    public final Dialog setContentView(View view,boolean recreate){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
-            create();
+            if (!isCreated()||recreate) {
+                create();
+            }
             DialogLayoutBinding binding=mBinding;
             if (null!=binding){
                 binding.setContentLayout(view);

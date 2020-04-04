@@ -216,7 +216,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         binding.setFile(meta);
         binding.setLoadState(What.WHAT_INVALID);
         final Dialog dialog=new Dialog(getViewContext());
-        dialog.setContentView(null!=binding?binding.getRoot():null).show(( view, clickCount, resId, data)->{
+        dialog.setContentView(null!=binding?binding.getRoot():null,true).show(( view, clickCount, resId, data)->{
             return true;
         },false);
         return null!=call(prepare(Api.class,Address.HOST).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
@@ -475,7 +475,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
             return false;
         }
         final Dialog dialog=new Dialog(getViewContext());
-        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
+        return dialog.setContentView(R.layout.edit_text,true).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
                 .right(R.string.cancel).show(( view, clickCount,  resId, data)->{
                     if (resId==R.string.sure){
                         String input=dialog.getViewText(R.id.edit_text,null);

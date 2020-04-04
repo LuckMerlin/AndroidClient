@@ -150,7 +150,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         if (null!=md5&&md5.length()>0){
             Dialog dialog=new Dialog(getViewContext());
             ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(com.merlin.client.BR.media,playing));
-            return dialog.setContentView(binding).title(R.string.addToSheet).left(R.string.create).right(R.string.cancel).
+            return dialog.setContentView(binding,true).title(R.string.addToSheet).left(R.string.create).right(R.string.cancel).
                     show((view,clickCount,resId,data)->{
                         dialog.dismiss();
                         String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
@@ -193,7 +193,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
             binding.setAdapter(adapter);
             String title=getText(R.string.playing);
             title=null!=title?title+" ("+size+")":null;
-            return dialog.setContentView(binding).title(title).show();
+            return dialog.setContentView(binding,true).title(title).show();
         }
         return false;
     }

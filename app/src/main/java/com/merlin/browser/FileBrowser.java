@@ -13,27 +13,30 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
-import com.merlin.api.Callback;
 import com.merlin.api.CoverMode;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FModify;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
+import com.merlin.client.databinding.LayoutFileModifyBinding;
+import com.merlin.client.databinding.LayoutFileModifyBindingImpl;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.server.Retrofit;
 import com.merlin.server.RetrofitCanceler;
+import com.merlin.view.Clicker;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import io.reactivex.Observable;
@@ -83,6 +86,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                         return createPath(true,"After create folder tap click.");
                     case R.string.setAsHome:
                         return setAsHome(view,data,"After set as home tap click.");
+                    case R.string.delete:
+                        return deletePath(data,"After tap click.");
                     case R.string.rename:
                         return null!=data&&data instanceof FileMeta &&renameFile((FileMeta)data, CoverMode.NONE,"After rename tap click.");
                     default:
@@ -237,7 +242,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
             return false;
         }
         final Dialog dialog=new Dialog(getViewContext());
-        return dialog.setContentView(R.layout.edit_text).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
+        return dialog.setContentView(R.layout.edit_text,true).title(dir?R.string.createFolder:R.string.createFile).left(R.string.sure)
                 .right(R.string.cancel).show(( view, clickCount,  resId, data)->{
                     if (resId==R.string.sure){
                         String input=dialog.getViewText(R.id.edit_text,null);
@@ -256,11 +261,53 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 });
     }
 
+    private boolean deletePath(Object data,String debug){
+        if (null==data||!(data instanceof FileMeta)){
+            return toast(R.string.pathInvalid)&&false;
+        }
+        List<FileMeta> list=new ArrayList<>();
+        list.add((FileMeta)data);
+        return deletePaths(list, debug);
+    }
+
+    public boolean deletePaths(List<FileMeta> paths,String debug){
+        final int length=null!=paths?paths.size():-1;
+        if (length<=0){
+            return toast(R.string.listEmpty)&&false;
+        }
+        final Dialog dialog=new Dialog(getViewContext());
+        FileMeta first=paths.get(0);
+        String name=null!=first?first.getName(false):null;
+        String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:
+                R.string.file)+" "+name):""):getText(R.string.items,length));
+        final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
+        final OnPathModify onDelete=(int what,Reply<String> file)-> {
+            binding.setFrom(file.getData());
+        };
+        return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).
+                left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)-> {
+                switch (resId){
+                    case R.string.sure:
+                        dialog.setContentView(binding,false).message(null).left(null);
+                        binding.setFrom("ddddddddd");
+                        onDeletePath(paths,onDelete,(what, note, data3, arg)->{
+
+                        },"After sure delete "+(null!=debug?debug:"."));
+                        break;
+                    default:
+                        dialog.dismiss();
+                        break;
+                }
+            return true;
+        });
+    }
+
     protected abstract boolean onShowFileDetail(View view,FileMeta meta,String debug);
     protected abstract boolean onSetAsHome(View view,String path,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenameFile(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
-//    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
+    protected abstract boolean onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug);
+    //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 
     protected final <T extends ViewDataBinding> T inflate(int layoutId){
         return inflate(getViewContext(),layoutId);

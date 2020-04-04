@@ -19,6 +19,8 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.dialog.Dialog;
 
+import java.util.List;
+
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -66,7 +68,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
         binding.setFile((NasFile)meta);
         binding.setLoadState(What.WHAT_INVALID);
         final Dialog dialog=new Dialog(getViewContext());
-        dialog.setContentView(null!=binding?binding.getRoot():null).show((v, clickCount, resId, data)->{
+        dialog.setContentView(null!=binding?binding.getRoot():null,true).show((v, clickCount, resId, data)->{
             return true;
         },false);
         return null!=call(prepare(Api.class,Address.URL,null).getDetail(path),null,null,null,(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
@@ -83,6 +85,13 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
+
+        return false;
+    }
+
+    @Override
+    protected boolean onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug) {
+
         return false;
     }
 

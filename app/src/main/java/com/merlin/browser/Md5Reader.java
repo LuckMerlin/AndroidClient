@@ -18,7 +18,7 @@ public class Md5Reader {
 
     public FileDB load(File file, boolean force){
         final FileDBDao fileDao=mFileDao;
-        final String path=null!=file&&file.exists()&&file.canRead()&&file.isFile()&&null!=fileDao?
+        final String path=null!=file&&file.exists()&&file.canRead()&&file.isFile()&&file.length()>0&&null!=fileDao?
                 file.getAbsolutePath():null;
         if (null!=path&&path.length()>0){
             FileDB fileData=force?null:fileDao.queryBuilder().where(FileDBDao.Properties.Path.eq(path)).unique();

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="from"
+            type="String" />
+        <variable
+            name="to"
+            type="String" />
+        <import type="android.view.View"/>
+    </data>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ProgressBar
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{from}"
+                android:gravity="left"
+                android:visibility="@{null!=from?View.VISIBLE:View.GONE}"
+                android:layout_weight="1"
+               style="@style/titleSubNormalTextView"/>
+            <TextView
+                android:text="@{to}"
+                android:gravity="right"
+                android:visibility="@{null!=from?View.VISIBLE:View.GONE}"
+                android:layout_weight="1"
+                style="@style/titleSubNormalTextView"/>
+        </LinearLayout>
+    </RelativeLayout>
+</layout>

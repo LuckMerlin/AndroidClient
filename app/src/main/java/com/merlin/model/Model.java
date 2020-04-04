@@ -485,7 +485,7 @@ public class Model extends Retrofit{
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-             dialog.setContentView(R.layout.dialog_loading).title(messageText).show();
+             dialog.setContentView(R.layout.dialog_loading,true).title(messageText).show();
             return Long.toString(System.currentTimeMillis());
         }
         return null;
