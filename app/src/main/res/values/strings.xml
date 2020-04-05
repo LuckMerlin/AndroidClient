@@ -132,4 +132,6 @@
     <string name="targetFolderInvalid">目标目录不合法</string>
     <string name="noneDataToOperate">没有可操作的数据</string>
     <string name="goTo">前往</string>
+    <string name="multiChoose">多选</string>
+    <string name="currentModeNotSupport">当前模式不能执行此操作</string>
 </resources>

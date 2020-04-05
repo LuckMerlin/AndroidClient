@@ -87,6 +87,7 @@
             android:layout_alignParentRight="true"
             style="@style/checkboxStyle"
             android:clickable="false"
+            android:duplicateParentState="true"
             android:visibility="@{isMultiChoose?View.VISIBLE:View.GONE}"
             android:layout_centerVertical="true"
             android:checked="@{isChoose}"

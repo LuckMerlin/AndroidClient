@@ -48,8 +48,8 @@ public class NasFileBrowser extends FileBrowser implements Label {
         Observable<Reply<Path>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
     }
 
-    public NasFileBrowser(Context context, ClientMeta meta,Callback callback){
-        super(context,meta,callback);
+    public NasFileBrowser(ClientMeta meta,Callback callback){
+        super(meta,callback);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected boolean onShowFileDetail(View view, FileMeta meta, String debug) {
+    protected boolean onShowPathDetail(FileMeta meta, String debug) {
         String path=null!=meta&&meta instanceof NasFile?meta.getPath(false):null;
         FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
         if (null==binding){
@@ -67,7 +67,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
         }
         binding.setFile((NasFile)meta);
         binding.setLoadState(What.WHAT_INVALID);
-        final Dialog dialog=new Dialog(getViewContext());
+        final Dialog dialog=new Dialog(getAdapterContext());
         dialog.setContentView(null!=binding?binding.getRoot():null,true).show((v, clickCount, resId, data)->{
             return true;
         },false);
@@ -79,7 +79,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected boolean onRenameFile(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
+    protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
         return null!=call(prepare(Api.class,Address.URL,null).renameFile(path,name, coverMode),null,null,finish);
     }
 
@@ -96,9 +96,12 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected boolean onSetAsHome(View view, String path, String debug) {
-        return null!=call(prepare(Api.class,Address.URL,null).setHome(path),null,null,null,(OnApiFinish<Reply<String>>)(what, note, data2, arg)->{
-           toast(what==WHAT_SUCCEED?R.string.succeed:(null!=note&&note.length()>0?note:getText(R.string.fail)));
-        });
+    protected boolean onSetAsHome(String path, String debug) {
+        return false;
+    }
+
+    @Override
+    protected boolean onOpenPath(FileMeta meta, String debug) {
+        return false;
     }
 }

@@ -3,25 +3,60 @@ package com.merlin.browser;
 import com.merlin.bean.FileMeta;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-public class Collector<T extends FileMeta> {
-    private ArrayList<T> mFiles;
+public final class Collector<T extends FileMeta> extends ArrayList<T>{
+    private Class<T> mTargetClass;
 
-    public Collector(T data){
-       add(data);
+    public Collector(Collection<T> data){
+        if (null!=data&&data.size()>0&&addAll(data)){
+           //Do nothing
+        }
     }
 
-    public final boolean add(T data){
-       if (null!=data){
-          List<T> files=mFiles;
-          files=null!=files?files:(mFiles=new ArrayList<>(1));
-          return !files.contains(data)&&files.add(data);
-       }
-       return false;
+    public Collector(Class<T> cls){
+        this(cls,null);
     }
 
-    public final ArrayList<T> getFiles() {
-        return mFiles;
+    public Collector(Class<T> cls,T data){
+        mTargetClass=cls;
+        add(data);
+    }
+
+    public final boolean add(T t,String debug) {
+        return null!=t&&add(t);
+    }
+
+    public final boolean remove(Object t,String debug) {
+        return null!=t&&remove(t);
+    }
+
+    @Override
+    public final boolean add(T t) {
+        Class<T> curr=mTargetClass;
+        if (null==t||(null!=curr&&!curr.equals(t.getClass()))){
+            return false;
+        }
+        mTargetClass=null!=mTargetClass?mTargetClass:(Class<T>) t.getClass();
+        return super.add(t);
+    }
+
+    public Class<T> getTargetClass() {
+        return mTargetClass;
+    }
+
+    public boolean isTargetClassEqual(Class<?> cls){
+        Class<T> curr=mTargetClass;
+        return (null==cls&&null==cls)||(null!=cls&&null!=curr&&curr.equals(cls));
+    }
+
+    public final ArrayList<T> getFiles(Class<T> cls) {
+        Class<T> target=mTargetClass;
+        if (null!=cls&&(null==target||!target.equals(cls))){
+            return null;
+        }
+        int size=size();
+        ArrayList<T> data=size>0?new ArrayList<>(size):null;
+        return null!=data&&data.addAll(this)?data:null;
     }
 }

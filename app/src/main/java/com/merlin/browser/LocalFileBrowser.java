@@ -54,8 +54,8 @@ public class LocalFileBrowser extends FileBrowser{
         Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Collection<String> md5s);
     }
 
-    public LocalFileBrowser(Context context, ClientMeta meta,Callback callback){
-        super(context,meta,callback);
+    public LocalFileBrowser(ClientMeta meta,Callback callback){
+        super(meta,callback);
     }
 
     @Override
@@ -193,8 +193,9 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onShowFileDetail(View view, FileMeta meta, String debug) {
-        if (null!=view&&null!=meta&&meta instanceof LocalFile){
+    protected boolean onShowPathDetail(FileMeta meta, String debug) {
+        Context context=getAdapterContext();
+        if (null!=context&&null!=meta&&meta instanceof LocalFile){
             String path=meta.getPath(false);
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
             if (null!=file&&file.exists()){
@@ -203,7 +204,7 @@ public class LocalFileBrowser extends FileBrowser{
                 binding.setMeta((LocalFile) meta);
                 String title=meta.getTitle();
                 binding.setTitle(null!=title?title:file.getName());
-                Dialog dialog=new Dialog(view.getContext());
+                Dialog dialog=new Dialog(context);
                 return dialog.setContentView(binding,true).setBackground(new Thumbs().getThumb(path)).title(file.getName()).show();
             }
             Debug.W(getClass(),"Can't show local file detail which not exist "+path+" "+(null!=debug?debug:"."));
@@ -215,16 +216,17 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onSetAsHome(View view, String path, String debug) {
-        File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
-        if (null!=file&&file.exists()&&file.isDirectory()&&new LocalBrowserHome().set(getViewContext(),path)){
+    protected boolean onSetAsHome(String path, String debug) {
+        Context context=getAdapterContext();
+        File file=null!=context&&null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
+        if (null!=file&&file.exists()&&file.isDirectory()&&new LocalBrowserHome().set(context,path)){
             return toast(R.string.succeed)||true;
         }
         return toast(R.string.fail)||false;
     }
 
     @Override
-    protected boolean openFile(FileMeta meta, String debug) {
+    protected boolean onOpenPath(FileMeta meta, String debug) {
         LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
         String path=localFile.getPath(false);
         if (null!=path&&path.length()>0){
@@ -235,7 +237,7 @@ public class LocalFileBrowser extends FileBrowser{
             Thumbs thumbs=new Thumbs();
             String extension=thumbs.getExtension(path);
             if (thumbs.isImageExtension(extension)){
-                Intent intent=new Intent(getViewContext(), PhotoPreviewActivity.class);
+                Intent intent=new Intent(getAdapterContext(), PhotoPreviewActivity.class);
                 intent.putExtra(Label.LABEL_DATA, Uri.fromFile(file));
                 return startActivity(intent);
             }
@@ -252,11 +254,11 @@ public class LocalFileBrowser extends FileBrowser{
             startActivity(intent);
             return true;
         }
-        return super.openFile(meta, debug);
+        return super.openPath(meta, debug);
     }
 
     @Override
-    protected boolean onRenameFile(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
+    protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
         Integer what=null;String note=null;boolean succeed=false;Path data=null;Object arg=null;
         if (null==path||null==name||path.length()<=0||name.length()<=0){
             what=What.WHAT_ARGS_INVALID;

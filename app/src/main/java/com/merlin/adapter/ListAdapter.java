@@ -354,13 +354,13 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                 int first=lm.findFirstVisibleItemPosition();
                 int last=lm.findLastVisibleItemPosition();
                 Debug.D(getClass(),"Update visible linear items from "+first+" to "+last+" "+(null!=debug?debug:"."));
-                return last>=first&&updateItems(first,last-first);
+                return last>=first&&updateItems(first>1?--first:first,last+2);
             }else if (manager instanceof GridLayoutManager){
                 GridLayoutManager glm=(GridLayoutManager)manager;
                 int first=glm.findFirstVisibleItemPosition();
                 int last=glm.findLastVisibleItemPosition();
                 Debug.D(getClass(),"Update visible grid items from "+first+" to "+last+" "+(null!=debug?debug:"."));
-                return last>=first&&updateItems(first,last-first);
+                return last>=first&&updateItems(first>1?--first:first,last+2);
             }else if (manager instanceof StaggeredGridLayoutManager){
 //                StaggeredGridLayoutManager glm=(StaggeredGridLayoutManager)manager;
 //                int first=glm.fin();
@@ -388,25 +388,25 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
      //Do nothing
   }
 
-  public final Context getContext(){
+  public final Context getAdapterContext(){
         RecyclerView rv=getRecyclerView();
         return null!=rv?rv.getContext():null;
   }
 
-    public final boolean toast(int textId){
-        Context context=getContext();
-        String text=null!=context&&textId!=Resources.ID_NULL?context.getString(textId):null;
-        return null!=text&&toast(text);
-    }
-
-  public final boolean toast(String text){
-        Context context=getContext();
-        if (null!=context){
-            Toast.makeText(context,text,Toast.LENGTH_SHORT).show();
+   protected final boolean toast(Object text){
+        Context context=null!=text?getAdapterContext():null;
+        text=null!=context?text instanceof Integer?getText((Integer)text):text:null;
+        if (null!=text&&text instanceof CharSequence){
+            Toast.makeText(context,(CharSequence)text,Toast.LENGTH_SHORT).show();
             return true;
         }
         return false;
-  }
+   }
+
+  protected final String getText(int textResId, Object ...args){
+        Context context=getAdapterContext();
+        return null!=context?context.getResources().getString(textResId,args):null;
+   }
 
   public final RecyclerView getRecyclerView(){
         WeakReference<RecyclerView> reference = mRecyclerView;

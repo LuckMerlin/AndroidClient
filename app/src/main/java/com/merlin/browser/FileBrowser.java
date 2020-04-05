@@ -44,25 +44,56 @@ import io.reactivex.Scheduler;
 
 public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,Mode {
     private final ClientMeta mMeta;
-    private final Context mContext;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
     private Retrofit mRetrofit;
+//    private int mMode;
 
-    public FileBrowser(Context context, ClientMeta meta,Callback callback){
+    public FileBrowser(ClientMeta meta,Callback callback){
         mCallback=callback;
-        mContext=context;
         mMeta=meta;
     }
 
     public interface Callback extends OnTapClick{
         void onFolderPageLoaded(PageData page, String debug);
-        int getMode();
     }
 
     public final ClientMeta getMeta() {
         return mMeta;
     }
+
+    protected void onModeChange(int last,int mode){
+        //Do nothing
+    }
+
+//    public final boolean isMode(int ... modes){
+//        if (null!=modes&&modes.length>0){
+//            int curr=getMode();
+//            for (int mode:modes){
+//                if (mode==curr){
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
+
+//    public final int getMode() {
+//        return mMode;
+//    }
+
+//    public final boolean entryMode(int mode,Collector collector,String debug){
+//        int curr=mMode;
+//        if (mode!=curr){
+//            mMode=mode;
+//            if (curr== Mode.MODE_MULTI_CHOOSE||mode==Mode.MODE_MULTI_CHOOSE){
+//                setCollector(mode==Mode.MODE_MULTI_CHOOSE?collector:null,"While multi choose mode changed "+(null!=debug?debug:"."));
+//            }
+//            onModeChange(curr, mode);
+//            return true;
+//        }
+//        return false;
+//    }
 
     @Override
     protected final void onPageLoadSucceed(PageData page, String debug) {
@@ -78,76 +109,35 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         switch (clickCount) {
             case 1:
                 switch (resId) {
-                    case R.string.detail:
-                        return showFileDetail(view,data,"After detail tap click.");
-                    case R.string.createFile:
-                        return createPath(false,"After create file tap click.");
-                    case R.string.createFolder:
-                        return createPath(true,"After create folder tap click.");
-                    case R.string.setAsHome:
-                        return setAsHome(view,data,"After set as home tap click.");
-                    case R.string.delete:
-                        return deletePath(data,"After tap click.");
-                    case R.string.rename:
-                        return null!=data&&data instanceof FileMeta &&renameFile((FileMeta)data, CoverMode.NONE,"After rename tap click.");
-                    default:
-                        if (null != data && data instanceof FileMeta) {
-                            FileMeta file = (FileMeta) data;
-                            if (isMode(MODE_MULTI_CHOOSE)) {
-                                return multiChoose(file, "After tap click.") || true;
-                            } else if (file.isAccessible()) {
-                                return file.isDirectory()? browserPath(file.getPath(false),
-                                        "After directory click."):openFile(file, "After item tap click.");
-                            } else {
-                                toast(R.string.nonePermission);
-                            }
-                        }
+//                    case R.string.detail:
+//                        return showFileDetail(view,data,"After detail tap click.");
+//                    case R.string.createFile:
+//                        return createPath(false,"After create file tap click.");
+//                    case R.string.createFolder:
+//                        return createPath(true,"After create folder tap click.");
+//                    case R.string.setAsHome:
+//                        return setAsHome(view,data,"After set as home tap click.");
+//                    case R.string.delete:
+//                        return deletePath(data,"After tap click.");
+//                    case R.string.rename:
+//                        return null!=data&&data instanceof FileMeta &&renameFile((FileMeta)data, CoverMode.NONE,"After rename tap click.");
                 }
                 break;
-            case 2:
-                switch (resId){
-                    default:
-                    if (null!=data&&data instanceof FileMeta){
-                        return onShowFileContextMenu(view,(FileMeta)data,"After 2 tap click.");
-                    }
-                }
-                break;
+//            case 2:
+//                switch (resId){
+//                    default:
+//                    if (null!=data&&data instanceof FileMeta){
+//                        return onShowFileContextMenu(view,(FileMeta)data,"After 2 tap click.");
+//                    }
+//                }
+//                break;
         }
         return false;
     }
 
-    protected final boolean isMode(int ... modes){
-        if (null!=modes&&modes.length>0){
-            int curr=getMode();
-            for (int mode:modes){
-                if (mode==curr){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    protected final int getMode(){
-        Callback callback= mCallback;
-        return null!=callback?callback.getMode():MODE_NORMAL;
-    }
-
-    protected boolean openFile(FileMeta file,String debug){
-        //Do nothing
-        return false;
-    }
-
-    private boolean onShowFileContextMenu(View view,FileMeta meta,String debug){
-        if (null!=view&&null!=meta){
-            FileContextMenuBinding binding= DataBindingUtil.inflate(LayoutInflater.from
-                    (view.getContext()), R.layout.file_context_menu,null,false);
-            if (null!=binding){
-                binding.setFile(meta);
-                return showAtLocationAsContext(view,binding);
-            }
-        }
-        return false;
+    public final boolean openPath(FileMeta file,String debug){
+        return null!=file&&(file.isDirectory()?browserPath(file.getPath(false),
+                "While open path "+(null!=debug?debug:".")):onOpenPath(file,debug));
     }
 
     public  final boolean browserParent(String debug){
@@ -168,46 +158,27 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return loadPage(null!=pathValue?pathValue:"",debug);
     }
 
-    protected final String getText(int textResId, Object ...args){
-        Context context=getViewContext();
-        return null!=context?context.getResources().getString(textResId,args):null;
-   }
-
-   protected final boolean toast(Object text){
-        Context context=null!=text?mContext:null;
-        text=null!=context?text instanceof Integer?getText((Integer)text):text:null;
-        if (null!=text&&text instanceof CharSequence){
-            Toast.makeText(context,(CharSequence)text,Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        return false;
-   }
-
-   protected final Context getViewContext(){
-        return mContext;
-   }
-
-   protected final String getClientRoot(){
+    protected final String getClientRoot(){
         ClientMeta meta=mMeta;
         return null!=meta?meta.getRoot():null;
    }
 
-    private boolean showFileDetail(View view,Object data,String debug){
+    public boolean showFileDetail(Object data,String debug){
         FileMeta meta=null!=data&&data instanceof FileMeta?(FileMeta)data:null;
         String path=null!=meta?meta.getPath(false):null;
         if (null==path||path.length()<=0){
             toast(R.string.pathInvalid);
             return false;
         }
-        return onShowFileDetail(view,meta,debug);
+        return onShowPathDetail(meta,debug);
     }
 
-    private boolean setAsHome(View view,Object data,String debug){
+    public boolean setAsHome(Object data,String debug){
         String path=null!=data&&data instanceof FolderData?((FolderData)data).getPath():null;
-        return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(view,path,debug);
+        return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(path,debug);
     }
 
-    private boolean renameFile(FileMeta meta,int coverMode,String debug){
+    public boolean renamePath(FileMeta meta,int coverMode,String debug){
         final String path=null!=meta?meta.getPath(false):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(true);
@@ -220,7 +191,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                     if (null!=dlg){
                         dlg.dismiss();
                     }
-                    onRenameFile(path,text,coverMode,(what, note, data, arg)->{
+                    onRenamePath(path,text,coverMode,(what, note, data, arg)->{
                         boolean succeed=what== What.WHAT_SUCCEED;
                         toast(note);
                         if (succeed&&null!=data&&meta.applyChange(data)){
@@ -234,7 +205,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return false;
     }
 
-    private boolean createPath(boolean dir,String debug){
+    public boolean createPath(boolean dir,String debug){
         FolderData folderData=getLastFolder();
         final String parent=null!=folderData?folderData.getPath():null;
         if (null==parent||parent.length()<=0){
@@ -261,7 +232,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 });
     }
 
-    private boolean deletePath(Object data,String debug){
+    public boolean deletePath(Object data,String debug){
         if (null==data||!(data instanceof FileMeta)){
             return toast(R.string.pathInvalid)&&false;
         }
@@ -302,10 +273,11 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         });
     }
 
-    protected abstract boolean onShowFileDetail(View view,FileMeta meta,String debug);
-    protected abstract boolean onSetAsHome(View view,String path,String debug);
+    protected abstract boolean onOpenPath(FileMeta meta,String debug);
+    protected abstract boolean onShowPathDetail(FileMeta meta,String debug);
+    protected abstract boolean onSetAsHome(String path,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
-    protected abstract boolean onRenameFile(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
+    protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug);
     //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 
@@ -386,5 +358,9 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                                                Scheduler observeOn, com.merlin.api.Callback...callbacks){
         Retrofit retrofit=mRetrofit;
         return (null!=retrofit?retrofit:(mRetrofit=new Retrofit())).call(observable,subscribeOn,observeOn,callbacks);
+    }
+
+    private Context getViewContext(){
+        return getAdapterContext();
     }
 }

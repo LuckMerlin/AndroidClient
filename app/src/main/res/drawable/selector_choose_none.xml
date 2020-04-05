@@ -2,10 +2,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:state_enabled = "false"
-        android:drawable = "@drawable/ic_menu_all_press_disable"/>
+        android:drawable = "@drawable/choose_all_disable"/>
     <item
         android:state_pressed = "true"
-        android:drawable = "@drawable/ic_menu_all_press"/>
+        android:drawable = "@drawable/choose_all_normal"/>
 
-    <item android:drawable = "@drawable/ic_menu_all" />
+    <item android:drawable = "@drawable/choose_none_normal" />
 </selector>

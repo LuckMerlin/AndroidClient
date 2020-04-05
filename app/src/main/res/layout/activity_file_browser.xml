@@ -62,13 +62,12 @@
                             <include
                                 android:id="@+id/fileBrowser_deviceNameTV"
                                 binding:device="@{vm.currentMeta}"
-                                layout="@layout/device_text"
-                                android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}" />
+                                layout="@layout/device_text" />
                             <TextView
-                                android:text="@{` (`+vm.currentFolder.length+')'}"
+                                android:text="@{` (`+((null==vm.currentMultiChooseCount||(vm.currentMultiChooseCount&lt;0))?``:``+vm.currentMultiChooseCount+`/`)+vm.currentFolder.length+')'}"
                                 style="@style/titleNormalTextView"
                                 android:textStyle="bold"
-                                android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE||(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1))?View.GONE:View.VISIBLE}"
+                                android:visibility="@{(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1)?View.GONE:View.VISIBLE}"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"/>
                         </LinearLayout>
@@ -91,13 +90,6 @@
                                 android:layout_height="wrap_content"/>
                         </LinearLayout>
                     </LinearLayout>
-                    <TextView
-                        android:text="@{vm.currentMultiChooseSummary}"
-                        android:textSize="@dimen/textTitle"
-                        android:textStyle="bold"
-                        android:visibility="@{vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
             </LinearLayout>
 
             <LinearLayout
@@ -106,6 +98,14 @@
                 android:layout_centerVertical="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
+                <ImageView
+                    binding:enableClick="@{true}"
+                    android:layout_width="@dimen/titleIconSize"
+                    android:layout_height="@dimen/titleIconSize"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="15dp"
+                    android:visibility="@{(vm.mode!=Model.MODE_MULTI_CHOOSE||vm.currentFolder.length&lt;0)?View.GONE:View.VISIBLE}"
+                    android:src="@{(vm.currentMultiChooseCount&lt;vm.currentAdapter.dataCount)?R.drawable.selector_choose_all:R.drawable.selector_choose_none}"/>
                 <ImageView
                     binding:enableClick="@{true}"
                     android:layout_width="@dimen/titleIconSize"
@@ -146,23 +146,35 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <HorizontalScrollView
-                android:visibility="@{vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_DOWNLOAD?View.VISIBLE:View.GONE}"
+                android:visibility="@{vm.mode==Model.MODE_MOVE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
                 android:id="@+id/activityFileBrowser_bottomHSV"
                 android:layout_alignParentBottom="true"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:scrollbars="none"
+                android:layout_marginLeft="5dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginRight="5dp"
+                android:paddingBottom="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_gravity="center"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <include layout="@layout/item_browser_bottom_menu"
-                        android:visibility="@{vm.mode==Model.MODE_UPLOAD?View.VISIBLE:View.GONE}"
+                        android:visibility="@{(vm.currentMeta.localClient&amp;&amp;(vm.mode==Model.MODE_UPLOAD))?View.VISIBLE:View.GONE}"
                         binding:menu="@{ContextMenu.create(R.string.upload)}"/>
                     <include layout="@layout/item_browser_bottom_menu"
-                        android:visibility="@{vm.mode==Model.MODE_DOWNLOAD?View.VISIBLE:View.GONE}"
+                        android:visibility="@{(!vm.currentMeta.localClient&amp;&amp;(vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_MULTI_CHOOSE))?View.VISIBLE:View.GONE}"
                         binding:menu="@{ContextMenu.create(R.string.download)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{(vm.mode==Model.MODE_MOVE||vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.move)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{(vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.copy)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.delete)}"/>
                 </LinearLayout>
             </HorizontalScrollView>
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

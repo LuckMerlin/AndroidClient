@@ -1,5 +1,4 @@
 package com.merlin.adapter;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -7,39 +6,59 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
 import com.merlin.bean.FileMeta;
-import com.merlin.bean.FModify;
 import com.merlin.bean.FolderData;
-import com.merlin.browser.Md5Reader;
+import com.merlin.browser.Collector;
+import com.merlin.browser.Mode;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
-import com.merlin.browser.FileBrowser;
+import com.merlin.debug.Debug;
 import com.merlin.util.Thumbs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<String, T> implements OnMoreLoadable{
-    private List<T> mMultiChoose;
     private final Thumbs mThumbs=new Thumbs();
-
-    public final List<T> getMultiChoose() {
-        return mMultiChoose;
-    }
-
-//    public final boolean renamePath(T meta, FModify modify){
-//        List<T> list=null!=meta&&null!=modify?getData():null;
-//        int size=null!=list?list.size():-1;
-//        int index=size>0?list.indexOf(meta):-1;
-//        meta=index>=0&&index<size?list.get(index):null;
-//        if (null!=meta&&meta.applyModify(modify)){
-//            notifyItemChanged(index);
-//            return true;
-//        }
-//        return false;
-//    }
+    private Collector<T> mMultiChoose;
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
         return viewType==TYPE_DATA?R.layout.item_list_file:null;
+    }
+
+    public final boolean multiChoose(Object object,Boolean choose,String debug){
+        Collector<T> collector=null!=object&&object instanceof  FileMeta?mMultiChoose:null;
+        if (null!=collector){
+            choose=null!=choose?choose:!collector.contains(object);
+            int index=(choose?!collector.contains(object):collector.contains(object))?index(object):-1;
+            if (index>=0&&(choose?collector.add((T) object,debug):collector.remove(object,debug))){
+                notifyItemChanged(index);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final boolean chooseAll(boolean choose,String debug){
+        Collector<T> collector=mMultiChoose;
+        if (null!=collector){
+            collector.clear();
+            ArrayList<T> all=getData();
+            if (null!=all&&all.size()>0&&(!choose||collector.addAll(all))){
+                updateVisibleItems("After choose all change "+choose+" "+(null!=debug?debug:"."));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final boolean setMultiCollector(Collector<T> collector,String debug){
+        Collector<T> curr=mMultiChoose;
+        if ((null==curr&&null==collector)||(null!=curr&&null!=collector&&curr==collector)){
+            return false;
+        }
+        mMultiChoose=collector;
+        return updateVisibleItems("After collector change "+(null!=debug?debug:"."))||true;
     }
 
     @Override
@@ -48,6 +67,9 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
         if (null!=binding&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             itemBinding.setMeta(data);
+            Collector<T> multiChoose=mMultiChoose;
+            itemBinding.setIsMultiChoose(null!=multiChoose);
+            itemBinding.setIsChoose(null!=multiChoose&&multiChoose.contains(data));
             itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath(true)):null);
             itemBinding.setPosition(position);
         }
@@ -63,18 +85,8 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
         return null!=pageData&&pageData instanceof FolderData?(FolderData)pageData:null;
     }
 
-    public final boolean chooseAll(boolean choose,String debug){
-        return false;
-    }
 
-    protected void onBrowserModeChanged(int last,int mode,String debug){
-        //Do nothing
-    }
-
-    public final boolean multiChoose(FileMeta file,String debug){
-        return false;
-    }
-//    public final boolean chooseAll(boolean choose){
+    //    public final boolean chooseAll(boolean choose){
 //        List<T> list = mMultiChoose;
 //        List<T> data = getData();
 //        int size = null != data ? data.size() : 0;
