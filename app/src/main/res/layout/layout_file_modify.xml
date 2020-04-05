@@ -30,10 +30,12 @@
                 android:gravity="center"
                 android:layout_weight="1">
                 <TextView
+                    android:lines="2"
                     android:text="@{left.name}"
                     android:textStyle="bold"
                     style="@style/titleSubNormalTextView"/>
                 <TextView
+                    android:singleLine="true"
                     android:text="@{left.host}"
                     style="@style/titleSmallTextView"/>
             </LinearLayout>
