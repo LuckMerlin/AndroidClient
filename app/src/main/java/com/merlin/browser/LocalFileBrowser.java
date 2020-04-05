@@ -2,6 +2,7 @@ package com.merlin.browser;
 
 import android.content.Context;
 import android.content.Intent;
+import android.icu.text.Replaceable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.StrictMode;
@@ -10,6 +11,7 @@ import android.webkit.MimeTypeMap;
 
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.api.Address;
+import com.merlin.api.ApiList;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
@@ -52,6 +54,9 @@ public class LocalFileBrowser extends FileBrowser{
         @POST(Address.PREFIX_FILE+"/sync/check")
         @FormUrlEncoded
         Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Collection<String> md5s);
+
+//        @POST(Address.PREFIX_FILE+"/none")
+//        Observable<Reply<ApiMap<String,Path>>> deleteLocalFile();
     }
 
     public LocalFileBrowser(ClientMeta meta,Callback callback){
@@ -338,25 +343,94 @@ public class LocalFileBrowser extends FileBrowser{
         return invokeFinish(succeed,what,note,finish,modify,arg);
     }
 
-    @Override
-    protected boolean onDeletePath(List<FileMeta> paths, OnPathModify delete, OnApiFinish<Reply<String>> finish, String debug) {
-
-        return false;
+//    @Override
+    protected Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug) {
+        if (null==paths||paths.size()<=0){
+            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
+            return null;
+        }
+        final OnPathModify update=null!=modify?modify:(Object note, Reply<FileMeta> path)-> {};
+        update.onFileModify(R.string.preparing,null);
+        for (FileMeta file:paths) {
+                String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath(false):null;
+                if (null==path||path.length()<=0){
+                    continue;
+                }
+                File childFile=new File(path);
+                Path childPath=new Path();
+                Reply<Path> childReply=null;
+                if (!childFile.exists()){//Just delete local file
+                    childReply=new Reply<>(true,What.WHAT_NOT_EXIST,"File note exist.",childPath);
+                }else if (!childFile.canWrite()){
+                    childReply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"File none permission.",childPath);
+                }else{
+                    deleteFile(childFile,disposable,delete);
+                    childReply=new Reply<>(true,childFile.exists()?What.WHAT_FAIL_UNKNOWN,"Delete fail.",childPath);
+                }
+//                map.put(path,childReply);
+            }
+            update.onFileModify(R.string.prepared,null);
+            if (null!=finish) {
+//                post(() -> finish.onApiFinish(What.WHAT_SUCCEED,"Finish",reply,null), 0);
+            }
+        return null;
+//        Reply<String> reply=new Reply<String>(true,What.WHAT_SUCCEED,"Deleted","dddddd 已删除");
+//        delete.onFileModify(reply);
+//        return call(prepare(Api.class, Address.URL, null).deleteLocalFile().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+//            final ApiMap<String,Reply> map=new ApiMap<>();
+//            final Reply<ApiMap<String,Path>> reply=new Reply<>(true,What.WHAT_SUCCEED,"Finish delete.",map);
+//            for (FileMeta file:paths) {
+//                String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath(false):null;
+//                if (null==path||path.length()<=0){
+//                    continue;
+//                }
+//                File childFile=new File(path);
+//                Path childPath=new Path();
+//                Reply<Path> childReply=null;
+//                if (!childFile.exists()){//Just delete local file
+//                    childReply=new Reply<>(true,What.WHAT_NOT_EXIST,"File note exist.",childPath);
+//                }else if (!childFile.canWrite()){
+//                    childReply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"File none permission.",childPath);
+//                }else{
+//                    deleteFile(childFile,disposable,delete);
+//                    childReply=new Reply<>(true,childFile.exists()?What.WHAT_FAIL_UNKNOWN,"Delete fail.",childPath);
+//                }
+//                map.put(path,childReply);
+//            }
+//            if (null!=finish) {
+//                post(() -> finish.onApiFinish(What.WHAT_SUCCEED,"Finish",reply,null), 0);
+//            }
+//            if (!disposable.isDisposed()) {//All request need cancel,We just use their sub thread function
+//                disposable.dispose();
+//            }
+//        })), null, null, null);
     }
 
-    private boolean invokeFinish(boolean succeed, Integer what, String note, OnApiFinish finish, Object data, Object arg){
-        if (null!=finish){
-            what=null!=what?what:What.WHAT_ERROR_UNKNOWN;
-            Reply reply=null;
-            if (null!=data){
-                reply=new Reply<>();
-                reply.setSuccess(succeed);
-                reply.setWhat(what);
-                reply.setNote(note);
-                reply.setData(data);
+//    private boolean invokeFinish(boolean succeed, Integer what, String note, OnApiFinish finish, Object data, Object arg){
+//        if (null!=finish){
+//            what=null!=what?what:What.WHAT_ERROR_UNKNOWN;
+//            Reply reply=null!=data?new Reply<>(succeed,what,note,data):null;
+//            finish.onApiFinish(what,note,reply,arg);
+//            return true;
+//        }
+//        return false;
+//    }
+
+    private boolean deleteFile(File file,Disposable disposable,OnPathModify modify){
+        if (null!=modify&&null!=file){
+            if (null!=disposable&&disposable.isDisposed()){
+                modify.onFileModify(R.string.canceled,null);
+                return false;
             }
-            finish.onApiFinish(what,note,reply,arg);
-            return true;
+            if (!file.canWrite()){
+                modify.onFileModify(R.string.nonePermission,new Reply<>(true,
+                        What.WHAT_NONE_PERMISSION,"None permission",));
+                return false;
+            }
+            if (file.isDirectory()){
+                return true;
+            }
+            file.delete();
         }
         return false;
     }

@@ -3,11 +3,11 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="from"
-            type="String" />
+            name="left"
+            type="Object" />
         <variable
-            name="to"
-            type="String" />
+            name="right"
+            type="Object" />
         <import type="android.view.View"/>
     </data>
     <LinearLayout
@@ -23,15 +23,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:text="@{from}"
+                android:text="@{left}"
                 android:gravity="left"
-                android:visibility="@{null!=from?View.VISIBLE:View.GONE}"
+                android:visibility="@{null!=left?View.VISIBLE:View.GONE}"
                 android:layout_weight="1"
                style="@style/titleSubNormalTextView"/>
             <TextView
-                android:text="@{to}"
+                android:text="@{right}"
                 android:gravity="right"
-                android:visibility="@{null!=from?View.VISIBLE:View.GONE}"
+                android:visibility="@{null!=right?View.VISIBLE:View.GONE}"
                 android:layout_weight="1"
                 style="@style/titleSubNormalTextView"/>
         </LinearLayout>

@@ -13,6 +13,9 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
+import com.merlin.api.Address;
+import com.merlin.api.ApiMap;
+import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
@@ -36,18 +39,26 @@ import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.http.POST;
 
 public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,Mode {
     private final ClientMeta mMeta;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
     private Retrofit mRetrofit;
-//    private int mMode;
+
+    private interface Api{
+        @POST("/none")
+        Observable<Reply<ApiMap<String,Path>>> deleteFiles();
+    }
 
     public FileBrowser(ClientMeta meta,Callback callback){
         mCallback=callback;
@@ -154,7 +165,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return false;
     }
 
-    public boolean browserPath(String pathValue, String debug){
+    public final boolean browserPath(String pathValue, String debug){
         return loadPage(null!=pathValue?pathValue:"",debug);
     }
 
@@ -163,7 +174,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return null!=meta?meta.getRoot():null;
    }
 
-    public boolean showFileDetail(Object data,String debug){
+    public final boolean showFileDetail(Object data,String debug){
         FileMeta meta=null!=data&&data instanceof FileMeta?(FileMeta)data:null;
         String path=null!=meta?meta.getPath(false):null;
         if (null==path||path.length()<=0){
@@ -173,12 +184,12 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return onShowPathDetail(meta,debug);
     }
 
-    public boolean setAsHome(Object data,String debug){
+    public final boolean setAsHome(Object data,String debug){
         String path=null!=data&&data instanceof FolderData?((FolderData)data).getPath():null;
         return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(path,debug);
     }
 
-    public boolean renamePath(FileMeta meta,int coverMode,String debug){
+    public final boolean renamePath(FileMeta meta,int coverMode,String debug){
         final String path=null!=meta?meta.getPath(false):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(true);
@@ -205,7 +216,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return false;
     }
 
-    public boolean createPath(boolean dir,String debug){
+    public final boolean createPath(boolean dir,String debug){
         FolderData folderData=getLastFolder();
         final String parent=null!=folderData?folderData.getPath():null;
         if (null==parent||parent.length()<=0){
@@ -232,7 +243,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 });
     }
 
-    public boolean deletePath(Object data,String debug){
+    public final boolean deletePath(Object data,String debug){
         if (null==data||!(data instanceof FileMeta)){
             return toast(R.string.pathInvalid)&&false;
         }
@@ -241,7 +252,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return deletePaths(list, debug);
     }
 
-    public boolean deletePaths(List<FileMeta> paths,String debug){
+    public final boolean deletePaths(List<FileMeta> paths,String debug){
         final int length=null!=paths?paths.size():-1;
         if (length<=0){
             return toast(R.string.listEmpty)&&false;
@@ -249,21 +260,40 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         final Dialog dialog=new Dialog(getViewContext());
         FileMeta first=paths.get(0);
         String name=null!=first?first.getName(false):null;
-        String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:
-                R.string.file)+" "+name):""):getText(R.string.items,length));
+        String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder: R.string.file)+" "+name):""):getText(R.string.items,length));
         final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-        final OnPathModify onDelete=(int what,Reply<String> file)-> {
-            binding.setFrom(file.getData());
+        final boolean[] existSucceed=new boolean[]{false};
+        final Canceler[] cancelers=new Canceler[1];
+        final OnPathModify onDelete=(Object note,Reply<FileMeta> file)-> {
+            post(()->{dialog.message(note);},0);
+            binding.setLeft(file.getData());
+            boolean succeed=null!=file&&file.isSuccess()&&file.getWhat()==What.WHAT_SUCCEED;
+            existSucceed[0]=succeed||existSucceed[0];
+            binding.setRight(succeed?R.string.succeed:R.string.fail);
         };
         return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).
                 left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)-> {
                 switch (resId){
                     case R.string.sure:
                         dialog.setContentView(binding,false).message(null).left(null);
-                        binding.setFrom("ddddddddd");
-                        onDeletePath(paths,onDelete,(what, note, data3, arg)->{
-
+                        final Canceler canceler=doDeleteFiles(paths,onDelete,(what, note, data3, arg)->{
+                            dialog.dismiss();
+                            if (existSucceed.length>0&&existSucceed[0]){
+                                resetAdapter("After file delete succeed ");
+                            }
                         },"After sure delete "+(null!=debug?debug:"."));
+                        if (null!=canceler){
+                            cancelers[0]=canceler;
+                            return true;
+                        }
+                        toast(R.string.fail);
+                        dialog.dismiss();
+                        break;
+                    case R.string.cancel:
+                        Canceler existCanceler= null!=cancelers&&cancelers.length>0?cancelers[0]:null;
+                        if (null!=existCanceler&&existCanceler.cancel(true,"While cancel tap")){
+                            //Do nothing
+                        }
                         break;
                     default:
                         dialog.dismiss();
@@ -273,12 +303,34 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         });
     }
 
+    private Canceler doDeleteFiles(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug){
+        if (null==paths||paths.size()<=0){
+            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
+            return null;
+        }
+        final OnPathModify update=null!=modify?modify:(Object note, Reply<FileMeta> path)-> {};
+        return call(prepare(Api.class, "NoneUrl", null).deleteFiles().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+            update.onFileModify(R.string.preparing,null); //Prepare files to delete
+            if (disposable.isDisposed()){
+                final Map<String,FileMeta> map=new HashMap<>();
+                for (FileMeta meta:paths) {
+                    if (null==meta){
+                        continue;
+                    }
+                   String path=meta.getPath(false);
+                   map.put(path,meta);
+                }
+            }
+            update.onFileModify(R.string.prepared,null);
+        })),null,null,null);
+    }
+
     protected abstract boolean onOpenPath(FileMeta meta,String debug);
     protected abstract boolean onShowPathDetail(FileMeta meta,String debug);
     protected abstract boolean onSetAsHome(String path,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
-    protected abstract boolean onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug);
+//    protected abstract Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug);
     //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 
     protected final <T extends ViewDataBinding> T inflate(int layoutId){
@@ -362,5 +414,15 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
 
     private Context getViewContext(){
         return getAdapterContext();
+    }
+
+    protected final boolean invokeFinish(boolean succeed, Integer what, String note, OnApiFinish finish, Object data, Object arg){
+        if (null!=finish){
+            what=null!=what?what:What.WHAT_ERROR_UNKNOWN;
+            Reply reply=null!=data?new Reply<>(succeed,what,note,data):null;
+            finish.onApiFinish(what,note,reply,arg);
+            return true;
+        }
+        return false;
     }
 }

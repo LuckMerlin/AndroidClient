@@ -109,7 +109,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         if (null!=url&&url.length()>0){
             Map<String,FileBrowser> list=mAllClientMetas;
             Debug.D(getClass(),"Put client "+url+" "+(null!=debug?debug:"."));
-            Context context=getViewContext();
             boolean local=meta.isLocalClient();
             list.put(url,local?new LocalFileBrowser(meta,mBrowserCallback): new NasFileBrowser(meta,mBrowserCallback));
             mClientCount.set(list.size());

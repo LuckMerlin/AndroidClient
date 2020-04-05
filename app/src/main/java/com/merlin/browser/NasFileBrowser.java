@@ -89,11 +89,11 @@ public class NasFileBrowser extends FileBrowser implements Label {
         return false;
     }
 
-    @Override
-    protected boolean onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug) {
-
-        return false;
-    }
+//    @Override
+//    protected Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug) {
+//
+//        return null;
+//    }
 
     @Override
     protected boolean onSetAsHome(String path, String debug) {

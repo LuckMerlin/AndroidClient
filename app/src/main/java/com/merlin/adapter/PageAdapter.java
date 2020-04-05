@@ -61,7 +61,14 @@ public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMore
         return succeed;
     }
 
-    public boolean reset(String debug){
+    /**
+     * @deprecated
+     */
+    public boolean reset(String debug) {
+        return resetAdapter(debug);
+    }
+
+    public boolean resetAdapter(String debug){
         Page<D> page=mCurrentPage;
         Debug.D(getClass(),"Reset current page "+page+" "+(null!=debug?debug:"."));
         D arg=null!=page?page.mArg:null;
