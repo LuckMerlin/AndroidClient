@@ -371,7 +371,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
                     switch (resId){
                         case R.string.sure:
-                             dialog.setContentView(binding,false).message("");//Clean message
+                             dialog.setContentView(binding,false).left(null).message("");//Clean message
                              final OnPathUpdate update=(int what, Object note, Path from,Path to)-> {
                                    dialog.message(null);
                                    dialog.title(note);
