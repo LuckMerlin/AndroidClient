@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import com.merlin.api.Address;
+import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
@@ -89,7 +90,12 @@ public class NasFileBrowser extends FileBrowser implements Label {
         return false;
     }
 
-//    @Override
+    @Override
+    protected Canceler onDeletePath(List<FileMeta> paths, OnPathUpdate modify, OnApiFinish<Reply<ApiMap<String, Path>>> finish, String debug) {
+        return null;
+    }
+
+    //    @Override
 //    protected Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug) {
 //
 //        return null;

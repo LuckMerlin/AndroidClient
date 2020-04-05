@@ -34,6 +34,7 @@ import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.server.Retrofit;
 import com.merlin.server.RetrofitCanceler;
+import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
@@ -252,6 +253,57 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return deletePaths(list, debug);
     }
 
+    public final boolean executePathsModify(int mode,List<FileMeta> files,String folder,int coverMode,String debug){
+        if (null==files||files.size()<=0){
+            return toast(R.string.listEmpty)&&false;
+        }else if (null==folder||folder.length()<=0){
+            return toast(R.string.targetFolderInvalid)&&false;
+        }
+        Dialog dialog=new Dialog(getAdapterContext());
+        LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
+//        final OnPathUpdate mOnPathUpdate=new OnPathUpdate() {
+//            @Override
+//            public void onPathUpdate(int what, FileMeta meta, String note) {
+////                binding.
+//            }
+//        };
+        return dialog.setContentView(binding,false).title(R.string.move).left(R.string.cancel).right(R.string.cancel).show((view,clickCount,resId, data)-> {
+                    switch (resId){
+                        case R.string.sure:
+
+                            break;
+                        case R.string.cancel:
+                            dialog.dismiss();
+                            break;
+                    }
+                    return true; });
+    }
+
+    public final boolean copyPaths(List<FileMeta> files,String folder,int coverMode,String debug){
+
+        return true;
+    }
+
+    public final boolean movePaths(List<FileMeta> files,String folder,int coverMode,String debug){
+        if (null==files||files.size()<=0){
+            return toast(R.string.listEmpty)&&false;
+        }else if (null==folder||folder.length()<=0){
+            return toast(R.string.targetFolderInvalid)&&false;
+        }
+        Dialog dialog=new Dialog(getAdapterContext());
+        LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
+        return dialog.setContentView(binding,false).title(R.string.move).left(R.string.cancel)
+                .right(R.string.cancel).show((view,clickCount,resId, data)-> {
+                    switch (resId){
+                        case R.string.sure:
+                            break;
+                        case R.string.cancel:
+                            dialog.dismiss();
+                            break;
+                    }
+                    return true; });
+    }
+
     public final boolean deletePaths(List<FileMeta> paths,String debug){
         final int length=null!=paths?paths.size():-1;
         if (length<=0){
@@ -264,19 +316,18 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
         final boolean[] existSucceed=new boolean[]{false};
         final Canceler[] cancelers=new Canceler[1];
-        final OnPathModify onDelete=(Object note,Reply<FileMeta> file)-> {
-            post(()->{dialog.message(note);},0);
-            binding.setLeft(file.getData());
-            boolean succeed=null!=file&&file.isSuccess()&&file.getWhat()==What.WHAT_SUCCEED;
-            existSucceed[0]=succeed||existSucceed[0];
-            binding.setRight(succeed?R.string.succeed:R.string.fail);
-        };
-        return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).
-                left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)-> {
+//        final OnPathUpdate onDelete=(int what,String note,FileMeta file)-> {
+//            post(()->{dialog.message(note);},0);
+//            binding.setLeft(file.getData());
+//            boolean succeed=null!=file&&file.isSuccess()&&file.getWhat()==What.WHAT_SUCCEED;
+//            existSucceed[0]=succeed||existSucceed[0];
+//            binding.setRight(succeed?R.string.succeed:R.string.fail);
+//        };
+        return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)-> {
                 switch (resId){
                     case R.string.sure:
                         dialog.setContentView(binding,false).message(null).left(null);
-                        final Canceler canceler=doDeleteFiles(paths,onDelete,(what, note, data3, arg)->{
+                        final Canceler canceler=onDeletePath(paths,null,(what, note, data3, arg)->{
                             dialog.dismiss();
                             if (existSucceed.length>0&&existSucceed[0]){
                                 resetAdapter("After file delete succeed ");
@@ -291,8 +342,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                         break;
                     case R.string.cancel:
                         Canceler existCanceler= null!=cancelers&&cancelers.length>0?cancelers[0]:null;
-                        if (null!=existCanceler&&existCanceler.cancel(true,"While cancel tap")){
-                            //Do nothing
+                        if (null==existCanceler||existCanceler.cancel(true,"While cancel tap")){
+                            dialog.dismiss();
                         }
                         break;
                     default:
@@ -303,34 +354,72 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         });
     }
 
-    private Canceler doDeleteFiles(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug){
-        if (null==paths||paths.size()<=0){
-            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
-            return null;
+    public final boolean process(ArrayList<FileMeta> paths,String title){
+        final int length=null!=paths?paths.size():-1;
+        if (length<=0){
+            return toast(R.string.listEmpty)&&false;
         }
-        final OnPathModify update=null!=modify?modify:(Object note, Reply<FileMeta> path)-> {};
-        return call(prepare(Api.class, "NoneUrl", null).deleteFiles().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
-            update.onFileModify(R.string.preparing,null); //Prepare files to delete
-            if (disposable.isDisposed()){
-                final Map<String,FileMeta> map=new HashMap<>();
-                for (FileMeta meta:paths) {
-                    if (null==meta){
-                        continue;
+        FileMeta first=paths.get(0);
+        String name=null!=first?first.getName(false):null;
+        String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:
+                R.string.file)+" "+name):""):getText(R.string.items,length));
+        final Dialog dialog=new Dialog(getAdapterContext());
+        final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
+        final Canceler[] cancelers=new Canceler[1];
+        return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).
+                title(title).message(getText(R.string.processSure,title,message)).
+                left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
+                    switch (resId){
+                        case R.string.sure:
+                             dialog.setContentView(binding,false).message("");//Clean message
+                             final OnPathUpdate update=(int what, Object note, Path from,Path to)-> {
+                                   dialog.message(null);
+                                   dialog.title(note);
+                                   binding.setLeft(from);
+//                                   binding.setRight();
+                             };
+                             Path from=new Path("https://192.167.0.1","/sdcard/sdfasd/","ddsfa",".mp3");
+                             Path tp=new Path("https://192.167.0.2","/sdcard/sdfasd/","ddsfa",".mp3");
+                            update.onPathUpdate(What.WHAT_SUCCEED,"准备中",from,tp);
+                            break;
+                        case R.string.cancel:
+                            Canceler canceler=null!=cancelers&&cancelers.length>0?cancelers[0]:null;
+                            if (null==canceler||canceler.cancel(true,"While cancel tap.")){
+                                dialog.dismiss();//Dismiss dialog while cancel succeed
+                            }
+                            break;
                     }
-                   String path=meta.getPath(false);
-                   map.put(path,meta);
-                }
-            }
-            update.onFileModify(R.string.prepared,null);
-        })),null,null,null);
+                    return true; });
     }
+
+//    private Canceler doDeleteFiles(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug){
+//        if (null==paths||paths.size()<=0){
+//            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
+//            return null;
+//        }
+//        final OnPathModify update=null!=modify?modify:(Object note, Reply<FileMeta> path)-> {};
+//        return call(prepare(Api.class, "NoneUrl", null).deleteFiles().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+//            update.onFileModify(R.string.preparing,null); //Prepare files to delete
+//            if (disposable.isDisposed()){
+//                final Map<String,FileMeta> map=new HashMap<>();
+//                for (FileMeta meta:paths) {
+//                    if (null==meta){
+//                        continue;
+//                    }
+//                   String path=meta.getPath(false);
+//                   map.put(path,meta);
+//                }
+//            }
+//            update.onFileModify(R.string.prepared,null);
+//        })),null,null,null);
+//    }
 
     protected abstract boolean onOpenPath(FileMeta meta,String debug);
     protected abstract boolean onShowPathDetail(FileMeta meta,String debug);
     protected abstract boolean onSetAsHome(String path,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
-//    protected abstract Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug);
+    protected abstract Canceler onDeletePath(List<FileMeta> paths, OnPathUpdate modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug);
     //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
 
     protected final <T extends ViewDataBinding> T inflate(int layoutId){

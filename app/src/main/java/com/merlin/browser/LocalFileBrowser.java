@@ -24,6 +24,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
+import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;
@@ -55,8 +56,8 @@ public class LocalFileBrowser extends FileBrowser{
         @FormUrlEncoded
         Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Collection<String> md5s);
 
-//        @POST(Address.PREFIX_FILE+"/none")
-//        Observable<Reply<ApiMap<String,Path>>> deleteLocalFile();
+        @POST(Address.PREFIX_FILE+"/none")
+        Observable<Reply<ApiMap<String,Path>>> deleteLocalFile();
     }
 
     public LocalFileBrowser(ClientMeta meta,Callback callback){
@@ -150,6 +151,11 @@ public class LocalFileBrowser extends FileBrowser{
                         reply.setWhat(What.WHAT_SUCCEED);
                         reply.setData(folderData);
                         if (null!=finish){
+                            //test
+                            post(()->{      ArrayList<FileMeta> ddd=new ArrayList<>();
+                                ddd.add(list.get(0));
+                                process(ddd,getText(R.string.delete));},0);
+                            //test end
                             post(()->finish.onApiFinish(reply.getWhat(),"Empty",reply, "List succeed."),0);
                         }
                         if (null==list||list.size()<=0){
@@ -343,7 +349,23 @@ public class LocalFileBrowser extends FileBrowser{
         return invokeFinish(succeed,what,note,finish,modify,arg);
     }
 
-//    @Override
+    @Override
+    protected Canceler onDeletePath(List<FileMeta> paths, OnPathUpdate modify, OnApiFinish<Reply<ApiMap<String, Path>>> finish, String debug) {
+        if (null==paths||paths.size()<=0){
+            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
+            return null;
+        }
+//        final OnPathUpdate update=null!=modify?modify:(int what,String note,FileMeta meta)-> {};
+//        return call(prepare(Api.class, Address.URL, null).deleteLocalFile().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+//            disposable.dispose();
+//            for (FileMeta meta:paths) {
+//                update.onPathUpdate(What.);
+//            }
+//        })), null, null, null);
+        return null;
+    }
+
+    //    @Override
     protected Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug) {
         if (null==paths||paths.size()<=0){
             invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
@@ -352,27 +374,27 @@ public class LocalFileBrowser extends FileBrowser{
         final OnPathModify update=null!=modify?modify:(Object note, Reply<FileMeta> path)-> {};
         update.onFileModify(R.string.preparing,null);
         for (FileMeta file:paths) {
-                String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath(false):null;
-                if (null==path||path.length()<=0){
-                    continue;
-                }
-                File childFile=new File(path);
-                Path childPath=new Path();
-                Reply<Path> childReply=null;
-                if (!childFile.exists()){//Just delete local file
-                    childReply=new Reply<>(true,What.WHAT_NOT_EXIST,"File note exist.",childPath);
-                }else if (!childFile.canWrite()){
-                    childReply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"File none permission.",childPath);
-                }else{
-                    deleteFile(childFile,disposable,delete);
-                    childReply=new Reply<>(true,childFile.exists()?What.WHAT_FAIL_UNKNOWN,"Delete fail.",childPath);
-                }
+            String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath(false):null;
+            if (null==path||path.length()<=0){
+                continue;
+            }
+            File childFile=new File(path);
+            Path childPath=new Path();
+            Reply<Path> childReply=null;
+            if (!childFile.exists()){//Just delete local file
+                childReply=new Reply<>(true,What.WHAT_NOT_EXIST,"File note exist.",childPath);
+            }else if (!childFile.canWrite()){
+                childReply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"File none permission.",childPath);
+            }else{
+//                    deleteFile(childFile,disposable,delete);
+//                    childReply=new Reply<>(true,childFile.exists()?What.WHAT_FAIL_UNKNOWN,"Delete fail.",childPath);
+            }
 //                map.put(path,childReply);
-            }
-            update.onFileModify(R.string.prepared,null);
-            if (null!=finish) {
+        }
+        update.onFileModify(R.string.prepared,null);
+        if (null!=finish) {
 //                post(() -> finish.onApiFinish(What.WHAT_SUCCEED,"Finish",reply,null), 0);
-            }
+        }
         return null;
 //        Reply<String> reply=new Reply<String>(true,What.WHAT_SUCCEED,"Deleted","dddddd 已删除");
 //        delete.onFileModify(reply);
@@ -423,8 +445,8 @@ public class LocalFileBrowser extends FileBrowser{
                 return false;
             }
             if (!file.canWrite()){
-                modify.onFileModify(R.string.nonePermission,new Reply<>(true,
-                        What.WHAT_NONE_PERMISSION,"None permission",));
+//                modify.onFileModify(R.string.nonePermission,new Reply<>(true,
+//                        What.WHAT_NONE_PERMISSION,"None permission",));
                 return false;
             }
             if (file.isDirectory()){
@@ -433,5 +455,8 @@ public class LocalFileBrowser extends FileBrowser{
             file.delete();
         }
         return false;
+    }
+    private interface OnFileDelete{
+
     }
 }

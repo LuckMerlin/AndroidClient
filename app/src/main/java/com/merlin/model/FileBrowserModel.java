@@ -200,7 +200,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         }
         switch (resId){
             case R.string.move:
-                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_MOVE) ? move(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                return isMode(Mode.MODE_MOVE) ? move(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_MOVE, data, null,"After tap click.");
             case R.string.upload:
                 return isMode(Mode.MODE_UPLOAD) ? upload(getCollected(LocalFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
@@ -239,6 +239,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean copy(ArrayList<FileMeta> files,int coverMode, String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
+        }else if (isMode(Mode.MODE_COPY)){
+            FileBrowser browser=getCurrentModel();
+            FolderData data=mCurrentFolder.get();
+            return null!=browser&&browser.copyPaths(files,null!=data?data.getPath():null,coverMode,debug)&&
+                    entryMode(Mode.MODE_NORMAL,null,"After start copy files "+(null!=debug?debug:"."));
         }
         return entryMode(Mode.MODE_COPY,new Collector(files),"While copy files "+(null!=debug?debug:"."));
     }
@@ -246,9 +251,24 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private boolean move(ArrayList<FileMeta> files,int coverMode,String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
+        }else if (isMode(Mode.MODE_MOVE)){
+            FileBrowser browser=getCurrentModel();
+            FolderData data=mCurrentFolder.get();
+            return null!=browser&&browser.movePaths(files,null!=data?data.getPath():null,coverMode,debug)&& entryMode(Mode.MODE_NORMAL,null,"After start move files "+(null!=debug?debug:"."));
         }
-        return entryMode(Mode.MODE_MOVE,new Collector(files),"While move files "+(null!=debug?debug:"."));
+        return entryMode(Mode.MODE_MOVE,new Collector(files),"While start move files "+(null!=debug?debug:"."));
     }
+
+//    private boolean applyCollectedFiles(int mode,ArrayList<FileMeta> files,int coverMode,String debug){
+//        if (null==files||files.size()<=0){
+//            return toast(R.string.noneDataToOperate)&&false;
+//        }else if (isMode(mode)){
+//            FileBrowser browser=getCurrentModel();
+//            FolderData data=mCurrentFolder.get();
+//            return null!=browser&&browser.executePathsModify(mode,files,null!=data?data.getPath():null,coverMode,debug)&&entryMode(Mode.MODE_NORMAL,null,"After start apply collect files "+(null!=debug?debug:"."));
+//        }
+//        return entryMode(mode,new Collector(files),"While start apply collect files "+(null!=debug?debug:"."));
+//    }
 
     private boolean upload(ArrayList<LocalFile> files,int coverMode,String debug){
         if (null==files||files.size()<=0){

@@ -4,10 +4,10 @@
     <data>
         <variable
             name="left"
-            type="Object" />
+            type="com.merlin.bean.Path" />
         <variable
             name="right"
-            type="Object" />
+            type="com.merlin.bean.Path" />
         <import type="android.view.View"/>
     </data>
     <LinearLayout
@@ -16,24 +16,27 @@
         android:layout_height="wrap_content">
         <ProgressBar
             android:layout_gravity="center_horizontal"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <TextView
-                android:text="@{left}"
-                android:gravity="left"
-                android:visibility="@{null!=left?View.VISIBLE:View.GONE}"
-                android:layout_weight="1"
-               style="@style/titleSubNormalTextView"/>
-            <TextView
-                android:text="@{right}"
-                android:gravity="right"
-                android:visibility="@{null!=right?View.VISIBLE:View.GONE}"
-                android:layout_weight="1"
-                style="@style/titleSubNormalTextView"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_weight="1">
+                <TextView
+                    android:text="@{left.name}"
+                    android:textStyle="bold"
+                    style="@style/titleSubNormalTextView"/>
+                <TextView
+                    android:text="@{left.host}"
+                    style="@style/titleSmallTextView"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </layout>
