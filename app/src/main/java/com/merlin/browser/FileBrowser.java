@@ -285,7 +285,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
                     FileProcess.Interrupt interrupt=null!=interrupts&&interrupts.length>0?interrupts[0]:null;
                     if (null!=interrupt){
-                        return null==(interrupts[0]=interrupt.onNext(resId)?interrupt:null)||true;
+                        interrupts[0]=null;
+                        return interrupt.setWhat(resId)||true;
                     }
                     switch (resId){
                         case R.string.sure:

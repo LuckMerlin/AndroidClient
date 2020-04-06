@@ -14,8 +14,20 @@ import java.util.ArrayList;
 public abstract class FileProcess <T extends FileMeta> extends ArrayList<T> {
     private final Object mTitle;
 
-    public interface Interrupt{
-        boolean onNext(int what);
+    public static class Interrupt{
+        private int mWhat;
+
+        public boolean setWhat(int what){
+            mWhat=what;
+            notifyAll();
+            return true;
+        }
+
+        public int getWhat() {
+            return mWhat;
+        }
+
+        //        boolean onNext(int what);
     }
 
     public FileProcess(){
