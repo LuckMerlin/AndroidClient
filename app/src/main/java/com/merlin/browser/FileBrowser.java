@@ -247,44 +247,18 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 });
     }
 
-//    public final boolean executePathsModify(int mode,List<FileMeta> files,String folder,int coverMode,String debug){
-//        if (null==files||files.size()<=0){
-//            return toast(R.string.listEmpty)&&false;
-//        }else if (null==folder||folder.length()<=0){
-//            return toast(R.string.targetFolderInvalid)&&false;
-//        }
-//        Dialog dialog=new Dialog(getAdapterContext());
-//        LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-////        final OnPathUpdate mOnPathUpdate=new OnPathUpdate() {
-////            @Override
-////            public void onPathUpdate(int what, FileMeta meta, String note) {
-//////                binding.
-////            }
-////        };
-//        return dialog.setContentView(binding,false).title(R.string.move).left(R.string.cancel).right(R.string.cancel).show((view,clickCount,resId, data)-> {
-//                    switch (resId){
-//                        case R.string.sure:
-//
-//                            break;
-//                        case R.string.cancel:
-//                            dialog.dismiss();
-//                            break;
-//                    }
-//                    return true; });
-//    }
-
     public final boolean copyPaths(ArrayList<FileMeta> files,String folder,int coverMode,String debug){
-        FileProcess process=onCreatePathsProcess(R.string.copy,files,folder,coverMode,debug);
+        FileProcess process=createPathsProcess(R.string.copy,files,folder,coverMode,debug);
         return null!=process?process(process):(toast(R.string.fail)&&false);
     }
 
     public final boolean movePaths(ArrayList<FileMeta> files,String folder,int coverMode,String debug){
-        FileProcess process=onCreatePathsProcess(R.string.move,files,folder,coverMode,debug);
+        FileProcess process=createPathsProcess(R.string.move,files,folder,coverMode,debug);
         return null!=process?process(process):(toast(R.string.fail)&&false);
     }
 
     public final boolean deletePaths(ArrayList<FileMeta> paths,String debug){
-        FileProcess process=onCreatePathsProcess(R.string.delete,paths,null,null,debug);
+        FileProcess process=createPathsProcess(R.string.delete,paths,null,null,debug);
         return null!=process?process(process):(toast(R.string.fail)&&false);
     }
 
@@ -370,7 +344,29 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
     protected abstract boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
-    protected abstract FileProcess onCreatePathsProcess(int mode,ArrayList<FileMeta> paths,String folder,Integer coverMode,String debug);
+    protected FileProcess onCreatePathsProcess(int mode,ArrayList<FileMeta> paths,String folder,Integer coverMode,String debug){
+        //Do nothing
+        return null;
+    }
+
+    private FileProcess createPathsProcess(int mode,ArrayList<FileMeta> paths,String folder,Integer coverMode,String debug){
+        FileProcess process=onCreatePathsProcess(mode,paths,folder,coverMode,debug);
+        if (null==process){
+            switch (mode) {
+                case R.string.delete:
+                    return new FileDeleteProcess(mode,paths);
+                case R.string.move:
+                    return new FileMoveProcess(mode,paths,folder,coverMode);
+                case R.string.copy:
+                    return new FileCopyProcess(mode,paths,folder,coverMode);
+                case R.string.download:
+                    return new FileDownloadProcess(mode,paths,folder,coverMode);
+                case R.string.upload:
+                    return new FileUploadProcess(mode,paths,folder,coverMode);
+            }
+        }
+        return process;
+    }
 
     protected final <T extends ViewDataBinding> T inflate(int layoutId){
         return inflate(getViewContext(),layoutId);
