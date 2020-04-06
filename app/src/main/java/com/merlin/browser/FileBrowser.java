@@ -54,11 +54,11 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
     private final ClientMeta mMeta;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
-    private Retrofit mRetrofit;
+    private final Retrofit mRetrofit=new Retrofit();
 
     private interface Api{
         @POST("/none")
-        Observable<Reply<ApiMap<String,Path>>> deleteFiles();
+        Observable<Reply<ApiMap<String,Path>>> noneRequest();
     }
 
     public FileBrowser(ClientMeta meta,Callback callback){
@@ -187,7 +187,10 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
 
     public final boolean setAsHome(Object data,String debug){
         String path=null!=data&&data instanceof FolderData?((FolderData)data).getPath():null;
-        return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(path,debug);
+        return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(path,(what,note, data1, arg)->{
+            boolean succeed=null!=data1&&data1.isSuccess()&&data1.getWhat()==What.WHAT_SUCCEED;
+            toast(succeed?R.string.succeed:(null!=note&&note.length()>0?note:R.string.fail));
+        },debug);
     }
 
     public final boolean renamePath(FileMeta meta,int coverMode,String debug){
@@ -244,143 +247,113 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 });
     }
 
+//    public final boolean executePathsModify(int mode,List<FileMeta> files,String folder,int coverMode,String debug){
+//        if (null==files||files.size()<=0){
+//            return toast(R.string.listEmpty)&&false;
+//        }else if (null==folder||folder.length()<=0){
+//            return toast(R.string.targetFolderInvalid)&&false;
+//        }
+//        Dialog dialog=new Dialog(getAdapterContext());
+//        LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
+////        final OnPathUpdate mOnPathUpdate=new OnPathUpdate() {
+////            @Override
+////            public void onPathUpdate(int what, FileMeta meta, String note) {
+//////                binding.
+////            }
+////        };
+//        return dialog.setContentView(binding,false).title(R.string.move).left(R.string.cancel).right(R.string.cancel).show((view,clickCount,resId, data)-> {
+//                    switch (resId){
+//                        case R.string.sure:
+//
+//                            break;
+//                        case R.string.cancel:
+//                            dialog.dismiss();
+//                            break;
+//                    }
+//                    return true; });
+//    }
+
+    public final boolean copyPaths(ArrayList<FileMeta> files,String folder,int coverMode,String debug){
+        FileProcess process=onCreatePathsProcess(R.string.copy,files,folder,coverMode,debug);
+        return null!=process?process(process):(toast(R.string.fail)&&false);
+    }
+
+    public final boolean movePaths(ArrayList<FileMeta> files,String folder,int coverMode,String debug){
+        FileProcess process=onCreatePathsProcess(R.string.move,files,folder,coverMode,debug);
+        return null!=process?process(process):(toast(R.string.fail)&&false);
+    }
+
+    public final boolean deletePaths(ArrayList<FileMeta> paths,String debug){
+        FileProcess process=onCreatePathsProcess(R.string.delete,paths,null,null,debug);
+        return null!=process?process(process):(toast(R.string.fail)&&false);
+    }
+
     public final boolean deletePath(Object data,String debug){
         if (null==data||!(data instanceof FileMeta)){
             return toast(R.string.pathInvalid)&&false;
         }
-        List<FileMeta> list=new ArrayList<>();
+        ArrayList<FileMeta> list=new ArrayList<>();
         list.add((FileMeta)data);
         return deletePaths(list, debug);
     }
 
-    public final boolean executePathsModify(int mode,List<FileMeta> files,String folder,int coverMode,String debug){
-        if (null==files||files.size()<=0){
-            return toast(R.string.listEmpty)&&false;
-        }else if (null==folder||folder.length()<=0){
-            return toast(R.string.targetFolderInvalid)&&false;
-        }
-        Dialog dialog=new Dialog(getAdapterContext());
-        LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-//        final OnPathUpdate mOnPathUpdate=new OnPathUpdate() {
-//            @Override
-//            public void onPathUpdate(int what, FileMeta meta, String note) {
-////                binding.
-//            }
-//        };
-        return dialog.setContentView(binding,false).title(R.string.move).left(R.string.cancel).right(R.string.cancel).show((view,clickCount,resId, data)-> {
-                    switch (resId){
-                        case R.string.sure:
-
-                            break;
-                        case R.string.cancel:
-                            dialog.dismiss();
-                            break;
-                    }
-                    return true; });
-    }
-
-    public final boolean copyPaths(List<FileMeta> files,String folder,int coverMode,String debug){
-
-        return true;
-    }
-
-    public final boolean movePaths(List<FileMeta> files,String folder,int coverMode,String debug){
-        if (null==files||files.size()<=0){
-            return toast(R.string.listEmpty)&&false;
-        }else if (null==folder||folder.length()<=0){
-            return toast(R.string.targetFolderInvalid)&&false;
-        }
-        Dialog dialog=new Dialog(getAdapterContext());
-        LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-        return dialog.setContentView(binding,false).title(R.string.move).left(R.string.cancel)
-                .right(R.string.cancel).show((view,clickCount,resId, data)-> {
-                    switch (resId){
-                        case R.string.sure:
-                            break;
-                        case R.string.cancel:
-                            dialog.dismiss();
-                            break;
-                    }
-                    return true; });
-    }
-
-    public final boolean deletePaths(List<FileMeta> paths,String debug){
-        final int length=null!=paths?paths.size():-1;
+    public final boolean process(FileProcess process){
+        final int length=null!=process?process.size():-1;
         if (length<=0){
             return toast(R.string.listEmpty)&&false;
         }
-        final Dialog dialog=new Dialog(getViewContext());
-        FileMeta first=paths.get(0);
-        String name=null!=first?first.getName(false):null;
-        String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder: R.string.file)+" "+name):""):getText(R.string.items,length));
-        final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-        final boolean[] existSucceed=new boolean[]{false};
-        final Canceler[] cancelers=new Canceler[1];
-//        final OnPathUpdate onDelete=(int what,String note,FileMeta file)-> {
-//            post(()->{dialog.message(note);},0);
-//            binding.setLeft(file.getData());
-//            boolean succeed=null!=file&&file.isSuccess()&&file.getWhat()==What.WHAT_SUCCEED;
-//            existSucceed[0]=succeed||existSucceed[0];
-//            binding.setRight(succeed?R.string.succeed:R.string.fail);
-//        };
-        return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)-> {
-                switch (resId){
-                    case R.string.sure:
-                        dialog.setContentView(binding,false).message(null).left(null);
-                        final Canceler canceler=onDeletePath(paths,null,(what, note, data3, arg)->{
-                            dialog.dismiss();
-                            if (existSucceed.length>0&&existSucceed[0]){
-                                resetAdapter("After file delete succeed ");
-                            }
-                        },"After sure delete "+(null!=debug?debug:"."));
-                        if (null!=canceler){
-                            cancelers[0]=canceler;
-                            return true;
-                        }
-                        toast(R.string.fail);
-                        dialog.dismiss();
-                        break;
-                    case R.string.cancel:
-                        Canceler existCanceler= null!=cancelers&&cancelers.length>0?cancelers[0]:null;
-                        if (null==existCanceler||existCanceler.cancel(true,"While cancel tap")){
-                            dialog.dismiss();
-                        }
-                        break;
-                    default:
-                        dialog.dismiss();
-                        break;
-                }
-            return true;
-        });
-    }
-
-    public final boolean process(ArrayList<FileMeta> paths,String title){
-        final int length=null!=paths?paths.size():-1;
-        if (length<=0){
-            return toast(R.string.listEmpty)&&false;
-        }
-        FileMeta first=paths.get(0);
-        String name=null!=first?first.getName(false):null;
-        String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:
-                R.string.file)+" "+name):""):getText(R.string.items,length));
+        String message=process.getMessage(getAdapterContext());
         final Dialog dialog=new Dialog(getAdapterContext());
         final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
         final Canceler[] cancelers=new Canceler[1];
-        return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).
-                title(title).message(getText(R.string.processSure,title,message)).
-                left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
+        final FileProcess.Interrupt[] interrupts=new FileProcess.Interrupt[1];
+        Object title=process.getTitle();
+        return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
+                    FileProcess.Interrupt interrupt=null!=interrupts&&interrupts.length>0?interrupts[0]:null;
+                    if (null!=interrupt){
+                        return null==(interrupts[0]=interrupt.onNext(resId)?interrupt:null)||true;
+                    }
                     switch (resId){
                         case R.string.sure:
                              dialog.setContentView(binding,false).left(null).message("");//Clean message
-                             final OnPathUpdate update=(int what, Object note, Path from,Path to)-> {
-                                   dialog.message(null);
-                                   dialog.title(note);
-                                   binding.setLeft(from);
-//                                   binding.setRight();
+                             final OnApiFinish apiFinish=(int what, String note, Object apiData, Object arg) ->{
+                                    if (what==What.WHAT_SUCCEED){
+                                        post(()->dialog.dismiss(),1000);
+                                    }
                              };
-                             Path from=new Path("https://192.167.0.1","/sdcard/sdfasd/","ddsfa",".mp3");
-                             Path tp=new Path("https://192.167.0.2","/sdcard/sdfasd/","ddsfa",".mp3");
-                            update.onPathUpdate(What.WHAT_SUCCEED,"准备中",from,tp);
+                             final FileProcess.OnProcessUpdate update=(what,note,from,to,arg)-> {
+                                   switch (what){
+                                       case What.WHAT_SUCCEED://Get through
+                                            if (null!=arg){
+
+                                            }
+                                       case What.WHAT_DOING:
+                                       case What.WHAT_FAIL_UNKNOWN:
+                                           dialog.message(null).title(note);
+                                           binding.setLeft(from);
+                                           binding.setRight(to);
+                                           break;
+                                       case What.WHAT_INTERRUPT:
+                                           if (null!=arg&&arg instanceof FileProcess.Interrupt){
+                                               interrupts[0]=(FileProcess.Interrupt)arg;
+                                               dialog.message(note).left(R.string.sure).right(R.string.cancel);
+                                           }
+                                           break;
+                                   }
+                             };
+                            if (null==call(prepare(Api.class, "http://None.request.Url", null).noneRequest().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+                                if (!disposable.isDisposed()){
+                                    disposable.dispose();//Cancel none request
+                                    Canceler canceler=cancelers[0]=process.onProcess(update, apiFinish,mRetrofit);
+                                    if (null==canceler){//Process fail?Dismiss dialog
+                                        post(()->dialog.dismiss(),1000);
+                                    }
+                                }else {
+                                    post(()->dialog.dismiss(),1000);
+                                }
+                            })), null, null, null)){
+                                dialog.dismiss();
+                            }
                             break;
                         case R.string.cancel:
                             Canceler canceler=null!=cancelers&&cancelers.length>0?cancelers[0]:null;
@@ -392,35 +365,12 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                     return true; });
     }
 
-//    private Canceler doDeleteFiles(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug){
-//        if (null==paths||paths.size()<=0){
-//            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
-//            return null;
-//        }
-//        final OnPathModify update=null!=modify?modify:(Object note, Reply<FileMeta> path)-> {};
-//        return call(prepare(Api.class, "NoneUrl", null).deleteFiles().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
-//            update.onFileModify(R.string.preparing,null); //Prepare files to delete
-//            if (disposable.isDisposed()){
-//                final Map<String,FileMeta> map=new HashMap<>();
-//                for (FileMeta meta:paths) {
-//                    if (null==meta){
-//                        continue;
-//                    }
-//                   String path=meta.getPath(false);
-//                   map.put(path,meta);
-//                }
-//            }
-//            update.onFileModify(R.string.prepared,null);
-//        })),null,null,null);
-//    }
-
     protected abstract boolean onOpenPath(FileMeta meta,String debug);
     protected abstract boolean onShowPathDetail(FileMeta meta,String debug);
-    protected abstract boolean onSetAsHome(String path,String debug);
+    protected abstract boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
-    protected abstract Canceler onDeletePath(List<FileMeta> paths, OnPathUpdate modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug);
-    //    protected abstract boolean onDeleteFile(List<String> files, OnApiFinish<Reply<ApiList<String>>> finish, String debug);
+    protected abstract FileProcess onCreatePathsProcess(int mode,ArrayList<FileMeta> paths,String folder,Integer coverMode,String debug);
 
     protected final <T extends ViewDataBinding> T inflate(int layoutId){
         return inflate(getViewContext(),layoutId);
@@ -492,13 +442,13 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
 
     protected final  <T> T prepare(Class<T>  cls, String url, Executor callbackExecutor){
         Retrofit retrofit=mRetrofit;
-        return (null!=retrofit?retrofit:(mRetrofit=new Retrofit())).prepare(cls,url,callbackExecutor);
+        return null!=retrofit?retrofit.prepare(cls,url,callbackExecutor):null;
     }
 
     protected final  <T> RetrofitCanceler call(Observable<T> observable, Scheduler subscribeOn,
                                                Scheduler observeOn, com.merlin.api.Callback...callbacks){
         Retrofit retrofit=mRetrofit;
-        return (null!=retrofit?retrofit:(mRetrofit=new Retrofit())).call(observable,subscribeOn,observeOn,callbacks);
+        return null!=retrofit?retrofit.call(observable,subscribeOn,observeOn,callbacks):null;
     }
 
     private Context getViewContext(){
@@ -514,4 +464,5 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         }
         return false;
     }
+
 }

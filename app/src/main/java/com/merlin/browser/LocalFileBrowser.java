@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.icu.text.Replaceable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -152,9 +153,9 @@ public class LocalFileBrowser extends FileBrowser{
                         reply.setData(folderData);
                         if (null!=finish){
                             //test
-                            post(()->{      ArrayList<FileMeta> ddd=new ArrayList<>();
-                                ddd.add(list.get(0));
-                                process(ddd,getText(R.string.delete));},0);
+//                            post(()->{      ArrayList<FileMeta> ddd=new ArrayList<>();
+//                                ddd.add(list.get(0));
+//                                deletePaths(ddd,getText(R.string.delete));},0);
                             //test end
                             post(()->finish.onApiFinish(reply.getWhat(),"Empty",reply, "List succeed."),0);
                         }
@@ -227,13 +228,15 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onSetAsHome(String path, String debug) {
+    protected boolean onSetAsHome(String path, OnApiFinish<Reply<String>> finish, String debug) {
         Context context=getAdapterContext();
         File file=null!=context&&null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
-        if (null!=file&&file.exists()&&file.isDirectory()&&new LocalBrowserHome().set(context,path)){
-            return toast(R.string.succeed)||true;
+        boolean succeed=null!=file&&file.exists()&&file.isDirectory()&&new LocalBrowserHome().set(context,path);
+        if (null!=finish){
+            Reply<String> reply=new Reply<>(true,succeed?What.WHAT_SUCCEED:What.WHAT_FAIL_UNKNOWN,succeed?"Succeed":"Fail",path);
+            finish.onApiFinish(reply.getWhat(),reply.getNote(),reply,null);
         }
-        return toast(R.string.fail)||false;
+        return true;
     }
 
     @Override
@@ -350,20 +353,39 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected Canceler onDeletePath(List<FileMeta> paths, OnPathUpdate modify, OnApiFinish<Reply<ApiMap<String, Path>>> finish, String debug) {
-        if (null==paths||paths.size()<=0){
-            invokeFinish(false,What.WHAT_EMPTY,"None file to delete.",finish,null,null);
-            return null;
+    protected FileProcess onCreatePathsProcess(int mode, ArrayList<FileMeta> paths, String folder, Integer coverMode, String debug) {
+        switch (mode) {
+            case R.string.delete:
+                return new FileDeleteProcess(mode,paths);
         }
-//        final OnPathUpdate update=null!=modify?modify:(int what,String note,FileMeta meta)-> {};
-//        return call(prepare(Api.class, Address.URL, null).deleteLocalFile().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
-//            disposable.dispose();
-//            for (FileMeta meta:paths) {
-//                update.onPathUpdate(What.);
-//            }
-//        })), null, null, null);
         return null;
     }
+
+    //    @Override
+//    protected FileProcess onCreatePathsProcess(int mode, ArrayList<FileMeta> paths, String folder, Integer coverMode, String debug) {
+//        Path from=new Path("https://192.167.0.1","/sdcard/sdfasd/","ddsfa",".mp3");
+//        Path tp=new Path("https://192.167.0.2","/sdcard/sdfasd/","ddsfa",".mp3");
+//        switch (mode){
+//            case R.string.delete:
+//                return new FileProcess(paths) {
+//                    @Override
+//                    public Canceler onProcess(OnProcessUpdate update, OnApiFinish apiFinish) {
+////                        update.onProcessUpdate(What.WHAT_NONE_NETWORK,"沙发大厦"+(Looper.myLooper()==Looper.getMainLooper()),null,null);
+////                        while (true){
+////                            update.onProcessUpdate(What.WHAT_NONE_NETWORK,"沙 "+System.currentTimeMillis()+(Looper.myLooper()==Looper.getMainLooper()),null,null);
+////                        }
+////                        return null;
+////                        return new Canceler() {
+////                            @Override
+////                            public boolean cancel(boolean cancel, String debug) {
+////                                return false;
+////                            }
+////                        };
+//                    }
+//                };
+//        }
+//        return super.onCreatePathsProcess(mode, paths, debug);
+//    }
 
     //    @Override
     protected Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<ApiMap<String,Path>>> finish, String debug) {

@@ -20,6 +20,7 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.dialog.Dialog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -47,6 +48,10 @@ public class NasFileBrowser extends FileBrowser implements Label {
         @POST(Address.PREFIX_FILE+"/rename")
         @FormUrlEncoded
         Observable<Reply<Path>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
+
+        @POST(Address.PREFIX_FILE+"/create")
+        @FormUrlEncoded
+        Observable<Reply<Path>> createPath(@Field(LABEL_FOLDER) boolean folder,@Field(LABEL_PARENT) String parent,@Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
     }
 
     public NasFileBrowser(ClientMeta meta,Callback callback){
@@ -86,28 +91,26 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
-
-        return false;
+        return null!=call(prepare(Api.class,Address.URL,null).createPath(dir,folder, name,coverMode),null,null,finish);
     }
 
     @Override
-    protected Canceler onDeletePath(List<FileMeta> paths, OnPathUpdate modify, OnApiFinish<Reply<ApiMap<String, Path>>> finish, String debug) {
+    protected FileProcess onCreatePathsProcess(int mode, ArrayList<FileMeta> paths, String folder, Integer coverMode, String debug) {
+        switch (mode){
+            case R.string.delete:
+                return new FileDeleteProcess(mode,paths);
+        }
         return null;
     }
 
-    //    @Override
-//    protected Canceler onDeletePath(List<FileMeta> paths, OnPathModify modify, OnApiFinish<Reply<String>> finish, String debug) {
-//
-//        return null;
-//    }
-
     @Override
-    protected boolean onSetAsHome(String path, String debug) {
-        return false;
+    protected boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish, String debug) {
+        return null!=call(prepare(Api.class,Address.URL,null).setHome(path),null,null,finish);
     }
 
     @Override
     protected boolean onOpenPath(FileMeta meta, String debug) {
+
         return false;
     }
 }
