@@ -171,6 +171,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         return (!isMode(Mode.MODE_MULTI_CHOOSE)&&entryMode(Mode.MODE_MULTI_CHOOSE, new Collector(null,null),"After multi choose tap click."))||true;
                     case R.string.goTo:
                         return launchGoTo("After tap click");
+                    case R.string.exit:
+                        return finishActivity("After tap click.")||true;
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -194,7 +196,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                              if (null!=data&&data instanceof FileMeta){
                                  return showFileContextMenu((FileMeta)data,"After 2 tap click.");
                              }
-
                          break;
                  }
         }

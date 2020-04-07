@@ -34,7 +34,7 @@
                 android:src="@{imageUrl}"
                 android:visibility="@{(null==imageUrl)?View.GONE:View.VISIBLE}"
                 android:layout_gravity="center_horizontal"
-                android:layout_width="50dp"
+                android:layout_width="20dp"
                 android:layout_height="50dp"/>
             <View
                 android:background="@{meta.syncColor()}"

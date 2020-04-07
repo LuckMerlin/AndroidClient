@@ -246,13 +246,14 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     return null!=list&&list.add(data)&&add(list,exceptExist,debug);
    }
 
-  public final boolean add(List<T> data,boolean exceptExist,String debug){
+  public final boolean add(List<T> data,boolean exceptExist,String debug)
+  {
         if (null!=data&&data.size()>0){
             List<T> list=mData;
             list=null!=list?list:(mData=new ArrayList<>());
             synchronized (list){
                 for (T child:data) {
-                    if (null==child||(list.contains(child)&&exceptExist)||list.add(child)){
+                    if (null==child||(list.contains(child)&&exceptExist)||!list.add(child)){
                         continue;
                     }
                     notifyItemInserted(list.size()-1);

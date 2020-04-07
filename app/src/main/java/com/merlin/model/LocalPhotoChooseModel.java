@@ -21,6 +21,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.LocalPhoto;
 import com.merlin.debug.Debug;
+import com.merlin.global.Database;
 import com.merlin.photo.LocalPhotoLoader;
 import com.merlin.photo.Photo;
 import com.merlin.view.OnLongClick;
@@ -67,10 +68,6 @@ public class LocalPhotoChooseModel extends Model implements OnTapClick,Label, Mo
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        switch (clickCount){
-            case 1:
-                return true;
-        }
         return false;
     }
 

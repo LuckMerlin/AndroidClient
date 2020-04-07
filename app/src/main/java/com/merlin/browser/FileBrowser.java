@@ -78,35 +78,6 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         //Do nothing
     }
 
-//    public final boolean isMode(int ... modes){
-//        if (null!=modes&&modes.length>0){
-//            int curr=getMode();
-//            for (int mode:modes){
-//                if (mode==curr){
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
-
-//    public final int getMode() {
-//        return mMode;
-//    }
-
-//    public final boolean entryMode(int mode,Collector collector,String debug){
-//        int curr=mMode;
-//        if (mode!=curr){
-//            mMode=mode;
-//            if (curr== Mode.MODE_MULTI_CHOOSE||mode==Mode.MODE_MULTI_CHOOSE){
-//                setCollector(mode==Mode.MODE_MULTI_CHOOSE?collector:null,"While multi choose mode changed "+(null!=debug?debug:"."));
-//            }
-//            onModeChange(curr, mode);
-//            return true;
-//        }
-//        return false;
-//    }
-
     @Override
     protected final void onPageLoadSucceed(PageData page, String debug) {
         super.onPageLoadSucceed(page, debug);

@@ -291,15 +291,17 @@ public class Model extends Retrofit{
         return null!=context&&context instanceof Application?(Application)context:null;
     }
 
-    protected final List<Activity> finishAllActivity(Object...activities){
+    protected final List<Activity> finishAllActivity(String debug,Object...activities){
         Application application=getApplication();
-        return null!=application?application.finishAllActivity(activities):null;
+        return null!=application?application.finishAllActivity(debug,activities):null;
     }
 
-    public final boolean finishActivity(){
+    public final boolean finishActivity(String debug){
         Activity activity=getActivity(null);
         if (null!=activity){
+            Debug.D(getClass(),"Finish activity "+activity+" "+(null!=debug?debug:"."));
             activity.finish();
+            return true;
         }
         return false;
     }
@@ -379,6 +381,7 @@ public class Model extends Retrofit{
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             if(null!=forResultCode){
                 if ((context instanceof Activity)){
+                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                      Debug.D(getClass(),"Start activity for result."+forResultCode);
                      ((Activity)context).startActivityForResult(intent,forResultCode);
                      return true;

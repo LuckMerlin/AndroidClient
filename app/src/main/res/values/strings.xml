@@ -135,4 +135,5 @@
     <string name="goTo">前往</string>
     <string name="multiChoose">多选</string>
     <string name="currentModeNotSupport">当前模式不能执行此操作</string>
+    <string name="exit">退出</string>
 </resources>

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.view.View;
 import android.widget.TimePicker;
 
@@ -21,12 +22,17 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FileMeta;
+import com.merlin.bean.LocalFile;
+import com.merlin.bean.LocalPhoto;
 import com.merlin.bean.Love;
 import com.merlin.bean.NasFile;
+import com.merlin.bean.Path;
 import com.merlin.bean._Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileSaveBuilder;
+import com.merlin.photo.PathPhoto;
+import com.merlin.photo.Photo;
 import com.merlin.view.OnTapClick;
 
 import java.io.File;
@@ -128,7 +134,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         mContent.set(null!=love?love.getData():null);
         mTitle.set(null!=love?love.getName():null);
         mPlanTime.set(null!=love?love.getTime():null);
-        mPhotoAdapter.set(null!=love?love.getImage():null,"After love apply.");
+//        mPhotoAdapter.set(null!=love?love.getImage():null,"After love apply.");
     }
 
     private boolean save(String debug){
@@ -152,21 +158,21 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         loveTextMap.put(Label.LABEL_MODE, "");
         Debug.D(getClass(),"Save love "+title+" "+(null!=debug?debug:"."));
         final String dialogKey=showLoading(R.string.loading);
-        final List<FileMeta> adapterPhotos=mPhotoAdapter.getData();
+        final List<Photo> adapterPhotos=mPhotoAdapter.getData();
         List<MultipartBody.Part> parts=null;
         if (null!=adapterPhotos&&adapterPhotos.size()>0){
             FileSaveBuilder builder=new FileSaveBuilder();
             parts = new ArrayList<>();
-            for (FileMeta photo:adapterPhotos) {
-                Object imageUrlObj = null != photo ? photo.getPath(true) : null;
+            for (Photo photo:adapterPhotos) {
+                Object imageUrlObj = null != photo ? photo.getLoadUrl() : null;
                 String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
                 if (null != imageUrl && imageUrl.length() > 0) {
                     if (photo instanceof NasFile) {
-                        photos.add(photo);
+//                        photos.add(new PathPhoto());
                     } else {
                         File file = new File(imageUrl);
                         String name = "" + title + "_" + planTime + "_" + file.getName();
-                        MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "loves") : null;
+                        MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "./lovesPhotos") : null;
                         if (null == part || !parts.add(part)) {
                             continue;
                         }
@@ -219,16 +225,18 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             case PHOTO_CHOOSE_ACTIVITY_RESULT_CODE:
                 Bundle bundle=null!=data?data.getExtras():null;
                 Object object=null!=bundle?bundle.get(Label.LABEL_DATA):null;
-                Debug.D(getClass(),"阀手动阀   "+object);
-//                Bundle bundle=null!=data?data.getExtras():null;
-//                Object object=null!=bundle?bundle.get("select_result"):null;
-//                if (null!=object&&object instanceof ArrayList){
-//                    for (Object child:(ArrayList)object) {
-//                        if (null!=child&& child instanceof String&&((String)child).length()>0){
-//                            mPhotoAdapter.add(LocalFile.create(new File((String)child),null),true,"");
-//                        }
-//                    }
-//                }
+                PhotoAdapter adapter=mPhotoAdapter;
+                if (null!=adapter&&null!=object&&object instanceof ArrayList){
+                    for (Object child:(ArrayList)object) {
+                        if (null!=child){
+                            if (child instanceof String&&((String)child).length()>0){
+                                adapter.add(new PathPhoto((String)child),true,"");
+                            }else if (child instanceof Photo){
+                                adapter.add((Photo)child,true,"After activity choose result.");
+                            }
+                        }
+                    }
+                }
                 break;
         }
     }

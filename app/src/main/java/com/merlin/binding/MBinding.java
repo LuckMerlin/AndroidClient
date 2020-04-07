@@ -52,6 +52,7 @@ import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;
 import com.merlin.model.OnBeforeTextChange;
 import com.merlin.model.OnTextChange;
+import com.merlin.photo.Photo;
 import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
 import com.merlin.view.OnSeekBarChangeListener;
@@ -198,6 +199,7 @@ public class MBinding {
     public static void setSrc(ImageView view, Object img) {
         if (null!=view) {
             if (null != img) {
+                img=img instanceof Photo?((Photo)img).getLoadUrl():img;
                 if (img instanceof Integer){
                     if (!img.equals(Resources.ID_NULL)) {
                         view.setImageResource((Integer) img);

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
@@ -24,6 +23,7 @@ import com.merlin.api.Label;
 import com.merlin.bean.LocalPhoto;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPhotoGridBinding;
+import com.merlin.debug.Debug;
 import com.merlin.photo.Photo;
 import com.merlin.view.OnTapClick;
 
@@ -150,10 +150,10 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implem
                     ArrayList<Photo> list=mChoose;
                     if (null!=list){
                         intent.putParcelableArrayListExtra(Label.LABEL_DATA,list);
-                        cleanChoose(false);
                     }
                     ((Activity)context).setResult(Activity.RESULT_OK,intent);
                     ((Activity)context).finish();
+                    cleanChoose(false);
                     return true;
                 }
                 return false;

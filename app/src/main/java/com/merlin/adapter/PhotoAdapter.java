@@ -8,10 +8,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.bean.FileMeta;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPhotoBinding;
+import com.merlin.photo.Photo;
 
 import java.util.List;
 
-public class  PhotoAdapter <T extends FileMeta> extends ListAdapter<T> {
+public class  PhotoAdapter extends ListAdapter<com.merlin.photo.Photo> {
     private final int mSpanCount;
     private final boolean mEnableAdd;
 
@@ -30,9 +31,9 @@ public class  PhotoAdapter <T extends FileMeta> extends ListAdapter<T> {
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Photo data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemPhotoBinding){
-            ((ItemPhotoBinding)binding).setPhoto(isAddPhotoViewType(viewType)?R.drawable.selector_photo_add:(null!=data?data.getPath(true):null));
+            ((ItemPhotoBinding)binding).setPhoto(isAddPhotoViewType(viewType)?R.drawable.selector_photo_add:(null!=data?data.getLoadUrl():null));
         }
     }
 
