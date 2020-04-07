@@ -1,8 +1,11 @@
 package com.merlin.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.File;
 
-public class Path {
+public class Path implements Parcelable {
     private String parent;
     private String name;
     private String extension;
@@ -73,4 +76,38 @@ public class Path {
         }
         return result;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(parent);
+        dest.writeString(name);
+        dest.writeString(extension);
+        dest.writeString(host);
+    }
+
+    protected Path(Parcel parcel){
+        parent=parcel.readString();
+        name=parcel.readString();
+        extension=parcel.readString();
+        host=parcel.readString();
+
+    }
+
+    public static final Creator<Path> CREATOR = new Creator<Path>() {
+        @Override
+        public Path createFromParcel(Parcel in) {
+            return new Path(in);
+        }
+
+        @Override
+        public Path[] newArray(int size) {
+            return new Path[size];
+        }
+    };
+
 }

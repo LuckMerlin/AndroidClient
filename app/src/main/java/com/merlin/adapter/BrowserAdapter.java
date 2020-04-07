@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.api.PageData;
 import com.merlin.bean.FileMeta;
 import com.merlin.bean.FolderData;
+import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
