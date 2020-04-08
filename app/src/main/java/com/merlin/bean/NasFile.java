@@ -53,7 +53,8 @@ public class NasFile  extends File{
             boolean favorite=dest.readBoolean();
             long accessTime=dest.readLong();
             createTime=dest.readLong();
-            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime);
+            int permission=dest.readInt();
+            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime,permission);
         }
     }
 
@@ -74,6 +75,7 @@ public class NasFile  extends File{
         dest.writeBoolean(isFavorite());
         dest.writeLong(getAccessTime());
         dest.writeLong(createTime);
+        dest.writeInt(getPermission());
     }
 
     public static final Creator<NasFile> CREATOR = new Creator<NasFile>() {

@@ -65,7 +65,7 @@
              android:paddingRight="5dp"
              android:layout_height="match_parent">
              <TextView
-                 android:text="@{mediaFile.meta.title??mediaFile.getName(false)??``}"
+                 android:text="@{mediaFile.title??mediaFile.getName(false)??``}"
                  android:singleLine="true"
                  style="@style/titleNormalTextView"/>
              <LinearLayout
@@ -73,15 +73,15 @@
                  android:orientation="horizontal"
                  android:layout_marginLeft="10dp"
                  android:layout_height="wrap_content">
-                 <TextView
-                     android:text="@{mediaFile.meta.durationText}"
-                     style="@style/smallNormalTextView" />
-                 <TextView
-                     android:text="@{` `+mediaFile.meta.artist??``}"
-                     style="@style/smallNormalTextView" />
-                 <TextView
-                     android:text="@{` `+mediaFile.meta.album??``}"
-                     style="@style/smallNormalTextView" />
+<!--                 <TextView-->
+<!--                     android:text="@{mediaFile.meta.durationText}"-->
+<!--                     style="@style/smallNormalTextView" />-->
+<!--                 <TextView-->
+<!--                     android:text="@{` `+mediaFile.meta.artist??``}"-->
+<!--                     style="@style/smallNormalTextView" />-->
+<!--                 <TextView-->
+<!--                     android:text="@{` `+mediaFile.meta.album??``}"-->
+<!--                     style="@style/smallNormalTextView" />-->
              </LinearLayout>
          </LinearLayout>
 

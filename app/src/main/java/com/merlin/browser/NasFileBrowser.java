@@ -1,12 +1,7 @@
 package com.merlin.browser;
 
-import android.content.Context;
-import android.view.View;
-
 import com.merlin.api.Address;
-import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
-import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
@@ -17,11 +12,10 @@ import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
-import com.merlin.client.databinding.FileDetailBinding;
+import com.merlin.client.databinding.NasFileDetailBinding;
 import com.merlin.dialog.Dialog;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -67,7 +61,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
     @Override
     protected boolean onShowPathDetail(FileMeta meta, String debug) {
         String path=null!=meta&&meta instanceof NasFile?meta.getPath(false):null;
-        FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
+        NasFileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.nas_file_detail);
         if (null==binding){
             return toast(R.string.pathInvalid)&&false;
         }

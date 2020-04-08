@@ -26,7 +26,7 @@
             android:layout_height="wrap_content">
             <ImageView
                 android:src="@{file.imageUrl}"
-                android:visibility="@{(null==file.imageUrl)?View.GONE:View.VISIBLE}"
+                android:visibility="@{(file.imageUrl.length()>0)?View.GONE:View.VISIBLE}"
                 android:layout_gravity="center_horizontal"
                 android:layout_width="50dp"
                 android:layout_height="50dp"/>
@@ -36,12 +36,11 @@
                 android:visibility="@{null==file.getName(false)?View.GONE:View.VISIBLE}"
                 android:layout_gravity="center_horizontal"
                 style="@style/titleNormalTextView"/>
-            <include binding:key="@{R.string.name}" binding:value="@{file.meta.title}"  android:visibility="@{null==file.meta.title?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.name}" binding:value="@{file.title}"  android:visibility="@{null==file.title?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.size}" binding:value="@{file.childCount>=0?``+file.childCount:FileSize.formatSizeText(file.length)}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.format}" binding:value="@{file.directory?(Integer)R.string.folder:(file.mime??file.extension)}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.type}" binding:value="@{FileType.formatType(file.mode)}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.path}" binding:value="@{file.getPath(false)}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.modifyTime}" binding:value="@{Time.formatTime((long)file.modifyTime)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.path}" binding:value="@{file.getPath(null)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.modifyTime}" binding:value="@{Time.formatTime(file.modifyTime)}" layout="@layout/item_key_value"/>
             <include android:visibility="@{What.WHAT_INVALID!=loadState?View.GONE:View.VISIBLE}" layout="@layout/loading" binding:message="@{`加载中`}" />
             <LinearLayout
                 android:visibility="@{What.WHAT_INVALID!=loadState?View.VISIBLE:View.GONE}"
@@ -50,7 +49,7 @@
                 android:layout_height="wrap_content">
                 <include binding:key="@{R.string.accessTime}" binding:value="@{Time.formatTime((long)file.accessTime)}" layout="@layout/item_key_value"/>
                 <include binding:key="@{R.string.createTime}" binding:value="@{Time.formatTime((long)file.createTime)}" layout="@layout/item_key_value"/>
-                <include binding:key="@{R.string.permission}" binding:value="@{``+file.permissions}" layout="@layout/item_key_value"/>
+                <include binding:key="@{R.string.permission}" binding:value="@{``+file.permission}" layout="@layout/item_key_value"/>
                 <include binding:key="@{R.string.md5}" binding:value="@{file.md5}" android:visibility="@{file.directory?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
                 <include binding:key="@{R.string.artist}" binding:value="@{``+file.meta.artist}" android:visibility="@{null!=file.meta.artist?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>
                 <include binding:key="@{R.string.album}" binding:value="@{``+file.meta.album}" android:visibility="@{null!=file.meta.album?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>

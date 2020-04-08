@@ -27,10 +27,10 @@
         <include layout="@layout/item_context_menu"
             binding:menu="@{ContextMenu.create(R.string.copy,file)}"/>
         <include layout="@layout/item_context_menu"
-            android:visibility="@{file.directory&amp;&amp;Permissions.canDelete(file.permissions)?View.VISIBLE:View.GONE}"
+            android:visibility="@{file.directory&amp;&amp;Permissions.canDelete(file.permission)?View.VISIBLE:View.GONE}"
             binding:menu="@{ContextMenu.create(R.string.setAsHome,file)}"/>
         <include layout="@layout/item_context_menu"
-            android:visibility="@{Permissions.canDelete(file.permissions)?View.VISIBLE:View.GONE}"
+            android:visibility="@{Permissions.canDelete(file.permission)?View.VISIBLE:View.GONE}"
             binding:menu="@{ContextMenu.create(R.string.delete,file)}"/>
         <include layout="@layout/item_context_menu"
             binding:menu="@{ContextMenu.create(R.string.rename,file)}"/>

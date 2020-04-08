@@ -17,7 +17,6 @@ import com.merlin.bean.FilePaste;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
-import com.merlin.client.databinding.FileDetailBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
@@ -178,7 +177,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean scan(NasFile file, boolean recursive){
-        String path=null!=file?file.getPath(false):null;
+        String path=null!=file?file.getPath(null):null;
         return null!=path&&path.length()>0&&null!=call(prepare(Api.class,Address.HOST).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
     }
 
@@ -207,29 +206,30 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean showFileDetail(NasFile meta){
-        String path=null!=meta?meta.getPath(false):null;
-        FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.file_detail);
-        if (null==binding){
-            toast(R.string.pathInvalid);
-            return false;
-        }
-        binding.setFile(meta);
-        binding.setLoadState(What.WHAT_INVALID);
-        final Dialog dialog=new Dialog(getViewContext());
-        dialog.setContentView(null!=binding?binding.getRoot():null,true).show(( view, clickCount, resId, data)->{
-            return true;
-        },false);
-        return null!=call(prepare(Api.class,Address.HOST).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
-            NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
-            if (null!=detail){
-                binding.setFile(detail);
-            }
-            binding.setLoadState(what);
-        });
+//        String path=null!=meta?meta.getPath(false):null;
+//        FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.nas_file_detail);
+//        if (null==binding){
+//            toast(R.string.pathInvalid);
+//            return false;
+//        }
+//        binding.setFile(meta);
+//        binding.setLoadState(What.WHAT_INVALID);
+//        final Dialog dialog=new Dialog(getViewContext());
+//        dialog.setContentView(null!=binding?binding.getRoot():null,true).show(( view, clickCount, resId, data)->{
+//            return true;
+//        },false);
+//        return null!=call(prepare(Api.class,Address.HOST).getDetail(path),(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
+//            NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
+//            if (null!=detail){
+//                binding.setFile(detail);
+//            }
+//            binding.setLoadState(what);
+//        });
+        return false;
     }
 
     private boolean downloadFile(NasFile meta, String debug){
-        String path=null!=meta?meta.getPath(false):null;
+        String path=null!=meta?meta.getPath(null):null;
         if (null!=path&&path.length()>0){
             ArrayList<NasFile> list=new ArrayList<>();
             list.add(meta);
@@ -248,7 +248,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean uploadFile(NasFile meta){
-        String path=null!=meta?meta.getPath(false):null;
+        String path=null!=meta?meta.getPath(null):null;
         if (null==path||path.length()<=0 ||!meta.isDirectory()){
             toast(R.string.pathInvalid);
             return false;
@@ -433,7 +433,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                     List<String> paths=new ArrayList<>();
                     Map<String, NasFile> map=new HashMap<>(length);
                     for (NasFile meta:files) {
-                        String path=null!=meta?meta.getPath(false):null;
+                        String path=null!=meta?meta.getPath(null):null;
                         if (null!=path&&path.length()>0){
                             paths.add(path);
                             map.put(path,meta);
@@ -498,7 +498,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     }
 
     private boolean renameFile(NasFile meta){
-        final String path=null!=meta?meta.getPath(false):null;
+        final String path=null!=meta?meta.getPath(null):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(false);
             return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
