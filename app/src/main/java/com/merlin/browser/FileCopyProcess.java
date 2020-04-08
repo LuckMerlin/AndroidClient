@@ -4,6 +4,7 @@ import com.merlin.api.Address;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
+import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
@@ -30,10 +31,6 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-import static com.merlin.api.Label.LABEL_MODE;
-import static com.merlin.api.Label.LABEL_PARENT;
-import static com.merlin.api.Label.LABEL_PATH;
-
 public final class FileCopyProcess extends FileProcess<Document> {
     private final Integer mCoverMode;
     private final String mFolder;
@@ -41,7 +38,7 @@ public final class FileCopyProcess extends FileProcess<Document> {
     private interface Api{
         @POST(Address.PREFIX_FILE+"/copy")
         @FormUrlEncoded
-        Call<Reply<ApiMap<String,Reply<String>>>> copyPaths(@Field(LABEL_PARENT)String folder,@Field(LABEL_MODE) Integer coverMode, @Field(LABEL_PATH) String ...paths);
+        Call<Reply<ApiMap<String,Reply<String>>>> copyPaths(@Field(Label.LABEL_PARENT)String folder, @Field(Label.LABEL_MODE) Integer coverMode, @Field(Label.LABEL_PATH) String ...paths);
     }
 
     public FileCopyProcess(Object title, ArrayList<Document> files, String folder, Integer coverMode){
