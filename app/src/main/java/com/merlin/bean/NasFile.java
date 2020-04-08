@@ -14,188 +14,20 @@ import com.merlin.player.Playable;
 
 import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
 
-public class NasFile  implements FileMeta,Parcelable , Playable {
-    private long id;
-    private String md5;
-    private String mime;
-    private int mode;
-    private double createTime;
-    private int permissions;
-    private long length;
-    private double insertTime;
-    private boolean favorite;
-    private String extra;
-    private String imageUrl;
+public class NasFile  extends File{
+    private long createTime;
     private NasMedia meta;
-    private double accessTime;
-    private String parent;
-    private String name;
-    private String title;
-    private String extension;
-    private String host;
-    private int size;
-    private double modifyTime;
 
-    public int getMode() {
-        return mode;
+    protected NasFile(){
+        this(null,null,null,null);
     }
 
-    public long getLength() {
-        return length;
-    }
-
-    public NasFile(String parent,String name,String extension){
-
-    }
-
-    @Override
-    public boolean applyChange(Reply<Path> reply) {
-        Path path=null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?reply.getData():null;
-        if (null!=path){
-            parent=path.getParent();
-            name=path.getName(false);
-            extension=path.getExtension();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean applyModify(FModify modify){
-        if (null!=modify){
-//            String path=modify.getPath();
-//            String name=modify.getName();
-//            if (null!=path||null!=name){
-//                this.path=path;
-//                this.name=name;
-//                return true;
-//            }
-        }
-        return false;
-    }
-
-    @Override
-    public Object onViewData(int what, View view, String debug) {
-        return null;
-    }
-
-    public double getAccessTime() {
-        return accessTime;
+    public NasFile(String host,String parent,String name,String extension){
+        super(host,parent,name,extension);
     }
 
     public double getCreateTime() {
         return createTime;
-    }
-
-    public String getMime() {
-        return mime;
-    }
-
-    public void setFavorite(boolean favorite) {
-        this.favorite = favorite;
-    }
-
-    public NasMedia getMeta() {
-        return meta;
-    }
-
-    public boolean isFavorite() {
-        return favorite;
-    }
-
-    public String getMd5() {
-        return md5;
-    }
-
-    public double getInsertTime() {
-        return insertTime;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    @Override
-    public double getModifyTime() {
-        return modifyTime;
-    }
-
-    @Override
-    public int getChildCount() {
-        return size;
-    }
-
-    public String getExtra() {
-        return extra;
-    }
-
-    @Override
-    public String getExtension() {
-        return extension;
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    @Override
-    public String getName(boolean extension) {
-        return extension&&null!=this.extension&&null!=name?name+this.extension:name;
-    }
-
-    @Override
-    public String getPath(boolean addHost) {
-        String value=getName(true);
-        String host=this.host;
-        return (!addHost||null!=host)&&null!=parent&&null!=value?(addHost?host+"?"+ Label.LABEL_PATH+"=" :"")+parent+value:null;
-    }
-
-    @Override
-    public String getParent() {
-        return parent;
-    }
-
-    @Override
-    public boolean isAccessible(){
-        if (getChildCount()== What.WHAT_NONE_PERMISSION){
-            return false;
-        }
-        int permission=permissions;
-        Permissions permissions=new Permissions();
-        return permissions.isOtherReadable(permission)&&(!isDirectory()||permissions.isOtherExecutable(permission));
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public final int getPermissions() {
-        return permissions;
-    }
-
-    public final boolean isDirectory(){
-        return getChildCount()!=WHAT_NOT_DIRECTORY;
-    }
-
-    @Override
-    public String permission() {
-        return Integer.toString(permissions);
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (null!=obj){
-            if (obj instanceof String){
-                String path=getPath(true);
-                return null!=path&&path.equals(obj);
-            }
-        }
-        return super.equals(obj);
     }
 
     @Override
@@ -203,45 +35,45 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
         return 0;
     }
 
-    private NasFile(Parcel in){
-        id=in.readLong();
-        length=in.readLong();
-//        path=in.readString();
-//        name=in.readString();
-        md5=in.readString();
-        mime=in.readString();
-//        extension=in.readString();
-        extra=in.readString();
-        imageUrl=in.readString();
-        createTime=in.readDouble();
-//        modifyTime=in.readDouble();
-        insertTime=in.readDouble();
-        permissions=in.readInt();
-//        size=in.readLong();
-        favorite=in.readInt()==1;
-        Parcelable parcelable=in.readParcelable(NasFile.class.getClassLoader());
-        meta=null!=parcelable&&parcelable instanceof NasMedia ?(NasMedia)parcelable:null;
+    private NasFile(Parcel dest){
+        if (null!=dest){
+            String host=dest.readString();
+            String parent=dest.readString();
+            String name=dest.readString();
+            String extension=dest.readString();
+            setPath(host,parent,name,extension);
+            String title=dest.readString();
+            String imageUrl=dest.readString();
+            int childCount=dest.readInt();
+            long length=dest.readLong();
+            long modifyTime=dest.readLong();
+            boolean accessible=dest.readBoolean();
+            String md5=dest.readString();
+            String mime=dest.readString();
+            boolean favorite=dest.readBoolean();
+            long accessTime=dest.readLong();
+            createTime=dest.readLong();
+            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime);
+        }
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
-        dest.writeLong(length);
-//        dest.writeString(path);
-//        dest.writeString(name);
-        dest.writeString(md5);
-        dest.writeString(mime);
-//        dest.writeString(extension);
-        dest.writeString(extra);
-        dest.writeString(imageUrl);
-        dest.writeDouble(createTime);
-//        dest.writeDouble(modifyTime);
-        dest.writeDouble(insertTime);
-        dest.writeInt(permissions);
-//        dest.writeLong(size);
-        dest.writeInt(favorite?1:0);
-        dest.writeParcelable(meta,0);
-
+        dest.writeString(getHost());
+        dest.writeString(getParent());
+        dest.writeString(getName());
+        dest.writeString(getExtension());
+        dest.writeString(getTitle());
+        dest.writeString(getImageUrl());
+        dest.writeInt(getChildCount());
+        dest.writeLong(getLength());
+        dest.writeLong(getModifyTime());
+        dest.writeBoolean(isAccessible());
+        dest.writeString(getMd5());
+        dest.writeString(getMime());
+        dest.writeBoolean(isFavorite());
+        dest.writeLong(getAccessTime());
+        dest.writeLong(createTime);
     }
 
     public static final Creator<NasFile> CREATOR = new Creator<NasFile>() {
@@ -255,29 +87,4 @@ public class NasFile  implements FileMeta,Parcelable , Playable {
             return new NasFile[size];
         }
     };
-
-    @Override
-    public String toString() {
-        return "NasFile{" +
-                "id=" + id +
-                ", md5='" + md5 + '\'' +
-                ", mime='" + mime + '\'' +
-                ", mode=" + mode +
-                ", createTime=" + createTime +
-                ", permissions=" + permissions +
-                ", length=" + length +
-                ", insertTime=" + insertTime +
-                ", favorite=" + favorite +
-                ", extra='" + extra + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", meta=" + meta +
-                ", accessTime=" + accessTime +
-                ", parent='" + parent + '\'' +
-                ", name='" + name + '\'' +
-                ", title='" + title + '\'' +
-                ", extension='" + extension + '\'' +
-                ", size=" + size +
-                ", modifyTime=" + modifyTime +
-                '}';
-    }
 }

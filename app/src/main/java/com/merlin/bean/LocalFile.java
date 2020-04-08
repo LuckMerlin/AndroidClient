@@ -17,8 +17,8 @@ public final class LocalFile extends File {
     private transient Reply<Path> sync;
 
     public LocalFile(String parent,String name,String extension,String title,String imageUrl,int childCount,
-                     long length,long modifyTime,boolean accessible,String md5){
-        super(null,parent,name,extension,title,imageUrl,childCount,length,modifyTime,accessible,md5);
+                     long length,long modifyTime,boolean accessible,String md5,long accessTime){
+        super(null,parent,name,extension,title,imageUrl,childCount,length,modifyTime,accessible,md5,accessTime);
     }
 
     public static LocalFile create(java.io.File file, String imageUrl){
@@ -46,7 +46,8 @@ public final class LocalFile extends File {
             }
             long modifyTime=file.lastModified();
             boolean accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
-            return new LocalFile(parent,name,extension,title,imageUrl,childCount,size,modifyTime,accessible,md5);
+            return new LocalFile(parent,name,extension,title,imageUrl,childCount,size,
+                    modifyTime,accessible,md5,modifyTime);
         }
         return null;
     }
@@ -108,6 +109,9 @@ public final class LocalFile extends File {
         dest.writeLong(getModifyTime());
         dest.writeBoolean(isAccessible());
         dest.writeString(getMd5());
+        dest.writeString(getMime());
+        dest.writeBoolean(isFavorite());
+        dest.writeLong(getAccessTime());
     }
 
     private LocalFile(Parcel dest){
@@ -124,7 +128,10 @@ public final class LocalFile extends File {
             long modifyTime=dest.readLong();
             boolean accessible=dest.readBoolean();
             String md5=dest.readString();
-            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5);
+            String mime=dest.readString();
+            boolean favorite=dest.readBoolean();
+            long accessTime=dest.readLong();
+            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime);
         }
     }
 

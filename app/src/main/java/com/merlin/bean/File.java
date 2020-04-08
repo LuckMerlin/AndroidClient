@@ -7,15 +7,22 @@ public class File extends Path {
     private long length;
     private int childCount;
     private long modifyTime;
+    private long accessTime;
     private boolean accessible;
+    private String mime;
     private String md5;
+    private boolean favorite;
 
     protected File(){
-        this(null,null,null,null,null,null,0,0,0,false,null);
+        this(null,null,null,null);
+    }
+
+    protected File(String host,String parent,String name,String extension){
+        this(host,parent,name,extension,null,null,0,0,0,false,null,0);
     }
 
     public File(String host,String parent,String name,String extension,String title,String imageUrl,
-                int childCount,long length,long modifyTime,boolean accessible,String md5){
+                int childCount,long length,long modifyTime,boolean accessible,String md5,long accessTime){
         super(host,parent,name,extension);
         this.title=title;
         this.childCount=childCount;
@@ -24,6 +31,7 @@ public class File extends Path {
         this.modifyTime=modifyTime;
         this.accessible=accessible;
         this.md5=md5;
+        this.accessTime=accessTime;
     }
 
     public final boolean isAccessible() {
@@ -62,8 +70,21 @@ public class File extends Path {
         return length;
     }
 
+    public final String getMime() {
+        return mime;
+    }
+
+    public final boolean isFavorite() {
+        return favorite;
+    }
+
+    public final long getAccessTime() {
+        return accessTime;
+    }
+
     protected final boolean setFile(String title, String imageUrl, int childCount,
-                                    long length, long modifyTime, boolean accessible, String md5){
+                                    long length, long modifyTime, boolean accessible, String md5, String mime,
+                                    boolean favorite, long accessTime){
         this.title=title;
         this.imageUrl=imageUrl;
         this.childCount=childCount;
@@ -71,6 +92,9 @@ public class File extends Path {
         this.modifyTime=modifyTime;
         this.accessible=accessible;
         this.md5=md5;
+        this.mime=mime;
+        this.favorite=favorite;
+        this.accessTime=accessTime;
         return true;
     }
 
@@ -88,6 +112,9 @@ public class File extends Path {
             modifyTime=dest.readLong();
             accessible=dest.readBoolean();
             md5=dest.readString();
+            mime=dest.readString();
+            favorite=dest.readBoolean();
+            accessTime=dest.readLong();
         }
     }
 
@@ -104,6 +131,9 @@ public class File extends Path {
         dest.writeLong(modifyTime);
         dest.writeBoolean(accessible);
         dest.writeString(md5);
+        dest.writeString(mime);
+        dest.writeBoolean(favorite);
+        dest.writeLong(accessTime);
     }
 
     public static final Creator<File> CREATOR = new Creator<File>() {
