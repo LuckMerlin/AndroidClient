@@ -2,7 +2,7 @@ package com.merlin.bean;
 
 import com.merlin.api.PageData;
 
-public class FolderData<T extends File> extends PageData<T> {
+public class FolderData<T extends Document> extends PageData<T> {
     private String name;
     private String parent;
     private String pathSep;

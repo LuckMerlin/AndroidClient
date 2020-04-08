@@ -20,7 +20,7 @@ import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
@@ -38,6 +38,7 @@ import com.merlin.view.Clicker;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,8 +118,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return false;
     }
 
-    public final boolean openPath(FileMeta file,String debug){
-        return null!=file&&(file.isDirectory()?browserPath(file.getPath(false),
+    public final boolean openPath(Document file,String debug){
+        return null!=file&&(file.isDirectory()?browserPath(file.getPath(null),
                 "While open path "+(null!=debug?debug:".")):onOpenPath(file,debug));
     }
 
@@ -146,8 +147,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
    }
 
     public final boolean showFileDetail(Object data,String debug){
-        FileMeta meta=null!=data&&data instanceof FileMeta?(FileMeta)data:null;
-        String path=null!=meta?meta.getPath(false):null;
+        Document meta=null!=data&&data instanceof Document?(Document)data:null;
+        String path=null!=meta?meta.getPath(null):null;
         if (null==path||path.length()<=0){
             toast(R.string.pathInvalid);
             return false;
@@ -163,8 +164,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         },debug);
     }
 
-    public final boolean renamePath(FileMeta meta,int coverMode,String debug){
-        final String path=null!=meta?meta.getPath(false):null;
+    public final boolean renamePath(Document meta, int coverMode, String debug){
+        final String path=null!=meta?meta.getPath(null):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(true);
             final Dialog dialog=new Dialog(getViewContext());
@@ -182,7 +183,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                                 dialog.dismiss();
                                 onRenamePath(path,text,coverMode,(what, note, data1, arg)->{
                                     boolean succeed=what== What.WHAT_SUCCEED;
-                                    if (succeed&&null!=data&&meta.applyChange(data1)){
+                                    if (succeed&&null!=data&&meta.applyPathChange(data1)){
                                         replace(meta,"After rename succeed.");
                                     }
                                     toast(note);
@@ -223,27 +224,27 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                 });
     }
 
-    public final boolean copyPaths(ArrayList<FileMeta> files,String folder,int coverMode,String debug){
+    public final boolean copyPaths(ArrayList<Document> files,String folder,int coverMode,String debug){
         FileProcess process=createPathsProcess(R.string.copy,files,folder,coverMode,debug);
         return null!=process?process(process):(toast(R.string.fail)&&false);
     }
 
-    public final boolean movePaths(ArrayList<FileMeta> files,String folder,int coverMode,String debug){
+    public final boolean movePaths(ArrayList<Document> files, String folder, int coverMode, String debug){
         FileProcess process=createPathsProcess(R.string.move,files,folder,coverMode,debug);
         return null!=process?process(process):(toast(R.string.fail)&&false);
     }
 
-    public final boolean deletePaths(ArrayList<FileMeta> paths,String debug){
+    public final boolean deletePaths(ArrayList<Document> paths,String debug){
         FileProcess process=createPathsProcess(R.string.delete,paths,null,null,debug);
         return null!=process?process(process):(toast(R.string.fail)&&false);
     }
 
     public final boolean deletePath(Object data,String debug){
-        if (null==data||!(data instanceof FileMeta)){
+        if (null==data||!(data instanceof File)){
             return toast(R.string.pathInvalid)&&false;
         }
-        ArrayList<FileMeta> list=new ArrayList<>();
-        list.add((FileMeta)data);
+        ArrayList<Document> list=new ArrayList<>();
+        list.add((Document)data);
         return deletePaths(list, debug);
     }
 
@@ -316,17 +317,17 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                     return true; });
     }
 
-    protected abstract boolean onOpenPath(FileMeta meta,String debug);
-    protected abstract boolean onShowPathDetail(FileMeta meta,String debug);
+    protected abstract boolean onOpenPath(Document meta,String debug);
+    protected abstract boolean onShowPathDetail(Document meta,String debug);
     protected abstract boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish,String debug);
     protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
     protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
-    protected FileProcess onCreatePathsProcess(int mode,ArrayList<FileMeta> paths,String folder,Integer coverMode,String debug){
+    protected FileProcess onCreatePathsProcess(int mode,ArrayList<Document> paths,String folder,Integer coverMode,String debug){
         //Do nothing
         return null;
     }
 
-    private FileProcess createPathsProcess(int mode,ArrayList<FileMeta> paths,String folder,Integer coverMode,String debug){
+    private FileProcess createPathsProcess(int mode,ArrayList<Document> paths,String folder,Integer coverMode,String debug){
         FileProcess process=onCreatePathsProcess(mode,paths,folder,coverMode,debug);
         if (null==process){
             switch (mode) {

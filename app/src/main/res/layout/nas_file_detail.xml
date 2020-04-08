@@ -39,7 +39,7 @@
             <include binding:key="@{R.string.name}" binding:value="@{file.title}"  android:visibility="@{null==file.title?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.size}" binding:value="@{file.childCount>=0?``+file.childCount:FileSize.formatSizeText(file.length)}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.format}" binding:value="@{file.directory?(Integer)R.string.folder:(file.mime??file.extension)}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.path}" binding:value="@{file.getPath(null)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.path}" binding:value="@{file.getPath()}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.modifyTime}" binding:value="@{Time.formatTime(file.modifyTime)}" layout="@layout/item_key_value"/>
             <include android:visibility="@{What.WHAT_INVALID!=loadState?View.GONE:View.VISIBLE}" layout="@layout/loading" binding:message="@{`加载中`}" />
             <LinearLayout

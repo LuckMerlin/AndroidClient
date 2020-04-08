@@ -4,14 +4,14 @@ import android.content.Context;
 
 import com.merlin.api.Canceler;
 import com.merlin.api.OnApiFinish;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.server.Retrofit;
 
 import java.util.ArrayList;
 
-public abstract class FileProcess <T extends FileMeta> extends ArrayList<T> {
+public abstract class FileProcess <T extends Document> extends ArrayList<T> {
     private final Object mTitle;
 
     public static class Interrupt{
@@ -50,7 +50,7 @@ public abstract class FileProcess <T extends FileMeta> extends ArrayList<T> {
 
     public String getMessage(Context context){
         final int size=size();
-        FileMeta first=size>0?get(0):null;
+        Document first=size>0?get(0):null;
         String name=null!=first?first.getName(false):null;
         return ""+(size==1?(null!=name?(""+getText(context,first.isDirectory()? R.string.folder:
                 R.string.file)+" "+name):""):getText(context,R.string.items,size));

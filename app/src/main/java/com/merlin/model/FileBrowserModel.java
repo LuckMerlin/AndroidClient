@@ -249,7 +249,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return entryMode(Mode.MODE_COPY,new Collector(files),"While copy files "+(null!=debug?debug:"."));
     }
 
-    private boolean move(ArrayList<FileMeta> files,int coverMode,String debug){
+    private boolean move(ArrayList<File> files,int coverMode,String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
         }else if (isMode(Mode.MODE_MOVE)){
@@ -310,13 +310,13 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return toast(R.string.fail);
     }
 
-    private boolean collectFile(int mode,Object obj,Class<? extends FileMeta> targetCls,String debug){
+    private boolean collectFile(int mode,Object obj,Class<? extends File> targetCls,String debug){
         Collector collector=mProcessing;
         return (isMode(mode)||entryMode(mode,(null==collector||!collector.isTargetClassEqual(targetCls))?
                 new Collector(targetCls):collector,debug))&&addToCollector(obj,debug);
     }
 
-    private <T extends FileMeta>ArrayList<T> getCollected(Class<T> cls){
+    private <T extends File>ArrayList<T> getCollected(Class<T> cls){
         Collector collector = mProcessing;
         return null!=collector?collector.getFiles(cls):null;
     }

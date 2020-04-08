@@ -1,19 +1,14 @@
 package com.merlin.bean;
 
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.view.View;
-
-import androidx.annotation.Nullable;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.browser.Md5Reader;
 import com.merlin.client.R;
 import com.merlin.database.FileDB;
-import com.merlin.debug.Debug;
 
-public final class LocalFile extends File {
+public final class LocalFile extends Document {
     private transient Reply<Path> sync;
 
     public LocalFile(String parent,String name,String extension,String title,String imageUrl,int childCount,

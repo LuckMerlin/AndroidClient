@@ -1,20 +1,8 @@
 package com.merlin.bean;
 
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.view.View;
 
-import androidx.annotation.Nullable;
-
-import com.merlin.api.Label;
-import com.merlin.api.Reply;
-import com.merlin.api.What;
-import com.merlin.browser.Permissions;
-import com.merlin.player.Playable;
-
-import static com.merlin.api.What.WHAT_NOT_DIRECTORY;
-
-public class NasFile  extends File{
+public class NasFile  extends Document {
     private long createTime;
     private NasMedia meta;
 
@@ -76,6 +64,10 @@ public class NasFile  extends File{
         dest.writeLong(getAccessTime());
         dest.writeLong(createTime);
         dest.writeInt(getPermission());
+    }
+
+    public final NasMedia getMeta() {
+        return meta;
     }
 
     public static final Creator<NasFile> CREATOR = new Creator<NasFile>() {

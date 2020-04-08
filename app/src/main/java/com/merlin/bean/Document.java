@@ -1,7 +1,7 @@
 package com.merlin.bean;
 import android.os.Parcel;
 
-public class File extends Path {
+public class Document extends Path {
     private String title;
     private String imageUrl;
     private long length;
@@ -14,16 +14,16 @@ public class File extends Path {
     private boolean favorite;
     private int permission;
 
-    protected File(){
+    protected Document(){
         this(null,null,null,null);
     }
 
-    protected File(String host,String parent,String name,String extension){
+    protected Document(String host, String parent, String name, String extension){
         this(host,parent,name,extension,null,null,0,0,0,false,null,0,0);
     }
 
-    public File(String host,String parent,String name,String extension,String title,String imageUrl,
-                int childCount,long length,long modifyTime,boolean accessible,String md5,long accessTime,int permission){
+    public Document(String host, String parent, String name, String extension, String title, String imageUrl,
+                    int childCount, long length, long modifyTime, boolean accessible, String md5, long accessTime, int permission){
         super(host,parent,name,extension);
         this.title=title;
         this.childCount=childCount;
@@ -101,7 +101,7 @@ public class File extends Path {
         return true;
     }
 
-    private File(Parcel dest){
+    private Document(Parcel dest){
         if (null!=dest){
             String host=dest.readString();
             String parent=dest.readString();
@@ -141,13 +141,13 @@ public class File extends Path {
         dest.writeInt(permission);
     }
 
-    public static final Creator<File> CREATOR = new Creator<File>() {
-        public File createFromParcel(Parcel in) {
-            return new File(in);
+    public static final Creator<Document> CREATOR = new Creator<Document>() {
+        public Document createFromParcel(Parcel in) {
+            return new Document(in);
         }
         @Override
-        public File[] newArray(int size) {
-            return new File[size];
+        public Document[] newArray(int size) {
+            return new Document[size];
         }
     };
 }

@@ -9,7 +9,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
@@ -26,11 +26,11 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class FileDeleteProcess extends FileProcess<FileMeta> {
+public class FileDeleteProcess extends FileProcess<Document> {
     public FileDeleteProcess(){
         this(null,null);
     }
-    public FileDeleteProcess(Object title,ArrayList<FileMeta> files){
+    public FileDeleteProcess(Object title,ArrayList<Document> files){
         super(title,files);
     }
 
@@ -48,9 +48,9 @@ public class FileDeleteProcess extends FileProcess<FileMeta> {
         }
         synchronized (this){
             if (size()>0){
-                for (FileMeta meta:this) {
+                for (Document meta:this) {
                     if (null!=meta){
-                        final String path=meta.getPath(false);
+                        final String path=meta.getPath(null);
                         Path fromPath=new Path(meta instanceof NasFile?((NasFile)meta).getHost():null,meta.getParent(), meta.getName(false),meta.getExtension());
                         if (null==path||path.length()<=0) {
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.deleteFail, fromPath, null, meta);

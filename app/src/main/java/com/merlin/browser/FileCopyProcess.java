@@ -7,7 +7,7 @@ import com.merlin.api.CoverMode;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
@@ -34,7 +34,7 @@ import static com.merlin.api.Label.LABEL_MODE;
 import static com.merlin.api.Label.LABEL_PARENT;
 import static com.merlin.api.Label.LABEL_PATH;
 
-public final class FileCopyProcess extends FileProcess<FileMeta> {
+public final class FileCopyProcess extends FileProcess<Document> {
     private final Integer mCoverMode;
     private final String mFolder;
 
@@ -44,7 +44,7 @@ public final class FileCopyProcess extends FileProcess<FileMeta> {
         Call<Reply<ApiMap<String,Reply<String>>>> copyPaths(@Field(LABEL_PARENT)String folder,@Field(LABEL_MODE) Integer coverMode, @Field(LABEL_PATH) String ...paths);
     }
 
-    public FileCopyProcess(Object title, ArrayList<FileMeta> files, String folder, Integer coverMode){
+    public FileCopyProcess(Object title, ArrayList<Document> files, String folder, Integer coverMode){
         super(title,files);
         mFolder=folder;
         mCoverMode=coverMode;
@@ -60,11 +60,11 @@ public final class FileCopyProcess extends FileProcess<FileMeta> {
         final Integer coverMode=mCoverMode;
         synchronized (this) {
             if (size() > 0) {
-                for (FileMeta meta:this) {
+                for (Document meta:this) {
                     if (null==meta){
                         continue;
                     }
-                    final String path=meta.getPath(false);
+                    final String path=meta.getPath(null);
                     Path fromPath=new Path(meta instanceof NasFile ?((NasFile)meta).getHost():null,meta.getParent(), meta.getName(false),meta.getExtension());
                     if (null==path||path.length()<=0) {
                         update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.fail, fromPath, null, meta);

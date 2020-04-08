@@ -2,10 +2,11 @@ package com.merlin.browser;
 
 import com.merlin.bean.FileMeta;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class Collector<T extends FileMeta> extends ArrayList<T>{
+public final class Collector<T extends File> extends ArrayList<T>{
     private Class<T> mTargetClass;
 
     public Collector(Collection<T> data){
