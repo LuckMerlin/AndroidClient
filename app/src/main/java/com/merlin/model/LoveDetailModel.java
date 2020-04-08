@@ -54,8 +54,8 @@ import retrofit2.http.PartMap;
 
 public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityIntentChange, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
-    private final ObservableField<String> mContent=new ObservableField<>("测试内容");
-    private final ObservableField<String> mTitle=new ObservableField<>("测试i标题");
+    private final ObservableField<String> mContent=new ObservableField<>();
+    private final ObservableField<String> mTitle=new ObservableField<>();
     private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
     private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
     private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20242;
@@ -86,8 +86,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                         Context context=getViewContext();
                         if (null!=context&&context instanceof Activity){
                             startActivity(new Intent(context, LocalPhotoChooseActivity.class),PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
-//                            MultiImageSelector.create().showCamera(true).count(-1) .multi() .
-//                                    start((Activity)context, PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
                         }
                         return true;
                     case R.id.loveDetail_planDateTV:

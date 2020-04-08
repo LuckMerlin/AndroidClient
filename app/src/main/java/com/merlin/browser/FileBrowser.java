@@ -7,13 +7,11 @@ import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.adapter.BrowserAdapter;
-import com.merlin.api.Address;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
@@ -29,6 +27,7 @@ import com.merlin.client.R;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.client.databinding.LayoutFileModifyBinding;
 import com.merlin.client.databinding.LayoutFileModifyBindingImpl;
+import com.merlin.client.databinding.SingleEditTextBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
@@ -168,24 +167,30 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         final String path=null!=meta?meta.getPath(false):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(true);
-            return new SingleInputDialog(getViewContext()).show(R.string.rename,(dlg, text)->{
-                if (null==text||text.length()<=0){
-                    toast(R.string.inputNotNull);
-                }else if (null!=name&&text.equals(name)){
-                    toast(R.string.noneChanged);
-                }else{
-                    if (null!=dlg){
-                        dlg.dismiss();
+            final Dialog dialog=new Dialog(getViewContext());
+            SingleEditTextBinding binding=inflate(R.layout.single_edit_text);
+            return dialog.setContentView(binding,true).title(R.string.rename).left(R.string.sure).
+                    right(R.string.cancel).show((View view,int clickCount, int resId, Object data)->{
+                    switch (resId){
+                        case R.string.sure:
+                            String text=binding.singleET.getText().toString();
+                            if (null==text||text.length()<=0){
+                                toast(R.string.inputNotNull);
+                            }else if (null!=name&&text.equals(name)){
+                                toast(R.string.noneChanged);
+                            }else{
+                                dialog.dismiss();
+                                onRenamePath(path,text,coverMode,(what, note, data1, arg)->{
+                                    boolean succeed=what== What.WHAT_SUCCEED;
+                                    if (succeed&&null!=data&&meta.applyChange(data1)){
+                                        replace(meta,"After rename succeed.");
+                                    }
+                                    toast(note);
+                                },debug);
+                            }
+                            break;
                     }
-                    onRenamePath(path,text,coverMode,(what, note, data, arg)->{
-                        boolean succeed=what== What.WHAT_SUCCEED;
-                        toast(note);
-                        if (succeed&&null!=data&&meta.applyChange(data)){
-                            replace(meta,"After rename succeed.");
-                        }
-                    },debug);
-                }
-            });
+                return true; });
         }
         Debug.W(getClass(),"Can't rename file.path="+path);
         return false;

@@ -13,38 +13,16 @@ import com.merlin.client.R;
 import com.merlin.database.FileDB;
 import com.merlin.debug.Debug;
 
-public final class LocalFile implements Parcelable,FileMeta {
-    private String parent;
-    private String name;
-    private String title;
-    private String extension;
-    private String imageUrl;
-    private long length;
-    private int childCount;
-    private double modifyTime;
-    private boolean directory;
-    private boolean accessible;
-    private String md5;
-    private Reply<Path> sync;
+public final class LocalFile extends File {
+    private transient Reply<Path> sync;
 
-    public LocalFile(String parent,String title,String name,String extension,
-                     String imageUrl,int childCount,long length,long modifyTime, boolean directory,
-                     boolean accessible,String md5){
-        this.parent=parent;
-        this.title=title;
-        this.name=name;
-        this.childCount=childCount;
-        this.extension=extension;
-        this.imageUrl=imageUrl;
-        this.length=length;
-        this.modifyTime=modifyTime;
-        this.directory=directory;
-        this.accessible=accessible;
-        this.md5=md5;
+    public LocalFile(String parent,String name,String extension,String title,String imageUrl,int childCount,
+                     long length,long modifyTime,boolean accessible,String md5){
+        super(null,parent,name,extension,title,imageUrl,childCount,length,modifyTime,accessible,md5);
     }
 
     public static LocalFile create(java.io.File file, String imageUrl){
-            return create(file,imageUrl,null);
+        return create(file,imageUrl,null);
     }
 
     public static LocalFile create(java.io.File file, String imageUrl, Md5Reader reader){
@@ -68,14 +46,13 @@ public final class LocalFile implements Parcelable,FileMeta {
             }
             long modifyTime=file.lastModified();
             boolean accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
-            return new LocalFile(parent,title,name,extension,imageUrl,childCount,size,modifyTime,
-                    directory,accessible,md5);
+            return new LocalFile(parent,name,extension,title,imageUrl,childCount,size,modifyTime,accessible,md5);
         }
         return null;
     }
 
     public java.io.File getFile(){
-        String path= getPath(false);
+        String path= getPath(null);
         return null!=path&&path.length()>0?new java.io.File(path):null;
     }
 
@@ -98,6 +75,7 @@ public final class LocalFile implements Parcelable,FileMeta {
 
     public int syncColor(){
         int color=R.color.syncNull;
+        String md5=getMd5();
         if (null!=md5&&md5.length()>0){
             color=R.color.syncNeed;
             if (null!=sync){
@@ -117,147 +95,37 @@ public final class LocalFile implements Parcelable,FileMeta {
         return true;
     }
 
-
-    @Override
-    public boolean applyChange(Reply<Path> reply) {
-        Path path=null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?reply.getData():null;
-        if (null!=path){
-            parent=path.getParent();
-            name=path.getName(false);
-            extension=path.getExtension();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @deprecated
-     */
-    public boolean applyModify(FModify modify) {
-        if (null!=modify){
-            String name=modify.getName();
-            if (null!=name){
-                this.name=name;
-            }
-            String extension=modify.getExtension();
-            if (null!=extension){
-                this.extension=extension;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public String getParent() {
-        return parent;
-    }
-
-    public String getName(boolean extension) {
-        return null!=name&&extension&&null!=this.extension?name+this.extension:name;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getExtension() {
-        return extension;
-    }
-
-    @Override
-    public long getLength() {
-        return length;
-    }
-
-    public double getModifyTime() {
-        return modifyTime;
-    }
-
-    @Override
-    public String getPath(boolean host) {
-        String value=getName(true);
-        return null!=parent&&null!=value?parent+value:null;
-    }
-
-    public boolean isAccessible() {
-        return accessible;
-    }
-
-    public boolean isDirectory() {
-        return directory;
-    }
-
-    public String permission() {
-        return "";
-    }
-
-    public String getMd5() {
-        return md5;
-    }
-
-    @Override
-    public Object onViewData(int what, View view, String debug) {
-        switch (what){
-            case DATA_LOADED:
-                Debug.D(getClass(),"AAAAAAAAAAAA "+view+" "+debug);
-
-                break;
-        }
-        return null;
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (null!=obj&&obj instanceof LocalFile){
-            LocalFile file=(LocalFile)obj;
-            return equals(file.parent,parent)&&equals(file.name,name)&&equals(file.extension,extension);
-        }
-        return super.equals(obj);
-    }
-
-    private boolean equals(String v1,String v2){
-        return null!=v1&&null!=v2?v1.equals(v2):(null==v1&&null==v2);
-    }
-
-    @Override
-    public int getChildCount() {
-        return childCount;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(parent);
-        dest.writeString(name);
-        dest.writeString(title);
-        dest.writeString(extension);
-        dest.writeString(imageUrl);
-        dest.writeLong(length);
-        dest.writeInt(childCount);
-        dest.writeDouble(modifyTime);
-        dest.writeBoolean(directory);
-        dest.writeBoolean(accessible);
+        dest.writeString(getHost());
+        dest.writeString(getParent());
+        dest.writeString(getName());
+        dest.writeString(getExtension());
+        dest.writeString(getTitle());
+        dest.writeString(getImageUrl());
+        dest.writeInt(getChildCount());
+        dest.writeLong(getLength());
+        dest.writeLong(getModifyTime());
+        dest.writeBoolean(isAccessible());
+        dest.writeString(getMd5());
     }
 
-    private LocalFile(Parcel in){
-        parent=in.readString();
-        name=in.readString();
-        title=in.readString();
-        extension=in.readString();
-        imageUrl=in.readString();
-        length=in.readLong();
-        childCount=in.readInt();
-        modifyTime=in.readDouble();
-        directory=in.readBoolean();
-        accessible=in.readBoolean();
+    private LocalFile(Parcel dest){
+        if (null!=dest){
+            String host=dest.readString();
+            String parent=dest.readString();
+            String name=dest.readString();
+            String extension=dest.readString();
+            setPath(host,parent,name,extension);
+            String title=dest.readString();
+            String imageUrl=dest.readString();
+            int childCount=dest.readInt();
+            long length=dest.readLong();
+            long modifyTime=dest.readLong();
+            boolean accessible=dest.readBoolean();
+            String md5=dest.readString();
+            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5);
+        }
     }
 
     public static final Creator<LocalFile> CREATOR = new Creator<LocalFile>() {

@@ -6,6 +6,9 @@ import android.widget.EditText;
 
 import com.merlin.client.R;
 
+/**
+ * @deprecated
+ */
 public class SingleInputDialog extends TitleDialog  {
     private Callback mCallback;
 
