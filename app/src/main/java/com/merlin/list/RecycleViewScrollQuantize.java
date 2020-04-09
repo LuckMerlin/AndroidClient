@@ -4,13 +4,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.merlin.adapter.ListAdapter;
-import com.merlin.client.databinding.ItemListFileBindingImpl;
-import com.merlin.debug.Debug;
 
 public class RecycleViewScrollQuantize extends RecyclerView.OnScrollListener {
     private volatile Integer mTop;

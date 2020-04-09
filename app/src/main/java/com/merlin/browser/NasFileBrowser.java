@@ -7,7 +7,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
@@ -59,8 +59,8 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected boolean onShowPathDetail(FileMeta meta, String debug) {
-        String path=null!=meta&&meta instanceof NasFile?meta.getPath(false):null;
+    protected boolean onShowPathDetail(Document meta, String debug) {
+        String path=null!=meta&&meta instanceof NasFile?meta.getPath(null):null;
         NasFileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.nas_file_detail);
         if (null==binding){
             return toast(R.string.pathInvalid)&&false;
@@ -89,7 +89,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected FileProcess onCreatePathsProcess(int mode, ArrayList<FileMeta> paths, String folder, Integer coverMode, String debug) {
+    protected FileProcess onCreatePathsProcess(int mode, ArrayList<Document> paths, String folder, Integer coverMode, String debug) {
         switch (mode){
             case R.string.delete:
                 return new FileDeleteProcess(mode,paths);
@@ -103,7 +103,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected boolean onOpenPath(FileMeta meta, String debug) {
+    protected boolean onOpenPath(Document meta, String debug) {
 
         return false;
     }

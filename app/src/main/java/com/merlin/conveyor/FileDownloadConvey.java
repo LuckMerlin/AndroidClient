@@ -36,7 +36,7 @@ public class FileDownloadConvey extends Convey{
         super(null!=nas?nas.getName(true):null);
         String name=getName();
         mRetrofit=retrofit;
-        mPath=null!=nas?nas.getPath(true):null;
+        mPath=null!=nas?nas.getPath(null):null;
         mUrl=url;
         mTarget=null!=name&&name.length()>0&&null!=folder?new File(folder,name):null;
     }

@@ -1,11 +1,11 @@
 package com.merlin.browser;
 
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class _Collector<T extends FileMeta> {
+public class _Collector<T extends Document> {
     private ArrayList<T> mFiles;
 
     public _Collector(T data){

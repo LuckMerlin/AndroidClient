@@ -23,7 +23,7 @@ public abstract class MediaAdapter extends MultiSectionAdapter<String,NasFile, P
                 NasFile meta=list.get(i);
                 String curr=null!=meta?meta.getMd5():null;
                 if (null!=curr&&curr.equals(md5)){
-                    meta.setFavorite(favorite);
+//                    meta.setFavorite(favorite);
                     notifyItemChanged(i);
                     return true;
                 }

@@ -4,7 +4,10 @@
     <data>
         <variable
             name="photo"
-            type="com.merlin.photo.Photo" />
+            type="com.merlin.bean.Path" />
+        <variable
+            name="photoUrl"
+            type="Object" />
         <variable
             name="chooseEnable"
             type="boolean" />
@@ -19,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="130dp">
         <ImageView
-            android:src="@{photo.loadUrl}"
+            android:src="@{photoUrl}"
             binding:enableClick="@{Clicker.multiClick(photo,true)}"
             android:scaleType="centerCrop"
             android:alpha="0.85"

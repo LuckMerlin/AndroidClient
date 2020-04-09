@@ -19,6 +19,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
+import retrofit2.HttpException;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Retrofit {
@@ -87,30 +88,46 @@ public class Retrofit {
 
         @Override
         public void onNext(T t) {
-            finishCall(null,t,mCallbacks,null,"After next.");
+            finishCall(null,t,mCallbacks,null);
         }
 
         @Override
         public void onError(Throwable e) {
             Debug.E(getClass(),"Error on api "+e,e);
             int what=What.WHAT_ERROR_UNKNOWN;
-            String note="After error.";
-            if (null!=e){
-                if (e instanceof ConnectException){
-                    what=What.WHAT_NONE_NETWORK;
-                    note="None network";
+            String note=e.toString();
+            if (e instanceof HttpException) {
+                HttpException httpException = (HttpException) e;
+                //httpException.response().errorBody().string()
+                int code = httpException.code();
+                note = httpException.getMessage();
+                if (code == 504) {
+                    note=" Network poor.";
+                    what=What.WHAT_NETWORK_POOR;
+                } else if (code == 502) {
+                    note = "Server error.";
+                    what=What.WHAT_SERVER_EXCEPTION;
+                } else if (code == 408) {
+                    note = "Request timeout.";
+                    what=What.WHAT_TIMEOUT;
+                } else if (code == 403) {
+                    note = "None request permission.";
+                    what=What.WHAT_NONE_PERMISSION;
+                } else if (code == 401) {
+                    note="Token invalid.";
+                    what=What.WHAT_TOKEN_INVALID;
                 }
             }
-            finishCall(what,null,mCallbacks,e,note);
+            finishCall(what,null,mCallbacks,note);
         }
 
-        private void finishCall(Integer what,Object data,Callback[] callbacks,Object arg,String debug){
+        private void finishCall(Integer what,Object data,Callback[] callbacks,String note){
             if (null!=callbacks&&callbacks.length>0){
                 for (Callback callback:callbacks) {
                     if(null==callback||!(callback instanceof OnApiFinish)){
                         continue;
                     }
-                    String note=null;int childWhat=What.WHAT_FAIL_UNKNOWN;boolean succeed=false;
+                    int childWhat=What.WHAT_FAIL_UNKNOWN;boolean succeed=false;
                     data=data!=null&&checkDataGeneric(data,callback)?data:null;
                     if (null!=data&&data instanceof Reply){
                         Reply reply=(Reply)data;
@@ -120,7 +137,7 @@ public class Retrofit {
                     }else{
                         data=null;
                     }
-                    ((OnApiFinish) callback).onApiFinish(childWhat,note,data,arg);
+                    ((OnApiFinish) callback).onApiFinish(childWhat,note,data,null);
                 }
             }
         }

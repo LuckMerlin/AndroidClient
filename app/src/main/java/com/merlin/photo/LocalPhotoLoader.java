@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 
 import com.merlin.bean.LocalPhoto;
+import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 
 public class LocalPhotoLoader {
@@ -40,12 +41,14 @@ public class LocalPhotoLoader {
         if (null!=cursor&&null!=callback){
             if(from<0){
                 callback.onLocalPhotoLoaded(OnLocalPhotoLoad.WHAT_LOAD_ERROR,null,-1);
+                cursor.close();
                 return false;
             }
             if (!cursor.isClosed()){
                 length=cursor.getCount();
                 if (from>=length){
                     callback.onLocalPhotoLoaded(OnLocalPhotoLoad.WHAT_LOAD_OUT_OF_BOUNDS,null,length);
+                    cursor.close();
                     return false;
                 }
                 limit=limit<=0?10:limit;
@@ -63,6 +66,7 @@ public class LocalPhotoLoader {
                    }while (cursor.moveToNext());
                 }
             }
+            cursor.close();
             callback.onLocalPhotoLoaded(OnLocalPhotoLoad.WHAT_FINISH,null,length);
             return true;
         }
@@ -79,7 +83,11 @@ public class LocalPhotoLoader {
              String  path= getCursorString(cursor,MediaStore.Images.Media.DATA,null);
              int  width= getCursorInt(cursor,MediaStore.Images.Media.WIDTH,0);
              int  height= getCursorInt(cursor,MediaStore.Images.Media.HEIGHT,0);
-             return new LocalPhoto(path,title,mimeType,width,height,desc);
+             Path path1=Path.build(path,null);
+             if (null==path1){
+                 return null;
+             }
+             return new LocalPhoto(path1.getParent(),path1.getName(),path1.getExtension(),title,mimeType,width,height,desc);
          }
         Debug.W(getClass(),"Can't load local photo from cursor. "+cursor);
         return null;

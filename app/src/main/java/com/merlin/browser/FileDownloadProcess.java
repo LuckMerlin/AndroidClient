@@ -2,14 +2,14 @@ package com.merlin.browser;
 
 import com.merlin.api.Canceler;
 import com.merlin.api.OnApiFinish;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.server.Retrofit;
 
 import java.util.ArrayList;
 
-public class FileDownloadProcess extends FileProcess<FileMeta> {
+public class FileDownloadProcess extends FileProcess<Document> {
 
-    public FileDownloadProcess(Object title, ArrayList<FileMeta> files, String folder, Integer coverMode){
+    public FileDownloadProcess(Object title, ArrayList<Document> files, String folder, Integer coverMode){
         super(title,files);
     }
 

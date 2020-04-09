@@ -5,34 +5,26 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.photo.Photo;
-
-public final class LocalPhoto implements Photo {
+public final class LocalPhoto extends Path {
     private String mTitle;
-    private String mPath;
     private String mNote;
     private String mMimeType;
     private int mWidth;
     private int mHeight;
 
-    public LocalPhoto(String path, String title, String mimeType, int width, int height, String note){
+    public LocalPhoto(String parent,String name,String extension,String title, String mimeType, int width, int height, String note){
+        super(parent,name,extension);
         mTitle=title;
         mMimeType=mimeType;
         mWidth=width;
         mHeight=height;
-        mPath=path;
         mNote=note;
     }
-
-    public String getPath() {
-        return mPath;
-    }
-
     @Override
     public boolean equals(@Nullable Object obj) {
         if (null!=obj&&obj instanceof LocalPhoto){
-            String path=((LocalPhoto)obj).mPath;
-            String currPath=mPath;
+            String path=((LocalPhoto)obj).getPath(null);
+            String currPath=getPath(null);
             return (null==path&&null==currPath)||(null!=path&&null!=currPath&&path.equals(currPath));
         }
         return super.equals(obj);
@@ -42,27 +34,29 @@ public final class LocalPhoto implements Photo {
     private LocalPhoto(Parcel in){
         if (null!=in){
             mTitle=in.readString();
-            mPath=in.readString();
             mNote=in.readString();
             mMimeType=in.readString();
             mWidth=in.readInt();
             mHeight=in.readInt();
+            String host=in.readString();
+            String parent=in.readString();
+            String name=in.readString();
+            String extension=in.readString();
+            setPath(host,parent,name,extension);
         }
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mTitle);
-        dest.writeString(mPath);
         dest.writeString(mNote);
         dest.writeString(mMimeType);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
-    }
-
-    @Override
-    public Object getLoadUrl() {
-        return mPath;
+        dest.writeString(getHost());
+        dest.writeString(getParent());
+        dest.writeString(getName(false));
+        dest.writeString(getExtension());
     }
 
     @Override

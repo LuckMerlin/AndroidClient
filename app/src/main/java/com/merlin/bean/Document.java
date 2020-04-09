@@ -113,10 +113,10 @@ public class Document extends Path {
             length=dest.readLong();
             childCount=dest.readInt();
             modifyTime=dest.readLong();
-            accessible=dest.readBoolean();
+            accessible=dest.readInt()==1;
             md5=dest.readString();
             mime=dest.readString();
-            favorite=dest.readBoolean();
+            favorite=dest.readInt()==1;
             accessTime=dest.readLong();
             permission=dest.readInt();
         }
@@ -133,10 +133,10 @@ public class Document extends Path {
         dest.writeLong(length);
         dest.writeInt(childCount);
         dest.writeLong(modifyTime);
-        dest.writeBoolean(accessible);
+        dest.writeInt(accessible?1:0);
         dest.writeString(md5);
         dest.writeString(mime);
-        dest.writeBoolean(favorite);
+        dest.writeInt(favorite?1:0);
         dest.writeLong(accessTime);
         dest.writeInt(permission);
     }

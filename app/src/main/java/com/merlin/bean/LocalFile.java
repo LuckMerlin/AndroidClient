@@ -12,8 +12,8 @@ public final class LocalFile extends Document {
     private transient Reply<Path> sync;
 
     public LocalFile(String parent,String name,String extension,String title,String imageUrl,int childCount,
-                     long length,long modifyTime,boolean accessible,String md5,long accessTime){
-        super(null,parent,name,extension,title,imageUrl,childCount,length,modifyTime,accessible,md5,accessTime);
+                     long length,long modifyTime,boolean accessible,String md5,long accessTime,int permission){
+        super(null,parent,name,extension,title,imageUrl,childCount,length,modifyTime,accessible,md5,accessTime,permission);
     }
 
     public static LocalFile create(java.io.File file, String imageUrl){
@@ -41,8 +41,9 @@ public final class LocalFile extends Document {
             }
             long modifyTime=file.lastModified();
             boolean accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
+            int permission=0x1111111;
             return new LocalFile(parent,name,extension,title,imageUrl,childCount,size,
-                    modifyTime,accessible,md5,modifyTime);
+                    modifyTime,accessible,md5,modifyTime,permission);
         }
         return null;
     }
@@ -102,11 +103,12 @@ public final class LocalFile extends Document {
         dest.writeInt(getChildCount());
         dest.writeLong(getLength());
         dest.writeLong(getModifyTime());
-        dest.writeBoolean(isAccessible());
+        dest.writeInt(isAccessible()?1:0);
         dest.writeString(getMd5());
         dest.writeString(getMime());
-        dest.writeBoolean(isFavorite());
+        dest.writeInt(isFavorite()?1:0);
         dest.writeLong(getAccessTime());
+        dest.writeInt(getPermission());
     }
 
     private LocalFile(Parcel dest){
@@ -121,12 +123,13 @@ public final class LocalFile extends Document {
             int childCount=dest.readInt();
             long length=dest.readLong();
             long modifyTime=dest.readLong();
-            boolean accessible=dest.readBoolean();
+            boolean accessible=dest.readInt()==1;
             String md5=dest.readString();
             String mime=dest.readString();
-            boolean favorite=dest.readBoolean();
+            boolean favorite=dest.readInt()==1;
             long accessTime=dest.readLong();
-            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime);
+            int permission=dest.readInt();
+            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime,permission);
         }
     }
 

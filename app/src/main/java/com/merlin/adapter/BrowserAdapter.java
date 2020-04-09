@@ -5,9 +5,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
@@ -16,7 +15,7 @@ import com.merlin.util.Thumbs;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<String, T> implements OnMoreLoadable{
+public abstract class BrowserAdapter<T extends Document> extends PageAdapter<String, T> implements OnMoreLoadable{
     private final Thumbs mThumbs=new Thumbs();
     private Collector<T> mMultiChoose;
 
@@ -26,7 +25,7 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
     }
 
     public final boolean multiChoose(Object object,Boolean choose,String debug){
-        Collector<T> collector=null!=object&&object instanceof  FileMeta?mMultiChoose:null;
+        Collector<T> collector=null!=object&&object instanceof  Document?mMultiChoose:null;
         if (null!=collector){
             choose=null!=choose?choose:!collector.contains(object);
             int index=(choose?!collector.contains(object):collector.contains(object))?index(object):-1;
@@ -69,7 +68,7 @@ public abstract class BrowserAdapter<T extends FileMeta> extends PageAdapter<Str
             Collector<T> multiChoose=mMultiChoose;
             itemBinding.setIsMultiChoose(null!=multiChoose);
             itemBinding.setIsChoose(null!=multiChoose&&multiChoose.contains(data));
-            itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath(true)):null);
+            itemBinding.setThumbUrl(null!=data?data.isDirectory()?R.drawable.folder:mThumbs.getThumb(data.getPath(null)):null);
             itemBinding.setPosition(position);
         }
     }

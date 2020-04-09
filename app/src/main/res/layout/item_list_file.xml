@@ -10,7 +10,7 @@
             type="Boolean" />
         <variable
             name="meta"
-            type="com.merlin.bean.FileMeta" />
+            type="com.merlin.bean.Document" />
         <variable
             name="position"
             type="int" />
@@ -29,7 +29,6 @@
         binding:enableClick="@{Clicker.multiClick(meta,true)}"
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
-        binding:loadViewData="@{meta}"
         android:clickable="true"
         android:background="@{meta.accessible?R.drawable.selector_round_dark_corner_small:R.drawable.round_dark_corner_small_disable}"
         android:layout_height="@dimen/listItemNormal">
@@ -79,7 +78,7 @@
                     android:text="@{Time.formatTime((long)meta.modifyTime)}"/>
                 <TextView
                     style="@style/titleSmallTextView"
-                    android:text="@{``+meta.permission()}"/>
+                    android:text="@{``+meta.permission}"/>
             </LinearLayout>
         </LinearLayout>
         <CheckBox

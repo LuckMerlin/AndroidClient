@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.debug.Debug;
 
 import java.io.File;
 
@@ -94,6 +95,8 @@ public class Path implements Parcelable {
     public static <T extends Path> Path build(Object object,T result){
         Path path=null;
         if (null!=object){
+            Debug.D(Path.class,"SSSSSpathSSSSs "+object);
+            object=object instanceof String?null:null;
             if (object instanceof File){
                 File file=(File)object;
                 String parent=file.getParent();

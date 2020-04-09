@@ -28,6 +28,9 @@ import okhttp3.OkHttpClient;
 import retrofit2.HttpException;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * @deprecated
+ */
 public final class Retrofit implements What {
     private WeakReference<LifecycleProvider> mLifecycleProvider;
     private final String mUrl;

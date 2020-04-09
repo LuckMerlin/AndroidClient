@@ -22,7 +22,7 @@ import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
@@ -205,10 +205,10 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onShowPathDetail(FileMeta meta, String debug) {
+    protected boolean onShowPathDetail(Document meta, String debug) {
         Context context=getAdapterContext();
         if (null!=context&&null!=meta&&meta instanceof LocalFile){
-            String path=meta.getPath(false);
+            String path=meta.getPath(null);
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
             if (null!=file&&file.exists()){
                 LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
@@ -240,9 +240,9 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onOpenPath(FileMeta meta, String debug) {
+    protected boolean onOpenPath(Document meta, String debug) {
         LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
-        String path=localFile.getPath(false);
+        String path=localFile.getPath(null);
         if (null!=path&&path.length()>0){
             final File file=new File(path);
             if (!file.exists()){

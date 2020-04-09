@@ -20,7 +20,7 @@ import com.merlin.api.Label;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.FileMeta;
+import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.NasFile;
@@ -42,14 +42,11 @@ import com.merlin.protocol.Tag;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -164,7 +161,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                     case R.string.setAsHome:
                         return setAsHome(data,"After set as home tap click.");
                     case R.string.rename:
-                        return null!=data&&data instanceof FileMeta &&renamePath((FileMeta)data, CoverMode.NONE,"After rename tap click.");
+                        return null!=data&&data instanceof Document &&renamePath((Document)data, CoverMode.NONE,"After rename tap click.");
                     case R.string.transportList:
                         return launchTransportList("After transport list tap click.");
                     case R.string.multiChoose:
@@ -193,8 +190,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                          return (null != view && null != data && data instanceof ClientMeta &&
                                  showClientDetail(view, (ClientMeta) data, "After tap click.")) || true;
                          default:
-                             if (null!=data&&data instanceof FileMeta){
-                                 return showFileContextMenu((FileMeta)data,"After 2 tap click.");
+                             if (null!=data&&data instanceof Document){
+                                 return showFileContextMenu((Document)data,"After 2 tap click.");
                              }
                          break;
                  }
@@ -217,14 +214,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
                         deletePath(data,"After delete tap click"))||true;
             default:
                 if (clickCount==1){
-                    if (null != data && data instanceof FileMeta) {
-                        FileMeta file = (FileMeta) data;
+                    if (null != data && data instanceof Document) {
+                        Document file = (Document) data;
                         FileBrowser browser=getCurrentModel();
                         if (isMode(Mode.MODE_MULTI_CHOOSE)) {
                             return (null!=browser&&browser.multiChoose(data,null,"After tap click.")&&
                                     (refreshMultiSummary("After multi choose tap click")||true))||(toast(R.string.fail)&&false);
                         } else if (file.isAccessible()) {
-                            return null!=browser&&(file.isDirectory()? browser.browserPath(file.getPath(false),
+                            return null!=browser&&(file.isDirectory()? browser.browserPath(file.getPath(null),
                                     "After directory click."):openPath(data, "After item tap click."));
                         } else {
                             toast(R.string.nonePermission);
@@ -237,7 +234,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
     }
 
-    private boolean copy(ArrayList<FileMeta> files,int coverMode, String debug){
+    private boolean copy(ArrayList<Document> files,int coverMode, String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
         }else if (isMode(Mode.MODE_COPY)){
@@ -249,7 +246,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return entryMode(Mode.MODE_COPY,new Collector(files),"While copy files "+(null!=debug?debug:"."));
     }
 
-    private boolean move(ArrayList<File> files,int coverMode,String debug){
+    private boolean move(ArrayList<Document> files,int coverMode,String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
         }else if (isMode(Mode.MODE_MOVE)){
@@ -310,26 +307,26 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return toast(R.string.fail);
     }
 
-    private boolean collectFile(int mode,Object obj,Class<? extends File> targetCls,String debug){
+    private boolean collectFile(int mode,Object obj,Class<? extends Document> targetCls,String debug){
         Collector collector=mProcessing;
         return (isMode(mode)||entryMode(mode,(null==collector||!collector.isTargetClassEqual(targetCls))?
                 new Collector(targetCls):collector,debug))&&addToCollector(obj,debug);
     }
 
-    private <T extends File>ArrayList<T> getCollected(Class<T> cls){
+    private <T extends Document>ArrayList<T> getCollected(Class<T> cls){
         Collector collector = mProcessing;
         return null!=collector?collector.getFiles(cls):null;
     }
 
     private boolean addToCollector(Object meta,String debug){
-        Collector collector=null!=meta&&meta instanceof FileMeta?mProcessing:null;
-        boolean succeed=null!=collector&&collector.add((FileMeta) meta,debug);
+        Collector collector=null!=meta&&meta instanceof Document?mProcessing:null;
+        boolean succeed=null!=collector&&collector.add((Document) meta,debug);
         return succeed?true:(toast(R.string.fail)&&false);
     }
 
     private boolean openPath(Object object,String debug){
-        FileBrowser browser=null!=object&&object instanceof FileMeta?getCurrentModel():null;
-        boolean succeed=null!=browser&&browser.openPath((FileMeta)object,debug);
+        FileBrowser browser=null!=object&&object instanceof Document?getCurrentModel():null;
+        boolean succeed=null!=browser&&browser.openPath((Document)object,debug);
         return succeed||(toast(R.string.fail)&&false);
     }
 
@@ -358,15 +355,15 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     }
 
     private boolean deletePath(Object data,String debug){
-        if (null==data||!(data instanceof FileMeta)){
+        if (null==data||!(data instanceof Document)){
             return toast(R.string.fail)&&false;
         }
-        ArrayList<FileMeta> list=new ArrayList<>(1);
-        list.add((FileMeta)data);
+        ArrayList<Document> list=new ArrayList<>(1);
+        list.add((Document)data);
         return deletePaths(list,debug);
     }
 
-    private boolean deletePaths(ArrayList<FileMeta> files,String debug){
+    private boolean deletePaths(ArrayList<Document> files,String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
         }
@@ -374,7 +371,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=browser&&browser.deletePaths(files,debug);
     }
 
-    private boolean renamePath(FileMeta meta,int coverMode,String debug){
+    private boolean renamePath(Document meta,int coverMode,String debug){
         FileBrowser browser=getCurrentModel();
         return null!=browser&&browser.renamePath(meta,coverMode,debug);
     }
@@ -522,7 +519,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return null!=browser&&browser.browserPath(path,debug);
     }
 
-    private boolean showFileContextMenu(FileMeta meta,String debug){
+    private boolean showFileContextMenu(Document meta,String debug){
         View view=getRoot();
         FileContextMenuBinding binding=null!=view&&null!=meta?DataBindingUtil.inflate(LayoutInflater.
                 from(view.getContext()), R.layout.file_context_menu,null,false):null;

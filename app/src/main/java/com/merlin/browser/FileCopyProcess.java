@@ -16,15 +16,11 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 import com.merlin.util.Closer;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.Field;

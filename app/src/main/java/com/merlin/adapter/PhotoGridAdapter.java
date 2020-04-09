@@ -21,20 +21,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.api.Label;
 import com.merlin.bean.LocalPhoto;
+import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPhotoGridBinding;
-import com.merlin.debug.Debug;
-import com.merlin.photo.Photo;
 import com.merlin.view.OnTapClick;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implements OnTapClick {
+public abstract class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTapClick {
     private int mSpanCount;
     private int mMaxChoose=0;
     private boolean mVisibleCamera;
-    private ArrayList<Photo> mChoose;
+    private ArrayList<Path> mChoose;
 
     public PhotoGridAdapter(){
         this(3,false,0);
@@ -74,12 +73,17 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implem
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Photo data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Path data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemPhotoGridBinding){
-            data=mVisibleCamera&&(viewType==TYPE_EMPTY||viewType==TYPE_TAIL)?new CameraPhoto(null):data;
+            Object url=data;
+            if (mVisibleCamera&&(viewType==TYPE_EMPTY||viewType==TYPE_TAIL)){
+                data=new CameraPhoto(null);
+                url=((CameraPhoto)data).mResId;
+            }
             ((ItemPhotoGridBinding)binding).setPhoto(data);
+            ((ItemPhotoGridBinding)binding).setPhotoUrl(url);
             ((ItemPhotoGridBinding)binding).setChooseEnable(viewType==TYPE_DATA&&mMaxChoose>0);
-            List<Photo> list=mChoose;
+            List<Path> list=mChoose;
             ((ItemPhotoGridBinding)binding).setExistChoose(null!=data&&null!=list&&list.contains(data));
         }
     }
@@ -94,11 +98,10 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implem
         return gridLayoutManager;
     }
 
-    public static final class CameraPhoto implements Photo{
+    public static final class CameraPhoto extends Path{
         private final int mResId=android.R.drawable.ic_menu_camera;
 
-        @Override
-        public Object getLoadUrl() {
+        public int getResId() {
             return mResId;
         }
 
@@ -137,17 +140,17 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implem
                     case android.R.drawable.ic_menu_camera:
                         return startCamera("After camera tap click.");
                     default:
-                        if (null!=view&&null!=data&&data instanceof Photo){
-                            return view instanceof ImageView?showPhoto(view,(Photo) data,"After photo tap click."):
-                                    view instanceof CheckBox?choosePhoto(view,(LocalPhoto)data,"After photo tap click."):false;
+                        if (null!=view&&null!=data&&data instanceof Path){
+                            return view instanceof ImageView?showPhoto(view,(Path) data,"After photo tap click."):
+                                    view instanceof CheckBox?choosePhoto(view,(Path)data,"After photo tap click."):false;
                         }
                 }
                 return false;
             case 2:
-                Context context=null!=view&&null!=data&&data instanceof Photo?view.getContext():null;
+                Context context=null!=view&&null!=data&&data instanceof Path?view.getContext():null;
                 if (null!=context&&context instanceof Activity){
                     Intent intent=new Intent();
-                    ArrayList<Photo> list=mChoose;
+                    ArrayList<Path> list=mChoose;
                     if (null!=list){
                         intent.putParcelableArrayListExtra(Label.LABEL_DATA,list);
                     }
@@ -171,9 +174,9 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implem
         return false;
     }
 
-    private boolean choosePhoto(View view,Photo photo,String debug){
+    private boolean choosePhoto(View view,Path photo,String debug){
         if (null!=photo&&null!=view){
-            List<Photo> choose=mChoose;
+            List<Path> choose=mChoose;
             if (view instanceof CheckBox&&((CheckBox)view).isChecked()){
                 if (null!=choose&&choose.size()>=mMaxChoose){
                     Context context=view.getContext();
@@ -192,13 +195,13 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Photo> implem
         return false;
     }
 
-    private boolean showPhoto(View view,Photo photo, String debug){
+    private boolean showPhoto(View view, Path photo, String debug){
         ArrayList<LocalPhoto> list=null!=view&&null!=photo&&photo instanceof LocalPhoto?new ArrayList<>(1):null;
         return null!=list&&list.add((LocalPhoto)photo)&& PhotoPreviewActivity.start(view.getContext(),list,0,debug);
     }
 
     private boolean cleanChoose(boolean notify){
-        ArrayList<Photo> list=mChoose;
+        ArrayList<Path> list=mChoose;
         if (null!=list){
             int size=list.size();
             list.clear();

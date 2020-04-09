@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +44,7 @@ import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
-import com.merlin.api.Label;
-import com.merlin.bean.LocalFile;
+import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.list.RecycleViewScrollQuantize;
@@ -52,7 +52,6 @@ import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;
 import com.merlin.model.OnBeforeTextChange;
 import com.merlin.model.OnTextChange;
-import com.merlin.photo.Photo;
 import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
 import com.merlin.view.OnSeekBarChangeListener;
@@ -181,7 +180,7 @@ public class MBinding {
 
     @BindingAdapter("loadViewData")
     public static void autoLoadViewData(View view, ViewDataLoadable loadable) {
-        if (null!=view&&null!=loadable&& loadable instanceof LocalFile){
+//        if (null!=view&&null!=loadable&& loadable instanceof LocalFile){
 //            Glide.with(view).as(FileSync.class).load(loadable);
 //            Glide.with(view).load(loadable).into(new CustomViewTarget(view){
 //                @Override
@@ -192,22 +191,26 @@ public class MBinding {
 //            });
 //            Debug.D(MBinding.class,"AAAAAAAAAAA "+view.hashCode()+" "+loadable+" "+
 //                    (Looper.getMainLooper()==Looper.myLooper()));
-        }
+//        }
     }
 
     @BindingAdapter("android:src")
-    public static void setSrc(ImageView view, Object img) {
+    public static void setSrc(ImageView view, Object path) {
         if (null!=view) {
-            if (null != img) {
-                img=img instanceof Photo?((Photo)img).getLoadUrl():img;
-                if (img instanceof Integer){
-                    if (!img.equals(Resources.ID_NULL)) {
-                        view.setImageResource((Integer) img);
-                        Clicker.putRes(view, new Res((Integer) img, null));
+            if (null != path) {
+                String host=null;
+                if (path instanceof Path){
+                    host=((Path)path).getHost();
+                    path=((Path)path).getPath(null);
+                }
+                if (path instanceof Integer){
+                    if (!path.equals(Resources.ID_NULL)) {
+                        view.setImageResource((Integer) path);
+                        Clicker.putRes(view, new Res((Integer) path, null));
                         return;
                     }
-                }else if (img instanceof String){
-                    String value=(String)img;
+                }else if (path instanceof String){
+                    String value=(String)path;
                     if (null!=value&&value.length()>0){
                             RoundedCorners roundedCorners = new RoundedCorners(10);
                             RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
@@ -215,7 +218,7 @@ public class MBinding {
                             if (!value.startsWith("http")) {
                                 builder=Glide.with(view.getContext()).load(new File(value));
                             }else {
-//                                Debug.D(MBinding.class,"ddd "+value);
+                                Log.d("LM","AAAAAAAAAA "+host);
                                 builder=Glide.with(view.getContext()).load(value);
                             }
                             if (null!=builder) {

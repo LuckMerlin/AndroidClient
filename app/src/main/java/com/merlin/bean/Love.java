@@ -5,7 +5,7 @@ import java.util.List;
 public final class Love {
     private String name;
     private String data;
-    private List<byte[]> image;
+    private List<Path> image;
     private long id;
     private String mode;
     private String account;
@@ -16,7 +16,7 @@ public final class Love {
         this(null,0,null,null);
     }
 
-    public Love(String name,long time,String content,List<byte[]> photos){
+    public Love(String name,long time,String content,List<Path> photos){
         this.name=name;
         this.time=time;
         this.data=content;
@@ -51,7 +51,7 @@ public final class Love {
         return id;
     }
 
-    public List<byte[]> getImage() {
+    public List<Path> getImage() {
         return image;
     }
 }

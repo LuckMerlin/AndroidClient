@@ -46,7 +46,6 @@
                 android:singleLine="true"
                 android:gravity="right"
                 binding:enableClick="@{true}"
-                android:visibility="@{null==vm.love?View.VISIBLE:View.INVISIBLE}"
                 android:text="@{R.string.save}"
                 style="@style/titleNormalTextView"/>
         </LinearLayout>
