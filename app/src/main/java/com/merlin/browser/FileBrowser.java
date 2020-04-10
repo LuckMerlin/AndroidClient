@@ -301,7 +301,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                                 }else {
                                     post(()->dialog.dismiss(),1000);
                                 }
-                            })), null, null, null)){
+                            })), null, null)){
                                 dialog.dismiss();
                             }
                             break;

@@ -132,8 +132,8 @@ public class LocalFileBrowser extends FileBrowser{
                         final Md5Reader md5Reader=mMd5Reader;
                         LocalFile localFile;File child;String md5;
                         for (int i = from; i < toIndex; i++) {
-                            if (null!=(localFile=null!=(child=files[i])?LocalFile.create(child,
-                                    null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
+                            if (null!=(localFile=null!=(child=files[i])?
+                                    LocalFile.build(child, null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
                                 if (list.add(localFile)&&null!=(md5=(null==localFile.getSync()?localFile.getMd5():
                                         null))&& md5.length()>0&&!md5s.contains(md5)&&md5s.add(md5)){
                                     List<LocalFile> fileList=fileMaps.get(md5);
@@ -341,7 +341,7 @@ public class LocalFileBrowser extends FileBrowser{
                         what=What.WHAT_SUCCEED;
                         String[] fix=LocalFile.getPostfix(file);
                         modify = new Path(folder, fix[0],fix[1]);
-                        arg = LocalFile.create(file,null);
+                        arg = LocalFile.build(file,null,null);
                     }
                 } catch (IOException e) {
                     what=What.WHAT_ERROR_UNKNOWN;

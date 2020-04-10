@@ -23,6 +23,7 @@ import com.merlin.api.What;
 import com.merlin.bean.Document;
 import com.merlin.bean.LocalFile;
 import com.merlin.bean.Love;
+import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.bean._Photo;
 import com.merlin.client.R;
@@ -60,12 +61,13 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 
         @POST(Address.PREFIX_LOVE + "/save")
         @Multipart
-        Observable<Reply<Love>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
+        Observable<Reply<Love<NasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
     }
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
+        startActivity(new Intent(root.getContext(), LocalPhotoChooseActivity.class),PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
     }
 
     @Override
@@ -159,7 +161,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                 Object imageUrlObj = null != photo ? photo.getPath(null) : null;
                 String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
                 if (null != imageUrl && imageUrl.length() > 0) {
-                    if (photo instanceof LocalFile) {
+                    if (photo instanceof Path) {
                         File file = new File(imageUrl);
                         String name = "" + title + "_" + planTime + "_" + file.getName();
                         MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "./lovesPhotos") : null;
@@ -173,6 +175,9 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             dismissLoading(dialogKey);
             toast(note);
             Love love=null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED?data.getData():null;
+            List list=null!=love?love.getImage():null;
+            Object object=null!=list&&list.size()>0?list.get(0):null;
+            Debug.D(getClass(),"SS "+(null!=object?object.getClass():null)+" "+object+" "+list);
             if (null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED) {
                 applyLove(love);
             }
@@ -222,13 +227,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                 if (null!=adapter&&null!=object&&object instanceof ArrayList){
                     for (Object child:(ArrayList)object) {
                         if (null!=child){
-                            if (child instanceof String&&((String)child).length()>0){
-                                LocalFile localFile= LocalFile.create(new File((String)child),null);
-                                if (null!=localFile) {
-                                    adapter.add(localFile, true, "");
-                                }
-                            }else if (child instanceof LocalFile){
-                                adapter.add((LocalFile)child,true,"After activity choose result.");
+                            if (child instanceof Path){
+                                adapter.add((Path)child,true,"After activity choose result.");
                             }
                         }
                     }

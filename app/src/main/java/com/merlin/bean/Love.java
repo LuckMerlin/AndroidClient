@@ -2,10 +2,10 @@ package com.merlin.bean;
 
 import java.util.List;
 
-public final class Love {
+public final class Love<T extends Path> {
     private String name;
     private String data;
-    private List<Path> image;
+    private List<T> image;
     private long id;
     private String mode;
     private String account;
@@ -16,7 +16,7 @@ public final class Love {
         this(null,0,null,null);
     }
 
-    public Love(String name,long time,String content,List<Path> photos){
+    public Love(String name,long time,String content,List<T> photos){
         this.name=name;
         this.time=time;
         this.data=content;
@@ -51,7 +51,7 @@ public final class Love {
         return id;
     }
 
-    public List<Path> getImage() {
+    public List<T> getImage() {
         return image;
     }
 }

@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+/**
+ * @deprecated
+ */
 public final class LocalPhoto extends Path {
     private String mTitle;
     private String mNote;

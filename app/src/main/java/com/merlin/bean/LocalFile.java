@@ -8,29 +8,23 @@ import com.merlin.browser.Md5Reader;
 import com.merlin.client.R;
 import com.merlin.database.FileDB;
 
+import java.io.File;
+
 public final class LocalFile extends Document {
     private transient Reply<Path> sync;
 
-    public LocalFile(String parent,String name,String extension,String title,String imageUrl,int childCount,
-                     long length,long modifyTime,boolean accessible,String md5,long accessTime,int permission){
-        super(null,parent,name,extension,title,imageUrl,childCount,length,modifyTime,accessible,md5,accessTime,permission);
+    public LocalFile(String parent, String name, String extension, String title, String imageUrl, int childCount,
+                     long length, long modifyTime, String md5, long accessTime, int permission) {
+        super(null, parent, name, extension, title, imageUrl, childCount, length, modifyTime, md5, accessTime, permission);
     }
 
-    public static LocalFile create(java.io.File file, String imageUrl){
-        return create(file,imageUrl,null);
-    }
-
-    public static LocalFile create(java.io.File file, String imageUrl, Md5Reader reader){
-        if (null!=file){
-            String parent=file.getParent();
-            parent=null!=parent?parent+ java.io.File.separator:null;
-            String[] fix=getPostfix(file);
-            String name=fix[0];
-            String extension=fix[1];
-            String title=file.getName();
-            String md5=null;
+    public static LocalFile build(File file, String imageUrl, Md5Reader reader){
+        Path path=null!=file?Path.build(file.getAbsolutePath(),null):null;
+        if (null!=path){
+            int permission=0x1111111;
             boolean directory=file.isDirectory();
             long size=file.length();
+            String md5=null;
             int childCount= What.WHAT_NOT_DIRECTORY;
             if (directory){
                 String[] names=file.list();
@@ -40,10 +34,8 @@ public final class LocalFile extends Document {
                 md5=null!=fileDB?fileDB.getMd5():null;
             }
             long modifyTime=file.lastModified();
-            boolean accessible=file.canRead()&&(!file.isDirectory()||file.canExecute());
-            int permission=0x1111111;
-            return new LocalFile(parent,name,extension,title,imageUrl,childCount,size,
-                    modifyTime,accessible,md5,modifyTime,permission);
+            return new LocalFile(path.getParent(),path.getName(false),path.getExtension(),
+                    file.getName(),imageUrl,childCount,size,modifyTime,md5,modifyTime,permission);
         }
         return null;
     }
@@ -103,7 +95,6 @@ public final class LocalFile extends Document {
         dest.writeInt(getChildCount());
         dest.writeLong(getLength());
         dest.writeLong(getModifyTime());
-        dest.writeInt(isAccessible()?1:0);
         dest.writeString(getMd5());
         dest.writeString(getMime());
         dest.writeInt(isFavorite()?1:0);
@@ -123,13 +114,12 @@ public final class LocalFile extends Document {
             int childCount=dest.readInt();
             long length=dest.readLong();
             long modifyTime=dest.readLong();
-            boolean accessible=dest.readInt()==1;
             String md5=dest.readString();
             String mime=dest.readString();
             boolean favorite=dest.readInt()==1;
             long accessTime=dest.readLong();
             int permission=dest.readInt();
-            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime,permission);
+            setFile(title,imageUrl,childCount,length,modifyTime,md5,mime,favorite,accessTime,permission);
         }
     }
 

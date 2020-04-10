@@ -12,6 +12,7 @@ import com.github.chrisbanes.photoview.PhotoView;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.merlin.api.Label;
 import com.merlin.bean.LocalPhoto;
+import com.merlin.bean.Path;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class PhotoPreViewModel extends Model implements Model.OnActivityIntentCh
         PhotoView photoView=mPhotoView;
         PhotoViewAttacher attacher=mAttacher;
         if (null!=photo&&null!=photoView&&null!=attacher){
-            photo= photo instanceof LocalPhoto ?((LocalPhoto)photo).getPath():photo;
+            photo= photo instanceof Path ?((Path)photo).getPath():photo;
             if (photo instanceof String){
                 File file=new File((String)photo);
                 if (file.exists()){

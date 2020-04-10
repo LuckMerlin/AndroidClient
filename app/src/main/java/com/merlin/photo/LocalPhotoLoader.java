@@ -5,9 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
+import com.merlin.bean.LocalFile;
 import com.merlin.bean.LocalPhoto;
 import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
+
+import java.io.File;
 
 public class LocalPhotoLoader {
 
@@ -83,11 +86,7 @@ public class LocalPhotoLoader {
              String  path= getCursorString(cursor,MediaStore.Images.Media.DATA,null);
              int  width= getCursorInt(cursor,MediaStore.Images.Media.WIDTH,0);
              int  height= getCursorInt(cursor,MediaStore.Images.Media.HEIGHT,0);
-             Path path1=Path.build(path,null);
-             if (null==path1){
-                 return null;
-             }
-             return new LocalPhoto(path1.getParent(),path1.getName(),path1.getExtension(),title,mimeType,width,height,desc);
+             return new LocalPhoto(path,title,mimeType,width,height,desc);
          }
         Debug.W(getClass(),"Can't load local photo from cursor. "+cursor);
         return null;
@@ -101,6 +100,48 @@ public class LocalPhotoLoader {
     private int getCursorInt(Cursor cursor,String key,int def){
         int index=null!=key&&key.length()>0&&null!=cursor&&!cursor.isClosed()?cursor.getColumnIndex(key):-1;
         return index>=0?cursor.getInt(index):def;
+    }
+
+    public final static class LocalPhoto{
+        private final String mPath;
+        private final String mTitle;
+        private final String mMimeType;
+        private final int mWidth;
+        private final int mHeight;
+        private final String mDesc;
+
+        private LocalPhoto(String path,String title,String mimeType,int width,int height,String desc){
+            mPath=path;
+            mTitle=title;
+            mMimeType=mimeType;
+            mWidth=width;
+            mHeight=height;
+            mDesc=desc;
+        }
+
+        public int getHeight() {
+            return mHeight;
+        }
+
+        public int getWidth() {
+            return mWidth;
+        }
+
+        public String getDesc() {
+            return mDesc;
+        }
+
+        public String getMimeType() {
+            return mMimeType;
+        }
+
+        public String getPath() {
+            return mPath;
+        }
+
+        public String getTitle() {
+            return mTitle;
+        }
     }
 
 }

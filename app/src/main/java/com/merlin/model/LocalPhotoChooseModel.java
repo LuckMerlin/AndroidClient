@@ -13,6 +13,7 @@ import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
+import com.merlin.debug.Debug;
 import com.merlin.photo.LocalPhotoLoader;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
@@ -34,7 +35,9 @@ public class LocalPhotoChooseModel extends Model implements OnTapClick,Label, Mo
             return null!=finish&&null!=loader&&loader.load(getContentResolver(), from, from + pageLimit, (what, photo,length)-> {
                     switch (what){
                         case LocalPhotoLoader.OnLocalPhotoLoad.WHAT_LOAD_ONE:
-                            return null!=photo&&photos.add(photo);
+                            String pathValue=null!=photo?photo.getPath():null;
+                            Path path=null!=pathValue&&pathValue.length()>0?Path.build(pathValue,null):null;
+                            return (null!=path&&photos.add(path))||true;
                         case LocalPhotoLoader.OnLocalPhotoLoad.WHAT_FINISH:
                             finish.onApiFinish(What.WHAT_SUCCEED,"Load succeed.",new Reply<PageData<Path>>
                                     (true,What.WHAT_SUCCEED,"Load succeed.", new PageData(from,photos,length)),null);

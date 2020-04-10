@@ -8,7 +8,6 @@ public class Document extends Path {
     private int childCount;
     private long modifyTime;
     private long accessTime;
-    private boolean accessible;
     private String mime;
     private String md5;
     private boolean favorite;
@@ -19,25 +18,24 @@ public class Document extends Path {
     }
 
     protected Document(String host, String parent, String name, String extension){
-        this(host,parent,name,extension,null,null,0,0,0,false,null,0,0);
+        this(host,parent,name,extension,null,null,0,0,0,null,0,0);
     }
 
     public Document(String host, String parent, String name, String extension, String title, String imageUrl,
-                    int childCount, long length, long modifyTime, boolean accessible, String md5, long accessTime, int permission){
+                    int childCount, long length, long modifyTime, String md5, long accessTime, int permission){
         super(host,parent,name,extension);
         this.title=title;
         this.childCount=childCount;
         this.imageUrl=imageUrl;
         this.length=length;
         this.modifyTime=modifyTime;
-        this.accessible=accessible;
         this.md5=md5;
         this.accessTime=accessTime;
         this.permission=permission;
     }
 
-    public final boolean isAccessible() {
-        return accessible;
+    public final boolean isAccessible(){
+        return true;
     }
 
     public final boolean isDirectory() {
@@ -85,14 +83,13 @@ public class Document extends Path {
     }
 
     protected final boolean setFile(String title, String imageUrl, int childCount,
-                                    long length, long modifyTime, boolean accessible, String md5, String mime,
+                                    long length, long modifyTime, String md5, String mime,
                                     boolean favorite, long accessTime,int permission){
         this.title=title;
         this.imageUrl=imageUrl;
         this.childCount=childCount;
         this.length=length;
         this.modifyTime=modifyTime;
-        this.accessible=accessible;
         this.md5=md5;
         this.mime=mime;
         this.favorite=favorite;
@@ -113,7 +110,6 @@ public class Document extends Path {
             length=dest.readLong();
             childCount=dest.readInt();
             modifyTime=dest.readLong();
-            accessible=dest.readInt()==1;
             md5=dest.readString();
             mime=dest.readString();
             favorite=dest.readInt()==1;
@@ -133,7 +129,6 @@ public class Document extends Path {
         dest.writeLong(length);
         dest.writeInt(childCount);
         dest.writeLong(modifyTime);
-        dest.writeInt(accessible?1:0);
         dest.writeString(md5);
         dest.writeString(mime);
         dest.writeInt(favorite?1:0);

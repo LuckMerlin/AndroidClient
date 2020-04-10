@@ -35,14 +35,13 @@ public class NasFile  extends Document {
             int childCount=dest.readInt();
             long length=dest.readLong();
             long modifyTime=dest.readLong();
-            boolean accessible=dest.readBoolean();
             String md5=dest.readString();
             String mime=dest.readString();
             boolean favorite=dest.readBoolean();
             long accessTime=dest.readLong();
             createTime=dest.readLong();
             int permission=dest.readInt();
-            setFile(title,imageUrl,childCount,length,modifyTime,accessible,md5,mime,favorite,accessTime,permission);
+            setFile(title,imageUrl,childCount,length,modifyTime,md5,mime,favorite,accessTime,permission);
         }
     }
 
@@ -57,7 +56,6 @@ public class NasFile  extends Document {
         dest.writeInt(getChildCount());
         dest.writeLong(getLength());
         dest.writeLong(getModifyTime());
-        dest.writeBoolean(isAccessible());
         dest.writeString(getMd5());
         dest.writeString(getMime());
         dest.writeBoolean(isFavorite());

@@ -1,5 +1,6 @@
 package com.merlin.bean;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -7,9 +8,12 @@ import androidx.annotation.Nullable;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.database.FileDB;
 import com.merlin.debug.Debug;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URL;
 
 public class Path implements Parcelable {
     private String parent;
@@ -95,20 +99,50 @@ public class Path implements Parcelable {
     public static <T extends Path> Path build(Object object,T result){
         Path path=null;
         if (null!=object){
-            Debug.D(Path.class,"SSSSSpathSSSSs "+object);
-            object=object instanceof String?null:null;
             if (object instanceof File){
                 File file=(File)object;
                 String parent=file.getParent();
-                parent=null!=parent?parent+ java.io.File.separator:null;
-                String name=null!=file?file.getName():null;
-                int index=null!=name?name.lastIndexOf("."):-1;
-                String extension=index>0?name.substring(index):null;
-                name=index>0?name.substring(0,index):name;
-                if (null==result){
-                    path=new Path(null,parent,name,extension);
-                }else{
-                    (path=result).setPath(null,parent,name,extension);
+                String name=file.getName();
+                String extension=null;
+                int length=null!=name?name.length():-1;
+                int index=length>0?name.lastIndexOf("."):-1;
+                if (index>0&&index<length){
+                    extension=name.substring(index);
+                    name=name.substring(0,index);
+                }
+                return new Path(null,parent,name,extension);
+            }
+            if (null!=object){
+                if (object instanceof String){
+                    String value=(String)object;
+                    int length=value.length();
+                    int index=value.lastIndexOf(File.separator);
+                    String parent=value;
+                    String name=null;
+                    if (index>0&&index<length){
+                        parent=value.substring(0,index);
+                        name=value.substring(index);
+                    }
+                    length=null!=parent?parent.length():-1;
+                    index=null!=parent?parent.lastIndexOf(":"):-1;
+                    String host=null;
+                    if (index>0&&length>0&&index<length){
+                        host=value.substring(0,index);
+                        parent=value.substring(index);
+                    }
+                    String extension=null;
+                    length=null!=name?name.length():-1;
+                    index=length>0?name.lastIndexOf("."):-1;
+                    if (index>0&&index<length){
+                        extension=name.substring(index);
+                        name=name.substring(0,index);
+                    }
+                    return new Path(host,parent,name,extension);
+                }else if (object instanceof URL){
+                    ((URL)object).getHost();
+                }else if (object instanceof URI){
+
+                }else if (object instanceof Uri){
                 }
             }
         }

@@ -196,8 +196,8 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Path> impleme
     }
 
     private boolean showPhoto(View view, Path photo, String debug){
-        ArrayList<LocalPhoto> list=null!=view&&null!=photo&&photo instanceof LocalPhoto?new ArrayList<>(1):null;
-        return null!=list&&list.add((LocalPhoto)photo)&& PhotoPreviewActivity.start(view.getContext(),list,0,debug);
+        ArrayList<Path> list=null!=view&&null!=photo&&photo instanceof Path?new ArrayList<>(1):null;
+        return null!=list&&list.add((Path)photo)&& PhotoPreviewActivity.start(view.getContext(),list,0,debug);
     }
 
     private boolean cleanChoose(boolean notify){
