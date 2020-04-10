@@ -33,6 +33,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.merlin.adapter.LinearItemDecoration;
@@ -44,6 +46,8 @@ import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Address;
+import com.merlin.api.Label;
+import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -197,9 +201,16 @@ public class MBinding {
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, Object path) {
         if (null!=view) {
+            RequestBuilder<Drawable> builder=null;
             if (null != path) {
                 String host=null;
-                if (path instanceof Path){
+                if (path instanceof NasFile){
+                    NasFile nasFile=(NasFile)path;
+                    String url=nasFile.getHost();
+                    GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
+                            .addHeader(Label.LABEL_PATH, nasFile.getPath(null)).build());
+                     builder= Glide.with(view.getContext()).load(glideUrl);
+                }else if (path instanceof Path){
                     host=((Path)path).getHost();
                     path=((Path)path).getPath(null);
                 }
@@ -212,33 +223,31 @@ public class MBinding {
                 }else if (path instanceof String){
                     String value=(String)path;
                     if (null!=value&&value.length()>0){
-                            RoundedCorners roundedCorners = new RoundedCorners(10);
-                            RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-                            RequestBuilder<Drawable> builder=null;
                             if (!value.startsWith("http")) {
                                 builder=Glide.with(view.getContext()).load(new File(value));
                             }else {
-                                Log.d("LM","AAAAAAAAAA "+host);
                                 builder=Glide.with(view.getContext()).load(value);
                             }
-                            if (null!=builder) {
+                        }
+                }
+                if (null!=builder) {
+                    RoundedCorners roundedCorners = new RoundedCorners(10);
+                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
 //                        DrawableRequestBuilder<String> thumbnailRequest = Glide
 //                                .with(context)
 //                                .load(picture.getSmall())
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
 //                                        new TopCropTransformation(context));
-                                builder.centerCrop()
-                                        .apply(options)
-                                        .thumbnail(1f)
+                    builder.centerCrop()
+                            .apply(options)
+                            .thumbnail(1f)
 //                                .transform(new BlurMaskFilter)
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
 //                                new TopCropTransformation(context))
-                                        .placeholder(R.drawable.ic_picture_default)
-                                        .error(R.drawable.ic_picture_default)
-                                        .into(view);
-                                return;
-                            }
-                        }
+                            .placeholder(R.drawable.ic_picture_default)
+                            .error(R.drawable.ic_picture_default)
+                            .into(view);
+                    return;
                 }
             }
             view.setImageDrawable(null);//Clean
