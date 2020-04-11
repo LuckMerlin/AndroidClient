@@ -206,10 +206,12 @@ public class MBinding {
                 String host=null;
                 if (path instanceof NasFile){
                     NasFile nasFile=(NasFile)path;
-                    String url=nasFile.getHost();
-                    GlideUrl glideUrl = new GlideUrl(url, new LazyHeaders.Builder()
-                            .addHeader(Label.LABEL_PATH, nasFile.getPath(null)).build());
+                    String nasPath=nasFile.getPath(null);
+                    host=nasFile.getHost();
+                    GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder()
+                            .addHeader(Label.LABEL_PATH, nasPath).build());
                      builder= Glide.with(view.getContext()).load(glideUrl);
+                     Debug.D(MBinding.class,"AAAsafa  AA "+host+" "+nasPath);
                 }else if (path instanceof Path){
                     host=((Path)path).getHost();
                     path=((Path)path).getPath(null);
