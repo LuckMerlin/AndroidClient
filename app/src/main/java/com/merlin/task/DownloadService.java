@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @deprecated
+ */
 public class DownloadService extends Service {
     private static final String LABEL_DOWNLOAD ="download";
     private final List<Transport> mRunningList=new ArrayList<>();

@@ -1,6 +1,7 @@
 package com.merlin.browser;
 
 import com.merlin.api.Label;
+import com.merlin.util.Encoder;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -34,22 +35,15 @@ public class FileSaveBuilder implements Label {
         if (null!=name&&name.length()>0){
             String folder=toFolder;
             name= null!=name?name:"";
-            headersBuilder.add(LABEL_NAME,encode(name,""));
-            headersBuilder.add(LABEL_PARENT,encode(folder,""));
-            headersBuilder.add(LABEL_PATH_SEP,encode(File.separator,""));
+            Encoder encoder=new Encoder();
+            String encoding="utf-8";
+            headersBuilder.add(LABEL_NAME,encoder.encode(name,"",encoding));
+            headersBuilder.add(LABEL_PARENT,encoder.encode(folder,"",encoding));
+            headersBuilder.add(LABEL_PATH_SEP,encoder.encode(File.separator,"",encoding));
             if (isDirectory){
                 headersBuilder.add(LABEL_FOLDER,LABEL_FOLDER);
             }
         }
         return headersBuilder;
-    }
-
-    private String encode(String name, String def){
-        try {
-            return null!=name&&name.length()>0? URLEncoder.encode(name, "UTF-8"):def;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return def;
     }
 }

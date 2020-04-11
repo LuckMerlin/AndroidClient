@@ -2,6 +2,7 @@ package com.merlin.conveyor;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
+import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
 import com.merlin.transport.Status;
 
@@ -29,11 +30,11 @@ public abstract class Convey extends ConveyStatus implements What {
        setListener(change,"While new instance.");
    }
 
-   protected abstract Reply onPrepare(String debug);
+   protected abstract Reply onPrepare(Retrofit retrofit, String debug);
 
-   protected  abstract Boolean onCancel(boolean cancel,String debug);
+   protected  abstract Boolean onCancel(Retrofit retrofit,boolean cancel,String debug);
 
-   public final boolean cancel(boolean cancel,String debug){
+   public final boolean cancel(Retrofit retrofit,boolean cancel,String debug){
        if (isStatus(Status.FINISHED)){
            return false;
        }
@@ -42,7 +43,7 @@ public abstract class Convey extends ConveyStatus implements What {
             return false;
        }
        mCancel=cancel;
-       Boolean onCancel=onCancel(cancel,debug);
+       Boolean onCancel=onCancel(retrofit,debug);
        if (null!=onCancel&&onCancel){
             updateStatus(Status.CANCELED,null);
             return true;
@@ -50,16 +51,16 @@ public abstract class Convey extends ConveyStatus implements What {
        return false;
    }
 
-   protected abstract Reply onStart(Finisher finish,String debug);
+   protected abstract Reply onStart(Retrofit retrofit,Finisher finish,String debug);
 
-   public final Reply start(Finisher finisher,OnConveyStatusChange change,String debug){
+   public final Reply start(Retrofit retrofit,Finisher finisher,OnConveyStatusChange change,String debug){
        int status=getStatus();
        if (status!=ConveyStatus.IDLE&&status!=ConveyStatus.FINISHED&&status!=ConveyStatus.CANCELED&&status!=ConveyStatus.PAUSED){
            Debug.W(getClass(),"Can't start convey again while in status "+(null!=debug?debug:".")+" status="+status);
             return null;
        }
        notifyChangeStatus(ConveyStatus.PREPARING,null,change);
-       Reply reply=onPrepare(debug);
+       Reply reply=onPrepare(retrofit,debug);
        notifyChangeStatus(ConveyStatus.PREPARED,null,change);
        if (null!=reply&&!reply.isSuccess()){ //Prepare fail
            notifyChangeStatus(ConveyStatus.FINISHED,reply,change);
@@ -84,7 +85,7 @@ public abstract class Convey extends ConveyStatus implements What {
            }
        };
        notifyChangeStatus(ConveyStatus.STARTED,null,change);
-       final Reply startReply= onStart(innerFinish,debug);
+       final Reply startReply= onStart(retrofit,innerFinish,debug);
        if (null!=startReply&&!startReply.isSuccess()){
            innerFinish.onFinish(startReply);
            notifyChangeStatus(ConveyStatus.FINISHED,startReply,change);
@@ -182,7 +183,6 @@ public abstract class Convey extends ConveyStatus implements What {
 
    @Override
    public String toString() {
-        return ""+getName()+" " +
-                ""+super.toString();
+        return ""+getName()+" "+super.toString();
     }
 }

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConveyorService extends Service implements Label, OnConveyStatusChange {
-    private final Conveyor mConveyor=new Conveyor(Looper.getMainLooper());
+    private final Conveyor mConveyor=new Conveyor(null,Looper.getMainLooper());
     private final Retrofit mRetrofit=new Retrofit();
     private final Binder mBinder=new Binder();
 
@@ -53,6 +53,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
             Debug.W(getClass(),"Can't handle convey intent "+what+" "+conveyor);
             return false;
         }
+        int coverModer=CoverMode.NONE;
         Object debugObj = bundle.get(LABEL_HINT);
         String debug=null!=debugObj&&debugObj instanceof String?(String)debugObj:null;
         if (what.equals(LABEL_UPLOAD)) {
@@ -70,7 +71,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
                     String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath(null):null;
                     File child=null!=path&&path.length()>0?new File(path):null;
                     if (null!=child&&child.exists()){
-                        conveyor.add(null, debug,new FileUploadConvey(mRetrofit,child,url,folder));
+                        conveyor.add(null, debug,new FileUploadConvey(child,url,folder,coverModer));
                     }
                 }
                 return true;

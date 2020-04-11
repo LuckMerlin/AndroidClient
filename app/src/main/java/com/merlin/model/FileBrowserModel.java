@@ -32,13 +32,18 @@ import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.client.databinding.SingleEditTextBinding;
+import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.conveyor.ConveyorService;
+import com.merlin.conveyor.FileUploadConvey;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileBrowser;
 import com.merlin.browser.LocalFileBrowser;
 import com.merlin.browser.NasFileBrowser;
 import com.merlin.dialog.Dialog;
 import com.merlin.protocol.Tag;
+import com.merlin.server.Retrofit;
+import com.merlin.transport.Status;
+import com.merlin.transport.TransportBinder;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -52,7 +57,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
+public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, Model.OnBindChange, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
     private final Map<String,FileBrowser> mAllClientMetas=new HashMap<>();
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
     private final ObservableField<FileBrowser> mCurrent=new ObservableField<>();
@@ -61,6 +66,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
     private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
     private final ObservableField<Integer> mCurrentMultiChooseCount=new ObservableField<>();
+    private ConveyorBinder mTransportBinder;
 
     private final FileBrowser.Callback mBrowserCallback=new FileBrowser.Callback() {
         @Override
@@ -279,6 +285,14 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
             toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
             return false;
         }
+        final ConveyorBinder binder=mTransportBinder;
+        if (null==binder){
+            toast(R.string.serverUnConnect);
+            return false;
+        }
+//        Retrofit retrofit,File file,String url,String folder,int coverMode
+        binder.run(Status.ADD,"While upload file.",new FileUploadConvey());
+
         if (ConveyorService.upload(getViewContext(),files,meta,folderPath,coverMode,debug)){
             entryMode(FileBrowser.MODE_NORMAL,null,"After upload start succeed.");
             launchTransportList("");
@@ -569,4 +583,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, O
         return mClientCount;
     }
 
+    @Override
+    public boolean onBindChanged(Object obj, String debug) {
+        mTransportBinder=null!=obj&&obj instanceof ConveyorBinder?(ConveyorBinder)obj:null;
+        return true;
+    }
 }

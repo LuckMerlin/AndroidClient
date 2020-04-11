@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.binding.MBinding;
 import com.merlin.database.FileDB;
 import com.merlin.debug.Debug;
 
@@ -119,9 +120,9 @@ public class Path implements Parcelable {
                     int index=value.lastIndexOf(File.separator);
                     String parent=value;
                     String name=null;
-                    if (index>0&&index<length){
-                        parent=value.substring(0,index);
-                        name=value.substring(index);
+                    if (index>0&&index+1<length){
+                        parent=value.substring(0,index+1);
+                        name=value.substring(index+1);
                     }
                     length=null!=parent?parent.length():-1;
                     index=null!=parent?parent.lastIndexOf(":"):-1;

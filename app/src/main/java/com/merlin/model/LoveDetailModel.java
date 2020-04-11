@@ -57,17 +57,11 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     private interface Api {
         @POST(Address.PREFIX_LOVE + "/detail")
         @FormUrlEncoded
-        Observable<Reply<Love>> getLovesDetail(@Field(Label.LABEL_ID) String id);
+        Observable<Reply<Love<NasFile>>> getLovesDetail(@Field(Label.LABEL_ID) String id);
 
         @POST(Address.PREFIX_LOVE + "/save")
         @Multipart
         Observable<Reply<Love<NasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
-    }
-
-    @Override
-    protected void onRootAttached(View root) {
-        super.onRootAttached(root);
-        startActivity(new Intent(root.getContext(), LocalPhotoChooseActivity.class),PHOTO_CHOOSE_ACTIVITY_RESULT_CODE);
     }
 
     @Override
@@ -143,7 +137,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
         }
-        final List<Document> photos=new ArrayList<>();
         Map<String,String> loveTextMap=new HashMap<>();
         String mode=null;
         loveTextMap.put(Label.LABEL_NAME, title);
@@ -175,9 +168,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
             dismissLoading(dialogKey);
             toast(note);
             Love love=null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED?data.getData():null;
-            List list=null!=love?love.getImage():null;
-            Object object=null!=list&&list.size()>0?list.get(0):null;
-            Debug.D(getClass(),"SS "+(null!=object?object.getClass():null)+" "+object+" "+list);
             if (null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED) {
                 applyLove(love);
             }
@@ -208,7 +198,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     public void onActivityIntentChanged(Activity activity, Intent intent) {
         String id=null!=intent?intent.getStringExtra(Label.LABEL_ID):null;
         if (null!=id&&id.length()>0){
-            call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love>>)( what,  note,  data,  arg)-> {
+            call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love<NasFile>>>)( what,  note,  data,  arg)-> {
                 Love love=what == What.WHAT_SUCCEED&&null!=data?data.getData():null;
                 if (null!=love){
                     applyLove(love);

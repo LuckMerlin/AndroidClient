@@ -22,10 +22,14 @@
             android:paddingRight="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
                 binding:adapter="@{vm.adapter}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         </FrameLayout>
     </FrameLayout>
 </layout>

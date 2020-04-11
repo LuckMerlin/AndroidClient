@@ -26,19 +26,18 @@ import retrofit2.Response;
 
 public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
     private final File mFile;
-    private final Retrofit mRetrofit;
     private final String mFolder;
+    private final int mCoverMode;
 
-    public FileUploadConvey(Retrofit retrofit,File file,String url,String folder){
+    public FileUploadConvey(File file,String url,String folder,int coverMode){
         super(null!=file?file.getName():null);
-        mRetrofit=retrofit;
         mFile=file;
         mFolder=folder;
+        mCoverMode=coverMode;
     }
 
     @Override
-    protected Reply onPrepare(String debug) {
-        final Retrofit retrofit=mRetrofit;
+    protected Reply onPrepare(Retrofit retrofit,String debug) {
         if (null==retrofit){
             return new Reply(false,WHAT_ARGS_INVALID,"None retrofit.",null);
         }
@@ -67,7 +66,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
                 }
                 targetFolderName=folder+targetFolderName;
             }
-            addChild(new FileConvey(mRetrofit,file,targetFolderName),debug);
+            addChild(new FileConvey(file,targetFolderName),debug);
             File[] files=file.isDirectory()?file.listFiles():null;;
             if (null!=files){
                 for (File child:files) {
@@ -104,19 +103,16 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
     protected final static class FileConvey extends Convey {
         private final String mFilePath;
         private final String mFolder;
-        private final Retrofit mRetrofit;
         private Call<Reply<ApiList<Reply<NasFile>>>> mUploadingCall;
 
-        private FileConvey(Retrofit retrofit,File file,String folder){
+        private FileConvey(File file,String folder){
             super(null!=file?file.getName():null);
-            mRetrofit=retrofit;
             mFilePath= null!=file?file.getAbsolutePath():null;
             mFolder=folder;
         }
 
         @Override
-        protected Reply onPrepare(String debug) {
-            final Retrofit retrofit=mRetrofit;
+        protected Reply onPrepare(Retrofit retrofit,String debug) {
             if (null==retrofit){
                 return new Reply(false,WHAT_ARGS_INVALID,"None retrofit.",null);
             }
@@ -131,8 +127,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         }
 
         @Override
-        protected Reply onStart(Finisher finish, String debug) {
-            final Retrofit retrofit=mRetrofit;
+        protected Reply onStart(Retrofit retrofit,Finisher finish, String debug) {
             if (null==retrofit){
                 Debug.W(getClass(),"Can't upload file with NULL retrofit."+(null!=debug?debug:"."));
                 return new Reply(false,WHAT_ARGS_INVALID,"None retrofit.",null);
@@ -211,8 +206,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         }
 
         @Override
-        protected Boolean onCancel(boolean cancel, String debug) {
-            final Retrofit retrofit=mRetrofit;
+        protected Boolean onCancel(Retrofit retrofit,boolean cancel, String debug) {
             Call<Reply<ApiList<Reply<NasFile>>>> curr=mUploadingCall;
             if (null!=retrofit&&null!=curr){
                 if (cancel&&!curr.isCanceled()){

@@ -56,6 +56,7 @@ import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;
 import com.merlin.model.OnBeforeTextChange;
 import com.merlin.model.OnTextChange;
+import com.merlin.util.Encoder;
 import com.merlin.util.Layout;
 import com.merlin.view.Clicker;
 import com.merlin.view.OnSeekBarChangeListener;
@@ -124,7 +125,7 @@ public class MBinding {
 
 
     @BindingAdapter("android:background")
-    public static void setBackgroundc(View view, Object img) {
+    public static void setBackground(View view, Object img) {
         if (null!=view&&null!=img){
             if (img instanceof Integer){
                 view.setBackgroundResource((Integer)img);
@@ -208,10 +209,9 @@ public class MBinding {
                     NasFile nasFile=(NasFile)path;
                     String nasPath=nasFile.getPath(null);
                     host=nasFile.getHost();
-                    GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder()
-                            .addHeader(Label.LABEL_PATH, nasPath).build());
+                    GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
+                            .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
                      builder= Glide.with(view.getContext()).load(glideUrl);
-                     Debug.D(MBinding.class,"AAAsafa  AA "+host+" "+nasPath);
                 }else if (path instanceof Path){
                     host=((Path)path).getHost();
                     path=((Path)path).getPath(null);
@@ -235,20 +235,12 @@ public class MBinding {
                 if (null!=builder) {
                     RoundedCorners roundedCorners = new RoundedCorners(10);
                     RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-//                        DrawableRequestBuilder<String> thumbnailRequest = Glide
-//                                .with(context)
-//                                .load(picture.getSmall())
-//                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
-//                                        new TopCropTransformation(context));
-                    builder.centerCrop()
-                            .apply(options)
-                            .thumbnail(1f)
+                    builder.centerCrop().apply(options).thumbnail(1f)
 //                                .transform(new BlurMaskFilter)
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
 //                                new TopCropTransformation(context))
                             .placeholder(R.drawable.ic_picture_default)
-                            .error(R.drawable.ic_picture_default)
-                            .into(view);
+                            .error(R.drawable.ic_picture_default).into(view);
                     return;
                 }
             }

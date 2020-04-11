@@ -5,13 +5,13 @@ public class Document extends Path {
     private String title;
     private String imageUrl;
     private long length;
-    private int childCount;
+    private int size;
     private long modifyTime;
     private long accessTime;
     private String mime;
     private String md5;
     private boolean favorite;
-    private int permission;
+    private int permissions;
 
     protected Document(){
         this(null,null,null,null);
@@ -22,16 +22,16 @@ public class Document extends Path {
     }
 
     public Document(String host, String parent, String name, String extension, String title, String imageUrl,
-                    int childCount, long length, long modifyTime, String md5, long accessTime, int permission){
+                    int childCount, long length, long modifyTime, String md5, long accessTime, int permissions){
         super(host,parent,name,extension);
         this.title=title;
-        this.childCount=childCount;
+        this.size=childCount;
         this.imageUrl=imageUrl;
         this.length=length;
         this.modifyTime=modifyTime;
         this.md5=md5;
         this.accessTime=accessTime;
-        this.permission=permission;
+        this.permissions=permissions;
     }
 
     public final boolean isAccessible(){
@@ -39,7 +39,7 @@ public class Document extends Path {
     }
 
     public final boolean isDirectory() {
-        return childCount>=0;
+        return size>=0;
     }
 
     public final String getMd5() {
@@ -47,11 +47,11 @@ public class Document extends Path {
     }
 
     public final int getPermission(){
-        return permission;
+        return permissions;
     }
 
     public final int getChildCount() {
-        return childCount;
+        return size;
     }
 
     public final String getTitle() {
@@ -84,17 +84,17 @@ public class Document extends Path {
 
     protected final boolean setFile(String title, String imageUrl, int childCount,
                                     long length, long modifyTime, String md5, String mime,
-                                    boolean favorite, long accessTime,int permission){
+                                    boolean favorite, long accessTime,int permissions){
         this.title=title;
         this.imageUrl=imageUrl;
-        this.childCount=childCount;
+        this.size=childCount;
         this.length=length;
         this.modifyTime=modifyTime;
         this.md5=md5;
         this.mime=mime;
         this.favorite=favorite;
         this.accessTime=accessTime;
-        this.permission=permission;
+        this.permissions=permissions;
         return true;
     }
 
@@ -108,13 +108,13 @@ public class Document extends Path {
             title=dest.readString();
             imageUrl=dest.readString();
             length=dest.readLong();
-            childCount=dest.readInt();
+            size=dest.readInt();
             modifyTime=dest.readLong();
             md5=dest.readString();
             mime=dest.readString();
             favorite=dest.readInt()==1;
             accessTime=dest.readLong();
-            permission=dest.readInt();
+            permissions=dest.readInt();
         }
     }
 
@@ -127,13 +127,13 @@ public class Document extends Path {
         dest.writeString(title);
         dest.writeString(imageUrl);
         dest.writeLong(length);
-        dest.writeInt(childCount);
+        dest.writeInt(size);
         dest.writeLong(modifyTime);
         dest.writeString(md5);
         dest.writeString(mime);
         dest.writeInt(favorite?1:0);
         dest.writeLong(accessTime);
-        dest.writeInt(permission);
+        dest.writeInt(permissions);
     }
 
     public static final Creator<Document> CREATOR = new Creator<Document>() {

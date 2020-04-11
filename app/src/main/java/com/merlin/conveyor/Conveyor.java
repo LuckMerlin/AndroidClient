@@ -5,6 +5,7 @@ import android.os.Looper;
 
 import com.merlin.api.Reply;
 import com.merlin.debug.Debug;
+import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
 import com.merlin.transport.Status;
 
@@ -19,20 +20,21 @@ import java.util.concurrent.Executors;
 
 public final class Conveyor {
     private final Map<Convey,Conveying> mConveying=new ConcurrentHashMap<>();
-    private final ExecutorService mService = Executors.newCachedThreadPool();
     private final Map<OnConveyStatusChange,Long> mListeners=new WeakHashMap<>();
     private int mLimit;
     private final Handler mHandler;
+    private final Retrofit mRetrofit;
     public interface Callback{
 
     }
 
-    public Conveyor(Looper looper){
-        this(new Handler(null!=looper?looper:Looper.getMainLooper()));
+    public Conveyor(Retrofit retrofit,Looper looper){
+        this(retrofit,new Handler(null!=looper?looper:Looper.getMainLooper()));
     }
 
-    public Conveyor(Handler handler){
+    public Conveyor(Retrofit retrofit,Handler handler){
         mHandler=null!=handler?handler:new Handler(Looper.getMainLooper());
+        mRetrofit=null!=retrofit?retrofit:new Retrofit();
     }
 
     public final boolean listener(int status,OnConveyStatusChange listener,String debug){
@@ -101,10 +103,10 @@ public final class Conveyor {
             Debug.W(getClass(),"Can't start convey while convey is NULL "+(null!=debug?debug:"."));
             return false;
         }
-        final ExecutorService service =mService;
-        if (null==service){
-            Debug.W(getClass(),"Can't start convey while service is NULL "+(null!=debug?debug:".")+" "+convey);
-            notifyStatus(ConveyStatus.CANCELED,"Convey service is NULL.",convey,null,mListeners,callback);
+        final Retrofit retrofit =mRetrofit;
+        if (null==retrofit){
+            Debug.W(getClass(),"Can't start convey while retrofit is NULL "+(null!=debug?debug:".")+" "+convey);
+            notifyStatus(ConveyStatus.CANCELED,"Convey retrofit is NULL.",convey,null,mListeners,callback);
             return false;
         }
         final Map<Convey, Conveying> conveyingMap=mConveying;
@@ -148,13 +150,11 @@ public final class Conveyor {
                 notifyStatus(ConveyStatus.PROGRESS,"Progress.",convey,c,mListeners,callback);
             }
         };
-        service.submit(()->{
-            notifyStatus(ConveyStatus.CREATE,"Convey create.",convey,null,mListeners,callback);
-            Reply reply=convey.start(finisher,innerChange,debug);
-            if (null!=reply&&null!=conveying1){//Save reply
-                conveying1.updateStatus(ConveyStatus.FINISHED,reply);
-            }
-            notifyStatus(ConveyStatus.DESTROY,"Convey destroy.",convey,null,mListeners,callback);});
+        notifyStatus(ConveyStatus.CREATE,"Convey create.",convey,null,mListeners,callback);
+        Reply reply=convey.start(retrofit,finisher,innerChange,debug);
+        if (null!=reply&&null!=conveying1){//Save reply
+            conveying1.updateStatus(ConveyStatus.FINISHED,reply);
+        }
         return false;
     }
 

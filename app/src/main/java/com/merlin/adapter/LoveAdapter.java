@@ -6,14 +6,14 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.PageData;
 import com.merlin.bean.Love;
+import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemLoveBinding;
 
 import java.util.List;
 
-public abstract class LoveAdapter extends PageAdapter<String,Love> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
+public abstract class LoveAdapter extends PageAdapter<String,Love<NasFile>> implements ItemSlideRemover.OnItemSlideRemove, OnItemTouchResolver{
     private final ItemSlideRemover mItemSlideRemover=new ItemSlideRemover();
 
     @Override
@@ -22,7 +22,7 @@ public abstract class LoveAdapter extends PageAdapter<String,Love> implements It
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Love data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Love<NasFile> data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemLoveBinding){
             ((ItemLoveBinding)binding).setPosition(position+1);
             ((ItemLoveBinding)binding).setLove(data);

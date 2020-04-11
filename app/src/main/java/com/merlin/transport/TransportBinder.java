@@ -2,6 +2,9 @@ package com.merlin.transport;
 
 import java.util.Collection;
 
+/**
+ * @deprecated
+ */
 public interface TransportBinder extends Callback {
     Collection<? extends AbsTransport> getRunning(int type);
     boolean callback(int status,Callback callback);

@@ -48,6 +48,10 @@ public class Model extends Retrofit{
     private Dialog mLoadingDialog;
     private PopupWindow mPopWindow;
 
+    public interface OnBindChange{
+        boolean onBindChanged(Object obj,String debug);
+    }
+
     public interface OnModelAttachedToWindow{
         void onModelAttachedToWindow(View v,Model model);
     }
