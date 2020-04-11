@@ -130,31 +130,41 @@ public final class Conveyor {
            }
         }
         Debug.D(getClass(),"Start convey "+convey+(null!=debug?debug:"."));
-        final Conveying conveying1=conveying;
-        final OnConveyStatusChange innerChange=( status, innerConvey, data)-> {
-                if (null!=callback){
-                    callback.onConveyStatusChanged(status,innerConvey,data);
-                }
-            };
-        final Convey.Finisher finisher=new Convey.Finisher() {
+        final  OnConveyStatusChange change=new OnConveyStatusChange() {
             @Override
-            public void onFinish(Reply reply) {
-                if (null!=reply&&null!=conveying1){//Save reply
-                    conveying1.updateStatus(ConveyStatus.FINISHED,reply);
-                }
-                notifyStatus(ConveyStatus.FINISHED,"Finished.",convey,reply,mListeners,callback);
-            }
+            public void onConveyStatusChanged(int status, Convey convey, Object data) {
 
-            @Override
-            public void onProgress(long conveyed, long total, float speed, Convey c) {
-                notifyStatus(ConveyStatus.PROGRESS,"Progress.",convey,c,mListeners,callback);
             }
         };
-        notifyStatus(ConveyStatus.CREATE,"Convey create.",convey,null,mListeners,callback);
-        Reply reply=convey.start(retrofit,finisher,innerChange,debug);
-        if (null!=reply&&null!=conveying1){//Save reply
-            conveying1.updateStatus(ConveyStatus.FINISHED,reply);
-        }
+        final Step step=(Reply reply) ->{
+
+        };
+        convey.start(step,mRetrofit,change,debug);
+//        final OnConveyStatusChange innerChange=( status, innerConvey, data)-> {
+//                if (null!=callback){
+//                    callback.onConveyStatusChanged(status,innerConvey,data);
+//                }
+//            };
+//
+//        final Convey.Finisher finisher=new Convey.Finisher() {
+//            @Override
+//            public void onFinish(Reply reply) {
+//                if (null!=reply&&null!=conveying1){//Save reply
+//                    conveying1.updateStatus(ConveyStatus.FINISHED,reply);
+//                }
+//                notifyStatus(ConveyStatus.FINISHED,"Finished.",convey,reply,mListeners,callback);
+//            }
+//
+//            @Override
+//            public void onProgress(long conveyed, long total, float speed, Convey c) {
+//                notifyStatus(ConveyStatus.PROGRESS,"Progress.",convey,c,mListeners,callback);
+//            }
+//        };
+//        notifyStatus(ConveyStatus.CREATE,"Convey create.",convey,null,mListeners,callback);
+//        Reply reply=convey.start(retrofit,finisher,innerChange,debug);
+//        if (null!=reply&&null!=conveying1){//Save reply
+//            conveying1.updateStatus(ConveyStatus.FINISHED,reply);
+//        }
         return false;
     }
 
@@ -246,7 +256,7 @@ public final class Conveyor {
                        if (null!=set){
                            for (Convey child:set) {
                                 if (null!=child&&child.equals(convey)&&(child.isStatus(Status.FINISHED)
-                                        ||child.cancel(true,"Before remove convey "+(null!=debug?debug:".")))){
+                                        ||child.cancel(mRetrofit,true,"Before remove convey "+(null!=debug?debug:".")))){
                                     conveyingMap.remove(child);
                                 }
                            }
@@ -313,4 +323,7 @@ public final class Conveyor {
         }
     }
 
+    public interface Step{
+        void reply(Reply reply);
+    }
 }

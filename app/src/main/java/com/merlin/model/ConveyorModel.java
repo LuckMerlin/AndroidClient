@@ -30,7 +30,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
             Convey convey=null!=binding&&binding instanceof ItemConveyorBinding ?((ItemConveyorBinding)binding).getData():null;
             ConveyorBinder binder=mBinder;
             if (null!=binder&&(null!=convey&&index(convey)<0)){
-                binder.run(CANCELED,"After remove from view.",convey);
+                binder.run(CANCELED,null,"After remove from view.",convey);
             }
         }
     };

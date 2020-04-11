@@ -35,6 +35,7 @@ import com.merlin.client.databinding.SingleEditTextBinding;
 import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.conveyor.ConveyorService;
 import com.merlin.conveyor.FileUploadConvey;
+import com.merlin.conveyor.LocalFileUploadConvey;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileBrowser;
 import com.merlin.browser.LocalFileBrowser;
@@ -290,12 +291,9 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
             toast(R.string.serverUnConnect);
             return false;
         }
-//        Retrofit retrofit,File file,String url,String folder,int coverMode
-        binder.run(Status.ADD,"While upload file.",new FileUploadConvey());
-
-        if (ConveyorService.upload(getViewContext(),files,meta,folderPath,coverMode,debug)){
+        if (binder.run(Status.ADD,null,"While upload file.",new LocalFileUploadConvey(files,meta.getUrl()
+                ,folder.getPath(),coverMode))){
             entryMode(FileBrowser.MODE_NORMAL,null,"After upload start succeed.");
-            launchTransportList("");
             return toast(R.string.succeed)||true;
         }
         return toast(R.string.fail);

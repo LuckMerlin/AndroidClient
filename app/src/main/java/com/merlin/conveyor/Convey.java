@@ -30,11 +30,14 @@ public abstract class Convey extends ConveyStatus implements What {
        setListener(change,"While new instance.");
    }
 
-   protected abstract Reply onPrepare(Retrofit retrofit, String debug);
+   protected void onPrepare(Conveyor.Step step, Retrofit retrofit, String debug){
+   }
 
-   protected  abstract Boolean onCancel(Retrofit retrofit,boolean cancel,String debug);
+   protected Boolean onCancel(Retrofit retrofit,boolean cancel,String debug){
+       return null;
+   }
 
-   public final boolean cancel(Retrofit retrofit,boolean cancel,String debug){
+   protected final boolean cancel(Retrofit retrofit,boolean cancel,String debug){
        if (isStatus(Status.FINISHED)){
            return false;
        }
@@ -43,7 +46,7 @@ public abstract class Convey extends ConveyStatus implements What {
             return false;
        }
        mCancel=cancel;
-       Boolean onCancel=onCancel(retrofit,debug);
+       Boolean onCancel=onCancel(retrofit,cancel,debug);
        if (null!=onCancel&&onCancel){
             updateStatus(Status.CANCELED,null);
             return true;
@@ -51,43 +54,45 @@ public abstract class Convey extends ConveyStatus implements What {
        return false;
    }
 
-   protected abstract Reply onStart(Retrofit retrofit,Finisher finish,String debug);
+   protected void onStart(Conveyor.Step step, Retrofit retrofit, String debug){
+       return;
+   }
 
-   public final Reply start(Retrofit retrofit,Finisher finisher,OnConveyStatusChange change,String debug){
+   protected final void start(Conveyor.Step step, Retrofit retrofit, OnConveyStatusChange change, String debug){
        int status=getStatus();
        if (status!=ConveyStatus.IDLE&&status!=ConveyStatus.FINISHED&&status!=ConveyStatus.CANCELED&&status!=ConveyStatus.PAUSED){
            Debug.W(getClass(),"Can't start convey again while in status "+(null!=debug?debug:".")+" status="+status);
-            return null;
+           return;
        }
        notifyChangeStatus(ConveyStatus.PREPARING,null,change);
-       Reply reply=onPrepare(retrofit,debug);
+       onPrepare(step,retrofit,debug);
        notifyChangeStatus(ConveyStatus.PREPARED,null,change);
-       if (null!=reply&&!reply.isSuccess()){ //Prepare fail
-           notifyChangeStatus(ConveyStatus.FINISHED,reply,change);
-           return null;
-       }
-       final Finisher innerFinish=new Finisher() {
-           @Override
-           public void onFinish(Reply innerReply) {
-               notifyChangeStatus(ConveyStatus.FINISHED,innerReply,change);
-               if (null!=finisher){
-                   finisher.onFinish(innerReply);
-               }
-           }
-
-           @Override
-           public void onProgress(long conveyed, long total, float speed,Convey convey) {
-               mConveyed=conveyed;mTotal=total;mSpeed=speed;
-               if (null!=finisher){
-                   finisher.onProgress(conveyed,total,speed,convey);
-               }
-               notifyChangeStatus(ConveyStatus.PROGRESS,convey,change);
-           }
-       };
+//       if (null!=reply&&!reply.isSuccess()){ //Prepare fail
+//           notifyChangeStatus(ConveyStatus.FINISHED,reply,change);
+//           return;
+//       }
+//       final Step innerFinish=new Finisher() {
+//           @Override
+//           public void onFinish(Reply innerReply) {
+//               notifyChangeStatus(ConveyStatus.FINISHED,innerReply,change);
+//               if (null!=finisher){
+//                   finisher.onFinish(innerReply);
+//               }
+//           }
+//
+//           @Override
+//           public void onProgress(long conveyed, long total, float speed,Convey convey) {
+//               mConveyed=conveyed;mTotal=total;mSpeed=speed;
+//               if (null!=finisher){
+//                   finisher.onProgress(conveyed,total,speed,convey);
+//               }
+//               notifyChangeStatus(ConveyStatus.PROGRESS,convey,change);
+//           }
+//       };
        notifyChangeStatus(ConveyStatus.STARTED,null,change);
-       final Reply startReply= onStart(retrofit,innerFinish,debug);
+       final Reply startReply= onStart(step,retrofit,debug);
        if (null!=startReply&&!startReply.isSuccess()){
-           innerFinish.onFinish(startReply);
+//           innerFinish.onFinish(startReply);
            notifyChangeStatus(ConveyStatus.FINISHED,startReply,change);
        }
        return startReply;
@@ -176,6 +181,9 @@ public abstract class Convey extends ConveyStatus implements What {
         return mStatusChange;
     }
 
+    /**
+     * @deprecated
+     */
     public interface Finisher{
         void onFinish(Reply reply);
         void onProgress(long conveyed,long total,float speed, Convey convey);

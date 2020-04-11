@@ -3,6 +3,7 @@ package com.merlin.conveyor;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
+import com.merlin.server.Retrofit;
 import com.merlin.transport.Status;
 
 import java.util.ArrayList;
@@ -30,31 +31,31 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return false;
     }
 
-    @Override
-    protected Reply onPrepare(String debug) {
-        //Do nothing
-        return null;
-    }
+//    @Override
+//    protected Reply onPrepare(Retrofit retrofit,String debug) {
+//        //Do nothing
+//        return null;
+//    }
+
+//    @Override
+//    protected final Reply onStart(Retrofit retrofit,Finisher finish, String debug) {
+//        T conveying=mConveying;
+//        if (null!=conveying){
+//            Debug.W(getClass(),"Can't start convey group while exist conveying child."+conveying);
+//            return new Reply(false,WHAT_EXIST,"Exist conveying convey.",conveying);
+//        }
+//        final T convey=indexNext(null,"While start convey "+(null!=debug?debug:"."));
+//        if (null==convey){
+//            Debug.W(getClass(),"Can't start convey group while next index NULL.");
+//            return new Reply(false,WHAT_EMPTY,"Not index first convey.",null);
+//        }
+//        return startChild(retrofit,finish,convey,debug);
+//    }
 
     @Override
-    protected final Reply onStart(Finisher finish, String debug) {
+    protected final Boolean onCancel(Retrofit retrofit,boolean cancel, String debug) {
         T conveying=mConveying;
-        if (null!=conveying){
-            Debug.W(getClass(),"Can't start convey group while exist conveying child."+conveying);
-            return new Reply(false,WHAT_EXIST,"Exist conveying convey.",conveying);
-        }
-        final T convey=indexNext(null,"While start convey "+(null!=debug?debug:"."));
-        if (null==convey){
-            Debug.W(getClass(),"Can't start convey group while next index NULL.");
-            return new Reply(false,WHAT_EMPTY,"Not index first convey.",null);
-        }
-        return startChild(finish,convey,debug);
-    }
-
-    @Override
-    protected final Boolean onCancel(boolean cancel, String debug) {
-        T conveying=mConveying;
-        return null!=conveying&&conveying.cancel(cancel,debug);
+        return null!=conveying&&conveying.cancel(retrofit,cancel,debug);
     }
 
     public final int childCount(){
@@ -72,7 +73,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
         return null!=data&&null!=findChild(data);
     }
 
-    private synchronized Reply startChild(Finisher finisher,T convey,String debug){
+    private synchronized Reply startChild(Retrofit retrofit,Finisher finisher,T convey,String debug){
         if (null==convey){
             Debug.W(getClass(),"Can't convey while arg NULL "+(null!=debug?debug:"."));
             return new Reply(false,WHAT_ARGS_INVALID,"Convey in NULL.",null);
@@ -95,7 +96,7 @@ public class ConveyGroup<T extends Convey> extends Convey {
                 }else if(null==innerReply||innerReply.getWhat()!=WHAT_NONE_NETWORK){//
                     T next= getFirstUnReplyChild();
                     if (null!=next) {
-                        startChild(finisher,next, "After one child finish." + convey.getName());
+                        startChild(retrofit,finisher,next, "After one child finish." + convey.getName());
                     }else if (null!=finisher){
                         finisher.onFinish(new Reply(true,WHAT_SUCCEED,"Group finish.",null));
                     }
@@ -113,15 +114,16 @@ public class ConveyGroup<T extends Convey> extends Convey {
         };
         mConveying=convey;
         Debug.D(getClass(),"Start child convey of group "+getName()+" "+(null!=debug?debug:"."));
-        final Reply startReply= convey.start(innerFinish,getStatusChange(),debug);
-        if (null!=startReply&&!startReply.isSuccess()){
-            Convey currentConveying=mConveying;
-            if (null!=currentConveying&&convey==currentConveying){
-                mConveying=null;
-            }
-            innerFinish.onFinish(startReply);
-        }
-        return startReply;
+//        final Reply startReply= convey.start(retrofit,innerFinish,getStatusChange(),debug);
+//        if (null!=startReply&&!startReply.isSuccess()){
+//            Convey currentConveying=mConveying;
+//            if (null!=currentConveying&&convey==currentConveying){
+//                mConveying=null;
+//            }
+//            innerFinish.onFinish(startReply);
+//        }
+//        return startReply;
+        return null;
     }
 
     public final T indexNext(T convey,String debug){
