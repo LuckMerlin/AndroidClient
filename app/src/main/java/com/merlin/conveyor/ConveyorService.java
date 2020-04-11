@@ -37,7 +37,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
     }
 
     @Override
-    public void onConveyStatusChanged(int status, Convey convey, Object data) {
+    public void onConveyStatusChanged(int status, _Convey convey, Object data) {
     }
 
     @Override
@@ -148,7 +148,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
 
     private class Binder extends android.os.Binder implements ConveyorBinder {
         @Override
-        public List<Convey> get(Class<? extends Convey> cls, int... status) {
+        public List<_Convey> get(Class<? extends _Convey> cls, int... status) {
             Conveyor conveyor=mConveyor;
             return null!=conveyor?conveyor.get(cls,status):null;
         }
@@ -160,7 +160,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
         }
 
         @Override
-        public boolean run(int status,OnConveyStatusChange change, String debug, Convey... conveys) {
+        public boolean run(int status,OnConveyStatusChange change, String debug, _Convey... conveys) {
             Conveyor conveyor=null!=conveys&&conveys.length>0?mConveyor:null;
             return null!=conveyor&&conveyor.convey(status,change,debug,conveys);
         }

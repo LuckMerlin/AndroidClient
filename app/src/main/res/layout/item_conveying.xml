@@ -4,7 +4,7 @@
     <data>
         <variable
             name="convey"
-            type="com.merlin.conveyor.Convey" />
+            type="com.merlin.conveyor._Convey" />
         <variable
             name="position"
             type="int" />

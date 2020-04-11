@@ -12,15 +12,15 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemConveyorBinding;
-import com.merlin.conveyor.Convey;
-import com.merlin.conveyor.ConveyGroup;
+import com.merlin.conveyor._Convey;
+import com.merlin.conveyor._ConveyGroup;
 import com.merlin.transport.Status;
 
 import java.util.List;
 
-public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements OnItemTouchResolver, Status {
+public class ConveyorAdapter<T extends _Convey> extends ListAdapter<T> implements OnItemTouchResolver, Status {
 
-    private Integer formatStatus(Convey convey){
+    private Integer formatStatus(_Convey convey){
         if (null!=convey){
             switch (convey.getStatus()){
                 case PROGRESS:
@@ -36,7 +36,7 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
                 case PAUSED:
                     return R.string.paused;
                 case FINISHED:
-                    Reply reply=convey instanceof ConveyGroup?((ConveyGroup)convey).getFirstUnSucceedChildReply():convey.getReply();
+                    Reply reply=convey instanceof _ConveyGroup ?((_ConveyGroup)convey).getFirstUnSucceedChildReply():convey.getReply();
                     Integer replyText=null!=convey?getReplyText(reply):null;
                     return null==replyText?R.string.finished:replyText;
             }
@@ -73,7 +73,7 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
             ItemConveyorBinding itb=(ItemConveyorBinding)binding;
             String status=null;
             String title=null;
-            Convey conveying=null;
+            _Convey conveying=null;
             if (null!=data){
                 Integer textId=formatStatus(data);
                 if (null!=textId){
@@ -82,10 +82,10 @@ public class ConveyorAdapter<T extends Convey> extends ListAdapter<T> implements
                     status=null!=context?context.getString(textId):null;
                 }
                 itb.setData(data);
-                if (data instanceof ConveyGroup){
-                    title=""+data.getName()+"("+(((ConveyGroup) data).getRepliedChildrenSize())+"/"
-                            +((ConveyGroup) data).getChildCount()+")";
-                    conveying=((ConveyGroup)data).getConveying();
+                if (data instanceof _ConveyGroup){
+                    title=""+data.getName()+"("+(((_ConveyGroup) data).getRepliedChildrenSize())+"/"
+                            +((_ConveyGroup) data).getChildCount()+")";
+                    conveying=((_ConveyGroup)data).getConveying();
                 }else{
                     conveying=data;
                     title=data.getName();

@@ -3,7 +3,7 @@ import com.merlin.bean.LocalFile;
 
 import java.util.ArrayList;
 
-public class LocalFileUploadConvey extends Convey{
+public class LocalFileUploadConvey extends _Convey {
     private final ArrayList<LocalFile> mFiles;
     private final String mServerUrl;
     private final String mFolder;

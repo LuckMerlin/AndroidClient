@@ -11,10 +11,10 @@ import com.merlin.adapter.ConveyorAdapter;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ConveyDetailBinding;
 import com.merlin.client.databinding.ItemConveyorBinding;
-import com.merlin.conveyor.ConveyGroup;
+import com.merlin.conveyor._ConveyGroup;
+import com.merlin.conveyor._Convey;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
-import com.merlin.conveyor.Convey;
 import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.transport.OnConveyStatusChange;
 import com.merlin.view.OnTapClick;
@@ -27,7 +27,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
     private final ConveyorAdapter mAdapter=new ConveyorAdapter(){
         @Override
         public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding) {
-            Convey convey=null!=binding&&binding instanceof ItemConveyorBinding ?((ItemConveyorBinding)binding).getData():null;
+            _Convey convey=null!=binding&&binding instanceof ItemConveyorBinding ?((ItemConveyorBinding)binding).getData():null;
             ConveyorBinder binder=mBinder;
             if (null!=binder&&(null!=convey&&index(convey)<0)){
                 binder.run(CANCELED,null,"After remove from view.",convey);
@@ -36,7 +36,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
     };
 
     @Override
-    public void onConveyStatusChanged(int status, Convey convey, Object data) {
+    public void onConveyStatusChanged(int status, _Convey convey, Object data) {
         switch (status){
             case ADD:
                 break;
@@ -56,19 +56,19 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             default:
-                if (null!=data&&data instanceof Convey){
-                    showConvey((Convey)data,"After tap click.");
+                if (null!=data&&data instanceof _Convey){
+                    showConvey((_Convey)data,"After tap click.");
                 }
                 break;
         }
         return true;
     }
 
-    public boolean showConvey(Convey convey,String debug){
+    public boolean showConvey(_Convey convey, String debug){
         if (null!=convey){
             ConveyDetailBinding binding=inflate(R.layout.convey_detail);
-            final OnConveyStatusChange change=(int status, Convey c, Object data)-> {
-                binding.setConvey(null!=data&&data instanceof Convey?(Convey)data:c);
+            final OnConveyStatusChange change=(int status, _Convey c, Object data)-> {
+                binding.setConvey(null!=data&&data instanceof _Convey ?(_Convey)data:c);
             };
             final Dialog dialog=new Dialog(getViewContext()){
                 @Override
@@ -78,7 +78,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
             };
             dialog.setContentView(binding,true);
             if (null!=binding){
-                binding.setChildAdapter(convey instanceof ConveyGroup?new ConveyingAdapter(((ConveyGroup)convey).getChildren()) :null);
+                binding.setChildAdapter(convey instanceof _ConveyGroup ?new ConveyingAdapter(((_ConveyGroup)convey).getChildren()) :null);
                 binding.setConvey(convey);
                 convey.setListener(change,"While show convey detail dialog.");
             }
@@ -97,7 +97,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
             if (null==current||current!=binder){
                 mBinder=binder;
                 binder.listener(ADD,this,debug);
-                List<Convey> conveys=binder.get(null);
+                List<_Convey> conveys=binder.get(null);
                 Debug.D(getClass(),"AAA setBinder AAAAAAAAA "+(null!=conveys?conveys.size():-1));
                 mAdapter.set(conveys,"After conveyor bind.");
                 return true;

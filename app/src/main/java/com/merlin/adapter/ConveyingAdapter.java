@@ -7,14 +7,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemConveyingBinding;
-import com.merlin.conveyor.Convey;
+import com.merlin.conveyor._Convey;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConveyingAdapter extends ListAdapter<Convey> {
+public class ConveyingAdapter extends ListAdapter<_Convey> {
 
-    public ConveyingAdapter(ArrayList<Convey> list){
+    public ConveyingAdapter(ArrayList<_Convey> list){
         super(list);
     }
 
@@ -24,7 +24,7 @@ public class ConveyingAdapter extends ListAdapter<Convey> {
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Convey data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, _Convey data, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
         if (null!=binding&&binding instanceof ItemConveyingBinding){
             ItemConveyingBinding icb=(ItemConveyingBinding)binding;

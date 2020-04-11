@@ -2,29 +2,18 @@ package com.merlin.conveyor;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.api.Address;
 import com.merlin.api.ApiList;
-import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.api.What;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
-import com.merlin.browser.FileSaveBuilder;
-import com.merlin.browser.FileUploadBody;
 import com.merlin.server.Retrofit;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.ProtocolException;
-import java.net.SocketTimeoutException;
 
-import okhttp3.MultipartBody;
 import retrofit2.Call;
-import retrofit2.Response;
 
-public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileConvey> implements Label{
+public final class FileUploadConvey extends _ConveyGroup<FileUploadConvey.FileConvey> implements Label{
     private final File mFile;
     private final String mFolder;
     private final int mCoverMode;
@@ -100,7 +89,7 @@ public final class FileUploadConvey extends ConveyGroup<FileUploadConvey.FileCon
         return super.equals(obj);
     }
 
-    protected final static class FileConvey extends Convey {
+    protected final static class FileConvey extends _Convey {
         private final String mFilePath;
         private final String mFolder;
         private Call<Reply<ApiList<Reply<NasFile>>>> mUploadingCall;

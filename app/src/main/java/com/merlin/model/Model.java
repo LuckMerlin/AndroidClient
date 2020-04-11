@@ -18,11 +18,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.api.Callback;
-import com.merlin.api.Canceler;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
-import com.merlin.conveyor.Convey;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.global.Application;
@@ -37,10 +34,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.concurrent.Executor;
-
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 
 public class Model extends Retrofit{
     private WeakReference<View> mRootView=null;

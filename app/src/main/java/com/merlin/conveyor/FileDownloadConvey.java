@@ -2,15 +2,10 @@ package com.merlin.conveyor;
 
 import com.merlin.api.Address;
 import com.merlin.api.Label;
-import com.merlin.api.Reply;
-import com.merlin.bean.ClientMeta;
 import com.merlin.bean.NasFile;
-import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
-import com.merlin.transport.Download;
 
 import java.io.File;
-import java.util.concurrent.Executors;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -19,7 +14,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import retrofit2.http.Streaming;
 
-public class FileDownloadConvey extends Convey{
+public class FileDownloadConvey extends _Convey {
     private interface Api{
         @Streaming
         @POST(Address.PREFIX_FILE+"/download")
