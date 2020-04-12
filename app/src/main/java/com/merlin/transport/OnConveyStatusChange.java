@@ -1,8 +1,8 @@
 package com.merlin.transport;
 
 import com.merlin.api.Reply;
-import com.merlin.conveyor._Convey;
+import com.merlin.conveyor.Convey;
 
-public interface OnConveyStatusChange extends Status {
-    void onConveyStatusChanged(int status, _Convey convey, Reply reply);
+public interface OnConveyStatusChange<T> extends Status {
+    void onConveyStatusChanged(int status, Convey convey, Reply<T> reply);
 }
