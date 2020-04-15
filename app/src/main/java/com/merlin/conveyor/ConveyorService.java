@@ -71,7 +71,7 @@ public class ConveyorService extends Service implements Label, OnConveyStatusCha
                     String path=null!=file&&file instanceof LocalFile?((LocalFile)file).getPath(null):null;
                     File child=null!=path&&path.length()>0?new File(path):null;
                     if (null!=child&&child.exists()){
-                        conveyor.add(null, debug,new FileUploadConvey(child,url,folder,coverModer));
+                        conveyor.add(null, debug,new _FileUploadConvey(child,url,folder,coverModer));
                     }
                 }
                 return true;
