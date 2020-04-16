@@ -3,6 +3,7 @@ package com.merlin.binding;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.media.audiofx.DynamicsProcessing;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -84,42 +85,18 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("layout")
-    public static void inflateLayout(View view, Object layout) {
-        if (null!=view&&view instanceof ViewGroup&&null!=layout){
-            if (layout instanceof Integer){
-                if (!layout.equals(Resources.ID_NULL)){
-                    DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),(Integer)layout,(ViewGroup)view,true);
-                }
-            }else if (layout instanceof View&&null==((View)layout).getParent()){
-                ViewGroup.LayoutParams params=view.getLayoutParams();
-                int width=null!=params?params.width:ViewGroup.LayoutParams.WRAP_CONTENT;
-                int height=null!=params?params.height:ViewGroup.LayoutParams.WRAP_CONTENT;
-                ((ViewGroup)view).addView((View)layout,new ViewGroup.LayoutParams(width,height));
-            }else if (layout instanceof ViewDataBinding){
-                  View root=((ViewDataBinding)layout).getRoot();
-                  if (null!=root&&null==root.getParent()){
-                      inflateLayout(view,root);
-                  }
-            }else if (layout instanceof Collection&&((Collection)layout).size()>0){
-                for (Object child:(Collection)layout) {
-                    inflateLayout(view,child);
-                }
-            }
-        }
-    }
-
-    @BindingAdapter("android:text")
+    @BindingAdapter("text1")
     public static void setText(TextView view, Object resId) {
+        Debug.D(MBinding.class,"DDDDDDDD "+resId);
         if (null!=view) {
-            view.setText("");
-            resId = null == resId ? "" : resId;
-            if (resId instanceof String) {
-                view.setText((String)resId);
-            } else if (resId instanceof Integer&&(Integer)resId!=Resources.ID_NULL) {
-                view.setText((Integer)resId);
-                Clicker.putRes(view,new Res((Integer)resId,null));
-            }
+//            view.setText("");
+//            resId = null == resId ? "" : resId;
+//            if (resId instanceof String) {
+//                view.setText((String)resId);
+//            } else if (resId instanceof Integer&&(Integer)resId!=Resources.ID_NULL) {
+//                view.setText((Integer)resId);
+//                Clicker.putRes(view,new Res((Integer)resId,null));
+//            }
         }
     }
 
@@ -181,22 +158,6 @@ public class MBinding {
 //                adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
             }
         }
-    }
-
-    @BindingAdapter("loadViewData")
-    public static void autoLoadViewData(View view, ViewDataLoadable loadable) {
-//        if (null!=view&&null!=loadable&& loadable instanceof LocalFile){
-//            Glide.with(view).as(FileSync.class).load(loadable);
-//            Glide.with(view).load(loadable).into(new CustomViewTarget(view){
-//                @Override
-//                public void onResourceReady(@NonNull Object resource, @Nullable Transition transition) {
-//                    super.onResourceReady(resource, transition);
-//                    Debug.D(getClass(),"AAAAAAAAA "+resource);
-//                }
-//            });
-//            Debug.D(MBinding.class,"AAAAAAAAAAA "+view.hashCode()+" "+loadable+" "+
-//                    (Looper.getMainLooper()==Looper.myLooper()));
-//        }
     }
 
     @BindingAdapter("android:src")
@@ -461,5 +422,31 @@ public class MBinding {
         }
 
     }
+
+    @BindingAdapter("layout")
+    public static void inflateLayout(View view, Object layout) {
+        if (null!=view&&view instanceof ViewGroup&&null!=layout){
+            if (layout instanceof Integer){
+                if (!layout.equals(Resources.ID_NULL)){
+                    DataBindingUtil.inflate(LayoutInflater.from(view.getContext()),(Integer)layout,(ViewGroup)view,true);
+                }
+            }else if (layout instanceof View&&null==((View)layout).getParent()){
+                ViewGroup.LayoutParams params=view.getLayoutParams();
+                int width=null!=params?params.width:ViewGroup.LayoutParams.WRAP_CONTENT;
+                int height=null!=params?params.height:ViewGroup.LayoutParams.WRAP_CONTENT;
+                ((ViewGroup)view).addView((View)layout,new ViewGroup.LayoutParams(width,height));
+            }else if (layout instanceof ViewDataBinding){
+                View root=((ViewDataBinding)layout).getRoot();
+                if (null!=root&&null==root.getParent()){
+                    inflateLayout(view,root);
+                }
+            }else if (layout instanceof Collection&&((Collection)layout).size()>0){
+                for (Object child:(Collection)layout) {
+                    inflateLayout(view,child);
+                }
+            }
+        }
+    }
+
 
 }
