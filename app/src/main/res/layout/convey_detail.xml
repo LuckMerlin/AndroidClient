@@ -4,7 +4,7 @@
     <data>
         <variable
             name="convey"
-            type="com.merlin.conveyor._Convey" />
+            type="com.merlin.conveyor.Convey" />
         <variable
             name="childAdapter"
             type="com.merlin.adapter.ConveyingAdapter" />
@@ -18,14 +18,14 @@
             android:orientation="vertical"
             android:layout_width="250dp"
             android:layout_height="wrap_content">
-            <TextView
-                android:singleLine="true"
-                android:layout_gravity="center"
-                style="@style/titleNormalTextView"
-                android:text="@{convey.name}" />
-            <include binding:key="@{R.string.status}" binding:value="@{``+convey.status}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.size}" binding:value="@{FileSize.formatSizeText((double)convey.conveyed)+`/`+FileSize.formatSizeText((double)convey.total)}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.speed}" binding:value="@{``+convey.speed}" android:visibility="@{convey.speed>0?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>
+<!--            <TextView-->
+<!--                android:singleLine="true"-->
+<!--                android:layout_gravity="center"-->
+<!--                style="@style/titleNormalTextView"-->
+<!--                android:text="@{convey.name}" />-->
+<!--            <include binding:key="@{R.string.status}" binding:value="@{``+convey.status}" layout="@layout/item_key_value"/>-->
+<!--            <include binding:key="@{R.string.size}" binding:value="@{FileSize.formatSizeText((double)convey.conveyed)+`/`+FileSize.formatSizeText((double)convey.total)}" layout="@layout/item_key_value"/>-->
+<!--            <include binding:key="@{R.string.speed}" binding:value="@{``+convey.speed}" android:visibility="@{convey.speed>0?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>-->
             <androidx.recyclerview.widget.RecyclerView
                 binding:adapter="@{childAdapter}"
                 android:layout_width="match_parent"

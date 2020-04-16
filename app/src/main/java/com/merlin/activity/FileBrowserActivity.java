@@ -16,7 +16,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
-import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.debug.Debug;
 import com.merlin.model.FileBrowserModel;
 import com.merlin.model.Model;
@@ -26,7 +25,6 @@ import com.merlin.transport.TransportService;
 
 public final class FileBrowserActivity extends  ModelActivity<FileBrowserModel> implements Tag {
     private static ServiceConnection mConnection;
-    private ConveyorBinder mBinder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,17 +37,17 @@ public final class FileBrowserActivity extends  ModelActivity<FileBrowserModel> 
             bindService(intent, mConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
-                    if (null!=service&&service instanceof ConveyorBinder){
-                        ConveyorBinder downloader=(ConveyorBinder)service;
-                        mBinder=downloader;
-                        setBinder(downloader,"After bind succeed");
-                    }
+//                    if (null!=service&&service instanceof ConveyorBinder){
+//                        ConveyorBinder downloader=(ConveyorBinder)service;
+//                        mBinder=downloader;
+//                        setBinder(downloader,"After bind succeed");
+//                    }
                 }
 
                 @Override
                 public void onServiceDisconnected(ComponentName name) {
-                    mBinder=null;
-                    setBinder(null,"After bind disconnected");
+//                    mBinder=null;
+//                    setBinder(null,"After bind disconnected");
                     Debug.D(getClass(),"####BrowserActivity####  onServiceDisconnected");
                 }
             }, Context.BIND_AUTO_CREATE);
@@ -88,25 +86,25 @@ public final class FileBrowserActivity extends  ModelActivity<FileBrowserModel> 
     @Override
     public void onModelBind(Model model) {
         super.onModelBind(model);
-        setBinder(mBinder,"After model bind.");
+//        setBinder(mBinder,"After model bind.");
     }
 
-    private boolean setBinder(ConveyorBinder binder, String debug){
-        Model model=getModel();
-        return null!=model&&model instanceof Model.OnBindChange &&((Model.OnBindChange)model).onBindChanged(binder,debug);
-    }
+//    private boolean setBinder(ConveyorBinder binder, String debug){
+//        Model model=getModel();
+//        return null!=model&&model instanceof Model.OnBindChange &&((Model.OnBindChange)model).onBindChanged(binder,debug);
+//    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Debug.D(getClass(),"####BrowserActivity####  onDestroy");
         ServiceConnection connection=mConnection;
-        setBinder(null,"After activity destroy.");
+//        setBinder(null,"After activity destroy.");
         if (null!=connection){
             mConnection=null;
             unbindService(connection);
         }
-        mBinder=null;
+//        mBinder=null;
     }
 
 }

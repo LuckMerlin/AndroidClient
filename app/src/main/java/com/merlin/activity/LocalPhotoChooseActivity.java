@@ -15,12 +15,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
-import com.merlin.conveyor.ConveyorBinder;
-import com.merlin.conveyor.ConveyorService;
-import com.merlin.debug.Debug;
-import com.merlin.model.ConveyorModel;
 import com.merlin.model.LocalPhotoChooseModel;
-import com.merlin.model.Model;
 
 public class LocalPhotoChooseActivity extends  ModelActivity<LocalPhotoChooseModel>  {
     private void checkPermission() {

@@ -35,7 +35,6 @@ public final class FileUploadConvey implements Convey {
         if (null==path||path.length()<=0){
             return new Reply<>(true, What.WHAT_ARGS_INVALID,"Path invalid.",null);
         }
-        new FIle
         return null;
     }
 }

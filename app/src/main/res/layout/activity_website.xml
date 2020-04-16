@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.merlin.model.WebsiteModel" />
+        <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.client.R"/>
+    </data>
+    <LinearLayout
+        binding:createModel="@{true}"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_gravity="right"
+            binding:enableClick="@{true}"
+            android:text="@{R.string.add}"
+            style="@style/titleNormalTextView"/>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.recyclerview.widget.RecyclerView
+                android:adapter="@{vm.adapter}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+</layout>

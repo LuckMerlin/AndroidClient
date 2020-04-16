@@ -18,12 +18,11 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.model.ConveyorModel;
 import com.merlin.model.Model;
-import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.conveyor.ConveyorService;
 
 public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {
     private static ServiceConnection mConnection;
-    private ConveyorBinder mBinder;
+//    private ConveyorBinder mBinder;
 
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
@@ -64,17 +63,17 @@ public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {
             bindService(intent, mConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
-                    if (null!=service&&service instanceof ConveyorBinder){
-                        ConveyorBinder conveyor=(ConveyorBinder)service;
-                        mBinder=conveyor;
-                        setBinder(conveyor,"After bind succeed");
-                    }
+//                    if (null!=service&&service instanceof ConveyorBinder){
+//                        ConveyorBinder conveyor=(ConveyorBinder)service;
+//                        mBinder=conveyor;
+//                        setBinder(conveyor,"After bind succeed");
+//                    }
                 }
 
                 @Override
                 public void onServiceDisconnected(ComponentName name) {
-                    mBinder=null;
-                    setBinder(null,"After bind disconnected");
+//                    mBinder=null;
+//                    setBinder(null,"After bind disconnected");
                     Debug.D(getClass(),"####ConveyorActivity####  onServiceDisconnected");
                 }
             }, Context.BIND_AUTO_CREATE);
@@ -84,25 +83,25 @@ public class ConveyorActivity extends  ModelActivity<ConveyorModel>  {
     @Override
     public void onModelBind(Model model) {
         super.onModelBind(model);
-        setBinder(mBinder,"After model bind.");
+//        setBinder(mBinder,"After model bind.");
     }
 
-    private boolean setBinder(ConveyorBinder conveyor, String debug){
-        Model model=getModel();
-        return null!=model&&model instanceof ConveyorModel &&((ConveyorModel)model).setBinder(conveyor,debug);
-    }
+//    private boolean setBinder(ConveyorBinder conveyor, String debug){
+//        Model model=getModel();
+//        return null!=model&&model instanceof ConveyorModel &&((ConveyorModel)model).setBinder(conveyor,debug);
+//    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Debug.D(getClass(),"####ConveyorActivity####  onDestroy");
         ServiceConnection connection=mConnection;
-        setBinder(null,"After activity destroy.");
+//        setBinder(null,"After activity destroy.");
         if (null!=connection){
             mConnection=null;
             unbindService(connection);
         }
-        mBinder=null;
+//        mBinder=null;
     }
 
 }

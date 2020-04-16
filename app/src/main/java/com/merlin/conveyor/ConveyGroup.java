@@ -1,6 +1,7 @@
 package com.merlin.conveyor;
 
 import com.merlin.api.Canceler;
+import com.merlin.api.Reply;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
 
@@ -16,10 +17,15 @@ public class ConveyGroup<T extends Convey> implements Convey {
     }
 
     @Override
-    public final Canceler onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug) {
-        List<T> list=mList;
+    public Reply<Canceler> onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug) {
         return null;
     }
+
+    //    @Override
+//    public final Canceler onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug) {
+//        List<T> list=mList;
+//        return null;
+//    }
 
     private boolean next(){
         T conveying=mConveying;

@@ -51,8 +51,8 @@ public class UploadConvey implements Convey {
            change.onConveyStatusChanged(Status.PREPARING,this,new Reply(true,What.WHAT_SUCCEED,"Preparing",null));
            int coverMode=mCoverMode;
            if (coverMode== CoverMode.SKIP||coverMode==CoverMode.NONE){
-               Observable.amb()
-               retrofit.prepare(ApiNasFileMeta.class,serverUrl,null).getMeta();
+//               Observable.amb()
+//               retrofit.prepare(ApiNasFileMeta.class,serverUrl,null).getMeta();
            }
            String folder=mFolder;
         return null;

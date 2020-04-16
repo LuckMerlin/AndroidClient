@@ -4,7 +4,7 @@
     <data>
         <variable
             name="convey"
-            type="com.merlin.conveyor._Convey" />
+            type="com.merlin.conveyor.Convey" />
         <variable
             name="position"
             type="int" />
@@ -19,19 +19,19 @@
             android:text="@{Integer.toString(position)+`. `}"
             android:singleLine="true"
             style="@style/titleNormalTextView"/>
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:text="@{convey.name}"
-                android:singleLine="true"
-                style="@style/titleNormalTextView"/>
+<!--        <LinearLayout-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--            <TextView-->
+<!--                android:text="@{convey.name}"-->
+<!--                android:singleLine="true"-->
+<!--                style="@style/titleNormalTextView"/>-->
 
-            <TextView
-                android:text="@{convey.reply.note}"
-                android:singleLine="true"
-                style="@style/titleNormalTextView"/>
-        </LinearLayout>
+<!--            <TextView-->
+<!--                android:text="@{convey.reply.note}"-->
+<!--                android:singleLine="true"-->
+<!--                style="@style/titleNormalTextView"/>-->
+<!--        </LinearLayout>-->
     </LinearLayout>
 </layout>

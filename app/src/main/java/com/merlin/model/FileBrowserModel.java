@@ -32,9 +32,7 @@ import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.client.databinding.SingleEditTextBinding;
-import com.merlin.conveyor.ConveyorBinder;
 import com.merlin.conveyor.ConveyorService;
-import com.merlin.conveyor.LocalFileUploadConvey;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileBrowser;
 import com.merlin.browser.LocalFileBrowser;
@@ -63,7 +61,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
     private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
     private final ObservableField<Integer> mCurrentMultiChooseCount=new ObservableField<>();
-    private ConveyorBinder mTransportBinder;
+//    private ConveyorBinder mTransportBinder;
 
     private final FileBrowser.Callback mBrowserCallback=new FileBrowser.Callback() {
         @Override
@@ -282,16 +280,16 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
             toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
             return false;
         }
-        final ConveyorBinder binder=mTransportBinder;
-        if (null==binder){
-            toast(R.string.serverUnConnect);
-            return false;
-        }
-        if (binder.run(Status.ADD,null,"While upload file.",new LocalFileUploadConvey(files,meta.getUrl()
-                ,folder.getPath(),coverMode))){
-            entryMode(FileBrowser.MODE_NORMAL,null,"After upload start succeed.");
-            return toast(R.string.succeed)||true;
-        }
+//        final ConveyorBinder binder=mTransportBinder;
+//        if (null==binder){
+//            toast(R.string.serverUnConnect);
+//            return false;
+//        }
+//        if (binder.run(Status.ADD,null,"While upload file.",new LocalFileUploadConvey(files,meta.getUrl()
+//                ,folder.getPath(),coverMode))){
+//            entryMode(FileBrowser.MODE_NORMAL,null,"After upload start succeed.");
+//            return toast(R.string.succeed)||true;
+//        }
         return toast(R.string.fail);
     }
 
@@ -307,11 +305,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
             toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
             return false;
         }
-        if (ConveyorService.download(getViewContext(),files,meta,folderPath,coverMode,debug)){
-            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
-            launchTransportList("");
-            return toast(R.string.succeed)||true;
-        }
+//        if (ConveyorService.download(getViewContext(),files,meta,folderPath,coverMode,debug)){
+//            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
+//            launchTransportList("");
+//            return toast(R.string.succeed)||true;
+//        }
         return toast(R.string.fail);
     }
 
@@ -579,7 +577,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
 
     @Override
     public boolean onBindChanged(Object obj, String debug) {
-        mTransportBinder=null!=obj&&obj instanceof ConveyorBinder?(ConveyorBinder)obj:null;
+//        mTransportBinder=null!=obj&&obj instanceof ConveyorBinder?(ConveyorBinder)obj:null;
         return true;
     }
 }
