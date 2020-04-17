@@ -37,9 +37,8 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnActivityResult {
-//    private final String mUrl="http://192.168.0.6" +
-//            ":5005";
-    private final String mUrl="http://172.16.20.212:45678";
+    private final String mUrl="http://192.168.0.6:5005";
+//    private final String mUrl="http://172.16.20.212:45678";
     private final static int PHOTO_CHOOSE_REQUEST_CODE=234234;
 
     private interface Api{
