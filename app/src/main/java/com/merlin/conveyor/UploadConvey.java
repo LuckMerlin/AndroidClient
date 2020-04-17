@@ -1,17 +1,17 @@
 package com.merlin.conveyor;
-import com.merlin.api.Address;
 import com.merlin.api.ApiList;
 import com.merlin.api.ApiSaveFile;
+import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.browser.FileSaveBuilder;
+import com.merlin.browser.Md5Reader;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
-import com.merlin.transport.litehttp.UploadBody;
 
 import org.json.JSONObject;
 
@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -27,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UploadConvey extends Convey {
+public class UploadConvey extends FileConvey {
     private final String mPath;
     private final String mServerUrl;
     private final String mFolder;
@@ -46,41 +48,78 @@ public class UploadConvey extends Convey {
             String path=mPath;
             final String folder=mFolder;
             if (null==path||path.length()<=0||null==serverUrl||null==retrofit||serverUrl.length()<=0){
-                return finish(change,this,new Reply<>(true, What.WHAT_ARGS_INVALID,"Args NULL.",null))&&false;
+                return updateStatus(FINISHED,change,this,new Reply<>(true, What.WHAT_ARGS_INVALID,"Args NULL.",null))&&false;
             }
             final File file=new File(path);
             if (!file.exists()){
-                return finish(change,this,new Reply<>(true, What.WHAT_FILE_NOT_EXIST,"File not exist.",null))&&false;
+                return updateStatus(FINISHED,change,this,new Reply<>(true, What.WHAT_FILE_NOT_EXIST,"File not exist.",null))&&false;
             }
             if (!file.canRead()){
-                return finish(change,this, new Reply<>(true, What.WHAT_NONE_PERMISSION,"File none permission.",null))&&false;
+                return updateStatus(FINISHED,change,this, new Reply<>(true, What.WHAT_NONE_PERMISSION,"File none permission.",null))&&false;
             }
-            FileSaveBuilder builder=new FileSaveBuilder();
-            Reply progressReply=new Reply();
-            UploadRequestBody uploadBody=new UploadRequestBody(file){
-                @Override
-                protected void onProgress(long upload, float speed) {
-                    progress(change,UploadConvey.this,progressReply);
+            final int coverMode=mCoverMode;
+            final String[] md5s=new String[1];
+            updateStatus(PREPARING,change,this,null);
+            final OnApiFinish<Reply<Path>> md5CheckFinish=(int what, String note, Reply<Path> data, Object arg)-> {
+                updateStatus(PREPARED,change,this,null);
+                Path exist=null!=data?data.getData():null;
+                final Confirm confirm=(int innerWhat,String de)->{
+                    if (!isCanceled()&&innerWhat==What.WHAT_SUCCEED){//If need continue
+                        final FileSaveBuilder builder=new FileSaveBuilder();
+                        final Progress progress=new Progress(file.length());
+                        final Reply<Progress> progressReply=new Reply<>(true,What.WHAT_SUCCEED,"",progress);
+                        final UploadRequestBody uploadBody=new UploadRequestBody(file){
+                            @Override
+                            protected Boolean onProgress(long upload, float speed) {
+                                if (!isFinished()){
+                                    progress.setConveyed(upload);
+                                    updateStatus(PROGRESS,change,UploadConvey.this,progressReply);
+                                    return false;
+                                }
+                                return true;
+                            }
+                        };
+                        MultipartBody.Part part=builder.createFilePart(builder.createFileHeadersBuilder(file.getName(),folder,file.isDirectory()),uploadBody);
+                        Debug.D(getClass(),"Upload file "+file.getName()+" to "+mFolder+" "+(null!=debug?debug:"."));
+                        Call<Reply<ApiList<Reply<Path>>>> call= retrofit.prepare(ApiSaveFile.class, serverUrl).save(part);
+                        call.enqueue(new Callback<Reply<ApiList<Reply<Path>>>>() {
+                            @Override
+                            public void onResponse(Call<Reply<ApiList<Reply<Path>>>> call, Response<Reply<ApiList<Reply<Path>>>> response) {
+                                updateStatus(FINISHED,change,UploadConvey.this,null!=response?response.body():null);
+                            }
+
+                            @Override
+                            public void onFailure(Call<Reply<ApiList<Reply<Path>>>> call, Throwable t) {
+                                updateStatus(FINISHED,change,UploadConvey.this,new Reply(true,What.WHAT_ERROR_UNKNOWN,"File upload error."+t,null));
+                            }
+                        });
+                    }else{
+                        updateStatus(FINISHED,change,UploadConvey.this,new Reply(true,What.WHAT_CANCEL,"Upload cancel.",null));
+                    }
+                };
+                if (null!=exist&&(coverMode!= CoverMode.REPLACE&&coverMode!=CoverMode.KEEP)){
+                    updateStatus(CONFIRM,change,UploadConvey.this,new Reply(true,What.WHAT_INTERRUPT,"File existed.",confirm));
+                }else{
+                    confirm.onConfirm(What.WHAT_SUCCEED,"Not need interrupt,Just go to upload.");
                 }
             };
-            MultipartBody.Part part=builder.createFilePart(builder.createFileHeadersBuilder(file.getName(),folder,file.isDirectory()),uploadBody);
-            Debug.D(getClass(),"Upload file "+file.getName()+" to "+mFolder+" "+(null!=debug?debug:"."));
-            Call<Reply<ApiList<Reply<Path>>>> call=retrofit.prepare(ApiSaveFile.class, serverUrl).save(part);
-            if (null==call){
-                Debug.W(getClass(),"Can't upload file which upload call is NULL."+(null!=debug?debug:"."));
-                return finish(change,this,new Reply(false,What.WHAT_ERROR_UNKNOWN,"Error on NULL file upload call.",null));
+            if (coverMode!= CoverMode.REPLACE&&coverMode!=CoverMode.KEEP){
+                final ApiSaveFile api=retrofit.prepare(ApiSaveFile.class,serverUrl);
+                retrofit.call(api.getSaved(null).subscribeOn(Schedulers.io()).doOnSubscribe((Disposable disposable) ->{
+                        disposable.dispose();
+                        if (!isCanceled()){
+                            String md5=md5s[0]=new Md5Reader().load(file);
+                            if (!isCanceled()&&null!=md5&&md5.length()>0){
+                                retrofit.call(api.getSaved(md5).subscribeOn(Schedulers.io()),md5CheckFinish);
+                            }else{
+                                md5CheckFinish.onApiFinish(What.WHAT_SUCCEED,"Md5 load NONE",
+                                        new Reply(true,What.WHAT_SUCCEED,"Md5 load none",null),null);
+                            }
+                        }
+                }));
             }
-            call.enqueue(new Callback<Reply<ApiList<Reply<Path>>>>() {
-                @Override
-                public void onResponse(Call<Reply<ApiList<Reply<Path>>>> call, Response<Reply<ApiList<Reply<Path>>>> response) {
-                    finish(change,UploadConvey.this,null!=response?response.body():null);
-                }
-
-                @Override
-                public void onFailure(Call<Reply<ApiList<Reply<Path>>>> call, Throwable t) {
-                    finish(change,UploadConvey.this,new Reply(false,What.WHAT_ERROR_UNKNOWN,"Request fail."+t,null));
-                }
-            });
+            md5CheckFinish.onApiFinish(What.WHAT_SUCCEED,"Not need check md5",
+                    new Reply(true,What.WHAT_SUCCEED,"Not need check md5",null),null);
             return true;
     }
 
@@ -89,7 +128,7 @@ public class UploadConvey extends Convey {
         private boolean mCancel=false;
         private final long mLength;
 
-        protected abstract void onProgress(long upload,float speed);
+        protected abstract Boolean onProgress(long upload,float speed);
 
         private UploadRequestBody(File file){
             mFile=file;
@@ -126,7 +165,11 @@ public class UploadConvey extends Convey {
                                 }
                                 uploaded += read;
                                 sink.write(buffer, 0, read);
-                                onProgress(uploaded, -1);
+                                Boolean interruptUpload=onProgress(uploaded, -1);
+                                if (null!=interruptUpload&&interruptUpload){
+                                    Debug.D(getClass(),"File upload interrupted.");
+                                    break;
+                                }
                             }
                         }
                     } catch (Exception e) {

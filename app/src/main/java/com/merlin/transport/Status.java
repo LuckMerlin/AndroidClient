@@ -6,6 +6,7 @@ public interface Status {
     public final static int PREPARING=12314;
     public final static int PREPARED=12315;
     public final static int STARTED=12317;
+    public final static int CONFIRM=12318;
 //    public final static int PAUSED=12318;
 //    public final static int CANCELED=12319;
     public final static int FINISHED=12320;

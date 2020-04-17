@@ -8,17 +8,15 @@ import com.merlin.transport.Status;
 
 public abstract class Convey implements Status {
     private ConveyStatus mStatus;
+    private boolean mCanceled=false;
 
     protected abstract boolean onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug);
 
     public final boolean convey(Retrofit retrofit, OnConveyStatusChange change, String debug){
         ConveyStatus status=mStatus;
         if (null!=status){
-            return finish(change,this,new Reply(true,What.WHAT_ALREADY_DOING,"Already started.",null));
+            return updateStatus(FINISHED,change,this,new Reply(true,What.WHAT_ALREADY_DOING,"Already started.",null));
         }
-        mStatus=status=new ConveyStatus(PREPARING,null);
-        mStatus=status=new ConveyStatus(PREPARED,null);
-        mStatus=status=new ConveyStatus(STARTED,null);
         final OnConveyStatusChange callback=(int st,Convey parent, Convey convey, Reply reply)-> {
             if (null!=convey&&convey==this&&st==FINISHED){
                 mStatus=new ConveyStatus(FINISHED,reply);
@@ -44,7 +42,9 @@ public abstract class Convey implements Status {
         }
         return false;
     }
-
+    /**
+     * @deprecated
+     */
     final boolean progress(OnConveyStatusChange change,Convey child,Reply reply){
         if (null!=change){
             change.onConveyStatusChanged(PROGRESS,this,child,reply);
@@ -53,12 +53,31 @@ public abstract class Convey implements Status {
         return false;
     }
 
+    /**
+     * @deprecated
+     */
     final boolean finish(OnConveyStatusChange change,Convey child,Reply reply){
         if (null!=change){
             change.onConveyStatusChanged(FINISHED,this,child,reply);
             return true;
         }
         return false;
+    }
+
+    public final boolean isCanceled() {
+        return mCanceled;
+    }
+
+    final boolean updateStatus(int status, OnConveyStatusChange change, Convey child, Reply reply){
+        if (null!=change){
+            change.onConveyStatusChanged(status,this,child,reply);
+            return true;
+        }
+        return false;
+    }
+
+    public interface Confirm{
+        void onConfirm(int what,String debug);
     }
 
 }

@@ -25,11 +25,11 @@ public class ConveyGroup<T extends Convey> extends Convey{
     protected final boolean onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug) {
         List<Convey> conveys=mConveys;
         if (null==conveys||conveys.size()<0){
-            return finish(change,null,new Reply<>(false, What.WHAT_EMPTY, "Convey group is EMPTY.",null))&&false;
+            return updateStatus(FINISHED,change,null,new Reply<>(false, What.WHAT_EMPTY, "Convey group is EMPTY.",null))&&false;
         }
         final Convey next=indexNextUnFinished();
         if (null==next){
-            return finish(change,null,new Reply<>(false, What.WHAT_ERROR_UNKNOWN,
+            return updateStatus(FINISHED,change,null,new Reply<>(false, What.WHAT_ERROR_UNKNOWN,
                     "Convey group index first next fail.",null))&&false;
         }
         final Canceler canceler=(boolean cancel,String de)->{
@@ -38,13 +38,13 @@ public class ConveyGroup<T extends Convey> extends Convey{
         final OnConveyStatusChange callback=new OnConveyStatusChange() {
             @Override
             public void onConveyStatusChanged(int status, Convey parent, Convey convey, Reply reply) {
-                finish(change,convey,reply);
+                updateStatus(status,change,convey,reply);
                 if (status==FINISHED){
                     final Convey nextConvey=indexNextUnFinished();
                     if (null!=nextConvey){
                         nextConvey.convey(retrofit,this,debug);
                     }else{
-                        finish(change,ConveyGroup.this,new Reply(true,What.WHAT_SUCCEED,null,null));
+                        updateStatus(FINISHED,change,ConveyGroup.this,new Reply(true,What.WHAT_SUCCEED,null,null));
                     }
                 }
             }

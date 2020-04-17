@@ -99,7 +99,7 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
             return toast(R.string.listEmpty)&&false;
         }
         group.convey(this, (int status, Convey cyp, Convey cy, Reply reply)-> {
-            Debug.D(getClass(),"AAAAAAAAA 结束 "+status+" "+cyp+" "+cy+" "+reply);
+            Debug.D(getClass(),"AAA convey AAAAAA  "+status+" "+cy+" "+reply);
         },"");
         Dialog dialog=new Dialog(getViewContext());
         return dialog.setContentView(R.layout.dialog_loading,false).title(R.string.upload).show();
