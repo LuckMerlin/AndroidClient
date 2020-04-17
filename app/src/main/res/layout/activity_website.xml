@@ -16,7 +16,7 @@
         <TextView
             android:layout_gravity="right"
             binding:enableClick="@{true}"
-            android:text="@{R.string.add}"
+            binding:textId="@{R.string.add}"
             style="@style/titleNormalTextView"/>
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:layout_width="match_parent"

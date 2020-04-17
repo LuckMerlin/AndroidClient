@@ -109,7 +109,7 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("android:text")
+    @BindingAdapter("textId")
     public static void setText(TextView view, Object resId) {
         if (null!=view) {
             view.setText("");
