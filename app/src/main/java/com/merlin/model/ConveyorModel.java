@@ -35,7 +35,7 @@ public final class ConveyorModel extends Model implements OnConveyStatusChange, 
     };
 
     @Override
-    public void onConveyStatusChanged(int status, Convey convey, Reply reply) {
+    public void onConveyStatusChanged(int status, Convey parent, Convey convey, Reply reply) {
 
     }
 

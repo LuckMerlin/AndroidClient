@@ -4,5 +4,5 @@ import com.merlin.api.Reply;
 import com.merlin.conveyor.Convey;
 
 public interface OnConveyStatusChange<T> extends Status {
-    void onConveyStatusChanged(int status, Convey convey, Reply<T> reply);
+    void onConveyStatusChanged(int status,Convey parent, Convey convey, Reply<T> reply);
 }
