@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="status"
+            type="String" />
+        <variable
+            name="from"
+            type="com.merlin.bean.Path" />
+        <variable
+            name="to"
+            type="com.merlin.bean.Path" />
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="@{status}"
+            android:layout_gravity="center"
+            style="@style/titleNormalTextView"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    style="@style/titleSubNormalTextView"
+                    android:singleLine="true"
+                    android:text="@{from.name}"/>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    style="@style/titleSubNormalTextView"
+                    android:singleLine="true"
+                    android:text="@{to.name}"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</layout>

@@ -45,7 +45,16 @@ public class Dialog implements View.OnClickListener{
     }
 
     public Dialog(Context context){
-        android.app.Dialog dialog=mDialog=new android.app.Dialog(context);
+        this(context,null);
+    }
+
+    public Dialog(ViewDataBinding contentBinding){
+        this(null,contentBinding);
+    }
+
+    public Dialog(Context context, ViewDataBinding contentBinding){
+        View view=null==context&&null!=contentBinding?contentBinding.getRoot():null;
+        android.app.Dialog dialog=mDialog=new android.app.Dialog(null!=view?view.getContext():context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window=dialog.getWindow();
 //        window.setType((WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG));
@@ -63,6 +72,9 @@ public class Dialog implements View.OnClickListener{
         });
         params.dimAmount = 0f;
         window.setAttributes(params);
+        if (null!=contentBinding){
+            setContentView(contentBinding,false);
+        }
     }
 
     public final Dialog setContentView(int layoutId,boolean recreate){
@@ -164,18 +176,26 @@ public class Dialog implements View.OnClickListener{
         return this;
     }
 
-    public final Dialog left(Object sureTextId){
+    public final Dialog left(Object leftTextId){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
-            binding.setLeftText(sureTextId);
+            binding.setLeftText(leftTextId);
         }
         return this;
     }
 
-    public final Dialog right(Object cancelTextId){
+    public final Dialog center(Object centerTextId){
         DialogLayoutBinding binding=mBinding;
         if (null!=binding){
-            binding.setRightText(cancelTextId);
+            binding.setCenterText(centerTextId);
+        }
+        return this;
+    }
+
+    public final Dialog right(Object rightTextId){
+        DialogLayoutBinding binding=mBinding;
+        if (null!=binding){
+            binding.setRightText(rightTextId);
         }
         return this;
     }

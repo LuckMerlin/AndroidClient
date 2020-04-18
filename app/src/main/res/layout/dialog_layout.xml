@@ -6,6 +6,9 @@
             name="leftText"
             type="Object" />
         <variable
+            name="centerText"
+            type="Object" />
+        <variable
             name="rightText"
             type="Object" />
         <variable
@@ -60,6 +63,15 @@
                     binding:enableClick="@{true}"
                     android:text="@{leftText==null?``:leftText}"
                     android:visibility="@{leftText==null?View.GONE:View.VISIBLE}"
+                    android:background="@drawable/selector_round_dark_corner_small"
+                    style="@style/titleNormalTextView"/>
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:layout_marginLeft="5dp"
+                    binding:enableClick="@{true}"
+                    android:text="@{centerText==null?``:centerText}"
+                    android:visibility="@{centerText==null?View.GONE:View.VISIBLE}"
                     android:background="@drawable/selector_round_dark_corner_small"
                     style="@style/titleNormalTextView"/>
                 <TextView

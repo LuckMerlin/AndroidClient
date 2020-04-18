@@ -12,6 +12,7 @@ import com.merlin.browser.Md5Reader;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
+import com.merlin.util.FileSize;
 
 import org.json.JSONObject;
 
@@ -94,7 +95,7 @@ public class UploadConvey extends FileConvey {
                             }
                         });
                     }else{
-                        updateStatus(FINISHED,change,UploadConvey.this,new Reply(true,What.WHAT_CANCEL,"Upload cancel.",null));
+                        updateStatus(FINISHED,change,UploadConvey.this,new Reply(true,innerWhat,"Upload cancel.",null));
                     }
                 };
                 if (null!=exist&&(coverMode!= CoverMode.REPLACE&&coverMode!=CoverMode.KEEP)){
@@ -117,22 +118,21 @@ public class UploadConvey extends FileConvey {
                             }
                         }
                 }));
+            }else {
+                md5CheckFinish.onApiFinish(What.WHAT_SUCCEED, "Not need check md5",
+                        new Reply(true, What.WHAT_SUCCEED, "Not need check md5", null), null);
             }
-            md5CheckFinish.onApiFinish(What.WHAT_SUCCEED,"Not need check md5",
-                    new Reply(true,What.WHAT_SUCCEED,"Not need check md5",null),null);
             return true;
     }
 
     private static abstract class UploadRequestBody extends RequestBody {
         private final File mFile;
         private boolean mCancel=false;
-        private final long mLength;
 
         protected abstract Boolean onProgress(long upload,float speed);
 
         private UploadRequestBody(File file){
             mFile=file;
-            mLength=null!=file?file.length():0;
         }
 
         @Override
@@ -146,6 +146,7 @@ public class UploadConvey extends FileConvey {
             boolean succeed = false;
             if (null != file && file.exists()) {
                 if (file.isFile()) {
+                    Debug.D(getClass(),"Uploading file "+ FileSize.formatSizeText(file.length()) +" "+file.getAbsolutePath());
                     FileInputStream in = null;
                     try {
                         long fileLength = file.length();

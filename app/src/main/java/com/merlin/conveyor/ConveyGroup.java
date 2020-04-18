@@ -44,7 +44,7 @@ public class ConveyGroup<T extends Convey> extends Convey{
                     if (null!=nextConvey){
                         nextConvey.convey(retrofit,this,debug);
                     }else{
-                        updateStatus(FINISHED,change,ConveyGroup.this,new Reply(true,What.WHAT_SUCCEED,null,null));
+                        updateStatus(FINISHED,change,ConveyGroup.this,new Reply(true,What.WHAT_SUCCEED,"Finish convey group.",null));
                     }
                 }
             }

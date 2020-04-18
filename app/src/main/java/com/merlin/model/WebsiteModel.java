@@ -20,12 +20,10 @@ import com.merlin.bean.Path;
 import com.merlin.bean.WebsiteImage;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemBannerBinding;
-import com.merlin.conveyor.Convey;
+import com.merlin.client.databinding.LayoutFileConveyingBinding;
 import com.merlin.conveyor.ConveyGroup;
 import com.merlin.conveyor.UploadConvey;
-import com.merlin.debug.Debug;
-import com.merlin.dialog.Dialog;
-import com.merlin.transport.OnConveyStatusChange;
+import com.merlin.dialog.FileConveyDialog;
 import com.merlin.view.OnTapClick;
 
 import java.util.ArrayList;
@@ -37,8 +35,8 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnActivityResult {
-    private final String mUrl="http://192.168.0.6:5005";
-//    private final String mUrl="http://172.16.20.212:45678";
+//    private final String mUrl="http://192.168.0.6:5005";
+    private final String mUrl="http://172.16.20.212:45678";
     private final static int PHOTO_CHOOSE_REQUEST_CODE=234234;
 
     private interface Api{
@@ -97,11 +95,10 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         if (empty){
             return toast(R.string.listEmpty)&&false;
         }
-        group.convey(this, (int status, Convey cyp, Convey cy, Reply reply)-> {
-            Debug.D(getClass(),"AAA convey AAAAAA  "+status+" "+cy+" "+(null!=reply?reply.getNote():null));
-        },"");
-        Dialog dialog=new Dialog(getViewContext());
-        return dialog.setContentView(R.layout.dialog_loading,false).title(R.string.upload).show();
+        final LayoutFileConveyingBinding binding=inflate(R.layout.layout_file_conveying);
+        final FileConveyDialog dialog=new FileConveyDialog(binding);
+        dialog.convey(this,group,"");
+        return dialog.title(R.string.upload).show();
     }
 
     @Override
