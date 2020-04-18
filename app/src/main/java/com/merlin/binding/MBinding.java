@@ -365,7 +365,7 @@ public class MBinding {
         }
     }
 
-    @BindingAdapter("adapter")
+    @BindingAdapter("android:adapter")
     public static void adapter(RecyclerView view, ListAdapter adapter) {
         if (null!=view){
             if (null!=adapter){
