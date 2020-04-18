@@ -7,6 +7,7 @@ import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LayoutFileConveyingBinding;
 import com.merlin.conveyor.Convey;
+import com.merlin.conveyor.FileConvey;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
@@ -21,7 +22,7 @@ public final class FileConveyDialog {
         mBinding=binding;
         View root=null!=binding?binding.getRoot():null;
         Context context=null!=root?root.getContext():null;
-        mDialog=null!=context?new Dialog(context,binding):null;
+        mDialog=null!=context?new Dialog(context,binding).setCanceledOnTouchOutside(false):null;
     }
 
     private final OnTapClick mOnTapClick=(View view, int clickCount, int resId, Object data)-> {
@@ -63,12 +64,23 @@ public final class FileConveyDialog {
                 Dialog dialog=mDialog;
                 if (null!=binding&&null!=dialog){
                     binding.setStatus(Integer.toString(status));
+                    if (null!=innerConvey&&innerConvey instanceof FileConvey){
+                        binding.setFrom(((FileConvey)innerConvey).getFrom());
+                        binding.setTo(((FileConvey)innerConvey).getTo());
+                    }
                     Debug.D(getClass()," "+status+" "+(null!=innerConvey?innerConvey.getStatus():null));
                     switch (status){
                         case CONFIRM:
                             Object object=null!=reply?reply.getData():null;
                             mConfirm=null!=object&&object instanceof Convey.Confirm?((Convey.Confirm)object):null;
                             dialog.left(R.string.skip).center(R.string.cover).right(R.string.cancel);
+                            break;
+                        case PROGRESS:
+                            Object proObject=null!=reply?reply.getData():null;
+                            FileConvey.Progress progress=null!=proObject&&proObject instanceof FileConvey.Progress?(FileConvey.Progress)proObject:null;
+                            if (null!=progress){
+                                binding.setProgress((int)progress.getProgress());
+                            }
                             break;
                         case FINISHED:
                             if (null!=innerConvey&&innerConvey==convey){

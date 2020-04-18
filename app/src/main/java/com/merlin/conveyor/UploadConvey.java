@@ -31,23 +31,18 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UploadConvey extends FileConvey {
-    private final String mPath;
-    private final String mServerUrl;
-    private final String mFolder;
-    private final int mCoverMode;
 
-    public UploadConvey(String path,String serverUrl,String folder,int coverMode){
-        mPath=path;
-        mServerUrl=serverUrl;
-        mFolder=folder;
-        mCoverMode=coverMode;
+    public UploadConvey(Path from,Path to,int coverMode){
+        super(from,to,coverMode);
     }
 
     @Override
     protected boolean onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug) {
-            String serverUrl=mServerUrl;
-            String path=mPath;
-            final String folder=mFolder;
+            Path to=getTo();
+            String serverUrl=null!=to?to.getHost():null;
+            Path pathValue=getFrom();
+            String path=null!=pathValue?pathValue.getPath():null;
+            final String folder=null!=to?to.getParent():null;
             if (null==path||path.length()<=0||null==serverUrl||null==retrofit||serverUrl.length()<=0){
                 return updateStatus(FINISHED,change,this,new Reply<>(true, What.WHAT_ARGS_INVALID,"Args NULL.",null))&&false;
             }
@@ -58,7 +53,7 @@ public class UploadConvey extends FileConvey {
             if (!file.canRead()){
                 return updateStatus(FINISHED,change,this, new Reply<>(true, What.WHAT_NONE_PERMISSION,"File none permission.",null))&&false;
             }
-            final int coverMode=mCoverMode;
+            final int coverMode=getCoverMode();
             final String[] md5s=new String[1];
             updateStatus(PREPARING,change,this,null);
             final OnApiFinish<Reply<Path>> md5CheckFinish=(int what, String note, Reply<Path> data, Object arg)-> {
@@ -81,7 +76,7 @@ public class UploadConvey extends FileConvey {
                             }
                         };
                         MultipartBody.Part part=builder.createFilePart(builder.createFileHeadersBuilder(file.getName(),folder,file.isDirectory()),uploadBody);
-                        Debug.D(getClass(),"Upload file "+file.getName()+" to "+mFolder+" "+(null!=debug?debug:"."));
+                        Debug.D(getClass(),"Upload file "+file.getName()+" to "+folder+" "+(null!=debug?debug:"."));
                         Call<Reply<ApiList<Reply<Path>>>> call= retrofit.prepare(ApiSaveFile.class, serverUrl).save(part);
                         call.enqueue(new Callback<Reply<ApiList<Reply<Path>>>>() {
                             @Override

@@ -11,6 +11,9 @@
         <variable
             name="to"
             type="com.merlin.bean.Path" />
+        <variable
+            name="progress"
+            type="int" />
     </data>
     <LinearLayout
         android:orientation="vertical"
@@ -45,5 +48,10 @@
                     android:text="@{to.name}"/>
             </LinearLayout>
         </LinearLayout>
+        <ProgressBar
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:progress="@{progress}"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
     </LinearLayout>
 </layout>

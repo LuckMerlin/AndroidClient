@@ -85,10 +85,11 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         String folder="lovePhotos";
         ConveyGroup<UploadConvey> group=new ConveyGroup<>();
         boolean empty=true;
+        Path remoteFolder=new Path(mUrl,folder,null,null);
         for (Path child:paths) {
             String path=null!=child?child.getPath():null;
-            if (null!=(convey=null!=path&&path.length()>0? new UploadConvey(path,mUrl,folder,
-                    CoverMode.SKIP):null)&&group.add(convey)){
+            if (null!=(convey=null!=path&&path.length()>0? new UploadConvey(Path.build(path,null),
+                    remoteFolder, CoverMode.SKIP):null)&&group.add(convey)){
                 empty=false;
             }
         }
