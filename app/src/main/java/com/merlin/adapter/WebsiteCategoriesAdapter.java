@@ -8,11 +8,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemWebPhotoBinding;
-import com.merlin.website.WebsiteModel;
+import com.merlin.website.TravelCategory;
 
 import java.util.List;
 
-public abstract class WebsiteBannerAdapter extends PageAdapter<String, Path>{
+public abstract class WebsiteCategoriesAdapter extends PageAdapter<String, TravelCategory>{
+    private final String mHost;
+
+    public WebsiteCategoriesAdapter(String host){
+        mHost=host;
+    }
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -20,12 +25,14 @@ public abstract class WebsiteBannerAdapter extends PageAdapter<String, Path>{
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Path data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, TravelCategory data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemWebPhotoBinding){
-            if (null!=data){
-                data.setHost(WebsiteModel.mUrl);
+            Path url=null!=data?data.getUrl():null;
+            if (null!=url&&null==url.getHost()){
+                url.setHost(mHost);
             }
-            ((ItemWebPhotoBinding)binding).setImage(data);
+//            Debug.D(getClass(),"DDDDDDDD "+(data.getChildren()));
+            ((ItemWebPhotoBinding)binding).setImage(url);
         }
     }
 

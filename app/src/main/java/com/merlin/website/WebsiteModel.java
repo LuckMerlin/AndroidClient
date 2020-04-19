@@ -1,4 +1,4 @@
-package com.merlin.model;
+package com.merlin.website;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.activity.LocalPhotoChooseActivity;
 import com.merlin.adapter.WebsiteBannerAdapter;
+import com.merlin.adapter.WebsiteCategoriesAdapter;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
@@ -24,8 +25,12 @@ import com.merlin.client.databinding.LayoutFileConveyingBinding;
 import com.merlin.conveyor.ConveyGroup;
 import com.merlin.conveyor.UploadConvey;
 import com.merlin.debug.Debug;
+import com.merlin.dialog.Dialog;
 import com.merlin.dialog.FileConveyDialog;
+import com.merlin.model.Model;
+import com.merlin.util.Int;
 import com.merlin.view.OnTapClick;
+import com.merlin.website.TravelCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,41 +42,71 @@ import retrofit2.http.POST;
 
 public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnActivityResult {
     public static final String mUrl="http://192.168.0.6:5005";
-//    private final String mUrl="http://172.16.20.212:45678";
     private final static int PHOTO_CHOOSE_REQUEST_CODE=234234;
 
     private interface Api{
-        @POST("/travel/images")
+        @POST("/travel/category")
         @FormUrlEncoded
-        Observable<Reply<PageData<WebsiteImage>>> getBanners(@Field(LABEL_NAME) String name, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+        Observable<Reply<PageData<TravelCategory>>> getCategories(@Field(LABEL_WHAT) String type,@Field(LABEL_NAME) String name, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+
+        @POST("/travel/category/create")
+        @FormUrlEncoded
+        Observable<Reply<TravelCategory>> createCategory(@Field(LABEL_ID) Long id,@Field(LABEL_TITLE) String title,
+                                                         @Field(LABEL_BANNER) boolean banner,@Field(LABEL_NOTE) String note,
+                                                         @Field(LABEL_URL) Integer coverId);
     }
 
     private ObservableField<RecyclerView.Adapter> mAdapter=new ObservableField<>();
-    private final WebsiteBannerAdapter mBannerAdapter=new WebsiteBannerAdapter(){
+    private final WebsiteBannerAdapter mImagesAdapter=new WebsiteBannerAdapter(){
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<WebsiteImage>>> finish) {
-            return call(prepare(Api.class,mUrl).getBanners(arg,from,from+10),finish);
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+            return call(prepare(Api.class,mUrl).getCategories(null,arg,from,from+10),finish);
+        }
+    };
+
+    private final WebsiteCategoriesAdapter mCategoriesAdapter=new WebsiteCategoriesAdapter(mUrl){
+        @Override
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<TravelCategory>>> finish) {
+            return call(prepare(Api.class,mUrl).getCategories(Label.LABEL_BANNER,arg,from,from+10),finish);
         }
     };
 
     public WebsiteModel(){
-        mAdapter.set(mBannerAdapter);
-        queryBanners();
+        mAdapter.set(mCategoriesAdapter);
+        queryCategories();
     }
+
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             case R.string.add:
                 startActivity(new Intent(view.getContext(), LocalPhotoChooseActivity.class),PHOTO_CHOOSE_REQUEST_CODE);
+//                createCategory();
                 break;
+            default:
+                if (null!=data&&data instanceof TravelCategory){
+
+                }
         }
         return true;
     }
 
-    public boolean queryBanners(){
-        WebsiteBannerAdapter bannerAdapter=mBannerAdapter;
+    private boolean queryCategories(){
+        WebsiteCategoriesAdapter categoriesAdapter=mCategoriesAdapter;
+        return null!=categoriesAdapter&&categoriesAdapter.loadPage("","");
+    }
+
+    public boolean queryImages(){
+        WebsiteBannerAdapter bannerAdapter=mImagesAdapter;
         return null!=bannerAdapter&&bannerAdapter.loadPage("","");
+    }
+
+    public boolean createCategory(){
+//        Dialog dialog=new Dialog(getViewContext());
+        call(prepare(Api.class,mUrl).createCategory(0l,"林强37",true,"Note", 1));
+//        return dialog.show();
+        return false;
     }
 
     public ObservableField<RecyclerView.Adapter> getAdapter() {

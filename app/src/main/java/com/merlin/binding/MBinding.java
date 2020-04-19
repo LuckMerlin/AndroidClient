@@ -171,32 +171,40 @@ public class MBinding {
                 Path nasFile=(Path)img;
                 String nasPath=nasFile.getPath(null);
                 String host=nasFile.getHost();
-                GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
-                        .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
-                RequestBuilder<Drawable> builder= Glide.with(view.getContext()).load(glideUrl).
-                        diskCacheStrategy(DiskCacheStrategy.NONE);
-                RoundedCorners roundedCorners = new RoundedCorners(1);
-                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
-                        view.getHeight());
-                CustomTarget<Drawable> simpleTarget = new CustomTarget<Drawable>() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    @Override
-                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        view.setBackground(resource);
+                RequestBuilder<Drawable> builder=null;
+                if (null!=nasPath&&nasPath.length()>0){
+                    if (null!=host&&host.length()>0){
+                        GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
+                                .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
+                        builder= Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
+                    }else{
+                        builder=Glide.with(view.getContext()).load(new File(nasPath));
                     }
+                }
+                if (null!=builder){
+                    RoundedCorners roundedCorners = new RoundedCorners(1);
+                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
+                            view.getHeight());
+                    CustomTarget<Drawable> simpleTarget = new CustomTarget<Drawable>() {
+                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            view.setBackground(resource);
+                        }
 
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                    }
-                };
+                        }
+                    };
 
-                builder.centerCrop().apply(options).thumbnail(1f)
+                    builder.centerCrop().apply(options).thumbnail(1f)
 //                                .transform(new BlurMaskFilter)
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
 //                                new TopCropTransformation(context))
-                        .placeholder(R.drawable.ic_picture_default)
-                        .error(R.drawable.ic_picture_default).into(simpleTarget);
+                            .placeholder(R.drawable.ic_picture_default)
+                            .error(R.drawable.ic_picture_default).into(simpleTarget);
+                }
             }
         }
     }
@@ -255,11 +263,17 @@ public class MBinding {
                     Path nasFile=(Path)path;
                     String nasPath=nasFile.getPath(null);
                     host=nasFile.getHost();
-                    GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
-                            .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
-                     builder= Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
-                }
-                if (path instanceof Integer){
+                    if (null!=nasPath&&nasPath.length()>0){
+                        if (null!=host&&host.length()>0){
+                            Debug.D(MBinding.class,"DDDDDDDEE  "+host+" "+nasPath);
+                            GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
+                                    .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
+                            builder= Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
+                        }else{
+                            builder=Glide.with(view.getContext()).load(new File(nasPath));
+                        }
+                    }
+                }else if (path instanceof Integer){
                     if (!path.equals(Resources.ID_NULL)) {
                         view.setImageResource((Integer) path);
                         Clicker.putRes(view, new Res((Integer) path, null));
@@ -277,8 +291,7 @@ public class MBinding {
                 }
                 if (null!=builder) {
                     RoundedCorners roundedCorners = new RoundedCorners(10);
-                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
-                            view.getHeight());
+                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
                     builder.centerCrop().apply(options).thumbnail(1f)
 //                                .transform(new BlurMaskFilter)
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换

@@ -44,4 +44,5 @@ public interface Label{
    String  LABEL_CLIENT = "client";
    String  LABEL_TIME="time";
    String  LABEL_ROOT="root";
+   String  LABEL_BANNER="banner";
 }

@@ -11,7 +11,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.merlin.client.R;
-import com.merlin.model.WebsiteModel;
+import com.merlin.website.WebsiteModel;
 
 public class WebsiteActivity extends ModelActivity<WebsiteModel>{
 
