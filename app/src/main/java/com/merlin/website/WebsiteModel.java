@@ -72,8 +72,11 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
     };
 
     public WebsiteModel(){
+
         mAdapter.set(mCategoriesAdapter);
-        queryCategories();
+//        queryCategories();
+        startActivity(AboutActivity.class);
+        finishActivity(null);
     }
 
 

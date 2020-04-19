@@ -74,6 +74,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
+        <activity android:name="com.merlin.website.AboutActivity"/>
+        <activity android:name="com.merlin.website.TravelCategoryActivity"/>
         <activity android:name="com.merlin.activity.WebsiteActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:label="@string/personalWebsite">
@@ -102,10 +104,6 @@
         <service android:name="com.merlin.media.MediaPlayService"/>
         <service android:name="com.merlin.conveyor.ConveyorService"/>
         <service android:name="com.merlin.transport.TransportService"/>
-        <activity
-            android:configChanges="orientation|screenSize"
-            android:name="me.nereo.multi_image_selector.MultiImageSelectorActivity" />
-
         <provider android:name="androidx.core.content.FileProvider"
             android:authorities="com.merlin.client.fileProvider"
             android:exported="false"
