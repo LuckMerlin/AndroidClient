@@ -23,6 +23,7 @@ import com.merlin.client.databinding.ItemBannerBinding;
 import com.merlin.client.databinding.LayoutFileConveyingBinding;
 import com.merlin.conveyor.ConveyGroup;
 import com.merlin.conveyor.UploadConvey;
+import com.merlin.debug.Debug;
 import com.merlin.dialog.FileConveyDialog;
 import com.merlin.view.OnTapClick;
 
@@ -35,7 +36,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnActivityResult {
-    private final String mUrl="http://192.168.0.6:5005";
+    public static final String mUrl="http://192.168.0.6:5005";
 //    private final String mUrl="http://172.16.20.212:45678";
     private final static int PHOTO_CHOOSE_REQUEST_CODE=234234;
 
@@ -45,14 +46,16 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         Observable<Reply<PageData<WebsiteImage>>> getBanners(@Field(LABEL_NAME) String name, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
     }
 
+    private ObservableField<RecyclerView.Adapter> mAdapter=new ObservableField<>();
     private final WebsiteBannerAdapter mBannerAdapter=new WebsiteBannerAdapter(){
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<WebsiteImage>>> finish) {
             return call(prepare(Api.class,mUrl).getBanners(arg,from,from+10),finish);
         }
     };
 
     public WebsiteModel(){
+        mAdapter.set(mBannerAdapter);
         queryBanners();
     }
 
@@ -71,8 +74,8 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         return null!=bannerAdapter&&bannerAdapter.loadPage("","");
     }
 
-    public RecyclerView.Adapter getAdapter() {
-        return mBannerAdapter;
+    public ObservableField<RecyclerView.Adapter> getAdapter() {
+        return mAdapter;
     }
 
     private boolean uploadFiles(List<Path> paths){

@@ -1,9 +1,5 @@
 package com.merlin.adapter;
-
-import android.content.Context;
 import android.view.View;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,7 +13,6 @@ import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.server.Retrofit;
 
 import java.util.ArrayList;
 import java.util.List;

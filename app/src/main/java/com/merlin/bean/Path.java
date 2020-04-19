@@ -8,9 +8,6 @@ import androidx.annotation.Nullable;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.binding.MBinding;
-import com.merlin.database.FileDB;
-import com.merlin.debug.Debug;
 
 import java.io.File;
 import java.net.URI;
@@ -35,6 +32,10 @@ public class Path implements Parcelable {
         this.parent=parent;
         this.name=name;
         this.extension=extension;
+    }
+
+    public final void setHost(String host) {
+        this.host = host;
     }
 
     public final String getExtension() {

@@ -47,7 +47,8 @@ public class PageData<T> {
         return null!=data?data.size():0;
     }
 
-    public long getLength() {
+    public final long getLength() {
         return length;
     }
+
 }

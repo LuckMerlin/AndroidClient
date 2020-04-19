@@ -19,6 +19,9 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
@@ -33,10 +36,18 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.adapter.LoadMoreInterceptor;
@@ -139,15 +150,15 @@ public class MBinding {
                     view.setBackground((Drawable)img);
                 }
             }else if (img instanceof String){
-                String path=(String)img;
-                RoundedCorners roundedCorners = new RoundedCorners(10);
-                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-               if (null!=path){
-                    if (path.startsWith("/")){
-                        path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
-                    }
-                }
-                Debug.D(MBinding.class," "+path);
+//                String path=(String)img;
+//                RoundedCorners roundedCorners = new RoundedCorners(10);
+//                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+//               if (null!=path){
+//                    if (path.startsWith("/")){
+//                        path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
+//                    }
+//                }
+//                Debug.D(MBinding.class," "+path);
 //                Glide.with(view.getContext())
 //                        .load(path)
 //                        .centerCrop()
@@ -156,6 +167,36 @@ public class MBinding {
 //                        .placeholder(R.drawable.ic_picture_default)
 ////                .error(R.drawable.ic_default_pic)
 //                        .into()
+            }else if (img instanceof Path){
+                Path nasFile=(Path)img;
+                String nasPath=nasFile.getPath(null);
+                String host=nasFile.getHost();
+                GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
+                        .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
+                RequestBuilder<Drawable> builder= Glide.with(view.getContext()).load(glideUrl).
+                        diskCacheStrategy(DiskCacheStrategy.NONE);
+                RoundedCorners roundedCorners = new RoundedCorners(1);
+                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
+                        view.getHeight());
+                CustomTarget<Drawable> simpleTarget = new CustomTarget<Drawable>() {
+                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        view.setBackground(resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                };
+
+                builder.centerCrop().apply(options).thumbnail(1f)
+//                                .transform(new BlurMaskFilter)
+//                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
+//                                new TopCropTransformation(context))
+                        .placeholder(R.drawable.ic_picture_default)
+                        .error(R.drawable.ic_picture_default).into(simpleTarget);
             }
         }
     }
@@ -210,16 +251,13 @@ public class MBinding {
             RequestBuilder<Drawable> builder=null;
             if (null != path) {
                 String host=null;
-                if (path instanceof NasFile){
-                    NasFile nasFile=(NasFile)path;
+                if (path instanceof Path){
+                    Path nasFile=(Path)path;
                     String nasPath=nasFile.getPath(null);
                     host=nasFile.getHost();
                     GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
                             .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
-                     builder= Glide.with(view.getContext()).load(glideUrl);
-                }else if (path instanceof Path){
-                    host=((Path)path).getHost();
-                    path=((Path)path).getPath(null);
+                     builder= Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
                 }
                 if (path instanceof Integer){
                     if (!path.equals(Resources.ID_NULL)) {
@@ -239,7 +277,8 @@ public class MBinding {
                 }
                 if (null!=builder) {
                     RoundedCorners roundedCorners = new RoundedCorners(10);
-                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
+                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
+                            view.getHeight());
                     builder.centerCrop().apply(options).thumbnail(1f)
 //                                .transform(new BlurMaskFilter)
 //                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
@@ -366,15 +405,15 @@ public class MBinding {
     }
 
     @BindingAdapter("android:adapter")
-    public static void adapter(RecyclerView view, ListAdapter adapter) {
+    public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
         if (null!=view){
-            if (null!=adapter){
+            if (null!=adapter&&adapter instanceof ListAdapter){
                 Object helper=adapter instanceof OnItemTouchResolver?((OnItemTouchResolver)adapter).onResolveItemTouch(view):null;
                 helper=null!=helper&&helper instanceof ItemTouchHelper.Callback?new ItemTouchHelper((ItemTouchHelper.Callback)helper):helper;
                 if (null!=helper&&helper instanceof ItemTouchHelper){
                     ((ItemTouchHelper)helper).attachToRecyclerView(view);
                 }
-                RecyclerView.LayoutManager manager=adapter.onResolveLayoutManager(view);
+                RecyclerView.LayoutManager manager=((ListAdapter)adapter).onResolveLayoutManager(view);
                 if (null!=manager){
                     view.setLayoutManager(manager);
                 }

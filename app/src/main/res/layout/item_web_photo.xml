@@ -3,20 +3,16 @@
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
-            name="photoUrl"
-            type="Object" />
+            name="image"
+            type="com.merlin.bean.WebsiteImage" />
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>
     </data>
     <RelativeLayout
         android:orientation="vertical"
+        android:background="@{image}"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ImageView
-            android:src="@{photoUrl}"
-            android:scaleType="centerCrop"
-            android:alpha="0.85"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+        android:layout_height="120dp">
+
     </RelativeLayout>
 </layout>

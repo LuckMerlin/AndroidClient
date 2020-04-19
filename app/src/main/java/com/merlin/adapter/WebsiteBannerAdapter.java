@@ -2,19 +2,22 @@ package com.merlin.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.bean.Path;
+import com.merlin.bean.WebsiteImage;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemBannerBinding;
 import com.merlin.client.databinding.ItemWebPhotoBinding;
 import com.merlin.debug.Debug;
+import com.merlin.model.WebsiteModel;
 import com.merlin.view.OnTapClick;
 
 import java.util.List;
 
-public abstract class WebsiteBannerAdapter extends PageAdapter<String, Path>{
+public abstract class WebsiteBannerAdapter extends PageAdapter<String, WebsiteImage>{
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -22,15 +25,17 @@ public abstract class WebsiteBannerAdapter extends PageAdapter<String, Path>{
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Path data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, WebsiteImage data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemWebPhotoBinding){
-            ((ItemWebPhotoBinding)binding).setPhotoUrl(data);
+            if (null!=data){
+                data.setHost(WebsiteModel.mUrl);
+            }
+            ((ItemWebPhotoBinding)binding).setImage(data);
         }
-        Debug.D(getClass(),""+(null!=data?data.getPath():null));
     }
 
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
-        return new LinearLayoutManager(rv.getContext(), RecyclerView.VERTICAL,false);
+        return new GridLayoutManager(rv.getContext(),3,RecyclerView.VERTICAL,false);
     }
 }
