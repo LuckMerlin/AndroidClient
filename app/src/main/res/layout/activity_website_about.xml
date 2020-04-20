@@ -4,7 +4,7 @@
     <data>
         <variable
             name="vm"
-            type="com.merlin.website.WebsiteModel" />
+            type="com.merlin.website.WebsiteAboutModel" />
         <import type="com.merlin.view.Clicker"/>
         <import type="com.merlin.client.R"/>
     </data>
@@ -13,5 +13,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+        <TextView
+            android:text="@{R.string.save}"
+            android:layout_gravity="right"
+            style="@style/titleNormalTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </layout>

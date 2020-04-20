@@ -1,9 +1,5 @@
 package com.merlin.photo;
 
-import android.provider.ContactsContract;
-
-import androidx.annotation.Nullable;
-
 public final class Photo {
     private final String mTitle;
     private final String mPath;
@@ -26,7 +22,7 @@ public final class Photo {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals( Object obj) {
         if (null!=obj&&obj instanceof Photo){
             String path=((Photo)obj).mPath;
             String currPath=mPath;

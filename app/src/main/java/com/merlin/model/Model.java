@@ -368,6 +368,11 @@ public class Model extends Retrofit{
         return false;
     }
 
+    protected final boolean startActivity(Class<? extends Activity> cls,Integer forResultCode){
+        Context context=getContext();
+        return null!=context&&null!=cls&&startActivity(new Intent(context,cls),forResultCode);
+    }
+
     protected final boolean startActivity(Intent intent,Integer forResultCode){
         Context context=null!=intent?null!=forResultCode?getViewContext():getContext():null;
         if (null==context){

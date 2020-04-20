@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.merlin.website.TravelCategoryActivityModel" />
+        <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.client.R"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.util.Time"/>
+    </data>
+    <LinearLayout
+        binding:createModel="@{true}"
+        android:padding="@dimen/contentGap"
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_gravity="right"
+            binding:enableClick="@{true}"
+            binding:textId="@{R.string.add}"
+            style="@style/titleNormalTextView"/>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:visibility="@{null==vm.category?View.VISIBLE:View.GONE}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:adapter="@{vm.categoriesAdapter}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <LinearLayout
+            android:visibility="@{null==vm.category?View.GONE:View.VISIBLE}"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_gravity="center"
+                binding:textId="@{vm.category.title}"
+                style="@style/titleNormalTextView"/>
+            <include binding:key="@{R.string.createTime}" binding:value="@{Time.formatTime(vm.category.createTime)}" layout="@layout/item_key_value"/>
+            <include layout="@layout/layout_photo_grid"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

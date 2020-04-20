@@ -61,6 +61,9 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Path> impleme
         return viewType==TYPE_DATA||viewType==TYPE_EMPTY||viewType==TYPE_TAIL? R.layout.item_photo_grid:null;
     }
 
+    /**
+     * @deprecated
+     */
     public final boolean visibleCamera(Boolean visible){
         if (null!=visible){
             boolean curr=mVisibleCamera;

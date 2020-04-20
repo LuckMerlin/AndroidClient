@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="category"
+            type="com.merlin.website.TravelCategory" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.view.Clicker"/>
+        <import type="com.merlin.util.Time"/>
+        <import type="com.merlin.client.R"/>
+    </data>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:padding="@dimen/contentGap"
+        binding:enableClick="@{Clicker.click(category)}"
+        android:background="@{category.url}"
+        android:layout_width="wrap_content"
+        android:layout_height="120dp">
+        <LinearLayout
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{``+category.children.size()}"
+                style="@style/titleSmallTextView"/>
+            <TextView
+                android:text="@{category.title}"
+                style="@style/titleSmallTextView"/>
+            <TextView
+                android:text="@{Time.formatTime(category.createTime)}"
+                style="@style/titleSmallTextView"/>
+        </LinearLayout>
+    </RelativeLayout>
+</layout>

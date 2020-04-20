@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,9 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     public final static int TYPE_TAIL=-1;
     public final static int TYPE_EMPTY=-3;
     public final static int TYPE_DATA=-4;
+    public final static int TYPE_HEAD=-5;
     private WeakReference<RecyclerView> mRecyclerView;
+    private final SparseArray<RecyclerView.ViewHolder> mFixHolder=new SparseArray<>();
 
     public ListAdapter(){
         this(null);
@@ -56,6 +59,24 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null;
     }
 
+    public final boolean setFixHolder(int type,View view){
+        return null!=view&&null==view.getParent()&&setFixHolder(type,new RecyclerView.ViewHolder(view){});
+    }
+
+    public final boolean setFixHolder(int type,RecyclerView.ViewHolder viewHolder){
+        SparseArray<RecyclerView.ViewHolder> array=mFixHolder;
+        if (null!=array){
+            RecyclerView.ViewHolder curr=array.get(type);
+            if ((null==curr&&null==viewHolder)||(null!=curr&&null!=viewHolder&&curr==viewHolder)){
+                return false;
+            }
+            array.put(type,viewHolder);
+            notifyDataSetChanged();
+            return true;
+        }
+        return false;
+    }
+
     @Override
   public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       final LayoutInflater in=LayoutInflater.from(parent.getContext());
@@ -67,11 +88,19 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
         if (null==viewHolder){
             switch (viewType){
+                case TYPE_HEAD:
+                    SparseArray<RecyclerView.ViewHolder> fixHolder=mFixHolder;
+                    viewHolder=null!=fixHolder?fixHolder.get(TYPE_HEAD):null;
+                    break;
                 case TYPE_TAIL:
-                    viewHolder= new BaseViewHolder(in.inflate(R.layout.list_tail, parent, false));
+                    fixHolder=mFixHolder;
+                    RecyclerView.ViewHolder holder=null!=fixHolder?fixHolder.get(TYPE_TAIL):null;
+                    viewHolder= null!=holder?holder:new BaseViewHolder(in.inflate(R.layout.list_tail, parent, false));
                     break;
                 case TYPE_EMPTY:
-                    viewHolder= new BaseViewHolder(in.inflate(R.layout.list_empty, parent, false));
+                    fixHolder=mFixHolder;
+                    holder=null!=fixHolder?fixHolder.get(TYPE_EMPTY):null;
+                    viewHolder= null!=holder?holder:new BaseViewHolder(in.inflate(R.layout.list_empty, parent, false));
                     break;
                 default:
                     viewHolder= new BaseViewHolder(new View(parent.getContext()));
@@ -114,7 +143,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     @Override
   public final int getItemCount() {
         int dataCount=getDataCount();
-        return (dataCount<=0?0:dataCount)+1;
+        SparseArray<RecyclerView.ViewHolder> fixHolder=mFixHolder;
+        int increase=0;
+        if (dataCount>0&&(null!=fixHolder&&null!=fixHolder.get(TYPE_HEAD))){
+            increase++;
+        }
+        return (dataCount<=0?0:dataCount)+1+increase;
     }
 
   protected int getItemViewType(int position,int size) {
@@ -125,8 +159,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
   public final int getItemViewType(int position) {
        List<T> data=mData;
        int size=null!=data?data.size():0;
-       if (size==0){
+       if (size<=0){
            return TYPE_EMPTY;
+       }
+       SparseArray<RecyclerView.ViewHolder> fixHolder=mFixHolder;
+       if (position == 1&&(null!=fixHolder&&null!=fixHolder.get(TYPE_HEAD))){
+           return TYPE_HEAD;
        }
        if (position == size){
            return TYPE_TAIL;
@@ -163,7 +201,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
    }
 
-    public final static class ViewHolder<V extends ViewDataBinding> extends RecyclerView.ViewHolder{
+  public final static class ViewHolder<V extends ViewDataBinding> extends RecyclerView.ViewHolder{
     private V mBinding;
 
         protected ViewHolder(V binding){
@@ -176,7 +214,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 }
 
-    public final ArrayList<T> remove(List<?> list,String debug){
+  public final ArrayList<T> remove(List<?> list,String debug){
         if (null!=list&&list.size()>0){
             ArrayList<T> removed=new ArrayList<>(list.size());
             T data=null;
@@ -190,7 +228,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null;
     }
 
-    public final T removeData(Object data,String debug){
+  public final T removeData(Object data,String debug){
         List<T> list=null!=data?mData:null;
         if (null!=list){
             synchronized (list){
@@ -208,7 +246,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null;
     }
 
-    public final int index(Object data){
+  public final int index(Object data){
         List<T> list=null!=data?mData:null;
         return null!=list?list.indexOf(data):-1;
    }
@@ -246,8 +284,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     return null!=list&&list.add(data)&&add(list,exceptExist,debug);
    }
 
-  public final boolean add(List<T> data,boolean exceptExist,String debug)
-  {
+  public final boolean add(List<T> data,boolean exceptExist,String debug) {
         if (null!=data&&data.size()>0){
             List<T> list=mData;
             list=null!=list?list:(mData=new ArrayList<>());
@@ -307,7 +344,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return false;
     }
 
-    public final boolean remove(int from,int to,String debug){
+  public final boolean remove(int from,int to,String debug){
         ArrayList<T> list=from>=0&&to>from?mData:null;
         if (null!=list){
             synchronized (list){
@@ -324,7 +361,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return false;
     }
 
-    public final boolean isExist(Object data){
+  public final boolean isExist(Object data){
         return null!=data&&index(data)>=0;
     }
 
@@ -341,7 +378,6 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             onViewDetachedFromWindow(holder,view,binding);
         }
     }
-
 
   public void onAttachedRecyclerView(RecyclerView recyclerView) {
         //Do nothing

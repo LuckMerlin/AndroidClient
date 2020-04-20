@@ -7,10 +7,10 @@ public final class PhotoChooser {
         mDisplay=display;
     }
 
-    public PhotoChooser setAdapter(DefaultPhotoAdapter adapter){
-
-        return this;
-    }
+//    public PhotoChooser setAdapter(DefaultPhotoAdapter adapter){
+//
+//        return this;
+//    }
 
     public final boolean choose(){
 

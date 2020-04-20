@@ -1,19 +1,17 @@
-package com.merlin.activity;
+package com.merlin.website;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
-
+import com.merlin.activity.ModelActivity;
 import com.merlin.client.R;
-import com.merlin.website.WebsiteModel;
 
-public class WebsiteActivity extends ModelActivity<WebsiteModel>{
+public class WebsiteActivity extends ModelActivity<WebsiteModel> {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
