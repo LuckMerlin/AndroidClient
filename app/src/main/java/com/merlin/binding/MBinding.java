@@ -2,6 +2,7 @@ package com.merlin.binding;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
@@ -263,6 +264,7 @@ public class MBinding {
                     Path nasFile=(Path)path;
                     String nasPath=nasFile.getPath(null);
                     host=nasFile.getHost();
+                    Debug.D(MBinding.class,"DDDDDDDEE  "+host+" "+nasPath);
                     if (null!=nasPath&&nasPath.length()>0){
                         if (null!=host&&host.length()>0){
                             Debug.D(MBinding.class,"DDDDDDDEE  "+host+" "+nasPath);
@@ -301,8 +303,8 @@ public class MBinding {
                     return;
                 }
             }
-            view.setImageDrawable(null);//Clean
-            Clicker.putRes(view,new Res(null,null));
+            Clicker.putRes(view,null);
+            view.setImageBitmap(BitmapFactory.decodeResource(view.getResources(),R.drawable.ic_picture_default));//Clean
         }
     }
 

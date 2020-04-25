@@ -139,7 +139,12 @@
     <string name="serverUnConnect">服务未连接,请稍后重试</string>
     <string name="cover">覆盖</string>
     <string name="gallery">相册</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="coverPhoto">封面</string>
 
     <!---->
     <string name="personalWebsite">网站</string>
+    <string name="banner">画廊</string>
+    <string name="note">说明</string>
 </resources>

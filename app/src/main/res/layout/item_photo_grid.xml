@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="130dp">
         <ImageView
-            android:src="@{photoUrl}"
+            android:src="@{null==photoUrl?photo.path:photoUrl}"
             binding:enableClick="@{Clicker.multiClick(photo,true)}"
             android:scaleType="centerCrop"
             android:alpha="0.85"

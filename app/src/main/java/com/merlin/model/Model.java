@@ -12,6 +12,9 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.Checkable;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
@@ -24,6 +27,7 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.global.Application;
 import com.merlin.server.Retrofit;
+import com.merlin.util.Text;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 import com.merlin.view.Res;
@@ -34,6 +38,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.RecursiveTask;
 
 public class Model extends Retrofit{
     private WeakReference<View> mRootView=null;
@@ -76,6 +81,22 @@ public class Model extends Retrofit{
 
     protected void onRootAttached(View root){
         //Do nothing
+    }
+
+    protected final CharSequence getViewText(int viewId,CharSequence def){
+        View view=findViewById(viewId);
+        if (null!=view&&view instanceof TextView){
+            return ((TextView)view).getText();
+        }
+        return null;
+    }
+
+    protected final boolean isViewChecked(int viewId,boolean def){
+        View view=findViewById(viewId);
+        if (null!=view&&view instanceof Checkable){
+            return ((Checkable)view).isChecked();
+        }
+        return def;
     }
 
     private boolean initial(View view){

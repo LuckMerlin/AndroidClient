@@ -23,7 +23,7 @@ public abstract class WebsiteCategoriesAdapter extends PageAdapter<String, Trave
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
-        return viewType==TYPE_DATA? R.layout.item_website_category:null;
+        return viewType == TYPE_DATA ? R.layout.item_website_category : null;
     }
 
     @Override

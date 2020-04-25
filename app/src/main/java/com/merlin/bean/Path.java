@@ -14,10 +14,14 @@ import java.net.URI;
 import java.net.URL;
 
 public class Path implements Parcelable {
+    public final static int PATH_WHAT_NONE=0;
+    public final static int PATH_WHAT_DELETE=90001;
+    public final static int PATH_WHAT_ADD=90002;
     private String parent;
     private String name;
     private String extension;
     private String host;
+    private Integer what;
 
     public Path(){
         this(null,null,null);
@@ -60,6 +64,24 @@ public class Path implements Parcelable {
 
     public final String getPath() {
         return getPath(null);
+    }
+
+    public void setWhat(Integer what) {
+        this.what = what;
+    }
+
+    public final Integer getWhat() {
+        return what;
+    }
+
+    public final boolean isExistHost(){
+        String host=this.host;
+        return null!=host&&host.length()>0;
+    }
+
+    public final boolean isNetworkHost(){
+        String host=this.host;
+        return null!=host&&host.length()>0&&host.toLowerCase().startsWith("http://");
     }
 
     public final String getPath(String hostDivider) {

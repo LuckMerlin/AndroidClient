@@ -19,7 +19,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.activity.PhotoPreviewActivity;
+import com.merlin.api.Canceler;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
+import com.merlin.api.Reply;
 import com.merlin.bean.LocalPhoto;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
@@ -29,20 +33,35 @@ import com.merlin.view.OnTapClick;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTapClick {
+public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTapClick {
     private int mSpanCount;
     private int mMaxChoose=0;
     private boolean mVisibleCamera;
     private ArrayList<Path> mChoose;
+    private int mMax;
 
     public PhotoGridAdapter(){
-        this(3,false,0);
+        this(Integer.MAX_VALUE);
+    }
+
+    public PhotoGridAdapter(int max){
+        this(max,3,false,0);
     }
 
     public PhotoGridAdapter(int spanCount,boolean visibleCamera,int maxChoose){
+        this(Integer.MAX_VALUE,spanCount,visibleCamera,maxChoose);
+    }
+
+    public PhotoGridAdapter(int max,int spanCount,boolean visibleCamera,int maxChoose){
+        mMax=max;
         mSpanCount=spanCount;
         mVisibleCamera=visibleCamera;
         mMaxChoose=maxChoose;
+    }
+
+    @Override
+    protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        return null;
     }
 
     public final int maxChoose(Integer maxChoose){
@@ -54,6 +73,15 @@ public abstract class PhotoGridAdapter extends PageAdapter<String, Path> impleme
             mChoose=null;
         }
         return mMaxChoose;
+    }
+
+    public final boolean setMax(int max) {
+        if (max!=this.mMax){
+            this.mMax=max;
+            notifyDataSetChanged();
+            return true;
+        }
+        return false;
     }
 
     @Override
