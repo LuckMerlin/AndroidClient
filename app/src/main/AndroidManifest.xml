@@ -75,7 +75,8 @@
         </activity>
         <activity android:name="com.merlin.activity.MediaSheetDetailActivity"/>
         <activity android:name="com.merlin.website.AboutActivity"/>
-        <activity android:name="com.merlin.website.TravelCategoryActivity"/>
+        <activity android:name="com.merlin.website.WebsiteTravelCategoryActivity"/>
+        <activity android:name="com.merlin.website.WebsitePhotosActivity"/>
         <activity android:name="com.merlin.website.WebsiteActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:label="@string/personalWebsite">

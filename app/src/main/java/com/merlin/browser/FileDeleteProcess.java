@@ -51,7 +51,7 @@ public class FileDeleteProcess extends FileProcess<Document> {
                 for (Document meta:this) {
                     if (null!=meta){
                         final String path=meta.getPath(null);
-                        Path fromPath=new Path(meta instanceof NasFile?((NasFile)meta).getHost():null,meta.getParent(), meta.getName(false),meta.getExtension());
+                        Path fromPath=Path.build(meta,null);
                         if (null==path||path.length()<=0) {
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.deleteFail, fromPath, null, meta);
                         }else{

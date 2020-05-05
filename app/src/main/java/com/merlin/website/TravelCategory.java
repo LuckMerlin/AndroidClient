@@ -13,7 +13,7 @@ public final class TravelCategory {
         private String permission;
         private long createTime;
         private long id;
-        private int children;
+        private int data;
 
     public String getTitle() {
         return title;
@@ -31,11 +31,17 @@ public final class TravelCategory {
         return url;
     }
 
+    public Long getUrlId() {
+        Path currPath=url;
+        return null!=currPath?currPath.getId():null;
+    }
+
     public void setUrl(Path url) {
         this.url = url;
     }
 
-    public String getUrlPath() {
+    public String getUrlPath()
+    {
         Path currUrl=url;
         return null!=currUrl?currUrl.getPath():null;
     }
@@ -49,7 +55,7 @@ public final class TravelCategory {
     }
 
     public int getChildren() {
-        return children;
+        return data;
     }
 
     public boolean isBanner() {

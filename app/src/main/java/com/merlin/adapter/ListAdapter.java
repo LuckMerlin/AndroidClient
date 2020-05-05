@@ -121,7 +121,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
       T data=getItemData(position);
       onBindViewHolder(holder,null!=holder?holder.getItemViewType():TYPE_NONE,binding,position,data,payloads);
       if (null==payloads||payloads.isEmpty()){
-//           onBindViewHolder(holder, position);
+           onBindViewHolder(holder, position);
        } else {
 //           View itemView=holder.itemView;
 //           if (null!=itemView){

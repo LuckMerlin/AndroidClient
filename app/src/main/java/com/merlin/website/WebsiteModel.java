@@ -18,19 +18,13 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.Path;
-import com.merlin.bean.WebsiteImage;
 import com.merlin.client.R;
-import com.merlin.client.databinding.ItemBannerBinding;
 import com.merlin.client.databinding.LayoutFileConveyingBinding;
 import com.merlin.conveyor.ConveyGroup;
 import com.merlin.conveyor.UploadConvey;
-import com.merlin.debug.Debug;
-import com.merlin.dialog.Dialog;
 import com.merlin.dialog.FileConveyDialog;
 import com.merlin.model.Model;
-import com.merlin.util.Int;
 import com.merlin.view.OnTapClick;
-import com.merlin.website.TravelCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +36,9 @@ import retrofit2.http.POST;
 
 public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnActivityResult {
 //    public static final String mUrl="http://192.168.0.6:5005";
-    public static final String mUrl="http://192.168.0.2:45678";
+    public static final String SERVER_IP="http://192.168.0.2";
+    public static final int SERVER_PORT=45678;
+    public static final String mUrl=SERVER_IP+":"+SERVER_PORT;
 //    public static final String mUrl="http://172.16.20.212:45678";
     private final static int PHOTO_CHOOSE_REQUEST_CODE=234234;
 
@@ -66,7 +62,7 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         }
     };
 
-    private final WebsiteCategoriesAdapter mCategoriesAdapter=new WebsiteCategoriesAdapter(mUrl){
+    private final WebsiteCategoriesAdapter mCategoriesAdapter=new WebsiteCategoriesAdapter(){
         @Override
         protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<TravelCategory>>> finish) {
             return call(prepare(Api.class,mUrl).getCategories(Label.LABEL_BANNER,arg,from,from+10),finish);
@@ -76,7 +72,7 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        startActivity(TravelCategoryActivity.class);
+        startActivity(WebsiteTravelCategoryActivity.class);
         finishActivity(null);
     }
 
@@ -124,13 +120,13 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         String folder="lovePhotos";
         ConveyGroup<UploadConvey> group=new ConveyGroup<>();
         boolean empty=true;
-        Path remoteFolder=new Path(mUrl,folder,null,null);
+//        Path remoteFolder=new Path(mUrl,folder,null,null);
         for (Path child:paths) {
             String path=null!=child?child.getPath():null;
-            if (null!=(convey=null!=path&&path.length()>0? new UploadConvey(Path.build(path,null),
-                    remoteFolder, CoverMode.SKIP):null)&&group.add(convey)){
-                empty=false;
-            }
+//            if (null!=(convey=null!=path&&path.length()>0? new UploadConvey(Path.build(path,null),
+//                    remoteFolder, CoverMode.SKIP):null)&&group.add(convey)){
+//                empty=false;
+//            }
         }
         if (empty){
             return toast(R.string.listEmpty)&&false;

@@ -303,7 +303,7 @@ public class LocalFileBrowser extends FileBrowser{
                note=getText(R.string.deleteFail);
            }else if(file.renameTo(target)&&target.exists()) {
                String[] fix=LocalFile.getPostfix(target);
-               data=new Path(folder.getAbsolutePath(),fix[0],fix[1]);
+//               data=new Path(folder.getAbsolutePath(),fix[0],fix[1]);
                what=What.WHAT_SUCCEED;
                note=getText(R.string.succeed);
            }
@@ -340,7 +340,7 @@ public class LocalFileBrowser extends FileBrowser{
                         note=getText(R.string.createSucceed);
                         what=What.WHAT_SUCCEED;
                         String[] fix=LocalFile.getPostfix(file);
-                        modify = new Path(folder, fix[0],fix[1]);
+//                        modify = new Path(folder, fix[0],fix[1]);
                         arg = LocalFile.build(file,null,null);
                     }
                 } catch (IOException e) {

@@ -2,6 +2,7 @@ package com.merlin.website;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -18,6 +19,8 @@ public class WebsiteActivity extends ModelActivity<WebsiteModel> {
         super.onCreate(savedInstanceState);
         DataBindingUtil.setContentView(this, R.layout.activity_website);
         checkPermission(this);
+        startActivity(new Intent(this,WebsiteTravelCategoryActivity.class));
+        finish();
     }
 
     public static  void checkPermission(Activity context) {

@@ -12,6 +12,8 @@ import com.merlin.activity.LocalPhotoChooseActivity;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.adapter.PhotoGridAdapter;
 import com.merlin.adapter.WebsiteCategoriesAdapter;
+
+import com.merlin.api.ApiList;
 import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Canceler;
 import com.merlin.api.Label;
@@ -35,6 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -52,19 +58,27 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
 
         @POST("/travel/category/save")
         @FormUrlEncoded
-        Observable<Reply<TravelCategory>> saveCategory(@Field(LABEL_ID) Long id,@Field(LABEL_TITLE) CharSequence title,
-                                                         @Field(LABEL_BANNER) boolean banner,@Field(LABEL_NOTE) CharSequence note,
-                                                         @Field(LABEL_URL) CharSequence coverPath);
+        Observable<Reply<TravelCategory>> saveCategory(@Field(LABEL_ID) String id,@Field(LABEL_URL) Long coverId,@Field(LABEL_TITLE) CharSequence title,
+                                                         @Field(LABEL_BANNER) boolean banner,@Field(LABEL_NOTE) CharSequence note);
+        @POST("/travel/category/photo")
+        @FormUrlEncoded
+        Observable<Reply<PageData<Path>>> getCategoryPhoto(@Field(LABEL_ID) String categoryId, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+
     }
 
-    private final WebsiteCategoriesAdapter mCategoriesAdapter=new WebsiteCategoriesAdapter(mUrl){
+    private final WebsiteCategoriesAdapter mCategoriesAdapter=new WebsiteCategoriesAdapter(){
         @Override
         protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<TravelCategory>>> finish) {
             return call(prepare(Api.class,mUrl).getCategories(null,arg,from,from+10),finish);
         }
     };
 
-    private final PhotoGridAdapter mCoverAdapter=new PhotoGridAdapter(1);
+    private final WebsiteCategoryPhotoAdapter mPhotoAdapter=new WebsiteCategoryPhotoAdapter() {
+        @Override
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+            return call(prepare(Api.class,mUrl).getCategoryPhoto(arg,from,from+10),finish);
+        }
+    };
 
     @Override
     protected void onRootAttached(View root) {
@@ -78,7 +92,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
             case R.string.add:
                 ObservableField<TravelCategory> categoryField=mCategory;
                 TravelCategory category=null!=categoryField?categoryField.get():null;
-                return (null!=category?startActivity(LocalPhotoChooseActivity.class,PHOTO_CHOOSE_REQUEST_CODE)
+                return (null!=category?startActivity(WebsitePhotosActivity.class,PHOTO_CHOOSE_REQUEST_CODE)
                         :createCategory())||true;
             case R.string.save:
                 return save()||true;
@@ -86,13 +100,20 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
                 return choosePhoto(clickCount);
             default:
                 if (null!=data){
-                    if (data instanceof TravelCategory){
-                        mCategory.set((TravelCategory)data);
+                    if(data instanceof TravelCategory){
+                        showCategory((TravelCategory)data);
+                    }else{
+
                     }
                 }
                 break;
         }
         return true;
+    }
+
+    private void showCategory(TravelCategory category){
+        mCategory.set(category);
+        mPhotoAdapter.loadPage(""+category.getId(),null);
     }
 
     @Override
@@ -121,7 +142,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
                         return toast(R.string.inputNotNull) || true;
                     }
                     dialog.dismiss();
-                return (resId==R.string.sure&&null!=call(prepare(Api.class,mUrl).saveCategory(null,text,false,null, null),
+                return (resId==R.string.sure&&null!=call(prepare(Api.class,mUrl).saveCategory(null,null,text,false,null),
                         (OnApiFinish<Reply<TravelCategory>>)(int what, String note, Reply<TravelCategory> reply, Object arg)-> {
                         toast(note); }))||true;
         });
@@ -137,17 +158,49 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
         Res res=null!=view?Clicker.getRes(view,null):null;
         Object coverObj=null!=res?res.getArg():null;
         Path coverPath=null!=coverObj&&coverObj instanceof Path?((Path)coverObj):null;
-        String cover=null!=coverPath?coverPath.getPath():null;
+//        String coverPathValue=null!=coverPath?coverPath.getPath():null;
+//        FileSaveBuilder builder=new FileSaveBuilder();
+//        if (coverPath.isLocal()){
+//            File coverFile=null!=coverPathValue&&coverPathValue.length()>0?new File(coverPathValue):null;
+//            if (null==coverFile||!coverFile.exists()){
+//                return toast("封面文件不存在");
+//            }else if (!coverFile.isFile()||coverFile.length()<=0){
+//                return toast("封面文件不合法");
+//            }
+//            Dialog dialog=new Dialog(getViewContext());
+//            dialog.setContentView(R.layout.dialog_loading,false).setCanceledOnTouchOutside(true).show();
+//            MultipartBody.Part part=builder.createFilePart(coverFile,null,"website");
+//            prepare(ApiSaveFile.class,mUrl).save(part).enqueue(new Callback<Reply<ApiList<Reply<Path>>>>() {
+//                @Override
+//                public void onResponse(Call<Reply<ApiList<Reply<Path>>>> call, Response<Reply<ApiList<Reply<Path>>>> response) {
+//                    dialog.dismiss();
+//                    Reply<ApiList<Reply<Path>>> reply=null!=response?response.body():null;
+//                    ApiList<Reply<Path>> list=null!=reply?reply.getData():null;
+//                    Reply<Path>  pathReply=null!=list&&list.size()>0?list.get(0):null;
+//                    Path replyPath=null!=pathReply?pathReply.getData():null;
+//                    Long coverId=replyPath.getId();
+//                    if (null==id||id<0){
+//                        toast("封面上传失败");
+//                    }else{
+//                        saveCategory(""+id,coverId);
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Reply<ApiList<Reply<Path>>>> call, Throwable t) {
+//                    dialog.dismiss();
+//                    toast("封面上传失败");
+//                }
+//            });
+//            return true;
+//        }
+        return saveCategory(""+id,category.getUrlId());
+    }
 
-        if (null!=cover&&!coverPath.isExistHost()){
-            FileSaveBuilder builder=new FileSaveBuilder();
-            new File(cover);
-//            builder.createFilePart(new File(cover),"");
-//            prepare(ApiSaveFile.class,mUrl).save();
-        }
-        return null!=call(prepare(Api.class, mUrl).saveCategory(id, getViewText(R.id.websiteTravelCategory_titleET,null),
-                isViewChecked(R.id.websiteTravelCategory_bannerCB,false),getViewText(R.id.websiteTravelCategory_noteET,null),
-                category.getUrlPath()),(OnApiFinish<Reply<TravelCategory>>)(int what, String note, Reply<TravelCategory> data, Object arg)-> {
+    private boolean saveCategory(String id,Long coverId){
+        return null!=call(prepare(Api.class, mUrl).saveCategory(id, coverId,getViewText(R.id.websiteTravelCategory_titleET,null),
+                isViewChecked(R.id.websiteTravelCategory_bannerCB,false),getViewText(R.id.websiteTravelCategory_noteET,null)),
+                (OnApiFinish<Reply<TravelCategory>>)(int what, String note, Reply<TravelCategory> data, Object arg)-> {
             toast(note);
             if (null!=data&&data.isSuccess()&&data.getWhat()== What.WHAT_SUCCEED){
                 TravelCategory newCategory=data.getData();
@@ -160,25 +213,42 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
     }
 
     private boolean choosePhoto(int clickCount){
-        return startActivity(LocalPhotoChooseActivity.class,COVER_PHOTO_CHOOSE_REQUEST_CODE);
+        return startActivity(WebsitePhotosActivity.class,COVER_PHOTO_CHOOSE_REQUEST_CODE);
     }
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case COVER_PHOTO_CHOOSE_REQUEST_CODE:
+            case PHOTO_CHOOSE_REQUEST_CODE:
                 Bundle bundle=null!=data?data.getExtras():null;
                 Object object=null!=bundle?bundle.get(Label.LABEL_DATA):null;
-                Object pathObj=null!=object&&object instanceof List&&((List)object).size()>0?((List)object).get(0):null;
-                ObservableField<TravelCategory> field=null!=pathObj&&pathObj instanceof Path?mCategory:null;
-                TravelCategory category=null!=field?field.get():null;
-                if (null!=category){
-                   field.set(null);
-                    category.setUrl((Path)pathObj);
-                   field.set(category);
+                if (null!=object&&object instanceof List&&((List)object).size()>0){
+                    List list=((List)object);
+                    switch (requestCode){
+                        case COVER_PHOTO_CHOOSE_REQUEST_CODE:
+                            Object pathObj=list.get(0);
+                            ObservableField<TravelCategory> field=null!=pathObj&&pathObj instanceof Path?mCategory:null;
+                            TravelCategory category=null!=field?field.get():null;
+                            if (null!=category){
+                                field.set(null);
+                                category.setUrl((Path)pathObj);
+                                field.set(category);
+                            }
+                            break;
+                        case PHOTO_CHOOSE_REQUEST_CODE:
+                            for (Object child:list){
+                                if (null==child||!(child instanceof Path)){
+                                    toast("存在不合法文件");
+                                }else{
+                                   mPhotoAdapter.add((Path)child,true,"After photo choose.");
+                                }
+                            }
+                            break;
+                    }
                 }
                 break;
-           case PHOTO_CHOOSE_REQUEST_CODE:
+//           case PHOTO_CHOOSE_REQUEST_CODE:
 //               Bundle bundle=null!=data?data.getExtras():null;
 //               Object object=null!=bundle?bundle.get(Label.LABEL_DATA):null;
 //               if (null!=object&&object instanceof ArrayList) {
@@ -190,7 +260,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
 //                   }
 ////                   uploadFiles(paths);
 //               }
-               break;
+//               break;
         }
     }
 
@@ -202,7 +272,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
         return mCategory;
     }
 
-    public PhotoGridAdapter getCoverAdapter() {
-        return mCoverAdapter;
+    public WebsiteCategoryPhotoAdapter getPhotoAdapter() {
+        return mPhotoAdapter;
     }
 }

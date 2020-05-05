@@ -11,15 +11,11 @@ import com.merlin.client.databinding.ItemWebPhotoBinding;
 import com.merlin.client.databinding.ItemWebsiteCategoryBinding;
 import com.merlin.debug.Debug;
 import com.merlin.website.TravelCategory;
+import com.merlin.website.WebsiteModel;
 
 import java.util.List;
 
 public abstract class WebsiteCategoriesAdapter extends PageAdapter<String, TravelCategory>{
-    private final String mHost;
-
-    public WebsiteCategoriesAdapter(String host){
-        mHost=host;
-    }
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -29,9 +25,10 @@ public abstract class WebsiteCategoriesAdapter extends PageAdapter<String, Trave
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, TravelCategory data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemWebsiteCategoryBinding){
-            Path url=null!=data?data.getUrl():null;
-            if (null!=url&&null==url.getHost()){
-                url.setHost(mHost);
+            Path path=null!=data?data.getUrl():null;
+            if (null!=path){
+                path.setHost(WebsiteModel.SERVER_IP);
+                path.setPort(WebsiteModel.SERVER_PORT);
             }
             ((ItemWebsiteCategoryBinding)binding).setCategory(data);
         }

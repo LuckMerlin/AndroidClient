@@ -17,12 +17,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <TextView
             android:padding="10dp"
-            android:layout_gravity="right"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
             binding:enableClick="@{true}"
-            binding:textId="@{null==vm.category?R.string.add:R.string.save}"
+            binding:textId="@{R.string.add}"
             style="@style/titleNormalTextView"/>
+        <TextView
+            android:padding="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="left"
+            binding:enableClick="@{true}"
+            binding:textId="@{R.string.save}"
+            android:visibility="@{null==vm.category?View.GONE:View.VISIBLE}"
+            style="@style/titleNormalTextView"/>
+    </RelativeLayout>
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:visibility="@{null==vm.category?View.VISIBLE:View.GONE}"
             android:layout_width="match_parent"
@@ -32,6 +46,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
         <LinearLayout
             android:visibility="@{null==vm.category?View.GONE:View.VISIBLE}"
             android:orientation="vertical"
@@ -108,12 +126,16 @@
                     android:layout_width="150dp"
                     android:layout_height="150dp"/>
             </LinearLayout>
+            <TextView
+                android:text="@{R.string.gallery}"
+                style="@style/smallNormalTextView"/>
             <androidx.recyclerview.widget.RecyclerView
-                android:adapter="@{vm.coverAdapter}"
-                android:visibility="gone"
+                android:adapter="@{vm.photoAdapter}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+
+        </ScrollView>
 
     </LinearLayout>
 </layout>

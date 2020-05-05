@@ -143,71 +143,7 @@ public class MBinding {
 
     @BindingAdapter("android:background")
     public static void setBackground(View view, Object img) {
-        if (null!=view&&null!=img){
-            if (img instanceof Integer){
-                view.setBackgroundResource((Integer)img);
-            }else if (img instanceof Drawable){
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.setBackground((Drawable)img);
-                }
-            }else if (img instanceof String){
-//                String path=(String)img;
-//                RoundedCorners roundedCorners = new RoundedCorners(10);
-//                RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-//               if (null!=path){
-//                    if (path.startsWith("/")){
-//                        path= Address.URL+Address.PREFIX_THUMB+"?path="+path;
-//                    }
-//                }
-//                Debug.D(MBinding.class," "+path);
-//                Glide.with(view.getContext())
-//                        .load(path)
-//                        .centerCrop()
-//                        .apply(options)
-//                        .thumbnail(1f)
-//                        .placeholder(R.drawable.ic_picture_default)
-////                .error(R.drawable.ic_default_pic)
-//                        .into()
-            }else if (img instanceof Path){
-                Path nasFile=(Path)img;
-                String nasPath=nasFile.getPath(null);
-                String host=nasFile.getHost();
-                RequestBuilder<Drawable> builder=null;
-                if (null!=nasPath&&nasPath.length()>0){
-                    if (null!=host&&host.length()>0){
-                        GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
-                                .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
-                        builder= Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
-                    }else{
-                        builder=Glide.with(view.getContext()).load(new File(nasPath));
-                    }
-                }
-                if (null!=builder){
-                    RoundedCorners roundedCorners = new RoundedCorners(1);
-                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
-                            view.getHeight());
-                    CustomTarget<Drawable> simpleTarget = new CustomTarget<Drawable>() {
-                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                            view.setBackground(resource);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    };
-
-                    builder.centerCrop().apply(options).thumbnail(1f)
-//                                .transform(new BlurMaskFilter)
-//                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
-//                                new TopCropTransformation(context))
-                            .placeholder(R.drawable.ic_picture_default)
-                            .error(R.drawable.ic_picture_default).into(simpleTarget);
-                }
-            }
-        }
+        new PathGlider().glide(view,img,true);
     }
 
     @BindingAdapter("adapter")
@@ -256,56 +192,7 @@ public class MBinding {
 
     @BindingAdapter("android:src")
     public static void setSrc(ImageView view, Object path) {
-        if (null!=view) {
-            RequestBuilder<Drawable> builder=null;
-            if (null != path) {
-                String host=null;
-                if (path instanceof Path){
-                    Path nasFile=(Path)path;
-                    String nasPath=nasFile.getPath(null);
-                    host=nasFile.getHost();
-                    Debug.D(MBinding.class,"DDDDDDDEE  "+host+" "+nasPath);
-                    if (null!=nasPath&&nasPath.length()>0){
-                        if (null!=host&&host.length()>0){
-                            Debug.D(MBinding.class,"DDDDDDDEE  "+host+" "+nasPath);
-                            GlideUrl glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
-                                    .LABEL_PATH, new Encoder().encode(nasPath,null,"utf-8")).build());
-                            builder= Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
-                        }else{
-                            builder=Glide.with(view.getContext()).load(new File(nasPath));
-                        }
-                    }
-                }else if (path instanceof Integer){
-                    if (!path.equals(Resources.ID_NULL)) {
-                        view.setImageResource((Integer) path);
-                        Clicker.putRes(view, new Res((Integer) path, null));
-                        return;
-                    }
-                }else if (path instanceof String){
-                    String value=(String)path;
-                    if (null!=value&&value.length()>0){
-                            if (!value.startsWith("http")) {
-                                builder=Glide.with(view.getContext()).load(new File(value));
-                            }else {
-                                builder=Glide.with(view.getContext()).load(value);
-                            }
-                        }
-                }
-                if (null!=builder) {
-                    RoundedCorners roundedCorners = new RoundedCorners(10);
-                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(), view.getHeight());
-                    builder.centerCrop().apply(options).thumbnail(1f)
-//                                .transform(new BlurMaskFilter)
-//                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
-//                                new TopCropTransformation(context))
-                            .placeholder(R.drawable.ic_picture_default)
-                            .error(R.drawable.ic_picture_default).into(view);
-                    return;
-                }
-            }
-            Clicker.putRes(view,null);
-            view.setImageBitmap(BitmapFactory.decodeResource(view.getResources(),R.drawable.ic_picture_default));//Clean
-        }
+        new PathGlider().glide(view,path,false);
     }
 
 

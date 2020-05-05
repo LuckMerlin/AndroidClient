@@ -17,21 +17,24 @@ public class Path implements Parcelable {
     public final static int PATH_WHAT_NONE=0;
     public final static int PATH_WHAT_DELETE=90001;
     public final static int PATH_WHAT_ADD=90002;
+//    private final static String LOCAL_HOST="localHost";
+    private Long  id;
     private String parent;
     private String name;
     private String extension;
+    private int what=PATH_WHAT_NONE;
     private String host;
-    private Integer what;
+    private int port;
 
-    public Path(){
+    protected Path(){
         this(null,null,null);
     }
 
-    public Path(String parent,String name,String extension){
+    protected Path(String parent,String name,String extension){
         this(null,parent,name,extension);
     }
 
-    public Path(String host,String parent,String name,String extension){
+    protected Path(String host,String parent,String name,String extension){
         this.host=host;
         this.parent=parent;
         this.name=name;
@@ -62,6 +65,21 @@ public class Path implements Parcelable {
         return host;
     }
 
+    public final String getHostName(){
+        return null!=host&&host.length()>0?host+":"+port:null;
+    }
+
+    /**
+     * @deprecated
+     */
+    public final String getHostUrl(){
+        return (null!=host?host:"")+":"+port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
     public final String getPath() {
         return getPath(null);
     }
@@ -74,11 +92,25 @@ public class Path implements Parcelable {
         return what;
     }
 
+    public final Long getId() {
+        return id;
+    }
+
+    /**
+     * @deprecated
+     */
     public final boolean isExistHost(){
         String host=this.host;
         return null!=host&&host.length()>0;
     }
 
+    public final boolean isLocal(){
+        return null==id||id<0;
+    }
+
+    /**
+     * @deprecated
+     */
     public final boolean isNetworkHost(){
         String host=this.host;
         return null!=host&&host.length()>0&&host.toLowerCase().startsWith("http://");
@@ -89,6 +121,10 @@ public class Path implements Parcelable {
         String path=null!=parent&&null!=value?parent+value:null;
         String host=null!=hostDivider?this.host:null;
         return null!=host?host+(hostDivider.length()<=0?"/":hostDivider):path;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public final boolean applyPathChange(Reply<Path> reply){
@@ -123,6 +159,10 @@ public class Path implements Parcelable {
     public static <T extends Path> Path build(Object object,T result){
         Path path=null;
         if (null!=object){
+            if (object instanceof Path){
+                Path objPath=(Path)object;
+                return new Path(objPath.getHost(),objPath.getParent(),objPath.getName(false),objPath.getExtension());
+            }
             if (object instanceof File){
                 File file=(File)object;
                 String parent=file.getParent();
@@ -161,7 +201,7 @@ public class Path implements Parcelable {
                         extension=name.substring(index);
                         name=name.substring(0,index);
                     }
-                    return new Path(host,parent,name,extension);
+                    return new Path(null!=host&&host.length()>0?host:null,parent,name,extension);
                 }else if (object instanceof URL){
                     ((URL)object).getHost();
                 }else if (object instanceof URI){
@@ -184,13 +224,19 @@ public class Path implements Parcelable {
         dest.writeString(name);
         dest.writeString(extension);
         dest.writeString(host);
+        dest.writeInt(port);
+        dest.writeInt(what);
     }
 
     protected Path(Parcel parcel){
-        parent=parcel.readString();
-        name=parcel.readString();
-        extension=parcel.readString();
-        host=parcel.readString();
+        if (null!=parcel) {
+            parent = parcel.readString();
+            name = parcel.readString();
+            extension = parcel.readString();
+            host = parcel.readString();
+            port = parcel.readInt();
+            what = parcel.readInt();
+        }
     }
 
     public static final Creator<Path> CREATOR = new Creator<Path>() {
