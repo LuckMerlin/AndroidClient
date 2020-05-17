@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.ConveyorActivity;
 import com.merlin.adapter.ListAdapter;
@@ -171,6 +172,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
                         return launchGoTo("After tap click");
                     case R.string.exit:
                         return finishActivity("After tap click.")||true;
+                    case R.string.terminal:
+                        return addTerminal("After tap click")||true;
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -233,6 +236,15 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
         }
         FileBrowser model=getCurrentModel();
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
+    }
+
+
+    private boolean addTerminal(String debug){
+        ViewDataBinding binding=null;
+        return new Dialog(getViewContext()).setContentView(binding,true).show((View view, int clickCount, int resId, Object data) ->{
+
+                return false;
+        },true);
     }
 
     private boolean copy(ArrayList<Document> files,int coverMode, String debug){

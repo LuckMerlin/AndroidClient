@@ -1,8 +1,8 @@
 package com.merlin.media;
 
-import com.merlin.player.Playable;
+import com.merlin.player.IPlayable;
 
-public final class Playing<T extends Playable>  implements Playable{
+public final class Playing<T extends IPlayable>  implements IPlayable {
     public final static int PLAYING_TYPE_NONE= 0x00;//0000 0000
     public final static int PLAYING_TYPE_PENDING= 0x01;//0000 0001
     public final static int PLAYING_TYPE_IN_QUEUE= 0x02;//0000 0010

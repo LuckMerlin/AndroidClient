@@ -29,6 +29,8 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.util.Encoder;
 import com.merlin.util.Resource;
+import com.merlin.view.Clicker;
+import com.merlin.view.Res;
 
 import java.io.File;
 
@@ -55,8 +57,11 @@ public class PathGlider {
             set(view,null,background);
             if (path instanceof Integer){
                 if (background){
+
+
                     view.setBackgroundResource((Integer)path);
                 }else if (view instanceof ImageView){
+                    Clicker.putRes(view, new Res((Integer)path,null));
                     ((ImageView)view).setImageResource((Integer)path);
                 }
                 return true;

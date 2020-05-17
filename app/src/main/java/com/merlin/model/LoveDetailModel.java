@@ -118,8 +118,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 
     private void applyLove(Love love){
         mLove.set(love);
-        mContent.set(null!=love?love.getData():null);
-        mTitle.set(null!=love?love.getName():null);
+        mContent.set(null!=love?love.getContent():null);
+        mTitle.set(null!=love?love.getTitle():null);
         mPlanTime.set(null!=love?love.getTime():null);
         mPhotoAdapter.set(null!=love?love.getImage():null,"After love apply.");
     }
@@ -144,7 +144,6 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         loveTextMap.put(Label.LABEL_DATA, content);
         loveTextMap.put(Label.LABEL_MODE, null!=mode?mode:"");
         Debug.D(getClass(),"Save love "+title+" "+(null!=debug?debug:"."));
-        final String dialogKey=showLoading(R.string.loading);
         final List<Path> adapterPhotos=mPhotoAdapter.getData();
         List<MultipartBody.Part> parts=null;
         if (null!=adapterPhotos&&adapterPhotos.size()>0){
@@ -164,6 +163,10 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                     }
                 }
             }};
+        if (parts==null||parts.size()<=0){
+            return toast(R.string.photo,getText(R.string.inputNotNull));
+        }
+        final String dialogKey=showLoading(R.string.loading);
         return null!=LoveDetailModel.this.call(prepare(Api.class,Address.LOVE_ADDRESS).save(loveTextMap,parts), null,(OnApiFinish<Reply<Love>>)(what, note, data,arg)-> {
             dismissLoading(dialogKey);
             toast(note);

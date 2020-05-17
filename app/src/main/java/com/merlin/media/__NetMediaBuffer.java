@@ -5,8 +5,8 @@ import com.merlin.bean.File_;
 import com.merlin.client.__Client;
 import com.merlin.debug.Debug;
 import com.merlin.browser.DownloadApi;
+import com.merlin.player.IPlayable;
 import com.merlin.player.MediaBuffer;
-import com.merlin.player.Playable;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Closer;
 import com.merlin.util.FileMaker;
@@ -40,7 +40,7 @@ public final class __NetMediaBuffer extends MediaBuffer<File_> {
             Debug.D(getClass(),"Can't play media "+(null!=debug?debug:".")+" retrofit="+retrofit);
             return false;
         }
-        final Playable media=getPlayable();
+        final IPlayable media=getPlayable();
 //        final String url=null!=media?media.getPath():null;
         final String url=null;
         if (null==url||url.length()<=0){

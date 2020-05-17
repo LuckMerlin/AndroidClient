@@ -5,10 +5,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.player.Playable;
+import com.merlin.player.IPlayable;
 import com.merlin.util.Time;
 
-public class NasMedia implements Parcelable, Playable {
+public class NasMedia implements Parcelable, IPlayable {
     private String md5;
     private String title;
     private String album;

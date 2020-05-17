@@ -361,7 +361,7 @@ Java_com_merlin_player_Player_playFile(JNIEnv *env,jobject type,jstring path,jfl
 }
 
 JNIEXPORT jint JNICALL
-Java_com_merlin_player_Player_getPlayerStatus(JNIEnv *env, jobject thiz) {
+Java_com_merlin_player_BK_1Player_getPlayerStatus(JNIEnv *env, jobject thiz) {
     return NULL!=handle?handle->playStatus:STATUS_IDLE;
 }
 
@@ -383,7 +383,7 @@ Java_com_merlin_player_Player_seek(JNIEnv *env, jobject thiz, jfloat seek) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_start(JNIEnv *env, jobject thiz, jfloat seek) {
+Java_com_merlin_player_BK_1Player_start(JNIEnv *env, jobject thiz, jfloat seek) {
     if (NULL!=handle){
         if (handle->playStatus==STATUS_PAUSE){
             LOGD("Restart play media file.%s",handle->filePath);
@@ -410,7 +410,7 @@ Java_com_merlin_player_Player_getDuration(JNIEnv *env, jobject thiz) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
+Java_com_merlin_player_BK_1Player_pause(JNIEnv *env, jobject thiz, jboolean stop) {
     return pauseMedia(stop);
 }
 

@@ -65,7 +65,7 @@
                 android:text=":"
                 android:layout_marginRight="5dp"
                 style="@style/itemLoveKeyTextView"/>
-            <EditText
+            <TextView
                 android:text="@{``+vm.love.id}"
                 android:gravity="left"
                 android:minWidth="50dp"
@@ -90,8 +90,7 @@
                 android:text=":"
                 android:layout_marginRight="5dp"
                 style="@style/itemLoveKeyTextView"/>
-            <EditText
-                android:text="@{``+vm.love.account}"
+            <TextView
                 android:gravity="left"
                 android:minWidth="50dp"
                 android:background="@android:color/transparent"
@@ -173,7 +172,7 @@
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            binding:adapter="@{vm.photoAdapter}"
+            android:adapter="@{vm.photoAdapter}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </LinearLayout>

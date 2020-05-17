@@ -7,27 +7,26 @@ import android.media.AudioTrack;
 import com.merlin.bean.NasMedia;
 import com.merlin.debug.Debug;
 import com.merlin.media.Indexer;
-import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.media.NasMediaBuffer;
 import com.merlin.media.NetMediaBuffer;
+import com.merlin.player.BK_Player;
+import com.merlin.player.IPlayable;
 import com.merlin.player.MediaBuffer;
 import com.merlin.player.OnMediaFrameDecodeFinish;
 import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Playable;
-import com.merlin.player.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayerStatusUpdate {
+public class MPlayer extends BK_Player implements OnMediaFrameDecodeFinish,OnPlayerStatusUpdate {
     public static final int PLAY_TYPE_NONE = 0x00; //0000 0000
     public static final int PLAY_TYPE_ORDER_NEXT = 0x01; //0000 0001
     public static final int PLAY_TYPE_PLAY_NOW = 0x02; //0000 0010
     public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x04; //0000 0100
     public static final int PLAY_TYPE_CLEAN_QUEUE = 0x08; //0000 1000
-    private final List<Playable> mQueue=new ArrayList<>();
+    private final List<IPlayable> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
     private Mode mPlayMode;
@@ -100,22 +99,22 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     @Override
-    public void onPlayerStatusUpdated(Player player, int status, String note, Playable media, Object data) {
+    public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
     }
 
     @Override
     protected final MediaBuffer onResolveNext(MediaBuffer buffer) {
-        Playable playable=null!=buffer?buffer.getPlayable():null;
+        IPlayable playable=null!=buffer?buffer.getPlayable():null;
         Mode mode=mPlayMode;
-        Playable played=null!=mode&&mode==Mode.SINGLE?buffer.getPlayable():null;
+        IPlayable played=null!=mode&&mode==Mode.SINGLE?buffer.getPlayable():null;
         if (null!=mode&&mode==Mode.SINGLE&&null!=played){
             return createMediaBuffer(played,0);
         }
-        Playable media=indexQueueNext(playable,false);
+        IPlayable media=indexQueueNext(playable,false);
         return null!=media?createMediaBuffer(media,0):null;
     }
 
-    private MediaBuffer createMediaBuffer(Playable media, double seek){
+    private MediaBuffer createMediaBuffer(IPlayable media, double seek){
         if (null!=media){
             if (media instanceof NasMedia){
                 return new NasMediaBuffer((NasMedia)media,seek);
@@ -137,13 +136,13 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return null;
     }
 
-    public final MediaBuffer setNext(Playable playable,double seek,String debug){
+    public final MediaBuffer setNext(IPlayable playable, double seek, String debug){
         MediaBuffer buffer=null!=playable?createMediaBuffer(playable,seek):null;
         return null!=buffer&&setNext(buffer,debug)?buffer:null;
     }
 
     public final boolean cleanPlayingQueue(String debug){
-        List<Playable> queue=mQueue;
+        List<IPlayable> queue=mQueue;
         int size=null!=queue?queue.size():-1;
         if (size>0){
             Debug.D(getClass(),"Clean playing queue("+size+")"+(null!=debug?debug:"."));
@@ -153,7 +152,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return false;
     }
 
-    public final boolean play(Playable playable, double seek, OnPlayerStatusUpdate update,String debug){
+    public final boolean play(IPlayable playable, double seek, OnPlayerStatusUpdate update, String debug){
         if (null!=playable){
              MediaBuffer buffer=createMediaBuffer(playable,seek);
              if (null!=buffer){
@@ -171,8 +170,8 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             if (object instanceof Integer){
                 int index=(Integer)object;
                 int size;
-                Playable media;
-                List<Playable> playing=mQueue;
+                IPlayable media;
+                List<IPlayable> playing=mQueue;
                 if (null!=playing&&index>=0){
                     synchronized (playing){
                         size=playing.size();
@@ -184,8 +183,8 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
                 }
                 Debug.W(getClass(),"Can't play media.index="+index+" playing="+playing);
                 return false;
-            }else if (object instanceof Playable){
-                return play((Playable)object,seek,update,debug);
+            }else if (object instanceof IPlayable){
+                return play((IPlayable)object,seek,update,debug);
             }
             Debug.W(getClass(),"Can't play media with seek."+object+" "+seek);
             return false;
@@ -198,14 +197,14 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return false;
     }
 
-    public synchronized final boolean append(Playable media){
+    public synchronized final boolean append(IPlayable media){
         return null!=media&&add(media,-1);
     }
 
-    public synchronized final boolean add(Playable media, int index){
+    public synchronized final boolean add(IPlayable media, int index){
         Boolean exist=null!=media?!isExist(media):null;
         if (null!=exist&&exist){
-            List<Playable> queue=mQueue;
+            List<IPlayable> queue=mQueue;
             if (null!=queue){
                 int size=null!=queue?queue.size():0;
                 synchronized (queue){
@@ -220,15 +219,15 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     public final int getQueueSize(){
-        List<Playable> queue=mQueue;
+        List<IPlayable> queue=mQueue;
         return null!=queue?queue.size():-1;
     }
 
-    public final Playable getPlayingMedia(Object ...objects){
-        Playable playable=super.getPlaying();
+    public final IPlayable getPlayingMedia(Object ...objects){
+        IPlayable playable=super.getPlaying();
         if (null!=playable){
             if (null!=objects&&objects.length>0){
-                Playable media;
+                IPlayable media;
                 for (Object object:objects ) {
                     if (null!=object&&null!=(media=indexMedia(object))){
                         return media;
@@ -242,7 +241,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     public final boolean playPre(String debug){
-        List<Playable> queue=mQueue;
+        List<IPlayable> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
         if (null!=queue&&null!=indexer){
@@ -250,7 +249,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
             synchronized (queue){
                 int current=index(super.getPlaying());
                 int count=queue.size();
-                Playable playing=count<=0?getPlaying():null;
+                IPlayable playing=count<=0?getPlaying():null;
                 if (null!=playing){
                     return play(playing,0,null,debug);
                 }
@@ -262,12 +261,12 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     public final boolean playNext(boolean user,String debug){
-        Playable next=indexQueueNext(super.getPlaying(),user);
+        IPlayable next=indexQueueNext(super.getPlaying(),user);
         return null!=next&&play(next,0,null,debug);
     }
 
-    public final Playable indexQueueNext(Playable media, boolean user){
-        List<Playable> queue=mQueue;
+    public final IPlayable indexQueueNext(IPlayable media, boolean user){
+        List<IPlayable> queue=mQueue;
         Indexer indexer=mIndexer;
         Mode mode=mPlayMode;
         if (null!=queue&&null!=indexer){
@@ -287,7 +286,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
 
     @Override
     public long getDuration() {
-        Playable playable=getPlaying();
+        IPlayable playable=getPlaying();
         return null!=playable&&playable instanceof NasMedia?((NasMedia)playable).getDuration():0;
     }
 
@@ -303,7 +302,7 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
     }
 
     public final boolean pause(boolean stop, Object... objects) {
-        Playable playing=super.getPlaying();
+        IPlayable playing=super.getPlaying();
         if (null!=playing){
             if (null!=objects&&objects.length>0){
                 for (Object object:objects) {
@@ -328,18 +327,18 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return null!=object&&object instanceof Integer?(Integer) object:-1;
     }
 
-    public final Playable indexMedia(Object media){
+    public final IPlayable indexMedia(Object media){
         return null!=media?findMedia(mQueue,media):null;
     }
 
-    private final Playable findMedia(List<Playable> queue, Object media){
+    private final IPlayable findMedia(List<IPlayable> queue, Object media){
         Object[] objects= find(queue,media);
         Object object=null!=objects&&objects.length==2?objects[0]:null;
-        return null!=object&&object instanceof Playable ?(Playable)object:null;
+        return null!=object&&object instanceof IPlayable ?(IPlayable)object:null;
     }
 
     private Object[] indexInQueue(Object ...objects){
-        List<Playable> list=mQueue;
+        List<IPlayable> list=mQueue;
         if (null!=objects&&objects.length>0&&null!=list){
             Object[] result;
             for (Object object:objects) {
@@ -351,11 +350,11 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return null;
     }
 
-    private Object[] find(List<Playable> queue, Object media){
+    private Object[] find(List<IPlayable> queue, Object media){
         if (null!=media&&null!=queue){
             synchronized (queue){
                 int size=null!=media&&null!=queue&&null!=media?queue.size():-1;
-                Playable child;
+                IPlayable child;
                 for (int i=0;i<size;i++){
                     child=queue.get(i);
                     if (null!=child&&child.equals(media)){
@@ -367,10 +366,10 @@ public class MPlayer extends Player implements OnMediaFrameDecodeFinish,OnPlayer
         return null;
     }
 
-    public final List<Playable> getQueue() {
-        List<Playable> result=null;
-        Playable playing=getPlaying();
-        List<Playable> list=mQueue;
+    public final List<IPlayable> getQueue() {
+        List<IPlayable> result=null;
+        IPlayable playing=getPlaying();
+        List<IPlayable> list=mQueue;
         int size=null!=list?list.size():0;
         final boolean existPlaying=null!=playing;
         if (size>0||existPlaying){

@@ -26,15 +26,21 @@ import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
+import com.merlin.player.BK_Player;
+import com.merlin.player.FileBuffer;
 import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.IPlayable;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 import com.merlin.player.Time;
-import com.merlin.server.Retrofit;
+import com.merlin.player1.LPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label,OnPlayerBindChange,OnPlayerStatusUpdate {
@@ -55,6 +61,51 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
             player.seek(progress/100.f,"After seekBar tap click.");
         }
     };
+
+    @Override
+    protected void onRootAttached(View root) {
+        super.onRootAttached(root);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                dd();
+            }
+        }).start();
+    }
+
+    private void dd(){
+        try {
+            FileInputStream fis=new FileInputStream("/sdcard/Musics/大壮 - 我们不一样.mp3");
+//            FileInputStream fis=new FileInputStream("/storage/sdcard0/gn.mp3");
+            new LPlayer().play(new Playable() {
+                @Override
+                public int read(byte[] buffer) {
+                    if (null!=buffer&&buffer.length>0){
+                        try {
+                            return fis.read(buffer);
+                        } catch (IOException e) {
+                            Debug.D(getClass(),"ddd "+e);
+                            e.printStackTrace();
+                        }
+                    }
+                    return BUFFER_READ_FINISH_NORMAL;
+                }
+
+                @Override
+                public boolean open() {
+                    return false;
+                }
+
+                @Override
+                public boolean close() {
+                    return false;
+                }
+            },0);
+        } catch (FileNotFoundException e) {
+            Debug.D(getClass(),""+e);
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
@@ -108,7 +159,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     }
 
     @Override
-    public void onPlayerStatusUpdated(Player player, int status, String note, Playable media, Object data) {
+    public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
         mStatus.set(status);
         switch (status){
             case STATUS_START: updatePlaying(null,"While status start.");break;
@@ -181,7 +232,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 
     private boolean showPlayingQueue(String debug){
         MediaPlayer player=mPlayer;
-        List<Playable> playing=null!=player?player.getQueue():null;
+        List<IPlayable> playing=null!=player?player.getQueue():null;
         final int size=null!=playing?playing.size():-1;
         if (size<=0){
             return toast(R.string.listEmpty)&&false;
@@ -224,7 +275,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         NasMedia playing=media;
         if (null==playing){
             MediaPlayer player=mPlayer;
-            Playable playable=null!=player?player.getPlaying():null;
+            IPlayable playable=null!=player?player.getPlaying():null;
             playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
         }
         mCurrPosition.set(Time.formatTime(0));

@@ -3,9 +3,9 @@ package com.merlin.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.merlin.player.Playable;
+import com.merlin.player.IPlayable;
 
-public class File_ implements Parcelable, Playable {
+public class File_ implements Parcelable, IPlayable {
     private long id;
     private String path;
     private String thumbImageUrl;

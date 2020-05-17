@@ -16,8 +16,8 @@ import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
+import com.merlin.player.IPlayable;
 import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Playable;
 import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
@@ -94,13 +94,13 @@ public class MediaPlayService extends Service implements Status {
         }
 
         @Override
-        public Playable getPlaying(Object... obj) {
+        public IPlayable getPlaying(Object... obj) {
             MPlayer player = mPlayer;
             return null != player ? player.getPlayingMedia(obj) : null;
         }
 
         @Override
-        public List<Playable> getQueue() {
+        public List<IPlayable> getQueue() {
             MPlayer player = mPlayer;
             return null != player ? player.getQueue() : null;
         }
@@ -158,14 +158,14 @@ public class MediaPlayService extends Service implements Status {
                         }
                         if ((playType&MPlayer.PLAY_TYPE_PLAY_NOW)==MPlayer.PLAY_TYPE_PLAY_NOW){
                             Object next=((List)object).get(0);
-                            if (null!=next&&next instanceof Playable){
-                                play((Playable)next,seek,"After call from intent.");
+                            if (null!=next&&next instanceof IPlayable){
+                                play((IPlayable)next,seek,"After call from intent.");
                             }
                         }
                         if ((playType&MPlayer.PLAY_TYPE_ORDER_NEXT)==MPlayer.PLAY_TYPE_ORDER_NEXT){
                             Object obj=((List)object).get(0);
-                            if (null!=obj&&obj instanceof Playable){
-                                setNext(((Playable)obj),seek,"After call from intent.");
+                            if (null!=obj&&obj instanceof IPlayable){
+                                setNext(((IPlayable)obj),seek,"After call from intent.");
                             }
                         }
                     }
@@ -179,7 +179,7 @@ public class MediaPlayService extends Service implements Status {
         return null!=player&&player.cleanPlayingQueue(debug);
     }
 
-    private boolean play(Playable playable,double seek,String debug){
+    private boolean play(IPlayable playable, double seek, String debug){
         final MPlayer player=null!=playable?mPlayer:null;
         return null!=player&&player.play(playable,seek,null,debug);
     }
@@ -199,7 +199,7 @@ public class MediaPlayService extends Service implements Status {
         return false;
     }
 
-    private boolean setNext(Playable playable,double seek,String debug){
+    private boolean setNext(IPlayable playable, double seek, String debug){
         final MPlayer player=null!=playable?mPlayer:null;
         if (null!=player&&null!=player.setNext(playable,seek,debug)){
             return toast(getText(R.string.setNext)+ " "+playable.getTitle());

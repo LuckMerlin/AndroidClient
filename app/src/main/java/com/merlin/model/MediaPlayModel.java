@@ -4,7 +4,7 @@ import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
-import com.merlin.player.Playable;
+import com.merlin.player.IPlayable;
 import com.merlin.player.Status;
 
 public class MediaPlayModel extends MediaDisplayModel implements Label, What,Status {
@@ -50,7 +50,7 @@ public class MediaPlayModel extends MediaDisplayModel implements Label, What,Sta
 //    }
 
     @Override
-    public void onPlayingChange(Playable playable) {
+    public void onPlayingChange(IPlayable playable) {
         super.onPlayingChange(playable);
         String title=null!=playable?playable.getTitle():null;
         setStatusBar(null!=playable?title:R.string.mediaPlay, StatusBar.CENTER);

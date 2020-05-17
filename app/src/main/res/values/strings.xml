@@ -142,6 +142,7 @@
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="coverPhoto">封面</string>
+    <string name="terminal">终端</string>
 
     <!---->
     <string name="personalWebsite">网站</string>

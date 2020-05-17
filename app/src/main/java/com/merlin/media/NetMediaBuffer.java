@@ -3,8 +3,8 @@ package com.merlin.media;
 import com.merlin.api.What;
 import com.merlin.client.__Client;
 import com.merlin.debug.Debug;
+import com.merlin.player.IPlayable;
 import com.merlin.player.MediaBuffer;
-import com.merlin.player.Playable;
 import com.merlin.util.Closer;
 
 import java.io.File;
@@ -18,7 +18,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public abstract class NetMediaBuffer<T extends Playable>  extends MediaBuffer<T> {
+public abstract class NetMediaBuffer<T extends IPlayable>  extends MediaBuffer<T> {
     private Reader mReader;
 
     public NetMediaBuffer(T media, double seek){

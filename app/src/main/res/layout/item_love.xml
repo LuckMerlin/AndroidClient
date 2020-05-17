@@ -19,11 +19,10 @@
         binding:enableClick="@{Clicker.click(love)}"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:background="@{love.mode.equals(``+What.WHAT_CANCEL)?Color.argb(150,0,0,0):Color.TRANSPARENT}"
         android:layout_margin="3dp"
         android:layout_height="@dimen/listItemSizeLessMedium">
         <TextView
-            android:text="@{``+position}"
+            android:text="@{``+position+` `}"
             android:layout_gravity="center_vertical"
             style="@style/titleNormalTextView"/>
         <LinearLayout
@@ -32,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:text="@{love.name}"
+                android:text="@{love.title}"
                 style="@style/titleNormalTextView"/>
             <LinearLayout
                 android:orientation="horizontal"

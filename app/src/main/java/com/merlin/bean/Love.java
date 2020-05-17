@@ -3,37 +3,15 @@ package com.merlin.bean;
 import java.util.List;
 
 public final class Love<T extends Path> {
-    private String name;
-    private String data;
-    private List<T> image;
-    private long id;
-    private String mode;
-    private String account;
+    private String title;
+    private String content;
     private long createTime;
     private long time;
-
-    public Love(){
-        this(null,0,null,null);
-    }
-
-    public Love(String name,long time,String content,List<T> photos){
-        this.name=name;
-        this.time=time;
-        this.data=content;
-        this.image=photos;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public String getMode() {
-        return mode;
-    }
+    private long id;
+    private String permission;
+    private String type;
+    private long url;
+    private List<T> image;
 
     public long getTime() {
         return time;
@@ -43,12 +21,28 @@ public final class Love<T extends Path> {
         return createTime;
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     public long getId() {
         return id;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public long getUrl() {
+        return url;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public List<T> getImage() {

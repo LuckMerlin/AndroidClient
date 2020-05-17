@@ -1,14 +1,12 @@
 package com.merlin.player;
 
-import android.os.Handler;
-
 import java.io.Closeable;
 import java.io.IOException;
 
 /*
 Decode for jni
  */
-public abstract class MediaBuffer<T extends Playable> {
+public abstract class MediaBuffer<T extends IPlayable> {
     public final static int READ_FINISH_SUCCEED = -1220;
     public final static int READ_FINISH_OUT_BOUNDS = -1221;
     public final static int READ_FINISH_TERMINAL = -1222;
