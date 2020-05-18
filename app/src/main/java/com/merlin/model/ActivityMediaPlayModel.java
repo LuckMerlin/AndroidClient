@@ -65,12 +65,13 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                dd();
-            }
-        }).start();
+        dd();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                dd();
+//            }
+//        }).start();
     }
 
     private void dd(){

@@ -13,6 +13,7 @@ import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.NasFileDetailBinding;
+import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 
 import java.util.ArrayList;
@@ -46,6 +47,9 @@ public class NasFileBrowser extends FileBrowser implements Label {
         @POST(Address.PREFIX_FILE+"/create")
         @FormUrlEncoded
         Observable<Reply<Path>> createPath(@Field(LABEL_FOLDER) boolean folder,@Field(LABEL_PARENT) String parent,@Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
+
+        @POST(Address.PREFIX_USER_REBOOT)
+        Observable<Reply> rebootClient();
     }
 
     public NasFileBrowser(ClientMeta meta,Callback callback){
@@ -105,6 +109,21 @@ public class NasFileBrowser extends FileBrowser implements Label {
     @Override
     protected boolean onOpenPath(Document meta, String debug) {
 
+        return false;
+    }
+
+    @Override
+    protected boolean onReboot(String debug) {
+        Dialog dialog=new Dialog(getViewContext());
+        dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
+            if (resId==R.string.sure){
+                Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
+                call(prepare(Api.class,Address.URL,null).rebootClient(),null,
+                        null,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
+            }
+            dialog.dismiss();
+            return true;
+        });
         return false;
     }
 }

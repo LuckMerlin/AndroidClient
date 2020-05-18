@@ -162,6 +162,10 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         },debug);
     }
 
+    public final boolean reboot(String debug){
+        return onReboot(debug);
+    }
+
     public final boolean renamePath(Document meta, int coverMode, String debug){
         final String path=null!=meta?meta.getPath(null):null;
         if (null!=path&&path.length()>0){
@@ -315,6 +319,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                     return true; });
     }
 
+    protected abstract boolean onReboot(String debug);
     protected abstract boolean onOpenPath(Document meta,String debug);
     protected abstract boolean onShowPathDetail(Document meta,String debug);
     protected abstract boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish,String debug);
@@ -423,7 +428,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         return null!=retrofit?retrofit.call(observable,subscribeOn,observeOn,callbacks):null;
     }
 
-    private Context getViewContext(){
+    protected final Context getViewContext(){
         return getAdapterContext();
     }
 

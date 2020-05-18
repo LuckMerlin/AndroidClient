@@ -1,5 +1,6 @@
 #include <jni.h>
 #include "baseclass/log.h"
+#include <pthread.h>
 #define LOG_TAG "LM"
 #include "FileOperator.h"
 #include "mad/mad.h"
@@ -52,8 +53,6 @@ struct BufferHandle{
     mad_timer_t timer;
     int playStatus;
     jbyteArray  buffer;
-    jbyteArray  cached;
-    jsize cacheOffset;
 };
 
 struct BufferHandle* handle;
@@ -191,6 +190,133 @@ int readMediaBytes(jobject media,int offset,int length){
 
 }
 
+pthread_t playerThread,cacheThread;
+
+void cache_function (void *ptr){
+    while (JNI_TRUE){
+        LOGD("sfasdfasafdasdfasda ");
+    }
+    cacheThread=NULL;
+}
+
+void player_function (void *ptr){
+    JNIEnv *env;
+    int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
+    if(res==JNI_OK) {
+        size_t handleSize = sizeof(struct BufferHandle);
+        handle = (struct BufferHandle *) malloc(handleSize);
+        handle->playStatus = STATUS_START;
+        notifyStatusChange(STATUS_START, NULL, "Media play start.");
+        handle->buffer = (*env)->NewByteArray(env, INPUT_BUFFER_SIZE);
+        mad_stream_init(&(handle->stream));
+        mad_frame_init(&handle->frame);
+        mad_timer_reset(&handle->timer);
+        mad_synth_init(&handle->synth);
+        while (JNI_TRUE){ //Wait media
+            int readState=BUFFER_READ_FINISH_NORMAL;
+            do{
+                int readLength=0;
+                if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
+                    if(handle->stream.next_frame != 0){
+                        int leftOver = handle->stream.bufend - handle->stream.next_frame;
+                        int i;
+                        for(i= 0;i<leftOver;i++){
+                            (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
+                        }
+                        int readBytes =readMediaBytes(media,leftOver,INPUT_BUFFER_SIZE-leftOver);
+                        readState=readBytes;
+                        if(readBytes <= 0){
+                            break;
+                        }
+                        readLength = leftOver + readBytes;
+                    }else{
+                        readLength  = readMediaBytes(media,0,INPUT_BUFFER_SIZE);
+                        readState=readLength;
+                        if(readLength <= 0){
+                            break;
+                        }
+                    }
+                    jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
+                    unsigned char* buf=(unsigned char*)bBuffer;
+                    (*env)->DeleteLocalRef(env, bBuffer);
+                    mad_stream_buffer(&handle->stream,buf,readLength);
+                    handle->stream.error = MAD_ERROR_NONE;
+                }
+                int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
+                if(decodeResult){
+                    if(handle->stream.error == MAD_ERROR_BUFLEN ||(MAD_RECOVERABLE(handle->stream.error))){
+                        continue;
+                    }
+                }else{
+                    break;
+                }
+            }while(JNI_TRUE);
+            mad_synth_frame(&handle->synth, &handle->frame);
+            onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->timer, handle->frame.header, handle->synth.pcm);
+            if (readState==BUFFER_READ_FINISH_EOF){
+                handle->playStatus=STATUS_FINISH;
+                LOGD("End play media file.");
+                notifyStatusChange(STATUS_FINISH,media,"Finish media.");
+                break;
+            }
+//        do{
+//            int readLength=0;
+//            if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
+//                if(handle->stream.next_frame != 0){
+//                    int leftOver = handle->stream.bufend - handle->stream.next_frame;
+//                    int i;
+//                    for(i= 0;i<leftOver;i++){
+//                        (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
+//                    }
+//                    int readBytes =readMediaBytes(media,leftOver,INPUT_BUFFER_SIZE-leftOver);
+//                    readState=readBytes;
+//                    if(readBytes <= 0){
+//                        break;
+//                    }
+//                    readLength = leftOver + readBytes;
+//                }else{
+//                    readLength  = readMediaBytes(media,0,INPUT_BUFFER_SIZE);
+//                    readState=readLength;
+//                    if(readLength <= 0){
+//                        break;
+//                    }
+//                }
+//                jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
+//                unsigned char* buf=(unsigned char*)bBuffer;
+//                (*env)->DeleteLocalRef(env, bBuffer);
+//                mad_stream_buffer(&handle->stream,buf,readLength);
+//                handle->stream.error = MAD_ERROR_NONE;
+//            }
+//            int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
+//            if(decodeResult){
+//                if(handle->stream.error == MAD_ERROR_BUFLEN ||(MAD_RECOVERABLE(handle->stream.error))){
+//                    continue;
+//                }
+//            }else{
+//                break;
+//            }
+//        }while (JNI_TRUE);
+//        mad_synth_frame(&handle->synth, &handle->frame);
+////        LOGD("%d", handle->synth.pcm);
+//        onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->timer, handle->frame.header, handle->synth.pcm);
+//        if (readState==BUFFER_READ_FINISH_EOF){
+//            handle->playStatus=STATUS_FINISH;
+//            LOGD("End play media file.");
+//            notifyStatusChange(STATUS_FINISH,media,"Finish media.");
+//            break;
+//        }
+//            }
+        }
+        mad_synth_finish(&handle->synth);
+        mad_frame_finish(&handle->frame);
+        mad_stream_finish(&handle->stream);
+        int status=handle->playStatus;
+        handle->playStatus=STATUS_IDLE;
+    }
+    playerThread=NULL;
+}
+
+
 JNIEXPORT jint JNICALL
 Java_com_merlin_player_Player_play(JNIEnv *env, jobject thiz, jobject media, jdouble seek) {
     if(NULL == media){
@@ -198,6 +324,21 @@ Java_com_merlin_player_Player_play(JNIEnv *env, jobject thiz, jobject media, jdo
         notifyStatusChange(STATUS_FINISH_ERROR,media,"MediaBuffer id NULL.");
         return STATUS_FINISH_ERROR;
     }
+    if (NULL==playerThread){
+        int player_thread_create_code = pthread_create(&playerThread, NULL, (void *)&player_function, NULL);
+        if(player_thread_create_code!=0){
+            LOGD("Can't play media while create player thread fail.");
+            return STATUS_FINISH_ERROR;
+        }
+    }
+    if (NULL==cacheThread){
+        int cache_thread_create_code = pthread_create(&cacheThread, NULL, (void *)&cache_function, NULL);
+        if(cache_thread_create_code!=0){
+            LOGD("Can't play media while create player cache thread fail.");
+            return STATUS_FINISH_ERROR;
+        }
+    }
+//    playerThread.
 //    notifyStatusChange(STATUS_OPENING,media,"Media opening.");
 //    jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Playable");
 //    jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"read", "([B)I");
@@ -212,22 +353,23 @@ Java_com_merlin_player_Player_play(JNIEnv *env, jobject thiz, jobject media, jdo
 //        return STATUS_FINISH_ERROR;
 //    }
 //    notifyStatusChange(STATUS_OPENED,media,"MediaBuffer open succeed.");
-    size_t handleSize=sizeof(struct BufferHandle);
-    handle = (struct BufferHandle*)malloc(handleSize);
-    handle->playStatus=STATUS_PREPARING;
-    notifyStatusChange(STATUS_PREPARING,media,"Media play prepare.");
-    handle->media=media;
-    handle->buffer=(*env)->NewByteArray(env, INPUT_BUFFER_SIZE);
-    handle->cached=(*env)->NewByteArray(env, INPUT_BUFFER_SIZE/2);
-    handle->cacheOffset = 0;
-    mad_stream_init(&(handle->stream));
-    mad_frame_init(&handle->frame);
-    mad_timer_reset(&handle->timer);
-    mad_synth_init(&handle->synth);
-    handle->playStatus=STATUS_PLAYING;
-    notifyStatusChange(STATUS_PLAYING,media,"Playing media.");
+//    size_t handleSize=sizeof(struct BufferHandle);
+//    handle = (struct BufferHandle*)malloc(handleSize);
+//    handle->playStatus=STATUS_PREPARING;
+//    notifyStatusChange(STATUS_PREPARING,media,"Media play prepare.");
+//    handle->media=media;
+//    handle->buffer=(*env)->NewByteArray(env, INPUT_BUFFER_SIZE);
+//    handle->cached=(*env)->NewByteArray(env, INPUT_BUFFER_SIZE/2);
+//    handle->cacheOffset = 0;
+//    mad_stream_init(&(handle->stream));
+//    mad_frame_init(&handle->frame);
+//    mad_timer_reset(&handle->timer);
+//    mad_synth_init(&handle->synth);
+//    handle->playStatus=STATUS_PLAYING;
+//    notifyStatusChange(STATUS_PLAYING,media,"Playing media.");
     LOGD("Playing media.");
-    while (JNI_TRUE){
+
+//    while (JNI_TRUE){
 //        if (handle->playStatus==STATUS_STOP){
 //            LOGD("Stop play media file.");
 //            notifyStatusChange(STATUS_STOP,media,"Stop media.");
@@ -244,72 +386,72 @@ Java_com_merlin_player_Player_play(JNIEnv *env, jobject thiz, jobject media, jdo
 //            notifyStatusChange(STATUS_PLAYING,media,"Playing media.");
 //            continue;
 //        }
-        int readState=BUFFER_READ_FINISH_NORMAL;
-        do{
-            int readLength=0;
-            if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
-                if(handle->stream.next_frame != 0){
-                    int leftOver = handle->stream.bufend - handle->stream.next_frame;
-                    int i;
-                    for(i= 0;i<leftOver;i++){
-                        (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
-                    }
-                    int readBytes =readMediaBytes(media,leftOver,INPUT_BUFFER_SIZE-leftOver);
-                    readState=readBytes;
-                    if(readBytes <= 0){
-                        break;
-                    }
-                    readLength = leftOver + readBytes;
-                }else{
-                    readLength  = readMediaBytes(media,0,INPUT_BUFFER_SIZE);
-                    readState=readLength;
-                    if(readLength <= 0){
-                        break;
-                    }
-                }
-                jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
-                unsigned char* buf=(unsigned char*)bBuffer;
-                (*env)->DeleteLocalRef(env, bBuffer);
-                mad_stream_buffer(&handle->stream,buf,readLength);
-                handle->stream.error = MAD_ERROR_NONE;
-            }
-            int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
-            if(decodeResult){
-                if(handle->stream.error == MAD_ERROR_BUFLEN ||(MAD_RECOVERABLE(handle->stream.error))){
-                    continue;
-                }
-            }else{
-                break;
-            }
-        }while (JNI_TRUE);
-        mad_synth_frame(&handle->synth, &handle->frame);
-//        LOGD("%d", handle->synth.pcm);
-        onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->timer, handle->frame.header, handle->synth.pcm);
-        if (readState==BUFFER_READ_FINISH_EOF){
-            handle->playStatus=STATUS_FINISH;
-            LOGD("End play media file.");
-            notifyStatusChange(STATUS_FINISH,media,"Finish media.");
-            break;
-        }
-    }
-    mad_synth_finish(&handle->synth);
-    mad_frame_finish(&handle->frame);
-    mad_stream_finish(&handle->stream);
-    int status=handle->playStatus;
-    handle->playStatus=STATUS_IDLE;
-    jclass playClass = (*env)->FindClass(env,"com/merlin/player/Playable");
-    jmethodID playMethodId=(*env)->GetMethodID(env,playClass,"close","()Z");
-    jstring playNoteString = (*env)->NewStringUTF(env,"While play finish.");
-    jboolean closed=(*env)->CallBooleanMethod(env,media,playMethodId);
-    (*env)->DeleteLocalRef(env,media);
-    (*env)->DeleteLocalRef(env,media);
-    (*env)->DeleteLocalRef(env,playNoteString);
-    (*env)->DeleteLocalRef(env,playClass);
-    (*env)->DeleteLocalRef(env,playMethodId);
-    handle=NULL;
-    notifyStatusChange(STATUS_IDLE,NULL,"Player idle.");
-    LOGD("Finish play media file.%d",closed);
-    return status;
+//        int readState=BUFFER_READ_FINISH_NORMAL;
+//        do{
+//            int readLength=0;
+//            if(handle->stream.buffer == 0 || handle->stream.error == MAD_ERROR_BUFLEN){
+//                if(handle->stream.next_frame != 0){
+//                    int leftOver = handle->stream.bufend - handle->stream.next_frame;
+//                    int i;
+//                    for(i= 0;i<leftOver;i++){
+//                        (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
+//                    }
+//                    int readBytes =readMediaBytes(media,leftOver,INPUT_BUFFER_SIZE-leftOver);
+//                    readState=readBytes;
+//                    if(readBytes <= 0){
+//                        break;
+//                    }
+//                    readLength = leftOver + readBytes;
+//                }else{
+//                    readLength  = readMediaBytes(media,0,INPUT_BUFFER_SIZE);
+//                    readState=readLength;
+//                    if(readLength <= 0){
+//                        break;
+//                    }
+//                }
+//                jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
+//                unsigned char* buf=(unsigned char*)bBuffer;
+//                (*env)->DeleteLocalRef(env, bBuffer);
+//                mad_stream_buffer(&handle->stream,buf,readLength);
+//                handle->stream.error = MAD_ERROR_NONE;
+//            }
+//            int decodeResult=mad_frame_decode(&handle->frame,&handle->stream);
+//            if(decodeResult){
+//                if(handle->stream.error == MAD_ERROR_BUFLEN ||(MAD_RECOVERABLE(handle->stream.error))){
+//                    continue;
+//                }
+//            }else{
+//                break;
+//            }
+//        }while (JNI_TRUE);
+//        mad_synth_frame(&handle->synth, &handle->frame);
+////        LOGD("%d", handle->synth.pcm);
+//        onFrameDecode(MEDIA_TYPE_AUDIO,media, handle->timer, handle->frame.header, handle->synth.pcm);
+//        if (readState==BUFFER_READ_FINISH_EOF){
+//            handle->playStatus=STATUS_FINISH;
+//            LOGD("End play media file.");
+//            notifyStatusChange(STATUS_FINISH,media,"Finish media.");
+//            break;
+//        }
+//    }
+//    mad_synth_finish(&handle->synth);
+//    mad_frame_finish(&handle->frame);
+//    mad_stream_finish(&handle->stream);
+//    int status=handle->playStatus;
+//    handle->playStatus=STATUS_IDLE;
+//    jclass playClass = (*env)->FindClass(env,"com/merlin/player/Playable");
+//    jmethodID playMethodId=(*env)->GetMethodID(env,playClass,"close","()Z");
+//    jstring playNoteString = (*env)->NewStringUTF(env,"While play finish.");
+//    jboolean closed=(*env)->CallBooleanMethod(env,media,playMethodId);
+//    (*env)->DeleteLocalRef(env,media);
+//    (*env)->DeleteLocalRef(env,media);
+//    (*env)->DeleteLocalRef(env,playNoteString);
+//    (*env)->DeleteLocalRef(env,playClass);
+//    (*env)->DeleteLocalRef(env,playMethodId);
+//    handle=NULL;
+//    notifyStatusChange(STATUS_IDLE,NULL,"Player idle.");
+//    LOGD("Finish play media file.%d",closed);
+    return 0;
 }
 
 

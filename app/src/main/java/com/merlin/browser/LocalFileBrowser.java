@@ -352,4 +352,9 @@ public class LocalFileBrowser extends FileBrowser{
         return invokeFinish(succeed,what,note,finish,modify,arg);
     }
 
+    @Override
+    protected boolean onReboot(String debug) {
+        toast("本地 暂不支持重启");
+        return true;
+    }
 }

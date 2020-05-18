@@ -24,6 +24,11 @@ import java.util.List;
 public class ConveyorService extends Service implements Label, OnConveyStatusChange {
 //    private final Conveyor mConveyor=new Conveyor(null,Looper.getMainLooper());
     private final Retrofit mRetrofit=new Retrofit();
+
+//    public static boolean download(Context viewContext, ArrayList<NasFile> files, ClientMeta meta, String folderPath, int coverMode, String debug) {
+//
+//        return false;
+//    }
 //    private final Binder mBinder=new Binder();
 
     @Override

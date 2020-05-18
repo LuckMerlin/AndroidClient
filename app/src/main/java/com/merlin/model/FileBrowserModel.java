@@ -174,6 +174,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
                         return finishActivity("After tap click.")||true;
                     case R.string.terminal:
                         return addTerminal("After tap click")||true;
+                    case R.string.reboot:
+                        return rebootClient("After reboot tap click.");
                     case R.drawable.selector_menu:
                         return showBrowserMenu(view,"After tap click.");
                     case R.drawable.selector_back:
@@ -292,7 +294,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
             toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
             return false;
         }
-//        final ConveyorBinder binder=mTransportBinder;
+//        final Convery binder=mTransportBinder;
 //        if (null==binder){
 //            toast(R.string.serverUnConnect);
 //            return false;
@@ -318,8 +320,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
             return false;
         }
 //        if (ConveyorService.download(getViewContext(),files,meta,folderPath,coverMode,debug)){
-//            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
-//            launchTransportList("");
+////            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
+////            launchTransportList("");
 //            return toast(R.string.succeed)||true;
 //        }
         return toast(R.string.fail);
@@ -407,6 +409,11 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
     private boolean setAsHome(Object data,String debug){
         FileBrowser browser=getCurrentModel();
         return null!=browser&&browser.setAsHome(data,debug);
+    }
+
+    private boolean rebootClient(String debug){
+        FileBrowser browser=getCurrentModel();
+        return null!=browser&&browser.reboot(debug);
     }
 
     public final boolean isMode(int ...models){
