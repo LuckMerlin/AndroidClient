@@ -9,7 +9,7 @@ import com.merlin.util.FileSize;
 
 import java.io.File;
 
-public final class Transport implements Parcelable ,Status {
+public final class Transport implements Parcelable , IStatus {
     private final static int MASK_DOWNLOAD=0x01;//0000 0001
     private final static int MASK_COVER_REPLACE=0x02;//0000 0010
     private final static int MASK_COVER_KEEP_ALL=0x04;//0000 0100

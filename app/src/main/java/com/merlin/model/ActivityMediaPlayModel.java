@@ -1,6 +1,8 @@
 package com.merlin.model;
 
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewParent;
 
@@ -27,11 +29,11 @@ import com.merlin.media.FavoriteApi;
 import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.player.BK_Player;
-import com.merlin.player.FileBuffer;
+import com.merlin.player.FileMedia;
+import com.merlin.player.Media;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.IPlayable;
 import com.merlin.player.Playable;
-import com.merlin.player.Player;
 import com.merlin.player.Time;
 import com.merlin.player1.LPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
@@ -62,50 +64,28 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         }
     };
 
+    LPlayer player=  new LPlayer();
+
+    Handler mHandler=new Handler(Looper.getMainLooper());
+
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
+        player.run();
         dd();
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                dd();
-//            }
-//        }).start();
+
     }
 
     private void dd(){
-        try {
-            FileInputStream fis=new FileInputStream("/sdcard/Musics/大壮 - 我们不一样.mp3");
-//            FileInputStream fis=new FileInputStream("/storage/sdcard0/gn.mp3");
-            new LPlayer().play(new Playable() {
-                @Override
-                public int read(byte[] buffer) {
-                    if (null!=buffer&&buffer.length>0){
-                        try {
-                            return fis.read(buffer);
-                        } catch (IOException e) {
-                            Debug.D(getClass(),"ddd "+e);
-                            e.printStackTrace();
-                        }
-                    }
-                    return BUFFER_READ_FINISH_NORMAL;
-                }
-
-                @Override
-                public boolean open() {
-                    return false;
-                }
-
-                @Override
-                public boolean close() {
-                    return false;
-                }
-            },0);
-        } catch (FileNotFoundException e) {
-            Debug.D(getClass(),""+e);
-            e.printStackTrace();
-        }
+        player.stop();
+//        String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
+//        new FileMedia(path,0)
+        String path="./摸摸.mp3";
+        Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000",0);
+        mHandler.postDelayed(()->{
+//            player.release();
+              player.play(media,14000);
+          },2000);
     }
 
     @Override
@@ -163,7 +143,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
         mStatus.set(status);
         switch (status){
-            case STATUS_START: updatePlaying(null,"While status start.");break;
+//            case STATUS_START: updatePlaying(null,"While status start.");break;
             case STATUS_STOP:updatePlaying(null,"While status stop.");break;
             case STATUS_IDLE:updatePlaying(null,"While status idle.");break;
             case STATUS_PROGRESS:

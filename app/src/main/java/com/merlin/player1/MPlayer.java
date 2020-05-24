@@ -93,7 +93,7 @@ public class MPlayer extends BK_Player implements OnMediaFrameDecodeFinish,OnPla
                 mPlayMode=mode;
             }
             //Save mode here
-            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",super.getPlaying());
+//            notifyPlayStatus(STATUS_MODE_CHANGED,"Play mode changed.",super.getPlaying());
         }
         return mPlayMode;
     }
@@ -307,12 +307,12 @@ public class MPlayer extends BK_Player implements OnMediaFrameDecodeFinish,OnPla
             if (null!=objects&&objects.length>0){
                 for (Object object:objects) {
                     if (null!=find(mQueue,object)){
-                        return super.pause(stop);
+//                        return super.pause(stop);
                     }
                 }
                 return false;
             }
-            return super.pause(stop);
+//            return super.pause(stop);
         }
         return false;
     }

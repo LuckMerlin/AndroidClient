@@ -32,7 +32,7 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
                 Toast.makeText(this, "请开通相关权限，否则无法正常使用本应用！", Toast.LENGTH_SHORT).show();
             }
             //申请权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2333);
         } else {
             Toast.makeText(this, "授权成功！", Toast.LENGTH_SHORT).show();
         }
@@ -44,7 +44,7 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
                 Toast.makeText(this, "请开通相关权限，否则无法正常使用本应用！", Toast.LENGTH_SHORT).show();
             }
             //申请权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2333);
         } else {
             Toast.makeText(this, "授权成功！", Toast.LENGTH_SHORT).show();
         }

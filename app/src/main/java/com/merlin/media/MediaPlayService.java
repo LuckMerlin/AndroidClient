@@ -77,7 +77,8 @@ public class MediaPlayService extends Service implements Status {
         @Override
         public int getPlayState() {
             MPlayer player = mPlayer;
-            return null != player ? player.getPlayerStatus() : STATUS_UNKNOWN;
+//            return null != player ? player.getPlayerStatus() : STATUS_UNKNOWN;
+            return -1;
         }
 
         @Override

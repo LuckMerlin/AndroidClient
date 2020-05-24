@@ -47,7 +47,7 @@ public class DownloadService extends Service {
     private int mMaxDownloading=1;
     private final Binder mBinder=new Binder();
 
-    public interface Callback extends Status{
+    public interface Callback extends IStatus {
         void onFileDownloadUpdate(int what, boolean finish, Transport task, Object data);
     }
 
@@ -89,7 +89,7 @@ public class DownloadService extends Service {
             synchronized (mRunningList) {
                 for (Transport child:mRunningList){
                     if (null!=child&&child.equals(download)){
-                        return child.getStatus()==Status.DOWNLOADING;
+                        return child.getStatus()== IStatus.DOWNLOADING;
                     }
                 }
             }
@@ -149,13 +149,13 @@ public class DownloadService extends Service {
             for (BreakPoint point:list){
                 Transport download=null!=point?point.getTask():null;
                 if (null!=download){ //Add task into queue
-                    download.setStatus(Status.PAUSE); //Reset status to pause
+                    download.setStatus(IStatus.PAUSE); //Reset status to pause
                     download.buildRemainFromFile();
                     if (!runningList.contains(download)){
                         runningList.add(download);
                     }
                     Debug.D(getClass(),"Add breakpoint file."+download);
-                    onFileDownloadUpdate(Status.ADD,false,download,null);
+                    onFileDownloadUpdate(IStatus.ADD,false,download,null);
                 }
             }
             checkDownloadNextPossible();//Check
@@ -232,8 +232,8 @@ public class DownloadService extends Service {
         synchronized (runningList) {
             existTask = index >= 0 ? runningList.get(index) : null;
         }
-        int status=null!=existTask?existTask.getStatus():Status.INVALID;
-        if (status==Status.DOWNLOADING){
+        int status=null!=existTask?existTask.getStatus(): IStatus.INVALID;
+        if (status== IStatus.DOWNLOADING){
             Debug.W(getClass(),"Can't download file.Exist downloading."+download);
             return null;
         }
@@ -241,13 +241,13 @@ public class DownloadService extends Service {
             runningList.remove(existTask);
         }
         runningList.add(download);
-        download.setStatus(Status.UNKNOWN);
+        download.setStatus(IStatus.UNKNOWN);
         int downloadingSize=binder.getDownloadingSize();
         if (downloadingSize>0){//Check if need waiting
             int maxDownloading=mMaxDownloading;
             if (downloadingSize>=(maxDownloading<=0?1:maxDownloading)){
                 Debug.W(getClass(),"Add download into wait queue."+downloadingSize+" "+maxDownloading);
-                download.setStatus(Status.WAITING);
+                download.setStatus(IStatus.WAITING);
                 onFileDownloadUpdate(Callback.WAITING,false,download,System.currentTimeMillis());
                 return null;
             }
@@ -261,7 +261,7 @@ public class DownloadService extends Service {
             }finally {
                 if (!targetFile.exists()){//Check if create succeed.
                     Debug.W(getClass(),"Can't download file.Create file fail."+targetFile);
-                    download.setStatus(Status.FINISH_WRITE_EXCEPTION);
+                    download.setStatus(IStatus.FINISH_WRITE_EXCEPTION);
                     return null;
                 }
             }
@@ -276,7 +276,7 @@ public class DownloadService extends Service {
             runningList.remove(download);
             runningList.add(download);
             onFileDownloadUpdate(Callback.START,false,download,startTime);
-            download.setStatus(Status.DOWNLOADING);
+            download.setStatus(IStatus.DOWNLOADING);
             final BreakPoint breakPoint=new BreakPoint(download);
             mBreakPointer.addBreakpoint(breakPoint);
             canceler=client.download(fromAccount, srcPath,seek<=0?0:seek,(succeed,what,note,frame)->{
@@ -306,7 +306,7 @@ public class DownloadService extends Service {
                             if (frame.isLastFrame()){
                                 removeAllTask(download);
                                 closeStream(fos);
-                                download.setStatus(Status.FINISH_SUCCEED);
+                                download.setStatus(IStatus.FINISH_SUCCEED);
                                 mBreakPointer.removeBreakpoint(download);
                                 onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,download,System.currentTimeMillis());
                                 Debug.D(getClass(),"下载完成了 "+note);
@@ -323,7 +323,7 @@ public class DownloadService extends Service {
                                 mBreakPointer.removeBreakpoint(breakPoint);
                                 targetFile.delete();
                             }
-                            download.setStatus(Status.FINISH_WRITE_EXCEPTION);
+                            download.setStatus(IStatus.FINISH_WRITE_EXCEPTION);
                             onFileDownloadUpdate(Callback.FINISH_WRITE_EXCEPTION,true,download,e);
                         }
                     }
@@ -340,14 +340,14 @@ public class DownloadService extends Service {
                     if (canceled){
                         download.setDeleteIncomplete(false);
 //                        download.setType(Transport.TYPE_NORMAL);
-                        download.setStatus(Status.PAUSE);
+                        download.setStatus(IStatus.PAUSE);
                         removeDownloadingTask(download);
                     }else {
                         removeAllTask(download);
                     }
                     if (alreadyDownloaded){
                         mBreakPointer.removeBreakpoint(download);
-                        download.setStatus(Status.FINISH_SUCCEED);
+                        download.setStatus(IStatus.FINISH_SUCCEED);
                         onFileDownloadUpdate(Callback.FINISH_SUCCEED,true,download,null);
                     }else{
                         if (download.isDeleteIncomplete()){
@@ -355,10 +355,10 @@ public class DownloadService extends Service {
                             mBreakPointer.removeBreakpoint(download);
                         }
                         if (canceled) {
-                            download.setStatus(Status.FINISH_CANCEL);
+                            download.setStatus(IStatus.FINISH_CANCEL);
                             onFileDownloadUpdate(Callback.FINISH_CANCEL, true, download, null);
                         }else {
-                            download.setStatus(Status.FINISH_SERVICE_FAIL);
+                            download.setStatus(IStatus.FINISH_SERVICE_FAIL);
                             onFileDownloadUpdate(Callback.FINISH_SERVICE_FAIL, true, download, null);
                         }
                     }
@@ -367,7 +367,7 @@ public class DownloadService extends Service {
             if (null!=canceler){
                 downloading.put(download,canceler);
             }else{
-                download.setStatus(Status.FINISH_START_FAIL);
+                download.setStatus(IStatus.FINISH_START_FAIL);
             }
             return canceler;
         } catch (Exception e) {
@@ -377,7 +377,7 @@ public class DownloadService extends Service {
             if (null==canceler&&null!=os){
                 Debug.E(getClass(),"Close file OutputStream While download fail. "+targetFile);
                 closeStream(os);
-                download.setStatus(Status.FINISH_START_FAIL);
+                download.setStatus(IStatus.FINISH_START_FAIL);
                 removeAllTask(download);
                 if (download.isDeleteIncomplete()){
                     targetFile.delete();
@@ -438,8 +438,8 @@ public class DownloadService extends Service {
               Transport next = null;
               synchronized (running) {
                   for (Transport task : running) {
-                      int status = null != task ? task.getStatus() : Status.INVALID;
-                      if (status == Status.WAITING) {
+                      int status = null != task ? task.getStatus() : IStatus.INVALID;
+                      if (status == IStatus.WAITING) {
                           next = task;
                           break;
                       }

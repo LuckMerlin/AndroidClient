@@ -5,11 +5,11 @@ import com.merlin.debug.Debug;
 import java.io.File;
 import java.io.FileInputStream;
 
-public final class FileBuffer<T  extends IPlayable> extends MediaBuffer<T> {
+public final class IFileBuffer<T  extends IPlayable> extends MediaBuffer<T> {
     private final String mPath;
     private FileInputStream mAccess;
 
-     public FileBuffer(T playable,double seek){
+     public IFileBuffer(T playable, double seek){
         super(playable,seek);
         mPath=null;
 //         mPath=null!=playable?playable.getPath():null;

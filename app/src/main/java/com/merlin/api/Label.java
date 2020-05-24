@@ -45,4 +45,5 @@ public interface Label{
    String  LABEL_TIME="time";
    String  LABEL_ROOT="root";
    String  LABEL_BANNER="banner";
+   String  LABEL_SIZE="size";
 }

@@ -65,9 +65,9 @@ public class BK_Player implements Status{
     }
 
     public boolean togglePausePlay(Object media){
-        if (!isIdle()){
-            return isPlaying()?pause(false):start(-1);
-        }
+//        if (!isIdle()){
+//            return isPlaying()?pause(false):start(-1);
+//        }
         return false;
     }
 
@@ -79,7 +79,7 @@ public class BK_Player implements Status{
     public synchronized boolean play(final MediaBuffer buffer,final OnPlayerStatusUpdate update,String debug){
         if (null==buffer){
             Debug.W(getClass(),"Can't play media buffer.buffer="+buffer);
-            notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",null);
+//            notifyPlayStatus(STATUS_FINISH_ERROR,"Path invalid.",null);
             return false;
         }
         mInnerUpdate=null!=mInnerUpdate?mInnerUpdate:new OnPlayerStatusUpdate() {
@@ -132,7 +132,7 @@ public class BK_Player implements Status{
                            lastPlay=mPlaying;
                            mPlaying=task;
                            Debug.D(getClass(),"Play "+task);
-                           playMedia(task,task.getSeek());
+//                           playMedia(task,task.getSeek());
                            mPlaying=null;
                        }
                     }
@@ -145,10 +145,10 @@ public class BK_Player implements Status{
             return true;
         }else{
             boolean putted=runnable.put(buffer);
-            if (!isIdle()){
-                Debug.D(getClass(),"Stop playing media before start new media."+buffer);
-                pause(true);
-            }
+//            if (!isIdle()){
+//                Debug.D(getClass(),"Stop playing media before start new media."+buffer);
+//                pause(true);
+//            }
             return putted;
         }
     }
@@ -171,17 +171,17 @@ public class BK_Player implements Status{
         return false;
     }
 
-    public final boolean isIdle(){
-        return STATUS_IDLE==getPlayerStatus();
-    }
+//    public final boolean isIdle(){
+//        return STATUS_IDLE==getPlayerStatus();
+//    }
 
-    public final boolean isPlaying(){
-        return STATUS_PLAYING==getPlayerStatus();
-    }
+//    public final boolean isPlaying(){
+//        return STATUS_PLAYING==getPlayerStatus();
+//    }
 
-    public final boolean isPaused(){
-        return STATUS_PAUSE==getPlayerStatus();
-    }
+//    public final boolean isPaused(){
+//        return STATUS_PAUSE==getPlayerStatus();
+//    }
 
     public final boolean isRunning(){
         PlayPending pending=mPlayRunnable;
@@ -235,7 +235,7 @@ public class BK_Player implements Status{
             pending.mRunning=false;
         }
         Debug.D(getClass(),"Destroy player.");
-        boolean succeed=isIdle()||pause(true);
+//        boolean succeed=isIdle()||pause(true);
         WeakHashMap reference=mUpdate;
         mCurrPosition=0;
         mUpdate=null;
@@ -245,7 +245,7 @@ public class BK_Player implements Status{
             reference.clear();
         }
         mInnerUpdate=null;
-        return succeed;
+        return false;
     }
 
 
@@ -306,15 +306,15 @@ public class BK_Player implements Status{
         notifyPlayStatus(status,note,null!=buffer?buffer.getPlayable():null);
     }
 
-    public native int getPlayerStatus();
-
-    private native int playMedia(MediaBuffer buffer, double seek);
+//    public native int getPlayerStatus();
+//
+//    private native int playMedia(MediaBuffer buffer, double seek);
 
 //    private native long getPosition();
 
 //    private native long getDuration();
 
-    public native boolean start(double seek);
-
-    public native boolean pause(boolean stop);
+//    public native boolean start(double seek);
+//
+//    public native boolean pause(boolean stop);
 }
