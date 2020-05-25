@@ -60,6 +60,7 @@ public class NasMedia extends Media<String> {
         return true;
     }
 
+    int ssss=0;
     @Override
     protected int onReadBytes(long start, int offset, byte[] buffer,int size) {
         Retrofit retrofit=mRetrofit;
@@ -70,14 +71,15 @@ public class NasMedia extends Media<String> {
             return -1;
         }
         try {
-            Response<ResponseBody> response=retrofit.prepare(Api.class,url).getMediaBytes(path,start,size).execute();
+            Response<ResponseBody> response=retrofit.prepare(Api.class,url).getMediaBytes(path,ssss,size).execute();
             ResponseBody body=null!=response?response.body():null;
             MediaType mediaType=null!=body?body.contentType():null;
             String contentType=null!=mediaType?mediaType.subtype():null;
             InputStream inputStream=null!=contentType&&contentType.equals("octet-stream")?body.byteStream():null;
             if (null!=inputStream) {
                 int readed= inputStream.read(buffer,offset,size);
-                Debug.D(getClass(),"DDDDDDDDd "+readed+" "+offset+" "+size);
+                ssss+=readed;
+                Debug.D(getClass(),"DDDDDDDDd "+ssss+" "+readed+" "+offset+" "+size);
                 return readed;
             }
         } catch (IOException e) {

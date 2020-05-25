@@ -78,9 +78,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 
     private void dd(){
         player.stop();
-//        String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
-//        new FileMedia(path,0)
-        String path="./摸摸.mp3";
+        String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
+//        Media media=new FileMedia(path,0);
+         path="./摸摸.mp3";
         Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000",0);
         mHandler.postDelayed(()->{
 //            player.release();
@@ -144,17 +144,17 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         mStatus.set(status);
         switch (status){
 //            case STATUS_START: updatePlaying(null,"While status start.");break;
-            case STATUS_STOP:updatePlaying(null,"While status stop.");break;
-            case STATUS_IDLE:updatePlaying(null,"While status idle.");break;
-            case STATUS_PROGRESS:
-                float progress=null!=player?player.getCurrentProgress():0;
-                progress=progress>=0&&progress<=1?progress:0;
-                long duration=player.getDuration();
-                if (duration>0){
-                    mCurrPosition.set(Time.formatTime((long)(progress*duration)));
-                }
-                mProgress.set((int)(progress*100));
-                break;
+//            case STATUS_STOP:updatePlaying(null,"While status stop.");break;
+//            case STATUS_IDLE:updatePlaying(null,"While status idle.");break;
+//            case STATUS_PROGRESS:
+//                float progress=null!=player?player.getCurrentProgress():0;
+//                progress=progress>=0&&progress<=1?progress:0;
+//                long duration=player.getDuration();
+//                if (duration>0){
+//                    mCurrPosition.set(Time.formatTime((long)(progress*duration)));
+//                }
+//                mProgress.set((int)(progress*100));
+//                break;
         }
     }
 

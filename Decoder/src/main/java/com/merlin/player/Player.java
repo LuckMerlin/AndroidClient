@@ -6,6 +6,15 @@ import android.os.Looper;
 import com.merlin.debug.Debug;
 
 public abstract class Player implements OnMediaFrameDecodeFinish{
+    public final static int  NORMAL = 0;
+    public final static int  END = -1;
+    public final static int  IDLE = -2003;
+    public final static int  STOP =  -2005;
+    public final static int  PROGRESS =  -2006;
+    public final static int  PLAYING =  -2007;
+    public final static int  CREATE =  -2021;
+    public final static int  DESTROY =  -2022;
+    public final static int  FATAL_ERROR =  -2023;
     private static OnMediaFrameDecodeFinish mListener;
     private PlayRunnable mRunnable;
     private Playable mPlayable;
@@ -139,14 +148,14 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
     private int nativeLoadBytes(int offset,byte[] buffer){
         final PlayRunnable runnable=mRunnable;
         if (null==runnable){
-            return Status.STATUS_DESTROY;
+            return DESTROY;
         }
         final Playable playable=mPlayable;
         if (null!=playable&&playable.isOpened()){
             long seek=mSeek;
             int read=playable.read(seek<=0?0:seek,offset,buffer);
             if (read<0){
-                return Status.STATUS_END;
+                return END;
             }
             mSeek=0;
             return read;
@@ -157,10 +166,10 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
                 runnable.wait();
 //                Debug.W(getClass(), "Wake up.");
             }
-            return Status.STATUS_NORMAL;
+            return NORMAL;
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return Status.STATUS_NORMAL;
+            return NORMAL;
         }
     }
 

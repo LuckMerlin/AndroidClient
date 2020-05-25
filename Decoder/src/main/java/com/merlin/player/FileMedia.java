@@ -27,13 +27,13 @@ public class FileMedia extends Media<String> {
             return false;
         }
         try {
-            File file=new File("/sdcard/Musics/大壮 - 我们不一样.mp3");
+            File file=new File(mediaPath);
             mLength=file.length();
             if (mLength<=0){
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;
             }
-            mInput=input=new FileInputStream(file);
+            mInput=new FileInputStream(file);
             Debug.D(getClass(),"Opened media file."+mediaPath);
             return true;
         } catch (FileNotFoundException e) {
@@ -68,7 +68,7 @@ public class FileMedia extends Media<String> {
         } catch (IOException e) {
             Debug.E(getClass(),"Exception read media file bytes.e="+e+" "+this,e);
             e.printStackTrace();
-            return -1;
+            return Player.FATAL_ERROR;
         }
     }
 

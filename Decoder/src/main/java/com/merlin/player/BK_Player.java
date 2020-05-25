@@ -85,9 +85,9 @@ public class BK_Player implements Status{
         mInnerUpdate=null!=mInnerUpdate?mInnerUpdate:new OnPlayerStatusUpdate() {
             @Override
             public void onPlayerStatusUpdated(BK_Player p, final int status, final String note, final IPlayable media, final Object data) {
-                if (status==STATUS_IDLE||status==STATUS_STOP){
-                    mCurrPosition=0;
-                }
+//                if (status==STATUS_IDLE||status==STATUS_STOP){
+//                    mCurrPosition=0;
+//                }
                 if (BK_Player.this instanceof OnPlayerStatusUpdate){
                     runOnUiThread(new Runnable() {
                         @Override

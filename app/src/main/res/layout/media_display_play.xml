@@ -97,8 +97,7 @@
                         android:layout_height="@dimen/iconSizeMedium"/>
 
                     <ImageView
-                        android:src="@{vm.model.status==Status.STATUS_PLAYING||vm.model.status==Status.STATUS_PROGRESS?R.drawable.selector_media_pause:R.drawable.selector_media_play}"
-                        binding:enableClick="@{true}"
+                       binding:enableClick="@{true}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeLarge"
                         android:layout_height="@dimen/iconSizeLarge"/>

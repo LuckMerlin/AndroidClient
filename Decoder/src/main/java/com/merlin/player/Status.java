@@ -1,15 +1,15 @@
 package com.merlin.player;
 
 public interface Status {
- int  STATUS_NORMAL = 0;
- int  STATUS_END = -1;
- int  STATUS_IDLE = -2003;
- int  STATUS_STOP =  -2005;
- int  STATUS_PROGRESS =  -2006;
- int  STATUS_PLAYING =  -2007;
- int  STATUS_CREATE =  -2021;
- int  STATUS_DESTROY =  -2022;
- int  STATUS_FATAL_ERROR =  -2023;
+// int  STATUS_NORMAL = 0;
+// int  STATUS_END = -1;
+// int  STATUS_IDLE = -2003;
+// int  STATUS_STOP =  -2005;
+// int  STATUS_PROGRESS =  -2006;
+// int  STATUS_PLAYING =  -2007;
+// int  STATUS_CREATE =  -2021;
+// int  STATUS_DESTROY =  -2022;
+// int  STATUS_FATAL_ERROR =  -2023;
 
 // int STATUS_UNKNOWN = 2001;
 // int STATUS_PAUSE = 2002;

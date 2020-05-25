@@ -6,7 +6,8 @@
 #include "mad/mad.h"
 #include "string.h"
 #include "pthread.h"
-#define INPUT_BUFFER_SIZE	8192*5 /*(8192/4) */
+
+#define INPUT_BUFFER_SIZE	8192*1024*3 /*(8192/4) */
 
 #define  STATUS_NORMAL 0
 #define  STATUS_END -1
@@ -169,7 +170,6 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
                     }
                     int readBytes =readMediaBytes(player,leftOver,handle->buffer);
                     if(readBytes <= 0){
-
                         readState=readBytes;
                         break;
                     }
