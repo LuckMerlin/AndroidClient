@@ -7,7 +7,7 @@
 #include "string.h"
 #include "pthread.h"
 
-#define INPUT_BUFFER_SIZE	8192*1024*3 /*(8192/4) */
+#define INPUT_BUFFER_SIZE	8192*4 /*(8192/4) */
 
 #define  STATUS_NORMAL 0
 #define  STATUS_END -1
