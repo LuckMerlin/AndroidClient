@@ -1,7 +1,8 @@
 package com.merlin.player;
-public abstract class Buffer implements Playable{
+
+ class Buffer{
      private final byte[] mBuffered;
-     private int mSize;
+     private int mStart,mEnd;
 
      public Buffer(int bufferSize){
          mBuffered=bufferSize>0?new byte[bufferSize]:null;
@@ -9,41 +10,22 @@ public abstract class Buffer implements Playable{
      }
 
      public final void resetBuffer(){
-         mSize=0;
+         mStart=0;
+         mEnd=0;
      }
 
-     protected abstract int onReadBytes(long start, int offset, byte[] buffer,int size);
+     protected int onLoad(byte[] buffer,int offset,int size){
+         return -1;
+     }
 
-    @Override
-    public final int read(long start, int offset, byte[] buffer) {
-        final int bufferSize=null!=buffer?buffer.length:-1;
-        if (bufferSize<=0){
-            return Player.FATAL_ERROR;
-        }
-        offset=offset<=0?0:offset;
-        int preferSize=bufferSize-offset;
-        if (preferSize<=0){
-            return Player.NORMAL;
-        }
-        byte[] buffered=mBuffered;
-        int volume=null!=buffered?buffered.length:-1;
-        if (volume>0) {//If buffer enabled
-            int size = mSize;
-            int availableSize=size>0?volume-size:-1;
-            if (availableSize>0) { //If exist buffered data
-                int copyLength=Math.min(preferSize,availableSize);
-                System.arraycopy(buffered,0,buffer,offset,copyLength);
-                if ((size=(availableSize-copyLength))>0) {
-                    System.arraycopy(buffered, availableSize, buffered, 0, size);
-                }
-                mSize=size;
-                return copyLength;
-            }
-        }
-        int readSize=onReadBytes(start,offset,buffer,preferSize);
-        if (readSize<=0){
+     public boolean read(byte[] buffer,int offset,int size){
+         int volume=null!=buffer?buffer.length:-1;
+         if (volume<=0||offset<0||size<=0||(offset+size>volume)){
+            return false;
+         }
 
-        }
-        return readSize;
-    }
+
+         return false;
+     }
+
 }

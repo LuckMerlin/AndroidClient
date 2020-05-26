@@ -71,6 +71,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
+
         player.run();
         dd();
 
@@ -84,8 +85,10 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000");
         mHandler.postDelayed(()->{
 //            player.release();
-              player.play(media,14000);
-          },2000);
+            Debug.D(getClass(),"SSSSSSSSS ");
+//              player.play(media,14000);
+            player.release();
+          },5000);
     }
 
     @Override
