@@ -18,12 +18,12 @@ public abstract class Buffer implements Playable{
     public final int read(long start, int offset, byte[] buffer) {
         final int bufferSize=null!=buffer?buffer.length:-1;
         if (bufferSize<=0){
-//            return Status.STATUS_NORMAL;
+            return Player.FATAL_ERROR;
         }
         offset=offset<=0?0:offset;
         int preferSize=bufferSize-offset;
         if (preferSize<=0){
-//            return Status.STATUS_NORMAL;
+            return Player.NORMAL;
         }
         byte[] buffered=mBuffered;
         int volume=null!=buffered?buffered.length:-1;

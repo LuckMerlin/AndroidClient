@@ -66,7 +66,7 @@ static inline signed int scale(mad_fixed_t sample){
     return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
-static inline void onFrameDecode(int mediaType,mad_timer_t timer,struct mad_header header,struct mad_pcm pcm)
+static inline void onFrameDecode(jobject player,int mediaType,mad_timer_t timer,struct mad_header header,struct mad_pcm pcm)
         {
     /* pcm->samplerate contains the sampling frequency */
     unsigned int layer=header.layer;
@@ -105,10 +105,10 @@ static inline void onFrameDecode(int mediaType,mad_timer_t timer,struct mad_head
         int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
         if(res==JNI_OK){
             jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
-            jmethodID callbackMethod = (*jniEnv)->GetStaticMethodID(jniEnv,callbackClass,"onNativeDecodeFinish","(I[BIII)V");
+            jmethodID callbackMethod = (*jniEnv)->GetMethodID(jniEnv,callbackClass,"onMediaFrameDecodeFinish","(I[BIII)V");
             jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
             (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
-            (*jniEnv)->CallStaticVoidMethod(jniEnv,callbackClass,callbackMethod,mediaType,data,channels,sampleRate,speed);
+            (*jniEnv)->CallVoidMethod(jniEnv,player,callbackMethod,mediaType,data,channels,sampleRate,speed);
             (*jniEnv)->DeleteLocalRef(jniEnv, data);
             (*jniEnv)->DeleteLocalRef(jniEnv,callbackClass);
             notifyStatusChange(STATUS_PROGRESS,"Update progress.");
@@ -197,7 +197,7 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
             }
         }while (JNI_TRUE);
         mad_synth_frame(&handle->synth, &handle->frame);
-        onFrameDecode(MEDIA_TYPE_AUDIO, handle->timer, handle->frame.header, handle->synth.pcm);
+        onFrameDecode(player,MEDIA_TYPE_AUDIO, handle->timer, handle->frame.header, handle->synth.pcm);
         if (readState==STATUS_END){
             handle->playStatus=STATUS_IDLE;
             notifyStatusChange(STATUS_END,"Media play end");

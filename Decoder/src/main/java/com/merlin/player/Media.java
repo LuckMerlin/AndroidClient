@@ -1,10 +1,9 @@
 package com.merlin.player;
 
-public abstract class Media<T> extends Buffer implements Playable{
+public abstract class Media<T>  implements Playable{
     private T mSrc;
 
-    public Media(T src,int bufferSize){
-        super(bufferSize);
+    public Media(T src){
         mSrc=src;
     }
 

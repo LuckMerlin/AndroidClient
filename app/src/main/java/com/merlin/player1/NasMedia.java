@@ -38,8 +38,8 @@ public class NasMedia extends Media<String> {
     private final Retrofit mRetrofit;
     private final String mUrl;
 
-    public NasMedia(Retrofit retrofit,String path,String url, int bufferSize){
-        super(path,bufferSize);
+    public NasMedia(Retrofit retrofit,String path,String url){
+        super(path);
         mUrl=url;
         mRetrofit=retrofit;
     }
@@ -59,9 +59,8 @@ public class NasMedia extends Media<String> {
         return true;
     }
 
-    int ssss=0;
     @Override
-    protected int onReadBytes(long start, int offset, byte[] buffer,int size) {
+    public int read(long start, int offset, byte[] buffer) {
         Retrofit retrofit=mRetrofit;
         String path=getSrc();
         String url=mUrl;
@@ -69,21 +68,21 @@ public class NasMedia extends Media<String> {
             Debug.W(getClass(),"Can't read nas media which arg invalid."+path+" "+url+" "+retrofit);
             return -1;
         }
-        try {
-            Response<ResponseBody> response=retrofit.prepare(Api.class,url).getMediaBytes(path,ssss,size).execute();
-            ResponseBody body=null!=response?response.body():null;
-            MediaType mediaType=null!=body?body.contentType():null;
-            String contentType=null!=mediaType?mediaType.subtype():null;
-            InputStream inputStream=null!=contentType&&contentType.equals("octet-stream")?body.byteStream():null;
-            if (null!=inputStream) {
-                int readed= inputStream.read(buffer,offset,size);
-                ssss+=readed;
-                Debug.D(getClass(),"DDDDDDDDd "+ssss+" "+readed+" "+offset+" "+size);
-                return readed;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Response<ResponseBody> response=retrofit.prepare(Api.class,url).getMediaBytes(path,ssss,size).execute();
+//            ResponseBody body=null!=response?response.body():null;
+//            MediaType mediaType=null!=body?body.contentType():null;
+//            String contentType=null!=mediaType?mediaType.subtype():null;
+//            InputStream inputStream=null!=contentType&&contentType.equals("octet-stream")?body.byteStream():null;
+//            if (null!=inputStream) {
+//                int readed= inputStream.read(buffer,offset,size);
+//                ssss+=readed;
+//                Debug.D(getClass(),"DDDDDDDDd "+ssss+" "+readed+" "+offset+" "+size);
+//                return readed;
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         return 0;
     }
 

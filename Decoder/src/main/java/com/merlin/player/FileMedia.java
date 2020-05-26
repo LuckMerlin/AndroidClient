@@ -11,8 +11,8 @@ public class FileMedia extends Media<String> {
     private FileInputStream mInput=null;
     private long mLength=0;
 
-    public FileMedia(String path,int bufferSize){
-        super(path,bufferSize);
+    public FileMedia(String path){
+        super(path);
     }
 
     @Override
@@ -50,26 +50,27 @@ public class FileMedia extends Media<String> {
     }
 
     @Override
-    protected int onReadBytes(long start, int offset, byte[] buffer,int size) {
+    public int read(long start, int offset, byte[] buffer) {
         FileInputStream input=mInput;
         if (null==input){
             Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
             return -1;
         }
-        if (size<=0){
-            Debug.W(getClass(),"Fail read media file bytes which offset or buffer invalid."+offset+" "+buffer);
-            return -1;
-        }
-        try {
-            if (start>0&&start<mLength){
-                input.skip(start);
-            }
-            return input.read(buffer,offset,size);
-        } catch (IOException e) {
-            Debug.E(getClass(),"Exception read media file bytes.e="+e+" "+this,e);
-            e.printStackTrace();
-            return Player.FATAL_ERROR;
-        }
+        return -1;
+//        if (size<=0){
+//            Debug.W(getClass(),"Fail read media file bytes which offset or buffer invalid."+offset+" "+buffer);
+//            return -1;
+//        }
+//        try {
+//            if (start>0&&start<mLength){
+//                input.skip(start);
+//            }
+//            return input.read(buffer,offset,size);
+//        } catch (IOException e) {
+//            Debug.E(getClass(),"Exception read media file bytes.e="+e+" "+this,e);
+//            e.printStackTrace();
+//            return Player.FATAL_ERROR;
+//        }
     }
 
     @Override
