@@ -22,7 +22,7 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
     public final static int  DESTROY =  -2022;
     public final static int  FATAL_ERROR =  -2023;
     private final Buffer mBuffer=new Buffer(1024*1024);
-    private Runnable mPlayerRunnable;
+    private PlayerRunnable mPlayerRunnable;
     private Playable mPlayable;
     private boolean mPaused=false;
     private long mSeek=0;
@@ -30,8 +30,6 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
     static {
         System.loadLibrary("linqiang");
     }
-
-    Handler handler=null;
 
     public final synchronized boolean run(){
         if (null!=mPlayerRunnable){
@@ -41,37 +39,25 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
         if (null==buffer){
             return false;
         }
-        new Thread(mPlayerRunnable=()->{
-            Debug.D(getClass(),"Player start");
-            Thread thread=new Thread(()->{
-                Debug.D(getClass(),"Cache start");
-//                try {
-                    Looper.prepare();
-                   handler=new Handler(Looper.myLooper()){
-                       @Override
-                       public void handleMessage(Message msg) {
-                           super.handleMessage(msg);
-                           Debug.D(getClass(),"SSSS "+msg);
-                       }
-                   };
-                    Looper.loop();
-//                }catch (InterruptedException e){
-//
-
-//                }
-                Debug.D(getClass(),"Cache stop");
-            });
-            thread.setDaemon(true);
-            thread.start();
-            create();
-            handler.sendMessage(handler.obtainMessage());
-
-            Runnable runnable=mPlayerRunnable;
-            if (null!=runnable&&runnable==this){
-                mPlayerRunnable=null;
+        final PlayerRunnable cacheRunnable=new PlayerRunnable("Cache"){
+            @Override
+            protected void onRun() {
             }
-            Debug.D(getClass(),"Player stop");
-        }).start();
+        };
+        final PlayerRunnable playerRunnable=mPlayerRunnable=new PlayerRunnable("Player"){
+            @Override
+            protected void onRun() {
+                Thread thread=new Thread(cacheRunnable);
+                thread.setDaemon(true);
+                thread.start();
+                create();
+                cacheRunnable.quit();//Quit cache thread
+                Runnable runnable=mPlayerRunnable;
+                if (null!=runnable&&runnable==this){
+                    mPlayerRunnable=null;
+                }
+            }};
+        new Thread(playerRunnable).start();
         return true;
     }
 
