@@ -11,7 +11,7 @@ public class LPlayer extends Player {
     private AudioTrack mAudioTrack;
 
     @Override
-    public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed, long currentPosition) {
+    protected void onFrameDecoded(int mediaType, byte[] bytes, int channels, int sampleRate, int speed) {
         final int length=null!=bytes?bytes.length:-1;
         if (length<=0){//Invalid frame data
             return;

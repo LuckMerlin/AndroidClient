@@ -1,8 +1,6 @@
 package com.merlin.model;
 
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -32,19 +30,15 @@ import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.player.BK_Player;
 import com.merlin.player.FileMedia;
-import com.merlin.player.Media;
+import com.merlin.player.IMedia;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.IPlayable;
-import com.merlin.player.Playable;
 import com.merlin.player.Time;
 import com.merlin.player1.LPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label,OnPlayerBindChange,OnPlayerStatusUpdate {
@@ -80,14 +74,19 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private void dd(){
 //        player.stop();
         String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
-        Media media=new FileMedia(path);
-         path="./摸摸.mp3";
+        IMedia media=new FileMedia(path);
+//         path="./摸摸.mp3";
 //        Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000");
-        mHandler.postDelayed(()->{
-            Debug.D(getClass(),"SSSSSSSSS ");
+        mHandler.postDelayed((
+
+
+        )->{
+            Debug.D(getClass(),"SSSSSSSSS &&&&& ");
 //            player.release();
               player.play(media,14000);
-//            Intent intent=new Intent();
+//            Intent intent=n
+//
+//            ew Intent();
 //            String key="E5ZimZDEywynjvZmjPCxcHjICYwl7fXL";
 //            intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key));
 ////            String url = "mqqwpa://im/chat?chat_type=wpa&uin=1014305258";

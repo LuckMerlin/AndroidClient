@@ -5,18 +5,14 @@ import com.merlin.debug.Debug;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Buffer {
-    private final byte[] mBuffer=new byte[1024];
+public class IIBuffer {
+    private final byte[] mBuffer=new byte[8192*3];
     public final static int EOF = -1;
     public final static int FATAL_ERROR = -2;//Keep not change for native
-    public final static int NORMAL = -3;//Keep not change for native
+    public final static int NORMAL = 0;//Keep not change for native
     public final static int EMPTY=-4;
     public final static int FULL=-5;
     private int mCursor=0;
-
-    protected Integer onLoadBytes(byte[] buffer,int offset) throws IOException {
-        return null;
-    }
 
     final void notifyRead(String debug){
         byte[] buffer=mBuffer;
@@ -26,13 +22,18 @@ public class Buffer {
         }
     }
 
+    protected Integer onLoadBytes(int length){
+        //Do nothing
+        return null;
+    }
+
     final int read(byte[] buffer,int offset) {
         int size=null!=buffer?buffer.length:-1;
         int emptyLength=offset>=0&&size>0&&offset<size?size-offset:-1;
-        if (emptyLength<0){
+        if (emptyLength < 0){
             return FATAL_ERROR;
         }
-        if (emptyLength==0){
+        if (emptyLength == 0){
             return NORMAL;
         }
         while (true) {
@@ -44,33 +45,40 @@ public class Buffer {
                     return FATAL_ERROR;
                 }
                 if (cursor == 0) {//Empty
-                    try {
-                        Integer load=onLoadBytes(innerBuffer,cursor);//Try load bytes
-                        if (null==load) {
-                            Debug.D(getClass(), "Wait writing bytes while read is empty.");
+                    Integer load=onLoadBytes(length);
+                    if (null==load){
+                        return IIBuffer.FATAL_ERROR;
+                    }
+                    if (load!= IIBuffer.NORMAL){
+                        try {
+                            Debug.D(getClass(), "Wait writing bytes after byte buffer empty.");
                             innerBuffer.wait();
                             Debug.D(getClass(), "Read is wake up.");
-                            continue;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return FATAL_ERROR;
                         }
-                        if (load>0){
-                            mCursor+=load;
-                        }
-                        return load;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return FATAL_ERROR;
-
-
                     }
+                    continue;
+//                        Integer load=onLoadBytes(mConnect);//Try load bytes
+//                        if (null==load){
+//                            Debug.D(getClass(), "Wait writing bytes while read is empty or read normal.");
+//                            innerBuffer.wait();
+//                            Debug.D(getClass(), "Read is wake up.");
+//                            continue;
+//                        }
+//                        if (load >= 0){
+//                            mCursor += load;
+//                            return read(buffer,offset);
+//                        }
+//                        return load;
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        return FATAL_ERROR;
+//                    }
                 }
                 int available=Math.min(emptyLength,cursor);//Not empty
                 System.arraycopy(innerBuffer,0,buffer,offset,available);
-//                StringBuffer st=new StringBuffer();
-//                for (int i = offset; i < Math.min(100,available); i++) {
-//                    st.append(Integer.toHexString(buffer[i]));
-//                    st.append(" ");
-//                }
-//                Debug.D(getClass(),"AAA "+st);
                 mCursor-=available;
                 return available;
             }

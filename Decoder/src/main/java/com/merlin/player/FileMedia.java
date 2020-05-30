@@ -1,5 +1,4 @@
 package com.merlin.player;
-
 import com.merlin.debug.Debug;
 
 import java.io.File;
@@ -7,17 +6,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class FileMedia extends Media<String> {
+public class FileMedia implements BytesMedia {
     private FileInputStream mInput=null;
+    private final String mPath;
     private long mLength=0;
 
     public FileMedia(String path){
-        super(path);
+        mPath=path;
     }
 
     @Override
     public final boolean open() {
-        final String mediaPath=getSrc();
+        final String mediaPath=mPath;
         if (null==mediaPath||mediaPath.length()<=0){
             Debug.W(getClass(),"Can't open media file which path is invalid."+mediaPath);
             return false;
@@ -50,19 +50,42 @@ public class FileMedia extends Media<String> {
     }
 
     @Override
-    public Integer read(byte[] buffer, int offset) throws IOException {
+    public boolean cache(CacheReady cacheReady) {
+        if (null!=cacheReady){
+            FileInputStream input=mInput;
+            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input);
+            return true;
+        }
+        //Do nothing
+        return false;
+    }
+
+    @Override
+    public int read(byte[] buffer, int offset) throws IOException {
         FileInputStream input=mInput;
         int length=null!=buffer?buffer.length:-1;
         if (null==input||length<0||offset<0||offset>length){
             Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
-            return null;
+            return Player.FATAL_ERROR;
         }
-        if (length==offset){
-            Debug.D(getClass(),"Already read full.");
-            return Buffer.NORMAL;
-        }
-       return input.read(buffer,offset,length-offset);
+        return input.read(buffer,offset,length-offset);
     }
+
+    //    @Override
+//    public void read(IIBuffer.OnStreamConnect connect) {
+//        FileInputStream input=mInput;
+////        int length=null!=buffer?buffer.length:-1;
+////        if (null==input||length<0||offset<0||offset>length){
+////            Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
+////            return null;
+////        }
+////        if (length==offset){
+////            Debug.D(getClass(),"Already read full.");
+////            return Buffer.NORMAL;
+////        }
+//        new Handler(Looper.getMainLooper()).post(()->{connect.OnStreamConnected(null==input?
+//                IIBuffer.FATAL_ERROR: IIBuffer.NORMAL,input);});
+//    }
 
     @Override
     public Meta getMeta() {

@@ -1,9 +1,9 @@
 package com.merlin.player;
 
-public abstract class Media<T>  implements Playable{
+public abstract class IMedia<T>  implements Playable{
     private T mSrc;
 
-    public Media(T src){
+    public IMedia(T src){
         mSrc=src;
     }
 

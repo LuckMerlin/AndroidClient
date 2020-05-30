@@ -7,10 +7,10 @@
 #include "string.h"
 #include "pthread.h"
 
-#define INPUT_BUFFER_SIZE	8192*5 /*(8192/5
+#define INPUT_BUFFER_SIZE	8192*3 /*(8192/5
  * ) */
 
-#define  STATUS_NORMAL -3 //Keep not change for java
+#define  STATUS_NORMAL 0 //Keep not change for java
 #define  STATUS_FATAL_ERROR -2 //Keep not change for java
 
 #define  STATUS_END -2001
@@ -118,15 +118,15 @@ static inline void onFrameDecode(jobject player,int mediaType,mad_timer_t timer,
     }
 }
 
-int readMediaBytes(jobject  player,int offset,jbyteArray buffer){
+int readMediaBytes(jobject  loader,int offset,jbyteArray buffer){
     JNIEnv *env;
     int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
     if(res==JNI_OK){
-        jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Player");
-        jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"nativeLoadBytes", "([BI)I");
-        jint opened=(*env)->CallIntMethod(env,player,methodId,buffer,offset);
+        jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/OnLoadMedia");
+        jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"onLoadMedia", "([BI)I");
+//        jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"nativeLoadBytes", "([BI)I");
+        jint opened=(*env)->CallIntMethod(env,loader,methodId,buffer,offset);
         (*env)->DeleteLocalRef(env, bufferClass);
-        LOGD("撒旦法 %d",opened);
         return opened;
     }
     LOGE("Jni env open fail.%d",res);
@@ -134,7 +134,7 @@ int readMediaBytes(jobject  player,int offset,jbyteArray buffer){
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
+Java_com_merlin_player_Player_create(JNIEnv *env, jobject player, jobject loader) {
     if (handle!=NULL){
         LOGW("Not need create media player which already started.");
         return JNI_FALSE;
@@ -171,14 +171,14 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
                     for(i= 0;i<leftOver;i++){
                         (*env)->SetByteArrayRegion(env,handle->buffer, i,1, &(handle->stream.next_frame[i]));
                     }
-                    int readBytes =readMediaBytes(player,leftOver,handle->buffer);
+                    int readBytes =readMediaBytes(loader,leftOver,handle->buffer);
                     if(readBytes <= 0){
                         readState=readBytes;
                         break;
                     }
                     readLength = leftOver + readBytes;
                 }else{
-                    readLength  = readMediaBytes(player,0,handle->buffer);
+                    readLength  = readMediaBytes(loader,0,handle->buffer);
                     if(readLength <= 0){
                         readState=readLength;
                         break;
@@ -187,7 +187,6 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
                 jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
                 unsigned char* buf=(unsigned char*)bBuffer;
                 (*env)->DeleteLocalRef(env, bBuffer);
-                LOGD("weeeeeeeee %d",readLength);
                 mad_stream_buffer(&handle->stream,buf,readLength);
                 handle->stream.error = MAD_ERROR_NONE;
             }
