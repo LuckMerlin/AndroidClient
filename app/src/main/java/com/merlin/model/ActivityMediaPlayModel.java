@@ -1,6 +1,8 @@
 package com.merlin.model;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -71,23 +73,35 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-
         player.run();
         dd();
-
     }
 
     private void dd(){
-        player.stop();
+//        player.stop();
         String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
-//        Media media=new FileMedia(path,0);
+        Media media=new FileMedia(path);
          path="./摸摸.mp3";
-        Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000");
+//        Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000");
         mHandler.postDelayed(()->{
-//            player.release();
             Debug.D(getClass(),"SSSSSSSSS ");
-//              player.play(media,14000);
-            player.release();
+//            player.release();
+              player.play(media,14000);
+//            Intent intent=new Intent();
+//            String key="E5ZimZDEywynjvZmjPCxcHjICYwl7fXL";
+//            intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key));
+////            String url = "mqqwpa://im/chat?chat_type=wpa&uin=1014305258";
+////            Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            String intentUri = intent.toUri(Intent.URI_INTENT_SCHEME);
+//            Debug.D(getClass(),"ddd "+intentUri);
+//            //intent://im/chat?chat_type=wpa&uin=1014305258#Intent;scheme=mqqwpa;launchFlags=0x10000000;end
+//            try {
+//                getContext().startActivity(intent);
+//            }catch (Exception e){
+//                Debug.D(getClass(),"SSSSSSSSS "+e);
+//            }
+//            player.release();
           },5000);
     }
 

@@ -7,16 +7,19 @@
 #include "string.h"
 #include "pthread.h"
 
-#define INPUT_BUFFER_SIZE	8192*4 /*(8192/4) */
+#define INPUT_BUFFER_SIZE	8192*5 /*(8192/5
+ * ) */
 
-#define  STATUS_NORMAL 0
-#define  STATUS_END -1
+#define  STATUS_NORMAL -3 //Keep not change for java
+#define  STATUS_FATAL_ERROR -2 //Keep not change for java
+
+#define  STATUS_END -2001
 #define  STATUS_IDLE -2003
+
 #define  STATUS_STOP -2005
 #define  STATUS_PROGRESS -2006
 #define  STATUS_CREATE -2021
 #define  STATUS_DESTROY -2022
-#define  STATUS_FATAL_ERROR -2023
 
 int MEDIA_TYPE_AUDIO =1;
 int MEDIA_TYPE_AUDIO_STREAM=2;
@@ -66,8 +69,7 @@ static inline signed int scale(mad_fixed_t sample){
     return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
-static inline void onFrameDecode(jobject player,int mediaType,mad_timer_t timer,struct mad_header header,struct mad_pcm pcm)
-        {
+static inline void onFrameDecode(jobject player,int mediaType,mad_timer_t timer,struct mad_header header,struct mad_pcm pcm){
     /* pcm->samplerate contains the sampling frequency */
     unsigned int layer=header.layer;
     unsigned int mode=header.mode;
@@ -121,9 +123,10 @@ int readMediaBytes(jobject  player,int offset,jbyteArray buffer){
     int res = (*VM)->GetEnv(VM,(void **) &env, JNI_VERSION_1_6);
     if(res==JNI_OK){
         jclass bufferClass = (*env)->FindClass(env,"com/merlin/player/Player");
-        jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"nativeLoadBytes", "(I[B)I");
-        jint opened=(*env)->CallIntMethod(env,player,methodId,offset,buffer);
+        jmethodID  methodId=(*env)->GetMethodID(env,bufferClass,"nativeLoadBytes", "([BI)I");
+        jint opened=(*env)->CallIntMethod(env,player,methodId,buffer,offset);
         (*env)->DeleteLocalRef(env, bufferClass);
+        LOGD("撒旦法 %d",opened);
         return opened;
     }
     LOGE("Jni env open fail.%d",res);
@@ -184,6 +187,7 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
                 jbyte* bBuffer = (*env)->GetByteArrayElements(env,handle->buffer,0);
                 unsigned char* buf=(unsigned char*)bBuffer;
                 (*env)->DeleteLocalRef(env, bBuffer);
+                LOGD("weeeeeeeee %d",readLength);
                 mad_stream_buffer(&handle->stream,buf,readLength);
                 handle->stream.error = MAD_ERROR_NONE;
             }
@@ -202,7 +206,7 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player) {
             handle->playStatus=STATUS_IDLE;
             notifyStatusChange(STATUS_END,"Media play end");
         }
-        if (readState==STATUS_DESTROY){
+        if (readState==STATUS_DESTROY||readState==STATUS_FATAL_ERROR){
             handle->playStatus=STATUS_DESTROY;
             notifyStatusChange(STATUS_DESTROY,"Destroy media player.");
             break;

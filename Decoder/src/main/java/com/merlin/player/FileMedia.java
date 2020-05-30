@@ -50,27 +50,18 @@ public class FileMedia extends Media<String> {
     }
 
     @Override
-    public int read(long start, int offset, byte[] buffer) {
+    public Integer read(byte[] buffer, int offset) throws IOException {
         FileInputStream input=mInput;
-        if (null==input){
+        int length=null!=buffer?buffer.length:-1;
+        if (null==input||length<0||offset<0||offset>length){
             Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
-            return -1;
+            return null;
         }
-        return -1;
-//        if (size<=0){
-//            Debug.W(getClass(),"Fail read media file bytes which offset or buffer invalid."+offset+" "+buffer);
-//            return -1;
-//        }
-//        try {
-//            if (start>0&&start<mLength){
-//                input.skip(start);
-//            }
-//            return input.read(buffer,offset,size);
-//        } catch (IOException e) {
-//            Debug.E(getClass(),"Exception read media file bytes.e="+e+" "+this,e);
-//            e.printStackTrace();
-//            return Player.FATAL_ERROR;
-//        }
+        if (length==offset){
+            Debug.D(getClass(),"Already read full.");
+            return Buffer.NORMAL;
+        }
+       return input.read(buffer,offset,length-offset);
     }
 
     @Override

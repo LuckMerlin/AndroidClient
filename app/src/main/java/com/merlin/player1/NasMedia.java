@@ -60,14 +60,19 @@ public class NasMedia extends Media<String> {
     }
 
     @Override
-    public int read(long start, int offset, byte[] buffer) {
-        Retrofit retrofit=mRetrofit;
-        String path=getSrc();
-        String url=mUrl;
-        if (null==retrofit||null==path||path.length()<=0||null==url||url.length()<=0){
-            Debug.W(getClass(),"Can't read nas media which arg invalid."+path+" "+url+" "+retrofit);
-            return -1;
-        }
+    public Integer read(byte[] buffer, int offset) throws IOException {
+        return null;
+    }
+
+    //    @Override
+//    public int read(long start, int offset, byte[] buffer) {
+//        Retrofit retrofit=mRetrofit;
+//        String path=getSrc();
+//        String url=mUrl;
+//        if (null==retrofit||null==path||path.length()<=0||null==url||url.length()<=0){
+//            Debug.W(getClass(),"Can't read nas media which arg invalid."+path+" "+url+" "+retrofit);
+//            return -1;
+//        }
 //        try {
 //            Response<ResponseBody> response=retrofit.prepare(Api.class,url).getMediaBytes(path,ssss,size).execute();
 //            ResponseBody body=null!=response?response.body():null;
@@ -83,8 +88,8 @@ public class NasMedia extends Media<String> {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        return 0;
-    }
+//        return 0;
+//    }
 
 
     @Override

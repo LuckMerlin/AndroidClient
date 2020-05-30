@@ -1,62 +1,70 @@
 package com.merlin.player;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
 import com.merlin.debug.Debug;
 
-import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.io.IOException;
 
 public abstract class Player implements OnMediaFrameDecodeFinish{
     public final static int  NORMAL = 0;
-    public final static int  END = -1;
     public final static int  IDLE = -2003;
     public final static int  STOP =  -2005;
     public final static int  PROGRESS =  -2006;
     public final static int  PLAYING =  -2007;
     public final static int  CREATE =  -2021;
     public final static int  DESTROY =  -2022;
-    public final static int  FATAL_ERROR =  -2023;
-    private final Buffer mBuffer=new Buffer(1024*1024);
+    private Buffer mBuffer;
     private PlayerRunnable mPlayerRunnable;
     private Playable mPlayable;
     private boolean mPaused=false;
-    private long mSeek=0;
 
     static {
         System.loadLibrary("linqiang");
     }
 
-    public final synchronized boolean run(){
+    public final synchronized boolean run() {
         if (null!=mPlayerRunnable){
             return false;
         }
         final Buffer buffer=mBuffer;
         if (null==buffer){
-            return false;
+            mBuffer=new Buffer(){
+                @Override
+                protected Integer onLoadBytes(byte[] buffer, int offset) throws IOException {
+                    if (null==mPlayerRunnable){
+                        return Buffer.FATAL_ERROR;
+                    }
+                    Playable playable=mPlayable;
+                    if (null!=playable){
+                        if (!playable.isOpened()&&!playable.open()){
+                            Debug.W(getClass(),"Media open fail."+playable);
+                            return Buffer.FATAL_ERROR;
+                        }
+                        int read=playable.read(buffer,offset);
+                        switch (read){
+                            case Buffer.EOF:
+                                 Debug.D(getClass(),"Media play finish."+playable);
+                                 mPlayable=null;
+                                 playable.close();
+                                 break;
+                        }
+                        return read;
+                    }
+                    return null;
+                }
+            };
         }
-        final PlayerRunnable cacheRunnable=new PlayerRunnable("Cache"){
-            @Override
-            protected void onRun() {
-            }
-        };
         final PlayerRunnable playerRunnable=mPlayerRunnable=new PlayerRunnable("Player"){
             @Override
-            protected void onRun() {
-                Thread thread=new Thread(cacheRunnable);
-                thread.setDaemon(true);
-                thread.start();
+            public void run() {
+                Debug.D(getClass(),"SSSSSSSEEEEE Player begin");
                 create();
-                cacheRunnable.quit();//Quit cache thread
                 Runnable runnable=mPlayerRunnable;
                 if (null!=runnable&&runnable==this){
                     mPlayerRunnable=null;
                 }
-            }};
+                Debug.D(getClass(),"SSSSSSSEEEEE Player end");
+            }
+        };
         new Thread(playerRunnable).start();
         return true;
     }
@@ -66,12 +74,15 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
         if (null==runnable){
             return false;
         }
-        stop();
+        Debug.D(getClass(),"Release player.");
         mPlayerRunnable=null;
-        synchronized (runnable){
-            runnable.notify();
-            return true;
+        stop();
+        final Buffer buffer=mBuffer;
+        mBuffer=null;
+        if (null!=buffer) {
+            buffer.notifyRead("While release player.");
         }
+        return true;
     }
 
     public final boolean pauseStart(){
@@ -107,7 +118,6 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
     public final boolean stop(){
         Playable playable=mPlayable;
         if (null!=playable){
-            mSeek=0;
             mPlayable=null;
             return playable.close();
         }
@@ -119,37 +129,35 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
             Debug.W(getClass(),"Can't play media while media is NULL.");
             return false;
         }
+        final Buffer buffer=mBuffer;
+        if (null==buffer){
+            Debug.W(getClass(),"Can't play media while buffer is NULL.");
+            return false;
+        }
         if (!isRunning()){
             Debug.W(getClass(),"Can't play media while player not run.");
             return false;
         }
-        Runnable runnable=mPlayerRunnable;
+        final PlayerRunnable runnable=mPlayerRunnable;
         if (null==runnable){
             Debug.W(getClass(),"Can't play media while player not start.");
             return false;
         }
         final Playable curr=mPlayable;
-        playable=(null==curr||!curr.equals(playable))?mPlayable=playable:curr;
-        if (playable.isOpened()||playable.open()){
-//            Meta meta=playable.getMeta();
-//            long length=null!=meta?meta.getLength():-1;
-//            if (length<=0){
-//                Debug.W(getClass(),"Can't play media while media length invalid.");
-//                return stop()&&false;
-//            }
-            synchronized (runnable) {
-                runnable.notify();
-            }
-            return true;
+        if (null!=curr&&curr.equals(playable)){
+            Debug.W(getClass(),"Can't play media while already playing.");
+            return false;
         }
-        Debug.W(getClass(),"Can't play media while media open fail.");
-        return false;
+        mPlayable=playable;
+        synchronized (buffer){
+            buffer.notifyRead("After play media changed.");
+        }
+        return true;
     }
 
     public final boolean isRunning(){
         return null!=mPlayerRunnable;
     }
-
     /**
      *
      *Call by native C
@@ -162,32 +170,15 @@ public abstract class Player implements OnMediaFrameDecodeFinish{
 
     private native boolean destroy();
 
-    private int nativeLoadBytes(int offset,byte[] buffer){
+    private int nativeLoadBytes(byte[] buffer,int offset){
         Runnable runnable=mPlayerRunnable;
         if (null==runnable){
-            return DESTROY;
+            return Buffer.FATAL_ERROR;
         }
-        final Playable playable=mPlayable;
-        if (null!=playable&&playable.isOpened()){
-            long seek=mSeek;
-            int read=playable.read(seek<=0?0:seek,offset,buffer);
-            if (read<0){
-                return END;
-            }
-            mSeek=0;
-            return read;
+        final Buffer innerBuffer=mBuffer;
+        if (null==innerBuffer){
+            return Buffer.FATAL_ERROR;
         }
-        try {
-            synchronized (runnable) {
-                Debug.W(getClass(), "Wait media to play.");
-                runnable.wait();
-                Debug.W(getClass(), "Wake up.");
-            }
-            return NORMAL;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return NORMAL;
-        }
+        return innerBuffer.read(buffer,offset);
     }
-
 }
