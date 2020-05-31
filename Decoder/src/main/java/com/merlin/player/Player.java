@@ -1,4 +1,5 @@
 package com.merlin.player;
+import android.os.Handler;
 import android.os.Looper;
 
 import com.merlin.debug.Debug;
@@ -57,10 +58,18 @@ public abstract class Player{
         try {
             cacheFile.deleteOnExit();
             final RandomAccessFile cacheAccess=new RandomAccessFile(cacheFile,"rw");
-            final Looper mainLooper=Looper.getMainLooper();
             final byte[] cacheBuffer=new byte[1024*1024];
-            final OnLoadMedia loader=(byte[] buffer, int offset) ->{
+            final OnLoadMedia loader=(byte[] playerBuffer, int playerOffset) ->{
+                final int playerBufferLength=null!=playerBuffer?playerBuffer.length:-1;
+                if (playerBufferLength<=0||playerOffset<0){//Buffer or offset not invalid
+                    Debug.W(getClass(),"Can't play media which player buffer or offset invalid.");
+                    return FATAL_ERROR;
+                }
+                if (playerOffset>=playerBufferLength){//Already full
+                    return NORMAL;
+                }
                 if (null==mCacheAccess){//Player has been stopped
+                    Debug.W(getClass(),"Can't play media which cache access is NULL.");
                     return FATAL_ERROR;
                 }
                 Playing playing=mPlaying;
@@ -79,35 +88,62 @@ public abstract class Player{
                     stop("While media open fail.");
                     return FATAL_ERROR;
                 }
-//                if (media instanceof BytesMedia){
-//                    return ((BytesMedia)media).read(buffer,offset);
-//                }
                 long length=cacheAccess.length();
-                if (length<=0){//Empty
+                long loadedCursor=playing.mCursor;
+                loadedCursor=loadedCursor<=0?0:loadedCursor;
+                Long totalLength=playing.mLength;
+                if ((null==totalLength||length<totalLength)&&(length<=0||loadedCursor>=length)){//Empty
                     final Looper currLooper=Looper.myLooper();
-                    final Playable.CacheReady[] caching=new Playable.CacheReady[]{};
-                    if (!media.cache(caching[0]=(what,inputStream)-> {
-                        caching[0]=null;
-                        Debug.D(getClass(),"$$$$$$$ "+currLooper);
-                        switch (what){
-                            case NORMAL:
-                                if (null!=inputStream){
-                                    inputStream.read(cacheBuffer);
-                                    cacheAccess.write();
+                    final Integer[] cacheLoad=new Integer[1];
+                    if (!media.cache((what,inputStream,total)-> {
+                        if (null!=inputStream){
+                            Looper myLooper=Looper.myLooper();
+                            new Handler(currLooper==myLooper?Looper.getMainLooper():myLooper).post(()->{
+                                long totalWritten=0;
+                                try {
+                                    do {
+                                        long currCursor=playing.mCursor;
+                                        long currLength=cacheAccess.length();
+                                        if (currLength>currCursor){
+                                            Debug.D(getClass(),"通知 "+currLength+" "+currCursor);
+                                            notify(cacheAccess,"After length more than cursor."+currCursor+" "+currLength);
+                                        }
+                                        int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
+                                        if (read>0) {
+                                            totalWritten+=read;
+                                            Debug.D(getClass(),"写入 "+totalWritten);
+                                            cacheAccess.write(cacheBuffer, 0, read);
+                                        }else if (read<0){
+                                            playing.mLength=totalWritten;
+                                            Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
+                                            break;
+                                        }
+                                    }while(true);
+                                }catch (Exception  e){
+                                    e.printStackTrace();
                                 }
-                                break;
+                            });
                         }
                     })){
                         Debug.W(getClass(),"Can't play media which cache fail."+playing);
                         stop("While media cache fail.");
                         return FATAL_ERROR;
                     }
-                    if (null!=caching[0]) {
+                    Integer cached=cacheLoad[0];
+                    if (null==cached) {//If already cached not need wait
                         wait(cacheAccess, " While buffer caching.");
+                        return NORMAL;
                     }
-                    return NORMAL;
+                    return cached;
+                }else if (loadedCursor<=length){//Need load
+                     int read= cacheAccess.read(playerBuffer,playerOffset,playerBufferLength-playerOffset);
+                     if (read>0) {
+                         Debug.D(getClass(),"读取 "+read);
+                         playing.mCursor += read;
+                     }
+                     return read;
                 }
-                Debug.D(getClass(),"Load OnLoadMedia loading "+buffer.length+" "+offset);
+                Debug.D(getClass(),"Loadisdfa是的发生 ng "+length);
                 return NORMAL;
             };
             mCacheAccess=cacheAccess;
@@ -232,9 +268,11 @@ public abstract class Player{
     private final static class Playing{
         private long mCursor;
         private final Playable mMedia;
+        private Long mLength=null;
 
         private Playing(Playable media){
             mMedia=media;
+            mCursor=0;
         }
     }
 

@@ -33,6 +33,7 @@ import com.merlin.player.FileMedia;
 import com.merlin.player.IMedia;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.IPlayable;
+import com.merlin.player.Playable;
 import com.merlin.player.Time;
 import com.merlin.player1.LPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
@@ -74,18 +75,14 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private void dd(){
 //        player.stop();
         String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
-        IMedia media=new FileMedia(path);
+        Playable media=new FileMedia(path);
 //         path="./摸摸.mp3";
 //        Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000");
-        mHandler.postDelayed((
-
-
-        )->{
+        mHandler.postDelayed(()->{
             Debug.D(getClass(),"SSSSSSSSS &&&&& ");
 //            player.release();
               player.play(media,14000);
 //            Intent intent=n
-//
 //            ew Intent();
 //            String key="E5ZimZDEywynjvZmjPCxcHjICYwl7fXL";
 //            intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key));

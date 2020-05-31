@@ -1,4 +1,7 @@
 package com.merlin.player;
+import android.os.Handler;
+import android.os.Looper;
+
 import com.merlin.debug.Debug;
 
 import java.io.File;
@@ -50,10 +53,10 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public boolean cache(CacheReady cacheReady) {
+    public boolean cache(CacheReady cacheReady) throws IOException {
         if (null!=cacheReady){
             FileInputStream input=mInput;
-            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input);
+            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input,mLength);
             return true;
         }
         //Do nothing
