@@ -7,6 +7,7 @@ import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 import com.merlin.player.IMedia;
 import com.merlin.player.Meta;
+import com.merlin.player.Playable;
 import com.merlin.server.Retrofit;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import retrofit2.http.Streaming;
 
-public class NasMedia extends IMedia<String> {
+public class NasMedia implements Playable {
 
     private interface Api{
         @Streaming
@@ -35,9 +36,10 @@ public class NasMedia extends IMedia<String> {
 
     private final Retrofit mRetrofit;
     private final String mUrl;
+    private final String mMd5;
 
-    public NasMedia(Retrofit retrofit,String path,String url){
-        super(path);
+    public NasMedia(Retrofit retrofit,String md5,String url){
+        mMd5=md5;
         mUrl=url;
         mRetrofit=retrofit;
     }
@@ -126,7 +128,7 @@ public class NasMedia extends IMedia<String> {
     @Override
     public Meta getMeta() {
         Retrofit retrofit=mRetrofit;
-        String md5=getSrc();
+        String md5=mMd5;
         String url=mUrl;
         if (null==retrofit||null==md5||md5.length()<=0||null==url||url.length()<=0){
             Debug.W(getClass(),"Can't get nas media meta which arg invalid."+md5+" "+url+" "+retrofit);

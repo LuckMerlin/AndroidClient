@@ -52,11 +52,11 @@ public class FileMedia implements BytesMedia {
 
     @Override
     public boolean cache(CacheReady cacheReady) throws IOException {
-        if (null!=cacheReady){
-            FileInputStream input=mInput;
-            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input,mLength);
-            return true;
-        }
+//        if (null!=cacheReady){
+//            FileInputStream input=mInput;
+//            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input,mLength);
+//            return true;
+//        }
         //Do nothing
         return false;
     }
@@ -71,22 +71,6 @@ public class FileMedia implements BytesMedia {
         }
         return input.read(buffer,offset,length-offset);
     }
-
-    //    @Override
-//    public void read(IIBuffer.OnStreamConnect connect) {
-//        FileInputStream input=mInput;
-////        int length=null!=buffer?buffer.length:-1;
-////        if (null==input||length<0||offset<0||offset>length){
-////            Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
-////            return null;
-////        }
-////        if (length==offset){
-////            Debug.D(getClass(),"Already read full.");
-////            return Buffer.NORMAL;
-////        }
-//        new Handler(Looper.getMainLooper()).post(()->{connect.OnStreamConnected(null==input?
-//                IIBuffer.FATAL_ERROR: IIBuffer.NORMAL,input);});
-//    }
 
     @Override
     public Meta getMeta() {
@@ -112,4 +96,10 @@ public class FileMedia implements BytesMedia {
         return false;
     }
 
+    @Override
+    public String toString() {
+        Meta meta=getMeta();
+        String name=null!=meta?meta.getName():null;
+        return (null!=name?name:"")+super.toString();
+    }
 }

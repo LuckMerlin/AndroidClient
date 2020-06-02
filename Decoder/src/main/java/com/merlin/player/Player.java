@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public abstract class Player{
-    public final static int  NORMAL = 0;
+    private final static int  NORMAL = 0;
+    private final static int  EOF = -1;
     public final static int  FATAL_ERROR = -2;
     public final static int  IDLE = -2003;
     public final static int  STOP =  -2005;
@@ -22,6 +23,7 @@ public abstract class Player{
     private RandomAccessFile mCacheAccess;
     private Playing mPlaying;
     private boolean mPaused=false;
+    private final Handler mHandler=new Handler(Looper.getMainLooper());
 
     static {
         System.loadLibrary("linqiang");
@@ -61,7 +63,7 @@ public abstract class Player{
             finalCacheFile.deleteOnExit();
             final RandomAccessFile cacheAccess=new RandomAccessFile(finalCacheFile,"rw");
             final byte[] cacheBuffer=new byte[1024*1024];
-            final OnLoadMedia loader=(byte[] playerBuffer, int playerOffset) ->{
+            final OnLoadMedia innerLoader=(byte[] playerBuffer, int playerOffset) ->{
                 final int playerBufferLength=null!=playerBuffer?playerBuffer.length:-1;
                 if (playerBufferLength<=0||playerOffset<0){//Buffer or offset not invalid
                     Debug.W(getClass(),"Can't play media which player buffer or offset invalid.");
@@ -90,11 +92,14 @@ public abstract class Player{
                     stop("While media open fail.");
                     return FATAL_ERROR;
                 }
+                if (media instanceof BytesMedia){
+                    return ((BytesMedia)media).read(playerBuffer,playerOffset);
+                }
                 long length=cacheAccess.length();
                 long loadCursor =playing.mLoadCursor;
                 loadCursor=loadCursor<=0?0:loadCursor;
                 Long totalLength=playing.mTotalLength;
-                if ((null==totalLength||length<totalLength)&&(length<=0||loadCursor>=length)){//Empty
+                if ((null==totalLength||length<totalLength)&&(length<=0||loadCursor>length)){//Empty
                     final Looper currLooper=Looper.myLooper();
                     final Integer[] cacheLoad=new Integer[1];
                     if (!media.cache((what,inputStream,total)-> {
@@ -111,7 +116,10 @@ public abstract class Player{
                                             break;
                                         }
                                         if (read>0) {
-                                            cacheAccess.write(cacheBuffer, 0, read);
+                                            synchronized (cacheAccess) {
+                                                cacheAccess.seek(cacheAccess.length());//Append to tail
+                                                cacheAccess.write(cacheBuffer, 0, read);
+                                            }
                                             totalWritten += read;
                                             long currCursor = playing.mLoadCursor;
                                             long currLength = cacheAccess.length();
@@ -137,13 +145,14 @@ public abstract class Player{
                     }
                     return cached;
                 }else if (loadCursor<length){//Need load
-                    Debug.D(getClass(),"Loading from "+loadCursor);
-                    cacheAccess.seek(loadCursor);
-                    int read= cacheAccess.read(playerBuffer,playerOffset,playerBufferLength-playerOffset);
-                    if (read>0){
-                        playing.mLoadCursor+=read;
+                    synchronized (cacheAccess) {
+                        cacheAccess.seek(loadCursor);
+                        int read = cacheAccess.read(playerBuffer, playerOffset, playerBufferLength - playerOffset);
+                        if (read > 0) {
+                            playing.mLoadCursor += read;
+                        }
+                        return read;
                     }
-                    return read;
                 }
                 return NORMAL;
             };
@@ -152,7 +161,13 @@ public abstract class Player{
                 @Override
                 public void run() {
                     Debug.D(getClass(),"SSSSSSSEEEEE Player begin");
-                    create(loader);
+                    create((byte[] playerBuffer, int playerOffset)->{
+                        int loaded=innerLoader.onLoadMedia(playerBuffer,playerOffset);
+                        if (loaded==EOF){
+                            stop("While load media eof.");
+                        }
+                        return loaded;
+                    });
                     RandomAccessFile curr=mCacheAccess;
                     if (null!=curr&&curr==cacheAccess){
                         mCacheAccess=null;
@@ -181,11 +196,6 @@ public abstract class Player{
         return true;
     }
 
-    public final boolean pauseStart(){
-        boolean pause=mPaused;
-        return pause?start():pause();
-    }
-
     public final boolean isPaused() {
         return mPaused;
     }
@@ -211,10 +221,19 @@ public abstract class Player{
         return false;
     }
 
+    public final boolean seek(double seek){
+        Playing playing=mPlaying;
+        if (null!=playing){
+//            playing.mMedia
+        }
+        return false;
+    }
+
     public final boolean stop(String debug){
         Playing playing=mPlaying;
         if (null!=playing){
             mPlaying=null;
+            cleanCached("While stop media "+(null!=debug?debug:"."));
             Playable playable=playing.mMedia;
             return null!=playable&&playable.close();
         }
@@ -235,12 +254,7 @@ public abstract class Player{
             Debug.W(getClass(),"Can't play media while player not run.");
             return false;
         }
-        final Playing curr=mPlaying;
-        Playable media=null!=curr?curr.mMedia:null;
-        if (null!=media&&media.equals(playable)){
-            Debug.W(getClass(),"Can't play media while already playing.");
-            return false;
-        }
+        stop("While play new media."+playable);
         mPlaying=new Playing(playable);
         notify(cacheAccess,"While play new media.");
         return true;
@@ -248,6 +262,21 @@ public abstract class Player{
 
     public final boolean isRunning(){
         return null!=mCacheAccess;
+    }
+
+    private boolean cleanCached(String debug){
+        RandomAccessFile accessFile=mCacheAccess;
+        if (null!=accessFile){
+            try {
+                accessFile.setLength(0);
+                Debug.D(getClass(),"Clean player cached "+(null!=debug?debug:"."));
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
     }
 
     protected void onFrameDecoded(int mediaType,byte[] bytes,int channels,int sampleRate,int speed){

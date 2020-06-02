@@ -10,4 +10,8 @@ public final class Meta {
     public long getLength() {
         return mLength;
     }
+
+    public String getName(){
+        return null;
+    }
 }
