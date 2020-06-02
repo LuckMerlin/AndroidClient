@@ -68,7 +68,8 @@ public class NasMedia extends IMedia<String> {
 //    }
 
     //    @Override
-//    public Integer read(byte[] buffer, int offset) throws IOException {
+//    public Integer read(byte[] buffer, int offset) th
+//    rows IOException {
 //            Retrofit retrofit=mRetrofit;
 //            String path=getSrc();
 //            String url=mUrl;

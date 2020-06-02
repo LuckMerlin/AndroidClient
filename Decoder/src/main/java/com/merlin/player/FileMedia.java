@@ -1,6 +1,4 @@
 package com.merlin.player;
-import android.os.Handler;
-import android.os.Looper;
 
 import com.merlin.debug.Debug;
 

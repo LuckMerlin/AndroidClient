@@ -17,6 +17,7 @@ public abstract class Player{
     public final static int  PLAYING =  -2007;
     public final static int  CREATE =  -2021;
     public final static int  DESTROY =  -2022;
+    private boolean mWaited=false;
     private final String mCacheFile;
     private RandomAccessFile mCacheAccess;
     private Playing mPlaying;
@@ -55,9 +56,10 @@ public abstract class Player{
             Debug.W(getClass(),"Can't run player while cache file NULL.");
             return false;
         }
+        final File finalCacheFile=cacheFile;
         try {
-            cacheFile.deleteOnExit();
-            final RandomAccessFile cacheAccess=new RandomAccessFile(cacheFile,"rw");
+            finalCacheFile.deleteOnExit();
+            final RandomAccessFile cacheAccess=new RandomAccessFile(finalCacheFile,"rw");
             final byte[] cacheBuffer=new byte[1024*1024];
             final OnLoadMedia loader=(byte[] playerBuffer, int playerOffset) ->{
                 final int playerBufferLength=null!=playerBuffer?playerBuffer.length:-1;
@@ -72,7 +74,7 @@ public abstract class Player{
                     Debug.W(getClass(),"Can't play media which cache access is NULL.");
                     return FATAL_ERROR;
                 }
-                Playing playing=mPlaying;
+                final Playing playing=mPlaying;
                 if (null==playing){//None media to play
                     wait(cacheAccess," While none media to play.");
                     return NORMAL;
@@ -89,34 +91,33 @@ public abstract class Player{
                     return FATAL_ERROR;
                 }
                 long length=cacheAccess.length();
-                long loadedCursor=playing.mCursor;
-                loadedCursor=loadedCursor<=0?0:loadedCursor;
-                Long totalLength=playing.mLength;
-                if ((null==totalLength||length<totalLength)&&(length<=0||loadedCursor>=length)){//Empty
+                long loadCursor =playing.mLoadCursor;
+                loadCursor=loadCursor<=0?0:loadCursor;
+                Long totalLength=playing.mTotalLength;
+                if ((null==totalLength||length<totalLength)&&(length<=0||loadCursor>=length)){//Empty
                     final Looper currLooper=Looper.myLooper();
                     final Integer[] cacheLoad=new Integer[1];
                     if (!media.cache((what,inputStream,total)-> {
                         if (null!=inputStream){
+                            playing.mTotalLength=total;
                             Looper myLooper=Looper.myLooper();
                             new Handler(currLooper==myLooper?Looper.getMainLooper():myLooper).post(()->{
                                 long totalWritten=0;
                                 try {
                                     do {
-                                        long currCursor=playing.mCursor;
-                                        long currLength=cacheAccess.length();
-                                        if (currLength>currCursor){
-                                            Debug.D(getClass(),"通知 "+currLength+" "+currCursor);
-                                            notify(cacheAccess,"After length more than cursor."+currCursor+" "+currLength);
-                                        }
                                         int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
-                                        if (read>0) {
-                                            totalWritten+=read;
-                                            Debug.D(getClass(),"写入 "+totalWritten);
-                                            cacheAccess.write(cacheBuffer, 0, read);
-                                        }else if (read<0){
-                                            playing.mLength=totalWritten;
+                                        if (read<0){
                                             Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
                                             break;
+                                        }
+                                        if (read>0) {
+                                            cacheAccess.write(cacheBuffer, 0, read);
+                                            totalWritten += read;
+                                            long currCursor = playing.mLoadCursor;
+                                            long currLength = cacheAccess.length();
+                                            if (mWaited && currLength > currCursor) {
+                                                notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
+                                            }
                                         }
                                     }while(true);
                                 }catch (Exception  e){
@@ -135,15 +136,15 @@ public abstract class Player{
                         return NORMAL;
                     }
                     return cached;
-                }else if (loadedCursor<=length){//Need load
-                     int read= cacheAccess.read(playerBuffer,playerOffset,playerBufferLength-playerOffset);
-                     if (read>0) {
-                         Debug.D(getClass(),"读取 "+read);
-                         playing.mCursor += read;
-                     }
-                     return read;
+                }else if (loadCursor<length){//Need load
+                    Debug.D(getClass(),"Loading from "+loadCursor);
+                    cacheAccess.seek(loadCursor);
+                    int read= cacheAccess.read(playerBuffer,playerOffset,playerBufferLength-playerOffset);
+                    if (read>0){
+                        playing.mLoadCursor+=read;
+                    }
+                    return read;
                 }
-                Debug.D(getClass(),"Loadisdfa是的发生 ng "+length);
                 return NORMAL;
             };
             mCacheAccess=cacheAccess;
@@ -156,6 +157,7 @@ public abstract class Player{
                     if (null!=curr&&curr==cacheAccess){
                         mCacheAccess=null;
                     }
+                    finalCacheFile.delete();
                     Debug.D(getClass(),"SSSSSSSEEEEE Player end");
                 }
             }).start();
@@ -175,9 +177,7 @@ public abstract class Player{
         Debug.D(getClass(),"Release player.");
         mCacheAccess=null;
         stop("While release player.");
-        synchronized (accessFile) {
-            accessFile.notify();
-        }
+       notify(accessFile,"While release player.");
         return true;
     }
 
@@ -266,13 +266,13 @@ public abstract class Player{
     private native boolean destroy();
 
     private final static class Playing{
-        private long mCursor;
+        private long mLoadCursor;
         private final Playable mMedia;
-        private Long mLength=null;
+        private Long mTotalLength=null;
 
         private Playing(Playable media){
             mMedia=media;
-            mCursor=0;
+            mLoadCursor=0;
         }
     }
 
@@ -290,7 +290,9 @@ public abstract class Player{
         if (null!=cache) {
             synchronized (cache) {
                 Debug.D(getClass(), "Wait "+(null!=debug?debug:"."));
+                mWaited=true;
                 cache.wait();
+                mWaited=false;
                 Debug.D(getClass(), "Wake up after "+(null!=debug?debug:"."));
             }
         }
