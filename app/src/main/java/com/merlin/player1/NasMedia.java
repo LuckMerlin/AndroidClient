@@ -1,7 +1,10 @@
 package com.merlin.player1;
 
+import androidx.databinding.ObservableField;
+
 import com.merlin.api.Address;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
@@ -14,10 +17,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Callback;
+
 import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -30,8 +36,8 @@ public class NasMedia implements Playable {
         @Streaming
         @POST(Address.PREFIX_MEDIA_PLAY+"/file")
         @FormUrlEncoded
-        Call<ResponseBody> getMediaBytes(@Field(Label.LABEL_PATH) String path, @Field(Label.LABEL_POSITION) double seek,
-                                           @Field(Label.LABEL_SIZE)int size);
+        Observable<ResponseBody> getMediaBytes(@Field(Label.LABEL_PATH) String path, @Field(Label.LABEL_POSITION) double seek,
+                                                    @Field(Label.LABEL_SIZE)int size);
 
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
@@ -95,29 +101,16 @@ public class NasMedia implements Playable {
             Debug.W(getClass(),"Can't read nas media which arg invalid."+md5+" "+url+" "+retrofit);
             return false;
         }
-        retrofit.prepare(Api.class,url).getMediaBytes(md5,0,0).enqueue(new Callback<ResponseBody>() {
+        return null!=retrofit.prepare(Api.class,url).getMediaBytes(md5,0,0).observeOn(Schedulers.io()).
+                subscribeOn(Schedulers.io()).subscribe(new Consumer<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                ResponseBody body=null!=response?response.body():null;
-                MediaType mediaType=null!=body?body.contentType():null;
+            public void accept(ResponseBody response) throws Exception {
+                MediaType mediaType=null!=response?response.contentType():null;
                 String contentType=null!=mediaType?mediaType.subtype():null;
-                InputStream inputStream=null!=contentType&&contentType.equals("octet-stream")?body.byteStream():null;
-                try {
-                    cacheReady.onCacheReady(inputStream);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                try {
-                    cacheReady.onCacheReady(null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                InputStream inputStream=null!=contentType&&contentType.equals("octet-stream")?response.byteStream():null;
+                cacheReady.onCacheReady(inputStream);
             }
         });
-        return true;
     }
 
     @Override

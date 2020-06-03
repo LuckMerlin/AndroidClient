@@ -106,42 +106,43 @@ public abstract class Player{
                 long loadCursor =playing.mLoadCursor;
                 loadCursor=loadCursor<=0?0:loadCursor;
                 if ((length<totalLength)&&(length<=0||loadCursor>length)){//Empty
-                    final Looper currLooper=Looper.myLooper();
+                    final long currThreadId=Thread.currentThread().getId();
                     final Integer[] cacheLoad=new Integer[1];
                     if (!media.cache((inputStream)-> {
                         if (null==inputStream){
                             stop( "While cache media stream NULL.");
                             return;
                         }
-                        Looper myLooper=Looper.myLooper();
-                        new Handler(currLooper==myLooper?Looper.getMainLooper():myLooper).post(()->{
-                            long totalWritten=0;
-                            try {
-                                do {
-                                    int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
-                                    if (read<0){
-                                        Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
-                                        break;
+                        if (currThreadId==Thread.currentThread().getId()){
+                            stop( "While cache media stream from same thread with player thread.");
+                            return;
+                        }
+                        long totalWritten=0;
+                        try {
+                            do {
+                                int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
+                                if (read<0){
+                                    Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
+                                    break;
+                                }
+                                if (read>0) {
+                                    synchronized (cacheAccess) {
+                                        cacheAccess.seek(cacheAccess.length());//Append to tail
+                                        cacheAccess.write(cacheBuffer, 0, read);
                                     }
-                                    if (read>0) {
-                                        synchronized (cacheAccess) {
-                                            cacheAccess.seek(cacheAccess.length());//Append to tail
-                                            cacheAccess.write(cacheBuffer, 0, read);
-                                        }
-                                        totalWritten += read;
-                                        long currCursor = playing.mLoadCursor;
-                                        long currLength = cacheAccess.length();
-                                        if (mWaited && currLength > currCursor) {
-                                            notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
-                                        }
+                                    totalWritten += read;
+                                    long currCursor = playing.mLoadCursor;
+                                    long currLength = cacheAccess.length();
+                                    if (mWaited && currLength > currCursor) {
+                                        notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
                                     }
-                                }while(true);
-                            }catch (Exception  e){
-                                Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
-                                e.printStackTrace();
-                                stop( "After read cache bytes exception.e="+e);
-                            }
-                        });
+                                }
+                            }while(true);
+                        }catch (Exception  e){
+                            Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
+                            e.printStackTrace();
+                            stop( "After read cache bytes exception.e="+e);
+                        }
                     })){
                         Debug.W(getClass(),"Can't play media which cache fail."+playing);
                         stop("While media cache fail.");
@@ -315,12 +316,11 @@ public abstract class Player{
         }
     }
 
-    private void notify(RandomAccessFile cache,String debug)
-    {
+    private void notify(RandomAccessFile cache,String debug) {
         if (null!=cache) {
             synchronized (cache) {
                 Debug.D(getClass(), "Notify "+(null!=debug?debug:"."));
-                cache.notify();
+                cache.notifyAll();
             }
         }
     }
