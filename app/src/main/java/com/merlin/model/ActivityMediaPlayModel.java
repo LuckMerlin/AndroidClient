@@ -78,14 +78,14 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         String path2="/sdcard/Musics/赵雷 - 成都.mp3";
         Playable media=new FileMedia(path);
         Playable media2=new FileMedia(path2);
-//         path="./摸摸.mp3";
-//        Media media=new com.merlin.player1.NasMedia(this,path,"http://192.168.0.3:5000");
+        String path3="./摸摸.mp3";
+        Playable media3=new com.merlin.player1.NasMedia(this,path3,"http://192.168.0.3:5000");
         mHandler.postDelayed(()->{
             Debug.D(getClass(),"SSSSSSSSS &&&&& ");
 //            player.release();
               player.play(media,14000);
               mHandler.postDelayed(()->{
-                  player.play(media2,14000);
+                  player.play(media3,14000);
               },5000);
 //            Intent intent=n
 //            ew Intent();

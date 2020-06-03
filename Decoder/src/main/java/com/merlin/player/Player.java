@@ -92,47 +92,56 @@ public abstract class Player{
                     stop("While media open fail.");
                     return FATAL_ERROR;
                 }
+                Meta meta=media.getMeta();
+                long totalLength=null!=meta?meta.getLength():-1;
+                if (totalLength<=0){
+                    Debug.W(getClass(),"Can't play media which total length invalid."+totalLength);
+                    stop("While media total length invalid."+totalLength);
+                    return FATAL_ERROR;
+                }
                 if (media instanceof BytesMedia){
                     return ((BytesMedia)media).read(playerBuffer,playerOffset);
                 }
                 long length=cacheAccess.length();
                 long loadCursor =playing.mLoadCursor;
                 loadCursor=loadCursor<=0?0:loadCursor;
-                Long totalLength=playing.mTotalLength;
-                if ((null==totalLength||length<totalLength)&&(length<=0||loadCursor>length)){//Empty
+                if ((length<totalLength)&&(length<=0||loadCursor>length)){//Empty
                     final Looper currLooper=Looper.myLooper();
                     final Integer[] cacheLoad=new Integer[1];
-                    if (!media.cache((what,inputStream,total)-> {
-                        if (null!=inputStream){
-                            playing.mTotalLength=total;
-                            Looper myLooper=Looper.myLooper();
-                            new Handler(currLooper==myLooper?Looper.getMainLooper():myLooper).post(()->{
-                                long totalWritten=0;
-                                try {
-                                    do {
-                                        int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
-                                        if (read<0){
-                                            Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
-                                            break;
-                                        }
-                                        if (read>0) {
-                                            synchronized (cacheAccess) {
-                                                cacheAccess.seek(cacheAccess.length());//Append to tail
-                                                cacheAccess.write(cacheBuffer, 0, read);
-                                            }
-                                            totalWritten += read;
-                                            long currCursor = playing.mLoadCursor;
-                                            long currLength = cacheAccess.length();
-                                            if (mWaited && currLength > currCursor) {
-                                                notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
-                                            }
-                                        }
-                                    }while(true);
-                                }catch (Exception  e){
-                                    e.printStackTrace();
-                                }
-                            });
+                    if (!media.cache((inputStream)-> {
+                        if (null==inputStream){
+                            stop( "While cache media stream NULL.");
+                            return;
                         }
+                        Looper myLooper=Looper.myLooper();
+                        new Handler(currLooper==myLooper?Looper.getMainLooper():myLooper).post(()->{
+                            long totalWritten=0;
+                            try {
+                                do {
+                                    int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
+                                    if (read<0){
+                                        Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
+                                        break;
+                                    }
+                                    if (read>0) {
+                                        synchronized (cacheAccess) {
+                                            cacheAccess.seek(cacheAccess.length());//Append to tail
+                                            cacheAccess.write(cacheBuffer, 0, read);
+                                        }
+                                        totalWritten += read;
+                                        long currCursor = playing.mLoadCursor;
+                                        long currLength = cacheAccess.length();
+                                        if (mWaited && currLength > currCursor) {
+                                            notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
+                                        }
+                                    }
+                                }while(true);
+                            }catch (Exception  e){
+                                Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
+                                e.printStackTrace();
+                                stop( "After read cache bytes exception.e="+e);
+                            }
+                        });
                     })){
                         Debug.W(getClass(),"Can't play media which cache fail."+playing);
                         stop("While media cache fail.");
@@ -224,12 +233,14 @@ public abstract class Player{
     public final boolean seek(double seek){
         Playing playing=mPlaying;
         if (null!=playing){
-//            playing.mMedia
+//            playing.
         }
         return false;
     }
 
-    public final boolean stop(String debug){
+    public final boolean stop(String debug)
+
+    {
         Playing playing=mPlaying;
         if (null!=playing){
             mPlaying=null;
@@ -297,7 +308,6 @@ public abstract class Player{
     private final static class Playing{
         private long mLoadCursor;
         private final Playable mMedia;
-        private Long mTotalLength=null;
 
         private Playing(Playable media){
             mMedia=media;

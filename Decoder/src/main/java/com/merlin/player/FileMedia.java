@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class FileMedia implements BytesMedia {
+    private Meta mMeta;
     private FileInputStream mInput=null;
     private final String mPath;
     private long mLength=0;
@@ -29,7 +30,8 @@ public class FileMedia implements BytesMedia {
         }
         try {
             File file=new File(mediaPath);
-            mLength=file.length();
+            long length=mLength=file.length();
+            mMeta=new Meta(length);
             if (mLength<=0){
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;
@@ -51,7 +53,7 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public boolean cache(CacheReady cacheReady) throws IOException {
+    public boolean cache(CacheReady cacheReady) {
 //        if (null!=cacheReady){
 //            FileInputStream input=mInput;
 //            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input,mLength);
@@ -73,11 +75,6 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public Meta getMeta() {
-        return new Meta(mLength);
-    }
-
-    @Override
     public final boolean close() {
         FileInputStream input=mInput;
         if (null!=input){
@@ -94,6 +91,11 @@ public class FileMedia implements BytesMedia {
             }
         }
         return false;
+    }
+
+    @Override
+    public final Meta getMeta() {
+        return mMeta;
     }
 
     @Override

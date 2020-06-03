@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 public interface Playable {
     interface CacheReady{
-        void onCacheReady(int what,InputStream inputStream,long total) throws IOException;
+        void onCacheReady(InputStream inputStream) throws IOException;
     }
     boolean open();
     boolean isOpened();
