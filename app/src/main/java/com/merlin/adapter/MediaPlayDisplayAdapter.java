@@ -1,11 +1,8 @@
 package com.merlin.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,8 +16,10 @@ import com.merlin.model.Model;
 import com.merlin.player.IPlayable;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyclerScrollStateChange{
+public class MediaPlayDisplayAdapter extends ListAdapter<Integer> implements OnRecyclerScrollStateChange{
     private final PagerSnapHelper mHelper=new PagerSnapHelper();
     private LinearLayoutManager mManager;
     private OnRecyclerScrollStateChange mChange;
@@ -35,8 +34,11 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
     }
 
     public MediaPlayDisplayAdapter(OnRecyclerScrollStateChange change){
-        super(R.layout.media_display_sheet_category,R.layout.media_display_play,R.layout.media_display_all_medias);
-//        super(R.layout.media_display_play);
+        List<Integer> list=new ArrayList<>(3);
+        list.add(R.layout.media_display_sheet_category);
+        list.add(R.layout.media_display_play);
+        list.add(R.layout.media_display_all_medias);
+        set(list,"");
         mChange=change;
     }
 
@@ -89,33 +91,26 @@ public class MediaPlayDisplayAdapter extends Adapter<Integer> implements OnRecyc
     }
 
     @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
+    public void onAttachedRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedRecyclerView(recyclerView);
         recyclerView.scrollToPosition(1);
     }
 
-    @NonNull
     @Override
-    public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context=parent.getContext();
-        final LayoutInflater in=LayoutInflater.from(context);
+    protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater in, int viewType, ViewGroup parent) {
         ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
         View  root=null!=binding?binding.getRoot():null;
-        ViewHolder viewHolder=new ViewHolder(null!=root?root:new View(context));
+        RecyclerView.ViewHolder viewHolder=null!=root?new ViewHolder(binding):new BaseViewHolder(new View(parent.getContext()));
         root.postDelayed(()->applyPlaying(root,null),500);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        Integer data=getItem(position);
+    protected int getItemViewType(int position, int size) {
+        Integer data=getItemData(position);
         return null!=data?data:-1;
     }
+
 
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {

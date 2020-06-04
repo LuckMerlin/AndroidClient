@@ -30,10 +30,10 @@ import com.merlin.media.MediaPlayer;
 import com.merlin.media.Mode;
 import com.merlin.player.BK_Player;
 import com.merlin.player.FileMedia;
-import com.merlin.player.IMedia;
 import com.merlin.player.OnPlayerStatusUpdate;
 import com.merlin.player.IPlayable;
 import com.merlin.player.Playable;
+import com.merlin.player.Player;
 import com.merlin.player.Time;
 import com.merlin.player1.LPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
@@ -42,7 +42,7 @@ import com.merlin.view.Res;
 
 import java.util.List;
 
-public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label,OnPlayerBindChange,OnPlayerStatusUpdate {
+public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label,OnPlayerBindChange, Player.OnPlayerStatusChange,OnPlayerStatusUpdate {
     private MediaPlayer mPlayer;
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Integer> mMode=new ObservableField<>();
@@ -66,8 +66,15 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     Handler mHandler=new Handler(Looper.getMainLooper());
 
     @Override
+    public void onPlayerStatusChanged(int status, Playable playable, Object arg, String debug) {
+        Debug.D(getClass(),"%%%%%%%%% "+status+" "+debug+" "+playable+" "+arg
+        );
+    }
+
+    @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
+        player.addListener(this);
         player.run();
         dd();
     }
@@ -87,22 +94,6 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
               mHandler.postDelayed(()->{
                   player.play(media3,14000);
               },5000);
-//            Intent intent=n
-//            ew Intent();
-//            String key="E5ZimZDEywynjvZmjPCxcHjICYwl7fXL";
-//            intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key));
-////            String url = "mqqwpa://im/chat?chat_type=wpa&uin=1014305258";
-////            Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            String intentUri = intent.toUri(Intent.URI_INTENT_SCHEME);
-//            Debug.D(getClass(),"ddd "+intentUri);
-//            //intent://im/chat?chat_type=wpa&uin=1014305258#Intent;scheme=mqqwpa;launchFlags=0x10000000;end
-//            try {
-//                getContext().startActivity(intent);
-//            }catch (Exception e){
-//                Debug.D(getClass(),"SSSSSSSSS "+e);
-//            }
-//            player.release();
           },5000);
     }
 

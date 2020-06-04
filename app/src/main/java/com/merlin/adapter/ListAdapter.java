@@ -55,7 +55,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null;
     }
 
-    protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater in,int viewType){
+    protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater in,int viewType,ViewGroup parent){
         return null;
     }
 
@@ -80,7 +80,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     @Override
   public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       final LayoutInflater in=LayoutInflater.from(parent.getContext());
-        RecyclerView.ViewHolder viewHolder=onCreateViewHolder(in,viewType);
+        RecyclerView.ViewHolder viewHolder=onCreateViewHolder(in,viewType,parent);
         if (viewHolder ==null){
            Integer integer= onResolveViewTypeLayoutId(viewType);
            ViewDataBinding binding=null!=integer&&integer!= Resources.ID_NULL?DataBindingUtil.inflate(in,integer,parent,false):null;

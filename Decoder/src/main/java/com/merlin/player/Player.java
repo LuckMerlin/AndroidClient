@@ -2,11 +2,15 @@ package com.merlin.player;
 import android.os.Handler;
 import android.os.Looper;
 
+
 import com.merlin.debug.Debug;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 public abstract class Player{
     private final static int  NORMAL = 0;
@@ -14,16 +18,22 @@ public abstract class Player{
     public final static int  FATAL_ERROR = -2;
     public final static int  IDLE = -2003;
     public final static int  STOP =  -2005;
-    public final static int  PROGRESS =  -2006;
     public final static int  PLAYING =  -2007;
+    public final static int  WAITING =  -2008;
+    public final static int  PLAY =  -2009;
     public final static int  CREATE =  -2021;
     public final static int  DESTROY =  -2022;
-    private boolean mWaited=false;
+    private boolean mWaiting=false;
     private final String mCacheFile;
     private RandomAccessFile mCacheAccess;
     private Playing mPlaying;
     private boolean mPaused=false;
     private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private final Map<OnPlayerStatusChange, Long> mChangeMap=new WeakHashMap<>();
+
+    public interface OnPlayerStatusChange{
+        void onPlayerStatusChanged(int status,Playable playable,Object arg,String debug);
+    }
 
     static {
         System.loadLibrary("linqiang");
@@ -37,10 +47,21 @@ public abstract class Player{
         mCacheFile=cacheFile;
     }
 
+    public final boolean addListener(OnPlayerStatusChange change){
+        Map<OnPlayerStatusChange, Long> changeMap=null!=change?mChangeMap:null;
+        return null!=changeMap&&null!=changeMap.put(change,System.currentTimeMillis());
+    }
+
+    public final boolean removeListener(OnPlayerStatusChange change){
+        Map<OnPlayerStatusChange, Long> changeMap=null!=change?mChangeMap:null;
+        return null!=changeMap&&null!=changeMap.remove(change);
+    }
+
     public final synchronized boolean run() {
         if (null!=mCacheAccess){
             return false;
         }
+        notifyStatusChange(CREATE,null,null,null);
         String cachePath=mCacheFile;
         File cacheFile=null;
         if (null==cachePath||cachePath.length()<=0){
@@ -49,6 +70,7 @@ public abstract class Player{
             } catch (IOException e) {
                 Debug.E(getClass(),"Can't run player while cache file create exception.e="+e,e);
                 e.printStackTrace();
+                notifyStatusChange(DESTROY,null,null,"Cache file create exception.");
                 return false;
             }
         }else{
@@ -56,6 +78,7 @@ public abstract class Player{
         }
         if (null==cacheFile){
             Debug.W(getClass(),"Can't run player while cache file NULL.");
+            notifyStatusChange(DESTROY,null,null,"Cache file NULL.");
             return false;
         }
         final File finalCacheFile=cacheFile;
@@ -100,7 +123,11 @@ public abstract class Player{
                     return FATAL_ERROR;
                 }
                 if (media instanceof BytesMedia){
-                    return ((BytesMedia)media).read(playerBuffer,playerOffset);
+                    int read=((BytesMedia)media).read(playerBuffer,playerOffset);
+                    if (read>0){
+                        notifyStatusChange(PLAYING,media,null,null);
+                    }
+                    return read;
                 }
                 long length=cacheAccess.length();
                 long loadCursor =playing.mLoadCursor;
@@ -133,7 +160,7 @@ public abstract class Player{
                                     totalWritten += read;
                                     long currCursor = playing.mLoadCursor;
                                     long currLength = cacheAccess.length();
-                                    if (mWaited && currLength > currCursor) {
+                                    if (mWaiting && currLength > currCursor) {
                                         notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
                                     }
                                 }
@@ -160,6 +187,7 @@ public abstract class Player{
                         int read = cacheAccess.read(playerBuffer, playerOffset, playerBufferLength - playerOffset);
                         if (read > 0) {
                             playing.mLoadCursor += read;
+                            notifyStatusChange(PLAYING,media,null,null);
                         }
                         return read;
                     }
@@ -178,20 +206,26 @@ public abstract class Player{
                         }
                         return loaded;
                     });
+                    finalCacheFile.delete();
+                    Debug.D(getClass(),"SSSSSSSEEEEE Player end");
                     RandomAccessFile curr=mCacheAccess;
                     if (null!=curr&&curr==cacheAccess){
                         mCacheAccess=null;
                     }
-                    finalCacheFile.delete();
-                    Debug.D(getClass(),"SSSSSSSEEEEE Player end");
+                    notifyStatusChange(DESTROY,null,null,"Player thread end.");
                 }
             }).start();
             return true;
         } catch (FileNotFoundException e) {
             Debug.E(getClass(),"Can't run player while run exception.e="+e,e);
             e.printStackTrace();
+            notifyStatusChange(DESTROY,null,null,"Exception player."+e);
             return false;
         }
+    }
+
+    public final boolean isWaiting() {
+        return mWaiting;
     }
 
     public final synchronized boolean release(){
@@ -208,6 +242,10 @@ public abstract class Player{
 
     public final boolean isPaused() {
         return mPaused;
+    }
+
+    public final boolean isIdle() {
+        return null==mPlaying;
     }
 
     public final boolean pause(){
@@ -239,14 +277,13 @@ public abstract class Player{
         return false;
     }
 
-    public final boolean stop(String debug)
-
-    {
+    public final boolean stop(String debug) {
         Playing playing=mPlaying;
         if (null!=playing){
             mPlaying=null;
             cleanCached("While stop media "+(null!=debug?debug:"."));
             Playable playable=playing.mMedia;
+            notifyStatusChange(STOP,playable,null,debug);
             return null!=playable&&playable.close();
         }
         return false;
@@ -268,12 +305,29 @@ public abstract class Player{
         }
         stop("While play new media."+playable);
         mPlaying=new Playing(playable);
+        notifyStatusChange(PLAY,playable,null,"While play new media.");
         notify(cacheAccess,"While play new media.");
         return true;
     }
 
     public final boolean isRunning(){
         return null!=mCacheAccess;
+    }
+
+    private void notifyStatusChange(int status,Playable playable,Object arg,String debug){
+       if (Thread.currentThread().getId()==Looper.getMainLooper().getThread().getId()) {
+           Map<OnPlayerStatusChange, Long> changeMap = mChangeMap;
+           Set<OnPlayerStatusChange> set = null != changeMap ? changeMap.keySet() : null;
+           if (null != set) {
+               for (OnPlayerStatusChange change : set) {
+                   if (null != change) {
+                       change.onPlayerStatusChanged(status, playable, arg,debug);
+                   }
+               }
+           }
+       }else{
+           mHandler.post(()->notifyStatusChange(status,playable,arg,debug));
+       }
     }
 
     private boolean cleanCached(String debug){
@@ -329,9 +383,10 @@ public abstract class Player{
         if (null!=cache) {
             synchronized (cache) {
                 Debug.D(getClass(), "Wait "+(null!=debug?debug:"."));
-                mWaited=true;
+                mWaiting=true;
+                notifyStatusChange(WAITING,null,null,"Cache file NULL.");
                 cache.wait();
-                mWaited=false;
+                mWaiting=false;
                 Debug.D(getClass(), "Wake up after "+(null!=debug?debug:"."));
             }
         }

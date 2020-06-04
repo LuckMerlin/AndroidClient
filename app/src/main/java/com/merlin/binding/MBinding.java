@@ -49,6 +49,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.merlin.adapter.Adapter;
 import com.merlin.adapter.LinearItemDecoration;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.adapter.LoadMoreInterceptor;
@@ -307,7 +308,7 @@ public class MBinding {
     }
 
     @BindingAdapter("android:adapter")
-    public static void adapter(RecyclerView view, RecyclerView.Adapter adapter) {
+    public static void adapter(RecyclerView view, ListAdapter adapter) {
         if (null!=view){
             if (null!=adapter&&adapter instanceof ListAdapter){
                 Object helper=adapter instanceof OnItemTouchResolver?((OnItemTouchResolver)adapter).onResolveItemTouch(view):null;

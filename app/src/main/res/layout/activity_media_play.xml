@@ -4,7 +4,7 @@
 
   <data>
       <variable
-          name="tvm3"
+          name="vm"
           type="com.merlin.model.ActivityMediaPlayModel" />
       <import type="com.merlin.binding.StatusBar"/>
   </data>
@@ -14,7 +14,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent">
       <androidx.recyclerview.widget.RecyclerView
-          binding:adapter="@{tvm3.displayAdapter}"
+          android:adapter="@{vm.displayAdapter}"
           android:layout_width="match_parent"
           android:layout_height="match_parent"/>
   </RelativeLayout>
