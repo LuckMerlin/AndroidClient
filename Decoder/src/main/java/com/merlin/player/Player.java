@@ -23,6 +23,8 @@ public abstract class Player{
     public final static int  PLAY =  -2009;
     public final static int  CREATE =  -2021;
     public final static int  DESTROY =  -2022;
+    public final static int  ADD =  -2023;
+    public final static int  REMOVE =  -2024;
     private boolean mWaiting=false;
     private final String mCacheFile;
     private RandomAccessFile mCacheAccess;
@@ -316,6 +318,10 @@ public abstract class Player{
         return true;
     }
 
+    public final String getCachePath() {
+        return mCacheFile;
+    }
+
     public final boolean isRunning(){
         return null!=mCacheAccess;
     }
@@ -324,15 +330,23 @@ public abstract class Player{
         //Do nothing
     }
 
-    private void notifyStatusChange(int status,Playable playable,Object arg,String debug){
+    protected final void notifyStatusChange(int status,Playable playable,Object arg,String debug,OnPlayerStatusChange change){
+        if (null != change) {
+            change.onPlayerStatusChanged(status, playable, arg,debug);
+        }
+    }
+
+    protected final void notifyStatusChange(int status,Playable playable,Object arg,String debug){
        if (Thread.currentThread().getId()==Looper.getMainLooper().getThread().getId()) {
            onStatusChanged(status,playable,arg,debug);
            Map<OnPlayerStatusChange, Long> changeMap = mChangeMap;
-           Set<OnPlayerStatusChange> set = null != changeMap ? changeMap.keySet() : null;
-           if (null != set) {
-               for (OnPlayerStatusChange change : set) {
-                   if (null != change) {
-                       change.onPlayerStatusChanged(status, playable, arg,debug);
+           if (null!=changeMap) {
+               synchronized (changeMap) {
+                   Set<OnPlayerStatusChange> set = changeMap.keySet();
+                   if (null != set) {
+                       for (OnPlayerStatusChange change : set) {
+                           notifyStatusChange(status, playable, arg, debug, change);
+                       }
                    }
                }
            }

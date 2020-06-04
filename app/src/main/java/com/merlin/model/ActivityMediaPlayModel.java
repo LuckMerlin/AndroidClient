@@ -31,7 +31,6 @@ import com.merlin.player.FileMedia;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 import com.merlin.player.Time;
-import com.merlin.player1.LPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
