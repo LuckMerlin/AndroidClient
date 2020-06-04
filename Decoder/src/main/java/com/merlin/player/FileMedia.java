@@ -11,7 +11,6 @@ public class FileMedia implements BytesMedia {
     private Meta mMeta;
     private FileInputStream mInput=null;
     private final String mPath;
-    private long mLength=0;
 
     public FileMedia(String path){
         mPath=path;
@@ -30,9 +29,9 @@ public class FileMedia implements BytesMedia {
         }
         try {
             File file=new File(mediaPath);
-            long length=mLength=file.length();
+            final long length=file.length();
             mMeta=new Meta(length);
-            if (mLength<=0){
+            if (length<=0){
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;
             }
@@ -53,7 +52,7 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public boolean cache(CacheReady cacheReady) {
+    public final boolean cache(CacheReady cacheReady) {
 //        if (null!=cacheReady){
 //            FileInputStream input=mInput;
 //            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input,mLength);
@@ -64,7 +63,7 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public int read(byte[] buffer, int offset) throws IOException {
+    public final int read(byte[] buffer, int offset) throws IOException {
         FileInputStream input=mInput;
         int length=null!=buffer?buffer.length:-1;
         if (null==input||length<0||offset<0||offset>length){
@@ -79,7 +78,6 @@ public class FileMedia implements BytesMedia {
         FileInputStream input=mInput;
         if (null!=input){
             mInput=null;
-            mLength=0;
             try {
                 input.close();
                 Debug.D(getClass(),"Closed media file."+this);

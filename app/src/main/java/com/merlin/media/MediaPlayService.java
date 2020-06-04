@@ -16,15 +16,12 @@ import com.merlin.bean.NasMedia;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
-import com.merlin.player.IPlayable;
-import com.merlin.player.OnPlayerStatusUpdate;
-import com.merlin.player.Status;
 import com.merlin.player1.MPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaPlayService extends Service implements Status {
+public class MediaPlayService extends Service {
     private final MPlayer mPlayer = new MPlayer();
     private final static String LABEL_MEDIAS = "medias";
     private final static String LABEL_POSITION = "position";

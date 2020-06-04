@@ -13,7 +13,6 @@ import com.merlin.binding.ModelBinder;
 import com.merlin.client.R;
 import com.merlin.model.MediaDisplayModel;
 import com.merlin.model.Model;
-import com.merlin.player.IPlayable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

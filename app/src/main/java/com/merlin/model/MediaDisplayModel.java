@@ -1,7 +1,5 @@
 package com.merlin.model;
 
-import com.merlin.player.IPlayable;
-
 public class MediaDisplayModel extends Model{
 
 

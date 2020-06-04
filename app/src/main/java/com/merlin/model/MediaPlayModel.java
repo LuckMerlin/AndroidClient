@@ -4,10 +4,8 @@ import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
-import com.merlin.player.IPlayable;
-import com.merlin.player.Status;
 
-public class MediaPlayModel extends MediaDisplayModel implements Label, What,Status {
+public class MediaPlayModel extends MediaDisplayModel implements Label, What {
 
 //    private interface Api{
 //        @POST(Address.PREFIX_MEDIA+"/favorite")

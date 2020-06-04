@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaPlayingBinding;
-import com.merlin.player.IPlayable;
 
 import java.util.List;
 

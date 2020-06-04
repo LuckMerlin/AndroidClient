@@ -195,25 +195,22 @@ public abstract class Player{
                 return NORMAL;
             };
             mCacheAccess=cacheAccess;
-            new Thread(new PlayerRunnable("Player"){
-                @Override
-                public void run() {
-                    Debug.D(getClass(),"SSSSSSSEEEEE Player begin");
+            new Thread(()->{
                     create((byte[] playerBuffer, int playerOffset)->{
                         int loaded=innerLoader.onLoadMedia(playerBuffer,playerOffset);
                         if (loaded==EOF){
+                            Playable playable=getPlaying();
                             stop("While load media eof.");
+                            onMediaPlayFinish(playable,"While load media eof.");
                         }
                         return loaded;
                     });
                     finalCacheFile.delete();
-                    Debug.D(getClass(),"SSSSSSSEEEEE Player end");
                     RandomAccessFile curr=mCacheAccess;
                     if (null!=curr&&curr==cacheAccess){
                         mCacheAccess=null;
                     }
                     notifyStatusChange(DESTROY,null,null,"Player thread end.");
-                }
             }).start();
             return true;
         } catch (FileNotFoundException e) {
@@ -222,6 +219,10 @@ public abstract class Player{
             notifyStatusChange(DESTROY,null,null,"Exception player."+e);
             return false;
         }
+    }
+
+    protected void onMediaPlayFinish(Playable playable,String debug){
+            //Do nothing
     }
 
     public final boolean isWaiting() {
@@ -246,6 +247,11 @@ public abstract class Player{
 
     public final boolean isIdle() {
         return null==mPlaying;
+    }
+
+    public final Playable getPlaying() {
+        Playing playing=mPlaying;
+        return null!=playing?playing.mMedia:null;
     }
 
     public final boolean pause(){
@@ -314,8 +320,13 @@ public abstract class Player{
         return null!=mCacheAccess;
     }
 
+    protected void onStatusChanged(int status,Playable playable,Object arg,String debug){
+        //Do nothing
+    }
+
     private void notifyStatusChange(int status,Playable playable,Object arg,String debug){
        if (Thread.currentThread().getId()==Looper.getMainLooper().getThread().getId()) {
+           onStatusChanged(status,playable,arg,debug);
            Map<OnPlayerStatusChange, Long> changeMap = mChangeMap;
            Set<OnPlayerStatusChange> set = null != changeMap ? changeMap.keySet() : null;
            if (null != set) {

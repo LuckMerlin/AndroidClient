@@ -10,39 +10,35 @@ import com.merlin.media.Indexer;
 import com.merlin.media.Mode;
 import com.merlin.media.NasMediaBuffer;
 import com.merlin.media.NetMediaBuffer;
-import com.merlin.player.BK_Player;
-import com.merlin.player.IPlayable;
-import com.merlin.player.MediaBuffer;
-import com.merlin.player.OnMediaFrameDecodeFinish;
-import com.merlin.player.OnPlayerStatusUpdate;
+import com.merlin.player.Playable;
+import com.merlin.player.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MPlayer extends BK_Player implements OnMediaFrameDecodeFinish,OnPlayerStatusUpdate {
+public class MPlayer extends Player {
     public static final int PLAY_TYPE_NONE = 0x00; //0000 0000
     public static final int PLAY_TYPE_ORDER_NEXT = 0x01; //0000 0001
     public static final int PLAY_TYPE_PLAY_NOW = 0x02; //0000 0010
     public static final int PLAY_TYPE_ADD_INTO_QUEUE = 0x04; //0000 0100
     public static final int PLAY_TYPE_CLEAN_QUEUE = 0x08; //0000 1000
-    private final List<IPlayable> mQueue=new ArrayList<>();
+    private final List<Playable> mQueue=new ArrayList<>();
     private AudioTrack mAudioTrack;
     private final Indexer mIndexer=new Indexer();
     private Mode mPlayMode;
 
     public MPlayer(){
-        addListener(this);
         mPlayMode=Mode.RANDOM;
     }
 
     @Override
-    public void onMediaFrameDecodeFinish(int mediaType, byte[] bytes, int channels, int sampleRate, int speed,long currPosition) {
+    protected void onFrameDecoded(int mediaType, byte[] bytes, int channels, int sampleRate, int speed) {
         final int length=null!=bytes?bytes.length:-1;
         if (length<=0){//Invalid frame data
             return;
         }
-        AudioTrack audioTrack=buildAudioTrack(sampleRate,AudioFormat.CHANNEL_IN_STEREO);
+        AudioTrack audioTrack=buildAudioTrack(sampleRate, AudioFormat.CHANNEL_IN_STEREO);
         if (null==audioTrack){
             Debug.W(getClass(),"Can't play media frame. sampleRate="+sampleRate);
             return;
@@ -51,6 +47,30 @@ public class MPlayer extends BK_Player implements OnMediaFrameDecodeFinish,OnPla
             audioTrack.play();
         }
         audioTrack.write(bytes,0,length);
+    }
+
+    private AudioTrack buildAudioTrack(int sampleRateInHz,int channelConfig){
+        if (sampleRateInHz<=0||channelConfig<=0){
+            Debug.W(getClass(),"Can't build audio track.sampleRate="+sampleRateInHz+" channelConfig="+channelConfig);
+            return null;
+        }
+        AudioTrack audioTrack=mAudioTrack;
+        if (null!=audioTrack){
+            int currSampleRateInHz=audioTrack.getSampleRate();
+            int currChannelConfig=audioTrack.getChannelConfiguration();
+            if (sampleRateInHz==currSampleRateInHz&&channelConfig==currChannelConfig){
+                return audioTrack;
+            }
+            Debug.W(getClass(),"Release existed audio track when sampleRate changed."+
+                    currSampleRateInHz+" "+sampleRateInHz+" "+currChannelConfig+" "+channelConfig);
+            mAudioTrack=null;
+            audioTrack.stop();
+            audioTrack.release();
+        }
+        mAudioTrack=audioTrack=new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateInHz, channelConfig,
+                AudioFormat.ENCODING_PCM_16BIT, AudioTrack.getMinBufferSize(sampleRateInHz,
+                channelConfig, AudioFormat.ENCODING_PCM_16BIT),AudioTrack.MODE_STREAM);
+        return audioTrack;
     }
 
     private AudioTrack buildAudioTrack(int sampleRateInHz,int channelConfig){
@@ -98,51 +118,8 @@ public class MPlayer extends BK_Player implements OnMediaFrameDecodeFinish,OnPla
         return mPlayMode;
     }
 
-    @Override
-    public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
-    }
-
-    @Override
-    protected final MediaBuffer onResolveNext(MediaBuffer buffer) {
-        IPlayable playable=null!=buffer?buffer.getPlayable():null;
-        Mode mode=mPlayMode;
-        IPlayable played=null!=mode&&mode==Mode.SINGLE?buffer.getPlayable():null;
-        if (null!=mode&&mode==Mode.SINGLE&&null!=played){
-            return createMediaBuffer(played,0);
-        }
-        IPlayable media=indexQueueNext(playable,false);
-        return null!=media?createMediaBuffer(media,0):null;
-    }
-
-    private MediaBuffer createMediaBuffer(IPlayable media, double seek){
-        if (null!=media){
-            if (media instanceof NasMedia){
-                return new NasMediaBuffer((NasMedia)media,seek);
-            }
-//            String path=media.getPath();//Try local media file firstly
-//            if (null!=path&&path.length()>0){
-//                File_ localFile=new File_(path);
-//                if (localFile.exists()&&localFile.length()>0){
-//                    return new FileBuffer(media,seek);
-//                }
-//            }
-//            String url=media.getPath();
-//            if (null!=url&&url.length()>0){
-//                if (media instanceof File_){
-//                    return new __NetMediaBuffer((File_) media,seek);
-//                }
-//            }
-        }
-        return null;
-    }
-
-    public final MediaBuffer setNext(IPlayable playable, double seek, String debug){
-        MediaBuffer buffer=null!=playable?createMediaBuffer(playable,seek):null;
-        return null!=buffer&&setNext(buffer,debug)?buffer:null;
-    }
-
-    public final boolean cleanPlayingQueue(String debug){
-        List<IPlayable> queue=mQueue;
+    public final boolean cleanQueue(String debug){
+        List<Playable> queue=mQueue;
         int size=null!=queue?queue.size():-1;
         if (size>0){
             Debug.D(getClass(),"Clean playing queue("+size+")"+(null!=debug?debug:"."));
