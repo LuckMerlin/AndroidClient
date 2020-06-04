@@ -4,7 +4,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.player.IPlayable" />
+            type="com.merlin.player.Playable" />
         <variable
             name="position"
             type="int" />
@@ -31,7 +31,7 @@
              android:layout_gravity="center_vertical"
              style="@style/titleSubNormalTextView"/>
          <TextView
-             android:text="@{media.title}"
+             android:text="@{media.meta.title}"
              android:layout_gravity="center_vertical"
              style="@style/titleSubNormalTextView"/>
      </LinearLayout>

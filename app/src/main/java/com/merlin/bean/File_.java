@@ -3,7 +3,10 @@ package com.merlin.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class File_ implements Parcelable, IPlayable {
+import com.merlin.player.Meta;
+import com.merlin.player.Playable;
+
+public class File_ implements Parcelable {
     private long id;
     private String path;
     private String thumbImageUrl;
@@ -63,12 +66,6 @@ public class File_ implements Parcelable, IPlayable {
             return name;
         }
         return null;
-    }
-
-
-    @Override
-    public String getTitle() {
-        return getName();
     }
 
     private File_(Parcel in){

@@ -101,11 +101,13 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         if (null==list||list.size()<=0){
             return toast(R.string.listEmpty);
         }
-        return MediaPlayService.play(getViewContext(),list,0,(MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE|MPlayer.PLAY_TYPE_CLEAN_QUEUE));
+//        return MediaPlayService.play(getViewContext(),list,0,(MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE|MPlayer.PLAY_TYPE_CLEAN_QUEUE));
+        return false;
     }
 
     private boolean play(NasMedia media, int playType){
-        return MediaPlayService.play(getViewContext(),media,0,playType);
+//        return MediaPlayService.play(getViewContext(),media,0,playType);
+        return false;
     }
 
     private boolean addToSheet(NasMedia media){

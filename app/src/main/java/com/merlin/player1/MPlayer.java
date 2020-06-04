@@ -4,7 +4,6 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import com.merlin.debug.Debug;
-import com.merlin.media.Indexer;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 
@@ -27,7 +26,7 @@ public class MPlayer extends Player {
 
     public MPlayer(String cacheFile,Indexer indexer){
         super(cacheFile);
-        mIndexer=indexer;
+        mIndexer=null!=indexer?indexer:new MIndexer();
     }
 
     @Override
@@ -71,6 +70,14 @@ public class MPlayer extends Player {
         return audioTrack;
     }
 
+    public final boolean setIndexer(Indexer indexer){
+        if (null!=indexer){
+            mIndexer=indexer;
+            return true;
+        }
+        return false;
+    }
+
     public final Indexer getIndexer() {
         return mIndexer;
     }
@@ -86,18 +93,32 @@ public class MPlayer extends Player {
         return false;
     }
 
-    public final boolean pre(String debug){
-
-        return false;
+    public final boolean pre(double seek,OnPlayerStatusChange change,String debug){
+        Indexer indexer=mIndexer;
+        return null!=indexer&&play(indexer.pre(getPlayingIndex(),size()),seek,change,debug);
     }
 
-    public final boolean next(String debug){
-        return next(true,debug);
+    public final boolean next(double seek,OnPlayerStatusChange change,String debug){
+        return next(true,seek,change,debug);
     }
 
-    private final boolean next(boolean user,String debug){
+    private final boolean next(boolean user,double seek,OnPlayerStatusChange change,String debug){
+        Indexer indexer=mIndexer;
+        return null!=indexer&&play(indexer.next(getPlayingIndex(),size(),user),seek,change,debug);
+    }
 
-        return false;
+    public final int getPlayingIndex(){
+        Playable playing=getPlaying();
+        return null!=playing?index(playing):-1;
+    }
+
+    public final boolean play(int index,double seek,OnPlayerStatusChange change,String debug){
+        Playable playable=get(index);
+        return null!=playable&&play(playable,seek,change,false,debug);
+    }
+
+    public final boolean play(Playable playable, double seek){
+        return play(playable,seek,null,false,null);
     }
 
     public final boolean play(Playable playable, double seek, OnPlayerStatusChange change,boolean add, String debug){

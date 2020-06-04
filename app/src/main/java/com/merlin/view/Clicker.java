@@ -7,25 +7,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.binding.IDs;
-import com.merlin.binding.MBinding;
 import com.merlin.binding.ModelBinder;
-import com.merlin.classes.Classes;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
-import com.merlin.media.Mode;
 import com.merlin.model.Model;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -18,7 +18,7 @@ public class FileType {
     }
 
     public static Object formatType(int mode){
-        Debug.D(FileType.class,"AAA  "+mode);
+//        Debug.D(FileType.class,"AAA  "+mode);
         switch (mode&MODE_MASK){
             case MASK_DIRECTORY:
                 return R.string.folder;

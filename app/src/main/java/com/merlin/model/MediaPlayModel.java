@@ -47,12 +47,12 @@ public class MediaPlayModel extends MediaDisplayModel implements Label, What {
 //        }
 //    }
 
-    @Override
-    public void onPlayingChange(IPlayable playable) {
-        super.onPlayingChange(playable);
-        String title=null!=playable?playable.getTitle():null;
-        setStatusBar(null!=playable?title:R.string.mediaPlay, StatusBar.CENTER);
-    }
+//    @Override
+//    public void onPlayingChange(IPlayable playable) {
+//        super.onPlayingChange(playable);
+//        String title=null!=playable?playable.getTitle():null;
+//        setStatusBar(null!=playable?title:R.string.mediaPlay, StatusBar.CENTER);
+//    }
 
     //    private boolean makeFavorite(NasMedia meta, boolean favorite){
 //        final String md5=null!=meta?meta.getMd5():null;

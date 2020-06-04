@@ -8,12 +8,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaPlayingBinding;
+import com.merlin.player.Playable;
 
 import java.util.List;
 
-public class MediaPlayingQueueAdapter extends Adapter<IPlayable>  {
+public class MediaPlayingQueueAdapter extends Adapter<Playable>  {
 
-    public MediaPlayingQueueAdapter(List<IPlayable> list){
+    public MediaPlayingQueueAdapter(List<Playable> list){
         setData(list);
     }
 
@@ -23,7 +24,7 @@ public class MediaPlayingQueueAdapter extends Adapter<IPlayable>  {
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, IPlayable data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Playable data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemMediaPlayingBinding){
             ((ItemMediaPlayingBinding)binding).setMedia(data);
             ((ItemMediaPlayingBinding)binding).setPosition(position);

@@ -1,9 +1,11 @@
 package com.merlin.model;
 
+import com.merlin.player.Playable;
+
 public class MediaDisplayModel extends Model{
 
 
-    public void onPlayingChange(IPlayable playable){
+    public void onPlayingChange(Playable playable){
 
     }
 //    private WeakReference<Playable> mPlaying;

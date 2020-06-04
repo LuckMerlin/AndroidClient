@@ -26,19 +26,18 @@ import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.media.AddToSheetApi;
 import com.merlin.media.FavoriteApi;
-import com.merlin.media.Mode;
 import com.merlin.player.FileMedia;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 import com.merlin.player.Time;
+import com.merlin.player1.MPlayer;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
 
 import java.util.List;
 
-public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label,OnPlayerBindChange, Player.OnPlayerStatusChange,OnPlayerStatusUpdate {
-    private MediaPlayer mPlayer;
+public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label {
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Integer> mMode=new ObservableField<>();
     private final ObservableField<Boolean> mFavorite=new ObservableField<>();
@@ -50,28 +49,18 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private final ObservableField<String> mPlayingArtistAlbum=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
     private final OnSeekBarProgressChange mOnSeekChange=(seekBar, progress, fromUser)-> {
-        MediaPlayer player=fromUser?mPlayer:null;
-        if (null!=player){
-            player.seek(progress/100.f,"After seekBar tap click.");
-        }
+//        MediaPlayer player=fromUser?mPlayer:null;
+//        if (null!=player){
+//            player.seek(progress/100.f,"After seekBar tap click.");
+//        }
     };
-
-    LPlayer player=  new LPlayer();
 
     Handler mHandler=new Handler(Looper.getMainLooper());
 
-    @Override
-    public void onPlayerStatusChanged(int status, Playable playable, Object arg, String debug) {
-        Debug.D(getClass(),"%%%%%%%%% "+status+" "+debug+" "+playable+" "+arg
-        );
-    }
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        player.addListener(this);
-        player.run();
-        dd();
     }
 
     private void dd(){
@@ -85,10 +74,10 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         mHandler.postDelayed(()->{
             Debug.D(getClass(),"SSSSSSSSS &&&&& ");
 //            player.release();
-              player.play(media,14000);
-              mHandler.postDelayed(()->{
-                  player.play(media3,14000);
-              },5000);
+//              player.play(media,14000);
+//              mHandler.postDelayed(()->{
+//                  player.play(media3,14000);
+//              },5000);
           },5000);
     }
 
@@ -100,21 +89,21 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
                     showMediaSheetDetail((Sheet)data);
                 }else{
                     switch (resId){
-                        case R.drawable.selector_media_pause://Get through
-                        case R.drawable.selector_media_play:
-                            return pause_play("After play_pause tap click.")||true;
-                        case R.drawable.single_normal:
-                        case R.drawable.random_normal:
-                        case R.drawable.list_sort_normal:
-                            return changePlayMode("After mode tap click.")||true;
-                        case R.drawable.selector_pre:
-                            return pre("After pre media tap click.")||true;
-                        case R.drawable.selector_menu:
-                            return showPlayingQueue("After menu tap click.")||true;
-                        case R.drawable.selector_add_to_sheet:
-                            return addToSheet("After add sheet tap click.")||true;
-                        case R.drawable.selector_next:
-                            return next("After next media tap click.")||true;
+//                        case R.drawable.selector_media_pause://Get through
+//                        case R.drawable.selector_media_play:
+//                            return pause_play("After play_pause tap click.")||true;
+//                        case R.drawable.single_normal:
+//                        case R.drawable.random_normal:
+//                        case R.drawable.list_sort_normal:
+//                            return changePlayMode("After mode tap click.")||true;
+//                        case R.drawable.selector_pre:
+//                            return pre("After pre media tap click.")||true;
+//                        case R.drawable.selector_menu:
+//                            return showPlayingQueue("After menu tap click.")||true;
+//                        case R.drawable.selector_add_to_sheet:
+//                            return addToSheet("After add sheet tap click.")||true;
+//                        case R.drawable.selector_next:
+//                            return next("After next media tap click.")||true;
 //                        case R.drawable.selector_download_media:
 //                            NasMedia media=mPlaying.get();
 //                            return null!=media&&TransportService.download(getContext(),media,"After play display download tap.")||true;
@@ -128,25 +117,25 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return false;
     }
 
-    @Override
-    public void onPlayerBindChanged(MediaPlayer player) {
-        MediaPlayer curr=mPlayer;
-        if (null!=curr){
-            mPlayer=null;
-            curr.removeListener(this);
-        }
-        if (null!=player){
-            mPlayer=player;
-            updatePlaying(null,"After player bind.");
-            updatePlayMode(null,"After player bind.");
-            player.addListener(this);
-        }
-    }
+//    @Override
+//    public void onPlayerBindChanged(MPlayer player) {
+//        MediaPlayer curr=mPlayer;
+//        if (null!=curr){
+//            mPlayer=null;
+//            curr.removeListener(this);
+//        }
+//        if (null!=player){
+//            mPlayer=player;
+//            updatePlaying(null,"After player bind.");
+//            updatePlayMode(null,"After player bind.");
+//            player.addListener(this);
+//        }
+//    }
 
-    @Override
-    public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
-        mStatus.set(status);
-        switch (status){
+//    @Override
+//    public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
+//        mStatus.set(status);
+//        switch (status){
 //            case STATUS_START: updatePlaying(null,"While status start.");break;
 //            case STATUS_STOP:updatePlaying(null,"While status stop.");break;
 //            case STATUS_IDLE:updatePlaying(null,"While status idle.");break;
@@ -159,80 +148,80 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 //                }
 //                mProgress.set((int)(progress*100));
 //                break;
-        }
-    }
+//        }
+//    }
 
-    private boolean updatePlayMode(Mode mode,String debug){
-        MediaPlayer player=mPlayer;
-        mode = null==mode&&null!=player?player.playMode(null):mode;
-        int id= R.drawable.single_normal;
-        if (null!=mode){
-            switch (mode){
-                case SINGLE:
-                    id=R.drawable.single_normal;break;
-                case RANDOM:
-                    id=R.drawable.random_normal;break;
-                case QUEUE_SORT:
-                    id=R.drawable.list_sort_normal;break;
-            }
-        }
-        mMode.set(id);
-        return true;
-    }
-
-    private boolean addToSheet(String debug){
-        NasMedia playing=mPlaying.get();
-        String md5=null!=playing?playing.getMd5():null;
-        if (null!=md5&&md5.length()>0){
-            Dialog dialog=new Dialog(getViewContext());
-            ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(com.merlin.client.BR.media,playing));
-            return dialog.setContentView(binding,true).title(R.string.addToSheet).left(R.string.create).right(R.string.cancel).
-                    show((view,clickCount,resId,data)->{
-                        dialog.dismiss();
-                        String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
-                        if (null!=sheetId&&sheetId.length()>0){
-                            return null!=call(prepare(AddToSheetApi.class, Address.HOST).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
-                                toast(note);
-                            })||true;
-                        }
-                        return false;},false);
-        }
-        return false;
-    }
-
-    private boolean changePlayMode(String debug){
-        MediaPlayer player=mPlayer;
-        return null!=player&&updatePlayMode(player.playMode(Mode.CHANGE_MODE),debug);
-    }
-
-    private boolean pre(String debug){
-        MediaPlayer player=mPlayer;
-        return null!=player&&player.pre(debug);
-    }
-
-    private boolean next(String debug){
-        MediaPlayer player=mPlayer;
-        return null!=player&&player.next(debug);
-    }
-
-    private boolean showPlayingQueue(String debug){
-        MediaPlayer player=mPlayer;
-        List<IPlayable> playing=null!=player?player.getQueue():null;
-        final int size=null!=playing?playing.size():-1;
-        if (size<=0){
-            return toast(R.string.listEmpty)&&false;
-        }
-        MediaPlayingQueueBinding binding=inflate(R.layout.media_playing_queue);
-        if (null!=binding){
-            Dialog dialog=new Dialog(getViewContext());
-            MediaPlayingQueueAdapter adapter=new MediaPlayingQueueAdapter(playing);
-            binding.setAdapter(adapter);
-            String title=getText(R.string.playing);
-            title=null!=title?title+" ("+size+")":null;
-            return dialog.setContentView(binding,true).title(title).show();
-        }
-        return false;
-    }
+//    private boolean updatePlayMode(Mode mode,String debug){
+//        MediaPlayer player=mPlayer;
+//        mode = null==mode&&null!=player?player.playMode(null):mode;
+//        int id= R.drawable.single_normal;
+//        if (null!=mode){
+//            switch (mode){
+//                case SINGLE:
+//                    id=R.drawable.single_normal;break;
+//                case RANDOM:
+//                    id=R.drawable.random_normal;break;
+//                case QUEUE_SORT:
+//                    id=R.drawable.list_sort_normal;break;
+//            }
+//        }
+//        mMode.set(id);
+//        return true;
+//    }
+//
+//    private boolean addToSheet(String debug){
+//        NasMedia playing=mPlaying.get();
+//        String md5=null!=playing?playing.getMd5():null;
+//        if (null!=md5&&md5.length()>0){
+//            Dialog dialog=new Dialog(getViewContext());
+//            ViewDataBinding binding=inflate(R.layout.media_sheet_choose,new Res(com.merlin.client.BR.media,playing));
+//            return dialog.setContentView(binding,true).title(R.string.addToSheet).left(R.string.create).right(R.string.cancel).
+//                    show((view,clickCount,resId,data)->{
+//                        dialog.dismiss();
+//                        String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
+//                        if (null!=sheetId&&sheetId.length()>0){
+//                            return null!=call(prepare(AddToSheetApi.class, Address.HOST).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
+//                                toast(note);
+//                            })||true;
+//                        }
+//                        return false;},false);
+//        }
+//        return false;
+//    }
+//
+//    private boolean changePlayMode(String debug){
+//        MediaPlayer player=mPlayer;
+//        return null!=player&&updatePlayMode(player.playMode(Mode.CHANGE_MODE),debug);
+//    }
+//
+//    private boolean pre(String debug){
+//        MediaPlayer player=mPlayer;
+//        return null!=player&&player.pre(debug);
+//    }
+//
+//    private boolean next(String debug){
+//        MediaPlayer player=mPlayer;
+//        return null!=player&&player.next(debug);
+//    }
+//
+//    private boolean showPlayingQueue(String debug){
+//        MediaPlayer player=mPlayer;
+//        List<IPlayable> playing=null!=player?player.getQueue():null;
+//        final int size=null!=playing?playing.size():-1;
+//        if (size<=0){
+//            return toast(R.string.listEmpty)&&false;
+//        }
+//        MediaPlayingQueueBinding binding=inflate(R.layout.media_playing_queue);
+//        if (null!=binding){
+//            Dialog dialog=new Dialog(getViewContext());
+//            MediaPlayingQueueAdapter adapter=new MediaPlayingQueueAdapter(playing);
+//            binding.setAdapter(adapter);
+//            String title=getText(R.string.playing);
+//            title=null!=title?title+" ("+size+")":null;
+//            return dialog.setContentView(binding,true).title(title).show();
+//        }
+//        return false;
+//    }
 
     private boolean makeFavorite(boolean favorite){
         final NasMedia playing=mPlaying.get();
@@ -244,44 +233,44 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
             if (what==WHAT_SUCCEED&&null!=data){
                 playing.setFavorite(favorite);
-                updatePlaying(playing,"After favorite succeed.");
+//                updatePlaying(playing,"After favorite succeed.");
             }else{
                 toast(note);
             }
         });
     }
 
-    private boolean pause_play(String debug){
-        MediaPlayer player=mPlayer;
-        return null!=player&&player.togglePlayPause(null);
-    }
-
-    private void updatePlaying(NasMedia media,String debug){
-        NasMedia playing=media;
-        if (null==playing){
-            MediaPlayer player=mPlayer;
-            IPlayable playable=null!=player?player.getPlaying():null;
-            playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
-        }
-        mCurrPosition.set(Time.formatTime(0));
-        mProgress.set(0);
-        mPlaying.set(playing);
-        mFavorite.set(null!=playing&&playing.isFavorite());
-        String imageUrl=null!=playing?playing.getThumbImageUrl():null;
-        mAlbumImage.set(null!=imageUrl&&imageUrl.length()>0?imageUrl:R.drawable.album_default);
-        int sampleRate=null!=playing?playing.getSampleRate():-1;
-        String bitrateMode=null!=playing?playing.getBitrateMode():null;
-        String meta=sampleRate>0?(sampleRate/1000.f)+"KHZ ":"";
-        meta=null!=bitrateMode?meta+bitrateMode:"";
-        String artist=null!=playing?playing.getArtist():"";
-        String album=null!=playing?playing.getAlbum():"";
-        mPlayingArtistAlbum.set((null!=artist?artist:"")+"\n "+(null!=album?album:""));
-        mPlayingMeta.set(meta);
-        MediaPlayDisplayAdapter adapter=mDisplayAdapter;
-        if (null!=adapter){
-            adapter.setPlaying(playing);
-        }
-    }
+//    private boolean pause_play(String debug){
+//        MediaPlayer player=mPlayer;
+//        return null!=player&&player.togglePlayPause(null);
+//    }
+//
+//    private void updatePlaying(NasMedia media,String debug){
+//        NasMedia playing=media;
+//        if (null==playing){
+//            MediaPlayer player=mPlayer;
+//            IPlayable playable=null!=player?player.getPlaying():null;
+//            playing=null!=playable&&playable instanceof NasMedia ?(NasMedia)playable:null;
+//        }
+//        mCurrPosition.set(Time.formatTime(0));
+//        mProgress.set(0);
+//        mPlaying.set(playing);
+//        mFavorite.set(null!=playing&&playing.isFavorite());
+//        String imageUrl=null!=playing?playing.getThumbImageUrl():null;
+//        mAlbumImage.set(null!=imageUrl&&imageUrl.length()>0?imageUrl:R.drawable.album_default);
+//        int sampleRate=null!=playing?playing.getSampleRate():-1;
+//        String bitrateMode=null!=playing?playing.getBitrateMode():null;
+//        String meta=sampleRate>0?(sampleRate/1000.f)+"KHZ ":"";
+//        meta=null!=bitrateMode?meta+bitrateMode:"";
+//        String artist=null!=playing?playing.getArtist():"";
+//        String album=null!=playing?playing.getAlbum():"";
+//        mPlayingArtistAlbum.set((null!=artist?artist:"")+"\n "+(null!=album?album:""));
+//        mPlayingMeta.set(meta);
+//        MediaPlayDisplayAdapter adapter=mDisplayAdapter;
+//        if (null!=adapter){
+//            adapter.setPlaying(playing);
+//        }
+//    }
 
     private boolean showMediaSheetDetail(Sheet sheet){
         if (null!=sheet){

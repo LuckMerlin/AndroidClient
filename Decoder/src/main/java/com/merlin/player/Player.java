@@ -12,19 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class Player{
+public abstract class Player implements Status{
     private final static int  NORMAL = 0;
     private final static int  EOF = -1;
-    public final static int  FATAL_ERROR = -2;
-    public final static int  IDLE = -2003;
-    public final static int  STOP =  -2005;
-    public final static int  PLAYING =  -2007;
-    public final static int  WAITING =  -2008;
-    public final static int  PLAY =  -2009;
-    public final static int  CREATE =  -2021;
-    public final static int  DESTROY =  -2022;
-    public final static int  ADD =  -2023;
-    public final static int  REMOVE =  -2024;
     private boolean mWaiting=false;
     private final String mCacheFile;
     private RandomAccessFile mCacheAccess;
@@ -59,7 +49,7 @@ public abstract class Player{
         return null!=changeMap&&null!=changeMap.remove(change);
     }
 
-    public final synchronized boolean run() {
+    public final synchronized boolean run(String debug) {
         if (null!=mCacheAccess){
             return false;
         }
@@ -231,15 +221,15 @@ public abstract class Player{
         return mWaiting;
     }
 
-    public final synchronized boolean release(){
+    public final synchronized boolean release(String debug){
         RandomAccessFile accessFile=mCacheAccess;
         if (null==accessFile){
             return false;
         }
-        Debug.D(getClass(),"Release player.");
+        Debug.D(getClass(),"Release player "+(null!=debug?debug:"."));
         mCacheAccess=null;
         stop("While release player.");
-       notify(accessFile,"While release player.");
+        notify(accessFile,"While release player.");
         return true;
     }
 

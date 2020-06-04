@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.Toast;
@@ -18,9 +19,10 @@ import com.merlin.media.MediaPlayService;
 import com.merlin.model.ActivityMediaPlayModel;
 import com.merlin.model.Model;
 import com.merlin.model.OnPlayerBindChange;
+import com.merlin.player1.MPlayer;
 
 public class MediaPlayActivity extends ModelActivity implements ServiceConnection{
-    private MediaPlayer mPlayer;
+
     private void checkPermission() {
         //检查权限（NEED_PERMISSION）是否被授权 PackageManager.PERMISSION_GRANTED表示同意授权
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -58,9 +60,9 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        if (null!=service&&service instanceof MediaPlayer){
-            setMediaPlayer((MediaPlayer)service);
-        }
+//        if (null!=service&&service instanceof MediaPlayer){
+//            setMediaPlayer((MediaPlayer)service);
+//        }
     }
 
     @Override
@@ -71,19 +73,19 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
     @Override
     public void onModelBind(Model model) {
         super.onModelBind(model);
-        MediaPlayer player=null!=model&&model instanceof ActivityMediaPlayModel?mPlayer:null;
-        if (null!=player&&model instanceof OnPlayerBindChange){
-            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
-        }
+//        MediaPlayer player=null!=model&&model instanceof ActivityMediaPlayModel?mPlayer:null;
+//        if (null!=player&&model instanceof OnPlayerBindChange){
+//            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
+//        }
     }
 
     private boolean setMediaPlayer(MediaPlayer player){
-        mPlayer=player;
-         Model model=getModel();
-        if (null!=model&&model instanceof OnPlayerBindChange){
-            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
-            return true;
-        }
+//        mPlayer=player;
+//         Model model=getModel();
+//        if (null!=model&&model instanceof OnPlayerBindChange){
+//            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
+//            return true;
+//        }
         return false;
     }
 

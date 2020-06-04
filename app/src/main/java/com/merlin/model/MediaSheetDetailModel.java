@@ -63,7 +63,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
                 return playAll("After play all tap click.");
             default:
                 if (null!=data&&data instanceof NasMedia){
-                    MediaPlayService.play(getContext(),(NasMedia)data,0, clickCount>1?MPlayer.PLAY_TYPE_PLAY_NOW&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
+//                    MediaPlayService.play(getContext(),(NasMedia)data,0, clickCount>1?MPlayer.PLAY_TYPE_PLAY_NOW&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
                 }
                 break;
         }
@@ -76,7 +76,8 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
         if (null==list||list.size()<=0){
             return toast(R.string.listEmpty);
         }
-        return MediaPlayService.play(getContext(),list,0,MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE|MPlayer.PLAY_TYPE_CLEAN_QUEUE);
+//        return MediaPlayService.play(getContext(),list,0,MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE|MPlayer.PLAY_TYPE_CLEAN_QUEUE);
+    return false;
     }
 
     private boolean showDetailContextMenu(View view) {

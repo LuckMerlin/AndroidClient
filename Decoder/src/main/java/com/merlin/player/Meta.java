@@ -14,4 +14,8 @@ public final class Meta {
     public String getName(){
         return null;
     }
+
+    public String getTitle(){
+        return null;
+    }
 }

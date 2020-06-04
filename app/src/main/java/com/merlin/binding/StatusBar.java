@@ -33,7 +33,7 @@ public final class StatusBar {
         Object parent=null!=view?view.getParent():null;
         if (null!=parent&&parent instanceof ViewParent){
             parent= view;
-            Debug.D(getClass(),"AAAAA "+view+" \n "+parent);
+//            Debug.D(getClass(),"AAAAA "+view+" \n "+parent);
 //            if (parent instanceof RecyclerView){
 //                if (view instanceof ViewGroup){ //Use self to create
 //                    parent=view;

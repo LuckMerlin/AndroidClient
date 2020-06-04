@@ -161,7 +161,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     private boolean open(File_ file, String debug){
         String path=null!=file?file.getPath():null;
         if (null!=path&&path.length()>0){
-            return  MediaPlayService.play(getContext(), file, 0, false);
+//            return  MediaPlayService.play(getContext(), file, 0, false);
         }
         toast(R.string.pathInvalid);
         return false;
