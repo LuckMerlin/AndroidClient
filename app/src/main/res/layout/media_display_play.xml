@@ -47,7 +47,7 @@
 
                     <TextView
                         android:id="@+id/mediaPlayBottomDurationTV"
-                        android:text="@{Time.formatTime(vm.model.playing.duration)}"
+                        android:text="@{Time.formatTime(vm.model.playing.meta.duration)}"
                         android:textColor="@color/textTitle"
                         android:layout_alignParentRight="true"
                         android:textSize="@dimen/textSmall"
@@ -97,7 +97,8 @@
                         android:layout_height="@dimen/iconSizeMedium"/>
 
                     <ImageView
-                       binding:enableClick="@{true}"
+                        binding:enableClick="@{true}"
+                        android:src="@{vm.model.isPlaying()?R.drawable.selector_media_pause:R.drawable.selector_media_play}"
                         android:layout_margin="8dp"
                         android:layout_width="@dimen/iconSizeLarge"
                         android:layout_height="@dimen/iconSizeLarge"/>
@@ -128,10 +129,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView
-                        android:text="@{vm.model.playingArtistAlbum}"
+                        android:text="@{vm.model.playing.meta.album}"
                         style="@style/titleSubNormalTextView" />
                     <TextView
-                        android:text="@{vm.model.playingMeta}"
+                        android:text="@{vm.model.playing.meta.title}"
                         style="@style/titleSmallTextView" />
                 </LinearLayout>
                 <ImageView

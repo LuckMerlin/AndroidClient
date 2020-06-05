@@ -30,7 +30,8 @@ public class FileMedia implements BytesMedia {
         try {
             File file=new File(mediaPath);
             final long length=file.length();
-            mMeta=new Meta(length);
+            String name=file.getName();
+            mMeta=new Meta(length,name,null!=name?name.replace("*.",""):null);
             if (length<=0){
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;

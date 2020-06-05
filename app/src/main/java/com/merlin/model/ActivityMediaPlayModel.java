@@ -1,7 +1,9 @@
 package com.merlin.model;
 
 
+import android.content.ComponentName;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewParent;
@@ -10,6 +12,7 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 
 import com.merlin.activity.MediaSheetDetailActivity;
+import com.merlin.activity.OnServiceBindChange;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaPlayingQueueAdapter;
 import com.merlin.api.Address;
@@ -23,31 +26,25 @@ import com.merlin.bean.Sheet;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaPlayingQueueBinding;
 import com.merlin.debug.Debug;
-import com.merlin.dialog.Dialog;
-import com.merlin.media.AddToSheetApi;
-import com.merlin.media.FavoriteApi;
+import com.merlin.media.MediaPlayBinder;
 import com.merlin.player.FileMedia;
+import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
-import com.merlin.player.Player;
-import com.merlin.player.Time;
-import com.merlin.player1.MPlayer;
+import com.merlin.player.Status;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
-import com.merlin.view.Res;
 
-import java.util.List;
-
-public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label {
+public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Label, OnServiceBindChange, OnPlayerStatusChange {
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Integer> mMode=new ObservableField<>();
     private final ObservableField<Boolean> mFavorite=new ObservableField<>();
-    private final ObservableField<NasMedia> mPlaying=new ObservableField<>();
+    private final ObservableField<Playable> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
     private final ObservableField<Object> mAlbumImage=new ObservableField<>();
+    private final ObservableField<Boolean> mIsPlaying=new ObservableField<>();
     private final ObservableField<String> mCurrPosition=new ObservableField<>();
-    private final ObservableField<String> mPlayingMeta=new ObservableField<>();
-    private final ObservableField<String> mPlayingArtistAlbum=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
+    private MediaPlayBinder mPlayerBinder;
     private final OnSeekBarProgressChange mOnSeekChange=(seekBar, progress, fromUser)-> {
 //        MediaPlayer player=fromUser?mPlayer:null;
 //        if (null!=player){
@@ -55,12 +52,30 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 //        }
     };
 
-    Handler mHandler=new Handler(Looper.getMainLooper());
-
+    @Override
+    public void onServiceBindChanged(ComponentName name, IBinder service) {
+        MediaPlayBinder current=mPlayerBinder;
+        MediaPlayBinder binder=mPlayerBinder=null!=service&&service instanceof MediaPlayBinder?(MediaPlayBinder)service:null;
+        MediaPlayBinder playBinder=null!=current?current:binder;
+        if (null!=playBinder){
+            playBinder.listener(null==binder?Status.REMOVE:Status.ADD,this,"After bind changed.");
+        }
+        applyPlayingMedia("After service bind changed.");
+    }
 
     @Override
-    protected void onRootAttached(View root) {
-        super.onRootAttached(root);
+    public void onPlayerStatusChanged(int status, Playable playable, Object arg, String debug) {
+        switch (status){
+            case Status.STOP:
+                applyPlayStatus("After status stop.");
+                break;
+            case Status.PAUSE:
+                applyPlayStatus("After status pause.");
+                break;
+            case Status.START:
+                applyPlayStatus("After status start.");
+                break;
+        }
     }
 
     private void dd(){
@@ -71,14 +86,14 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         Playable media2=new FileMedia(path2);
         String path3="./摸摸.mp3";
         Playable media3=new com.merlin.player1.NasMedia(this,path3,"http://192.168.0.3:5000");
-        mHandler.postDelayed(()->{
-            Debug.D(getClass(),"SSSSSSSSS &&&&& ");
+//        mHandler.postDelayed(()->{
+//            Debug.D(getClass(),"SSSSSSSSS &&&&& ");
 //            player.release();
 //              player.play(media,14000);
 //              mHandler.postDelayed(()->{
 //                  player.play(media3,14000);
 //              },5000);
-          },5000);
+//          },5000);
     }
 
     @Override
@@ -89,9 +104,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
                     showMediaSheetDetail((Sheet)data);
                 }else{
                     switch (resId){
-//                        case R.drawable.selector_media_pause://Get through
-//                        case R.drawable.selector_media_play:
-//                            return pause_play("After play_pause tap click.")||true;
+                        case R.drawable.selector_media_pause://Get through
+                        case R.drawable.selector_media_play:
+                            return pausePlay("After play_pause tap click.")||true;
 //                        case R.drawable.single_normal:
 //                        case R.drawable.random_normal:
 //                        case R.drawable.list_sort_normal:
@@ -117,6 +132,39 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return false;
     }
 
+    private void applyPlayStatus(String debug){
+        MediaPlayBinder binder=mPlayerBinder;
+        boolean isPlaying=false;
+        if (null!=binder){
+            isPlaying=binder.isPlaying(null,null);
+        }
+        mIsPlaying.set(isPlaying);
+    }
+
+    private void applyPlayingMedia(String debug){
+        MediaPlayBinder binder=mPlayerBinder;
+        Playable playing=null;
+        if (null!=binder){
+            playing=binder.getPlaying(null,null);
+        }
+        mPlaying.set(playing);
+        applyPlayStatus(debug);
+        Debug.D(getClass(),"HHHHplayingHHHHHh "+playing);
+        //        mCurrPosition.set(Time.formatTime(0));
+//        mProgress.set(0);
+//        mPlaying.set(playing);
+//        mFavorite.set(null!=playing&&playing.isFavorite());
+//        String imageUrl=null!=playing?playing.getThumbImageUrl():null;
+//        mAlbumImage.set(null!=imageUrl&&imageUrl.length()>0?imageUrl:R.drawable.album_default);
+//        int sampleRate=null!=playing?playing.getSampleRate():-1;
+//        String bitrateMode=null!=playing?playing.getBitrateMode():null;
+//        String meta=sampleRate>0?(sampleRate/1000.f)+"KHZ ":"";
+//        meta=null!=bitrateMode?meta+bitrateMode:"";
+//        String artist=null!=playing?playing.getArtist():"";
+//        String album=null!=playing?playing.getAlbum():"";
+//        mPlayingArtistAlbum.set((null!=artist?artist:"")+"\n "+(null!=album?album:""));
+//        mPlayingMeta.set(meta);
+    }
 //    @Override
 //    public void onPlayerBindChanged(MPlayer player) {
 //        MediaPlayer curr=mPlayer;
@@ -224,26 +272,28 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 //    }
 
     private boolean makeFavorite(boolean favorite){
-        final NasMedia playing=mPlaying.get();
-        String md5=null!=playing?playing.getMd5():null;
-        if (null==md5||md5.length()<=0){
-            return false;
-        }
-        Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
-            if (what==WHAT_SUCCEED&&null!=data){
-                playing.setFavorite(favorite);
-//                updatePlaying(playing,"After favorite succeed.");
-            }else{
-                toast(note);
-            }
-        });
+//        final Playable playing=mPlaying.get();
+//        String md5=null!=playing?playing.getMd5():null;
+//        if (null==md5||md5.length()<=0){
+//            return false;
+//        }
+//        Debug.D(getClass(),"favorite "+favorite);
+//        return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
+//            if (what==WHAT_SUCCEED&&null!=data){
+//                playing.setFavorite(favorite);
+////                updatePlaying(playing,"After favorite succeed.");
+//            }else{
+//                toast(note);
+//            }
+//        });
+        return false;
     }
 
-//    private boolean pause_play(String debug){
-//        MediaPlayer player=mPlayer;
-//        return null!=player&&player.togglePlayPause(null);
-//    }
+    private boolean pausePlay(String debug){
+        MediaPlayBinder player=mPlayerBinder;
+        Playable playing=mPlaying.get();
+        return null!=player&&player.toggle(player.isPlaying(null,null)? Status.PAUSE:Status.START,playing,debug);
+    }
 //
 //    private void updatePlaying(NasMedia media,String debug){
 //        NasMedia playing=media;
@@ -280,6 +330,10 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return false;
     }
 
+    public ObservableField<Boolean> isPlaying() {
+        return mIsPlaying;
+    }
+
     public ObservableField<Integer> getStatus() {
         return mStatus;
     }
@@ -288,7 +342,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return mDisplayAdapter;
     }
 
-    public ObservableField<NasMedia> getPlaying() {
+    public ObservableField<Playable> getPlaying() {
         return mPlaying;
     }
 
@@ -314,14 +368,6 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 
     public ObservableField<Object> getAlbumImage() {
         return mAlbumImage;
-    }
-
-    public ObservableField<String> getPlayingMeta() {
-        return mPlayingMeta;
-    }
-
-    public ObservableField<String> getPlayingArtistAlbum() {
-        return mPlayingArtistAlbum;
     }
 
     public static ActivityMediaPlayModel getModelFromChild(Model model){

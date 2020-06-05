@@ -23,10 +23,6 @@ public abstract class Player implements Status{
     private final Handler mHandler=new Handler(Looper.getMainLooper());
     private final Map<OnPlayerStatusChange, Long> mChangeMap=new WeakHashMap<>();
 
-    public interface OnPlayerStatusChange{
-        void onPlayerStatusChanged(int status,Playable playable,Object arg,String debug);
-    }
-
     static {
         System.loadLibrary("linqiang");
     }
@@ -160,11 +156,11 @@ public abstract class Player implements Status{
                         }catch (Exception  e){
                             Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
                             e.printStackTrace();
-                            stop( "After read cache bytes exception.e="+e);
+                            stop( null,"After read cache bytes exception.e="+e);
                         }
                     })){
                         Debug.W(getClass(),"Can't play media which cache fail."+playing);
-                        stop("While media cache fail.");
+                        stop(null,"While media cache fail.");
                         return FATAL_ERROR;
                     }
                     Integer cached=cacheLoad[0];
@@ -191,8 +187,8 @@ public abstract class Player implements Status{
                     create((byte[] playerBuffer, int playerOffset)->{
                         int loaded=innerLoader.onLoadMedia(playerBuffer,playerOffset);
                         if (loaded==EOF){
-                            Playable playable=getPlaying();
-                            stop("While load media eof.");
+                            Playable playable=getPlaying(null,false);
+                            stop(null,"While load media eof.");
                             onMediaPlayFinish(playable,"While load media eof.");
                         }
                         return loaded;
@@ -228,7 +224,7 @@ public abstract class Player implements Status{
         }
         Debug.D(getClass(),"Release player "+(null!=debug?debug:"."));
         mCacheAccess=null;
-        stop("While release player.");
+        stop(null,"While release player.");
         notify(accessFile,"While release player.");
         return true;
     }
@@ -241,25 +237,43 @@ public abstract class Player implements Status{
         return null==mPlaying;
     }
 
-    public final Playable getPlaying() {
-        Playing playing=mPlaying;
-        return null!=playing?playing.mMedia:null;
+    public final Playable getPlaying(Object object) {
+        return getPlaying(object,null);
     }
 
-    public final boolean pause(){
-        if (!mPaused) {
-            return mPaused = true;
+    public final Playable getPlaying(Object object,Boolean justPlaying) {
+        Playing playing=mPlaying;
+        Playable media=null!=playing?playing.mMedia:null;
+        return null!=media&&(null==justPlaying||!justPlaying||!isWaiting())&&(null==object||
+                media.equals(object))?media:null;
+    }
+
+    public final boolean isPlaying(Object object){
+        return isPlaying(object,null);
+    }
+
+    public final boolean isPlaying(Object object,Boolean justPlaying){
+        return null!=getPlaying(object,justPlaying);
+    }
+
+    public final boolean pause(Object arg,String debug){
+        if (null==arg||isPlaying(arg)){
+            if (!mPaused) {
+                Debug.D(getClass(),"Pause play media "+(null!=debug?debug:"."));
+                return mPaused = true;
+            }
         }
         return false;
     }
 
-    public final boolean start(){
-        if (mPaused){
+    public final boolean start(Object obj,String debug){
+        if ((null==obj||isPlaying(obj))&&mPaused){
             RandomAccessFile cacheAccess=mCacheAccess;
             if (null!=cacheAccess) {
                 mPaused = false;
                 synchronized (cacheAccess) {
-                    cacheAccess.notify();
+                    Debug.D(getClass(),"Resume start play media "+(null!=debug?debug:"."));
+                    cacheAccess.notifyAll();
                     return true;
                 }
             }
@@ -276,8 +290,12 @@ public abstract class Player implements Status{
     }
 
     public final boolean stop(String debug) {
+        return stop(null,debug);
+    }
+
+    public final boolean stop(Object arg,String debug) {
         Playing playing=mPlaying;
-        if (null!=playing){
+        if (null!=playing&&(null==arg||playing.equals(arg))){
             mPlaying=null;
             cleanCached("While stop media "+(null!=debug?debug:"."));
             Playable playable=playing.mMedia;
@@ -301,9 +319,9 @@ public abstract class Player implements Status{
             Debug.W(getClass(),"Can't play media while player not run.");
             return false;
         }
-        stop("While play new media."+playable);
+        stop(null,"While play new media."+playable);
         mPlaying=new Playing(playable);
-        notifyStatusChange(PLAY,playable,null,"While play new media.");
+        notifyStatusChange(START,playable,null,"While play new media.");
         notify(cacheAccess,"While play new media.");
         return true;
     }

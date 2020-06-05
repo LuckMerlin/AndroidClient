@@ -1,11 +1,17 @@
 package com.merlin.model;
 
+import android.app.Activity;
+import android.view.View;
+
 import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
+import com.merlin.player.Playable;
+import com.merlin.view.OnTapClick;
 
-public class MediaPlayModel extends MediaDisplayModel implements Label, What {
+public class MediaPlayModel extends MediaDisplayModel implements Label, What, OnTapClick {
 
 //    private interface Api{
 //        @POST(Address.PREFIX_MEDIA+"/favorite")
@@ -22,7 +28,22 @@ public class MediaPlayModel extends MediaDisplayModel implements Label, What {
 //        setStatusBar(null!=playing?title:R.string.mediaPlay, StatusBar.CENTER);
     }
 
-//    @Override
+    @Override
+    protected void onRootAttached(View root) {
+        super.onRootAttached(root);
+    }
+
+    @Override
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+//        switch (resId){
+//            case R.drawable.selector_media_pause://Get through
+//            case R.drawable.selector_media_play:
+//                return pausePlay("After play_pause tap click.")||true;
+//        }
+        return false;
+    }
+
+    //    @Override
 //    protected void onRootAttached(View root) {
 //        super.onRootAttached(root);
 //        final SeekBar seekbar=null!=root?root.findViewById(R.id.mediaPlayBottomProgressSB):null;

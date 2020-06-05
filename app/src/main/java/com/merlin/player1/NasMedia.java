@@ -68,11 +68,9 @@ public class NasMedia implements Playable {
             Response<Reply<NasFile>> response=retrofit.prepare(Api.class,url).getMediaMeta(md5).execute();
             Reply<NasFile> reply=null!=response?response.body():null;
             NasFile nasFile= null!=reply?reply.getData():null;
-            long length=-1;
             if (null!=nasFile){
-                length=nasFile.getLength();
+                mMeta=new Meta(nasFile.getLength(),nasFile.getName(),nasFile.getTitle());
             }
-            mMeta=new Meta(length);
             return true;
         } catch (IOException e) {
             Debug.E(getClass(),"Exception get nas media meta.e="+e+" "+md5+" "+url+" "+retrofit,e);

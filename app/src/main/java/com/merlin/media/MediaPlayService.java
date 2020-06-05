@@ -17,7 +17,9 @@ import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
 import com.merlin.player.FileMedia;
+import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
+import com.merlin.player.Player;
 import com.merlin.player1.MPlayer;
 
 import java.util.ArrayList;
@@ -34,7 +36,27 @@ public class MediaPlayService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return new MediaPlayBinder();
+        return new MediaPlayBinder(){
+            @Override
+            public Playable getPlaying(Object arg,Boolean playing) {
+                return mMPlayer.getPlaying(arg,playing);
+            }
+
+            @Override
+            public boolean isPlaying(Object arg, Boolean playing) {
+                return mMPlayer.isPlaying(arg,playing);
+            }
+
+            @Override
+            public boolean toggle(int status, Object arg, String debug) {
+                return mMPlayer.toggle(status,arg,debug);
+            }
+
+            @Override
+            public boolean listener(int status, OnPlayerStatusChange change, String debug) {
+                return mMPlayer.listener(status,change,debug);
+            }
+        };
     }
 
     @Override

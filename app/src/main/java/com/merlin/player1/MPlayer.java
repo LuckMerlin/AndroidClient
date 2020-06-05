@@ -4,6 +4,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import com.merlin.debug.Debug;
+import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
 import com.merlin.player.Player;
 
@@ -95,20 +96,24 @@ public class MPlayer extends Player {
 
     public final boolean pre(double seek,OnPlayerStatusChange change,String debug){
         Indexer indexer=mIndexer;
-        return null!=indexer&&play(indexer.pre(getPlayingIndex(),size()),seek,change,debug);
+        return null!=indexer&&play(indexer.pre(getPlayingIndex(null),size()),seek,change,debug);
     }
 
-    public final boolean next(double seek,OnPlayerStatusChange change,String debug){
+    public final boolean next(double seek, OnPlayerStatusChange change, String debug){
         return next(true,seek,change,debug);
     }
 
     private final boolean next(boolean user,double seek,OnPlayerStatusChange change,String debug){
         Indexer indexer=mIndexer;
-        return null!=indexer&&play(indexer.next(getPlayingIndex(),size(),user),seek,change,debug);
+        return null!=indexer&&play(indexer.next(getPlayingIndex(null),size(),user),seek,change,debug);
     }
 
-    public final int getPlayingIndex(){
-        Playable playing=getPlaying();
+    public final int getPlayingIndex(Object arg){
+        return getPlayingIndex(arg,null);
+    }
+
+    public final int getPlayingIndex(Object arg,Boolean justPlaying){
+        Playable playing=getPlaying(arg,justPlaying);
         return null!=playing?index(playing):-1;
     }
 
@@ -164,6 +169,28 @@ public class MPlayer extends Player {
         return false;
     }
 
+    public final boolean toggle(int status, Object arg, String debug){
+        switch (status){
+            case STOP:
+                return stop(arg,debug);
+            case PAUSE:
+                return pause(arg,debug);
+            case START:
+                return start(arg,debug);
+        }
+        return false;
+    }
+
+    public final boolean listener(int status, OnPlayerStatusChange change, String debug){
+        switch (status){
+            case ADD:
+                return addListener(change);
+            case REMOVE:
+                return removeListener(change);
+        }
+        return false;
+    }
+
     public final int size(){
         List<Playable> queue=mQueue;
         if (null!=queue){
@@ -204,7 +231,7 @@ public class MPlayer extends Player {
             result.addAll(list);
         }
         if (containPlaying) {
-            Playable playing = getPlaying();
+            Playable playing = getPlaying(null);
             if (null != playing && !(null==result?result=new ArrayList<>(1):result).contains(playing)) {
                 result.add(playing);
             }

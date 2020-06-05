@@ -60,40 +60,23 @@ public class MediaPlayActivity extends ModelActivity implements ServiceConnectio
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-//        if (null!=service&&service instanceof MediaPlayer){
-//            setMediaPlayer((MediaPlayer)service);
-//        }
+       Model model=getModel();
+       if (null!=model&&model instanceof OnServiceBindChange){
+           ((OnServiceBindChange)model).onServiceBindChanged(name,service);
+       }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        setMediaPlayer(null);
+        Model model=getModel();
+        if (null!=model&&model instanceof OnServiceBindChange){
+            ((OnServiceBindChange)model).onServiceBindChanged(name,null);
+        }
     }
-
-    @Override
-    public void onModelBind(Model model) {
-        super.onModelBind(model);
-//        MediaPlayer player=null!=model&&model instanceof ActivityMediaPlayModel?mPlayer:null;
-//        if (null!=player&&model instanceof OnPlayerBindChange){
-//            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
-//        }
-    }
-
-    private boolean setMediaPlayer(MediaPlayer player){
-//        mPlayer=player;
-//         Model model=getModel();
-//        if (null!=model&&model instanceof OnPlayerBindChange){
-//            ((OnPlayerBindChange)model).onPlayerBindChanged(player);
-//            return true;
-//        }
-        return false;
-    }
-
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        setMediaPlayer(null);
         MediaPlayService.unbind(this);
     }
 }
