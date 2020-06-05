@@ -78,24 +78,6 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         }
     }
 
-    private void dd(){
-//        player.stop();
-        String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
-        String path2="/sdcard/Musics/赵雷 - 成都.mp3";
-        Playable media=new FileMedia(path);
-        Playable media2=new FileMedia(path2);
-        String path3="./摸摸.mp3";
-        Playable media3=new com.merlin.player1.NasMedia(this,path3,"http://192.168.0.3:5000");
-//        mHandler.postDelayed(()->{
-//            Debug.D(getClass(),"SSSSSSSSS &&&&& ");
-//            player.release();
-//              player.play(media,14000);
-//              mHandler.postDelayed(()->{
-//                  player.play(media3,14000);
-//              },5000);
-//          },5000);
-    }
-
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (clickCount){
@@ -134,10 +116,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
 
     private void applyPlayStatus(String debug){
         MediaPlayBinder binder=mPlayerBinder;
-        boolean isPlaying=false;
-        if (null!=binder){
-            isPlaying=binder.isPlaying(null,null);
-        }
+        boolean isPlaying=null!=binder&&binder.isPlaying(null,true);
         mIsPlaying.set(isPlaying);
     }
 
@@ -149,7 +128,6 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         }
         mPlaying.set(playing);
         applyPlayStatus(debug);
-        Debug.D(getClass(),"HHHHplayingHHHHHh "+playing);
         //        mCurrPosition.set(Time.formatTime(0));
 //        mProgress.set(0);
 //        mPlaying.set(playing);
@@ -292,7 +270,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private boolean pausePlay(String debug){
         MediaPlayBinder player=mPlayerBinder;
         Playable playing=mPlaying.get();
-        return null!=player&&player.toggle(player.isPlaying(null,null)? Status.PAUSE:Status.START,playing,debug);
+        return null!=player&&player.toggle(player.isPlaying(null,true)? Status.PAUSE:Status.START,playing,debug);
     }
 //
 //    private void updatePlaying(NasMedia media,String debug){

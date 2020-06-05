@@ -6,10 +6,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 
 public class FileMedia implements BytesMedia {
     private Meta mMeta;
-    private FileInputStream mInput=null;
+    private RandomAccessFile mInput=null;
     private final String mPath;
 
     public FileMedia(String path){
@@ -23,7 +25,7 @@ public class FileMedia implements BytesMedia {
             Debug.W(getClass(),"Can't open media file which path is invalid."+mediaPath);
             return false;
         }
-        FileInputStream input=mInput;
+        RandomAccessFile input=mInput;
         if (input!=null){//Already opened
             return false;
         }
@@ -36,7 +38,7 @@ public class FileMedia implements BytesMedia {
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;
             }
-            mInput=new FileInputStream(file);
+            mInput=new RandomAccessFile(file,"r");
             Debug.D(getClass(),"Opened media file."+mediaPath);
             return true;
         } catch (FileNotFoundException e) {
@@ -48,7 +50,7 @@ public class FileMedia implements BytesMedia {
 
     @Override
     public final boolean isOpened() {
-        FileInputStream input=mInput;
+        RandomAccessFile input=mInput;
         return null!=input&&null!=input.getChannel();
     }
 
@@ -64,19 +66,25 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public final int read(byte[] buffer, int offset) throws IOException {
-        FileInputStream input=mInput;
+    public final int read(byte[] buffer, int offset,long loadCursor) throws IOException
+
+    {
+        RandomAccessFile input=mInput;
         int length=null!=buffer?buffer.length:-1;
         if (null==input||length<0||offset<0||offset>length){
             Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
             return Player.FATAL_ERROR;
+        }
+        Meta meta=mMeta;
+        if (null!=meta&&loadCursor>=0&&loadCursor<=meta.getLength()){
+            input.seek(loadCursor);
         }
         return input.read(buffer,offset,length-offset);
     }
 
     @Override
     public final boolean close() {
-        FileInputStream input=mInput;
+        RandomAccessFile input=mInput;
         if (null!=input){
             mInput=null;
             try {

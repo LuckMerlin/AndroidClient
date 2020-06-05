@@ -11,27 +11,25 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.File_;
-import com.merlin.bean.NasMedia;
-import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
 import com.merlin.player.FileMedia;
 import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
-import com.merlin.player.Player;
 import com.merlin.player1.MPlayer;
+import com.merlin.player1.NasMedia;
+import com.merlin.server.Retrofit;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MediaPlayService extends Service {
-    private final MPlayer mPlayer = new MPlayer();
     private final static String LABEL_MEDIAS = "medias";
     private final static String LABEL_POSITION = "position";
     private final static String LABEL_PLAY_TYPE = "playType";
     private final static List<ServiceConnection> mConnections = new ArrayList<>();
     private final MPlayer mMPlayer=new MPlayer();
+    private final Retrofit mRetrofit=new Retrofit();
 
     @Nullable
     @Override
@@ -70,8 +68,12 @@ public class MediaPlayService extends Service {
         Playable media=new FileMedia(path);
         Playable media2=new FileMedia(path2);
         String path3="./摸摸.mp3";
-//        Playable media3=new NasMedia(null,path3,"http://192.168.0.3:5000");
-        mMPlayer.play(media2,0);
+        Playable media3=new NasMedia(mRetrofit,path3,"http://192.168.0.3:5000");
+        mMPlayer.play(media3,-0.97);
+        mMPlayer.post(()->{
+//            mMPlayer.seek(-
+//                    1,"test");
+        },0);
     }
 
     @Override
@@ -119,12 +121,10 @@ public class MediaPlayService extends Service {
     }
 
     @Override
-    public void onDestroy()
-
-    {
+    public void onDestroy() {
         super.onDestroy();
         Debug.D(getClass(), "Player service onDestroy.");
-        mPlayer.release("While play service onDestroy.");
+        mMPlayer.release("While play service onDestroy.");
     }
 
     public static boolean start(Context context, Intent intent) {
