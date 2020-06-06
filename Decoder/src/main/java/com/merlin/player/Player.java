@@ -1,6 +1,7 @@
 package com.merlin.player;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 
 
 import com.merlin.debug.Debug;
@@ -119,11 +120,12 @@ public abstract class Player implements Status{
                     int read=((BytesMedia)media).read(playerBuffer,playerOffset,loadCursor);
                     if (read>0){
                         playing.increaseCursor(read);
+                        playing.onWriteId3(playerBuffer,playerOffset,read);
                         notifyStatusChange(PLAYING,media,null,null);
                     }
                     return read;
                 }
-                long length=cacheAccess.length();
+                final long length=cacheAccess.length();
                 if ((length<totalLength)&&(length<=0||loadCursor>length)){//Empty
                     final long currThreadId=Thread.currentThread().getId();
                     final Integer[] cacheLoad=new Integer[1];
@@ -149,6 +151,7 @@ public abstract class Player implements Status{
                                     synchronized (cacheAccess) {
                                         cacheAccess.seek(cacheAccess.length());//Append to tail
                                         cacheAccess.write(cacheBuffer, 0, read);
+                                        playing.onWriteId3(cacheBuffer,0,read);
                                     }
                                     totalWritten += read;
                                     long currCursor = playing.getCursor();
@@ -187,7 +190,6 @@ public abstract class Player implements Status{
                         return read;
                     }
                 }
-
                 return loadCursor>=length&&playing.isCacheOver()?EOF:NORMAL;
             };
             mCacheAccess=cacheAccess;
@@ -309,6 +311,26 @@ public abstract class Player implements Status{
         return stop(null,debug);
     }
 
+    public final int getSampleRate(){
+        Playing playing=mPlaying;
+        return null!=playing?playing.getSampleRate():-1;
+    }
+
+    public final byte getChannels(){
+        Playing playing=mPlaying;
+        return null!=playing?playing.getChannels():-1;
+    }
+
+    public final long getPosition(Object arg,String debug){
+        Playing playing=mPlaying;
+        return null!=playing&&(null==arg||playing.isMediaEquals(arg))?playing.getPosition():0;
+    }
+
+    public final long getDuration(Object arg,String debug){
+        Playing playing=mPlaying;
+        return null!=playing&&(null==arg||playing.isMediaEquals(arg))?playing.getDuration():0;
+    }
+
     public final boolean stop(Object arg,String debug) {
         Playing playing=mPlaying;
         if (null!=playing&&(null==arg||playing.equals(arg))){
@@ -406,7 +428,12 @@ public abstract class Player implements Status{
      *
      *Call by native C
      */
-    private void onMediaFrameDecodeFinish(int mediaType,byte[] bytes,int channels,int sampleRate,int speed){
+    private void onMediaFrameDecodeFinish(int mediaType,byte[] bytes,byte channels,int sampleRate,int speed){
+        Playing playing=mPlaying;
+        if (null!=playing){
+            playing.setChannels(channels);
+            playing.setSampleRate(sampleRate);
+        }
         onFrameDecoded(mediaType,bytes,channels,sampleRate,speed);
     }
 

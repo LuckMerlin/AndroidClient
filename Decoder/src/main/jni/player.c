@@ -107,7 +107,8 @@ static inline void onFrameDecode(jobject player,int mediaType,mad_timer_t timer,
         int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
         if(res==JNI_OK){
             jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
-            jmethodID callbackMethod = (*jniEnv)->GetMethodID(jniEnv,callbackClass,"onMediaFrameDecodeFinish","(I[BIII)V");
+            jmethodID callbackMethod = (*jniEnv)->GetMethodID(jniEnv,callbackClass,"onMediaFrameDecodeFinish",
+                                                              "(I[BBII)V");
             jbyteArray data = (*jniEnv)->NewByteArray(jniEnv, length);
             (*jniEnv)->SetByteArrayRegion(jniEnv, data, 0, length, output);
             (*jniEnv)->CallVoidMethod(jniEnv,player,callbackMethod,mediaType,data,channels,sampleRate,speed);

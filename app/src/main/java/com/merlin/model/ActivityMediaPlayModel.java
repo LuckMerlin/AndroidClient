@@ -14,20 +14,12 @@ import androidx.databinding.ViewDataBinding;
 import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.activity.OnServiceBindChange;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
-import com.merlin.adapter.MediaPlayingQueueAdapter;
-import com.merlin.api.Address;
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.NasFile;
-import com.merlin.bean.NasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
-import com.merlin.client.databinding.MediaPlayingQueueBinding;
 import com.merlin.debug.Debug;
 import com.merlin.media.MediaPlayBinder;
-import com.merlin.player.FileMedia;
 import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
 import com.merlin.player.Status;
@@ -42,7 +34,8 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private final ObservableField<Integer> mProgress=new ObservableField<>();
     private final ObservableField<Object> mAlbumImage=new ObservableField<>();
     private final ObservableField<Boolean> mIsPlaying=new ObservableField<>();
-    private final ObservableField<String> mCurrPosition=new ObservableField<>();
+    private final ObservableField<Long> mPosition=new ObservableField<>();
+    private final ObservableField<Long> mDuration=new ObservableField<>();
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
     private MediaPlayBinder mPlayerBinder;
     private final OnSeekBarProgressChange mOnSeekChange=(seekBar, progress, fromUser)-> {
@@ -66,6 +59,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     @Override
     public void onPlayerStatusChanged(int status, Playable playable, Object arg, String debug) {
         switch (status){
+            case Status.PLAYING:
+                applyPlayProgress();
+                break;
             case Status.STOP:
                 applyPlayStatus("After status stop.");
                 break;
@@ -114,10 +110,22 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return false;
     }
 
+    private void applyPlayProgress(){
+        MediaPlayBinder binder=mPlayerBinder;
+        if (null!=binder){
+            mPosition.set(binder.getPosition(null,null));
+            mDuration.set(binder.getDuration(null,null));
+        }
+    }
+
     private void applyPlayStatus(String debug){
         MediaPlayBinder binder=mPlayerBinder;
-        boolean isPlaying=null!=binder&&binder.isPlaying(null,true);
-        mIsPlaying.set(isPlaying);
+        if (null!=binder){
+            boolean isPlaying=binder.isPlaying(null,true);
+            mIsPlaying.set(isPlaying);
+            mDuration.set(binder.getDuration(null,null));
+            mPosition.set(binder.getPosition(null,null));
+        }
     }
 
     private void applyPlayingMedia(String debug){
@@ -332,8 +340,12 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         return mOnSeekChange;
     }
 
-    public ObservableField<String> getCurrentPosition() {
-        return mCurrPosition;
+    public ObservableField<Long> getDuration() {
+        return mDuration;
+    }
+
+    public ObservableField<Long> getPosition() {
+        return mPosition;
     }
 
     public ObservableField<Boolean> getFavorite() {

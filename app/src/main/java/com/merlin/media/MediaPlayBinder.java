@@ -11,4 +11,6 @@ public abstract class MediaPlayBinder extends Binder {
     public abstract boolean toggle(int status,Object arg,String debug);
     public abstract boolean listener(int status, OnPlayerStatusChange change, String debug);
     public abstract boolean seek(double seek,Object arg,String debug);
+    public abstract long getDuration(Object arg,String debug);
+    public abstract long getPosition(Object arg,String debug);
 }

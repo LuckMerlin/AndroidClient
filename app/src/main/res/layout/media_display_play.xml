@@ -40,14 +40,14 @@
                         android:textColor="@color/textTitle"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
-                        android:text="@{vm.model.currentPosition??Time.formatTime(0)}"
+                        android:text="@{Time.formatTime(vm.model.position)}"
                         android:textSize="@dimen/textSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
                     <TextView
                         android:id="@+id/mediaPlayBottomDurationTV"
-                        android:text="@{Time.formatTime(vm.model.playing.meta.duration)}"
+                        android:text="@{Time.formatTime(vm.model.duration)}"
                         android:textColor="@color/textTitle"
                         android:layout_alignParentRight="true"
                         android:textSize="@dimen/textSmall"
