@@ -187,6 +187,7 @@ public abstract class Player implements Status{
                         return read;
                     }
                 }
+
                 return loadCursor>=length&&playing.isCacheOver()?EOF:NORMAL;
             };
             mCacheAccess=cacheAccess;
@@ -292,8 +293,13 @@ public abstract class Player implements Status{
     }
 
     public final boolean seek(double seek,String debug){
+        return seek(seek,null,debug);
+    }
+
+    public final boolean seek(double seek,Object arg,String debug){
         Playing playing=mPlaying;
-        if (null!=playing){
+        Playable media=null!=playing?playing.getMedia():null;
+        if (null!=media&&(null==arg||media.equals(arg))){
             return playing.setSeek(seek,debug);
         }
         return false;

@@ -3,10 +3,8 @@ package com.merlin.player;
 import com.merlin.debug.Debug;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 public class FileMedia implements BytesMedia {

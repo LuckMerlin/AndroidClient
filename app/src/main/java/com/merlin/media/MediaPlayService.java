@@ -54,6 +54,11 @@ public class MediaPlayService extends Service {
             public boolean listener(int status, OnPlayerStatusChange change, String debug) {
                 return mMPlayer.listener(status,change,debug);
             }
+
+            @Override
+            public boolean seek(double seek, Object arg, String debug) {
+                return mMPlayer.seek(seek,arg,debug);
+            }
         };
     }
 

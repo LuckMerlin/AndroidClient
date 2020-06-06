@@ -46,10 +46,10 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private final MediaPlayDisplayAdapter mDisplayAdapter=new MediaPlayDisplayAdapter();
     private MediaPlayBinder mPlayerBinder;
     private final OnSeekBarProgressChange mOnSeekChange=(seekBar, progress, fromUser)-> {
-//        MediaPlayer player=fromUser?mPlayer:null;
-//        if (null!=player){
-//            player.seek(progress/100.f,"After seekBar tap click.");
-//        }
+        MediaPlayBinder player=fromUser?mPlayerBinder:null;
+        if (null!=player){
+            player.seek(-progress/100.f,null,"After seekBar tap click.");
+        }
     };
 
     @Override
