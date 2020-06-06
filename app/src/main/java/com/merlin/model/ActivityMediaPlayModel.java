@@ -113,8 +113,11 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
     private void applyPlayProgress(){
         MediaPlayBinder binder=mPlayerBinder;
         if (null!=binder){
-            mPosition.set(binder.getPosition(null,null));
-            mDuration.set(binder.getDuration(null,null));
+            long duration=binder.getDuration(null,null);
+            long position=binder.getPosition(null,null);
+            mPosition.set(position);
+            mDuration.set(duration);
+            mProgress.set(duration>0?(int)(position*100/duration):0);
         }
     }
 
@@ -136,54 +139,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, L
         }
         mPlaying.set(playing);
         applyPlayStatus(debug);
-        //        mCurrPosition.set(Time.formatTime(0));
-//        mProgress.set(0);
-//        mPlaying.set(playing);
-//        mFavorite.set(null!=playing&&playing.isFavorite());
-//        String imageUrl=null!=playing?playing.getThumbImageUrl():null;
-//        mAlbumImage.set(null!=imageUrl&&imageUrl.length()>0?imageUrl:R.drawable.album_default);
-//        int sampleRate=null!=playing?playing.getSampleRate():-1;
-//        String bitrateMode=null!=playing?playing.getBitrateMode():null;
-//        String meta=sampleRate>0?(sampleRate/1000.f)+"KHZ ":"";
-//        meta=null!=bitrateMode?meta+bitrateMode:"";
-//        String artist=null!=playing?playing.getArtist():"";
-//        String album=null!=playing?playing.getAlbum():"";
-//        mPlayingArtistAlbum.set((null!=artist?artist:"")+"\n "+(null!=album?album:""));
-//        mPlayingMeta.set(meta);
     }
-//    @Override
-//    public void onPlayerBindChanged(MPlayer player) {
-//        MediaPlayer curr=mPlayer;
-//        if (null!=curr){
-//            mPlayer=null;
-//            curr.removeListener(this);
-//        }
-//        if (null!=player){
-//            mPlayer=player;
-//            updatePlaying(null,"After player bind.");
-//            updatePlayMode(null,"After player bind.");
-//            player.addListener(this);
-//        }
-//    }
-
-//    @Override
-//    public void onPlayerStatusUpdated(BK_Player player, int status, String note, IPlayable media, Object data) {
-//        mStatus.set(status);
-//        switch (status){
-//            case STATUS_START: updatePlaying(null,"While status start.");break;
-//            case STATUS_STOP:updatePlaying(null,"While status stop.");break;
-//            case STATUS_IDLE:updatePlaying(null,"While status idle.");break;
-//            case STATUS_PROGRESS:
-//                float progress=null!=player?player.getCurrentProgress():0;
-//                progress=progress>=0&&progress<=1?progress:0;
-//                long duration=player.getDuration();
-//                if (duration>0){
-//                    mCurrPosition.set(Time.formatTime((long)(progress*duration)));
-//                }
-//                mProgress.set((int)(progress*100));
-//                break;
-//        }
-//    }
 
 //    private boolean updatePlayMode(Mode mode,String debug){
 //        MediaPlayer player=mPlayer;

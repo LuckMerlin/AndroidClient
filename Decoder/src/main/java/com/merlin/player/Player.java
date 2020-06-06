@@ -1,7 +1,6 @@
 package com.merlin.player;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
 
 
 import com.merlin.debug.Debug;
