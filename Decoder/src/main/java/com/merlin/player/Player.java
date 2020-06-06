@@ -141,6 +141,7 @@ public abstract class Player implements Status{
                             do {
                                 int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
                                 if (read<0){
+                                    playing.setCacheOver(true);
                                     Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
                                     break;
                                 }
@@ -177,10 +178,8 @@ public abstract class Player implements Status{
                     return cached;
                 }else if (loadCursor<length){//Need load
                     synchronized (cacheAccess) {
-                        Debug.D(getClass(),"撒旦法 "+loadCursor);
                         cacheAccess.seek(loadCursor);
                         int read = cacheAccess.read(playerBuffer, playerOffset, playerBufferLength - playerOffset);
-                        Debug.D(getClass(),"撒旦法 "+read);
                         if (read > 0) {
                             playing.increaseCursor(read);
                             notifyStatusChange(PLAYING,media,null,null);
@@ -188,7 +187,7 @@ public abstract class Player implements Status{
                         return read;
                     }
                 }
-                return NORMAL;
+                return loadCursor>=length&&playing.isCacheOver()?EOF:NORMAL;
             };
             mCacheAccess=cacheAccess;
             new Thread(()->{

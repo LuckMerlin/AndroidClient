@@ -6,6 +6,7 @@ final class Playing {
     private long mCursor;
     private final Playable mMedia;
     private Double mSeek;
+    private boolean mCacheOver=false;
 
     Playing(Playable media,Double seek){
         mMedia=media;
@@ -13,7 +14,16 @@ final class Playing {
         mCursor=0;
     }
 
-    public boolean setSeek(Double seek,String debug) {
+    public boolean setCacheOver(boolean over){
+        mCacheOver=over;
+        return false;
+    }
+
+    public boolean isCacheOver() {
+        return mCacheOver;
+    }
+
+    public boolean setSeek(Double seek, String debug) {
         if (null==seek||seek>=-1){
             mSeek=seek;
             return true;

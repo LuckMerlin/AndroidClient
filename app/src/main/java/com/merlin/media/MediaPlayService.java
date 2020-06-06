@@ -69,7 +69,7 @@ public class MediaPlayService extends Service {
         Playable media2=new FileMedia(path2);
         String path3="./摸摸.mp3";
         Playable media3=new NasMedia(mRetrofit,path3,"http://192.168.0.3:5000");
-        mMPlayer.play(media3,-0.97);
+        mMPlayer.play(media3,-0.85);
         mMPlayer.post(()->{
 //            mMPlayer.seek(-
 //                    1,"test");
