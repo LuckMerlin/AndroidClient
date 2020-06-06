@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class FileMedia implements BytesMedia {
-    private Meta mMeta;
     private RandomAccessFile mInput=null;
     private final String mPath;
+    private long mLength;
+    private String mName;
+    private String mTitle;
 
     public FileMedia(String path){
         mPath=path;
@@ -31,7 +33,9 @@ public class FileMedia implements BytesMedia {
             File file=new File(mediaPath);
             final long length=file.length();
             String name=file.getName();
-            mMeta=new Meta(length,name,null!=name?name.replace("*.",""):null);
+            mLength=length;
+            mName=name;
+            mTitle=null!=name?name.replace("*.",""):null;
             if (length<=0){
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;
@@ -64,17 +68,14 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public final int read(byte[] buffer, int offset,long loadCursor) throws IOException
-
-    {
+    public final int read(byte[] buffer, int offset,long loadCursor) throws IOException {
         RandomAccessFile input=mInput;
         int length=null!=buffer?buffer.length:-1;
         if (null==input||length<0||offset<0||offset>length){
             Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
             return Player.FATAL_ERROR;
         }
-        Meta meta=mMeta;
-        if (null!=meta&&loadCursor>=0&&loadCursor<=meta.getLength()){
+        if (loadCursor>=0&&loadCursor<=mLength){
             input.seek(loadCursor);
         }
         return input.read(buffer,offset,length-offset);
@@ -99,14 +100,28 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public final Meta getMeta() {
-        return mMeta;
+    public long getLength() {
+        return mLength;
+    }
+
+    @Override
+    public long getDuration() {
+        return 0;
+    }
+
+    @Override
+    public String getName() {
+        return mName;
+    }
+
+    @Override
+    public String getTitle() {
+        return mTitle;
     }
 
     @Override
     public String toString() {
-        Meta meta=getMeta();
-        String name=null!=meta?meta.getName():null;
+        String name=mName;
         return (null!=name?name:"")+super.toString();
     }
 }

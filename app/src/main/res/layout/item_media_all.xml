@@ -4,7 +4,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.bean.NasMedia" />
+            type="com.merlin.player.Playable" />
         <variable
             name="position"
             type="int" />
@@ -46,7 +46,6 @@
              <ImageView
                  android:src="@{R.drawable.selector_heart}"
                  android:duplicateParentState="false"
-                 binding:selected="@{media.favorite}"
                  android:padding="2dp"
                  binding:enableClick="@{Clicker.click(media,true)}"
                  android:layout_width="30dp"
@@ -72,11 +71,11 @@
                      android:id="@+id/item_media_durationTV"
                      android:singleLine="true"
                      android:layout_alignParentRight="true"
-                     android:text="@{Time.formatMediaDuration(media.duration)}"
+                     android:text="@{Time.formatMediaDuration(media.meta.duration)}"
                      style="@style/titleSubNormalTextView"/>
 
                  <TextView
-                     android:text="@{media.title}"
+                     android:text="@{media.meta.title}"
                      android:gravity="left"
                      android:layout_alignParentLeft="true"
                      android:singleLine="true"
@@ -89,11 +88,11 @@
                      android:orientation="horizontal"
                      android:layout_height="wrap_content">
                      <TextView
-                         android:text="@{media.artist??` `}"
+                         android:text="@{media.meta.artist??` `}"
                          style="@style/smallNormalTextView" />
                      <TextView
                          android:layout_marginLeft="3dp"
-                         android:text="@{media.album??` `}"
+                         android:text="@{media.meta.album??` `}"
                          style="@style/smallNormalTextView" />
                  </LinearLayout>
          </LinearLayout>

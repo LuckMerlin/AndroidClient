@@ -72,6 +72,7 @@
     <string name="play">播放</string>
     <string name="orderNext">下一首播放</string>
     <string name="addToSheet">添加到歌单</string>
+    <string name="notDo">不能执行此操作</string>
     <string name="allMedias">所有媒体</string>
     <string name="mediaPlay">媒体播放</string>
     <string name="noMoreData">已经没有更多了</string>
@@ -105,6 +106,7 @@
     <string name="queuing">排队中</string>
     <string name="canNotOperateOnLocalDevice">本地在本地设备上操作</string>
     <string name="planTime">计划时间</string>
+    <string name="pleaseInput">请输入</string>
     <string name="id">ID</string>
     <string name="content">内容</string>
     <string name="photo">图片</string>
@@ -112,6 +114,7 @@
     <string name="save">保存</string>
     <string name="title">标题</string>
     <string name="preparing">准备中</string>
+    <string name="contentInvalid">内容不合法</string>
     <string name="prepared">准备完成</string>
     <string name="canceled">已取消</string>
     <string name="started">已启动</string>

@@ -31,7 +31,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Streaming;
 
 public class NasMedia implements Playable {
-
     private interface Api{
         @Streaming
         @POST(Address.PREFIX_MEDIA_PLAY+"/file")
@@ -45,20 +44,27 @@ public class NasMedia implements Playable {
     }
 
     private final Retrofit mRetrofit;
-    private Meta mMeta;
-    private final String mUrl;
-    private final String mMd5;
+    private int id;
+    private String folder;
+    private String name;
+//    private Object imageUrl;
+    private String md5;
+    private long loadTime;
+    private String mime;
+    private String extension;
+    private String url;
+
 
     public NasMedia(Retrofit retrofit,String md5,String url){
-        mMd5=md5;
-        mUrl=url;
+        this.md5=md5;
+        this.url=url;
         mRetrofit=retrofit;
     }
 
     @Override
     public final boolean open() {
         Retrofit retrofit=mRetrofit;
-        String md5=mMd5;
+        String md5=this.md5;
         String url=mUrl;
         if (null==retrofit||null==md5||md5.length()<=0||null==url||url.length()<=0){
             Debug.W(getClass(),"Can't get nas media meta which arg invalid."+md5+" "+url+" "+retrofit);
@@ -109,6 +115,10 @@ public class NasMedia implements Playable {
                 cacheReady.onCacheReady(inputStream);
             }
         });
+    }
+
+    public String getMd5() {
+        return mMd5;
     }
 
     @Override

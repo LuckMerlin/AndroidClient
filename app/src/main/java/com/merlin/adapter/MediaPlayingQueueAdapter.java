@@ -8,23 +8,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaPlayingBinding;
+import com.merlin.debug.Debug;
 import com.merlin.player.Playable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MediaPlayingQueueAdapter extends Adapter<Playable>  {
+public class MediaPlayingQueueAdapter extends ListAdapter<Playable>  {
 
-    public MediaPlayingQueueAdapter(List<Playable> list){
-        setData(list);
+    public MediaPlayingQueueAdapter(ArrayList<Playable> list){
+        super(list);
     }
 
     @Override
-    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
-        return  R.layout.item_media_playing;
+    protected Integer onResolveViewTypeLayoutId(int viewType) {
+        return viewType==TYPE_DATA?R.layout.item_media_playing:null;
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Playable data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Playable data, @NonNull List<Object> payloads) {
+        super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
         if (null!=binding&&binding instanceof ItemMediaPlayingBinding){
             ((ItemMediaPlayingBinding)binding).setMedia(data);
             ((ItemMediaPlayingBinding)binding).setPosition(position);

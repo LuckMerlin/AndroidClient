@@ -8,8 +8,13 @@ public interface Status {
     public final static int  PLAYING =  -2007;
     public final static int  WAITING =  -2008;
     public final static int  START =  -2009;
+    public final static int  PLAY=-2010;
     public final static int  CREATE =  -2021;
     public final static int  DESTROY =  -2022;
     public final static int  ADD =  -2023;
     public final static int  REMOVE =  -2024;
+    public final static int  MODE_CHANGE =  -2025;
+    public final static int  SEEK =  -2026;
+    public final static int  PRE =  -2027;
+    public final static int  NEXT =  -2028;
 }

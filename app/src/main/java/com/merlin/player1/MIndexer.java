@@ -7,11 +7,11 @@ public class MIndexer implements Indexer {
     }
 
     @Override
-    public int mode(Integer mode, String debug) {
+    public Integer mode(Integer mode, String debug) {
         if (null!=mode){
 
         }
-        return 0;
+        return null;
     }
 
     @Override

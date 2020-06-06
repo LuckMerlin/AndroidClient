@@ -94,6 +94,11 @@ public class MPlayer extends Player {
         return false;
     }
 
+    public final boolean changeMode(Integer mode,String debug){
+        Indexer indexer=mIndexer;
+        return null!=indexer&&null!=indexer.mode(mode,debug);
+    }
+
     public final boolean pre(double seek,OnPlayerStatusChange change,String debug){
         Indexer indexer=mIndexer;
         return null!=indexer&&play(indexer.pre(getPlayingIndex(null),size()),seek,change,debug);
@@ -177,6 +182,19 @@ public class MPlayer extends Player {
                 return pause(arg,debug);
             case START:
                 return start(arg,debug);
+            case PLAY:
+                return null!=arg&&arg instanceof Playable&&play((Playable) arg,0);
+            case MODE_CHANGE:
+                return changeMode(null!=arg&&arg instanceof Integer?(Integer)arg:null,debug);
+            case SEEK:
+                arg=null!=arg&&arg instanceof Number&&!(arg instanceof Double)?Double.parseDouble(arg.toString()):arg;
+                return null!=arg&&arg instanceof Double&&seek((Double)arg,debug);
+            case ADD:
+                return null!=arg?arg instanceof OnPlayerStatusChange?addListener((OnPlayerStatusChange)arg)
+                        :arg instanceof Playable?append((Playable)arg,true):false:false;
+            case REMOVE:
+                return null!=arg?arg instanceof OnPlayerStatusChange?removeListener((OnPlayerStatusChange)arg)
+                        :arg instanceof Playable?remove((Playable)arg):false:false;
         }
         return false;
     }
@@ -222,8 +240,8 @@ public class MPlayer extends Player {
         return -1;
     }
 
-    public final List<Playable> getQueue(boolean containPlaying) {
-        List<Playable> result=null;
+    public final ArrayList<Playable> getQueue(boolean containPlaying) {
+        ArrayList<Playable> result=null;
         List<Playable> list=mQueue;
         int size=null!=list?list.size():0;
         if (size>0){

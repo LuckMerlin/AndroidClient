@@ -6,10 +6,10 @@ public interface Address {
 //    String URL="http://172.16.20.215:2008";
     String LOVE_ADDRESS="http://192.168.0.3:45678";
 //    String LOVE_ADDRESS="http://192.168.0.6:2008";
-//    String HOST="http://192.168.0.6";
-    String HOST="http://106.12.163.77";
+    String HOST="http://192.168.0.3";
+//    String HOST="http://106.12.163.77";
 //    String HOST="http://172.16.20.212";
-    int PORT=2018;
+    int PORT=5000;//2018;
     String URL=HOST+":"+PORT;
 //    String URL="http://106.12.163.77:2020";
 //    String URL="http://172.16.20.210:2008";//GS

@@ -34,7 +34,8 @@ public class MediaPlayService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return new MediaPlayBinder(){
+        return new PlayerBinder(){
+
             @Override
             public Playable getPlaying(Object arg,Boolean playing) {
                 return mMPlayer.getPlaying(arg,playing);
@@ -51,14 +52,19 @@ public class MediaPlayService extends Service {
             }
 
             @Override
-            public boolean listener(int status, OnPlayerStatusChange change, String debug) {
-                return mMPlayer.listener(status,change,debug);
+            public ArrayList<Playable> getQueue(boolean containPlaying) {
+                return mMPlayer.getQueue(containPlaying);
             }
 
-            @Override
-            public boolean seek(double seek, Object arg, String debug) {
-                return mMPlayer.seek(seek,arg,debug);
-            }
+            //            @Override
+//            public boolean listener(int status, OnPlayerStatusChange change, String debug) {
+//                return mMPlayer.listener(status,change,debug);
+//            }
+//
+//            @Override
+//            public boolean seek(double seek, Object arg, String debug) {
+//                return mMPlayer.seek(seek,arg,debug);
+//            }
 
             @Override
             public long getDuration(Object arg, String debug) {
@@ -84,8 +90,10 @@ public class MediaPlayService extends Service {
         Playable media2=new FileMedia(path2);
         String path3="./摸摸.mp3";
         Playable media3=new NasMedia(mRetrofit,path3,"http://192.168.0.3:5000");
-        mMPlayer.play(media,0);
+        mMPlayer.play(media3,0);
         mMPlayer.post(()->{
+
+
 //            mMPlayer.seek(-
 //                    1,"test");
         },0);

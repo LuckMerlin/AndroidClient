@@ -11,5 +11,9 @@ public interface Playable {
     boolean isOpened();
     boolean close();
     boolean cache(CacheReady cacheReady) throws IOException;
-    Meta getMeta();
+    long getLength();
+    String getName();
+    String getTitle();
+    long getDuration();
+
 }

@@ -58,7 +58,8 @@ final class Playing {
         return sampleRate<=0?0:(length * 1000 / sampleRate);
     }
 
-    public long getDuration() {
+    public long getDuration()
+    {
         Long duration=mDuration;
         if (null!=duration){
             return duration;
@@ -67,7 +68,10 @@ final class Playing {
         Meta meta=null!=playable?playable.getMeta():null;
         long length=null!=meta?meta.getLength():-1;
         long time=length>0?lengthToTime(length):0;
-        return mDuration=(time>0?time:null);
+        if (time>0){
+            duration=mDuration=time;
+        }
+        return null!=duration?duration:0;
     }
 
     public long getPosition() {

@@ -1,8 +1,11 @@
 package com.merlin.adapter;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.binding.ModelBinder;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.model.MediaDisplayModel;
 import com.merlin.model.Model;
 import com.merlin.player.Playable;
@@ -46,6 +50,28 @@ public class MediaPlayDisplayAdapter extends ListAdapter<Integer> implements OnR
         LinearLayoutManager manager=mManager;
         PagerSnapHelper helper=mHelper;
         return null!=manager&&null!=helper?helper.findSnapView(manager):null;
+    }
+
+    public boolean showDisplay(Class<? extends ViewDataBinding> cls){
+        if (null!=cls){
+            LinearLayoutManager manager=mManager;
+            PagerSnapHelper helper=mHelper;
+            View view=null!=helper?helper.findSnapView(manager):null;
+            ViewParent parent=null!=view?view.getParent():null;
+            RecyclerView recyclerView=null!=parent&&parent instanceof RecyclerView?((RecyclerView)parent):null;
+            if (null!=recyclerView){
+                int count=recyclerView.getChildCount();
+                for (int i = 0; i < count; i++) {
+                    View child=recyclerView.getChildAt(i);
+                    ViewDataBinding binding=null!=child?DataBindingUtil.getBinding(child):null;
+                    if (null!=binding&&binding.getClass().equals(cls)){
+                        recyclerView.smoothScrollToPosition(i);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public final Model getCurrentModel(){
@@ -96,13 +122,16 @@ public class MediaPlayDisplayAdapter extends ListAdapter<Integer> implements OnR
         recyclerView.scrollToPosition(1);
     }
 
-    @Override
+        @Override
     protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater in, int viewType, ViewGroup parent) {
-        ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
-        View  root=null!=binding?binding.getRoot():null;
-        RecyclerView.ViewHolder viewHolder=null!=root?new ViewHolder(binding):new BaseViewHolder(new View(parent.getContext()));
-        root.postDelayed(()->applyPlaying(root,null),500);
-        return viewHolder;
+        if (viewType!= Resources.ID_NULL&&viewType!=-1){
+            ViewDataBinding binding= DataBindingUtil.inflate(in,viewType, parent, false);
+            View  root=null!=binding?binding.getRoot():null;
+            RecyclerView.ViewHolder viewHolder=null!=root?new ViewHolder(binding):new BaseViewHolder(new View(parent.getContext()));
+            root.postDelayed(()->applyPlaying(root,null),500);
+            return viewHolder;
+        }
+        return null;
     }
 
     @Override

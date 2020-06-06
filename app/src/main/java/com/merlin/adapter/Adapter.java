@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @deprecated
+ */
 public abstract class Adapter<T> extends  RecyclerView.Adapter<RecyclerView.ViewHolder> implements OnLayoutManagerResolve  {
     private List<T> mData;
 

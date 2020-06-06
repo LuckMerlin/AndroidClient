@@ -2,20 +2,23 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:binding="http://schemas.android.com/apk/res-auto">
     <data>
-        <import type="android.view.View"/>
-        <import type="com.merlin.view.Clicker"/>
         <variable
-            name="adapter"
-            type="com.merlin.adapter.MediaPlayingQueueAdapter" />
+            name="vm"
+            type="com.merlin.model.MediaSheetCreateModel" />
     </data>
     <LinearLayout
+        binding:createModel="@{true}"
         android:orientation="vertical"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <androidx.recyclerview.widget.RecyclerView
-            android:adapter="@{adapter}"
+        <EditText
+            android:text="@{vm.title}"
+            android:singleLine="true"
+            android:gravity="left"
+            android:minWidth="50dp"
+            android:hint="@string/pleaseInput"
+            android:background="@android:color/transparent"
+            style="@style/itemLoveKeyTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>

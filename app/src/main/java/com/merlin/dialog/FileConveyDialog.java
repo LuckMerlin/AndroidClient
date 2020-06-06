@@ -22,7 +22,7 @@ public final class FileConveyDialog {
         mBinding=binding;
         View root=null!=binding?binding.getRoot():null;
         Context context=null!=root?root.getContext():null;
-        mDialog=null!=context?new Dialog(context,binding).setCanceledOnTouchOutside(false):null;
+        mDialog=null!=context?new Dialog(context,binding,null).setCanceledOnTouchOutside(false):null;
     }
 
     private final OnTapClick mOnTapClick=(View view, int clickCount, int resId, Object data)-> {

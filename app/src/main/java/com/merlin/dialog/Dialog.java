@@ -1,16 +1,11 @@
 package com.merlin.dialog;
-
 import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BlendMode;
-import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,43 +16,42 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
-
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.merlin.client.R;
 import com.merlin.client.databinding.DialogLayoutBinding;
 import com.merlin.model.Model;
 import com.merlin.view.Clicker;
-import com.merlin.view.CustomViewTarget;
 import com.merlin.view.OnTapClick;
 
 public class Dialog implements View.OnClickListener{
     private final android.app.Dialog mDialog;
     private DialogLayoutBinding mBinding;
 
-    public interface Callback{
-
-    }
-
     public Dialog(Context context){
-        this(context,null);
+        this(context,null,null);
     }
 
     public Dialog(ViewDataBinding contentBinding){
-        this(null,contentBinding);
+        this(null,contentBinding,null);
     }
 
-    public Dialog(Context context, ViewDataBinding contentBinding){
+    public Dialog(Context context, ViewDataBinding contentBinding,Integer windowType){
+        this(context,contentBinding,windowType,null);
+    }
+
+    public Dialog(Context context, ViewDataBinding contentBinding,Integer windowType,int[] padding){
         View view=null==context&&null!=contentBinding?contentBinding.getRoot():null;
         android.app.Dialog dialog=mDialog=new android.app.Dialog(null!=view?view.getContext():context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        dialog.setVolumeControlStream();
         Window window=dialog.getWindow();
-//        window.setType((WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG));
+        if (null!=windowType){
+            window.setType(windowType);
+        }
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams params = window.getAttributes();
         dialog.setOnDismissListener((dlg)->{
@@ -73,7 +67,7 @@ public class Dialog implements View.OnClickListener{
         params.dimAmount = 0f;
         window.setAttributes(params);
         if (null!=contentBinding){
-            setContentView(contentBinding,false);
+            setContentView(contentBinding,false,padding);
         }
     }
 
@@ -91,31 +85,76 @@ public class Dialog implements View.OnClickListener{
     }
 
     public final Dialog setContentView(ViewDataBinding binding, boolean recreate){
-        View view=null!=binding?binding.getRoot():null;
-        return null!=view?setContentView(view,recreate):this;
+        return setContentView(binding,recreate,null);
     }
 
-    public final Dialog create(){
+    public final Dialog setContentView(ViewDataBinding binding, boolean recreate,int[] padding){
+        View view=null!=binding?binding.getRoot():null;
+        return null!=view?setContentView(view,recreate,padding):this;
+    }
+
+    public final Dialog gravity(int gravity){
+        android.app.Dialog dialog=mDialog;
+        Window window=null!=dialog?dialog.getWindow():null;
+        if (null!=dialog){
+            window.setGravity(gravity);
+        }
+        return this;
+    }
+
+    public final Dialog create() {
+        return create(null);
+    }
+
+    public final Dialog create(int[] padding){
+        return create(null,null);
+    }
+
+    public final Dialog create(Integer w, Integer h){
+        return create(w,h,null);
+    }
+
+    public final Dialog create(Integer w, Integer h,int[] padding){
         final android.app.Dialog dialog=mDialog;
         final Context context=null!=dialog?dialog.getContext():null;
         if (null!=dialog&&null!=context){
             DialogLayoutBinding binding=DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.dialog_layout,null,false);
             View root=null!=binding?binding.getRoot():null;
             if (null!=root){
+                padding(root,null!=padding&&padding.length>3?padding:new int[]{dip2px(context,20),dip2px(context,20),
+                        dip2px(context,10),dip2px(context,10)});
                 mBinding=binding;
                 Clicker.setInterrupterTag(root,null);
-                dialog.setContentView(root);
+                dialog.setContentView(root,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 Resources resources =null!=context?context.getResources():null;
                 DisplayMetrics dm = null!=resources?resources.getDisplayMetrics():null;
                 int width=null!=dm?dm.widthPixels:800;
-                dialog.getWindow().setLayout((int)((width<=0?800:width)*0.75), ViewGroup.LayoutParams.WRAP_CONTENT);
+                dialog.getWindow().setLayout(null!=w?w:(int)((width<=0?800:width)*0.75), null!=h?h:ViewGroup.LayoutParams.WRAP_CONTENT);
+                ViewGroup.LayoutParams params=root.getLayoutParams();
+                params=null!=params?params:new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                root.setLayoutParams(params);
             }
         }
         return this;
     }
 
+
     public final boolean isCreated(){
         return null!=mBinding;
+    }
+
+    public final Dialog padding(int[] padding){
+        DialogLayoutBinding binding=mBinding;
+        View root=null!=binding?binding.getRoot():null;
+        padding(root,padding);
+        return this;
+    }
+
+    private final Dialog padding(View view,int[] padding){
+        if (null!=view&&padding.length>3){
+            view.setPadding(padding[0],padding[1],padding[2],padding[3]);
+        }
+        return this;
     }
 
     public final Dialog cleanBackground(){
@@ -127,35 +166,88 @@ public class Dialog implements View.OnClickListener{
         return this;
     }
 
-    public final Dialog setBackground(String path){
-        DialogLayoutBinding binding=mBinding;
-        View root=null!=binding?binding.getRoot():null;
-        if (null!=root&&null!=path&&path.length()>0){
-            Glide.with(root).load(path).into(new CustomViewTarget<View,Drawable>(root) {
-                @Override
-                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                    super.onResourceReady(resource, transition);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        root.setBackground(resource);
-                    }else{
-                        root.setBackgroundDrawable(resource);
-                    }
-                }
-            });
-        }
+    public final Dialog setBackground(Object background){
+//        DialogLayoutBinding binding=mBinding;
+//        View root=null!=binding?binding.getRoot():null;
+//        if (null!=root){
+//            applyBackground(background);
+//        }
+//
+//
+//        if (null!=background&&background instanceof String&&((String)background).length()>0){
+//            DialogLayoutBinding binding=mBinding;
+//            View root=null!=binding?binding.getRoot():null;
+//            if (null!=root){
+//                if (null!=background){
+//                    Glide.with(root).load(((String)background)).into(new CustomViewTarget<View,Drawable>(root) {
+//                        @Override
+//                        protected void onResourceCleared(@Nullable Drawable placeholder) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+//                            applyBackground(resource);
+//                        }
+//                    });
+//                }
+//            }
+//        }else {
+//            applyBackground(background);
+//        }
+        applyBackground(background);
         return this;
     }
 
+    private boolean applyBackground(Object background){
+        DialogLayoutBinding binding=mBinding;
+        View root=null!=binding?binding.getRoot():null;
+        if (null!=root) {
+            Drawable drawable = null;
+            if (null != background) {
+                if (background instanceof Drawable) {
+                    drawable = (Drawable) background;
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//                android:background="@drawable/radius_corner_dialog"
+                root.setBackground(drawable);
+            } else {
+                root.setBackgroundDrawable(drawable);
+            }
+            return true;
+        }
+        return false;
+    }
+
     public final Dialog setContentView(View view,boolean recreate){
+        return setContentView(view,recreate,null);
+    }
+
+    public final Dialog setContentView(View view,boolean recreate,int[] padding){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
             if (!isCreated()||recreate) {
-                create();
+                create(padding);
             }
             DialogLayoutBinding binding=mBinding;
             if (null!=binding){
                 binding.setContentLayout(view);
             }
+        }
+        return this;
+    }
+
+    public final Dialog setLayoutParams(ViewGroup.LayoutParams params){
+        DialogLayoutBinding binding=mBinding;
+        View root=null!=binding?binding.getRoot():null;
+        if (null!=binding){
+            root.setLayoutParams(params);
         }
         return this;
     }
@@ -256,7 +348,7 @@ public class Dialog implements View.OnClickListener{
     }
 
     public final boolean show(OnTapClick click){
-        return show(click,null!=click&&(click instanceof Model||click instanceof Activity||
+        return show(click,null!=click&&(click instanceof Model ||click instanceof Activity||
                 click instanceof Service ||click instanceof BroadcastReceiver));
     }
 
@@ -303,6 +395,16 @@ public class Dialog implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        //DO nothing
+        //D0 nothing
     }
+
+    private int dip2px(Context context, float dpValue) {
+        if (dpValue>0){
+            Resources resources=null!=context?context.getResources():null;
+            DisplayMetrics metrics=null!=resources?resources.getDisplayMetrics():null;
+            return null!=metrics?(int) (dpValue * metrics.density + 0.5f):null;
+        }
+        return 0;
+    }
+
 }
