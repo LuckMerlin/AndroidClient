@@ -1,19 +1,9 @@
 package com.merlin.adapter;
 
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.databinding.ViewDataBinding;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.merlin.bean.NasFile;
-import com.merlin.client.R;
-import com.merlin.client.databinding.ItemListFileBinding;
-
-import java.util.List;
+import com.merlin.bean.INasFile;
 
 
-public abstract class NasBrowserAdapter extends BrowserAdapter<NasFile>{
+public abstract class NasBrowserAdapter extends BrowserAdapter<INasFile>{
 //
 //    @Override
 //    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {

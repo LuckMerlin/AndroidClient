@@ -11,8 +11,9 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.PageData;
 import com.merlin.api.What;
+import com.merlin.bean.NasMediaFile;
 import com.merlin.client.R;
-import com.merlin.media.FavoriteApi;
+import com.merlin.media.Play;
 import com.merlin.player1.NasMedia;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
@@ -22,12 +23,12 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 
-public final class MediaDisplayAllMediasModel extends Model implements OnTapClick, OnLongClick,Label,What,OnTextChange, MediaPlayDisplayAdapter.OnMediaPlayModelShow {
+public final class MediaDisplayAllMediasModel extends MediaPlayModel implements OnTapClick, OnLongClick,Label,What,OnTextChange, MediaPlayDisplayAdapter.OnMediaPlayModelShow {
     private String mFilter;
 
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<NasMediaFile>>> finish) {
             return call(prepare(Api.class,Address.URL).queryAllMedias(from,from+20,arg),finish);
         }
     };
@@ -35,7 +36,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<com.merlin.player1.NasMedia>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
+        Observable<Reply<PageData<NasMediaFile>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
                                                                                 @Field(LABEL_NAME) String name,
                                                                                 @Field(LABEL_FORMAT) String... formats);
     }
@@ -52,28 +53,15 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
             case R.string.playAll:
                 return playAll("After play all tap click.");
             case R.drawable.selector_heart:
-                return (null!=data&&null!=view&&data instanceof NasMedia &&makeFavorite((NasMedia)data,!view.isSelected()))|true;
-//            case R.string.play://Get through
-//                return (null!=data&&null!=view&&data instanceof NasMedia &&play((NasMedia)data,MPlayer.PLAY_TYPE_PLAY_NOW))||true;
-//            case R.string.orderNext://Get through
-//                return (null!=data&&null!=view&&data instanceof NasMedia &&play((NasMedia)data,MPlayer.PLAY_TYPE_ORDER_NEXT))||true;
-//            case R.string.addToSheet://Get through
-//                return (null!=data&&null!=view&&data instanceof NasMedia &&addToSheet((NasMedia)data))||true;
-//            default:
-//                if (null!=data&&data instanceof NasMedia) {
-//                    NasMedia media=(NasMedia)data;
-//                    switch (clickCount) {
-//                        case 1:
-//                            return play(media,MPlayer.PLAY_TYPE_PLAY_NOW);
-//                        case 2:
-//                            return play(media,MPlayer.PLAY_TYPE_PLAY_NOW|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE);
-//                        case 3:
-//                            return play(media,MPlayer.PLAY_TYPE_ORDER_NEXT);
-//                        default:
-//                            return play(media,MPlayer.PLAY_TYPE_ORDER_NEXT|MPlayer.PLAY_TYPE_ADD_INTO_QUEUE);
-//                    }
-//                }
-//                break;
+                return (null!=data&&null!=view&&data instanceof NasMediaFile &&makeFavorite((NasMediaFile)data,!view.isSelected()))|true;
+            default:
+                if (null!=data){
+                    if (data instanceof NasMediaFile) {
+                        NasMediaFile media=(NasMediaFile)data;
+                        return new Play().playFromClick(getPlayer(),new NasMedia(media),clickCount,"After tap click ")||true;
+                    }
+                }
+                break;
         }
         return true;
     }
@@ -98,12 +86,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         return false;
     }
 
-    private boolean play(NasMedia media, int playType){
-//        return MediaPlayService.play(getViewContext(),media,0,playType);
-        return false;
-    }
-
-    private boolean addToSheet(NasMedia media){
+    private boolean addToSheet(NasMediaFile media){
         final String md5=null!=media?media.getMd5():null;
         if (null!=md5&&md5.length()>0){
 //            Dialog dialog=new Dialog(getViewContext());
@@ -133,7 +116,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
         return true;
     }
 
-    private boolean makeFavorite(NasMedia meta, boolean favorite){
+    private boolean makeFavorite(NasMediaFile meta, boolean favorite){
         final String md5=null!=meta?meta.getMd5():null;
         if (null==md5||md5.length()<=0){
             return false;
@@ -156,7 +139,7 @@ public final class MediaDisplayAllMediasModel extends Model implements OnTapClic
 
     @Override
     public void onTextChanged(EditText et, CharSequence s, int start, int before, int count) {
-           queryAllMedias(mFilter=null!=s&&s.length()>0?""+s:null,"After title_text change.");
+        queryAllMedias(mFilter=null!=s&&s.length()>0?""+s:null,"After title_text change.");
     }
 
     public AllMediasAdapter getAdapter() {

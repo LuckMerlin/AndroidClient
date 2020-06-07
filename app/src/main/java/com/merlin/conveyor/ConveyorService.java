@@ -1,25 +1,13 @@
 package com.merlin.conveyor;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
-import com.merlin.api.CoverMode;
+
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.bean.ClientMeta;
-import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
-import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
-
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ConveyorService extends Service implements Label, OnConveyStatusChange {
 //    private final Conveyor mConveyor=new Conveyor(null,Looper.getMainLooper());

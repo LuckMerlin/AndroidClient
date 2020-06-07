@@ -10,18 +10,16 @@ import com.merlin.api.ApiList;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
-import com.merlin.api.What;
 import com.merlin.bean.File_;
 import com.merlin.bean.FModify;
 import com.merlin.bean.FilePaste;
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.bean.NasFolder;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.dialog.SingleInputDialog;
 import com.merlin.browser.FileBrowser;
-import com.merlin.media.MediaPlayService;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -75,11 +73,11 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
 
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
-        Observable<Reply<NasFile>> getDetail(@Field(LABEL_PATH) String path);
+        Observable<Reply<INasFile>> getDetail(@Field(LABEL_PATH) String path);
 
         @POST(Address.PREFIX_FILE+"/scan")
         @FormUrlEncoded
-        Observable<Reply<NasFile>> scan(@Field(LABEL_PATH) String path,@Field(LABEL_ENABLE) boolean recursive);
+        Observable<Reply<INasFile>> scan(@Field(LABEL_PATH) String path, @Field(LABEL_ENABLE) boolean recursive);
 
         @POST(Address.PREFIX_FILE+"/paste")
         @FormUrlEncoded
@@ -137,7 +135,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
 
             default:
                 if (null!=data){
-                    if (data instanceof NasFile){
+                    if (data instanceof INasFile){
 //                        NasFile file=(NasFile)data;
 //                        if (isMode(MODE_MULTI_CHOOSE)) {
 //                            multiChoose(file);
@@ -171,12 +169,12 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
     public boolean onLongClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
             case R.string.scan:
-                return null!=data&&data instanceof NasFile&&scan((NasFile)data,true)||true;
+                return null!=data&&data instanceof INasFile &&scan((INasFile)data,true)||true;
         }
         return false;
     }
 
-    private boolean scan(NasFile file, boolean recursive){
+    private boolean scan(INasFile file, boolean recursive){
         String path=null!=file?file.getPath(null):null;
         return null!=path&&path.length()>0&&null!=call(prepare(Api.class,Address.HOST).scan(path,recursive),(OnApiFinish<Reply>)(what, note, data2, arg)->toast(note));
     }
@@ -205,7 +203,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean showFileDetail(NasFile meta){
+    private boolean showFileDetail(INasFile meta){
 //        String path=null!=meta?meta.getPath(false):null;
 //        FileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.nas_file_detail);
 //        if (null==binding){
@@ -228,10 +226,10 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean downloadFile(NasFile meta, String debug){
+    private boolean downloadFile(INasFile meta, String debug){
         String path=null!=meta?meta.getPath(null):null;
         if (null!=path&&path.length()>0){
-            ArrayList<NasFile> list=new ArrayList<>();
+            ArrayList<INasFile> list=new ArrayList<>();
             list.add(meta);
             return downloadFile(list,debug);
         }
@@ -239,7 +237,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean downloadFile(ArrayList<NasFile> files, String debug){
+    private boolean downloadFile(ArrayList<INasFile> files, String debug){
         if (null==files||files.size()<=0){
             return false;
         }
@@ -247,7 +245,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean uploadFile(NasFile meta){
+    private boolean uploadFile(INasFile meta){
         String path=null!=meta?meta.getPath(null):null;
         if (null==path||path.length()<=0 ||!meta.isDirectory()){
             toast(R.string.pathInvalid);
@@ -287,7 +285,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean moveFile(NasFile meta, String debug){
+    private boolean moveFile(INasFile meta, String debug){
         if (null!=meta&&isMode(MODE_MOVE)||entryMode(MODE_MOVE)){
             mProcessing=meta;
             return true;
@@ -295,7 +293,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean copyFile(NasFile meta, String debug){
+    private boolean copyFile(INasFile meta, String debug){
         if (null!=meta&&isMode(MODE_COPY)||entryMode(MODE_COPY)){
             mProcessing=meta;
             return true;
@@ -334,7 +332,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return false;
     }
 
-    private boolean multiChoose(NasFile meta){
+    private boolean multiChoose(INasFile meta){
 //        BrowserAdapter adapter=mNasBrowserAdapter;
 //        if (null!=meta&&isMode(MODE_MULTI_CHOOSE)&&adapter.multiChoose(meta)){
 //            refreshMultiChooseCount();
@@ -420,19 +418,19 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
         return true;
     }
 
-    private boolean deleteFile(List<NasFile> files, String debug){
+    private boolean deleteFile(List<INasFile> files, String debug){
         final int length=null!=files?files.size():-1;
         if (length>0){
             Dialog dialog=new Dialog(getViewContext());
-            NasFile first=files.get(0);
+            INasFile first=files.get(0);
             String name=null!=first?first.getName(false):null;
             String message=""+(length==1?(null!=name?(""+getText(first.isDirectory()? R.string.folder:R.string.file)+" "+name):""):getText(R.string.items,length));
             return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,message)).left(R.string.sure).right(R.string.cancel).show((view, clickCount,  resId, data)->{
                 dialog.dismiss();
                 if (resId ==R.string.sure){
                     List<String> paths=new ArrayList<>();
-                    Map<String, NasFile> map=new HashMap<>(length);
-                    for (NasFile meta:files) {
+                    Map<String, INasFile> map=new HashMap<>(length);
+                    for (INasFile meta:files) {
                         String path=null!=meta?meta.getPath(null):null;
                         if (null!=path&&path.length()>0){
                             paths.add(path);
@@ -447,9 +445,9 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                                 BrowserAdapter adapter=mNasBrowserAdapter;
                                 int size=null!=deletedPaths&&null!=adapter?deletedPaths.size():-1;
                                 if (size>0){
-                                    List<NasFile> deleted=new ArrayList<>(size);
+                                    List<INasFile> deleted=new ArrayList<>(size);
                                     for (String  path:deletedPaths) {
-                                        NasFile child=null!=path?map.get(path):null;
+                                        INasFile child=null!=path?map.get(path):null;
                                         if (null!=child){
                                             deleted.add(child);
                                         }
@@ -497,7 +495,7 @@ public final class FileBrowserRemoteModel extends Model implements Label, OnTapC
                 });
     }
 
-    private boolean renameFile(NasFile meta){
+    private boolean renameFile(INasFile meta){
         final String path=null!=meta?meta.getPath(null):null;
         if (null!=path&&path.length()>0){
             final String name=meta.getName(false);

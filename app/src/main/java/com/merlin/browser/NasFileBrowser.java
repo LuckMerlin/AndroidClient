@@ -9,7 +9,7 @@ import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.NasFileDetailBinding;
@@ -30,11 +30,11 @@ public class NasFileBrowser extends FileBrowser implements Label {
     private interface Api {
         @POST(Address.PREFIX_FILE+"/directory/browser")
         @FormUrlEncoded
-        Observable<Reply<FolderData<NasFile>>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FROM) int from,
-                                                          @Field(LABEL_TO) int to);
+        Observable<Reply<FolderData<INasFile>>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FROM) int from,
+                                                           @Field(LABEL_TO) int to);
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
-        Observable<Reply<NasFile>> getDetail(@Field(LABEL_PATH) String path);
+        Observable<Reply<INasFile>> getDetail(@Field(LABEL_PATH) String path);
 
         @POST(Address.PREFIX_FILE+"/home")
         @FormUrlEncoded
@@ -64,19 +64,19 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onShowPathDetail(Document meta, String debug) {
-        String path=null!=meta&&meta instanceof NasFile?meta.getPath(null):null;
+        String path=null!=meta&&meta instanceof INasFile ?meta.getPath(null):null;
         NasFileDetailBinding binding=null==path||path.length()<=0?null:inflate(R.layout.nas_file_detail);
         if (null==binding){
             return toast(R.string.pathInvalid)&&false;
         }
-        binding.setFile((NasFile)meta);
+        binding.setFile((INasFile)meta);
         binding.setLoadState(What.WHAT_INVALID);
         final Dialog dialog=new Dialog(getAdapterContext());
         dialog.setContentView(null!=binding?binding.getRoot():null,true).show((v, clickCount, resId, data)->{
             return true;
         },false);
-        return null!=call(prepare(Api.class,Address.URL,null).getDetail(path),null,null,null,(OnApiFinish<Reply<NasFile>>)(what, note, data2, arg)->{
-            NasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
+        return null!=call(prepare(Api.class,Address.URL,null).getDetail(path),null,null,null,(OnApiFinish<Reply<INasFile>>)(what, note, data2, arg)->{
+            INasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
             binding.setFile(detail);
             binding.setLoadState(what);
         });

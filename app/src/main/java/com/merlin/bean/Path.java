@@ -14,27 +14,27 @@ import java.net.URI;
 import java.net.URL;
 
 public class Path implements Parcelable {
-    public final static int PATH_WHAT_NONE=0;
-    public final static int PATH_WHAT_DELETE=90001;
-    public final static int PATH_WHAT_ADD=90002;
-//    private final static String LOCAL_HOST="localHost";
-    private Long  id;
+    private long  id;
     private String parent;
     private String name;
     private String extension;
-    private int what=PATH_WHAT_NONE;
+    private String mime;
     private String host;
+    private long length;
+    private String md5;
     private int port;
+    private String title;
+    private Object thumb;
 
-    protected Path(){
+    public Path(){
         this(null,null,null);
     }
 
-    protected Path(String parent,String name,String extension){
+    public Path(String parent,String name,String extension){
         this(null,parent,name,extension);
     }
 
-    protected Path(String host,String parent,String name,String extension){
+    public Path(String host,String parent,String name,String extension){
         this.host=host;
         this.parent=parent;
         this.name=name;
@@ -61,12 +61,24 @@ public class Path implements Parcelable {
         return null!=name&&extension&&null!=this.extension?name+this.extension:name;
     }
 
+    public String getMime() {
+        return mime;
+    }
+
     public final String getHost() {
         return host;
     }
 
     public final String getHostName(){
         return null!=host&&host.length()>0?host+":"+port:null;
+    }
+
+    public final String getMd5() {
+        return md5;
+    }
+
+    public final long getLength() {
+        return length;
     }
 
     /**
@@ -84,16 +96,12 @@ public class Path implements Parcelable {
         return getPath(null);
     }
 
-    public void setWhat(Integer what) {
-        this.what = what;
-    }
-
-    public final Integer getWhat() {
-        return what;
-    }
-
     public final Long getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     /**
@@ -105,7 +113,7 @@ public class Path implements Parcelable {
     }
 
     public final boolean isLocal(){
-        return null==id||id<0;
+        return false;
     }
 
     /**
@@ -125,6 +133,10 @@ public class Path implements Parcelable {
 
     public int getPort() {
         return port;
+    }
+
+    public Object getThumb() {
+        return thumb;
     }
 
     public final boolean applyPathChange(Reply<Path> reply){
@@ -225,7 +237,6 @@ public class Path implements Parcelable {
         dest.writeString(extension);
         dest.writeString(host);
         dest.writeInt(port);
-        dest.writeInt(what);
     }
 
     protected Path(Parcel parcel){
@@ -235,7 +246,6 @@ public class Path implements Parcelable {
             extension = parcel.readString();
             host = parcel.readString();
             port = parcel.readInt();
-            what = parcel.readInt();
         }
     }
 

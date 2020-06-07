@@ -13,13 +13,10 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.PageData;
-import com.merlin.bean.NasMedia;
+import com.merlin.bean.INasMedia;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
 import com.merlin.client.databinding.SheetMediasMenusBinding;
-import com.merlin.media.MediaPlayService;
-import com.merlin.player1.MPlayer;
-import com.merlin.server.Retrofit;
 import com.merlin.view.OnTapClick;
 
 import java.util.ArrayList;
@@ -34,7 +31,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private final ObservableField<Sheet> mSheet=new ObservableField<>();
     private final SheetMediasAdapter mAdapter=new SheetMediasAdapter(){
         @Override
-        protected Canceler onPageLoad(String title, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
+        protected Canceler onPageLoad(String title, int from, OnApiFinish<Reply<PageData<INasMedia>>> finish) {
             return call(prepare(Api.class,Address.HOST).queryMedias(title,from,from+20),finish);
         }
     };
@@ -42,7 +39,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/medias")
         @FormUrlEncoded
-        Observable<Reply<PageData<NasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+        Observable<Reply<PageData<INasMedia>>> queryMedias(@Field(LABEL_ID) String id, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
     }
 
     @Override
@@ -62,7 +59,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
             case R.string.playAll:
                 return playAll("After play all tap click.");
             default:
-                if (null!=data&&data instanceof NasMedia){
+                if (null!=data&&data instanceof INasMedia){
 //                    MediaPlayService.play(getContext(),(NasMedia)data,0, clickCount>1?MPlayer.PLAY_TYPE_PLAY_NOW&MPlayer.PLAY_TYPE_ADD_INTO_QUEUE:MPlayer.PLAY_TYPE_PLAY_NOW);
                 }
                 break;
@@ -72,7 +69,7 @@ public class MediaSheetDetailModel extends Model implements Model.OnActivityInte
 
     private boolean playAll(String debug){
         SheetMediasAdapter adapter=mAdapter;
-        ArrayList<NasMedia> list=null!=adapter?adapter.getData():null;
+        ArrayList<INasMedia> list=null!=adapter?adapter.getData():null;
         if (null==list||list.size()<=0){
             return toast(R.string.listEmpty);
         }

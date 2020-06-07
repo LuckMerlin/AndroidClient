@@ -6,7 +6,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
 
@@ -33,7 +33,7 @@ public final class Upload extends AbsTransport<Canceler> {
 
         @POST(Address.PREFIX_FILE+"/upload/prepare")
         @FormUrlEncoded
-        Observable<Reply<ApiList<NasFile>>> uploadPrepare(@Field(Label.LABEL_PATH) List<String> uploads);
+        Observable<Reply<ApiList<INasFile>>> uploadPrepare(@Field(Label.LABEL_PATH) List<String> uploads);
 
     }
 

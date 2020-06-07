@@ -1,12 +1,12 @@
 package com.merlin.transport;
 
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 
 public class FileDownload {
-    private final NasFile mFile;
+    private final INasFile mFile;
     private final String mFolder;
 
-    public FileDownload(NasFile file, String folder){
+    public FileDownload(INasFile file, String folder){
         mFile=file;
         mFolder=folder;
     }

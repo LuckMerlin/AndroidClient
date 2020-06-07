@@ -12,9 +12,8 @@ import com.merlin.api.PageQuery;
 import com.merlin.api.Reply;
 import com.merlin.api.PageData;
 import com.merlin.api.What;
-import com.merlin.bean.NasFile;
-import com.merlin.bean.NasMedia;
-import com.merlin.server.Retrofit;
+import com.merlin.bean.INasFile;
+import com.merlin.bean.INasMedia;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -24,13 +23,13 @@ import retrofit2.http.POST;
 /**
  * @deprecated
  */
-public final class MediaDisplayAlModel extends Model implements Label,What, BaseAdapter.OnItemClickListener<NasFile> {
+public final class MediaDisplayAlModel extends Model implements Label,What, BaseAdapter.OnItemClickListener<INasFile> {
     private PageQuery<String> mQuerying;
-    private PageData<NasFile> mLatestQueried=null;
+    private PageData<INasFile> mLatestQueried=null;
 
     private final MediaAdapter mAdapter=new MediaAdapter(){
         @Override
-        protected Canceler onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<NasFile>>> finish) {
+        protected Canceler onPageLoad(String arg, int page, OnApiFinish<Reply<PageData<INasFile>>> finish) {
             return call(prepare(Api.class,Address.HOST).queryAllMedias(arg,page,page+20));
         }
     };
@@ -38,9 +37,9 @@ public final class MediaDisplayAlModel extends Model implements Label,What, Base
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<NasFile>>> queryAllMedias(@Field(LABEL_FORMAT) String format,
-                                                            @Field(LABEL_PAGE)int page,
-                                                            @Field(LABEL_LIMIT)int limit);
+        Observable<Reply<PageData<INasFile>>> queryAllMedias(@Field(LABEL_FORMAT) String format,
+                                                             @Field(LABEL_PAGE)int page,
+                                                             @Field(LABEL_LIMIT)int limit);
     }
 
 
@@ -82,8 +81,8 @@ public final class MediaDisplayAlModel extends Model implements Label,What, Base
     }
 
     @Override
-    public void onItemClick(View view, int sourceId, int position, NasFile data) {
-        NasMedia media=null!=data?data.getMeta():null;
+    public void onItemClick(View view, int sourceId, int position, INasFile data) {
+        INasMedia media=null!=data?data.getMeta():null;
         if (null!=media&&null!=data&&null!=view){
 //            MediaPlayService.play(view.getContext(),media,0,false);
         }

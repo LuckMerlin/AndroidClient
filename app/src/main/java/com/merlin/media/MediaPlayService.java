@@ -11,10 +11,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import com.merlin.api.Address;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
 import com.merlin.player.FileMedia;
-import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
 import com.merlin.player1.MPlayer;
 import com.merlin.player1.NasMedia;
@@ -22,14 +22,20 @@ import com.merlin.server.Retrofit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class MediaPlayService extends Service {
     private final static String LABEL_MEDIAS = "medias";
     private final static String LABEL_POSITION = "position";
     private final static String LABEL_PLAY_TYPE = "playType";
     private final static List<ServiceConnection> mConnections = new ArrayList<>();
-    private final MPlayer mMPlayer=new MPlayer();
-    private final Retrofit mRetrofit=new Retrofit();
+    private final Retrofit mRetrofit= new Retrofit(){
+        @Override
+        protected String onResolveUrl(Class<?> cls, Executor callbackExecutor) {
+            return "http://192.168.0.3:5000";
+        }
+    };
+    private final MPlayer mMPlayer=new MPlayer(null,null,mRetrofit );
 
     @Nullable
     @Override
@@ -88,12 +94,10 @@ public class MediaPlayService extends Service {
         String path2="/sdcard/Musics/赵雷 - 成都.mp3";
         Playable media=new FileMedia(path);
         Playable media2=new FileMedia(path2);
-        String path3="./摸摸.mp3";
-        Playable media3=new NasMedia(mRetrofit,path3,"http://192.168.0.3:5000");
+        String path3="./Test/摸摸.mp3";
+        Playable media3=new NasMedia("http://192.168.0.3:5000",null,path3);
         mMPlayer.play(media3,0);
         mMPlayer.post(()->{
-
-
 //            mMPlayer.seek(-
 //                    1,"test");
         },0);

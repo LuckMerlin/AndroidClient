@@ -9,8 +9,8 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Document;
+import com.merlin.bean.INasFile;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -64,7 +64,7 @@ public final class FileCopyProcess extends FileProcess<Document> {
                         File file=new File(path);
                         copyLocalFile(file,folder,coverMode,update);
                         update.onProcessUpdate(What.WHAT_SUCCEED, R.string.succeed,fromPath,null,meta);
-                    }else if (meta instanceof NasFile){
+                    }else if (meta instanceof INasFile){
                         if (null==retrofit){
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.inputNotNull,fromPath,null,meta);
                         }else {

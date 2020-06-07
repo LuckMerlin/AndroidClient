@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemListFileBinding;
 
@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class FileBrowserAdapter extends BaseAdapter<NasFile, ItemListFileBinding>  {
-    private List<NasFile> mMultiChoose;
+public class FileBrowserAdapter extends BaseAdapter<INasFile, ItemListFileBinding>  {
+    private List<INasFile> mMultiChoose;
 
     @Override
     protected Integer onResolveNormalTypeLayoutId() {
@@ -23,7 +23,7 @@ public class FileBrowserAdapter extends BaseAdapter<NasFile, ItemListFileBinding
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ItemListFileBinding binding, int position, INasFile data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data){
             boolean multiChoose=null!=mMultiChoose;
             binding.setIsChoose(isChoose(data));
@@ -40,8 +40,8 @@ public class FileBrowserAdapter extends BaseAdapter<NasFile, ItemListFileBinding
         }
     }
 
-    public boolean isChoose(NasFile meta){
-        List<NasFile> choose=mMultiChoose;
+    public boolean isChoose(INasFile meta){
+        List<INasFile> choose=mMultiChoose;
         return null!=meta&&null!=choose&&choose.contains(meta);
     }
 
@@ -58,8 +58,8 @@ public class FileBrowserAdapter extends BaseAdapter<NasFile, ItemListFileBinding
     }
 
     public final boolean chooseAll(boolean choose){
-        List<NasFile> list = mMultiChoose;
-        List<NasFile> data = getData();
+        List<INasFile> list = mMultiChoose;
+        List<INasFile> data = getData();
         int size = null != data ? data.size() : 0;
         if (choose && (size > 0 &&(null==list||size != list.size()))) {
             if (null==list){
@@ -78,8 +78,8 @@ public class FileBrowserAdapter extends BaseAdapter<NasFile, ItemListFileBinding
         return false;
     }
 
-    public boolean multiChoose(NasFile meta){
-        List<NasFile> list=mMultiChoose;
+    public boolean multiChoose(INasFile meta){
+        List<INasFile> list=mMultiChoose;
         if (null!=meta){
             if (null==list?(list=new ArrayList<>()).add(meta):
                     (list.contains(meta)?list.remove(meta):list.add(meta))){
@@ -92,12 +92,12 @@ public class FileBrowserAdapter extends BaseAdapter<NasFile, ItemListFileBinding
     }
 
     public int getChooseCount(){
-        List<NasFile> list=mMultiChoose;
+        List<INasFile> list=mMultiChoose;
         return null!=list?list.size():0;
     }
 
-    public List<NasFile> getChoose(){
-        List<NasFile> list=mMultiChoose;
+    public List<INasFile> getChoose(){
+        List<INasFile> list=mMultiChoose;
         return list;
     }
 

@@ -1,6 +1,6 @@
 package com.merlin.transport;
 
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.debug.Debug;
 
 import java.util.ArrayList;
@@ -92,9 +92,9 @@ public final class FileDownloader {
         return false;
     }
 
-    public boolean download(List<NasFile> files, String folder, String debug){
+    public boolean download(List<INasFile> files, String folder, String debug){
         if (null!=files&&files.size()>0){
-            for (NasFile meta:files){
+            for (INasFile meta:files){
                 if (null!=meta&&add(new FileDownload(meta,folder),debug)){
 
                 }

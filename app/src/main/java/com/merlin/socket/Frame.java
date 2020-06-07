@@ -1,20 +1,15 @@
 package com.merlin.socket;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
-import com.merlin.retrofit.Retrofit;
 import com.merlin.util.Int;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public final class Frame implements Label{

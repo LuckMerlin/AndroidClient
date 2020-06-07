@@ -7,13 +7,9 @@ public interface Playable {
     interface CacheReady{
         void onCacheReady(InputStream inputStream) throws IOException;
     }
-    boolean open();
+    boolean open(Player player);
     boolean isOpened();
-    boolean close();
-    boolean cache(CacheReady cacheReady) throws IOException;
-    long getLength();
-    String getName();
-    String getTitle();
-    long getDuration();
-
+    boolean close(Player player);
+    boolean cache(Player player,CacheReady cacheReady) throws IOException;
+    Meta getMeta();
 }

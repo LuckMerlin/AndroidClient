@@ -13,7 +13,7 @@ public class MediaSheet implements Serializable {
     private String imageUrl;
     private String note;
     private String title;
-    private List<NasMedia> data;
+    private List<INasMedia> data;
 
     public void setSize(int size) {
         this.size = size;
@@ -87,11 +87,11 @@ public class MediaSheet implements Serializable {
         this.title = title;
     }
 
-    public List<NasMedia> getData() {
+    public List<INasMedia> getData() {
         return data;
     }
 
-    public void setData(List<NasMedia> data) {
+    public void setData(List<INasMedia> data) {
         this.data = data;
     }
 }

@@ -9,17 +9,15 @@ import java.io.RandomAccessFile;
 
 public class FileMedia implements BytesMedia {
     private RandomAccessFile mInput=null;
+    private Meta mMeta;
     private final String mPath;
-    private long mLength;
-    private String mName;
-    private String mTitle;
 
     public FileMedia(String path){
         mPath=path;
     }
 
     @Override
-    public final boolean open() {
+    public final boolean open(Player player) {
         final String mediaPath=mPath;
         if (null==mediaPath||mediaPath.length()<=0){
             Debug.W(getClass(),"Can't open media file which path is invalid."+mediaPath);
@@ -33,10 +31,9 @@ public class FileMedia implements BytesMedia {
             File file=new File(mediaPath);
             final long length=file.length();
             String name=file.getName();
-            mLength=length;
-            mName=name;
-            mTitle=null!=name?name.replace("*.",""):null;
+            mMeta=new Meta(length,name,null!=name?name.replace("*.",""):null,null);
             if (length<=0){
+
                 Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
                 return false;
             }
@@ -57,7 +54,7 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public final boolean cache(CacheReady cacheReady) {
+    public final boolean cache(Player player,CacheReady cacheReady) {
 //        if (null!=cacheReady){
 //            FileInputStream input=mInput;
 //            cacheReady.onCacheReady(null==input?Player.FATAL_ERROR:Player.NORMAL,input,mLength);
@@ -75,14 +72,15 @@ public class FileMedia implements BytesMedia {
             Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
             return Player.FATAL_ERROR;
         }
-        if (loadCursor>=0&&loadCursor<=mLength){
+        Meta meta=mMeta;
+        if (null!=meta&&loadCursor>=0&&loadCursor<=meta.getLength()){
             input.seek(loadCursor);
         }
         return input.read(buffer,offset,length-offset);
     }
 
     @Override
-    public final boolean close() {
+    public final boolean close(Player player) {
         RandomAccessFile input=mInput;
         if (null!=input){
             mInput=null;
@@ -100,28 +98,13 @@ public class FileMedia implements BytesMedia {
     }
 
     @Override
-    public long getLength() {
-        return mLength;
-    }
-
-    @Override
-    public long getDuration() {
-        return 0;
-    }
-
-    @Override
-    public String getName() {
-        return mName;
-    }
-
-    @Override
-    public String getTitle() {
-        return mTitle;
+    public Meta getMeta() {
+        return mMeta;
     }
 
     @Override
     public String toString() {
-        String name=mName;
-        return (null!=name?name:"")+super.toString();
+        Meta meta=mMeta;
+        return (null!=meta?meta:"")+super.toString();
     }
 }

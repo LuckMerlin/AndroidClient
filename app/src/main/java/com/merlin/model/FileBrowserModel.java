@@ -24,7 +24,7 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.browser.Collector;
 import com.merlin.browser.Mode;
 import com.merlin.client.R;
@@ -33,14 +33,12 @@ import com.merlin.client.databinding.DeviceTextBinding;
 import com.merlin.client.databinding.FileBrowserMenuBinding;
 import com.merlin.client.databinding.FileContextMenuBinding;
 import com.merlin.client.databinding.SingleEditTextBinding;
-import com.merlin.conveyor.ConveyorService;
 import com.merlin.debug.Debug;
 import com.merlin.browser.FileBrowser;
 import com.merlin.browser.LocalFileBrowser;
 import com.merlin.browser.NasFileBrowser;
 import com.merlin.dialog.Dialog;
 import com.merlin.protocol.Tag;
-import com.merlin.transport.Status;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
 
@@ -210,8 +208,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
                 return isMode(Mode.MODE_UPLOAD) ? upload(getCollected(LocalFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_UPLOAD, data, LocalFile.class,"After tap click.");
             case R.string.download:
-                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? download(getCollected(NasFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_DOWNLOAD, data, NasFile.class,"After tap click.");
+                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? download(getCollected(INasFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                        : collectFile(Mode.MODE_DOWNLOAD, data, INasFile.class,"After tap click.");
             case R.string.copy:
                 return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY) ? copy(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_COPY, data, null,"After tap click.");
@@ -307,7 +305,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
         return toast(R.string.fail);
     }
 
-    private boolean download(ArrayList<NasFile> files,int coverMode,String debug){
+    private boolean download(ArrayList<INasFile> files, int coverMode, String debug){
         Debug.D(getClass(),"下载 "+files);
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;

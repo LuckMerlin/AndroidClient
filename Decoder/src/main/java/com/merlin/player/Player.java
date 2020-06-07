@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class Player implements Status{
+public abstract class Player implements Action {
     private final static int  NORMAL = 0;
     private final static int  EOF = -1;
     private boolean mWaiting=false;
@@ -20,19 +20,22 @@ public abstract class Player implements Status{
     private RandomAccessFile mCacheAccess;
     private Playing mPlaying;
     private boolean mPaused=false;
+    private boolean mStopped=false;
     private final Handler mHandler=new Handler(Looper.getMainLooper());
     private final Map<OnPlayerStatusChange, Long> mChangeMap=new WeakHashMap<>();
+    private SyncLoader mLoader;
 
     static {
         System.loadLibrary("linqiang");
     }
 
     public Player(){
-        this(null);
+        this(null,null);
     }
 
-    public Player(String cacheFile){
+    public Player(String cacheFile, SyncLoader loader){
         mCacheFile=cacheFile;
+        mLoader=loader;
     }
 
     public final boolean addListener(OnPlayerStatusChange change){
@@ -75,23 +78,24 @@ public abstract class Player implements Status{
             final RandomAccessFile cacheAccess=new RandomAccessFile(finalCacheFile,"rw");
             final byte[] cacheBuffer=new byte[1024*1024];
             final OnLoadMedia innerLoader=(byte[] playerBuffer, int playerOffset) ->{
-                while (mPaused){
-                    wait(cacheAccess,"While pause flag setted.");
+                while (mPaused||mStopped){
+                    wait(cacheAccess,"While pause or stop flag set.");
                 }
                 final int playerBufferLength=null!=playerBuffer?playerBuffer.length:-1;
                 if (playerBufferLength<=0||playerOffset<0){//Buffer or offset not invalid
                     Debug.W(getClass(),"Can't play media which player buffer or offset invalid.");
                     return FATAL_ERROR;
                 }
-                if (playerOffset>=playerBufferLength){//Already full
-                    return NORMAL;
-                }
                 if (null==mCacheAccess){//Player has been stopped
                     Debug.W(getClass(),"Can't play media which cache access is NULL.");
                     return FATAL_ERROR;
                 }
+                if (playerOffset>=playerBufferLength){//Already full
+                    return NORMAL;
+                }
                 final Playing playing=mPlaying;
                 if (null==playing){//None media to play
+                    notifyStatusChange(IDLE,null,null,null);
                     wait(cacheAccess," While none media to play.");
                     return NORMAL;
                 }
@@ -99,19 +103,19 @@ public abstract class Player implements Status{
                 if (null==media){
                     Debug.W(getClass(),"Can't play media which is NULL."+playing);
                     stop("While media is NULL.");
-                    return FATAL_ERROR;
+                    return NORMAL;
                 }
-                if (!media.isOpened()&&!media.open()){
+                if (!media.isOpened()&&!media.open(this)){
                     Debug.W(getClass(),"Can't play media which open fail."+playing);
                     stop("While media open fail.");
-                    return FATAL_ERROR;
+                    return NORMAL;
                 }
                 Meta meta=media.getMeta();
                 long totalLength=null!=meta?meta.getLength():-1;
                 if (totalLength<=0){
                     Debug.W(getClass(),"Can't play media which total length invalid."+totalLength);
                     stop("While media total length invalid."+totalLength);
-                    return FATAL_ERROR;
+                    return NORMAL;
                 }
                 long cursor = playing.getCursor();
                 final long loadCursor=cursor<=0?0:cursor;
@@ -120,7 +124,7 @@ public abstract class Player implements Status{
                     if (read>0){
                         playing.increaseCursor(read);
                         playing.onWriteId3(playerBuffer,playerOffset,read);
-                        notifyStatusChange(PLAYING,media,null,null);
+                        notifyStatusChange(PLAY,media,null,null);
                     }
                     return read;
                 }
@@ -128,7 +132,7 @@ public abstract class Player implements Status{
                 if ((length<totalLength)&&(length<=0||loadCursor>length)){//Empty
                     final long currThreadId=Thread.currentThread().getId();
                     final Integer[] cacheLoad=new Integer[1];
-                    if (!media.cache((inputStream)-> {
+                    if (!media.cache(this,(inputStream)-> {
                         if (null==inputStream){
                             stop( "While cache media stream NULL.");
                             return;
@@ -170,7 +174,7 @@ public abstract class Player implements Status{
                     })){
                         Debug.W(getClass(),"Can't play media which cache fail."+playing);
                         stop(null,"While media cache fail.");
-                        return FATAL_ERROR;
+                        return NORMAL;
                     }
                     Integer cached=cacheLoad[0];
                     if (null==cached) {//If already cached not need wait
@@ -184,7 +188,7 @@ public abstract class Player implements Status{
                         int read = cacheAccess.read(playerBuffer, playerOffset, playerBufferLength - playerOffset);
                         if (read > 0) {
                             playing.increaseCursor(read);
-                            notifyStatusChange(PLAYING,media,null,null);
+                            notifyStatusChange(PLAY,media,null,null);
                         }
                         return read;
                     }
@@ -242,6 +246,10 @@ public abstract class Player implements Status{
         return mPaused;
     }
 
+    public final boolean isStopped() {
+        return mStopped;
+    }
+
     public final boolean isIdle() {
         return null==mPlaying;
     }
@@ -282,6 +290,7 @@ public abstract class Player implements Status{
             RandomAccessFile cacheAccess=mCacheAccess;
             if (null!=cacheAccess) {
                 mPaused = false;
+                mStopped=false;
                 synchronized (cacheAccess) {
                     Debug.D(getClass(),"Resume start play media "+(null!=debug?debug:"."));
                     cacheAccess.notifyAll();
@@ -333,11 +342,13 @@ public abstract class Player implements Status{
     public final boolean stop(Object arg,String debug) {
         Playing playing=mPlaying;
         if (null!=playing&&(null==arg||playing.equals(arg))){
+            mStopped=true;
             mPlaying=null;
             cleanCached("While stop media "+(null!=debug?debug:"."));
             Playable playable=playing.getMedia();
+            boolean succeed=null!=playable&&playable.close(this);
             notifyStatusChange(STOP,playable,null,debug);
-            return null!=playable&&playable.close();
+            return succeed;
         }
         return false;
     }
@@ -358,6 +369,7 @@ public abstract class Player implements Status{
         }
         stop(null,"While play new media."+playable);
         mPlaying=new Playing(playable,seek);
+        mPaused=mStopped=false;//Reset
         notifyStatusChange(START,playable,null,"While play new media.");
         notify(cacheAccess,"While play new media.");
         return true;
@@ -365,6 +377,10 @@ public abstract class Player implements Status{
 
     public final String getCachePath() {
         return mCacheFile;
+    }
+
+    public final SyncLoader getLoader() {
+        return mLoader;
     }
 
     public final boolean isRunning(){
@@ -400,6 +416,9 @@ public abstract class Player implements Status{
                    }
                }
            }
+//           if (status==IDLE) {//Try to play next while idle
+//               mHandler.post(()-> onStatusChanged(status,playable,arg,debug));
+//           }
        }else{
            mHandler.post(()->notifyStatusChange(status,playable,arg,debug));
        }

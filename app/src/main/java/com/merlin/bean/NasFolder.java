@@ -3,5 +3,5 @@ package com.merlin.bean;
 /**
  * @deprecated
  */
-public class NasFolder extends FolderData<NasFile> {
+public class NasFolder extends FolderData<INasFile> {
 }

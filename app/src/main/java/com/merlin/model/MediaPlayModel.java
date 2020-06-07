@@ -8,6 +8,7 @@ import com.merlin.api.What;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
+import com.merlin.media.PlayerBinder;
 import com.merlin.player.Playable;
 import com.merlin.view.OnTapClick;
 
@@ -173,8 +174,14 @@ public class MediaPlayModel extends MediaDisplayModel implements Label, What, On
 ////        mPlayState.set(null!=player?player.getPlayState():STATUS_UNKNOW);
 //    }
 
-    public ActivityMediaPlayModel getModel(){
+    public final ActivityMediaPlayModel getModel(){
         return ActivityMediaPlayModel.getModelFromChild(this);
+    }
+
+
+    public final PlayerBinder getPlayer(){
+        ActivityMediaPlayModel model=getModel();
+        return null!=model?model.getPlayerBinder():null;
     }
 
 }

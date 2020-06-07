@@ -4,7 +4,7 @@
     <data>
         <variable
             name="mediaFile"
-            type="com.merlin.bean.NasFile" />
+            type="com.merlin.bean.INasFile" />
         <variable
             name="position"
             type="int" />

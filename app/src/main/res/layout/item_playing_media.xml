@@ -3,7 +3,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.bean.NasMedia" />
+            type="com.merlin.bean.INasMedia" />
         <variable
             name="position"
             type="int" />

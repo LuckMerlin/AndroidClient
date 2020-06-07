@@ -1,7 +1,5 @@
 package com.merlin.browser;
 
-import android.icu.text.Replaceable;
-
 import com.merlin.api.Address;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
@@ -10,8 +8,8 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Document;
+import com.merlin.bean.INasFile;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -64,7 +62,7 @@ public class FileDeleteProcess extends FileProcess<Document> {
                                     boolean exist=file.exists();
                                     update.onProcessUpdate(exist?What.WHAT_FAIL_UNKNOWN:What.WHAT_SUCCEED, exist?R.string.deleteFail:R.string.deleteSucceed,fromPath,null,meta);
                                 }
-                            }else if (meta instanceof NasFile){//Delete nas file
+                            }else if (meta instanceof INasFile){//Delete nas file
 //                                NasFile nasFile=(NasFile)meta;
                                 if (null==retrofit){
                                     update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.inputNotNull,fromPath,null,meta);

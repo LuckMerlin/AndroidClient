@@ -6,6 +6,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
+import com.merlin.player.SyncLoader;
 
 import java.net.ConnectException;
 import java.util.concurrent.Executor;
@@ -22,7 +23,7 @@ import okhttp3.OkHttpClient;
 import retrofit2.HttpException;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class Retrofit {
+public class Retrofit implements SyncLoader {
     private final retrofit2.Retrofit.Builder mBuilder;
 
     public Retrofit(){
@@ -38,7 +39,13 @@ public class Retrofit {
             return prepare(cls,url,null);
     }
 
+    protected String onResolveUrl(Class<?> cls,Executor callbackExecutor){
+
+        return null;
+    }
+
     public final <T>T prepare(Class<T>  cls,String url,Executor callbackExecutor){
+        url=null==url||url.length()<=0?onResolveUrl(cls,callbackExecutor):url;
         if (null==url||url.length()<=0){
             Debug.E(getClass(),"None url to prepare.");
             throw new RuntimeException("None url to prepare.");

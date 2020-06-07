@@ -5,13 +5,12 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.player.Playable;
 import com.merlin.util.Time;
 
 /**
  * @deprecated
  */
-public class NasMedia implements Parcelable {
+public class INasMedia implements Parcelable {
     private String md5;
     private String title;
     private String album;
@@ -87,7 +86,7 @@ public class NasMedia implements Parcelable {
         return 0;
     }
 
-    private NasMedia(Parcel in){
+    private INasMedia(Parcel in){
         duration=in.readLong();
         title=in.readString();
         album=in.readString();
@@ -116,15 +115,15 @@ public class NasMedia implements Parcelable {
         dest.writeString(genre);
     }
 
-    public static final Creator<NasMedia> CREATOR = new Creator<NasMedia>() {
+    public static final Creator<INasMedia> CREATOR = new Creator<INasMedia>() {
         @Override
-        public NasMedia createFromParcel(Parcel in) {
-            return new NasMedia(in);
+        public INasMedia createFromParcel(Parcel in) {
+            return new INasMedia(in);
         }
 
         @Override
-        public NasMedia[] newArray(int size) {
-            return new NasMedia[size];
+        public INasMedia[] newArray(int size) {
+            return new INasMedia[size];
         }
     };
 
@@ -134,8 +133,8 @@ public class NasMedia implements Parcelable {
         if (null!=obj){
             if (obj instanceof String){
                 return null!=md5&&md5.equals(obj);
-            }else if (obj instanceof NasMedia){
-                 String md5=((NasMedia)obj).md5;
+            }else if (obj instanceof INasMedia){
+                 String md5=((INasMedia)obj).md5;
                 return (null==md5&&this.md5==null)||(null!=md5&&null!=this.md5&&this.md5.equals(md5));
             }
         }

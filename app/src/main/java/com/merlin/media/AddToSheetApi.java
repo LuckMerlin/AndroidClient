@@ -3,7 +3,7 @@ package com.merlin.media;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.bean.NasMedia;
+import com.merlin.bean.INasMedia;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -14,6 +14,6 @@ public interface AddToSheetApi {
 
     @POST(Address.PREFIX_MEDIA+"/play/addMediaIntoSheet")
     @FormUrlEncoded
-    Observable<Reply<NasMedia>> addIntoSheet(@Field(Label.LABEL_MD5) String md5, @Field(Label.LABEL_ID) String sheet_id);
+    Observable<Reply<INasMedia>> addIntoSheet(@Field(Label.LABEL_MD5) String md5, @Field(Label.LABEL_ID) String sheet_id);
 
 }

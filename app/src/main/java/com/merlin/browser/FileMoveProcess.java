@@ -4,27 +4,21 @@ import com.merlin.api.Address;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
-import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Document;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
-import com.merlin.util.Closer;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.Field;
@@ -73,7 +67,7 @@ public final class FileMoveProcess extends FileProcess<Document> {
                         File file=new File(path);
                         moveLocalFile(file,folder,coverMode,update);
                         update.onProcessUpdate(What.WHAT_SUCCEED, R.string.succeed,fromPath,null,meta);
-                    }else if (meta instanceof NasFile){
+                    }else if (meta instanceof INasFile){
                         if (null==retrofit){
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.inputNotNull,fromPath,null,meta);
                         }else {

@@ -7,20 +7,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
-import com.merlin.bean.NasFile;
+import com.merlin.bean.INasFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaBinding;
 
 import java.util.List;
 //String,Sheet, SectionData<Sheet>
-public abstract class MediaAdapter extends MultiSectionAdapter<String,NasFile, PageData<NasFile>> implements OnMoreLoadable {
+public abstract class MediaAdapter extends MultiSectionAdapter<String, INasFile, PageData<INasFile>> implements OnMoreLoadable {
 
     public final boolean notifyFavoriteChange(String md5, boolean favorite){
         if (null!=md5&&md5.length()>0){
-            List<NasFile> list=getData();
+            List<INasFile> list=getData();
             int length=null!=list?list.size():0;
             for (int i = 0; i < length; i++) {
-                NasFile meta=list.get(i);
+                INasFile meta=list.get(i);
                 String curr=null!=meta?meta.getMd5():null;
                 if (null!=curr&&curr.equals(md5)){
 //                    meta.setFavorite(favorite);
@@ -38,7 +38,7 @@ public abstract class MediaAdapter extends MultiSectionAdapter<String,NasFile, P
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, NasFile data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, INasFile data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemMediaBinding){
             ItemMediaBinding itemBinding=(ItemMediaBinding)binding;
             itemBinding.setMediaFile(data);

@@ -2,17 +2,14 @@ package com.merlin.browser;
 
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.Replaceable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.merlin.activity.PhotoPreviewActivity;
 import com.merlin.api.Address;
-import com.merlin.api.ApiList;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
@@ -25,7 +22,6 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.LocalFile;
-import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;

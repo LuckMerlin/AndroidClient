@@ -1,26 +1,26 @@
 package com.merlin.adapter;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.bean.NasMediaFile;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaAllBinding;
-import com.merlin.player1.NasMedia;
 
 import java.util.List;
 
-public abstract class AllMediasAdapter extends PageAdapter<String, NasMedia>  {
+public abstract class AllMediasAdapter extends PageAdapter<String, NasMediaFile>  {
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
         return viewType==TYPE_DATA?R.layout.item_media_all:null;
     }
 
+
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, NasMedia data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, NasMediaFile data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemMediaAllBinding){
             ((ItemMediaAllBinding)binding).setMedia(data);
             ((ItemMediaAllBinding)binding).setPosition(position);

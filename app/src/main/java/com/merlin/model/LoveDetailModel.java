@@ -20,10 +20,8 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.Document;
-import com.merlin.bean.LocalFile;
+import com.merlin.bean.INasFile;
 import com.merlin.bean.Love;
-import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.bean._Photo;
 import com.merlin.client.R;
@@ -57,11 +55,11 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     private interface Api {
         @POST(Address.PREFIX_LOVE + "/detail")
         @FormUrlEncoded
-        Observable<Reply<Love<NasFile>>> getLovesDetail(@Field(Label.LABEL_ID) String id);
+        Observable<Reply<Love<INasFile>>> getLovesDetail(@Field(Label.LABEL_ID) String id);
 
         @POST(Address.PREFIX_LOVE + "/save")
         @Multipart
-        Observable<Reply<Love<NasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
+        Observable<Reply<Love<INasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
     }
 
     @Override
@@ -201,7 +199,7 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     public void onActivityIntentChanged(Activity activity, Intent intent) {
         String id=null!=intent?intent.getStringExtra(Label.LABEL_ID):null;
         if (null!=id&&id.length()>0){
-            call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love<NasFile>>>)( what,  note,  data,  arg)-> {
+            call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love<INasFile>>>)(what, note, data, arg)-> {
                 Love love=what == What.WHAT_SUCCEED&&null!=data?data.getData():null;
                 if (null!=love){
                     applyLove(love);

@@ -1,11 +1,7 @@
 package com.merlin.socket;
 
-import com.google.gson.internal.LinkedTreeMap;
-import com.google.gson.reflect.TypeToken;
-import com.merlin.api.Label;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.NasFile;
 import com.merlin.debug.Debug;
 
 import java.io.File;

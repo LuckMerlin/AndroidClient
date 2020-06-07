@@ -16,6 +16,7 @@ import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaPlayingQueueAdapter;
 import com.merlin.api.Label;
 import com.merlin.api.What;
+import com.merlin.bean.NasMediaFile;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaDisplayPlayBinding;
@@ -25,8 +26,7 @@ import com.merlin.dialog.Dialog;
 import com.merlin.media.PlayerBinder;
 import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
-import com.merlin.player.Status;
-import com.merlin.player1.NasMedia;
+import com.merlin.player.Action;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 
@@ -47,7 +47,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
     private final OnSeekBarProgressChange mOnSeekChange=(seekBar, progress, fromUser)-> {
         PlayerBinder player=fromUser?mPlayerBinder:null;
         if (null!=player){
-             player.toggle(Status.SEEK,-progress/100.f,"After seekBar tap click.");
+             player.toggle(Action.SEEK,-progress/100.f,"After seekBar tap click.");
         }
     };
 
@@ -57,7 +57,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
         PlayerBinder binder=mPlayerBinder=null!=service&&service instanceof PlayerBinder ?(PlayerBinder)service:null;
         PlayerBinder playBinder=null!=current?current:binder;
         if (null!=playBinder){
-            playBinder.toggle(null==binder?Status.REMOVE:Status.ADD,this,"After bind changed.");
+            playBinder.toggle(null==binder? Action.REMOVE: Action.ADD,this,"After bind changed.");
         }
         applyPlayingMedia("After service bind changed.");
     }
@@ -75,21 +75,21 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
     @Override
     public void onPlayerStatusChanged(int status, Playable playable, Object arg, String debug) {
         switch (status){
-            case Status.PLAYING:
+            case Action.PLAY:
                 applyPlayProgress();
                 break;
-            case Status.STOP:
+            case Action.STOP:
                 applyPlayStatus("After status stop.");
                 break;
-            case Status.PAUSE:
+            case Action.PAUSE:
                 applyPlayStatus("After status pause.");
                 break;
-            case Status.START:
+            case Action.START:
                 applyPlayStatus("After status start.");
                 break;
-            case Status.ADD:
+            case Action.ADD:
                 break;
-            case Status.REMOVE:
+            case Action.REMOVE:
                 break;
         }
     }
@@ -171,15 +171,16 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
 
     private boolean play(Playable playable,String debug){
         PlayerBinder binder=null!=playable?mPlayerBinder:null;
-        return null!=binder&&binder.toggle(Status.START,playable,debug);
+        return null!=binder&&binder.toggle(Action.START,playable,debug);
     }
 //
     private boolean addToSheet(String debug){
         Playable playing=mPlaying.get();
-        NasMedia nasMedia=null!=playing&&playing instanceof NasMedia?(NasMedia)playing:null;
+        NasMediaFile nasMedia=null!=playing&&playing instanceof NasMediaFile ?(NasMediaFile)playing:null;
         if (null==nasMedia){
             return toast(R.string.notDo);
         }
+
         String md5=nasMedia.getMd5();
         if (null==md5||md5.length()<=0){
             return toast(R.string.contentInvalid);
@@ -207,17 +208,17 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
 
     private boolean changePlayMode(String debug){
         PlayerBinder binder=mPlayerBinder;
-        return null!=binder&&binder.toggle(Status.MODE_CHANGE,null,debug);
+        return null!=binder&&binder.toggle(Action.MODE_CHANGE,null,debug);
     }
 
     private boolean pre(String debug){
         PlayerBinder player=mPlayerBinder;
-        return null!=player&&player.toggle(Status.PRE,null,debug);
+        return null!=player&&player.toggle(Action.PRE,null,debug);
     }
 
     private boolean next(String debug){
         PlayerBinder player=mPlayerBinder;
-        return null!=player&&player.toggle(Status.NEXT,null,debug);
+        return null!=player&&player.toggle(Action.NEXT,null,debug);
     }
 
     private boolean showPlayingQueue(String debug){
@@ -260,7 +261,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
     private boolean pausePlay(String debug){
         PlayerBinder player=mPlayerBinder;
         Playable playing=mPlaying.get();
-        return null!=player&&player.toggle(player.isPlaying(null,true)? Status.PAUSE:Status.START,playing,debug);
+        return null!=player&&player.toggle(player.isPlaying(null,true)? Action.PAUSE: Action.START,playing,debug);
     }
 //
 //    private void updatePlaying(NasMedia media,String debug){
@@ -340,6 +341,10 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
 
     public ObservableField<Object> getAlbumImage() {
         return mAlbumImage;
+    }
+
+    public PlayerBinder getPlayerBinder() {
+        return mPlayerBinder;
     }
 
     public static ActivityMediaPlayModel getModelFromChild(Model model){

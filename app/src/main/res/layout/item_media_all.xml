@@ -4,7 +4,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.player.Playable" />
+            type="com.merlin.bean.NasMediaFile" />
         <variable
             name="position"
             type="int" />
@@ -71,11 +71,11 @@
                      android:id="@+id/item_media_durationTV"
                      android:singleLine="true"
                      android:layout_alignParentRight="true"
-                     android:text="@{Time.formatMediaDuration(media.meta.duration)}"
+                     android:text="@{Time.formatMediaDuration(media.duration)}"
                      style="@style/titleSubNormalTextView"/>
 
                  <TextView
-                     android:text="@{media.meta.title}"
+                     android:text="@{media.title??media.name}"
                      android:gravity="left"
                      android:layout_alignParentLeft="true"
                      android:singleLine="true"
@@ -88,11 +88,11 @@
                      android:orientation="horizontal"
                      android:layout_height="wrap_content">
                      <TextView
-                         android:text="@{media.meta.artist??` `}"
+                         android:text="@{media.artist??` `}"
                          style="@style/smallNormalTextView" />
                      <TextView
                          android:layout_marginLeft="3dp"
-                         android:text="@{media.meta.album??` `}"
+                         android:text="@{media.album??` `}"
                          style="@style/smallNormalTextView" />
                  </LinearLayout>
          </LinearLayout>

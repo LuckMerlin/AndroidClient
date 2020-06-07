@@ -42,10 +42,6 @@ public class Document extends Path {
         return size>=0;
     }
 
-    public final String getMd5() {
-        return md5;
-    }
-
     public final int getPermission(){
         return permissions;
     }
@@ -66,9 +62,6 @@ public class Document extends Path {
         return modifyTime;
     }
 
-    public final long getLength() {
-        return length;
-    }
 
     public final String getMime() {
         return mime;
