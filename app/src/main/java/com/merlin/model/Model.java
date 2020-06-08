@@ -21,6 +21,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.Address;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -38,6 +39,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.RecursiveTask;
 
 public class Model extends Retrofit{
@@ -56,6 +58,11 @@ public class Model extends Retrofit{
 
     public interface OnModelDetachedFromWindow{
         void onModelDetachedFromWindow(View v,Model model);
+    }
+
+    @Override
+    protected String onResolveUrl(Class<?> cls, Executor callbackExecutor) {
+        return Address.URL;
     }
 
     public final View getRoot() {

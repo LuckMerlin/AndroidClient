@@ -95,7 +95,7 @@ public class MediaPlayService extends Service {
         Playable media=new FileMedia(path);
         Playable media2=new FileMedia(path2);
         String path3="./Test/摸摸.mp3";
-        Playable media3=new NasMedia("http://192.168.0.3:5000",null,path3);
+        Playable media3=new NasMedia("http://192.168.0.3:5000","10134eb48ca85cad3da96deb57c3131b",null);
         mMPlayer.play(media3,0);
         mMPlayer.post(()->{
 //            mMPlayer.seek(-

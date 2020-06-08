@@ -14,16 +14,23 @@ import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.activity.OnServiceBindChange;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaPlayingQueueAdapter;
+import com.merlin.api.Address;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
+import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.bean.NasFile;
 import com.merlin.bean.NasMediaFile;
+import com.merlin.bean.Path;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaDisplayPlayBinding;
 import com.merlin.client.databinding.MediaPlayingQueueBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
+import com.merlin.media.FavoriteApi;
 import com.merlin.media.PlayerBinder;
+import com.merlin.player.Meta;
 import com.merlin.player.OnPlayerStatusChange;
 import com.merlin.player.Playable;
 import com.merlin.player.Action;
@@ -241,21 +248,22 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
     }
 
     private boolean makeFavorite(boolean favorite){
-//        final Playable playing=mPlaying.get();
-//        String md5=null!=playing?playing.getMd5():null;
-//        if (null==md5||md5.length()<=0){
-//            return false;
-//        }
-//        Debug.D(getClass(),"favorite "+favorite);
-//        return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<NasFile>>)(what, note, data, arg)->{
-//            if (what==WHAT_SUCCEED&&null!=data){
+        final Playable playing=mPlaying.get();
+        Meta meta=null!=playing?playing.getMeta():null;
+        String md5=null!=meta?meta.getMd5():null;
+        if (null==md5||md5.length()<=0){
+            Debug.D(getClass(),"Can't make file favorite while md5 invalid");
+            return toast(R.string.requestFail)&&false;
+        }
+        Debug.D(getClass(),"favorite "+favorite);
+        return null!=call(prepare(FavoriteApi.class,null).makeFavorite(md5,favorite),(OnApiFinish<Reply<Path>>)(what, note, data, arg)->{
+            if (what==WHAT_SUCCEED&&null!=data){
 //                playing.setFavorite(favorite);
-////                updatePlaying(playing,"After favorite succeed.");
-//            }else{
-//                toast(note);
-//            }
-//        });
-        return false;
+//                updatePlaying(playing,"After favorite succeed.");
+            }else{
+                toast(note);
+            }
+        });
     }
 
     private boolean pausePlay(String debug){
