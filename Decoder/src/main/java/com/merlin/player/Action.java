@@ -16,4 +16,6 @@ public interface Action {
     public final static int  SEEK = 0x800f;//1000 0000 0000 0000
     public final static int  PRE = 0x1000f;//0001 0000 0000 0000 0000
     public final static int  NEXT = 0x2000f;//0010 0000 0000 0000 0000
+    public final static int  OPEN = 0x4000f;//0100 0000 0000 0000 0000
+    public final static int  CLOSE = 0x8000f;//1000 0000 0000 0000 0000
 }

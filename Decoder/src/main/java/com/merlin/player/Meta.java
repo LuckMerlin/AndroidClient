@@ -9,12 +9,17 @@ public class Meta {
     private final String mAlbum="厉害";
     private String mMd5;
     private String mHost;
+    private boolean mFavorite;
 
     public Meta(long length,String name,String title,String md5){
         mLength=length;
         mName=name;
         mTitle=title;
         mMd5=md5;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.mFavorite = favorite;
     }
 
     public long getDuration() {
@@ -39,6 +44,10 @@ public class Meta {
 
     public String getArtist() {
         return mArtist;
+    }
+
+    public boolean isFavorite() {
+        return mFavorite;
     }
 
     public String getMd5(){

@@ -153,7 +153,7 @@
                     <ImageView
                         binding:enableClick="@{true}"
                         android:visibility="@{vm.model.playing instanceof FileMedia?View.INVISIBLE:View.VISIBLE}"
-                        android:src="@{vm.model.favorite?R.drawable.heart_pressed:R.drawable.heart_normal}"
+                        android:src="@{vm.model.playing.meta.favorite?R.drawable.heart_pressed:R.drawable.heart_normal}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>

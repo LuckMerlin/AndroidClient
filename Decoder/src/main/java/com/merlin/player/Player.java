@@ -105,10 +105,13 @@ public abstract class Player implements Action {
                     stop("While media is NULL.");
                     return NORMAL;
                 }
-                if (!media.isOpened()&&!media.open(this)){
-                    Debug.W(getClass(),"Can't play media which open fail."+playing);
-                    stop("While media open fail.");
-                    return NORMAL;
+                if (!media.isOpened()){
+                    if (!media.open(this)){
+                        Debug.W(getClass(),"Can't play media which open fail."+playing);
+                        stop("While media open fail.");
+                        return NORMAL;
+                    }
+                    notifyStatusChange(OPEN,media,null,null);
                 }
                 Meta meta=media.getMeta();
                 long totalLength=null!=meta?meta.getLength():-1;
@@ -346,7 +349,11 @@ public abstract class Player implements Action {
             mPlaying=null;
             cleanCached("While stop media "+(null!=debug?debug:"."));
             Playable playable=playing.getMedia();
-            boolean succeed=null!=playable&&playable.close(this);
+            boolean succeed=false;
+            if (null!=playable&&playable.isOpened()&&playable.close(this)){
+                succeed=true;
+                notifyStatusChange(CLOSE,playable,null,null);
+            }
             notifyStatusChange(STOP,playable,null,debug);
             return succeed;
         }

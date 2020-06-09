@@ -21,6 +21,7 @@ public class Path implements Parcelable {
     private String mime;
     private String host;
     private long length;
+    private boolean favorite;
     private String md5;
     private int port;
     private String title;
@@ -79,6 +80,10 @@ public class Path implements Parcelable {
 
     public final long getLength() {
         return length;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
     }
 
     /**

@@ -32,7 +32,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     private final MediaSheetCategoryAdapter mCategoryAdapter=new MediaSheetCategoryAdapter(){
         @Override
         protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Sheet>>> finish) {
-            return call(prepare(Api.class,Address.HOST).queryCategory(arg,false,from,from+10),finish);
+            return call(prepare(Api.class,null).queryCategory(arg,false,from,from+10),finish);
         }
     };
 

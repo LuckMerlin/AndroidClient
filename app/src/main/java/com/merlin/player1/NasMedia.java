@@ -127,11 +127,15 @@ public final class NasMedia implements Playable {
     private final static class NasMeta extends Meta{
         private final NasMediaFile mNasFile;
 
-
         private NasMeta(NasMediaFile nasFile){
             super(nasFile.getLength(),nasFile.getName(),nasFile.getTitle(),nasFile.getMd5());
-            Debug.D(getClass(),"AAAAAbbbbbbbb AAA  "+nasFile.getMd5());
             mNasFile=nasFile;
+        }
+
+        @Override
+        public boolean isFavorite() {
+            NasMediaFile nasFile=mNasFile;
+            return null!=nasFile&&nasFile.isFavorite();
         }
 
         @Override
