@@ -12,7 +12,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public interface FavoriteApi  {
-        @POST(Address.PREFIX_MEDIA+"/favorite")
+        @POST(Address.PREFIX_FILE+"/favorite")
         @FormUrlEncoded
         Observable<Reply<Path>> makeFavorite(@Field(Label.LABEL_MD5) String md5, @Field(Label.LABEL_DATA) boolean favorite );
 }
