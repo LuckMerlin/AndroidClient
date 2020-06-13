@@ -4,12 +4,15 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.bean.NasMediaFile" />
+            type="com.merlin.player.Media" />
         <variable
             name="position"
             type="int" />
         <variable
             name="playing"
+            type="boolean" />
+        <variable
+            name="favorite"
             type="boolean" />
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>
@@ -44,9 +47,9 @@
              android:paddingRight="10dp"
              android:layout_height="match_parent">
              <ImageView
-                 android:src="@{R.drawable.selector_heart}"
+                 android:src="@{favorite?R.drawable.heart_pressed:R.drawable.heart_normal}"
                  android:duplicateParentState="false"
-                 android:padding="2dp"
+                 android:padding="5dp"
                  binding:enableClick="@{Clicker.click(media,true)}"
                  android:layout_width="30dp"
                  android:layout_height="30dp"/>
@@ -71,11 +74,11 @@
                      android:id="@+id/item_media_durationTV"
                      android:singleLine="true"
                      android:layout_alignParentRight="true"
-                     android:text="@{Time.formatMediaDuration(media.duration)}"
+                     android:text="@{Time.formatMediaDuration(media.meta.duration)}"
                      style="@style/titleSubNormalTextView"/>
 
                  <TextView
-                     android:text="@{media.title??media.name}"
+                     android:text="@{media.meta.title??media.meta.name}"
                      android:gravity="left"
                      android:layout_alignParentLeft="true"
                      android:singleLine="true"
@@ -88,11 +91,11 @@
                      android:orientation="horizontal"
                      android:layout_height="wrap_content">
                      <TextView
-                         android:text="@{media.artist??` `}"
+                         android:text="@{media.meta.artist??` `}"
                          style="@style/smallNormalTextView" />
                      <TextView
                          android:layout_marginLeft="3dp"
-                         android:text="@{media.album??` `}"
+                         android:text="@{media.meta.album??` `}"
                          style="@style/smallNormalTextView" />
                  </LinearLayout>
          </LinearLayout>

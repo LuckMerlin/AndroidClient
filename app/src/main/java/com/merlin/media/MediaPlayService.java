@@ -11,11 +11,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.api.Address;
 import com.merlin.debug.Debug;
 import com.merlin.global.Service;
 import com.merlin.player.FileMedia;
-import com.merlin.player.Playable;
+import com.merlin.player.Media;
 import com.merlin.player1.MPlayer;
 import com.merlin.player1.NasMedia;
 import com.merlin.server.Retrofit;
@@ -35,6 +34,7 @@ public class MediaPlayService extends Service {
             return "http://192.168.0.3:5000";
         }
     };
+
     private final MPlayer mMPlayer=new MPlayer(null,null,mRetrofit );
 
     @Nullable
@@ -43,7 +43,7 @@ public class MediaPlayService extends Service {
         return new PlayerBinder(){
 
             @Override
-            public Playable getPlaying(Object arg,Boolean playing) {
+            public Media getPlaying(Object arg, Boolean playing) {
                 return mMPlayer.getPlaying(arg,playing);
             }
 
@@ -58,7 +58,7 @@ public class MediaPlayService extends Service {
             }
 
             @Override
-            public ArrayList<Playable> getQueue(boolean containPlaying) {
+            public ArrayList<Media> getQueue(boolean containPlaying) {
                 return mMPlayer.getQueue(containPlaying);
             }
 
@@ -92,12 +92,16 @@ public class MediaPlayService extends Service {
         //test
         String path="/sdcard/Musics/大壮 - 我们不一样.mp3";
         String path2="/sdcard/Musics/赵雷 - 成都.mp3";
-        Playable media=new FileMedia(path);
-        Playable media2=new FileMedia(path2);
+//        Media media=new FileMedia(path);
+//        Media media2=new FileMedia(path2);
         String path3="./Test/摸摸.mp3";
-        Playable media3=new NasMedia("http://192.168.0.3:5000","10134eb48ca85cad3da96deb57c3131b",null);
-        mMPlayer.play(media3,0);
+        String md5="10134eb48ca85cad3da96deb57c3131b";
+        new Thread(()->{NasMedia nasMedia=NasMedia.requestByMd5(mRetrofit,md5);
+            mMPlayer.play(nasMedia,0);}).start();
+//        Playable media3=new NasMedia("http://192.168.0.3:5000","10134eb48ca85cad3da96deb57c3131b",null);
+//        mMPlayer.play(media3,0);
         mMPlayer.post(()->{
+
 //            mMPlayer.seek(-
 //                    1,"test");
         },0);

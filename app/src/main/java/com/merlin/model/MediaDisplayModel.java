@@ -1,11 +1,14 @@
 package com.merlin.model;
 
-import com.merlin.player.Playable;
+import com.merlin.player.Media;
 
+/**
+ * @deprecated
+ */
 public class MediaDisplayModel extends Model{
 
 
-    public void onPlayingChange(Playable playable){
+    public void onPlayingChange(Media playable){
 
     }
 //    private WeakReference<Playable> mPlaying;

@@ -1,13 +1,13 @@
 package com.merlin.player1;
 
-import com.merlin.player.Playable;
+import com.merlin.player.Media;
 
 final class Pending {
-     private final Playable mMedia;
+     private final Media mMedia;
      private final double mSeek;
      private final String mDebug;
 
-     public Pending(Playable playable,double seek,String debug){
+     public Pending(Media playable, double seek, String debug){
          mMedia=playable;
          mSeek=seek;
          mDebug=debug;
@@ -17,7 +17,7 @@ final class Pending {
         return mSeek;
     }
 
-    public Playable getMedia() {
+    public Media getMedia() {
         return mMedia;
     }
 

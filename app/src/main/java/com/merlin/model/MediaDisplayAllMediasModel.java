@@ -23,12 +23,12 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 
-public final class MediaDisplayAllMediasModel extends MediaPlayModel implements OnTapClick, OnLongClick,Label,What,OnTextChange, MediaPlayDisplayAdapter.OnMediaPlayModelShow {
+public final class MediaDisplayAllMediasModel extends MediaModel implements OnTapClick, OnLongClick,Label,What,OnTextChange, MediaPlayDisplayAdapter.OnMediaPlayModelShow {
     private String mFilter;
 
     private final AllMediasAdapter mAdapter=new AllMediasAdapter() {
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<NasMediaFile>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<NasMedia>>> finish) {
             return call(prepare(Api.class,Address.URL).queryAllMedias(from,from+20,arg),finish);
         }
     };
@@ -36,7 +36,7 @@ public final class MediaDisplayAllMediasModel extends MediaPlayModel implements 
     private interface Api{
         @POST(Address.PREFIX_MEDIA_PLAY+"/media/all")
         @FormUrlEncoded
-        Observable<Reply<PageData<NasMediaFile>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
+        Observable<Reply<PageData<NasMedia>>> queryAllMedias(@Field(LABEL_FROM) int from, @Field(LABEL_TO) int to,
                                                                                 @Field(LABEL_NAME) String name,
                                                                                 @Field(LABEL_FORMAT) String... formats);
     }
@@ -53,12 +53,21 @@ public final class MediaDisplayAllMediasModel extends MediaPlayModel implements 
             case R.string.playAll:
                 return playAll("After play all tap click.");
             case R.drawable.selector_heart:
-                return (null!=data&&null!=view&&data instanceof NasMediaFile &&makeFavorite((NasMediaFile)data,!view.isSelected()))|true;
+                boolean favorite=!view.isSelected();
+                NasMedia mediaFile=null!=data&&data instanceof NasMedia?(NasMedia)data:null;
+                return (null!=mediaFile&&null!=view&&makeFavorite(mediaFile,favorite,(what, note, data1, arg)->{
+                        AllMediasAdapter adapter=mAdapter;
+                        if (what==WHAT_SUCCEED){
+                            adapter.notifyByMd5(mediaFile.getMd5());
+                        }else{
+                            toast(note);
+                        }
+                }))|true;
             default:
                 if (null!=data){
-                    if (data instanceof NasMediaFile) {
-                        NasMediaFile media=(NasMediaFile)data;
-                        return new Play().playFromClick(getPlayer(),new NasMedia(media),clickCount,"After tap click ")||true;
+                    if (data instanceof NasMedia) {
+                        NasMedia media=(NasMedia)data;
+                        return new Play().playFromClick(getPlayer(),media,clickCount,"After tap click ")||true;
                     }
                 }
                 break;
@@ -116,11 +125,11 @@ public final class MediaDisplayAllMediasModel extends MediaPlayModel implements 
         return true;
     }
 
-    private boolean makeFavorite(NasMediaFile meta, boolean favorite){
-        final String md5=null!=meta?meta.getMd5():null;
-        if (null==md5||md5.length()<=0){
-            return false;
-        }
+//    private boolean makeFavorite(NasMediaFile meta, boolean favorite){
+//        final String md5=null!=meta?meta.getMd5():null;
+//        if (null==md5||md5.length()<=0){
+//            return false;
+//        }
 //        return null!=call(prepare(FavoriteApi.class,Address.HOST).makeFavorite(md5,favorite),(OnApiFinish<Reply<File_>>)(what, note, data, arg)->{
 //            AllMediasAdapter adapter=mAdapter;
 //            if (what==WHAT_SUCCEED&&null!=data){
@@ -129,8 +138,8 @@ public final class MediaDisplayAllMediasModel extends MediaPlayModel implements 
 //                toast(note);
 //            }
 //        });
-        return false;
-    }
+//        return false;
+//    }
 
     private boolean queryAllMedias(String name,String debug){
         AllMediasAdapter adapter=mAdapter;

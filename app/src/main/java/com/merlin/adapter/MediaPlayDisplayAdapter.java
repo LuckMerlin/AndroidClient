@@ -14,10 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.binding.ModelBinder;
 import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.model.MediaDisplayModel;
 import com.merlin.model.Model;
-import com.merlin.player.Playable;
+import com.merlin.player.Media;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class MediaPlayDisplayAdapter extends ListAdapter<Integer> implements OnR
     private final PagerSnapHelper mHelper=new PagerSnapHelper();
     private LinearLayoutManager mManager;
     private OnRecyclerScrollStateChange mChange;
-    private WeakReference<Playable> mPlaying;
+    private WeakReference<Media> mPlaying;
 
     public interface OnMediaPlayModelShow{
         void onMediaPlayModelShow();
@@ -80,13 +79,13 @@ public class MediaPlayDisplayAdapter extends ListAdapter<Integer> implements OnR
         return null!=object&&object instanceof Model?((Model)object):null;
     }
 
-    protected final Playable getPlaying() {
-        WeakReference<Playable> reference=mPlaying;
+    protected final Media getPlaying() {
+        WeakReference<Media> reference=mPlaying;
         return null!=reference?reference.get():null;
     }
 
-    public final boolean setPlaying(Playable playable){
-        WeakReference<Playable> playing=mPlaying;
+    public final boolean setPlaying(Media playable){
+        WeakReference<Media> playing=mPlaying;
         mPlaying=null;
         if (null!=playing){
             playing.clear();
@@ -98,16 +97,16 @@ public class MediaPlayDisplayAdapter extends ListAdapter<Integer> implements OnR
         return true;
     }
 
-    private void setCurrentPlaying(Playable playing){
+    private void setCurrentPlaying(Media playing){
         View root=getCurrentView();
         if (null!=root){
             applyPlaying(root,playing);
         }
     }
 
-    private void applyPlaying(View root, Playable playing){
+    private void applyPlaying(View root, Media playing){
         if (playing==null){
-            WeakReference<Playable> reference=null!=root?mPlaying:null;
+            WeakReference<Media> reference=null!=root?mPlaying:null;
             playing=null!=reference?reference.get():null;
         }
         Model model=null!=playing?ModelBinder.getBindModel(root):null;

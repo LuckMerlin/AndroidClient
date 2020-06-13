@@ -1,24 +1,16 @@
 package com.merlin.model;
 
-import android.app.Activity;
 import android.view.View;
 
 import com.merlin.api.Label;
 import com.merlin.api.What;
-import com.merlin.binding.StatusBar;
-import com.merlin.client.R;
-import com.merlin.debug.Debug;
 import com.merlin.media.PlayerBinder;
-import com.merlin.player.Playable;
 import com.merlin.view.OnTapClick;
 
+/**
+ * @deprecated
+ */
 public class MediaPlayModel extends MediaDisplayModel implements Label, What, OnTapClick {
-
-//    private interface Api{
-//        @POST(Address.PREFIX_MEDIA+"/favorite")
-//        @FormUrlEncoded
-//        Observable<Reply<NasMedia>> makeFavorite(@Field(LABEL_MD5) String md5, @Field(LABEL_DATA) boolean favorite);
-//    }
 
     public MediaPlayModel() {
 //        mPlayingAdapter=new MediaListAdapter();

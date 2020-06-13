@@ -10,6 +10,6 @@ public interface Playable {
     boolean open(Player player);
     boolean isOpened();
     boolean close(Player player);
-    boolean cache(Player player,CacheReady cacheReady) throws IOException;
+    boolean cache(Player player, CacheReady cacheReady) throws IOException;
     Meta getMeta();
 }

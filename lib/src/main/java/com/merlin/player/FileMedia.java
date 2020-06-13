@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public abstract class FileMedia implements BytesMedia {
+public class FileMedia implements BytesMedia {
     private RandomAccessFile mInput=null;
     private Meta mMeta;
     private final String mPath;
@@ -98,7 +98,7 @@ public abstract class FileMedia implements BytesMedia {
     }
 
     @Override
-    public final Meta getMeta() {
+    public Meta getMeta() {
         return mMeta;
     }
 

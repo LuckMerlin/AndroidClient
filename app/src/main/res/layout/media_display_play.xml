@@ -4,14 +4,15 @@
     <data>
         <variable
             name="vm"
-            type="com.merlin.model.MediaPlayModel" />
+            type="com.merlin.model.MediaModel" />
         <import type="com.merlin.player.Action"/>
         <import type="com.merlin.player.Time"/>
         <import type="com.merlin.binding.StatusBar"/>
         <import type="com.merlin.client.R"/>
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>
-        <import type="com.merlin.player.FileMedia"/>
+        <import type="com.merlin.media.LocalMedia"/>
+        <import type="com.merlin.bean.Path"/>
     </data>
     <RelativeLayout
         android:id="@+id/media_display_play_rootRL"
@@ -152,21 +153,21 @@
                     android:layout_height="wrap_content">
                     <ImageView
                         binding:enableClick="@{true}"
-                        android:visibility="@{vm.model.playing instanceof FileMedia?View.INVISIBLE:View.VISIBLE}"
-                        android:src="@{vm.model.playing.meta.favorite?R.drawable.heart_pressed:R.drawable.heart_normal}"
+                        android:visibility="@{vm.model.playing instanceof Path ?View.VISIBLE:View.INVISIBLE}"
+                        android:src="@{vm.model.playing instanceof Path&amp;&amp;((Path)vm.model.playing).isFavorite()?R.drawable.heart_pressed:R.drawable.heart_normal}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>
                     <ImageView
                         binding:enableClick="@{true}"
                         android:src="@{R.drawable.selector_download_media}"
-                        android:visibility="@{vm.model.playing instanceof FileMedia?View.INVISIBLE:View.VISIBLE}"
+                        android:visibility="@{vm.model.playing instanceof LocalMedia?View.INVISIBLE:View.VISIBLE}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>
                     <ImageView
                         android:src="@{R.drawable.selector_add_to_sheet}"
-                        android:visibility="@{vm.model.playing instanceof FileMedia?View.INVISIBLE:View.VISIBLE}"
+                        android:visibility="@{vm.model.playing instanceof LocalMedia?View.INVISIBLE:View.VISIBLE}"
                         binding:enableClick="@{true}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
@@ -174,7 +175,7 @@
 
                     <ImageView
                         android:src="@{R.drawable.share_normal}"
-                        android:visibility="@{vm.model.playing instanceof FileMedia?View.INVISIBLE:View.VISIBLE}"
+                        android:visibility="@{vm.model.playing instanceof LocalMedia?View.INVISIBLE:View.VISIBLE}"
                         binding:enableClick="@{true}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"

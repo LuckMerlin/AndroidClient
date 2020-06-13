@@ -42,6 +42,11 @@ public class Path implements Parcelable {
         this.extension=extension;
     }
 
+    public final boolean setFavorite(boolean favorite,String debug){
+        this.favorite=favorite;
+        return true;
+    }
+
     public final void setHost(String host) {
         this.host = host;
     }

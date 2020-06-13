@@ -1,12 +1,15 @@
 package com.merlin.player;
 
-public abstract class Media implements Playable {
+import java.io.IOException;
+import java.io.InputStream;
 
-//    long getLength();
-//    String getName();
-//    String getTitle();
-//    long getDuration();
-//    String getArtist();
-//    String getAlbum();
-
+public interface Media {
+    interface CacheReady{
+        void onCacheReady(InputStream inputStream) throws IOException;
+    }
+    boolean open(Player player);
+    boolean isOpened();
+    boolean close(Player player);
+    boolean cache(Player player,CacheReady cacheReady) throws IOException;
+    Meta getMeta();
 }

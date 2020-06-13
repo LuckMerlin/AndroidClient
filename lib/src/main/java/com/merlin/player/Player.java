@@ -1,12 +1,10 @@
 package com.merlin.player;
-import android.os.Handler;
-import android.os.Looper;
-
 
 import com.merlin.debug.Debug;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Set;
@@ -21,12 +19,12 @@ public abstract class Player implements Action {
     private Playing mPlaying;
     private boolean mPaused=false;
     private boolean mStopped=false;
-    private final Handler mHandler=new Handler(Looper.getMainLooper());
     private final Map<OnPlayerStatusChange, Long> mChangeMap=new WeakHashMap<>();
     private SyncLoader mLoader;
 
     static {
-        System.loadLibrary("linqiang");
+//        System.loadLibrary("linqiang");
+        System.load("/Volumes/Work/LuckMerlinWorkspace/AndroidClient/lib/libs/liblinqiang.so");
     }
 
     public Player(){
@@ -77,9 +75,11 @@ public abstract class Player implements Action {
             finalCacheFile.deleteOnExit();
             final RandomAccessFile cacheAccess=new RandomAccessFile(finalCacheFile,"rw");
             final byte[] cacheBuffer=new byte[1024*1024];
-            final OnLoadMedia innerLoader=(byte[] playerBuffer, int playerOffset) ->{
+            final OnLoadMedia innerLoader= new OnLoadMedia(){
+                @Override
+                public int onLoadMedia(byte[] playerBuffer, int playerOffset) throws IOException, InterruptedException {
                 while (mPaused||mStopped){
-                    wait(cacheAccess,"While pause or stop flag set.");
+                    Player.this.wait(cacheAccess,"While pause or stop flag set.");
                 }
                 final int playerBufferLength=null!=playerBuffer?playerBuffer.length:-1;
                 if (playerBufferLength<=0||playerOffset<0){//Buffer or offset not invalid
@@ -96,17 +96,17 @@ public abstract class Player implements Action {
                 final Playing playing=mPlaying;
                 if (null==playing){//None media to play
                     notifyStatusChange(IDLE,null,null,null);
-                    wait(cacheAccess," While none media to play.");
+                    Player.this.wait(cacheAccess," While none media to play.");
                     return NORMAL;
                 }
-                Media media=playing.getMedia();
+                Playable media=playing.getMedia();
                 if (null==media){
                     Debug.W(getClass(),"Can't play media which is NULL."+playing);
                     stop("While media is NULL.");
                     return NORMAL;
                 }
                 if (!media.isOpened()){
-                    if (!media.open(this)){
+                    if (!media.open(Player.this)){
                         Debug.W(getClass(),"Can't play media which open fail."+playing);
                         stop("While media open fail.");
                         return NORMAL;
@@ -126,7 +126,6 @@ public abstract class Player implements Action {
                     int read=((BytesMedia)media).read(playerBuffer,playerOffset,loadCursor);
                     if (read>0){
                         playing.increaseCursor(read);
-                        playing.onWriteId3(playerBuffer,playerOffset,read);
                         notifyStatusChange(PLAY,media,null,null);
                     }
                     return read;
@@ -135,44 +134,46 @@ public abstract class Player implements Action {
                 if ((length<totalLength)&&(length<=0||loadCursor>length)){//Empty
                     final long currThreadId=Thread.currentThread().getId();
                     final Integer[] cacheLoad=new Integer[1];
-                    if (!media.cache(this,(inputStream)-> {
-                        if (null==inputStream){
-                            stop( "While cache media stream NULL.");
-                            return;
-                        }
-                        if (currThreadId==Thread.currentThread().getId()){
-                            stop( "While cache media stream from same thread with player thread.");
-                            return;
-                        }
-                        long totalWritten=0;
-                        try {
-                            do {
-                                int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
-                                if (read<0){
-                                    playing.setCacheOver(true);
-                                    Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
-                                    break;
-                                }
-                                if (read>0) {
-                                    synchronized (cacheAccess) {
-                                        cacheAccess.seek(cacheAccess.length());//Append to tail
-                                        cacheAccess.write(cacheBuffer, 0, read);
-                                        playing.onWriteId3(cacheBuffer,0,read);
+                    if (!media.cache(Player.this, new Playable.CacheReady() {
+                        @Override
+                        public void onCacheReady(InputStream inputStream) throws IOException {
+                            if (null==inputStream){
+                                stop( "While cache media stream NULL.");
+                                return;
+                            }
+                            if (currThreadId==Thread.currentThread().getId()){
+                                stop( "While cache media stream from same thread with player thread.");
+                                return;
+                            }
+                            long totalWritten=0;
+                            try {
+                                do {
+                                    int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
+                                    if (read<0){
+                                        playing.setCacheOver(true);
+                                        Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
+                                        break;
                                     }
-                                    totalWritten += read;
-                                    long currCursor = playing.getCursor();
-                                    long currLength = cacheAccess.length();
-                                    if (currLength > currCursor) {
-                                        if (mWaiting) {//Must keep alone for this if logical
-                                            notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
+                                    if (read>0) {
+                                        synchronized (cacheAccess) {
+                                            cacheAccess.seek(cacheAccess.length());//Append to tail
+                                            cacheAccess.write(cacheBuffer, 0, read);
+                                        }
+                                        totalWritten += read;
+                                        long currCursor = playing.getCursor();
+                                        long currLength = cacheAccess.length();
+                                        if (currLength > currCursor) {
+                                            if (mWaiting) {//Must keep alone for this if logical
+                                                Player.this.notify(cacheAccess, "After length more than cursor." + currCursor + " " + currLength);
+                                            }
                                         }
                                     }
-                                }
-                            }while(true);
-                        }catch (Exception  e){
-                            Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
-                            e.printStackTrace();
-                            stop( null,"After read cache bytes exception.e="+e);
+                                }while(true);
+                            }catch (Exception  e){
+                                Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
+                                e.printStackTrace();
+                                stop( null,"After read cache bytes exception.e="+e);
+                            }
                         }
                     })){
                         Debug.W(getClass(),"Can't play media which cache fail."+playing);
@@ -181,7 +182,7 @@ public abstract class Player implements Action {
                     }
                     Integer cached=cacheLoad[0];
                     if (null==cached) {//If already cached not need wait
-                        wait(cacheAccess, " While buffer caching.");
+                        Player.this.wait(cacheAccess, " While buffer caching.");
                         return NORMAL;
                     }
                     return cached;
@@ -197,17 +198,22 @@ public abstract class Player implements Action {
                     }
                 }
                 return loadCursor>=length&&playing.isCacheOver()?EOF:NORMAL;
-            };
+            }};
             mCacheAccess=cacheAccess;
-            new Thread(()->{
-                    create((byte[] playerBuffer, int playerOffset)->{
-                        int loaded=innerLoader.onLoadMedia(playerBuffer,playerOffset);
-                        if (loaded==EOF){
-                            Media playable=getPlaying(null,false);
-                            stop(null,"While load media eof.");
-                            onMediaPlayFinish(playable,"While load media eof.");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    create(new OnLoadMedia() {
+                        @Override
+                        public int onLoadMedia(byte[] playerBuffer, int playerOffset) throws IOException, InterruptedException {
+                            int loaded=innerLoader.onLoadMedia(playerBuffer,playerOffset);
+                            if (loaded==EOF){
+                                Playable playable=getPlaying(null,false);
+                                stop(null,"While load media eof.");
+                                onMediaPlayFinish(playable,"While load media eof.");
+                            }
+                            return loaded;
                         }
-                        return loaded;
                     });
                     finalCacheFile.delete();
                     RandomAccessFile curr=mCacheAccess;
@@ -215,6 +221,7 @@ public abstract class Player implements Action {
                         mCacheAccess=null;
                     }
                     notifyStatusChange(DESTROY,getPlaying(null),null,"Player thread end.");
+                }
             }).start();
             return true;
         } catch (FileNotFoundException e) {
@@ -225,7 +232,7 @@ public abstract class Player implements Action {
         }
     }
 
-    protected void onMediaPlayFinish(Media playable, String debug){
+    protected void onMediaPlayFinish(Playable playable,String debug){
             //Do nothing
     }
 
@@ -257,13 +264,13 @@ public abstract class Player implements Action {
         return null==mPlaying;
     }
 
-    public final Media getPlaying(Object object) {
+    public final Playable getPlaying(Object object) {
         return getPlaying(object,null);
     }
 
-    public final Media getPlaying(Object object, Boolean justPlaying) {
+    public final Playable getPlaying(Object object,Boolean justPlaying) {
         Playing playing=mPlaying;
-        Media media=null!=playing?playing.getMedia():null;
+        Playable media=null!=playing?playing.getMedia():null;
         return null!=media&&(null==justPlaying||!justPlaying||!isPaused())&&(null==object||
                 media.equals(object))?media:null;
     }
@@ -311,7 +318,7 @@ public abstract class Player implements Action {
 
     public final boolean seek(double seek,Object arg,String debug){
         Playing playing=mPlaying;
-        Media media=null!=playing?playing.getMedia():null;
+        Playable media=null!=playing?playing.getMedia():null;
         if (null!=media&&(null==arg||media.equals(arg))){
             return playing.setSeek(seek,debug);
         }
@@ -348,7 +355,7 @@ public abstract class Player implements Action {
             mStopped=true;
             mPlaying=null;
             cleanCached("While stop media "+(null!=debug?debug:"."));
-            Media playable=playing.getMedia();
+            Playable playable=playing.getMedia();
             boolean succeed=false;
             if (null!=playable&&playable.isOpened()&&playable.close(this)){
                 succeed=true;
@@ -360,7 +367,7 @@ public abstract class Player implements Action {
         return false;
     }
 
-    public boolean play(Media playable, double seek){
+    public boolean play(Playable playable,double seek){
         if (playable==null){
             Debug.W(getClass(),"Can't play media while media is NULL.");
             return false;
@@ -394,23 +401,18 @@ public abstract class Player implements Action {
         return null!=mCacheAccess;
     }
 
-    public final boolean post(Runnable runnable,int delay){
-        Handler handler=null!=runnable?mHandler:null;
-        return null!=handler&&handler.postDelayed(runnable,delay);
-    }
-
-    protected void onStatusChanged(int status, Media playable, Object arg, String debug){
+    protected void onStatusChanged(int status,Playable playable,Object arg,String debug){
         //Do nothing
     }
 
-    protected final void notifyStatusChange(int status, Media playable, Object arg, String debug, OnPlayerStatusChange change){
+    protected final void notifyStatusChange(int status,Playable playable,Object arg,String debug,OnPlayerStatusChange change){
         if (null != change) {
             change.onPlayerStatusChanged(status, playable, arg,debug);
         }
     }
 
-    protected final void notifyStatusChange(int status, Media playable, Object arg, String debug){
-       if (Thread.currentThread().getId()==Looper.getMainLooper().getThread().getId()) {
+    protected final void notifyStatusChange(int status,Playable playable,Object arg,String debug){
+//       if (Thread.currentThread().getId()==Looper.getMainLooper().getThread().getId()) {
            onStatusChanged(status,playable,arg,debug);
            Map<OnPlayerStatusChange, Long> changeMap = mChangeMap;
            if (null!=changeMap) {
@@ -426,9 +428,9 @@ public abstract class Player implements Action {
 //           if (status==IDLE) {//Try to play next while idle
 //               mHandler.post(()-> onStatusChanged(status,playable,arg,debug));
 //           }
-       }else{
-           mHandler.post(()->notifyStatusChange(status,playable,arg,debug));
-       }
+//       }else{
+//           mHandler.post(()->notifyStatusChange(status,playable,arg,debug));
+//       }
     }
 
     private boolean cleanCached(String debug){

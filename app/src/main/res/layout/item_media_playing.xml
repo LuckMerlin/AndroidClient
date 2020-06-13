@@ -4,7 +4,7 @@
     <data>
         <variable
             name="media"
-            type="com.merlin.player.Playable" />
+            type="com.merlin.player.Media" />
         <variable
             name="position"
             type="int" />

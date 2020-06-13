@@ -4,22 +4,22 @@ public class Meta {
     private long mLength;
     private String mName;
     private String mTitle;
-    private long mDuration;
+    private final long mDuration=0;
     private final String mArtist="林强";
     private final String mAlbum="厉害";
     private String mMd5;
     private String mHost;
-//    private boolean mFavorite;
+    private boolean mFavorite;
 
-    public Meta(){
-
-    }
-
-    protected Meta(long length,String name,String title,String md5){
+    public Meta(long length,String name,String title,String md5){
         mLength=length;
         mName=name;
         mTitle=title;
         mMd5=md5;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.mFavorite = favorite;
     }
 
     public long getDuration() {
@@ -46,9 +46,9 @@ public class Meta {
         return mArtist;
     }
 
-//    public boolean isFavorite() {
-//        return mFavorite;
-//    }
+    public boolean isFavorite() {
+        return mFavorite;
+    }
 
     public String getMd5(){
         return mMd5;

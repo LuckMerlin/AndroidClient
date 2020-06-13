@@ -3,11 +3,10 @@ package com.merlin.player;
 
 
 import com.merlin.debug.Debug;
-import com.merlin.id3.ID3;
 
 final class Playing {
     private long mCursor;
-    private final Media mMedia;
+    private final Playable mMedia;
     private Long mDuration;
     private Double mSeek;
     private byte mChannels;
@@ -15,24 +14,10 @@ final class Playing {
     private boolean mCacheOver=false;
     private Object mId3;
 
-    Playing(Media media, Double seek){
+    Playing(Playable media,Double seek){
         mMedia=media;
         mSeek=seek;
         mCursor=0;
-    }
-
-    public ID3 onWriteId3(byte[] buffer, int offset, int size){//Try read ID3 data here
-        Object id3=mId3;
-        if ((null!=id3&&!(id3 instanceof ID3Reader))||(null==buffer||offset<0||size<=0||buffer.length<offset+size)){
-            return null;
-        }
-        id3=mId3=(null!=id3&&id3 instanceof ID3Reader?(ID3Reader)id3:new ID3Reader()).onWrite(buffer,offset,size);
-        return null!=id3&&id3 instanceof ID3?(ID3)id3:null;
-    }
-
-    public ID3 getID3() {
-        Object object=mId3;
-        return null!=object&&object instanceof ID3?((ID3)object):null;
     }
 
     public boolean setCacheOver(boolean over){
@@ -45,7 +30,7 @@ final class Playing {
     }
 
     public boolean isMediaEquals(Object obj){
-        Media media=mMedia;
+        Playable media=mMedia;
         return null!=obj&&null!=media&&media.equals(obj);
     }
 
@@ -64,7 +49,7 @@ final class Playing {
         if (null!=duration){
             return duration;
         }
-        Media playable=mMedia;
+        Playable playable=mMedia;
         Meta meta=null!=playable?playable.getMeta():null;
         long length=null!=meta?meta.getLength():-1;
         long time=length>0?lengthToTime(length):0;
@@ -105,7 +90,7 @@ final class Playing {
     public long getCursor(){
         Double seek=mSeek;
         if (null!=seek) {
-            Media media = mMedia;
+            Playable media = mMedia;
             Meta meta = null != media ? media.getMeta() : null;
             long length = null != meta ? meta.getLength() : -1;
             if (length>=0){
@@ -120,7 +105,7 @@ final class Playing {
         return mCursor;
     }
 
-    public Media getMedia() {
+    public Playable getMedia() {
         return mMedia;
     }
 

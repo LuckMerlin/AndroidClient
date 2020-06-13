@@ -10,6 +10,7 @@
     <string name="requestFail">请求失败</string>
     <string name="createSheet">创建歌单</string>
     <string name="create">创建</string>
+    <string name="cloudFileValid">该操作只对云文件有效</string>
     <string name="sure">确定</string>
     <string name="cancel">取消</string>
     <string name="createSucceed">创建成功</string>

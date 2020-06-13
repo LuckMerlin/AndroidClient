@@ -14,35 +14,29 @@ import com.merlin.activity.MediaSheetDetailActivity;
 import com.merlin.activity.OnServiceBindChange;
 import com.merlin.adapter.MediaPlayDisplayAdapter;
 import com.merlin.adapter.MediaPlayingQueueAdapter;
-import com.merlin.api.Address;
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.NasFile;
 import com.merlin.bean.NasMediaFile;
-import com.merlin.bean.Path;
 import com.merlin.bean.Sheet;
 import com.merlin.client.R;
 import com.merlin.client.databinding.MediaDisplayPlayBinding;
 import com.merlin.client.databinding.MediaPlayingQueueBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
-import com.merlin.media.FavoriteApi;
 import com.merlin.media.PlayerBinder;
-import com.merlin.player.Meta;
 import com.merlin.player.OnPlayerStatusChange;
-import com.merlin.player.Playable;
+import com.merlin.player.Media;
 import com.merlin.player.Action;
+import com.merlin.player1.NasMedia;
 import com.merlin.view.OnSeekBarProgressChange;
 import com.merlin.view.OnTapClick;
 
 import java.util.ArrayList;
 
-public class ActivityMediaPlayModel extends Model implements OnTapClick, What, Model.OnActivityBackPress,Label, OnServiceBindChange, OnPlayerStatusChange {
+public class ActivityMediaPlayModel extends MediaModel implements OnTapClick, What, Model.OnActivityBackPress,Label, OnServiceBindChange, OnPlayerStatusChange {
     private final ObservableField<Integer> mStatus=new ObservableField<>();
     private final ObservableField<Integer> mMode=new ObservableField<>();
-    private final ObservableField<Playable> mPlaying=new ObservableField<>();
+    private final ObservableField<Media> mPlaying=new ObservableField<>();
     private final ObservableField<Integer> mProgress=new ObservableField<>();
     private final ObservableField<Object> mAlbumImage=new ObservableField<>();
     private final ObservableField<Boolean> mIsPlaying=new ObservableField<>();
@@ -72,14 +66,14 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
     public boolean onActivityBackPressed(Activity activity) {
         MediaPlayDisplayAdapter adapter=mDisplayAdapter;
         Model model=null!=adapter?adapter.getCurrentModel():null;
-        if (null!=model&&!(model instanceof MediaDisplayModel)&&adapter.showDisplay(MediaDisplayPlayBinding.class)){
+        if (null!=model&&!(model instanceof MediaModel)&&adapter.showDisplay(MediaDisplayPlayBinding.class)){
             return true;
         }
         return false;
     }
 
     @Override
-    public void onPlayerStatusChanged(int status, Playable playable, Object arg, String debug) {
+    public void onPlayerStatusChanged(int status, Media playable, Object arg, String debug) {
         switch (status){
             case Action.PLAY:
                 applyPlayProgress();
@@ -129,15 +123,26 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
 //                        case R.drawable.selector_download_media:
 //                            NasMedia media=mPlaying.get();
 //                            return null!=media&&TransportService.download(getContext(),media,"After play display download tap.")||true;
+//                    case R.drawable.selector_heart:
                     case R.drawable.heart_pressed://Get through
                     case R.drawable.heart_normal://get through
-                        return (null!=view&&makeFavorite(resId!=R.drawable.heart_pressed))||true;
+                        Media playable=mPlaying.get();
+                        boolean favorite=resId!=R.drawable.heart_pressed;
+                        NasMedia media=null!=playable&&playable instanceof NasMedia?(NasMedia)playable:null;
+                        return (null!=media &&null!=view&&makeFavorite(media,favorite,(what, note, data1, arg)->{
+                                    if (what==WHAT_SUCCEED){
+                                        media.setFavorite(favorite,"After favorite change succeed.");
+                                        applyPlayingMedia(playable,"After favorite succeed.");
+                                    }else{
+                                        toast(note);
+                                    }
+                                }))||true;
                     default:
                         if (null!=data){
                             if (data instanceof Sheet) {
                                 showMediaSheetDetail((Sheet) data);
-                            }else if (data instanceof Playable){
-                                play((Playable)data,"After tap click.");
+                            }else if (data instanceof Media){
+                                play((Media)data,"After tap click.");
                             }
                         }
                         break;
@@ -169,24 +174,25 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
         }
     }
 
-    private void applyPlayingMedia(Playable playing,String debug){
+    private void applyPlayingMedia(Media playing, String debug){
         if (null==playing){
             PlayerBinder binder=mPlayerBinder;
             if (null!=binder){
                 playing=binder.getPlaying(null,null);
             }
         }
-        mPlaying.set(playing);
+        mPlaying.set(null!=playing&&playing instanceof Media ?(Media)playing:null);
+        mPlaying.notifyChange();
         applyPlayStatus(debug);
     }
 
-    private boolean play(Playable playable,String debug){
+    private boolean play(Media playable, String debug){
         PlayerBinder binder=null!=playable?mPlayerBinder:null;
         return null!=binder&&binder.toggle(Action.START,playable,debug);
     }
 //
     private boolean addToSheet(String debug){
-        Playable playing=mPlaying.get();
+        Media playing=mPlaying.get();
         NasMediaFile nasMedia=null!=playing&&playing instanceof NasMediaFile ?(NasMediaFile)playing:null;
         if (null==nasMedia){
             return toast(R.string.notDo);
@@ -227,6 +233,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
         return null!=player&&player.toggle(Action.PRE,null,debug);
     }
 
+
     private boolean next(String debug){
         PlayerBinder player=mPlayerBinder;
         return null!=player&&player.toggle(Action.NEXT,null,debug);
@@ -234,7 +241,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
 
     private boolean showPlayingQueue(String debug){
         PlayerBinder player=mPlayerBinder;
-        ArrayList<Playable> playing=null!=player?player.getQueue(true):null;
+        ArrayList<Media> playing=null!=player?player.getQueue(true):null;
         final int size=null!=playing?playing.size():-1;
         if (size<=0){
             return toast(R.string.listEmpty)&&false;
@@ -251,28 +258,9 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
         return false;
     }
 
-    private boolean makeFavorite(boolean favorite){
-        final Playable playing=mPlaying.get();
-        Meta meta=null!=playing?playing.getMeta():null;
-        String md5=null!=meta?meta.getMd5():null;
-        if (null==md5||md5.length()<=0){
-            Debug.D(getClass(),"Can't make file favorite while md5 invalid");
-            return toast(R.string.requestFail)&&false;
-        }
-        Debug.D(getClass(),"favorite "+favorite);
-        return null!=call(prepare(FavoriteApi.class,null).makeFavorite(md5,favorite),(OnApiFinish<Reply<Path>>)(what, note, data, arg)->{
-            if (what==WHAT_SUCCEED&&null!=data){
-                meta.setFavorite(favorite);
-                applyPlayingMedia(playing,"After favorite succeed.");
-            }else{
-                toast(note);
-            }
-        });
-    }
-
     private boolean pausePlay(String debug){
         PlayerBinder player=mPlayerBinder;
-        Playable playing=mPlaying.get();
+        Media playing=mPlaying.get();
         return null!=player&&player.toggle(player.isPlaying(null,true)? Action.PAUSE: Action.START,playing,debug);
     }
 //
@@ -323,7 +311,7 @@ public class ActivityMediaPlayModel extends Model implements OnTapClick, What, M
         return mDisplayAdapter;
     }
 
-    public ObservableField<Playable> getPlaying() {
+    public ObservableField<Media> getPlaying() {
         return mPlaying;
     }
 

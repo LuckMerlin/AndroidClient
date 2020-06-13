@@ -1,5 +1,4 @@
 package com.merlin.adapter;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
@@ -8,15 +7,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaPlayingBinding;
-import com.merlin.debug.Debug;
-import com.merlin.player.Playable;
+import com.merlin.player.Media;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaPlayingQueueAdapter extends ListAdapter<Playable>  {
+public class MediaPlayingQueueAdapter extends ListAdapter<Media>  {
 
-    public MediaPlayingQueueAdapter(ArrayList<Playable> list){
+    public MediaPlayingQueueAdapter(ArrayList<Media> list){
         super(list);
     }
 
@@ -26,7 +24,7 @@ public class MediaPlayingQueueAdapter extends ListAdapter<Playable>  {
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Playable data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Media data, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, viewType, binding, position, data, payloads);
         if (null!=binding&&binding instanceof ItemMediaPlayingBinding){
             ((ItemMediaPlayingBinding)binding).setMedia(data);

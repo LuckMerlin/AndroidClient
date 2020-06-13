@@ -1,6 +1,9 @@
 package com.merlin.bean;
 
-public class NasMediaFile extends Path  {
+/**
+ * @deprecated
+ */
+public abstract class NasMediaFile extends Path  {
     private String artist;
     private String album;
     private long duration;
@@ -14,15 +17,15 @@ public class NasMediaFile extends Path  {
         super(host,parent,name,extension);
     }
 
-    public long getDuration() {
+    public final long getDuration() {
         return duration;
     }
 
-    public String getAlbum() {
+    public final String getAlbum() {
         return album;
     }
 
-    public String getArtist() {
+    public final String getArtist() {
         return artist;
     }
 
