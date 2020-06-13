@@ -13,6 +13,7 @@ import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.bean.INasFile;
 import com.merlin.bean.Love;
+import com.merlin.bean.NasFile;
 import com.merlin.client.R;
 import com.merlin.dialog.Dialog;
 import com.merlin.view.OnTapClick;
@@ -27,8 +28,8 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private interface Api{
         @POST(Address.PREFIX_LOVE+"/get")
         @FormUrlEncoded
-        Observable<Reply<PageData<Love<INasFile>>>> getLoves(@Field(LABEL_NAME) String name,
-                                                             @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+        Observable<Reply<PageData<Love<NasFile>>>> getLoves(@Field(LABEL_NAME) String name,
+                                                            @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
 
         @POST(Address.PREFIX_LOVE+"/delete")
         @FormUrlEncoded
@@ -37,8 +38,8 @@ public class LoveModel  extends Model implements OnTapClick,Label {
 
     private final LoveAdapter mAdapter=new LoveAdapter() {
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Love<INasFile>>>> finish) {
-            return call(prepare(Api.class,Address.LOVE_ADDRESS,null).getLoves(arg,from,from+2000),finish);
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Love<NasFile>>>> finish) {
+            return call(prepare(Api.class,null,null).getLoves(arg,from,from+2000),finish);
         }
 
         @Override

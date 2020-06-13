@@ -41,8 +41,8 @@ public final class NasMedia extends Path implements Media {
     private String artist;
     private String album;
     private long duration;
-
-    private Meta mMeta;
+    private final Meta mMeta=new NasMediaMeta(this);
+    private boolean mOpended=false;
 
     @Override
     public final boolean open(Player player) {
@@ -52,7 +52,7 @@ public final class NasMedia extends Path implements Media {
             Debug.W(getClass(),"Can't get nas media meta which retrofit invalid.");
             return false;
         }
-        mMeta=new NasMediaMeta(this);
+        mOpended=true;
 //        String md5=getMd5();
 //        String host=getHost();
 //        String path=getPath();
@@ -75,13 +75,12 @@ public final class NasMedia extends Path implements Media {
 
     @Override
     public final boolean isOpened() {
-        return null!=mMeta;
+        return mOpended;
     }
 
     @Override
     public boolean close(Player player) {
         Debug.D(getClass(),"Close nas media.");
-        mMeta=null;
         return false;
     }
 
@@ -104,6 +103,7 @@ public final class NasMedia extends Path implements Media {
         });
     }
 
+
     @Override
     public Meta getMeta() {
         return mMeta;
@@ -122,6 +122,7 @@ public final class NasMedia extends Path implements Media {
     }
 
     private final static class NasMediaMeta extends Meta{
+
         private final NasMedia mMedia;
 
         private NasMediaMeta(NasMedia nasFile){
@@ -132,6 +133,18 @@ public final class NasMedia extends Path implements Media {
         public long getLength() {
             NasMedia media=mMedia;
             return null!=media?media.getLength():-1;
+        }
+
+        @Override
+        public String getArtist() {
+            NasMedia media=mMedia;
+            return null!=media?media.artist:super.getArtist();
+        }
+
+        @Override
+        public String getAlbum() {
+            NasMedia media=mMedia;
+            return null!=media?media.album:super.getAlbum();
         }
 
         @Override

@@ -214,6 +214,15 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 }
 
+    public final ArrayList<T> remove(T data,String debug){
+        if (null!=data){
+            List list=new ArrayList<>(1);
+            list.add(data);
+            return remove(list,debug);
+        }
+        return null;
+    }
+
   public final ArrayList<T> remove(List<?> list,String debug){
         if (null!=list&&list.size()>0){
             ArrayList<T> removed=new ArrayList<>(list.size());

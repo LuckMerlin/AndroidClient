@@ -48,7 +48,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
 
         @POST(Address.PREFIX_MEDIA_PLAY+"/sheet/delete")
         @FormUrlEncoded
-        Observable<Reply<Sheet>> deleteSheet(@Field(LABEL_ID) String id);
+        Observable<Reply<Sheet>> deleteSheet(@Field(LABEL_ID) long id);
 
     }
 
@@ -78,11 +78,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
     }
 
     private boolean deleteSheet(Sheet sheet){
-        final String id=null!=sheet?sheet.getId():null;
-        if (null==id||id.length()<=0){
-            toast(R.string.inputNotNull);
-            return false;
-        }
+        final long id=null!=sheet?sheet.getId():null;
         final Dialog dialog=new Dialog(getViewContext());
         String title=sheet.getTitle();
         return dialog.create().title(R.string.delete).message(getText(R.string.deleteSure,(null!=title?title:"")+"("+sheet.getSize()+")")).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)->{
@@ -110,7 +106,7 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
                    toast(R.string.inputNotNull);
                    return true;
                }
-               call(prepare(Api.class,Address.HOST).createSheet(text,null,null),(OnApiFinish<Reply<ApiList<Sheet>>>)(what, note, data2, arg)->{
+               call(prepare(Api.class,null).createSheet(text,null,null),(OnApiFinish<Reply<ApiList<Sheet>>>)(what, note, data2, arg)->{
                    toast(note);
                    MediaSheetCategoryAdapter adapter=what== What.WHAT_SUCCEED?mCategoryAdapter:null;
                    if (null!=adapter){
@@ -125,14 +121,14 @@ public class MediaDisplaySheetCategoryModel extends Model implements Label, OnTa
 
     private boolean queryPage(boolean reset,String debug){
         MediaSheetCategoryAdapter adapter=mCategoryAdapter;
-        return null!=adapter&&(reset?adapter.reset(debug):adapter.loadPage(null,debug));
+        return null!=adapter&&(reset?adapter.resetAdapter(debug):adapter.loadPage(null,debug));
     }
 
     @Override
     public void onMediaPlayModelShow() {
         MediaSheetCategoryAdapter adapter= mCategoryAdapter;
         if (null!=adapter){
-            adapter.reset("After media sheet model show.");
+            adapter.resetAdapter("After media sheet model show.");
         }
     }
 

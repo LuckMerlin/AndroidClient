@@ -22,6 +22,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.INasFile;
 import com.merlin.bean.Love;
+import com.merlin.bean.NasFile;
 import com.merlin.bean.Path;
 import com.merlin.bean._Photo;
 import com.merlin.client.R;
@@ -46,8 +47,8 @@ import retrofit2.http.QueryMap;
 
 public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityIntentChange, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
-    private final ObservableField<String> mContent=new ObservableField<>();
-    private final ObservableField<String> mTitle=new ObservableField<>();
+    private final ObservableField<String> mContent=new ObservableField<>("ssssssss");
+    private final ObservableField<String> mTitle=new ObservableField<>("sssssssss");
     private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
     private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
     private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20242;
@@ -55,11 +56,15 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
     private interface Api {
         @POST(Address.PREFIX_LOVE + "/detail")
         @FormUrlEncoded
-        Observable<Reply<Love<INasFile>>> getLovesDetail(@Field(Label.LABEL_ID) String id);
+        Observable<Reply<Love<NasFile>>> getLovesDetail(@Field(Label.LABEL_ID) String id);
 
+//        @POST(Address.PREFIX_LOVE + "/save")
+//        @Multipart
+//        Observable<Reply<Love<NasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
         @POST(Address.PREFIX_LOVE + "/save")
-        @Multipart
-        Observable<Reply<Love<INasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
+        @FormUrlEncoded
+        Observable<Reply<Love<NasFile>>> save(@Field(Label.LABEL_ID) Long id,@QueryMap Map<String,String> map
+                ,@Field(Label.LABEL_IMAGE)long ...imageIds);
     }
 
     @Override
@@ -135,6 +140,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
         }
+        Love love=mLove.get();
+        long loveId=null!=love?love.getId():-1;
         Map<String,String> loveTextMap=new HashMap<>();
         String mode=null;
         loveTextMap.put(Label.LABEL_NAME, title);
@@ -142,35 +149,37 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         loveTextMap.put(Label.LABEL_DATA, content);
         loveTextMap.put(Label.LABEL_MODE, null!=mode?mode:"");
         Debug.D(getClass(),"Save love "+title+" "+(null!=debug?debug:"."));
-        final List<Path> adapterPhotos=mPhotoAdapter.getData();
-        List<MultipartBody.Part> parts=null;
-        if (null!=adapterPhotos&&adapterPhotos.size()>0){
-            FileSaveBuilder builder=new FileSaveBuilder();
-            parts = new ArrayList<>();
-            for (Path photo:adapterPhotos) {
-                Object imageUrlObj = null != photo ? photo.getPath(null) : null;
-                String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
-                if (null != imageUrl && imageUrl.length() > 0) {
-                    if (photo instanceof Path) {
-                        File file = new File(imageUrl);
-                        String name = "" + title + "_" + planTime + "_" + file.getName();
-                        MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "./lovesPhotos") : null;
-                        if (null == part || !parts.add(part)) {
-                            continue;
-                        }
-                    }
-                }
-            }};
-        if (parts==null||parts.size()<=0){
-            return toast(R.string.photo,getText(R.string.inputNotNull));
-        }
+//        final List<Path> adapterPhotos=mPhotoAdapter.getData();
+//        final List<MultipartBody.Part> parts=new ArrayList<>();
+//        if (null!=adapterPhotos&&adapterPhotos.size()>0){
+//            FileSaveBuilder builder=new FileSaveBuilder();
+//            for (Path photo:adapterPhotos) {
+//                Object imageUrlObj = null != photo ? photo.getPath(null) : null;
+//                String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
+//                if (null != imageUrl && imageUrl.length() > 0) {
+//                    if (photo instanceof Path) {
+//                        File file = new File(imageUrl);
+//                        String name = "" + title + "_" + planTime + "_" + file.getName();
+//                        MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "./lovesPhotos") : null;
+//                        if (null == part || !parts.add(part)) {
+//                            continue;
+//                        }
+//                    }
+//                }
+//            }};
+//        if (parts.size()<=0){
+////            return toast(R.string.photo,getText(R.string.inputNotNull));
+//            MultipartBody.Part part = MultipartBody.Part.createFormData("","");
+//            parts.add(part);
+//        }
         final String dialogKey=showLoading(R.string.loading);
-        return null!=LoveDetailModel.this.call(prepare(Api.class,Address.LOVE_ADDRESS).save(loveTextMap,parts), null,(OnApiFinish<Reply<Love>>)(what, note, data,arg)-> {
+        return null!=LoveDetailModel.this.call(prepare(Api.class,null).save(loveId,loveTextMap,null),
+                null,(OnApiFinish<Reply<Love<NasFile>>>)(what, note, data,arg)-> {
             dismissLoading(dialogKey);
             toast(note);
-            Love love=null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED?data.getData():null;
+            Love saveLove=null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED?data.getData():null;
             if (null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED) {
-                applyLove(love);
+                applyLove(saveLove);
             }
         });
     }

@@ -133,9 +133,8 @@ public class ActivityMediaPlayModel extends MediaModel implements OnTapClick, Wh
                                     if (what==WHAT_SUCCEED){
                                         media.setFavorite(favorite,"After favorite change succeed.");
                                         applyPlayingMedia(playable,"After favorite succeed.");
-                                    }else{
-                                        toast(note);
                                     }
+                                    toast(note);
                                 }))||true;
                     default:
                         if (null!=data){
@@ -212,12 +211,12 @@ public class ActivityMediaPlayModel extends MediaModel implements OnTapClick, Wh
                                 break;
                             default:
                                 dialog.dismiss();
-                                String sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
-                                if (null!=sheetId&&sheetId.length()>0){
+                                long sheetId=null!=data&&data instanceof Sheet?((Sheet)data).getId():null;
+//                                if (null!=sheetId&&sheetId.length()>0){
     //                            return null!=call(prepare(AddToSheetApi.class, Address.HOST).addIntoSheet(md5,sheetId),(OnApiFinish<Reply<NasMedia>>)(what, note, m, arg)->{
     //                                toast(note);
     //                            })||true;
-                                }
+//                                }
                                 break;
                         }
                         return true;},false);

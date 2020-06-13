@@ -62,16 +62,6 @@ public class MediaPlayService extends Service {
                 return mMPlayer.getQueue(containPlaying);
             }
 
-            //            @Override
-//            public boolean listener(int status, OnPlayerStatusChange change, String debug) {
-//                return mMPlayer.listener(status,change,debug);
-//            }
-//
-//            @Override
-//            public boolean seek(double seek, Object arg, String debug) {
-//                return mMPlayer.seek(seek,arg,debug);
-//            }
-
             @Override
             public long getDuration(Object arg, String debug) {
                 return mMPlayer.getDuration(arg,debug);

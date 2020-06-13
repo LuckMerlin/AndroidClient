@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:id="@+id/activityMediaSheetDetail_coverIV"
-                    android:src="@{vm.sheet.imageUrl}"
+                    android:src="@{vm.sheet.thumb}"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:scaleType="centerCrop"
@@ -89,7 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
-                binding:adapter="@{vm.adapter}"
+                android:adapter="@{vm.adapter}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

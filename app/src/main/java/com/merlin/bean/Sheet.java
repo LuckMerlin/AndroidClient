@@ -1,10 +1,13 @@
 package com.merlin.bean;
 
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.RequiresApi;
+
+import com.merlin.media.LocalMedia;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +21,17 @@ public final class Sheet implements Parcelable {
      * id : 1231321
      * create : 2342
      */
-    private String account;
     private String title;
     private long size;
-    private String url;
-    private String id;
+    private long id;
     private String note;
     private long createTime;
 
-    public Sheet(String id,String title,long size){
-        setId(id);
+    public Sheet(){
+        this(-1,null,-1);
+    }
+
+    public Sheet(long id,String title,long size){
         setTitle(title);
         setSize(size);
     }
@@ -44,23 +48,8 @@ public final class Sheet implements Parcelable {
         return size;
     }
 
-    /**
-     * @deprecated
-     */
-    public String getImageUrl() {
-        return url;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getId() {
+    public long getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public long getCreateTime() {
@@ -69,14 +58,6 @@ public final class Sheet implements Parcelable {
 
     public void setCreateTime(long create) {
         this.createTime = create;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getAccount() {
-        return account;
     }
 
     public void setSize(long size) {
@@ -92,22 +73,19 @@ public final class Sheet implements Parcelable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public Sheet(){
-        this(null);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     private Sheet(Parcel in){
         if (null!=in){
             title=in.readString();
             size=in.readLong();
-            url=in.readString();
-            id=in.readString();
+            id=in.readLong();
             createTime=in.readLong();
-            account=in.readString();
             note=in.readString();
 //            data=in.readParcelableList(new ArrayList<>(), NasMedia.class.getClassLoader());
         }
+    }
+
+    public Drawable getThumb(){
+        return null;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -115,10 +93,8 @@ public final class Sheet implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(title);
         dest.writeLong(size);
-        dest.writeString(url);
-        dest.writeString(id);
+        dest.writeLong(id);
         dest.writeLong(createTime);
-        dest.writeString(account);
         dest.writeString(note);
 //        dest.writeParcelableList(data,flags);
     }

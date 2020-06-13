@@ -14,15 +14,15 @@ import com.merlin.bean.Sheet;
 
 import java.util.List;
 
-public abstract class MediaSheetCategoryAdapter extends MultiSectionAdapter<String,Sheet, PageData<Sheet>>  {
+public abstract class MediaSheetCategoryAdapter extends PageAdapter<String,Sheet>  {
 
     @Override
-    protected Integer onResolveItemLayoutId(ViewGroup parent, int viewType) {
-        return R.layout.item_media_sheet;
+    protected Integer onResolveViewTypeLayoutId(int viewType) {
+        return viewType==TYPE_DATA?R.layout.item_media_sheet:null;
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, ViewDataBinding binding, int position, Sheet data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Sheet data, @NonNull List<Object> payloads) {
         if (null!=binding&&null!=data&&binding instanceof ItemMediaSheetBinding){
             ((ItemMediaSheetBinding)binding).setSheet(data);
         }

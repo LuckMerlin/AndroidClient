@@ -22,7 +22,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp">
             <ImageView
-                android:src="@{sheet.imageUrl}"
+                android:src="@{sheet.thumb}"
                 android:scaleType="fitXY"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
@@ -44,3 +44,4 @@
 
     </LinearLayout>
 </layout>
+

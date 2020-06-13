@@ -46,4 +46,5 @@ public interface Label{
    String  LABEL_ROOT="root";
    String  LABEL_BANNER="banner";
    String  LABEL_SIZE="size";
+   String  LABEL_IMAGE="image";
 }

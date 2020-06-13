@@ -9,10 +9,10 @@
             name="position"
             type="int" />
         <variable
-            name="playing"
+            name="favorite"
             type="boolean" />
         <variable
-            name="favorite"
+            name="playing"
             type="boolean" />
         <import type="android.view.View"/>
         <import type="com.merlin.view.Clicker"/>

@@ -4,7 +4,7 @@ import com.merlin.debug.Debug;
 import com.merlin.player.Media;
 import com.merlin.player.Action;
 
-public class Play {
+public class ClickPlayMedia {
 
     public boolean playFromClick(PlayerBinder binder, Media media, int clickCount, String debug){
         PlayerBinder player=binder;

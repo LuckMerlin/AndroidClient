@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemMediaAllBinding;
+import com.merlin.debug.Debug;
 import com.merlin.player1.NasMedia;
 
 import java.util.List;
@@ -47,23 +48,6 @@ public abstract class AllMediasAdapter extends PageAdapter<String, NasMedia>  {
             ((ItemMediaAllBinding)binding).setPlaying(false);
             ((ItemMediaAllBinding)binding).setFavorite(data.isFavorite());
         }
-    }
-
-    public final boolean notifyFavoriteChange(String md5, boolean favorite){
-//        if (null!=md5&&md5.length()>0){
-//            List<NasMedia> list=getData();
-//            int length=null!=list?list.size():0;
-//            for (int i = 0; i < length; i++) {
-//                NasMedia media=list.get(i);
-//                String curr=null!=media?media.getMd5():null;
-//                if (null!=curr&&curr.equals(md5)){
-//                    media.setFavorite(favorite);
-//                    notifyItemChanged(i);
-//                    return true;
-//                }
-//            }
-//        }
-        return false;
     }
 
     @Override

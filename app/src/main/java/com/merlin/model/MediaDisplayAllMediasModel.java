@@ -13,7 +13,7 @@ import com.merlin.api.PageData;
 import com.merlin.api.What;
 import com.merlin.bean.NasMediaFile;
 import com.merlin.client.R;
-import com.merlin.media.Play;
+import com.merlin.media.ClickPlayMedia;
 import com.merlin.player1.NasMedia;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
@@ -52,22 +52,23 @@ public final class MediaDisplayAllMediasModel extends MediaModel implements OnTa
                 return showContextMenu(view);
             case R.string.playAll:
                 return playAll("After play all tap click.");
-            case R.drawable.selector_heart:
-                boolean favorite=!view.isSelected();
+            case R.drawable.heart_pressed:
+            case R.drawable.heart_normal:
+                boolean favorite=!(resId==R.drawable.heart_pressed);
                 NasMedia mediaFile=null!=data&&data instanceof NasMedia?(NasMedia)data:null;
                 return (null!=mediaFile&&null!=view&&makeFavorite(mediaFile,favorite,(what, note, data1, arg)->{
-                        AllMediasAdapter adapter=mAdapter;
                         if (what==WHAT_SUCCEED){
+                            mediaFile.setFavorite(favorite,"After favorite change succeed.");
+                            AllMediasAdapter adapter=mAdapter;
                             adapter.notifyByMd5(mediaFile.getMd5());
-                        }else{
-                            toast(note);
                         }
+                        toast(note);
                 }))|true;
             default:
                 if (null!=data){
                     if (data instanceof NasMedia) {
                         NasMedia media=(NasMedia)data;
-                        return new Play().playFromClick(getPlayer(),media,clickCount,"After tap click ")||true;
+                        return new ClickPlayMedia().playFromClick(getPlayer(),media,clickCount,"After tap click ")||true;
                     }
                 }
                 break;
