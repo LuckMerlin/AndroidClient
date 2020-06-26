@@ -301,9 +301,16 @@ public class Model extends Retrofit {
     }
 
     public final boolean finishActivity(String debug){
+        return finishActivity(null,null,debug);
+    }
+
+    public final boolean finishActivity(Integer resultCode, Intent data,String debug){
         Activity activity=getActivity(null);
         if (null!=activity){
-            Debug.D(getClass(),"Finish activity "+activity+" "+(null!=debug?debug:"."));
+            Debug.D(getClass(),"Finish activity "+activity+" "+resultCode+" "+(null!=debug?debug:"."));
+            if (null!=resultCode){
+                activity.setResult(resultCode,data);
+            }
             activity.finish();
             return true;
         }
@@ -317,6 +324,11 @@ public class Model extends Retrofit {
             return (Activity)context;
         }
         return null;
+    }
+
+    protected final Intent getIntent(){
+       Activity activity= getActivity(null);
+        return null!=activity?activity.getIntent():null;
     }
 
     public final Object getActivityDataFromIntent(Intent intent){

@@ -1,5 +1,7 @@
 package com.merlin.browser;
 
+import androidx.annotation.Nullable;
+
 import com.merlin.bean.Path;
 
 import java.util.ArrayList;
@@ -32,6 +34,11 @@ public final class Collector<T extends Path> extends ArrayList<T>{
 
     public final boolean remove(Object t,String debug) {
         return null!=t&&remove(t);
+    }
+
+    public T indexOfChild(Object obj) {
+        int size=null!=obj?indexOf(obj):-1;
+        return size>=0&&size<size()?get(size):null;
     }
 
     @Override

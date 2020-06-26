@@ -19,7 +19,7 @@ import java.util.List;
 
 public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String, T> implements OnMoreLoadable{
     private final Thumbs mThumbs=new Thumbs();
-    private Collector<T> mMultiChoose;
+    private Collector<Path> mMultiChoose;
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -27,23 +27,37 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
     }
 
     public final boolean multiChoose(Object object,Boolean choose,String debug){
-        Collector<T> collector=null!=object&&object instanceof Path?mMultiChoose:null;
+        Collector<Path> collector=null!=object?mMultiChoose:null;
         if (null!=collector){
             choose=null!=choose?choose:!collector.contains(object);
-            int index=(choose?!collector.contains(object):collector.contains(object))?index(object):-1;
-            if (index>=0&&(choose?collector.add((T) object,debug):collector.remove(object,debug))){
-                notifyItemChanged(index);
-                if (updateVisibleItems("After choose item changed.")){
-                    //Do nothing
+            if (choose){
+                if (collector.contains(object)||!(object instanceof Path)){
+                    return false;
                 }
-                return true;
+                Integer max=collector.getMax();
+                if (null!=max&&max>=0&&collector.size()>=max){//Check if reached max
+                    return false;
+                }
+                if (collector.add((Path) object,debug)){
+                    notifyItemChanged(index(object),debug);
+                    updateVisibleItems("After choose item changed.");
+                    return true;
+                }
+            }else{
+                int index=collector.indexOf(object);
+                Path indexed= index>=0&&index<collector.size()?collector.get(index):null;
+                if (null!=indexed&&collector.remove(indexed)){
+                    notifyItemChanged(index,debug);
+                    updateVisibleItems("After un choose item change.");
+                    return true;
+                }
             }
         }
         return false;
     }
 
     public final boolean chooseAll(boolean choose,String debug){
-        Collector<T> collector=mMultiChoose;
+        Collector<Path> collector=mMultiChoose;
         if (null!=collector){
             collector.clear();
             ArrayList<T> all=getData();
@@ -55,8 +69,8 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
         return false;
     }
 
-    public final boolean setMultiCollector(Collector<T> collector,String debug){
-        Collector<T> curr=mMultiChoose;
+    public final boolean setMultiCollector(Collector<Path> collector,String debug){
+        Collector<Path> curr=mMultiChoose;
         if ((null==curr&&null==collector)||(null!=curr&&null!=collector&&curr==collector)){
             return false;
         }
@@ -70,7 +84,7 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
         if (null!=binding&&binding instanceof ItemListFileBinding){
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             itemBinding.setMeta(data);
-            Collector<T> multiChoose=mMultiChoose;
+            Collector<Path> multiChoose=mMultiChoose;
             Integer max=null!=multiChoose?multiChoose.getMax():0;
             max=null!=max?max:0;
             if (null!=multiChoose){

@@ -22,7 +22,6 @@
         <import type="com.merlin.file.R"/>
         <import type="com.merlin.browser.Thumbs"/>
         <import type="com.merlin.util.FileSize"/>
-        <import type="com.merlin.bean.LocalFile"/>
         <import type="com.merlin.browser.util.Time"/>
     </data>
     <RelativeLayout
@@ -60,8 +59,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <View
-                        android:background="@{meta instanceof LocalFile?((LocalFile)meta).syncColor():R.color.syncNull}"
-                        android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"
+                        android:background="@{meta.local?meta.syncColor():R.color.syncNull}"
+                        android:visibility="@{meta.local?View.VISIBLE:View.GONE}"
                         android:alpha="0.9"
                         android:layout_marginTop="3dp"
                         android:layout_marginBottom="3dp"

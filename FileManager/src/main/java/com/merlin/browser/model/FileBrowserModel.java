@@ -3,6 +3,8 @@ package com.merlin.browser.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,11 +38,13 @@ import com.merlin.model.Model;
 import com.merlin.server.Client;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 
-public class FileBrowserModel extends Model implements Label, OnTapClick, Model.OnBindChange, OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress {
+public class FileBrowserModel extends Model implements Label, OnTapClick, Model.OnBindChange,
+        OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress, Model.OnActivityIntentChange {
     private final Map<String, FileBrowser> mAllClientMetas=new HashMap<>();
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
     private final ObservableField<FileBrowser> mCurrent=new ObservableField<>();
@@ -48,8 +52,8 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
     private final ObservableField<Integer> mCurrentMode=new ObservableField<>(FileBrowser.MODE_NORMAL);
     private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<Client> mCurrentMeta=new ObservableField<>();
+    private final static int SELECT_RESULT_CODE=2020;
     private final ObservableField<Integer> mCurrentMultiChooseCount=new ObservableField<>();
-
     private final FileBrowser.Callback mBrowserCallback=new FileBrowser.Callback() {
         @Override
         public void onFolderPageLoaded(PageData page, String debug) {
@@ -61,8 +65,7 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
             return FileBrowserModel.this.onTapClick(view,clickCount,resId,data);
         }
     };
-
-    private Collector mProcessing;
+    private Collector mCollecting;
 
     @Override
     protected void onRootAttached(View root) {
@@ -72,7 +75,6 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
 //        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
         //
-        entryMode(Mode.MODE_SELECT,new Collector(5,null),"test");
 //        refreshClientMeta("After
 //        mode create.");
 //        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
@@ -106,7 +108,7 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
                 if (null!=map){
                     FileBrowser browser=map.get(host);
                     if (null!=browser){
-                         browser.setMultiCollector(isMode(Mode.MODE_MULTI_CHOOSE)?mProcessing:null,"While browser switched.");
+                         browser.setMultiCollector(isMode(Mode.MODE_MULTI_CHOOSE)?mCollecting:null,"While browser switched.");
                          mCurrentAdapter.set(browser);
                          Debug.D(getClass(),"Change browser device "+client.getName()+" "+(null!=debug?debug:"."));
                          PageData page=null!=browser?browser.getLastPage():null;
@@ -169,7 +171,17 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
                         return chooseAll(false,"After tap click.");
                     case R.string.sure:
                         if (isMode(Mode.MODE_SELECT)){
-                           return entryMode(Mode.MODE_NORMAL,null,"After select mode sure click.");
+                           Collector collecting=mCollecting;
+                           ArrayList<Parcelable> list=new ArrayList<>();
+                           if (null!=collecting&&collecting.size()>0){
+                               for (Object child: collecting){
+                                    if (null!=child&&child instanceof Parcelable){
+                                        list.add((Parcelable)child);
+                                    }
+                               }
+                           }
+                           return finishActivity(SELECT_RESULT_CODE,null!=list&&list.size()>0?new Intent().
+                                   putExtra(Label.LABEL_DATA,list):null,"After select mode sure click.")||true;
                         }
                         return true;
                     default:
@@ -226,7 +238,6 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
         FileBrowser model=getCurrentModel();
         return null!=model&&model.onTapClick(view,clickCount,resId,data);
     }
-
 
     private boolean addTerminal(String debug){
         ViewDataBinding binding=null;
@@ -316,18 +327,18 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
     }
 
     private boolean collectFile(int mode,Object obj,Class<? extends Path> targetCls,String debug){
-        Collector collector=mProcessing;
+        Collector collector=mCollecting;
         return (isMode(mode)||entryMode(mode,(null==collector||!collector.isTargetClassEqual(targetCls))?
                 new Collector(null,targetCls):collector,debug))&&addToCollector(obj,debug);
     }
 
     private <T extends Path>ArrayList<T> getCollected(Class<T> cls){
-        Collector collector = mProcessing;
+        Collector collector = mCollecting;
         return null!=collector?collector.getFiles(cls):null;
     }
 
     private boolean addToCollector(Object meta,String debug){
-        Collector collector=null!=meta&&meta instanceof Path ?mProcessing:null;
+        Collector collector=null!=meta&&meta instanceof Path ?mCollecting:null;
         boolean succeed=null!=collector&&collector.add((Path) meta,debug);
         return succeed?true:(toast(R.string.fail)&&false);
     }
@@ -417,7 +428,7 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
     }
 
     public final boolean entryMode(int mode,Collector collector,String debug){
-        mProcessing=collector;//Clean processing while each mode change
+        mCollecting=collector;//Clean processing while each mode change
         if (!isMode(mode)){
             mCurrentMode.set(mode);
             boolean multiMode=mode==Mode.MODE_MULTI_CHOOSE||mode==Mode.MODE_SELECT;
@@ -499,9 +510,9 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
     }
 
     private boolean refreshMultiSummary(String debug){
-        Collector collector=mProcessing;
+        Collector collector=mCollecting;
         int size=null!=collector?collector.size():-1;
-        mCurrentMultiChooseCount.set(isMode(Mode.MODE_MULTI_CHOOSE)?(size<=0?0:size):-1);
+        mCurrentMultiChooseCount.set(isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_SELECT)?(size<=0?0:size):-1);
         return true;
     }
 
@@ -588,5 +599,18 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
     public boolean onBindChanged(Object obj, String debug) {
 //        mTransportBinder=null!=obj&&obj instanceof ConveyorBinder?(ConveyorBinder)obj:null;
         return true;
+    }
+
+    @Override
+    public void onActivityIntentChanged(Activity activity, Intent intent) {
+        if (null!=intent){
+            String action=intent.getAction();
+            if (null!=action){
+                if (action.equals("merlin.intent.action.FILE_SELECT")){
+                    int max=intent.getIntExtra(LABEL_SIZE,-1);
+                    entryMode(Mode.MODE_SELECT,new Collector(max,null),"After activity intent changed.");
+                }
+            }
+        }
     }
 }
