@@ -4,7 +4,7 @@
     <data>
         <variable
             name="vm"
-            type="com.merlin.model.FileBrowserModel" />
+            type="com.merlin.browser.model.FileBrowserModel" />
         <variable
             name="client"
             type="com.merlin.api.Client" />

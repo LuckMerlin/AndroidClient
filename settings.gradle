@@ -1,3 +1,6 @@
-include ':app', ':Decoder'
+include  ':Decoder'
 rootProject.name='Test'
 include ':Photo'
+include ':LinuxPlayer'
+include ':Common'
+include ':FileManager'

@@ -11,10 +11,12 @@ public interface Address {
 //    String HOST="http://172.16.20.212";
     int PORT=5000;//2018;
     String URL=HOST+":"+PORT;
+
 //    String URL="http://106.12.163.77:2020";
 //    String URL="http://172.16.20.210:2008";//GS
 //    String URL="http://53971a7b.cpolar.io";
 //    String URL="http://792bcd1.cpolar.io";
+
     String PREFIX_USER="/user";
     String PREFIX_MEDIA="/media";
     String PREFIX_FILE="/file";
@@ -24,4 +26,6 @@ public interface Address {
     String PREFIX_MEDIA_PLAY=PREFIX_MEDIA+"/play";
     String PREFIX_THUMB=PREFIX_IMAGE+"/thumbs";
     String  LABEL_CLOUD_URL_PREFIX="cloudUrlPrefix";
+    //
+    String LOVE_URL="http://192.168.0.3:45678";
 }

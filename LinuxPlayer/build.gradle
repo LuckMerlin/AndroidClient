@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+apply plugin: 'application'
+//java.library.path="E:\\JNI_test"
+//sourceSets {
+//    main {
+//        jniLibs.srcDirs = ['libs']
+//    }
+//}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"

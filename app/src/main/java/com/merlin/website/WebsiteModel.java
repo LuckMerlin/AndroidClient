@@ -12,12 +12,11 @@ import com.merlin.activity.LocalPhotoChooseActivity;
 import com.merlin.adapter.WebsiteBannerAdapter;
 import com.merlin.adapter.WebsiteCategoriesAdapter;
 import com.merlin.api.Canceler;
-import com.merlin.api.CoverMode;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LayoutFileConveyingBinding;
 import com.merlin.conveyor.ConveyGroup;
@@ -57,7 +56,7 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
     private ObservableField<RecyclerView.Adapter> mAdapter=new ObservableField<>();
     private final WebsiteBannerAdapter mImagesAdapter=new WebsiteBannerAdapter(){
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<IPath>>> finish) {
             return call(prepare(Api.class,mUrl).getCategories(null,arg,from,from+10),finish);
         }
     };
@@ -112,7 +111,7 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         return mAdapter;
     }
 
-    private boolean uploadFiles(List<Path> paths){
+    private boolean uploadFiles(List<IPath> paths){
         if (null==paths||paths.size()<=0){
             return toast(R.string.listEmpty)&&false;
         }
@@ -121,7 +120,7 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
         ConveyGroup<UploadConvey> group=new ConveyGroup<>();
         boolean empty=true;
 //        Path remoteFolder=new Path(mUrl,folder,null,null);
-        for (Path child:paths) {
+        for (IPath child:paths) {
             String path=null!=child?child.getPath():null;
 //            if (null!=(convey=null!=path&&path.length()>0? new UploadConvey(Path.build(path,null),
 //                    remoteFolder, CoverMode.SKIP):null)&&group.add(convey)){
@@ -144,10 +143,10 @@ public class WebsiteModel  extends Model implements Label, OnTapClick, Model.OnA
                 Bundle bundle=null!=data?data.getExtras():null;
                 Object object=null!=bundle?bundle.get(Label.LABEL_DATA):null;
                 if (null!=object&&object instanceof ArrayList) {
-                    List<Path> paths=new ArrayList<>();
+                    List<IPath> paths=new ArrayList<>();
                     for (Object child : (ArrayList) object) {
-                        if (null != child&&child instanceof Path) {
-                            paths.add((Path)child);
+                        if (null != child&&child instanceof IPath) {
+                            paths.add((IPath)child);
                         }
                     }
                     uploadFiles(paths);

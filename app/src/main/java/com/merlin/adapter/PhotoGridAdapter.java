@@ -24,8 +24,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
-import com.merlin.bean.LocalPhoto;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPhotoGridBinding;
 import com.merlin.view.OnTapClick;
@@ -33,11 +32,11 @@ import com.merlin.view.OnTapClick;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTapClick {
+public class PhotoGridAdapter extends PageAdapter<String, IPath> implements OnTapClick {
     private int mSpanCount;
     private int mMaxChoose=0;
     private boolean mVisibleCamera;
-    private ArrayList<Path> mChoose;
+    private ArrayList<IPath> mChoose;
     private int mMax;
 
     public PhotoGridAdapter(){
@@ -60,7 +59,7 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
     }
 
     @Override
-    protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+    protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<IPath>>> finish) {
         return null;
     }
 
@@ -104,7 +103,7 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Path data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, IPath data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemPhotoGridBinding){
             Object url=data;
             if (mVisibleCamera&&(viewType==TYPE_EMPTY||viewType==TYPE_TAIL)){
@@ -114,7 +113,7 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
             ((ItemPhotoGridBinding)binding).setPhoto(data);
             ((ItemPhotoGridBinding)binding).setPhotoUrl(url);
             ((ItemPhotoGridBinding)binding).setChooseEnable(viewType==TYPE_DATA&&mMaxChoose>0);
-            List<Path> list=mChoose;
+            List<IPath> list=mChoose;
             ((ItemPhotoGridBinding)binding).setExistChoose(null!=data&&null!=list&&list.contains(data));
         }
     }
@@ -129,7 +128,7 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
         return gridLayoutManager;
     }
 
-    public static final class CameraPhoto extends Path{
+    public static final class CameraPhoto extends IPath {
         private final int mResId=android.R.drawable.ic_menu_camera;
 
         public int getResId() {
@@ -171,17 +170,17 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
                     case android.R.drawable.ic_menu_camera:
                         return startCamera("After camera tap click.");
                     default:
-                        if (null!=view&&null!=data&&data instanceof Path){
-                            return view instanceof ImageView?showPhoto(view,(Path) data,"After photo tap click."):
-                                    view instanceof CheckBox?choosePhoto(view,(Path)data,"After photo tap click."):false;
+                        if (null!=view&&null!=data&&data instanceof IPath){
+                            return view instanceof ImageView?showPhoto(view,(IPath) data,"After photo tap click."):
+                                    view instanceof CheckBox?choosePhoto(view,(IPath)data,"After photo tap click."):false;
                         }
                 }
                 return false;
             case 2:
-                Context context=null!=view&&null!=data&&data instanceof Path?view.getContext():null;
+                Context context=null!=view&&null!=data&&data instanceof IPath ?view.getContext():null;
                 if (null!=context&&context instanceof Activity){
                     Intent intent=new Intent();
-                    ArrayList<Path> list=mChoose;
+                    ArrayList<IPath> list=mChoose;
                     if (null!=list){
                         intent.putParcelableArrayListExtra(Label.LABEL_DATA,list);
                     }
@@ -205,9 +204,9 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
         return false;
     }
 
-    private boolean choosePhoto(View view,Path photo,String debug){
+    private boolean choosePhoto(View view, IPath photo, String debug){
         if (null!=photo&&null!=view){
-            List<Path> choose=mChoose;
+            List<IPath> choose=mChoose;
             if (view instanceof CheckBox&&((CheckBox)view).isChecked()){
                 if (null!=choose&&choose.size()>=mMaxChoose){
                     Context context=view.getContext();
@@ -226,13 +225,13 @@ public class PhotoGridAdapter extends PageAdapter<String, Path> implements OnTap
         return false;
     }
 
-    private boolean showPhoto(View view, Path photo, String debug){
-        ArrayList<Path> list=null!=view&&null!=photo&&photo instanceof Path?new ArrayList<>(1):null;
-        return null!=list&&list.add((Path)photo)&& PhotoPreviewActivity.start(view.getContext(),list,0,debug);
+    private boolean showPhoto(View view, IPath photo, String debug){
+        ArrayList<IPath> list=null!=view&&null!=photo&&photo instanceof IPath ?new ArrayList<>(1):null;
+        return null!=list&&list.add((IPath)photo)&& PhotoPreviewActivity.start(view.getContext(),list,0,debug);
     }
 
     private boolean cleanChoose(boolean notify){
-        ArrayList<Path> list=mChoose;
+        ArrayList<IPath> list=mChoose;
         if (null!=list){
             int size=list.size();
             list.clear();

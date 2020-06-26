@@ -1,11 +1,7 @@
 package com.merlin.binding;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,11 +20,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.merlin.api.Label;
-import com.merlin.bean.Path;
-import com.merlin.client.R;
-import com.merlin.debug.Debug;
+import com.merlin.bean.IPath;
 import com.merlin.util.Encoder;
-import com.merlin.util.Resource;
 import com.merlin.view.Clicker;
 import com.merlin.view.Res;
 
@@ -69,11 +62,11 @@ public class PathGlider {
             if (path instanceof Drawable){
                 set(view,(Drawable)path,background);
             }else if (path instanceof String){
-                path=Path.build(path,null);
+                path= IPath.build(path,null);
             }
             Context context=view.getContext();
-            if (null!=path&&path instanceof Path&&null!=context){
-                Path imagePath=(Path)path;
+            if (null!=path&&path instanceof IPath &&null!=context){
+                IPath imagePath=(IPath)path;
                 String nasPath=imagePath.getPath(null);
                 String host=imagePath.getHostName();
                 RequestBuilder<Drawable> builder=null;

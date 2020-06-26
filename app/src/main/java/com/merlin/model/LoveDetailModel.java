@@ -20,50 +20,41 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.INasFile;
+import com.merlin.bean.IPath;
 import com.merlin.bean.Love;
-import com.merlin.bean.NasFile;
-import com.merlin.bean.Path;
 import com.merlin.bean._Photo;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
-import com.merlin.browser.FileSaveBuilder;
 import com.merlin.view.OnTapClick;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import io.reactivex.Observable;
-import okhttp3.MultipartBody;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
-import retrofit2.http.Part;
 import retrofit2.http.QueryMap;
 
 public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivityIntentChange, Model.OnActivityResult {
     private final ObservableField<Love> mLove=new ObservableField<>();
     private final ObservableField<String> mContent=new ObservableField<>("ssssssss");
     private final ObservableField<String> mTitle=new ObservableField<>("sssssssss");
+    private final ObservableField<String> mName=new ObservableField<>("sssssssss");
     private final ObservableField<Long> mPlanTime=new ObservableField<>(System.currentTimeMillis());
     private final PhotoAdapter mPhotoAdapter=new PhotoAdapter(3,true);
     private final static int PHOTO_CHOOSE_ACTIVITY_RESULT_CODE=20242;
 
     private interface Api {
-        @POST(Address.PREFIX_LOVE + "/detail")
+        @POST(Address.PREFIX_LOVE + "/get/id")
         @FormUrlEncoded
-        Observable<Reply<Love<NasFile>>> getLovesDetail(@Field(Label.LABEL_ID) String id);
+        Observable<Reply<Love>> getLove(@Field(Label.LABEL_ID) String id,@Field(Label.LABEL_ACCESS)boolean access);
 
-//        @POST(Address.PREFIX_LOVE + "/save")
-//        @Multipart
-//        Observable<Reply<Love<NasFile>>> save(@QueryMap Map<String,String> map, @Part() List<MultipartBody.Part> list);
         @POST(Address.PREFIX_LOVE + "/save")
         @FormUrlEncoded
-        Observable<Reply<Love<NasFile>>> save(@Field(Label.LABEL_ID) Long id,@QueryMap Map<String,String> map
+        Observable<Reply<Love>> save(@Field(Label.LABEL_ID) Long id,@QueryMap Map<String,String> map
                 ,@Field(Label.LABEL_IMAGE)long ...imageIds);
     }
 
@@ -121,10 +112,10 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 
     private void applyLove(Love love){
         mLove.set(love);
-        mContent.set(null!=love?love.getContent():null);
+        mContent.set(null!=love?love.getData():null);
+        mName.set(null!=love?love.getName():null);
         mTitle.set(null!=love?love.getTitle():null);
         mPlanTime.set(null!=love?love.getTime():null);
-        mPhotoAdapter.set(null!=love?love.getImage():null,"After love apply.");
     }
 
     private boolean save(String debug){
@@ -140,11 +131,14 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         if (null==planTime||planTime<=0){
             return toast(R.string.planTime,getText(R.string.inputNotNull));
         }
+        String name=mName.get();
         Love love=mLove.get();
         long loveId=null!=love?love.getId():-1;
         Map<String,String> loveTextMap=new HashMap<>();
         String mode=null;
-        loveTextMap.put(Label.LABEL_NAME, title);
+        loveTextMap.put(Label.LABEL_ID, ""+loveId);
+        loveTextMap.put(Label.LABEL_TITLE, title);
+        loveTextMap.put(Label.LABEL_NAME, name);
         loveTextMap.put(Label.LABEL_TIME, Long.toString(planTime));
         loveTextMap.put(Label.LABEL_DATA, content);
         loveTextMap.put(Label.LABEL_MODE, null!=mode?mode:"");
@@ -154,13 +148,14 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 //        if (null!=adapterPhotos&&adapterPhotos.size()>0){
 //            FileSaveBuilder builder=new FileSaveBuilder();
 //            for (Path photo:adapterPhotos) {
-//                Object imageUrlObj = null != photo ? photo.getPath(null) : null;
+//                Object imageUrlObj = null != photo&&photo.isLocal() ? photo.getPath(null) : null;
 //                String imageUrl = null != imageUrlObj && imageUrlObj instanceof String ? ((String) imageUrlObj) : null;
 //                if (null != imageUrl && imageUrl.length() > 0) {
 //                    if (photo instanceof Path) {
 //                        File file = new File(imageUrl);
-//                        String name = "" + title + "_" + planTime + "_" + file.getName();
-//                        MultipartBody.Part part = null != file && file.exists() ? builder.createFilePart(file, name, "./lovesPhotos") : null;
+//                        String imageName = "" + title + "_" + planTime + "_" + file.getName();
+//                        MultipartBody.Part part = null != file && file.exists() ? builder.
+//                                createFilePart(file, imageName, "./lovesPhotos") : null;
 //                        if (null == part || !parts.add(part)) {
 //                            continue;
 //                        }
@@ -173,8 +168,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
 //            parts.add(part);
 //        }
         final String dialogKey=showLoading(R.string.loading);
-        return null!=LoveDetailModel.this.call(prepare(Api.class,null).save(loveId,loveTextMap,null),
-                null,(OnApiFinish<Reply<Love<NasFile>>>)(what, note, data,arg)-> {
+        return null!=LoveDetailModel.this.call(prepare(Api.class,Address.LOVE_URL).save(loveId,loveTextMap,null),
+                null,(OnApiFinish<Reply<Love>>)(what, note, data,arg)-> {
             dismissLoading(dialogKey);
             toast(note);
             Love saveLove=null!=data&&data.isSuccess()&&data.getWhat()==What.WHAT_SUCCEED?data.getData():null;
@@ -204,16 +199,28 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
         return mPlanTime;
     }
 
+    public ObservableField<String> getName() {
+        return mName;
+    }
+
     @Override
     public void onActivityIntentChanged(Activity activity, Intent intent) {
-        String id=null!=intent?intent.getStringExtra(Label.LABEL_ID):null;
-        if (null!=id&&id.length()>0){
-            call(prepare(Api.class,Address.LOVE_ADDRESS).getLovesDetail(id),(OnApiFinish<Reply<Love<INasFile>>>)(what, note, data, arg)-> {
-                Love love=what == What.WHAT_SUCCEED&&null!=data?data.getData():null;
-                if (null!=love){
-                    applyLove(love);
+        Object object=getActivityDataFromIntent(intent);
+        if (null!=object){
+            if (object instanceof String){
+                if (((String)object).length()>0){
+                    call(prepare(Api.class,Address.LOVE_URL).getLove((String)object,true),(OnApiFinish<Reply<Love>>)(what, note, data, arg)-> {
+                        Love love=what == What.WHAT_SUCCEED&&null!=data?data.getData():null;
+                        if (null!=love){
+                            applyLove(love);
+                        }else{
+                            toast(note);
+                        }
+                    });
                 }
-            });
+            }else if (object instanceof Love){
+                applyLove((Love)object);
+            }
         }
     }
 
@@ -227,8 +234,8 @@ public class LoveDetailModel extends Model implements OnTapClick, Model.OnActivi
                 if (null!=adapter&&null!=object&&object instanceof ArrayList){
                     for (Object child:(ArrayList)object) {
                         if (null!=child){
-                            if (child instanceof Path){
-                                adapter.add((Path)child,true,"After activity choose result.");
+                            if (child instanceof IPath){
+                                adapter.add((IPath)child,true,"After activity choose result.");
                             }
                         }
                     }

@@ -7,13 +7,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.GridSpacingItemDecoration;
 import com.merlin.adapter.PageAdapter;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPhotoGridBinding;
 
 import java.util.List;
 
-public abstract class WebsiteCategoryPhotoAdapter extends PageAdapter<String, Path> {
+public abstract class WebsiteCategoryPhotoAdapter extends PageAdapter<String, IPath> {
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -22,7 +22,7 @@ public abstract class WebsiteCategoryPhotoAdapter extends PageAdapter<String, Pa
 
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding,
-                                    int position, Path data, @NonNull List<Object> payloads) {
+                                    int position, IPath data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemPhotoGridBinding){
             if (null!=data&&(null==data.getHost()||data.getPort()<=0)){
                 data.setHost(WebsiteModel.SERVER_IP);

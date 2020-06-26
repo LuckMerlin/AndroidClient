@@ -5,20 +5,17 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.gson.Gson;
 import com.merlin.api.Canceler;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemPhotoBinding;
-import com.merlin.debug.Debug;
-import com.merlin.website.WebsiteModel;
 
 import java.util.List;
 
-public class  PhotoAdapter extends PageAdapter<String,Path> {
+public class  PhotoAdapter<M,T extends IPath> extends PageAdapter<M,T> {
     private final int mSpanCount;
     private final boolean mEnableAdd;
 
@@ -28,8 +25,7 @@ public class  PhotoAdapter extends PageAdapter<String,Path> {
     }
 
     @Override
-    protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
-        //Do  nothing
+    protected Canceler onPageLoad(M arg, int from, OnApiFinish<Reply<PageData<T>>> finish) {
         return null;
     }
 
@@ -43,12 +39,8 @@ public class  PhotoAdapter extends PageAdapter<String,Path> {
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Path data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, T data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemPhotoBinding){
-            if (null!=data&&data.getHost()==null){
-                data.setHost(WebsiteModel.SERVER_IP);
-                data.setPort(WebsiteModel.SERVER_PORT);
-            }
             ((ItemPhotoBinding)binding).setPhoto(isAddPhotoViewType(viewType)?R.drawable.selector_photo_add:data);
         }
     }

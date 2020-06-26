@@ -1,7 +1,7 @@
 package com.merlin.bean;
 import android.os.Parcel;
 
-public class Document extends Path {
+public class Document extends IPath {
     private String title;
     private String imageUrl;
     private long length;

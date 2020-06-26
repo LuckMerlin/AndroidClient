@@ -39,7 +39,6 @@ dependencies {
     implementation 'com.tonystark.android:socket:4.1.0'
     implementation 'com.alibaba:fastjson:1.2.62'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.android.support:recyclerview-v7'
     implementation 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
     implementation 'org.greenrobot:greendao:3.2.0'
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'

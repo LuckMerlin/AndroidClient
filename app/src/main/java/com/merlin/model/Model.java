@@ -22,6 +22,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.Address;
+import com.merlin.api.CoverMode;
 import com.merlin.binding.StatusBar;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
@@ -37,6 +38,7 @@ import com.trello.rxlifecycle2.LifecycleProvider;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -53,6 +55,7 @@ public class Model extends Retrofit{
     }
 
     public interface OnModelAttachedToWindow{
+        CoverMode
         void onModelAttachedToWindow(View v,Model model);
     }
 
@@ -345,12 +348,24 @@ public class Model extends Retrofit{
         return null!=bundle?bundle.get(LABEL_ACTIVITY_DATA):null;
     }
 
+    protected final boolean startActivity(Class<? extends Activity> cls, Serializable serializable){
+        if (null!=cls){
+            if (null!=serializable) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(LABEL_ACTIVITY_DATA,serializable);
+                return startActivity(cls,bundle);
+            }
+            return startActivity(cls);
+        }
+        return false;
+    }
+
     protected final boolean startActivity(Class<? extends Activity> cls, Parcelable parcelable){
         if (null!=cls){
             if (null!=parcelable) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(LABEL_ACTIVITY_DATA,parcelable);
-                return startActivityWithBundle(cls,bundle);
+                return startActivity(cls,bundle);
             }
             return startActivity(cls);
         }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="left"
+            type="com.merlin.bean.Path" />
+        <variable
+            name="right"
+            type="com.merlin.bean.Path" />
+        <import type="android.view.View"/>
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ProgressBar
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_weight="1">
+                <TextView
+                    android:lines="2"
+                    android:gravity="center"
+                    android:text="@{left.name}"
+                    android:textStyle="bold"
+                    style="@style/titleSubNormalTextView"/>
+                <TextView
+                    android:singleLine="true"
+                    android:text="@{left.host}"
+                    style="@style/titleSmallTextView"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</layout>

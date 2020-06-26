@@ -154,7 +154,6 @@
                     <ImageView
                         binding:enableClick="@{true}"
                         android:visibility="@{vm.model.playing instanceof Path ?View.VISIBLE:View.INVISIBLE}"
-                        android:src="@{vm.model.playing instanceof Path&amp;&amp;((Path)vm.model.playing).isFavorite()?R.drawable.heart_pressed:R.drawable.heart_normal}"
                         android:layout_margin="10dp"
                         android:layout_width="@dimen/iconSizeLittle"
                         android:layout_height="@dimen/iconSizeLittle"/>

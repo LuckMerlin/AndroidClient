@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 /**
  * @deprecated
  */
-public final class LocalPhoto extends Path {
+public final class LocalPhoto extends IPath {
     private String mTitle;
     private String mNote;
     private String mMimeType;

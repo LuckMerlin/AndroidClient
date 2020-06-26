@@ -7,10 +7,10 @@
             type="String" />
         <variable
             name="from"
-            type="com.merlin.bean.Path" />
+            type="com.merlin.bean.IPath" />
         <variable
             name="to"
-            type="com.merlin.bean.Path" />
+            type="com.merlin.bean.IPath" />
         <variable
             name="progress"
             type="int" />

@@ -12,8 +12,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.Path;
-import com.merlin.debug.Debug;
+import com.merlin.bean.IPath;
 import com.merlin.photo.LocalPhotoLoader;
 import com.merlin.view.OnLongClick;
 import com.merlin.view.OnTapClick;
@@ -25,25 +24,25 @@ public class LocalPhotoChooseModel extends Model implements OnTapClick,Label, Mo
     private final LocalPhotoLoader mLoader=new LocalPhotoLoader();
     private final PhotoGridAdapter mAdapter=new PhotoGridAdapter(3,false,10){
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<IPath>>> finish) {
             Canceler canceler=(boolean cancel, String debug)-> {
                     return false;
             };
             LocalPhotoLoader loader=mLoader;
             final int pageLimit=50;
-            final ArrayList<Path> photos=new ArrayList<>(pageLimit);
+            final ArrayList<IPath> photos=new ArrayList<>(pageLimit);
             return null!=finish&&null!=loader&&loader.load(getContentResolver(), from, from + pageLimit, (what, photo,length)-> {
                     switch (what){
                         case LocalPhotoLoader.OnLocalPhotoLoad.WHAT_LOAD_ONE:
                             String pathValue=null!=photo?photo.getPath():null;
-                            Path path=null!=pathValue&&pathValue.length()>0?Path.build(pathValue,null):null;
+                            IPath path=null!=pathValue&&pathValue.length()>0? IPath.build(pathValue,null):null;
                             return (null!=path&&photos.add(path))||true;
                         case LocalPhotoLoader.OnLocalPhotoLoad.WHAT_FINISH:
-                            finish.onApiFinish(What.WHAT_SUCCEED,"Load succeed.",new Reply<PageData<Path>>
+                            finish.onApiFinish(What.WHAT_SUCCEED,"Load succeed.",new Reply<PageData<IPath>>
                                     (true,What.WHAT_SUCCEED,"Load succeed.", new PageData(from,photos,length)),null);
                             return false;
                         case LocalPhotoLoader.OnLocalPhotoLoad.WHAT_LOAD_OUT_OF_BOUNDS:
-                            finish.onApiFinish(What.WHAT_OUT_OF_BOUNDS,"Out of bounds.",new Reply<PageData<Path>>
+                            finish.onApiFinish(What.WHAT_OUT_OF_BOUNDS,"Out of bounds.",new Reply<PageData<IPath>>
                                     (true,What.WHAT_OUT_OF_BOUNDS,"Out of bounds.", new PageData(from,photos,length)),null);
                             return false;
                     }

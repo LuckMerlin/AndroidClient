@@ -1,7 +1,7 @@
 package com.merlin.browser;
 
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 
-class Delete extends Path implements Modify {
+class Delete extends IPath implements Modify {
 
 }

@@ -23,8 +23,9 @@ import com.merlin.api.Reply;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.LocalFile;
+import com.merlin.bean.ILocalFile;
 import com.merlin.bean.INasFile;
+import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
 import com.merlin.browser.Mode;
 import com.merlin.client.R;
@@ -60,7 +61,6 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
     private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<ClientMeta> mCurrentMeta=new ObservableField<>();
     private final ObservableField<Integer> mCurrentMultiChooseCount=new ObservableField<>();
-//    private ConveyorBinder mTransportBinder;
 
     private final FileBrowser.Callback mBrowserCallback=new FileBrowser.Callback() {
         @Override
@@ -88,8 +88,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
-        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-        ClientMeta testClient=new ClientMeta("算法","",Address.URL,"",null,"///");
+//        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
+        ClientMeta testClient=new ClientMeta("算法","",Address.URL,"",null,"/");
 //        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
 //        refreshClientMeta("After mode create.");
@@ -120,13 +120,13 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
         final String url=null!=client?client.getUrl():null;
         if (null!=url&&url.length()>0){
             if (force||null==mCurrent.get()){
-                Debug.D(getClass(),"Change browser device "+client.getName()+" "+(null!=debug?debug:"."));
                 Map<String,FileBrowser> map=mAllClientMetas;
                 if (null!=map){
                     FileBrowser browser=map.get(url);
                     if (null!=browser){
                          browser.setMultiCollector(isMode(Mode.MODE_MULTI_CHOOSE)?mProcessing:null,"While browser switched.");
                          mCurrentAdapter.set(browser);
+                         Debug.D(getClass(),"Change browser device "+client.getName()+" "+(null!=debug?debug:"."));
                          PageData page=null!=browser?browser.getLastPage():null;
                          mCurrentFolder.set(null!=page&&page instanceof FolderData?(FolderData)page:null);
                          if (null==page){
@@ -205,8 +205,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
                 return isMode(Mode.MODE_MOVE) ? move(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_MOVE, data, null,"After tap click.");
             case R.string.upload:
-                return isMode(Mode.MODE_UPLOAD) ? upload(getCollected(LocalFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_UPLOAD, data, LocalFile.class,"After tap click.");
+                return isMode(Mode.MODE_UPLOAD) ? upload(getCollected(ILocalFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                        : collectFile(Mode.MODE_UPLOAD, data, ILocalFile.class,"After tap click.");
             case R.string.download:
                 return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? download(getCollected(INasFile.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_DOWNLOAD, data, INasFile.class,"After tap click.");
@@ -281,7 +281,7 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
 //        return entryMode(mode,new Collector(files),"While start apply collect files "+(null!=debug?debug:"."));
 //    }
 
-    private boolean upload(ArrayList<LocalFile> files,int coverMode,String debug){
+    private boolean upload(ArrayList<ILocalFile> files, int coverMode, String debug){
         if (null==files||files.size()<=0){
             return toast(R.string.noneDataToOperate)&&false;
         }
@@ -337,8 +337,8 @@ public class FileBrowserModel extends Model implements Label, Tag, OnTapClick, M
     }
 
     private boolean addToCollector(Object meta,String debug){
-        Collector collector=null!=meta&&meta instanceof Document?mProcessing:null;
-        boolean succeed=null!=collector&&collector.add((Document) meta,debug);
+        Collector collector=null!=meta&&meta instanceof Path ?mProcessing:null;
+        boolean succeed=null!=collector&&collector.add((Path) meta,debug);
         return succeed?true:(toast(R.string.fail)&&false);
     }
 

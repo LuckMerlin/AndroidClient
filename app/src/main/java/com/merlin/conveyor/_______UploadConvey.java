@@ -1,6 +1,6 @@
 package com.merlin.conveyor;
 
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import java.util.List;
 
 public class _______UploadConvey extends ConveyGroup {
@@ -8,7 +8,7 @@ public class _______UploadConvey extends ConveyGroup {
     private final String mFolder;
     private final int mCoverMode;
 
-    public _______UploadConvey(List<Path> paths, String serverUrl, String folder, int coverMode){
+    public _______UploadConvey(List<IPath> paths, String serverUrl, String folder, int coverMode){
         mServerUrl=serverUrl;
         mFolder=folder;
         mCoverMode=coverMode;

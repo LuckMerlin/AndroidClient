@@ -3,7 +3,7 @@ package com.merlin.player1;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.debug.Debug;
 import com.merlin.player.Media;
 import com.merlin.player.Meta;
@@ -25,7 +25,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import retrofit2.http.Streaming;
 
-public final class NasMedia extends Path implements Media {
+public final class NasMedia extends IPath implements Media {
     private interface Api{
         @Streaming
         @POST(Address.PREFIX_MEDIA_PLAY+"/file")

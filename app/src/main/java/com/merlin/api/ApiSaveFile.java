@@ -1,5 +1,5 @@
 package com.merlin.api;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 
 import java.util.List;
 
@@ -15,14 +15,14 @@ import retrofit2.http.Part;
 public interface ApiSaveFile {
     @POST(Address.PREFIX_FILE + "/save")
     @Multipart
-    Call<Reply<ApiList<Reply<Path>>>> save(@Part MultipartBody.Part file);
+    Call<Reply<ApiList<Reply<IPath>>>> save(@Part MultipartBody.Part file);
 
     @POST(Address.PREFIX_FILE + "/save")
     @Multipart
-    Call<Reply<ApiList<Reply<Path>>>> saves(@Part() List<MultipartBody.Part> list);
+    Call<Reply<ApiList<Reply<IPath>>>> saves(@Part() List<MultipartBody.Part> list);
 
     @POST(Address.PREFIX_FILE + "/meta")
     @FormUrlEncoded
-    Observable<Reply<Path>> getSaved(@Field(Label.LABEL_MD5) String md5);
+    Observable<Reply<IPath>> getSaved(@Field(Label.LABEL_MD5) String md5);
 }
 

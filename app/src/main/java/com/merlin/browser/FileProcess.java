@@ -5,7 +5,7 @@ import android.content.Context;
 import com.merlin.api.Canceler;
 import com.merlin.api.OnApiFinish;
 import com.merlin.bean.Document;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.server.Retrofit;
 
@@ -45,7 +45,7 @@ public abstract class FileProcess <T extends Document> extends ArrayList<T> {
     public abstract Canceler onProcess(OnProcessUpdate update, OnApiFinish apiFinish, Retrofit retrofit) ;
 
     public interface OnProcessUpdate {
-        void onProcessUpdate(int what, Object note, Path from, Path to,Object arg);
+        void onProcessUpdate(int what, Object note, IPath from, IPath to, Object arg);
     }
 
     public String getMessage(Context context){

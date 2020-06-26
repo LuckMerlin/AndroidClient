@@ -1,17 +1,18 @@
 package com.merlin.bean;
 
-import java.util.List;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public final class Love<T extends Path> {
+public final class Love implements Parcelable {
+    private long id;
     private String title;
-    private String content;
+    private String name;
+    private Account account;
+    private long image;
+    private String data;
+    private String mode;
     private long createTime;
     private long time;
-    private long id;
-    private String permission;
-    private String type;
-    private long url;
-    private List<T> image;
 
     public long getTime() {
         return time;
@@ -25,27 +26,76 @@ public final class Love<T extends Path> {
         return id;
     }
 
-    public String getPermission() {
-        return permission;
-    }
-
     public String getTitle() {
         return title;
     }
 
-    public long getUrl() {
-        return url;
+    public String getName() {
+        return name;
     }
 
-    public String getContent() {
-        return content;
+    public Account getAccount() {
+        return account;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public List<T> getImage() {
+    public long getImage() {
         return image;
     }
+
+    public String getData() {
+        return data;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+
+    private Love(Parcel parcel){
+        if (null!=parcel){
+            id=parcel.readLong();
+            title=parcel.readString();
+            name=parcel.readString();
+            data=parcel.readString();
+            mode=parcel.readString();
+            image=parcel.readLong();
+            createTime=parcel.readLong();
+            time=parcel.readLong();
+            account=parcel.readParcelable(Love.class.getClassLoader());
+        }
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(title);
+        dest.writeString(name);
+        dest.writeString(data);
+        dest.writeString(mode);
+        dest.writeLong(image);
+        dest.writeLong(createTime);
+        dest.writeLong(time);
+        dest.writeParcelable(account,flags);
+    }
+
+
+    public static final Parcelable.Creator<Love> CREATOR = new Parcelable.Creator<Love>(){
+
+        @Override
+        public Love createFromParcel(Parcel source) {
+            return new Love(source);
+        }
+
+        @Override
+        public Love[] newArray(int size) {
+            return new Love[size];
+        }
+
+    };
+
 }

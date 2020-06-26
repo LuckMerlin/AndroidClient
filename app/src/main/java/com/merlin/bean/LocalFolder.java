@@ -2,7 +2,7 @@ package com.merlin.bean;
 
 import java.io.File;
 
-public class LocalFolder extends FolderData<LocalFile> {
+public class LocalFolder extends FolderData<Path> {
 
     public final File getFile(){
         String path=getPath();

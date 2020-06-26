@@ -30,15 +30,35 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <TextView
-                android:text="@{love.title}"
-                style="@style/titleNormalTextView"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="@{love.title??love.name}"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    style="@style/titleNormalTextView"/>
+                <TextView
+                    android:text="@{``+love.image}"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    style="@style/titleNormalTextView"/>
+            </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_marginLeft="3dp"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <TextView
+                    android:text="@{Time.formatTime(love.createTime)}"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    style="@style/titleSmallTextView"/>
+                <TextView
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:gravity="right"
                     android:text="@{Time.formatTime(love.time)}"
                     style="@style/titleSmallTextView"/>
             </LinearLayout>

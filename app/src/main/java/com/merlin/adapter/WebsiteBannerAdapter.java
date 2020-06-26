@@ -5,14 +5,14 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.ItemWebPhotoBinding;
 import com.merlin.website.WebsiteModel;
 
 import java.util.List;
 
-public abstract class WebsiteBannerAdapter extends PageAdapter<String, Path>{
+public abstract class WebsiteBannerAdapter extends PageAdapter<String, IPath>{
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -20,7 +20,7 @@ public abstract class WebsiteBannerAdapter extends PageAdapter<String, Path>{
     }
 
     @Override
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, Path data, @NonNull List<Object> payloads) {
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, IPath data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemWebPhotoBinding){
             if (null!=data){
                 data.setHost(WebsiteModel.mUrl);

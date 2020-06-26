@@ -4,10 +4,10 @@
     <data>
         <variable
             name="left"
-            type="com.merlin.bean.Path" />
+            type="com.merlin.bean.IPath" />
         <variable
             name="right"
-            type="com.merlin.bean.Path" />
+            type="com.merlin.bean.IPath" />
         <import type="android.view.View"/>
     </data>
     <LinearLayout

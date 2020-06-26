@@ -5,11 +5,9 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
-import com.merlin.client.databinding.ItemWebPhotoBinding;
 import com.merlin.client.databinding.ItemWebsiteCategoryBinding;
-import com.merlin.debug.Debug;
 import com.merlin.website.TravelCategory;
 import com.merlin.website.WebsiteModel;
 
@@ -25,7 +23,7 @@ public abstract class WebsiteCategoriesAdapter extends PageAdapter<String, Trave
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder holder, int viewType, ViewDataBinding binding, int position, TravelCategory data, @NonNull List<Object> payloads) {
         if (null!=binding&&binding instanceof ItemWebsiteCategoryBinding){
-            Path path=null!=data?data.getUrl():null;
+            IPath path=null!=data?data.getUrl():null;
             if (null!=path){
                 path.setHost(WebsiteModel.SERVER_IP);
                 path.setPort(WebsiteModel.SERVER_PORT);

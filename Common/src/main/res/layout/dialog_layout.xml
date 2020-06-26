@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="leftText"
+            type="Object" />
+        <variable
+            name="centerText"
+            type="Object" />
+        <variable
+            name="rightText"
+            type="Object" />
+        <variable
+            name="titleText"
+            type="Object" />
+        <variable
+            name="messageText"
+            type="Object" />
+        <variable
+            name="contentLayout"
+            type="Object" />
+        <import type="android.content.res.Resources"/>
+        <import type="android.view.View"/>
+    </data>
+    <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:background="@drawable/round_corner_black"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                binding:text="@{titleText==null?``:titleText}"
+                android:singleLine="true"
+                android:visibility="@{titleText==null?View.GONE:View.VISIBLE}"
+                android:layout_marginBottom="15dp"
+                style="@style/titleNormalTextView"/>
+        <TextView
+            binding:text="@{messageText==null?``:messageText}"
+            android:visibility="@{messageText==null?View.GONE:View.VISIBLE}"
+            android:layout_marginBottom="15dp"
+            style="@style/titleNormalTextView"/>
+            <FrameLayout
+                android:visibility="@{null!=contentLayout?View.VISIBLE:View.GONE}"
+                binding:layout="@{contentLayout}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:visibility="@{leftText!=null||rightText!=null?View.VISIBLE:View.GONE}"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    binding:enableClick="@{true}"
+                    binding:text="@{leftText==null?``:leftText}"
+                    android:visibility="@{leftText==null?View.GONE:View.VISIBLE}"
+                    android:background="@drawable/selector_round_dark_corner_small"
+                    style="@style/titleNormalTextView"/>
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:layout_marginLeft="5dp"
+                    binding:enableClick="@{true}"
+                    binding:text="@{centerText==null?``:centerText}"
+                    android:visibility="@{centerText==null?View.GONE:View.VISIBLE}"
+                    android:background="@drawable/selector_round_dark_corner_small"
+                    style="@style/titleNormalTextView"/>
+                <TextView
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    binding:enableClick="@{true}"
+                    binding:text="@{rightText==null?``:rightText}"
+                    android:visibility="@{rightText==null?View.GONE:View.VISIBLE}"
+                    android:layout_marginLeft="5dp"
+                    android:background="@drawable/selector_round_dark_corner_small"
+                    style="@style/titleNormalTextView"/>
+            </LinearLayout>
+        </LinearLayout>
+</layout>

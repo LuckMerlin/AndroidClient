@@ -5,12 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
-import com.merlin.bean.LocalFile;
-import com.merlin.bean.LocalPhoto;
-import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
-
-import java.io.File;
 
 public class LocalPhotoLoader {
 

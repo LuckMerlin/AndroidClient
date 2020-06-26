@@ -3,7 +3,7 @@ package com.merlin.bean;
 /**
  * @deprecated
  */
-public abstract class NasMediaFile extends Path  {
+public abstract class NasMediaFile extends IPath {
     private String artist;
     private String album;
     private long duration;

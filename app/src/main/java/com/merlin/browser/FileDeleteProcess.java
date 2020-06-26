@@ -9,8 +9,8 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Document;
 import com.merlin.bean.INasFile;
-import com.merlin.bean.LocalFile;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
+import com.merlin.bean.ILocalFile;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
@@ -49,11 +49,11 @@ public class FileDeleteProcess extends FileProcess<Document> {
                 for (Document meta:this) {
                     if (null!=meta){
                         final String path=meta.getPath(null);
-                        Path fromPath=Path.build(meta,null);
+                        IPath fromPath= IPath.build(meta,null);
                         if (null==path||path.length()<=0) {
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.deleteFail, fromPath, null, meta);
                         }else{
-                            if (meta instanceof LocalFile){//Delete local file
+                            if (meta instanceof ILocalFile){//Delete local file
                                 if (null==path||path.length()<=0){
                                     update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.deleteFail,fromPath,null,meta);
                                 }else{
@@ -95,7 +95,7 @@ public class FileDeleteProcess extends FileProcess<Document> {
     }
 
     private boolean deleteLocalFile(File file,OnProcessUpdate update){
-        final Path filePath=null!=file&&null!=update?Path.build(file,null):null;
+        final IPath filePath=null!=file&&null!=update? IPath.build(file,null):null;
         if (null==filePath){
             return false;
         }

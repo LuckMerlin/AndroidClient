@@ -8,9 +8,9 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Document;
-import com.merlin.bean.LocalFile;
+import com.merlin.bean.ILocalFile;
+import com.merlin.bean.IPath;
 import com.merlin.bean.INasFile;
-import com.merlin.bean.Path;
 import com.merlin.client.R;
 import com.merlin.debug.Debug;
 import com.merlin.server.Retrofit;
@@ -60,10 +60,10 @@ public final class FileMoveProcess extends FileProcess<Document> {
                         continue;
                     }
                     final String path=meta.getPath(null);
-                    Path fromPath=Path.build(meta,null);
+                    IPath fromPath= IPath.build(meta,null);
                     if (null==path||path.length()<=0) {
                         update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.fail, fromPath, null, meta);
-                    }else if (meta instanceof LocalFile){//Copy local file
+                    }else if (meta instanceof ILocalFile){//Copy local file
                         File file=new File(path);
                         moveLocalFile(file,folder,coverMode,update);
                         update.onProcessUpdate(What.WHAT_SUCCEED, R.string.succeed,fromPath,null,meta);
@@ -97,8 +97,8 @@ public final class FileMoveProcess extends FileProcess<Document> {
     }
 
     private boolean moveLocalFile(final File file,String folderPath,Integer coverMode,OnProcessUpdate update){
-        final Path fromPath=null!=file&&null!=update?Path.build(file,null):null;
-        final Path toPath=null;
+        final IPath fromPath=null!=file&&null!=update? IPath.build(file,null):null;
+        final IPath toPath=null;
         if (null==fromPath||null==folderPath){
             return false;
         }

@@ -1,10 +1,11 @@
 package com.merlin.browser;
 import com.merlin.bean.Document;
+import com.merlin.bean.Path;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class Collector<T extends Document> extends ArrayList<T>{
+public final class Collector<T extends Path> extends ArrayList<T>{
     private Class<T> mTargetClass;
 
     public Collector(Collection<T> data){

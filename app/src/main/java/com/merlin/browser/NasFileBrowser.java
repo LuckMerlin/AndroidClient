@@ -10,7 +10,8 @@ import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.INasFile;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
+import com.merlin.bean.NasPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.NasFileDetailBinding;
 import com.merlin.debug.Debug;
@@ -26,12 +27,13 @@ import retrofit2.http.POST;
 import static com.merlin.api.What.WHAT_SUCCEED;
 
 public class NasFileBrowser extends FileBrowser implements Label {
+    private String mServerUrl="http://192.168.0.3:5000";
 
     private interface Api {
-        @POST(Address.PREFIX_FILE+"/directory/browser")
+        @POST(Address.PREFIX_FILE+"/browser")
         @FormUrlEncoded
-        Observable<Reply<FolderData<INasFile>>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FROM) int from,
-                                                           @Field(LABEL_TO) int to);
+        Observable<Reply<FolderData<NasPath>>> queryFiles(@Field(LABEL_PATH) String path, @Field(LABEL_FROM) int from,
+                                                          @Field(LABEL_TO) int to);
         @POST(Address.PREFIX_FILE+"/detail")
         @FormUrlEncoded
         Observable<Reply<INasFile>> getDetail(@Field(LABEL_PATH) String path);
@@ -42,11 +44,11 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
         @POST(Address.PREFIX_FILE+"/rename")
         @FormUrlEncoded
-        Observable<Reply<Path>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
+        Observable<Reply<IPath>> renameFile(@Field(LABEL_PATH) String path, @Field(LABEL_NAME) String name, @Field(LABEL_MODE) int coverMode);
 
         @POST(Address.PREFIX_FILE+"/create")
         @FormUrlEncoded
-        Observable<Reply<Path>> createPath(@Field(LABEL_FOLDER) boolean folder,@Field(LABEL_PARENT) String parent,@Field(LABEL_NAME) String name,@Field(LABEL_MODE) int coverMode);
+        Observable<Reply<IPath>> createPath(@Field(LABEL_FOLDER) boolean folder, @Field(LABEL_PARENT) String parent, @Field(LABEL_NAME) String name, @Field(LABEL_MODE) int coverMode);
 
         @POST(Address.PREFIX_USER_REBOOT)
         Observable<Reply> rebootClient();
@@ -58,7 +60,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected Canceler onPageLoad(Object path, int from, OnApiFinish finish) {
-        return null!=path&&path instanceof String?call(prepare(Api.class, Address.URL,null).queryFiles(
+        return null!=path&&path instanceof String?call(prepare(Api.class, mServerUrl,null).queryFiles(
                 (String)path, from,from+50),null,null,finish):null;
     }
 
@@ -75,7 +77,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
         dialog.setContentView(null!=binding?binding.getRoot():null,true).show((v, clickCount, resId, data)->{
             return true;
         },false);
-        return null!=call(prepare(Api.class,Address.URL,null).getDetail(path),null,null,null,(OnApiFinish<Reply<INasFile>>)(what, note, data2, arg)->{
+        return null!=call(prepare(Api.class,mServerUrl,null).getDetail(path),null,null,null,(OnApiFinish<Reply<INasFile>>)(what, note, data2, arg)->{
             INasFile detail=what==WHAT_SUCCEED&&null!=data2?data2.getData():null;
             binding.setFile(detail);
             binding.setLoadState(what);
@@ -83,13 +85,13 @@ public class NasFileBrowser extends FileBrowser implements Label {
     }
 
     @Override
-    protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
-        return null!=call(prepare(Api.class,Address.URL,null).renameFile(path,name, coverMode),null,null,finish);
+    protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<IPath>> finish, String debug) {
+        return null!=call(prepare(Api.class,mServerUrl,null).renameFile(path,name, coverMode),null,null,finish);
     }
 
     @Override
-    protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
-        return null!=call(prepare(Api.class,Address.URL,null).createPath(dir,folder, name,coverMode),null,null,finish);
+    protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<IPath>> finish, String debug) {
+        return null!=call(prepare(Api.class,mServerUrl,null).createPath(dir,folder, name,coverMode),null,null,finish);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
 
     @Override
     protected boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish, String debug) {
-        return null!=call(prepare(Api.class,Address.URL,null).setHome(path),null,null,finish);
+        return null!=call(prepare(Api.class,mServerUrl,null).setHome(path),null,null,finish);
     }
 
     @Override
@@ -118,7 +120,7 @@ public class NasFileBrowser extends FileBrowser implements Label {
         dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId,data)-> {
             if (resId==R.string.sure){
                 Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-                call(prepare(Api.class,Address.URL,null).rebootClient(),null,
+                call(prepare(Api.class,mServerUrl,null).rebootClient(),null,
                         null,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
             }
             dialog.dismiss();

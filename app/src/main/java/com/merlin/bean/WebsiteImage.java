@@ -1,6 +1,6 @@
 package com.merlin.bean;
 
-public class WebsiteImage extends Path{
+public class WebsiteImage extends IPath {
     private String title;
     private String note;
     private boolean banner;

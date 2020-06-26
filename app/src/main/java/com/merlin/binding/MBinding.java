@@ -37,6 +37,7 @@ import com.merlin.adapter.OnRecyclerScroll;
 import com.merlin.adapter.OnRecyclerScrollStateChange;
 import com.merlin.adapter.PageAdapter;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.list.RecycleViewScrollQuantize;
 import com.merlin.model.Callback;
 import com.merlin.model.OnAfterTextChange;

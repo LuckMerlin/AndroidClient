@@ -6,7 +6,7 @@ import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.browser.FileSaveBuilder;
 import com.merlin.browser.Md5Reader;
 import com.merlin.debug.Debug;
@@ -32,15 +32,15 @@ import retrofit2.Response;
 
 public class UploadConvey extends FileConvey {
 
-    public UploadConvey(Path from,Path to,int coverMode){
+    public UploadConvey(IPath from, IPath to, int coverMode){
         super(from,to,coverMode);
     }
 
     @Override
     protected boolean onConvey(Retrofit retrofit, OnConveyStatusChange change, String debug) {
-            Path to=getTo();
+            IPath to=getTo();
             String serverUrl=null!=to?to.getHost():null;
-            Path pathValue=getFrom();
+            IPath pathValue=getFrom();
             String path=null!=pathValue?pathValue.getPath():null;
             final String folder=null!=to?to.getParent():null;
             if (null==path||path.length()<=0||null==serverUrl||null==retrofit||serverUrl.length()<=0){
@@ -56,9 +56,9 @@ public class UploadConvey extends FileConvey {
             final int coverMode=getCoverMode();
             final String[] md5s=new String[1];
             updateStatus(PREPARING,change,this,null);
-            final OnApiFinish<Reply<Path>> md5CheckFinish=(int what, String note, Reply<Path> data, Object arg)-> {
+            final OnApiFinish<Reply<IPath>> md5CheckFinish=(int what, String note, Reply<IPath> data, Object arg)-> {
                 updateStatus(PREPARED,change,this,null);
-                Path exist=null!=data?data.getData():null;
+                IPath exist=null!=data?data.getData():null;
                 final Confirm confirm=(int innerWhat,String de)->{
                     if (!isCanceled()&&innerWhat==What.WHAT_SUCCEED){//If need continue
                         final FileSaveBuilder builder=new FileSaveBuilder();
@@ -77,15 +77,15 @@ public class UploadConvey extends FileConvey {
                         };
                         MultipartBody.Part part=builder.createFilePart(builder.createFileHeadersBuilder(file.getName(),folder,file.isDirectory()),uploadBody);
                         Debug.D(getClass(),"Upload file "+file.getName()+" to "+folder+" "+(null!=debug?debug:"."));
-                        Call<Reply<ApiList<Reply<Path>>>> call= retrofit.prepare(ApiSaveFile.class, serverUrl).save(part);
-                        call.enqueue(new Callback<Reply<ApiList<Reply<Path>>>>() {
+                        Call<Reply<ApiList<Reply<IPath>>>> call= retrofit.prepare(ApiSaveFile.class, serverUrl).save(part);
+                        call.enqueue(new Callback<Reply<ApiList<Reply<IPath>>>>() {
                             @Override
-                            public void onResponse(Call<Reply<ApiList<Reply<Path>>>> call, Response<Reply<ApiList<Reply<Path>>>> response) {
+                            public void onResponse(Call<Reply<ApiList<Reply<IPath>>>> call, Response<Reply<ApiList<Reply<IPath>>>> response) {
                                 updateStatus(FINISHED,change,UploadConvey.this,null!=response?response.body():null);
                             }
 
                             @Override
-                            public void onFailure(Call<Reply<ApiList<Reply<Path>>>> call, Throwable t) {
+                            public void onFailure(Call<Reply<ApiList<Reply<IPath>>>> call, Throwable t) {
                                 updateStatus(FINISHED,change,UploadConvey.this,new Reply(true,What.WHAT_ERROR_UNKNOWN,"File upload error."+t,null));
                             }
                         });

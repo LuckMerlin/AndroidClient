@@ -10,7 +10,7 @@
             type="Boolean" />
         <variable
             name="meta"
-            type="com.merlin.bean.Document" />
+            type="com.merlin.bean.Path" />
         <variable
             name="position"
             type="int" />
@@ -22,7 +22,6 @@
         <import type="com.merlin.util.Time"/>
         <import type="com.merlin.client.R"/>
         <import type="com.merlin.util.Thumbs"/>
-        <import type="com.merlin.bean.LocalFile"/>
         <import type="com.merlin.util.FileSize"/>
     </data>
     <RelativeLayout
@@ -30,67 +29,164 @@
         android:layout_marginBottom="5dp"
         android:layout_width="match_parent"
         android:clickable="true"
-        android:background="@{meta.accessible?R.drawable.selector_round_dark_corner_small:R.drawable.round_dark_corner_small_disable}"
         android:layout_height="@dimen/listItemNormal">
-        <ImageView
-            android:id="@+id/itemListFile_icon"
-            android:layout_alignParentLeft="true"
-            android:src="@{thumbUrl}"
-            android:padding="2dp"
-            android:layout_margin="1dp"
-            android:layout_width="@dimen/listItemNormal"
-            android:layout_height="@dimen/listItemNormal"/>
-        <LinearLayout
-            android:layout_toRightOf="@id/itemListFile_icon"
-            android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:layout_margin="5dp"
-            android:layout_height="wrap_content">
+<!--        <ImageView-->
+<!--            android:id="@+id/itemListFile_icon"-->
+<!--            android:layout_alignParentLeft="true"-->
+<!--            android:src="@{thumbUrl}"-->
+<!--            android:padding="2dp"-->
+<!--            android:layout_margin="1dp"-->
+<!--            android:layout_width="@dimen/listItemNormal"-->
+<!--            android:layout_height="@dimen/listItemNormal"/>-->
+<!--        <LinearLayout-->
+<!--            android:layout_toRightOf="@id/itemListFile_icon"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:layout_height="wrap_content">-->
 
-            <TextView
-                android:layout_width="match_parent"
-                android:textSize="@dimen/textTitle"
-                android:singleLine="true"
-                android:text="@{meta.getName(true)}"
-                android:textColor="@color/textTitle"
-                android:layout_height="wrap_content"/>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <View
-                    android:background="@{meta instanceof LocalFile?((LocalFile)meta).syncColor():R.color.syncNull}"
-                    android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"
-                    android:alpha="0.9"
-                    android:layout_marginTop="3dp"
-                    android:layout_marginBottom="3dp"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"/>
-                <TextView
-                    style="@style/titleSmallTextView"
-                    android:visibility="@{meta.directory?View.GONE:View.VISIBLE}"
-                    android:text="@{meta.directory?``:FileSize.formatSizeText((double)meta.length)}"/>
-                <TextView
-                    style="@style/titleSmallTextView"
-                    android:text="@{meta.directory?`(`+(meta.childCount)+`)`:(meta.extension??``)}"/>
-                <TextView
-                    style="@style/titleSmallTextView"
-                    android:text="@{Time.formatTime((long)meta.modifyTime)}"/>
-                <TextView
-                    style="@style/titleSmallTextView"
-                    android:text="@{``+meta.permission}"/>
-            </LinearLayout>
-        </LinearLayout>
-        <CheckBox
-            android:id="@+id/itemListFile_selectCB"
-            android:layout_alignParentRight="true"
-            style="@style/checkboxStyle"
-            android:clickable="false"
-            android:duplicateParentState="true"
-            android:visibility="@{isMultiChoose?View.VISIBLE:View.GONE}"
-            android:layout_centerVertical="true"
-            android:checked="@{isChoose}"
-            android:layout_width="@dimen/listIconNormal"
-            android:layout_height="@dimen/listIconNormal"/>
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:textSize="@dimen/textTitle"-->
+<!--                android:singleLine="true"-->
+<!--                android:text="@{meta.getName(true)}"-->
+<!--                android:textColor="@color/textTitle"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--            <LinearLayout-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content">-->
+<!--                <View-->
+<!--                    android:background="@{meta instanceof LocalFile?((LocalFile)meta).syncColor():R.color.syncNull}"-->
+<!--                    android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"-->
+<!--                    android:alpha="0.9"-->
+<!--                    android:layout_marginTop="3dp"-->
+<!--                    android:layout_marginBottom="3dp"-->
+<!--                    android:layout_width="3dp"-->
+<!--                    android:layout_height="3dp"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:visibility="@{meta.directory?View.GONE:View.VISIBLE}"-->
+<!--                    android:text="@{meta.directory?``:FileSize.formatSizeText((double)meta.length)}"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:text="@{meta.directory?`(`+(meta.size)+`)`:(meta.extension??``)}"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:text="@{Time.formatTime((long)meta.modifyTime)}"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:text="@{``+meta.permissions}"/>-->
+<!--            </LinearLayout>-->
+<!--        </LinearLayout>-->
+<!--        <CheckBox-->
+<!--            android:id="@+id/itemListFile_selectCB"-->
+<!--            android:layout_alignParentRight="true"-->
+<!--            style="@style/checkboxStyle"-->
+<!--            android:clickable="false"-->
+<!--            android:duplicateParentState="true"-->
+<!--            android:visibility="@{isMultiChoose?View.VISIBLE:View.GONE}"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:checked="@{isChoose}"-->
+<!--            android:layout_width="@dimen/listIconNormal"-->
+<!--            android:layout_height="@dimen/listIconNormal"/>-->
     </RelativeLayout>
 </layout>
+
+
+    <!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<layout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:binding="http://schemas.android.com/apk/res-auto">-->
+<!--    <data>-->
+<!--        <variable-->
+<!--            name="isMultiChoose"-->
+<!--            type="Boolean" />-->
+<!--        <variable-->
+<!--            name="isChoose"-->
+<!--            type="Boolean" />-->
+<!--        <variable-->
+<!--            name="meta"-->
+<!--            type="com.merlin.bean.Path" />-->
+<!--        <variable-->
+<!--            name="position"-->
+<!--            type="int" />-->
+<!--        <variable-->
+<!--            name="thumbUrl"-->
+<!--            type="Object" />-->
+<!--        <import type="android.view.View"/>-->
+<!--        <import type="com.merlin.view.Clicker"/>-->
+<!--        <import type="com.merlin.util.Time"/>-->
+<!--        <import type="com.merlin.client.R"/>-->
+<!--        <import type="com.merlin.util.Thumbs"/>-->
+<!--        <import type="com.merlin.bean.ILocalFile"/>-->
+<!--        <import type="com.merlin.util.FileSize"/>-->
+<!--    </data>-->
+<!--    <RelativeLayout-->
+<!--        binding:enableClick="@{Clicker.multiClick(meta,true)}"-->
+<!--        android:layout_marginBottom="5dp"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:clickable="true"-->
+<!--        android:background="@{meta.accessible?R.drawable.selector_round_dark_corner_small:R.drawable.round_dark_corner_small_disable}"-->
+<!--        android:layout_height="@dimen/listItemNormal">-->
+<!--        <ImageView-->
+<!--            android:id="@+id/itemListFile_icon"-->
+<!--            android:layout_alignParentLeft="true"-->
+<!--            android:src="@{thumbUrl}"-->
+<!--            android:padding="2dp"-->
+<!--            android:layout_margin="1dp"-->
+<!--            android:layout_width="@dimen/listItemNormal"-->
+<!--            android:layout_height="@dimen/listItemNormal"/>-->
+<!--        <LinearLayout-->
+<!--            android:layout_toRightOf="@id/itemListFile_icon"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:layout_height="wrap_content">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:textSize="@dimen/textTitle"-->
+<!--                android:singleLine="true"-->
+<!--                android:text="@{meta.getName(true)}"-->
+<!--                android:textColor="@color/textTitle"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--            <LinearLayout-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content">-->
+<!--                <View-->
+<!--                    android:background="@{meta instanceof LocalFile?((LocalFile)meta).syncColor():R.color.syncNull}"-->
+<!--                    android:visibility="@{meta instanceof LocalFile?View.VISIBLE:View.GONE}"-->
+<!--                    android:alpha="0.9"-->
+<!--                    android:layout_marginTop="3dp"-->
+<!--                    android:layout_marginBottom="3dp"-->
+<!--                    android:layout_width="3dp"-->
+<!--                    android:layout_height="3dp"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:visibility="@{meta.directory?View.GONE:View.VISIBLE}"-->
+<!--                    android:text="@{meta.directory?``:FileSize.formatSizeText((double)meta.length)}"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:text="@{meta.directory?`(`+(meta.childCount)+`)`:(meta.extension??``)}"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:text="@{Time.formatTime((long)meta.modifyTime)}"/>-->
+<!--                <TextView-->
+<!--                    style="@style/titleSmallTextView"-->
+<!--                    android:text="@{``+meta.permission}"/>-->
+<!--            </LinearLayout>-->
+<!--        </LinearLayout>-->
+<!--        <CheckBox-->
+<!--            android:id="@+id/itemListFile_selectCB"-->
+<!--            android:layout_alignParentRight="true"-->
+<!--            style="@style/checkboxStyle"-->
+<!--            android:clickable="false"-->
+<!--            android:duplicateParentState="true"-->
+<!--            android:visibility="@{isMultiChoose?View.VISIBLE:View.GONE}"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:checked="@{isChoose}"-->
+<!--            android:layout_width="@dimen/listIconNormal"-->
+<!--            android:layout_height="@dimen/listIconNormal"/>-->
+<!--    </RelativeLayout>-->
+<!--</layout>-->

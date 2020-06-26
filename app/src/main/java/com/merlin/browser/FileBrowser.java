@@ -22,25 +22,19 @@ import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LayoutFileModifyBinding;
 import com.merlin.client.databinding.SingleEditTextBinding;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
-import com.merlin.dialog.SingleInputDialog;
 import com.merlin.server.Retrofit;
 import com.merlin.server.RetrofitCanceler;
-import com.merlin.util.Layout;
-import com.merlin.view.Clicker;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.PopupWindow;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import io.reactivex.Observable;
@@ -56,7 +50,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
 
     private interface Api{
         @POST("/none")
-        Observable<Reply<ApiMap<String,Path>>> noneRequest();
+        Observable<Reply<ApiMap<String, IPath>>> noneRequest();
     }
 
     public FileBrowser(ClientMeta meta,Callback callback){
@@ -323,8 +317,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
     protected abstract boolean onOpenPath(Document meta,String debug);
     protected abstract boolean onShowPathDetail(Document meta,String debug);
     protected abstract boolean onSetAsHome(String path,OnApiFinish<Reply<String>> finish,String debug);
-    protected abstract boolean onCreatePath(boolean dir,int coverMode,String folder,String name,OnApiFinish<Reply<Path>> finish,String debug);
-    protected abstract boolean onRenamePath(String path, String name, int coverMode,OnApiFinish<Reply<Path>> finish,String debug);
+    protected abstract boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<IPath>> finish, String debug);
+    protected abstract boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<IPath>> finish, String debug);
     protected FileProcess onCreatePathsProcess(int mode,ArrayList<Document> paths,String folder,Integer coverMode,String debug){
         //Do nothing
         return null;

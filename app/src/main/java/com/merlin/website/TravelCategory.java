@@ -2,11 +2,11 @@ package com.merlin.website;
 
 import androidx.annotation.Nullable;
 
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 
 public final class TravelCategory {
         private boolean banner;
-        private Path url;
+        private IPath url;
         private String title;
         private String note;
         private Object tag;
@@ -27,22 +27,22 @@ public final class TravelCategory {
         return createTime;
     }
 
-    public Path getUrl() {
+    public IPath getUrl() {
         return url;
     }
 
     public Long getUrlId() {
-        Path currPath=url;
+        IPath currPath=url;
         return null!=currPath?currPath.getId():null;
     }
 
-    public void setUrl(Path url) {
+    public void setUrl(IPath url) {
         this.url = url;
     }
 
     public String getUrlPath()
     {
-        Path currUrl=url;
+        IPath currUrl=url;
         return null!=currUrl?currUrl.getPath():null;
     }
 

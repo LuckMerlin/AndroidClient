@@ -290,19 +290,25 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
 
   public final boolean add(T data,boolean exceptExist,String debug){
      List<T> list=null!=data?new ArrayList<>():null;
-    return null!=list&&list.add(data)&&add(list,exceptExist,debug);
+    return null!=list&&list.add(data)&&add(-1,list,exceptExist,debug);
    }
 
-  public final boolean add(List<T> data,boolean exceptExist,String debug) {
+   public final boolean add(List<T> data,boolean exceptExist,String debug) {
+    return add(-1,data,exceptExist,debug);
+  }
+
+  public final boolean add(int index,List<T> data,boolean exceptExist,String debug) {
         if (null!=data&&data.size()>0){
             List<T> list=mData;
             list=null!=list?list:(mData=new ArrayList<>());
             synchronized (list){
+                index=index<0||index>list.size()?list.size():index;
                 for (T child:data) {
-                    if (null==child||(list.contains(child)&&exceptExist)||!list.add(child)){
+                    if (null==child||(list.contains(child)&&exceptExist)){
                         continue;
                     }
-                    notifyItemInserted(list.size()-1);
+                    list.add(index,child);
+                    notifyItemInserted(index++);
                 }
             }
             return true;
@@ -315,6 +321,20 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
        int index=null!=list?list.indexOf(data):-1;
        return index>=0&&replace(index,data,debug);
    }
+
+    public final boolean insert(int index,T data,String debug) {
+        if (null!=data){
+            List list=new ArrayList(1);
+            list.add(data);
+            return insert(index,list,debug);
+        }
+        return false;
+    }
+
+    public final boolean insert(int index,List<T> data,String debug) {
+        return add(index, data, true,debug);
+    }
+
 
   public final boolean replace(int index,T data,String debug) {
         if (null!=data&&index>=0){

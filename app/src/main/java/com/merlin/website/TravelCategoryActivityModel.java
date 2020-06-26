@@ -8,39 +8,26 @@ import android.widget.TextView;
 
 import androidx.databinding.ObservableField;
 
-import com.merlin.activity.LocalPhotoChooseActivity;
-import com.merlin.adapter.ListAdapter;
-import com.merlin.adapter.PhotoGridAdapter;
 import com.merlin.adapter.WebsiteCategoriesAdapter;
 
-import com.merlin.api.ApiList;
-import com.merlin.api.ApiSaveFile;
 import com.merlin.api.Canceler;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.Path;
-import com.merlin.browser.FileSaveBuilder;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.SingleEditTextBinding;
-import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.model.Model;
 import com.merlin.view.Clicker;
 import com.merlin.view.OnTapClick;
 import com.merlin.view.Res;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
-import okhttp3.MultipartBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -62,7 +49,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
                                                          @Field(LABEL_BANNER) boolean banner,@Field(LABEL_NOTE) CharSequence note);
         @POST("/travel/category/photo")
         @FormUrlEncoded
-        Observable<Reply<PageData<Path>>> getCategoryPhoto(@Field(LABEL_ID) String categoryId, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
+        Observable<Reply<PageData<IPath>>> getCategoryPhoto(@Field(LABEL_ID) String categoryId, @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
 
     }
 
@@ -75,7 +62,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
 
     private final WebsiteCategoryPhotoAdapter mPhotoAdapter=new WebsiteCategoryPhotoAdapter() {
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<IPath>>> finish) {
             return call(prepare(Api.class,mUrl).getCategoryPhoto(arg,from,from+10),finish);
         }
     };
@@ -157,7 +144,7 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
         View view=findViewById(R.id.websiteTravelCategory_coverIV);
         Res res=null!=view?Clicker.getRes(view,null):null;
         Object coverObj=null!=res?res.getArg():null;
-        Path coverPath=null!=coverObj&&coverObj instanceof Path?((Path)coverObj):null;
+        IPath coverPath=null!=coverObj&&coverObj instanceof IPath ?((IPath)coverObj):null;
 //        String coverPathValue=null!=coverPath?coverPath.getPath():null;
 //        FileSaveBuilder builder=new FileSaveBuilder();
 //        if (coverPath.isLocal()){
@@ -228,20 +215,20 @@ public class TravelCategoryActivityModel extends Model implements OnTapClick,Lab
                     switch (requestCode){
                         case COVER_PHOTO_CHOOSE_REQUEST_CODE:
                             Object pathObj=list.get(0);
-                            ObservableField<TravelCategory> field=null!=pathObj&&pathObj instanceof Path?mCategory:null;
+                            ObservableField<TravelCategory> field=null!=pathObj&&pathObj instanceof IPath ?mCategory:null;
                             TravelCategory category=null!=field?field.get():null;
                             if (null!=category){
                                 field.set(null);
-                                category.setUrl((Path)pathObj);
+                                category.setUrl((IPath)pathObj);
                                 field.set(category);
                             }
                             break;
                         case PHOTO_CHOOSE_REQUEST_CODE:
                             for (Object child:list){
-                                if (null==child||!(child instanceof Path)){
+                                if (null==child||!(child instanceof IPath)){
                                     toast("存在不合法文件");
                                 }else{
-                                   mPhotoAdapter.add((Path)child,true,"After photo choose.");
+                                   mPhotoAdapter.add((IPath)child,true,"After photo choose.");
                                 }
                             }
                             break;

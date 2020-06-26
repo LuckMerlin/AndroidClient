@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <import type="com.merlin.click.Clicker"/>
+        <variable
+            name="device"
+            type="com.merlin.server.Client" />
+    </data>
+    <TextView
+        binding:enableClick="@{Clicker.click(device,true)}"
+        android:text="@{device.name}"
+        android:textSize="@dimen/textTitle"
+        android:padding="5dp"
+        android:minWidth="40dp"
+        android:textStyle="bold"
+        style="@style/titleNormalTextView"/>
+</layout>

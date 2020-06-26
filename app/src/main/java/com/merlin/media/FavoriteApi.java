@@ -3,8 +3,6 @@ package com.merlin.media;
 import com.merlin.api.Address;
 import com.merlin.api.Label;
 import com.merlin.api.Reply;
-import com.merlin.bean.INasFile;
-import com.merlin.bean.Path;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;

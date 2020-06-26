@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.merlin.browser.model.FileBrowserModel" />
+        <variable
+            name="client"
+            type="com.merlin.server.Client" />
+        <import type="com.merlin.util.FileSize"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.file.R"/>
+        <import type="com.merlin.click.Clicker"/>
+        <import type="com.merlin.browser.Mode" alias="Model"/>
+        <import type="android.text.Html"/>
+        <import type="com.merlin.browser.binding.ContextMenu"/>
+    </data>
+    <LinearLayout
+        binding:createModel="@{true}"
+        android:background="@drawable/round_corner_gray"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="10dp">
+        <RelativeLayout
+            android:layout_alignParentTop="true"
+            android:layout_width="match_parent"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_height="@dimen/listItemNormal"
+            android:layout_marginTop="15dp">
+            <LinearLayout
+                android:layout_alignParentLeft="true"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                    <ImageView
+                        binding:enableClick="@{true}"
+                        android:layout_width="@dimen/titleIconSize"
+                        android:layout_height="@dimen/titleIconSize"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="15dp"
+                        binding:src="@{R.drawable.selector_back}"/>
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:text="@{Html.fromHtml(`&lt;sup>`+vm.clientCount)}"
+                                android:textSize="7sp"
+                                android:visibility="@{vm.clientCount&lt;1?View.GONE:View.VISIBLE}"
+                                android:paddingBottom="5dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                            <include
+                                android:id="@+id/fileBrowser_deviceNameTV"
+                                binding:device="@{vm.currentMeta}"
+                                layout="@layout/device_text" />
+                            <TextView
+                                android:text="@{` (`+((null==vm.currentMultiChooseCount||(vm.currentMultiChooseCount&lt;0))?``:``+vm.currentMultiChooseCount+`/`)+vm.currentFolder.length+')'}"
+                                style="@style/titleNormalTextView"
+                                android:textStyle="bold"
+                                android:visibility="@{(null==vm.currentMeta&amp;&amp;vm.currentFolder.length&lt;1)?View.GONE:View.VISIBLE}"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:src="@drawable/switch_thumb_activated"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginRight="5dp"
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"/>
+                            <TextView
+                                android:text='@{""+FileSize.formatSizeText(vm.currentMeta.free)+"/"+FileSize.formatSizeText(vm.currentMeta.total)}'
+                                style="@style/titleSubNormalTextView"
+                                android:layout_width="wrap_content"
+                                android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
+                                android:singleLine="true"
+                                android:layout_height="wrap_content"/>
+                        </LinearLayout>
+                    </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                    binding:enableClick="@{true}"
+                    android:layout_width="@dimen/titleIconSize"
+                    android:layout_height="@dimen/titleIconSize"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="15dp"
+                    android:visibility="@{(vm.mode!=Model.MODE_MULTI_CHOOSE||vm.currentFolder.length&lt;0)?View.GONE:View.VISIBLE}"
+                    binding:src="@{(vm.currentMultiChooseCount&lt;vm.currentAdapter.dataCount)?R.drawable.selector_choose_all:R.drawable.selector_choose_none}"/>
+                <ImageView
+                    binding:enableClick="@{true}"
+                    android:layout_width="@dimen/titleIconSize"
+                    android:layout_height="@dimen/titleIconSize"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="15dp"
+                    android:visibility="@{vm.mode==Model.MODE_SELECT||vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_MULTI_CHOOSE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE?View.VISIBLE:View.GONE}"
+                    binding:src="@{R.drawable.selector_cancel}"/>
+                <ImageView
+                    binding:src="@{R.drawable.selector_menu}"
+                    android:visibility="@{(vm.mode==Model.MODE_NORMAL||vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MOVE)?View.VISIBLE:View.GONE}"
+                    binding:enableClick="@{true}"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"/>
+            </LinearLayout>
+        </RelativeLayout>
+        <HorizontalScrollView
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
+            android:scrollbars="none"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@{vm.currentFolder.path}"
+                android:visibility="@{vm.currentFolder.path.length()>0?View.VISIBLE:View.GONE}"
+                android:layout_width="wrap_content"
+                android:singleLine="true"
+                android:textSize="@dimen/textSmall"
+                android:layout_height="wrap_content"/>
+        </HorizontalScrollView>
+        <View
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            style="@style/horizontalDividerLine"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <HorizontalScrollView
+                android:visibility="@{vm.mode==Model.MODE_SELECT||vm.mode==Model.MODE_MOVE||vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_UPLOAD||vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_MULTI_CHOOSE?View.VISIBLE:View.GONE}"
+                android:id="@+id/activityFileBrowser_bottomHSV"
+                android:layout_alignParentBottom="true"
+                android:scrollbars="none"
+                android:layout_marginLeft="5dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginRight="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{((vm.mode==Model.MODE_SELECT))?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.sure)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{((vm.mode==Model.MODE_UPLOAD))?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.upload)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{((vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_MULTI_CHOOSE))?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.download)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{(vm.mode==Model.MODE_MOVE||vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.move)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{(vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.copy)}"/>
+                    <include layout="@layout/item_browser_bottom_menu"
+                        android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        binding:menu="@{ContextMenu.create(R.string.delete)}"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:layout_above="@id/activityFileBrowser_bottomHSV"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    binding:adapter="@{vm.currentAdapter}"
+                    android:layout_height="match_parent"/>
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </RelativeLayout>
+        </LinearLayout>
+</layout>

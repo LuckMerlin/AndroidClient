@@ -28,7 +28,7 @@ public class FileBrowserAdapter extends BaseAdapter<INasFile, ItemListFileBindin
             boolean multiChoose=null!=mMultiChoose;
             binding.setIsChoose(isChoose(data));
             binding.setIsMultiChoose(multiChoose);
-            binding.setMeta(data);
+//            binding.setMeta(data);
             binding.setPosition(position);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //            int count=data.getChildCount();

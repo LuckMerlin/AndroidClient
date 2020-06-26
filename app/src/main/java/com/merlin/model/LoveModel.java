@@ -15,6 +15,7 @@ import com.merlin.bean.INasFile;
 import com.merlin.bean.Love;
 import com.merlin.bean.NasFile;
 import com.merlin.client.R;
+import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
 import com.merlin.view.OnTapClick;
 
@@ -28,7 +29,7 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private interface Api{
         @POST(Address.PREFIX_LOVE+"/get")
         @FormUrlEncoded
-        Observable<Reply<PageData<Love<NasFile>>>> getLoves(@Field(LABEL_NAME) String name,
+        Observable<Reply<PageData<Love>>> getLoves(@Field(LABEL_NAME) String name,
                                                             @Field(LABEL_FROM) int from, @Field(LABEL_TO) int to);
 
         @POST(Address.PREFIX_LOVE+"/delete")
@@ -37,9 +38,10 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     }
 
     private final LoveAdapter mAdapter=new LoveAdapter() {
+
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Love<NasFile>>>> finish) {
-            return call(prepare(Api.class,null,null).getLoves(arg,from,from+2000),finish);
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Love>>> finish) {
+            return call(prepare(Api.class,Address.LOVE_URL,null).getLoves(arg,from,from+2000),finish);
         }
 
         @Override
@@ -52,21 +54,24 @@ public class LoveModel  extends Model implements OnTapClick,Label {
                     protected void onDismiss() {
                         super.onDismiss();
                         if (!deleted[0]){
-                            replace(position,love,"After delete fail.");
+                            insert(position,love,"After delete fail.");
                         }
                     }
                 };
-                dialog.create().title(R.string.deleteSure).left(R.string.sure).right(R.string.cancel)
+                String msg=love.getName();
+                msg=null!=msg?msg:love.getTitle();
+                dialog.create().title(getText(R.string.deleteSure,msg)).left(R.string.sure).right(R.string.cancel)
                         .show(( view,  clickCount,  resId, data2)-> {
                               dialog.dismiss();
                               if (resId ==R.string.sure){
+                                  remove(love,"while delete.");
                                   long id=null!=data&&data instanceof Love?((Love)data).getId():null;
-                                  if (null==call(prepare(Api.class,Address.LOVE_ADDRESS,null).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
-                                      if (what!= What.WHAT_SUCCEED){
-                                          deleted[0] =true;
-                                          replace(position,love,"After delete fail.");
+                                  if (null==call(prepare(Api.class,Address.LOVE_URL,null).delete(Long.toString(id)),(OnApiFinish<Reply>)(what,note, d, arg)->{
+                                      boolean succeed= deleted[0] =what== What.WHAT_SUCCEED;
+                                      if (!succeed){
+                                          insert(position,love,"After delete fail.");
                                       } })){
-                                      replace(position,love,"After delete fail.");
+                                      insert(position,love,"After delete fail.");
                                   }
                               }
                             return true;
@@ -78,7 +83,6 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     public LoveModel(){
         mAdapter.loadPage(null,"While model create.");
     }
-
 
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
@@ -92,10 +96,14 @@ public class LoveModel  extends Model implements OnTapClick,Label {
     private boolean onSingleTap(View view,int resId,Object data){
         switch (resId){
             case R.id.item_love:
-                Long id=null!=data&&data instanceof Love?((Love)data).getId():null;
-                return startActivity(LoveDetailActivity.class,Label.LABEL_ID,null!=id?Long.toString(id):null);
+                Love love=null!=data&&data instanceof Love?((Love)data):null;
+                String id=null;
+                if (null!=love){
+                    id=""+love.getId();
+                }
+                return startActivity(LoveDetailActivity.class,id);
             case R.string.add:
-                return startActivity(LoveDetailActivity.class,Label.LABEL_ID,null);
+                return startActivity(LoveDetailActivity.class,"");
         }
         return false;
     }

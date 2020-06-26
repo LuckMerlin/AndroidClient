@@ -7,7 +7,7 @@
             type="java.io.File" />
         <variable
             name="meta"
-            type="com.merlin.bean.LocalFile" />
+            type="com.merlin.bean.ILocalFile" />
         <variable
             name="imageUrl"
             type="Object" />

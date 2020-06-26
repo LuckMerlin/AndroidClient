@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="menu"
+            type="com.merlin.browser.binding.ContextMenu" />
+        <import type="com.merlin.click.Clicker"/>
+    </data>
+    <TextView
+        android:background="@drawable/selector_round_dark_corner_small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        binding:enableClick="@{Clicker.click(Clicker.SINGLE_TAP_MASK|Clicker.SINGLE_LONG_CLICK_MASK,menu.arg,true)}"
+        binding:text="@{menu.text}"
+        android:minWidth="83dp"
+        android:minHeight="40dp"
+        android:padding="5dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:textSize="@dimen/textTitle"
+        android:textColor="@color/textTitle"
+        android:textStyle="bold"/>
+</layout>

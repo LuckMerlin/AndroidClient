@@ -1,14 +1,13 @@
 package com.merlin.conveyor;
 
-import com.merlin.bean.Path;
-import com.merlin.debug.Debug;
+import com.merlin.bean.IPath;
 
 public abstract class FileConvey extends Convey{
-    private final Path mFrom;
-    private final Path mTo;
+    private final IPath mFrom;
+    private final IPath mTo;
     private final int mCoverMode;
 
-    public FileConvey(Path from,Path to,int coverMode){
+    public FileConvey(IPath from, IPath to, int coverMode){
         mCoverMode=coverMode;
         mFrom=from;
         mTo=to;
@@ -18,11 +17,11 @@ public abstract class FileConvey extends Convey{
         return mCoverMode;
     }
 
-    public final Path getFrom() {
+    public final IPath getFrom() {
         return mFrom;
     }
 
-    public final Path getTo() {
+    public final IPath getTo() {
         return mTo;
     }
 

@@ -10,15 +10,15 @@ import com.merlin.api.Canceler;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
-import com.merlin.bean.Path;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 
 public abstract class PhotoGridModel extends Model {
-    protected abstract Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish);
+    protected abstract Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<IPath>>> finish);
 
     private final PhotoGridAdapter mAdapter=new PhotoGridAdapter(){
         @Override
-        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<IPath>>> finish) {
             return PhotoGridModel.this.onPageLoad(arg,from,finish);
         }
     };

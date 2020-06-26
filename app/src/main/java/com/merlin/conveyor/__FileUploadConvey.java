@@ -1,21 +1,18 @@
 package com.merlin.conveyor;
 
-import com.merlin.api.Canceler;
 import com.merlin.api.CoverMode;
-import com.merlin.api.Reply;
-import com.merlin.api.What;
-import com.merlin.bean.LocalFile;
+import com.merlin.bean.ILocalFile;
 import com.merlin.server.Retrofit;
 import com.merlin.transport.OnConveyStatusChange;
 
 public final class __FileUploadConvey extends Convey {
-    private LocalFile mFrom;
+    private ILocalFile mFrom;
     private String mToFolder;
     private String mToName;
     private String mToHost;
     private int mCoverMode= CoverMode.NONE;
 
-    public __FileUploadConvey(LocalFile from,String toHost, String toFolder, String toName, int coverMode){
+    public __FileUploadConvey(ILocalFile from, String toHost, String toFolder, String toName, int coverMode){
         mFrom=from;
         mToHost=toHost;
         mToFolder=toFolder;

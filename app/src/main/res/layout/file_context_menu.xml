@@ -12,7 +12,7 @@
         <import type="com.merlin.view.ContextMenu"/>
         <import type="android.view.View"/>
         <import type="com.merlin.client.R"/>
-        <import type="com.merlin.bean.LocalFile"/>
+        <import type="com.merlin.bean.ILocalFile"/>
     </data>
     <LinearLayout
         android:orientation="vertical"

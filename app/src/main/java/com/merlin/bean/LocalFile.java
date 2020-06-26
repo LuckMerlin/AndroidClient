@@ -19,7 +19,7 @@ public final class LocalFile extends Document {
     }
 
     public static LocalFile build(File file, String imageUrl, Md5Reader reader){
-        Path path=null!=file?Path.build(file.getAbsolutePath(),null):null;
+        IPath path=null!=file? IPath.build(file.getAbsolutePath(),null):null;
         if (null!=path){
             int permission=0x1111111;
             boolean directory=file.isDirectory();
@@ -40,12 +40,12 @@ public final class LocalFile extends Document {
         return null;
     }
 
-    public java.io.File getFile(){
+    public File getFile(){
         String path= getPath(null);
-        return null!=path&&path.length()>0?new java.io.File(path):null;
+        return null!=path&&path.length()>0?new File(path):null;
     }
 
-    public static String[] getPostfix(java.io.File file){
+    public static String[] getPostfix(File file){
         String name=null!=file?file.getName():null;
         int index=null!=name?name.lastIndexOf("."):-1;
         String[] result=new String[2];

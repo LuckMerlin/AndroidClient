@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.merlin.api.PageData;
 import com.merlin.client.R;
 
 import java.lang.ref.WeakReference;
@@ -47,6 +48,7 @@ public abstract class BaseAdapter<T,V extends ViewDataBinding> extends RecyclerV
 
     public interface OnItemClickListener<T>{
         void onItemClick(View view,int sourceId,int position, T data);
+        PageData
     }
 
     /**

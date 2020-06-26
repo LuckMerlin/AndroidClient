@@ -21,8 +21,8 @@ import com.merlin.api.What;
 import com.merlin.bean.ClientMeta;
 import com.merlin.bean.Document;
 import com.merlin.bean.FolderData;
-import com.merlin.bean.LocalFile;
-import com.merlin.bean.Path;
+import com.merlin.bean.ILocalFile;
+import com.merlin.bean.IPath;
 import com.merlin.client.R;
 import com.merlin.client.databinding.LocalFileDetailBinding;
 import com.merlin.debug.Debug;
@@ -51,10 +51,10 @@ public class LocalFileBrowser extends FileBrowser{
     public interface Api{
         @POST(Address.PREFIX_FILE+"/sync/check")
         @FormUrlEncoded
-        Observable<Reply<ApiMap<String,Reply<Path>>>> checkSync(@Field(Label.LABEL_MD5) Collection<String> md5s);
+        Observable<Reply<ApiMap<String,Reply<IPath>>>> checkSync(@Field(Label.LABEL_MD5) Collection<String> md5s);
 
         @POST(Address.PREFIX_FILE+"/none")
-        Observable<Reply<ApiMap<String,Path>>> deleteLocalFile();
+        Observable<Reply<ApiMap<String, IPath>>> deleteLocalFile();
     }
 
     public LocalFileBrowser(ClientMeta meta,Callback callback){
@@ -71,10 +71,10 @@ public class LocalFileBrowser extends FileBrowser{
         return super.onTapClick(view, clickCount, resId, data);
     }
 
-    private Canceler browserFolder(String path, int from, int to, OnApiFinish<Reply<PageData<LocalFile>>> finish){
+    private Canceler browserFolder(String path, int from, int to, OnApiFinish<Reply<PageData<ILocalFile>>> finish){
         path=null!=path&&path.length()>0?path:getClientRoot();
         File folder=null!=path&&path.length()>0?new File(path):null;
-        final Reply<PageData<LocalFile>>  reply=new Reply<>();
+        final Reply<PageData<ILocalFile>>  reply=new Reply<>();
         Integer what=null;
         String note=null;
         Object arg=null;
@@ -100,7 +100,7 @@ public class LocalFileBrowser extends FileBrowser{
         if (null==what){
             final File[] files=folder.listFiles();
             final int length=null!=files?files.length:0;
-            FolderData<LocalFile> folderData=new FolderData<>();
+            FolderData folderData=new FolderData();
             folderData.setParent(folder.getParent());
             folderData.setPathSep(File.separator);
             folderData.setName(folder.getName());
@@ -118,21 +118,21 @@ public class LocalFileBrowser extends FileBrowser{
                 reply.setWhat(What.WHAT_SUCCEED);
                 Debug.D(getClass(),"Browsing local folders "+volume+" from "+from+" to "+toIndex+" "+path);
                 if (volume>0){
-                    final ArrayList<LocalFile> list=new ArrayList(volume>1000?100:volume);
-                    final Map<String,List<LocalFile>> fileMaps=new HashMap<>();
+                    final ArrayList<ILocalFile> list=new ArrayList(volume>1000?100:volume);
+                    final Map<String,List<ILocalFile>> fileMaps=new HashMap<>();
                     Api api=prepare(Api.class, Address.URL, null);
                     final List<String> md5s=new ArrayList<>();
                     final String pathArg=path;
                     return call(api.checkSync(md5s).subscribeOn(Schedulers.io()).doOnSubscribe((Disposable disposable) ->{
                         final int maxAutoLoadMd5=1024*1024*50;
                         final Md5Reader md5Reader=mMd5Reader;
-                        LocalFile localFile;File child;String md5;
+                        ILocalFile localFile;File child;String md5;
                         for (int i = from; i < toIndex; i++) {
                             if (null!=(localFile=null!=(child=files[i])?
-                                    LocalFile.build(child, null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
+                                    ILocalFile.build(child, null,child.length() <=maxAutoLoadMd5?md5Reader:null):null)){
                                 if (list.add(localFile)&&null!=(md5=(null==localFile.getSync()?localFile.getMd5():
                                         null))&& md5.length()>0&&!md5s.contains(md5)&&md5s.add(md5)){
-                                    List<LocalFile> fileList=fileMaps.get(md5);
+                                    List<ILocalFile> fileList=fileMaps.get(md5);
                                     if (null!=fileList){
                                         fileList.add(localFile);
                                     }else{
@@ -160,9 +160,9 @@ public class LocalFileBrowser extends FileBrowser{
                         }else{//Check file sync with server
                             //Do nothing
                         }
-                    }),null,Schedulers.trampoline(),(OnApiFinish<Reply<ApiMap<String,Reply<Path>>>>)
-                            (int serverWhat, String serverNote, Reply<ApiMap<String, Reply<Path>>> serverData, Object serverArg)->{
-                        ApiMap<String,Reply<Path>> map=null!=serverData?serverData.getData():null;
+                    }),null,Schedulers.trampoline(),(OnApiFinish<Reply<ApiMap<String,Reply<IPath>>>>)
+                            (int serverWhat, String serverNote, Reply<ApiMap<String, Reply<IPath>>> serverData, Object serverArg)->{
+                        ApiMap<String,Reply<IPath>> map=null!=serverData?serverData.getData():null;
                         Set<String> serverSet=null!=map&&map.size()>0?map.keySet():null;
                         if (null!=serverSet&&serverSet.size()>0){
                             for (String childMd5:serverSet){
@@ -170,10 +170,10 @@ public class LocalFileBrowser extends FileBrowser{
                                     break;
                                 }
                                 if (null!=childMd5){
-                                    Reply<Path> serverReply=map.get(childMd5);
-                                    List<LocalFile> localFiles=null!=childMd5?fileMaps.get(childMd5):null;
+                                    Reply<IPath> serverReply=map.get(childMd5);
+                                    List<ILocalFile> localFiles=null!=childMd5?fileMaps.get(childMd5):null;
                                     if (null!=localFiles&&localFiles.size()>0){
-                                        for (LocalFile file:localFiles) {
+                                        for (ILocalFile file:localFiles) {
                                             if (null!=file&&file.applySync(serverReply)){
                                                 post(()->replace(file,"After sync check finish."),0);
                                             }
@@ -203,13 +203,13 @@ public class LocalFileBrowser extends FileBrowser{
     @Override
     protected boolean onShowPathDetail(Document meta, String debug) {
         Context context=getAdapterContext();
-        if (null!=context&&null!=meta&&meta instanceof LocalFile){
+        if (null!=context&&null!=meta&&meta instanceof ILocalFile){
             String path=meta.getPath(null);
             File file=null!=path&&path.length()>0&&path.startsWith(File.separator)?new File(path):null;
             if (null!=file&&file.exists()){
                 LocalFileDetailBinding binding=(LocalFileDetailBinding)inflate(R.layout.local_file_detail);
-                binding.setFile(((LocalFile)meta).getFile());
-                binding.setMeta((LocalFile) meta);
+                binding.setFile(((ILocalFile)meta).getFile());
+                binding.setMeta((ILocalFile) meta);
                 String title=meta.getTitle();
                 binding.setTitle(null!=title?title:file.getName());
                 Dialog dialog=new Dialog(context);
@@ -237,7 +237,7 @@ public class LocalFileBrowser extends FileBrowser{
 
     @Override
     protected boolean onOpenPath(Document meta, String debug) {
-        LocalFile localFile=null!=meta&&meta instanceof LocalFile?((LocalFile)meta):null;
+        ILocalFile localFile=null!=meta&&meta instanceof ILocalFile ?((ILocalFile)meta):null;
         String path=localFile.getPath(null);
         if (null!=path&&path.length()>0){
             final File file=new File(path);
@@ -268,8 +268,9 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
-        Integer what=null;String note=null;boolean succeed=false;Path data=null;Object arg=null;
+    protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<IPath>> finish, String debug) {
+        Integer what=null;String note=null;boolean succeed=false;
+        IPath data=null;Object arg=null;
         if (null==path||null==name||path.length()<=0||name.length()<=0){
             what=What.WHAT_ARGS_INVALID;
             note=getText(R.string.inputNotNull);
@@ -298,7 +299,7 @@ public class LocalFileBrowser extends FileBrowser{
                what=What.WHAT_ERROR_UNKNOWN;
                note=getText(R.string.deleteFail);
            }else if(file.renameTo(target)&&target.exists()) {
-               String[] fix=LocalFile.getPostfix(target);
+               String[] fix= ILocalFile.getPostfix(target);
 //               data=new Path(folder.getAbsolutePath(),fix[0],fix[1]);
                what=What.WHAT_SUCCEED;
                note=getText(R.string.succeed);
@@ -308,9 +309,9 @@ public class LocalFileBrowser extends FileBrowser{
     }
 
     @Override
-    protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
+    protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<IPath>> finish, String debug) {
        Integer what=null;String note=null;boolean succeed=false;
-        Path modify=null;Object arg=null;
+        IPath modify=null;Object arg=null;
         if (null==folder||name==null||folder.length()<=0||name.length()<=0){
             what=What.WHAT_ARGS_INVALID;
             note=getText(R.string.inputNotNull);
@@ -335,9 +336,9 @@ public class LocalFileBrowser extends FileBrowser{
                     if (file.exists()) {
                         note=getText(R.string.createSucceed);
                         what=What.WHAT_SUCCEED;
-                        String[] fix=LocalFile.getPostfix(file);
+                        String[] fix= ILocalFile.getPostfix(file);
 //                        modify = new Path(folder, fix[0],fix[1]);
-                        arg = LocalFile.build(file,null,null);
+                        arg = ILocalFile.build(file,null,null);
                     }
                 } catch (IOException e) {
                     what=What.WHAT_ERROR_UNKNOWN;
