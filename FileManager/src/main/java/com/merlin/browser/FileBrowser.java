@@ -243,12 +243,12 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public final boolean movePaths(ArrayList<Path> files, String folder, int coverMode, String debug){
-        FileProcess process=onCreateFileProcess(R.string.move,files,folder,coverMode,debug);
+        FileProcess process=onCreateFileProcess(Mode.MODE_MOVE,files,folder,coverMode,debug);
         return null!=process?process(process,null):(toast(R.string.fail)&&false);
     }
 
     public final boolean deletePath(ArrayList<Path> paths,OnApiFinish<Reply<Path>> finish,String debug){
-        FileProcess process=onCreateFileProcess(R.string.delete,paths,null,null,debug);
+        FileProcess process=onCreateFileProcess(Mode.MODE_DELETE,paths,null,null,debug);
         return null!=process?process(process,finish):(toast(R.string.fail)&&false);
     }
 
