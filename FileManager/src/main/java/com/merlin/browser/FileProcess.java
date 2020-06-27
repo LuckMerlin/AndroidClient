@@ -40,7 +40,7 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> {
     }
 
 
-    public abstract Canceler onProcess(OnProcessUpdate update, OnApiFinish apiFinish, Retrofit retrofit) ;
+    protected abstract Canceler onProcess(OnProcessUpdate update, OnApiFinish apiFinish, Retrofit retrofit) ;
 
     public interface OnProcessUpdate {
         void onProcessUpdate(int what, Object note, Path from, Path to, Object arg);

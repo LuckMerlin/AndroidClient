@@ -8,5 +8,6 @@ public interface Mode {
     public final static int MODE_COPY=0x005;
     public final static int MODE_MOVE=0x006;
     public final static int MODE_SELECT=0x008;
+    public final static int MODE_DELETE=0x009;
 //    public final static int MODE_DELETE=0x007;
 }

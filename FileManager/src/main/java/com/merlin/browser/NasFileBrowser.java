@@ -22,6 +22,8 @@ import com.merlin.api.Label;
 
 import com.merlin.api.What;
 
+import java.util.ArrayList;
+
 public class NasFileBrowser extends FileBrowser {
 
     private interface Api{
@@ -119,5 +121,4 @@ public class NasFileBrowser extends FileBrowser {
     protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
         return call(prepare(Api.class, getClientHost(),null).queryFiles(path, from,from+50),null,null,finish);
     }
-
 }

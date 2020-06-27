@@ -9,6 +9,8 @@ import com.merlin.bean.Path;
 import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
 
+import java.util.ArrayList;
+
 public class LocalFileBrowser extends FileBrowser {
     public LocalFileBrowser(Client meta, Callback callback) {
         super(meta, callback);
@@ -51,6 +53,11 @@ public class LocalFileBrowser extends FileBrowser {
 
     @Override
     public Boolean onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
+        return null;
+    }
+
+    @Override
+    protected FileProcess onCreateFileProcess(int mode, ArrayList<Path> files, String target, Integer coverMode, String debug) {
         return null;
     }
 }

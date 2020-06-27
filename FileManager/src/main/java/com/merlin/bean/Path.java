@@ -7,6 +7,8 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.file.R;
 
+import java.io.File;
+
 public final class Path implements Parcelable {
     private transient Reply<Path> mSync;
     private Path thumb;
@@ -24,6 +26,33 @@ public final class Path implements Parcelable {
     private long modifyTime;
     private long createTime;
     private String md5;
+
+    public static Path build(File file,boolean load){
+        if (null!=file&&file.exists()){
+            String name=file.getName();
+            Path path=new Path();
+            path.name=name;
+            int extensionIndex=null!=name&&name.length()>1?name.indexOf("."):-1;
+            if (extensionIndex>0){
+                path.title = name.substring(0,extensionIndex);
+                path.extension = name.substring(extensionIndex);
+            }
+            path.modifyTime = file.lastModified();
+            path.length= file.length();
+            boolean directory=file.isDirectory();
+            String[] children=directory?file.list():null;
+            path.size = directory?null!=children?children.length:0:What.WHAT_NOT_DIRECTORY;
+            String parent = file.getParent();
+            path.parent=(null!=parent&&!parent.endsWith(File.separator)?parent+File.separator:parent);
+//            path.permissions
+//            path.accessTime=file
+//            path.createTime=file.
+//            path.mime
+//            path.md5 =
+            return path;
+        }
+        return null;
+    }
 
     public final String getName(boolean format) {
         return name;
@@ -107,23 +136,6 @@ public final class Path implements Parcelable {
         return false;
     }
 
-//    public final boolean apply(Path path){
-//        if (null==path){
-//            return false;
-//        }
-//        modifyTime=path.modifyTime;
-//        accessTime=path.accessTime;
-//        createTime=path.createTime;
-//        length=path.length;
-//        permissions=path.permissions;
-//        extension=path.extension;
-//        host=path.host;
-//        md5=path.md5;
-//        mime=path.mime;
-//        thumb=path.thumb;
-//        return false;
-//    }
-
     public final boolean applyNameChange(Reply<Path> reply){
         Path data=null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?reply.getData():null;
         if (null!=data){
@@ -181,6 +193,10 @@ public final class Path implements Parcelable {
         dest.writeInt(getPort());
     }
 
+    private Path(){
+        this(null);
+    }
+
     private Path(Parcel parcel){
         if (null!=parcel){
             host=parcel.readString();
@@ -216,60 +232,5 @@ public final class Path implements Parcelable {
             return new Path[size];
         }
     };
-
-//
-//    public void setPort(int port) {
-//        this.port = port;
-//    }
-//
-//    public void setAccessTime(long accessTime) {
-//        this.accessTime = accessTime;
-//    }
-//
-//    public void setCreateTime(long createTime) {
-//        this.createTime = createTime;
-//    }
-//
-//    public void setExtension(String extension) {
-//        this.extension = extension;
-//    }
-//
-//    public void setHost(String host) {
-//        this.host = host;
-//    }
-//
-//    public void setLength(long length) {
-//        this.length = length;
-//    }
-//
-//    public void setMd5(String md5) {
-//        this.md5 = md5;
-//    }
-//
-//    public void setMime(String mime) {
-//        this.mime = mime;
-//    }
-//
-//    public void setModifyTime(long modifyTime) {
-//        this.modifyTime = modifyTime;
-//    }
-//
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public void setParent(String parent) {
-//        this.parent = parent;
-//    }
-//
-//    public void setPermissions(int permissions) {
-//        this.permissions = permissions;
-//    }
-//
-//    public void setSize(long size) {
-//        this.size = size;
-//    }
-
-
 
 }
