@@ -1,5 +1,7 @@
 package com.merlin.browser;
 
+import android.view.View;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.OnApiFinish;
@@ -21,8 +23,6 @@ import retrofit2.http.POST;
 import com.merlin.api.Label;
 
 import com.merlin.api.What;
-
-import java.util.ArrayList;
 
 public class NasFileBrowser extends FileBrowser {
 
@@ -120,5 +120,18 @@ public class NasFileBrowser extends FileBrowser {
     @Override
     protected Canceler onPageLoad(String path, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
         return call(prepare(Api.class, getClientHost(),null).queryFiles(path, from,from+50),null,null,finish);
+    }
+
+    @Override
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        if(super.onTapClick(view, clickCount, resId, data)){
+            return true;
+        }
+        switch (resId){
+            case R.string.download:
+                Debug.D(getClass(),"EEEEEEEEE "+data);
+                break;
+        }
+        return false;
     }
 }

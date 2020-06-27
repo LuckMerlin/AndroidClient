@@ -229,7 +229,6 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
                         } else {
                             toast(R.string.nonePermission);
                         }
-                        return true;
                     }
                 }
         }

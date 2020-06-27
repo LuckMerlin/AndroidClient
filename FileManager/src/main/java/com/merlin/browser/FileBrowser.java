@@ -20,9 +20,6 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
-import com.merlin.browser.CoverMode;
-import com.merlin.browser.FileProcess;
-import com.merlin.browser.Mode;
 import com.merlin.click.OnTapClick;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
@@ -34,7 +31,6 @@ import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.retrofit.RetrofitCanceler;
 import com.merlin.server.Client;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
@@ -77,43 +73,17 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     @Override
+    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        return false;
+    }
+
+    @Override
     protected final void onPageLoadSucceed(PageData page, String debug) {
         super.onPageLoadSucceed(page, debug);
         Callback callback=mCallback;
         if (null!=callback){
             callback.onFolderPageLoaded(page,debug);
         }
-    }
-
-    @Override
-    public boolean onTapClick(View view, int clickCount, int resId, Object data) {
-        switch (clickCount) {
-            case 1:
-                switch (resId) {
-//                    case R.string.detail:
-//                        return showFileDetail(view,data,"After detail tap click.");
-//                    case R.string.createFile:
-//                        return createPath(false,"After create file tap click.");
-//                    case R.string.createFolder:
-//                        return createPath(true,"After create folder tap click.");
-//                    case R.string.setAsHome:
-//                        return setAsHome(view,data,"After set as home tap click.");
-//                    case R.string.delete:
-//                        return deletePath(data,"After tap click.");
-//                    case R.string.rename:
-//                        return null!=data&&data instanceof FileMeta &&renameFile((FileMeta)data, CoverMode.NONE,"After rename tap click.");
-                }
-                break;
-//            case 2:
-//                switch (resId){
-//                    default:
-//                    if (null!=data&&data instanceof FileMeta){
-//                        return onShowFileContextMenu(view,(FileMeta)data,"After 2 tap click.");
-//                    }
-//                }
-//                break;
-        }
-        return false;
     }
 
     public final boolean openPath(Path file,String debug){
@@ -232,7 +202,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     protected FileProcess onCreateFileProcess(int mode,ArrayList<Path> files,String target,Integer coverMode,String debug){
         switch (mode){
             case MODE_DELETE:
-                return new FileDeleteProcess();
+                return new FileDeleteProcess(R.string.delete,files);
         }
         return null;
     }
