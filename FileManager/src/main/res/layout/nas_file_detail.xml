@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="file"
+            type="com.merlin.bean.Path" />
+        <variable
+            name="loadState"
+            type="int" />
+        <import type="android.view.View"/>
+        <import type="com.merlin.api.What"/>
+        <import type="com.merlin.util.FileSize"/>
+        <import type="com.merlin.file.R"/>
+        <import type="com.merlin.browser.util.Time"/>
+    </data>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                binding:src="@{file.thumb}"
+                android:visibility="@{(file.thumb==null)?View.GONE:View.VISIBLE}"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+            <TextView
+                android:text="@{file.getName(false)}"
+                android:textStyle="bold"
+                android:visibility="@{null==file.getName(false)?View.GONE:View.VISIBLE}"
+                android:layout_gravity="center_horizontal"
+                style="@style/titleNormalTextView"/>
+            <include binding:key="@{R.string.name}" binding:value="@{file.title}"  android:visibility="@{null==file.title?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.size}" binding:value="@{file.size>=0?``+file.size:FileSize.formatSizeText(file.length)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.format}" binding:value="@{file.directory?(Integer)R.string.folder:(file.mime??file.extension)}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.path}" binding:value="@{file.getPath()}" layout="@layout/item_key_value"/>
+            <include binding:key="@{R.string.modifyTime}" binding:value="@{Time.formatTime(file.modifyTime)}" layout="@layout/item_key_value"/>
+            <include android:visibility="@{What.WHAT_INVALID!=loadState?View.GONE:View.VISIBLE}" layout="@layout/loading" binding:message="@{`加载中`}" />
+            <LinearLayout
+                android:visibility="@{What.WHAT_INVALID!=loadState?View.VISIBLE:View.GONE}"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <include binding:key="@{R.string.accessTime}" binding:value="@{Time.formatTime((long)file.accessTime)}" layout="@layout/item_key_value"/>
+                <include binding:key="@{R.string.createTime}" binding:value="@{Time.formatTime((long)file.createTime)}" layout="@layout/item_key_value"/>
+                <include binding:key="@{R.string.permission}" binding:value="@{``+file.permissions}" layout="@layout/item_key_value"/>
+                <include binding:key="@{R.string.md5}" binding:value="@{file.md5}" android:visibility="@{file.directory?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
+<!--                <include binding:key="@{R.string.artist}" binding:value="@{``+file.meta.artist}" android:visibility="@{null!=file.meta.artist?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>-->
+<!--                <include binding:key="@{R.string.album}" binding:value="@{``+file.meta.album}" android:visibility="@{null!=file.meta.album?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>-->
+<!--                <include binding:key="@{R.string.sampleRate}" binding:value="@{``+file.meta.sampleRate}" android:visibility="@{file.meta.sampleRate>0?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>-->
+<!--                <include binding:key="@{R.string.duration}" binding:value="@{``+Time.formatMediaDuration(file.meta.duration)}" android:visibility="@{file.meta.duration>0?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>-->
+<!--                <include binding:key="@{R.string.channel}" binding:value="@{``+file.meta.channel}" android:visibility="@{file.meta.channel>0?View.VISIBLE:View.GONE}" layout="@layout/item_key_value"/>-->
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</layout>

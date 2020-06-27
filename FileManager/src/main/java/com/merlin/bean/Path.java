@@ -9,6 +9,8 @@ import com.merlin.file.R;
 
 public final class Path implements Parcelable {
     private transient Reply<Path> mSync;
+    private Path thumb;
+    private String title;
     private String name;
     private String parent;
     private int permissions;
@@ -83,8 +85,18 @@ public final class Path implements Parcelable {
         return size>=0;
     }
 
+    public final String getUri(String divider){
+        String path=getPath();
+        String host=this.host;
+        int port=this.port;
+        return (null!=host&&host.length()>0)?host+":"+port+(null!=divider?divider:"/")+(null!=path?path:""):null;
+    }
+
     public final String getPath() {
-        return name;
+        String parent=this.parent;
+        String name=this.name;
+        String extension=this.extension;
+        return (null!=parent?parent:"")+(null!=name?name:"")+(null!=extension?extension:"");
     }
 
     public final boolean isAccessible() {
@@ -93,6 +105,36 @@ public final class Path implements Parcelable {
 
     public final boolean isLocal() {
         return false;
+    }
+
+//    public final boolean apply(Path path){
+//        if (null==path){
+//            return false;
+//        }
+//        modifyTime=path.modifyTime;
+//        accessTime=path.accessTime;
+//        createTime=path.createTime;
+//        length=path.length;
+//        permissions=path.permissions;
+//        extension=path.extension;
+//        host=path.host;
+//        md5=path.md5;
+//        mime=path.mime;
+//        thumb=path.thumb;
+//        return false;
+//    }
+
+    public final boolean applyNameChange(Reply<Path> reply){
+        Path data=null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?reply.getData():null;
+        if (null!=data){
+            name=data.name;
+            return true;
+        }
+        return false;
+    }
+
+    public Path getThumb() {
+        return thumb;
     }
 
     public int syncColor(){
@@ -113,6 +155,10 @@ public final class Path implements Parcelable {
         return color;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public Reply<Path> getSync() {
         return mSync;
     }
@@ -125,6 +171,7 @@ public final class Path implements Parcelable {
         dest.writeString(getExtension());
         dest.writeString(getMime());
         dest.writeString(getMd5());
+        dest.writeString(getTitle());
         dest.writeLong(getAccessTime());
         dest.writeLong(getCreateTime());
         dest.writeLong(getModifyTime());
@@ -141,6 +188,7 @@ public final class Path implements Parcelable {
             name=parcel.readString();
             extension=parcel.readString();
             mime=parcel.readString();
+            title=parcel.readString();
             md5=parcel.readString();
             accessTime=parcel.readLong();
             createTime=parcel.readLong();

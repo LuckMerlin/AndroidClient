@@ -1,6 +1,9 @@
 package com.merlin.browser;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.bean.Path;
 import com.merlin.lib.Canceler;
@@ -42,7 +45,12 @@ public class LocalFileBrowser extends FileBrowser {
     }
 
     @Override
-    protected Canceler onPageLoad(Object arg, int from, OnApiFinish finish) {
+    protected Canceler onPageLoad(String arg, int from, OnApiFinish<Reply<PageData<Path>>> finish) {
+        return null;
+    }
+
+    @Override
+    public Boolean onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
         return null;
     }
 }

@@ -3,7 +3,6 @@ package com.merlin.browser.model;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,7 +37,6 @@ import com.merlin.model.Model;
 import com.merlin.server.Client;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -181,7 +179,7 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
                                }
                            }
                            return finishActivity(SELECT_RESULT_CODE,null!=list&&list.size()>0?new Intent().
-                                   putExtra(Label.LABEL_DATA,list):null,"After select mode sure click.")||true;
+                                   putParcelableArrayListExtra(Label.LABEL_DATA,list):null,"After select mode sure click.")||true;
                         }
                         return true;
                     default:
@@ -387,7 +385,7 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
             return toast(R.string.noneDataToOperate)&&false;
         }
         FileBrowser browser=getCurrentModel();
-        return null!=browser&&browser.deletePaths(files,debug);
+        return null!=browser&&browser.deletePath(files,null,debug);
     }
 
     private boolean renamePath(Path meta,int coverMode,String debug){

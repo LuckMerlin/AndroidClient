@@ -10,14 +10,14 @@ import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
 import com.merlin.browser.Thumbs;
-import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.merlin.file.databinding.ItemListFileBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String, T> implements OnMoreLoadable{
+public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String, T>
+        implements OnMoreLoadable, OnItemTouchResolver,OnItemSlideRemove{
     private final Thumbs mThumbs=new Thumbs();
     private Collector<Path> mMultiChoose;
 
@@ -85,7 +85,7 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
             ItemListFileBinding itemBinding=(ItemListFileBinding)binding;
             itemBinding.setMeta(data);
             Collector<Path> multiChoose=mMultiChoose;
-            Integer max=null!=multiChoose?multiChoose.getMax():0;
+            Integer max=null!=multiChoose?multiChoose.getMax():null;
             max=null!=max?max:0;
             if (null!=multiChoose){
                 int chooseCount=multiChoose.size();
@@ -177,4 +177,14 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
 //        return null!=meta&&null!=choose&&choose.contains(meta);
 //    }
 
+
+    @Override
+    public Object onResolveItemTouch(RecyclerView recyclerView) {
+        return new ItemTouchInterrupt(){
+            @Override
+            protected Integer onResolveSlide(RecyclerView.ViewHolder holder, RecyclerView.LayoutManager manager) {
+                return new ItemSlideRemover().onResolveSlide(holder,manager);
+            }
+        };
+    }
 }

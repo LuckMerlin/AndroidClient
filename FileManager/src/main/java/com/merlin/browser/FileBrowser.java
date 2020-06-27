@@ -10,6 +10,7 @@ import android.view.View;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.ApiMap;
@@ -42,7 +43,7 @@ import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.http.POST;
 
-public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,Mode {
+public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapClick,Mode {
     private final Client mMeta;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
@@ -184,9 +185,9 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                                 dialog.dismiss();
                                 onRenamePath(path,text,coverMode,(what, note, data1, arg)->{
                                     boolean succeed=what== What.WHAT_SUCCEED;
-//                                    if (succeed&&null!=data&&pathObj.applyPathChange(data1)){
-//                                        replace(pathObj,"After rename succeed.");
-//                                    }
+                                    if (succeed&&pathObj.applyNameChange(data1)){
+                                        replace(pathObj,"After rename succeed.");
+                                    }
                                     toast(note);
                                 },debug);
                             }
@@ -217,6 +218,9 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                             dialog.dismiss();
                             return onCreatePath(dir, CoverMode.NONE,parent,input,(what, note, data2, arg)->{
                                 toast(note);
+                                if (what==What.WHAT_SUCCEED){
+                                    resetAdapter("After path create succeed.");
+                                }
                             },debug);
                         }
                     }
@@ -227,29 +231,29 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
 
     public final boolean copyPaths(ArrayList<Path> files,String folder,int coverMode,String debug){
         FileProcess process=createPathsProcess(R.string.copy,files,folder,coverMode,debug);
-        return null!=process?process(process):(toast(R.string.fail)&&false);
+        return null!=process?process(process,null):(toast(R.string.fail)&&false);
     }
 
     public final boolean movePaths(ArrayList<Path> files, String folder, int coverMode, String debug){
         FileProcess process=createPathsProcess(R.string.move,files,folder,coverMode,debug);
-        return null!=process?process(process):(toast(R.string.fail)&&false);
+        return null!=process?process(process,null):(toast(R.string.fail)&&false);
     }
 
-    public final boolean deletePaths(ArrayList<Path> paths,String debug){
+    public final boolean deletePath(ArrayList<Path> paths,OnApiFinish<Reply<Path>> finish,String debug){
         FileProcess process=createPathsProcess(R.string.delete,paths,null,null,debug);
-        return null!=process?process(process):(toast(R.string.fail)&&false);
+        return null!=process?process(process,finish):(toast(R.string.fail)&&false);
     }
 
-    public final boolean deletePath(Object data,String debug){
-        if (null==data||!(data instanceof File)){
+    public final boolean deletePath(Path data,OnApiFinish<Reply<Path>> finish,String debug){
+        if (null==data||!(data instanceof Path)){
             return toast(R.string.pathInvalid)&&false;
         }
-        ArrayList<Path> list=new ArrayList<>();
-        list.add((Path)data);
-        return deletePaths(list, debug);
+        ArrayList<Path> list=new ArrayList<>(1);
+        list.add(data);
+        return deletePath(list,finish, debug);
     }
 
-    public final boolean process(FileProcess process){
+    public final boolean process(FileProcess process,OnApiFinish<Reply<Path>> finish){
         final int length=null!=process?process.size():-1;
         if (length<=0){
             return toast(R.string.listEmpty)&&false;
@@ -260,7 +264,8 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
         final Canceler[] cancelers=new Canceler[1];
         final FileProcess.Interrupt[] interrupts=new FileProcess.Interrupt[1];
         Object title=process.getTitle();
-        return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
+        return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).
+                message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
                     FileProcess.Interrupt interrupt=null!=interrupts&&interrupts.length>0?interrupts[0]:null;
                     if (null!=interrupt){
                         interrupts[0]=null;
@@ -278,7 +283,7 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
                                    switch (what){
                                        case What.WHAT_SUCCEED://Get through
                                             if (null!=arg){
-
+//                                                finish.onApiFinish();
                                             }
                                        case What.WHAT_DOING:
                                        case What.WHAT_FAIL_UNKNOWN:
@@ -441,6 +446,16 @@ public abstract class FileBrowser extends BrowserAdapter implements OnTapClick,M
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Boolean onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
+        Path path=null!=data&&data instanceof Path?(Path)data:null;
+        return null!=remover?deletePath(path,(int what, String note, Reply<Path> reply, Object arg)->{
+            if (null!=reply&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED){
+                remover.remove(true);
+            }
+        },"While item slide remove."):null;
     }
 
 }
