@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class FileBrowserModel extends Model implements Label, OnTapClick, Model.OnBindChange,
+public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Model.OnBindChange,
         OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress, Model.OnActivityIntentChange {
     private final Map<String, FileBrowser> mAllClientMetas=new HashMap<>();
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
@@ -63,13 +63,14 @@ public class FileBrowserModel extends Model implements Label, OnTapClick, Model.
             return FileBrowserModel.this.onTapClick(view,clickCount,resId,data);
         }
     };
+
     private Collector mCollecting;
 
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
 //        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-        Client testClient=new Client("算法","http:192.168.0.3:5000","",null,"","/");
+        Client testClient=new Client("算法",getServerUri(),"",null,"","/");
 //        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
         //

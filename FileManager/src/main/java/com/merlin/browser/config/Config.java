@@ -1,8 +1,8 @@
 package com.merlin.browser.config;
 
 public final class Config {
-    private String mServerHost;
-    private String mServerPort;
+    private String mServerHost="http://106.12.163.77";
+    private String mServerPort="2018";
 
     public String getServerHost() {
         return mServerHost;
@@ -12,9 +12,9 @@ public final class Config {
         return mServerPort;
     }
 
-    public String getServer(){
+    public String getServerUri(){
         String serverHost=mServerHost;
         String serverPort=mServerPort;
-        return (null!=serverHost?serverHost:"")+(null!=serverPort?serverPort:"");
+        return (null!=serverHost?serverHost:"")+":"+(null!=serverPort?serverPort:"");
     }
 }

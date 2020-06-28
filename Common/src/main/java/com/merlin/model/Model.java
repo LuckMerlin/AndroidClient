@@ -51,11 +51,6 @@ public class Model extends Retrofit {
         void onModelDetachedFromWindow(View v, Model model);
     }
 
-    @Override
-    protected String onResolveUrl(Class<?> cls, Executor callbackExecutor) {
-        return "http://192.168.0.3:5000";
-    }
-
     public final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
