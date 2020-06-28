@@ -68,10 +68,6 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         return null!=client?client.getHost():null;
     }
 
-    protected void onModeChange(int last,int mode){
-        //Do nothing
-    }
-
     @Override
     public boolean onTapClick(View view, int clickCount, int resId, Object data) {
         return false;
