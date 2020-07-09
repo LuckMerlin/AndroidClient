@@ -17,12 +17,18 @@ import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
 
 import io.reactivex.Observable;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okio.BufferedSink;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import com.merlin.api.Label;
 
 import com.merlin.api.What;
+
+import java.io.IOException;
 
 public class NasFileBrowser extends FileBrowser {
 
@@ -51,6 +57,7 @@ public class NasFileBrowser extends FileBrowser {
         @POST("/file/detail")
         @FormUrlEncoded
         Observable<Reply<Path>> getDetail(@Field(Label.LABEL_PATH) String path);
+//        Observable<Reply<Path>> getDetail(@Body RequestBody file);
 
         @POST("/file/delete")
         @FormUrlEncoded

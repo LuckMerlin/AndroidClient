@@ -35,7 +35,6 @@
             <include binding:key="@{R.string.account}" binding:value="@{client.account}"  android:visibility="@{null==client.account?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.type}" binding:value="@{client.deviceType}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
             <include binding:key="@{R.string.platform}" binding:value="@{client.platform}"  android:visibility="@{null==client.platform?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
-            <include binding:key="@{R.string.capacity}" binding:value="@{FileSize.formatSizeText((double)client.free)+`/`+FileSize.formatSizeText((double)client.total)}"  android:visibility="@{null==client.deviceType?View.GONE:View.VISIBLE}" layout="@layout/item_key_value"/>
-        </LinearLayout>
+          </LinearLayout>
     </ScrollView>
 </layout>

@@ -11,6 +11,7 @@ import java.io.File;
 
 public final class Path implements Parcelable {
     private transient Reply<Path> mSync;
+    private final static String LOCAL_HOST="localDevice";
     private Path thumb;
     private String title;
     private String name;
@@ -44,6 +45,7 @@ public final class Path implements Parcelable {
             path.size = directory?null!=children?children.length:0:What.WHAT_NOT_DIRECTORY;
             String parent = file.getParent();
             path.parent=(null!=parent&&!parent.endsWith(File.separator)?parent+File.separator:parent);
+            path.host=LOCAL_HOST;
 //            path.permissions
 //            path.accessTime=file
 //            path.createTime=file.
@@ -114,11 +116,24 @@ public final class Path implements Parcelable {
         return size>=0;
     }
 
-    public final String getUri(String divider){
-        String path=getPath();
+    public final String getHostUri(){
+        return getHostUri(null);
+    }
+
+    public final String getHostUri(String protocol){
         String host=this.host;
         int port=this.port;
-        return (null!=host&&host.length()>0)?host+":"+port+(null!=divider?divider:"/")+(null!=path?path:""):null;
+        return null!=host&&host.length()>0?(null!=protocol?protocol:"http://")+host+":"+port:null;
+    }
+
+    public final String getUri(){
+        return getUri("");
+    }
+
+    public final String getUri(String divider){
+        String path=getPath();
+        String hostUri=getHostUri();
+        return (null!=hostUri&&hostUri.length()>0)?hostUri+(null!=divider?divider:"/")+(null!=path?path:""):null;
     }
 
     public final String getPath() {
@@ -133,7 +148,8 @@ public final class Path implements Parcelable {
     }
 
     public final boolean isLocal() {
-        return false;
+        String host=this.host;
+        return null!=host&&host.equals(LOCAL_HOST);
     }
 
     public final boolean applyNameChange(Reply<Path> reply){

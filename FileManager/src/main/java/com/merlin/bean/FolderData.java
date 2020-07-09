@@ -6,6 +6,8 @@ public class FolderData<T extends Path> extends PageData<T> {
     private String name;
     private String parent;
     private String pathSep;
+    private double total;
+    private double free;
 
     public void setName(String name) {
         this.name = name;
@@ -36,5 +38,13 @@ public class FolderData<T extends Path> extends PageData<T> {
 
     public void setPathSep(String pathSep) {
         this.pathSep = pathSep;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public double getFree() {
+        return free;
     }
 }

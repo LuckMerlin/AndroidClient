@@ -14,9 +14,6 @@
         <variable
             name="position"
             type="int" />
-        <variable
-            name="thumbUrl"
-            type="Object" />
         <import type="android.view.View"/>
         <import type="com.merlin.click.Clicker"/>
         <import type="com.merlin.file.R"/>
@@ -35,7 +32,7 @@
             <ImageView
                 android:id="@+id/itemListFile_icon"
                 android:layout_alignParentLeft="true"
-                binding:src="@{thumbUrl}"
+                binding:src="@{meta}"
                 android:padding="2dp"
                 android:layout_margin="1dp"
                 android:layout_width="@dimen/listItemNormal"

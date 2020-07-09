@@ -7,5 +7,5 @@ public interface OnItemSlideRemove {
         void remove(boolean remove);
     }
 
-    Boolean onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover);
+    void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover);
 }

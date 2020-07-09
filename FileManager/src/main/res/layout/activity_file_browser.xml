@@ -82,7 +82,7 @@
                                 android:layout_width="10dp"
                                 android:layout_height="10dp"/>
                             <TextView
-                                android:text='@{""+FileSize.formatSizeText(vm.currentMeta.free)+"/"+FileSize.formatSizeText(vm.currentMeta.total)}'
+                                android:text='@{""+FileSize.formatSizeText(vm.currentFolder.free)+"/"+FileSize.formatSizeText(vm.currentFolder.total)}'
                                 style="@style/titleSubNormalTextView"
                                 android:layout_width="wrap_content"
                                 android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"

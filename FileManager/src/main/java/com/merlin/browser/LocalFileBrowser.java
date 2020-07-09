@@ -52,8 +52,7 @@ public class LocalFileBrowser extends FileBrowser {
     }
 
     @Override
-    public Boolean onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
-        return null;
+    public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
     }
 
     @Override

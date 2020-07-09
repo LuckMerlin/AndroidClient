@@ -55,7 +55,6 @@ public class ItemTouchInterrupt extends ItemTouchHelper.Callback {
                 final List datas=((ListAdapter)adapter).getData();
                 int oldPosition = viewHolder.getAdapterPosition();
                 int newPosition = target.getAdapterPosition();
-
                 if (oldPosition < newPosition) {
                     for (int i = oldPosition; i < newPosition; i++) {
                         Collections.swap(datas, i, i +1);    // 改变实际的数据集
@@ -77,51 +76,20 @@ public class ItemTouchInterrupt extends ItemTouchHelper.Callback {
         ViewParent parent =null!=view?view.getParent():null;
         RecyclerView.Adapter adapter=null!=parent&&parent instanceof RecyclerView?((RecyclerView)parent).getAdapter():null;
         if (null!=adapter&&adapter instanceof ListAdapter){
+            ListAdapter listAdapter=(ListAdapter)adapter;
             int position = viewHolder.getAdapterPosition();
-            Object data=((ListAdapter)adapter).getItemData(position);
+            Object data=listAdapter.getItemData(position);
             if (null!=data) {
                 Boolean removed=onItemSlideRemove(position,data,direction,viewHolder);
-                removed=null!=removed?removed:adapter instanceof OnItemSlideRemove?((OnItemSlideRemove)adapter).
-                        onItemSlideRemove(position,data,direction,viewHolder,(needRemove)->{
-                           if (needRemove){
-                               ((ListAdapter) adapter).removeData(data, "After slide remover callback.");
-                           }
-                        }):null;
-                if (null!=removed&&removed){
-                    ((ListAdapter) adapter).removeData(data, "After slide remover call.");
-                }else{
-                    adapter.notifyItemChanged(position);
+                listAdapter.removeData(data, "After slide remover call.");
+                if ((null==removed||!removed)&&adapter instanceof OnItemSlideRemove){
+                    ((OnItemSlideRemove)adapter).onItemSlideRemove(position,data,direction,viewHolder,(needRemove)->{
+                        if (!needRemove) {
+                            listAdapter.insert(position,data, "After slide remover not remove callback.");
+                        }
+                    });
                 }
             }
         }
     }
-
-    //    @Override
-//    public final void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-//        View view=null!=viewHolder?viewHolder.itemView:null;
-//        if (null!=view){
-//            Debug.D(getClass(),"SS onSwiped SSSSSS "+view+" "+view.getParent());
-////            int position = viewHolder.getAdapterPosition();
-////            RecyclerView.Adapter adapter=recyclerView.getAdapter();
-////            mdatas.remove(position);
-////            myAdapter.notifyItemRemoved(position);
-//        }
-//    }
-//    @Override
-//    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-//        View view=viewHolder.itemView;
-//        if (null!=view&&actionState!=ItemTouchHelper.ACTION_STATE_IDLE){
-//            view.setBackgroundColor(Color.parseColor("#303F9F"));
-//        }
-//    }
-//    @Override
-//    public final void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-//        super.clearView(recyclerView, viewHolder);
-//        View view=viewHolder.itemView;
-//        if (null!=view) {
-//            view.setBackgroundColor(Color.TRANSPARENT);
-//        }
-//    }
-
-
 }
