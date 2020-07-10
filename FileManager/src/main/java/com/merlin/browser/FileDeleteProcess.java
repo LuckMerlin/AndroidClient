@@ -64,6 +64,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
                             Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
                             ApiMap<String,Reply<String>> map=null!=reply?reply.getData():null;
                             Reply<String> apiReply=null!=map?map.get(path):null;
+                            Debug.D(getClass(),"AAAAAAAAAAA "+reply);
                             if (null!=apiReply){
                                 String note=apiReply.getNote();
                                 boolean succeed=apiReply.isSuccess()&&apiReply.getWhat()==What.WHAT_SUCCEED;
@@ -74,6 +75,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
                                 update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.fail,pathObj,null,path);
                             }
                         } catch (IOException e) {
+                            Debug.D(getClass(),"AAAAAAAAAAA "+e);
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.exception,pathObj,null,path);
                         }
                     }
