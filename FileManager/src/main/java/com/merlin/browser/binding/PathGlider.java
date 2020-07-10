@@ -32,7 +32,9 @@ import com.merlin.click.Clicker;
 import com.merlin.debug.Debug;
 import com.merlin.file.R;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -184,6 +186,7 @@ public class PathGlider {
             String filePath=path.getPath();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 try {
+                    //ByteArrayOutputStream dd=new ByteArrayOutputStream();
                     int width = view.getWidth();
                     int height = view.getHeight();
                     GlideUrl glideUrl = new GlideUrl(hostUri, new LazyHeaders.Builder()
