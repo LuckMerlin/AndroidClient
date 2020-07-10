@@ -25,7 +25,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
         this(null,null);
     }
 
-    public FileDeleteProcess(Object title,ArrayList<Path> files){
+    public FileDeleteProcess(String title,ArrayList<Path> files){
         super(title,files);
     }
 
@@ -60,7 +60,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
                     }else{//Delete cloud file
                         try {
                             Response<Reply<ApiMap<String,Reply<String>>>> response=retrofit.prepare(Api.class,
-                                    pathObj.getHost(),null).delete(path).execute();
+                                    pathObj.getHostUri(),null).delete(path).execute();
                             Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
                             ApiMap<String,Reply<String>> map=null!=reply?reply.getData():null;
                             Reply<String> apiReply=null!=map?map.get(path):null;

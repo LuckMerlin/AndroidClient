@@ -79,7 +79,6 @@ public class PathGlider {
                     return false;
                 }
                 String mime=path.getMime();
-                Debug.D(getClass(),"DDDDDDDDDDd "+mime);
                 Integer iconId=null;
                 if (null == mime || mime.length() <= 0) {
                     iconId = R.drawable.hidisk_icon_unknown;

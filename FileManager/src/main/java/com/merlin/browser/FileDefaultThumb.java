@@ -55,6 +55,8 @@ public final class FileDefaultThumb {
                 iconId = R.drawable.hidisk_icon_music;
             } else if (mime.startsWith("video/")) {
                 iconId = R.drawable.hidisk_icon_video;
+            } else if (mime.equalsIgnoreCase(".log")) {
+                iconId = R.drawable.hidisk_icon_log;
             }
             return iconId;
     }

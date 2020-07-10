@@ -63,7 +63,7 @@
     <string name="upload">上传</string>
     <string name="paste">粘贴</string>
     <string name="items">(%1$d)个</string>
-    <string name="processSure">确认%1$s%2$s吗?</string>
+    <string name="processSure">确认%1$s %2$s 吗?</string>
     <string name="deleteSure">确认删除 %1$s 吗?</string>
     <string name="sampleRate">采样率</string>
     <string name="duration">时长</string>

@@ -10,7 +10,7 @@ import com.merlin.retrofit.Retrofit;
 import java.util.ArrayList;
 
 public abstract class FileProcess<T extends Path> extends ArrayList<T> {
-    private final Object mTitle;
+    private final String mTitle;
 
     public static class Interrupt{
         private int mWhat;
@@ -32,7 +32,7 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> {
         this(null,null);
     }
 
-    public FileProcess(Object title, ArrayList<T> files){
+    public FileProcess(String title, ArrayList<T> files){
         mTitle=title;
             if (null!=files&&files.size()>0){
                 addAll(files);
@@ -54,7 +54,7 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> {
                 R.string.file)+" "+name):""):getText(context,R.string.items,size));
     }
 
-    public final Object getTitle() {
+    public final String getTitle() {
         return mTitle;
     }
 

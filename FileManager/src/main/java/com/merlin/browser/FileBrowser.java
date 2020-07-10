@@ -198,7 +198,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     protected FileProcess onCreateFileProcess(int mode,ArrayList<Path> files,String target,Integer coverMode,String debug){
         switch (mode){
             case MODE_DELETE:
-                return new FileDeleteProcess(R.string.delete,files);
+                return new FileDeleteProcess(getText(R.string.delete),files);
         }
         return null;
     }
