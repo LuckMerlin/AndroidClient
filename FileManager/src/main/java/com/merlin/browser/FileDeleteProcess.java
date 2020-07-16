@@ -3,6 +3,8 @@ package com.merlin.browser;
 import com.merlin.api.ApiMap;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.Processing;
+import com.merlin.api.ProcessingFetcher;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
@@ -32,7 +34,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
     private interface Api{
         @POST("/file/delete")
         @FormUrlEncoded
-        Call<Reply<ApiMap<String,Reply<String>>>> delete(@Field(Label.LABEL_PATH) String... paths);
+        Call<Reply<Processing>> delete(@Field(Label.LABEL_PATH) String... paths);
     }
 
     @Override
@@ -59,21 +61,27 @@ public class FileDeleteProcess extends FileProcess<Path> {
                         }
                     }else{//Delete cloud file
                         try {
-                            Response<Reply<ApiMap<String,Reply<String>>>> response=retrofit.prepare(Api.class,
-                                    pathObj.getHostUri(),null).delete(path).execute();
-                            Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
-                            ApiMap<String,Reply<String>> map=null!=reply?reply.getData():null;
-                            Reply<String> apiReply=null!=map?map.get(path):null;
-                            Debug.D(getClass(),"AAAAAAAAAAA "+reply);
-                            if (null!=apiReply){
-                                String note=apiReply.getNote();
-                                boolean succeed=apiReply.isSuccess()&&apiReply.getWhat()==What.WHAT_SUCCEED;
-                                update.onProcessUpdate(succeed?What.WHAT_SUCCEED:What.WHAT_FAIL_UNKNOWN,
-                                        succeed?R.string.succeed:(null!=note&&note.length()>0?note:R.string.fail),
-                                        pathObj,null,path);
-                            }else{
-                                update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.fail,pathObj,null,path);
-                            }
+//                            Response<Reply<Processing>> response=retrofit.prepare(Api.class, pathObj.getHostUri(),null).delete(path).execute();
+//                            Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
+                            ProcessingFetcher fetcher=new ProcessingFetcher();
+                            Call<Reply<Processing>> call=retrofit.prepare(Api.class, pathObj.getHostUri(), null).delete(path);
+                            call.execute();
+                            fetcher.call(retrofit, call, null);
+//                            fetcher.call();
+//                            fetcher.fetch(null!=response?response.body());
+//                            Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
+//                            ApiMap<String,Reply<String>> map=null!=reply?reply.getData():null;
+//                            Reply<String> apiReply=null!=map?map.get(path):null;
+//                            Debug.D(getClass(),"AAAAAAAAAAA "+reply);
+//                            if (null!=apiReply){
+//                                String note=apiReply.getNote();
+//                                boolean succeed=apiReply.isSuccess()&&apiReply.getWhat()==What.WHAT_SUCCEED;
+//                                update.onProcessUpdate(succeed?What.WHAT_SUCCEED:What.WHAT_FAIL_UNKNOWN,
+//                                        succeed?R.string.succeed:(null!=note&&note.length()>0?note:R.string.fail),
+//                                        pathObj,null,path);
+//                            }else{
+//                                update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.fail,pathObj,null,path);
+//                            }
                         } catch (IOException e) {
                             Debug.D(getClass(),"AAAAAAAAAAA "+e);
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.exception,pathObj,null,path);
