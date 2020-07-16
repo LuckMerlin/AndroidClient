@@ -15,6 +15,8 @@ import com.merlin.retrofit.Retrofit;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.Field;
@@ -61,12 +63,23 @@ public class FileDeleteProcess extends FileProcess<Path> {
                         }
                     }else{//Delete cloud file
                         try {
-//                            Response<Reply<Processing>> response=retrofit.prepare(Api.class, pathObj.getHostUri(),null).delete(path).execute();
-//                            Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
+                            Response<Reply<Processing>> response=retrofit.prepare(Api.class, pathObj.getHostUri(), null).delete(path).execute();
+                            Reply<Processing> reply=null!=response?response.body():null;
+                            if (null==reply){
+                                update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN,R.string.deleteSucceed,pathObj,null,path);
+                                return null;
+                            }
+                            Processing processing=reply.getData();
+                            String processingId=null!=processing&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?processing.getId():null;
+                            if (null==processingId||processingId.length()<=0){//Delete launch fail
+                                update.onProcessUpdate(reply.getWhat(),reply.getNote(),pathObj,null,path);
+                                return null;
+                            }
                             ProcessingFetcher fetcher=new ProcessingFetcher();
-                            Call<Reply<Processing>> call=retrofit.prepare(Api.class, pathObj.getHostUri(), null).delete(path);
-                            call.execute();
-                            fetcher.call(retrofit, call, null);
+                            fetcher.fetch(retrofit,processingId);
+                            //                            fetcher.call(retrofit,observable,null);
+                            //                            call.execute();
+//                            fetcher.call(retrofit, call, null);
 //                            fetcher.call();
 //                            fetcher.fetch(null!=response?response.body());
 //                            Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
