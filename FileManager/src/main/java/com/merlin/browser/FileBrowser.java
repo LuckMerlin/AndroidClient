@@ -20,6 +20,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
+import com.merlin.browser.config.Config;
 import com.merlin.click.OnTapClick;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
@@ -43,7 +44,18 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     private final Client mMeta;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
-    private final Retrofit mRetrofit=new Retrofit();
+    private final Retrofit mRetrofit=new Retrofit(){
+        @Override
+        protected String onResolveUrl(Class<?> cls, Executor callbackExecutor) {
+                Context context=getAdapterContext();
+                context=null!=context?context.getApplicationContext():null;
+                android.app.Application application= null!=context&&context instanceof android.app.Application?(android.app.Application)context:null;
+                com.merlin.browser.Application app=null!=application&&application instanceof
+                        com.merlin.browser.Application?(com.merlin.browser.Application)application:null;
+                Config config=null!=app?app.getConfig():null;
+            return null!=config?config.getServerUri():null;
+        }
+    };
 
     private interface Api{
         @POST("/none")
@@ -239,10 +251,12 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         final Dialog dialog=new Dialog(getAdapterContext());
         final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
         final Canceler[] cancelers=new Canceler[1];
+
         final FileProcess.Interrupt[] interrupts=new FileProcess.Interrupt[1];
         Object title=process.getTitle();
         return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).
                 message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
+                    dialog.message(null);
                     switch (resId){
                         case R.string.sure:
                              dialog.setContentView(binding,false).left(null).message("");//Clean message
@@ -250,15 +264,16 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                                     if (what==What.WHAT_SUCCEED){
                                         post(()->dialog.dismiss(),100);
                                     }
-                             };
+                             }
+                             ;
                              final FileProcess.OnProcessUpdate update=(what,note,from,to,arg)-> {
                                    switch (what){
-//                                       case What.WHAT_DOING:
+                                       case What.WHAT_DOING:
 //                                       case What.WHAT_FAIL_UNKNOWN:
-//                                           dialog.message(null).title(note);
-//                                           binding.setLeft(from);
-//                                           binding.setRight(to);
-//                                           break;
+                                           binding.setLeft(from);
+                                           binding.setRight(to);
+                                           break;
+
 //                                       case What.WHAT_INTERRUPT:
 //                                           if (null!=arg&&arg instanceof FileProcess.Interrupt){
 //                                               interrupts[0]=(FileProcess.Interrupt)arg;

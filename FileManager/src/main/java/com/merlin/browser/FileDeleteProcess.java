@@ -1,10 +1,8 @@
 package com.merlin.browser;
 
-import com.merlin.api.ApiMap;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.Processing;
-import com.merlin.api.ProcessingFetcher;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
@@ -13,10 +11,8 @@ import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.Field;
@@ -46,7 +42,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
             return null;
         }
         synchronized (this){
-            if (size()>0){
+            if (size()>=0){
                 for (Path pathObj:this) {
                     final String path=null!=pathObj?pathObj.getPath():null;
                     if (null==path|path.length()<=0){
@@ -63,40 +59,31 @@ public class FileDeleteProcess extends FileProcess<Path> {
                         }
                     }else{//Delete cloud file
                         try {
-                            Response<Reply<Processing>> response=retrofit.prepare(Api.class, pathObj.getHostUri(), null).delete(path).execute();
+                            Response<Reply<Processing>> response=retrofit.prepare(Api.class, pathObj
+                                    .getHostUri(), null).delete(path).execute();
                             Reply<Processing> reply=null!=response?response.body():null;
                             if (null==reply){
                                 update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN,R.string.deleteSucceed,pathObj,null,path);
-                                return null;
+                                continue;
                             }
                             Processing processing=reply.getData();
-                            String processingId=null!=processing&&reply.isSuccess()&&reply.getWhat()==What.WHAT_SUCCEED?processing.getId():null;
+                            String processingId=null!=processing&&reply.isSuccess()&&reply.getWhat()
+                                    ==What.WHAT_SUCCEED?processing.getId():null;
                             if (null==processingId||processingId.length()<=0){//Delete launch fail
                                 update.onProcessUpdate(reply.getWhat(),reply.getNote(),pathObj,null,path);
-                                return null;
+                                continue;
                             }
-                            ProcessingFetcher fetcher=new ProcessingFetcher();
-                            fetcher.fetch(retrofit,processingId);
-                            //                            fetcher.call(retrofit,observable,null);
-                            //                            call.execute();
-//                            fetcher.call(retrofit, call, null);
-//                            fetcher.call();
-//                            fetcher.fetch(null!=response?response.body());
-//                            Reply<ApiMap<String,Reply<String>>> reply=null!=response?response.body():null;
-//                            ApiMap<String,Reply<String>> map=null!=reply?reply.getData():null;
-//                            Reply<String> apiReply=null!=map?map.get(path):null;
-//                            Debug.D(getClass(),"AAAAAAAAAAA "+reply);
-//                            if (null!=apiReply){
-//                                String note=apiReply.getNote();
-//                                boolean succeed=apiReply.isSuccess()&&apiReply.getWhat()==What.WHAT_SUCCEED;
-//                                update.onProcessUpdate(succeed?What.WHAT_SUCCEED:What.WHAT_FAIL_UNKNOWN,
-//                                        succeed?R.string.succeed:(null!=note&&note.length()>0?note:R.string.fail),
-//                                        pathObj,null,path);
-//                            }else{
-//                                update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.fail,pathObj,null,path);
-//                            }
-                        } catch (IOException e) {
-                            Debug.D(getClass(),"AAAAAAAAAAA "+e);
+                            ProcessingFetcher fetcher=new ProcessingFetcher(processingId){
+                                @Override
+                                protected void onProcessingUpdate(Processing<Path,Path,Reply<Path>> process) {
+                                    Path path=null!=process?process.getPath():null;
+                                    update.onProcessUpdate(What.WHAT_DOING,"",path,null,null);
+                                }
+
+                            };
+                            fetcher.delete(retrofit);
+                        } catch (Exception e) {
+                            Debug.E(getClass(),"Exception delete nas file.e="+e,e);
                             update.onProcessUpdate(What.WHAT_FAIL_UNKNOWN, R.string.exception,pathObj,null,path);
                         }
                     }

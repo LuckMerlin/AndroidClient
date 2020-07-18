@@ -2,7 +2,7 @@ package com.merlin.api;
 
 import java.util.List;
 
-public final class Processing<T,V,M> {
+public class Processing<T,V,M> {
     private String id;
     private T path;
     private int position;
