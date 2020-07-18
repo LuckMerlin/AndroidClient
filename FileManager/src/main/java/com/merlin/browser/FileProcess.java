@@ -1,7 +1,10 @@
 package com.merlin.browser;
 
 import android.content.Context;
+
+import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.Processing;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
@@ -14,10 +17,22 @@ import com.merlin.retrofit.Retrofit;
 import java.io.File;
 import java.util.ArrayList;
 
-public abstract class FileProcess<T extends Path> extends ArrayList<T> {
+import retrofit2.Call;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
+
+public abstract class FileProcess<T extends Path> extends ArrayList<T> implements Canceler{
     private final String mTitle;
     private boolean mProcessing=false;
+    private boolean mCancel=false;
     private int mProcessingIndex;
+
+    private interface Api{
+        @POST("/file/processing")
+        @FormUrlEncoded
+        Call<Reply<Processing>> cancelProcess(@Field(Label.LABEL_ID) String processingId);
+    }
 
     public static class Interrupt{
         private int mWhat;
@@ -44,9 +59,27 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> {
         }
     }
 
-    protected abstract Reply onProcess(T pathObj,OnProcessUpdate update, Retrofit retrofit);
+    protected void onCanceled(boolean cancel,String debug){
+        //Do nothing
+    }
 
-    public final Reply onProcess(OnProcessUpdate update, Cancel canceler, Retrofit retrofit) {
+    @Override
+    public final boolean cancel(boolean cancel, String debug) {
+        if (mCancel!=cancel){
+            mCancel=cancel;
+            onCanceled(cancel, debug);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean isCancel() {
+        return mCancel;
+    }
+
+    protected abstract Reply onProcess(T pathObj, OnProcessUpdate update, Retrofit retrofit);
+
+    public final Reply onProcess(OnProcessUpdate update, Retrofit retrofit) {
         if (null==update){
             Debug.W(getClass(),"Can't process file delete with invalid args "+update);
             return null;
@@ -58,9 +91,9 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> {
                     Reply reply=null;
                     mProcessing=true;
                     for (T pathObj:this) {
-                        if (null!=canceler&&canceler.isCanceled()){
-                            update.onProcessUpdate(R.string.canceled,pathObj,null, pathObj,null);
-                            return null;
+                        if (isCancel()){
+//                            update.onProcessUpdate(R.string.canceled,pathObj,null, pathObj,null);
+                            return new Reply(true,What.WHAT_CANCEL,"Canceled.",null);
                         }
                         mProcessingIndex+=1;
                         reply=onProcess(pathObj,update,retrofit);

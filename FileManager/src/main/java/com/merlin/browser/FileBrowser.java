@@ -251,7 +251,6 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         String message=process.getMessage(getAdapterContext());
         final Dialog dialog=new Dialog(getAdapterContext());
         final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-        final Cancel canceler=new Cancel();
         Object title=process.getTitle();
         return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).
                 message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
@@ -270,7 +269,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             if (null==call(prepare(Api.class, "http://None.request.Url", null).noneRequest().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
                                 if (!disposable.isDisposed()){
                                     disposable.dispose();//Cancel none request
-                                    Reply reply=process.onProcess(update,canceler,mRetrofit);
+                                    Reply reply=process.onProcess(update,mRetrofit);
                                     binding.setReply(reply);
                                     dialog.right(R.string.finished);
                                 }else {
@@ -282,9 +281,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             }
                             break;
                         case R.string.cancel:
-                            if (null==canceler||canceler.cancel(true,"While cancel tap.")){
-                                dialog.dismiss();//Dismiss dialog while cancel succeed
-                            }
+                            process.cancel(true,"After user cancel click.");
                             if (null!=finish){
                                 finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
                             }

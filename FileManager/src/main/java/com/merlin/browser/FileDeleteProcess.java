@@ -57,6 +57,10 @@ public class FileDeleteProcess extends FileProcess<Path> {
                 update.onProcessUpdate(R.string.deleteFail, path, null, null,0);
                 return new Reply(true,What.WHAT_FAIL_UNKNOWN,"Process return NUll",null);
             }
+            if (isCancel()){
+
+                return new Reply(true,What.WHAT_CANCEL,"Delete cancel",null);
+            }
             Processing processing = reply.getData();
             String processingId = null != processing && reply.isSuccess() && reply.getWhat() == What.WHAT_SUCCEED ? processing.getId() : null;
             if (null == processingId || processingId.length() <= 0) {//Delete launch fail
