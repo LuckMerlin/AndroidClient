@@ -42,7 +42,6 @@
         <TextView
             binding:text="@{messageText==null?``:messageText}"
             android:visibility="@{messageText==null?View.GONE:View.VISIBLE}"
-            android:layout_marginBottom="15dp"
             style="@style/titleNormalTextView"/>
             <FrameLayout
                 android:visibility="@{null!=contentLayout?View.VISIBLE:View.GONE}"

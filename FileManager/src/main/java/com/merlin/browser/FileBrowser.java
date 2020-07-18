@@ -28,6 +28,7 @@ import com.merlin.dialog.PopupWindow;
 import com.merlin.file.R;
 import com.merlin.file.databinding.LayoutFileModifyBinding;
 import com.merlin.file.databinding.SingleEditTextBinding;
+import com.merlin.lib.Cancel;
 import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.retrofit.RetrofitCanceler;
@@ -250,61 +251,46 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         String message=process.getMessage(getAdapterContext());
         final Dialog dialog=new Dialog(getAdapterContext());
         final LayoutFileModifyBinding binding=inflate(R.layout.layout_file_modify);
-        final Canceler[] cancelers=new Canceler[1];
-
-        final FileProcess.Interrupt[] interrupts=new FileProcess.Interrupt[1];
+        final Cancel canceler=new Cancel();
         Object title=process.getTitle();
         return dialog.create().setCancelable(false).setCanceledOnTouchOutside(false).title(title).
                 message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
-                    dialog.message(null);
                     switch (resId){
                         case R.string.sure:
-                             dialog.setContentView(binding,false).left(null).message("");//Clean message
-                             final OnApiFinish apiFinish=(int what, String note, Object apiData, Object arg) ->{
-                                    if (what==What.WHAT_SUCCEED){
-                                        post(()->dialog.dismiss(),100);
-                                    }
-                             }
-                             ;
-                             final FileProcess.OnProcessUpdate update=(what,note,from,to,arg)-> {
-                                   switch (what){
-                                       case What.WHAT_DOING:
-//                                       case What.WHAT_FAIL_UNKNOWN:
-                                           binding.setLeft(from);
-                                           binding.setRight(to);
-                                           break;
-
-//                                       case What.WHAT_INTERRUPT:
-//                                           if (null!=arg&&arg instanceof FileProcess.Interrupt){
-//                                               interrupts[0]=(FileProcess.Interrupt)arg;
-//                                               dialog.message(note).left(R.string.sure).right(R.string.cancel);
-//                                           }
-//                                           break;
-                                   }
-                             };
-                            if (null==call(prepare(Api.class, "http://None.request.Url", null)
-                                    .noneRequest().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+                             dialog.setContentView(binding,false).title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）").left(null).message(null);//Clean message
+                             binding.setRight(null);
+                             final FileProcess.OnProcessUpdate update=(Object note, Path from, Path to,Path instant, Integer progress)-> {
+                                 binding.setLeft(from);
+                                 binding.setRight(to);
+                                 binding.setInstant(instant);
+                                 dialog.title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）");
+                                 if (null != progress) {
+                                     binding.setProgress(progress);
+                                 }};
+                            if (null==call(prepare(Api.class, "http://None.request.Url", null).noneRequest().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
                                 if (!disposable.isDisposed()){
                                     disposable.dispose();//Cancel none request
-                                    Canceler canceler=cancelers[0]=process.onProcess(update,apiFinish,mRetrofit);
-                                    if (null==canceler){//Process fail?Dismiss dialog
-                                        post(()->dialog.dismiss(),1000);
-                                    }
+                                    Reply reply=process.onProcess(update,canceler,mRetrofit);
+                                    binding.setReply(reply);
+                                    dialog.right(R.string.finished);
                                 }else {
-                                    post(()->dialog.dismiss(),1000);
+                                    post(()->{dialog.dismiss();toast(R.string.canceled);},1000);
                                 }
                             })), null, null)){
                                 dialog.dismiss();
+                                toast(R.string.fail);
                             }
                             break;
                         case R.string.cancel:
-                            Canceler canceler=null!=cancelers&&cancelers.length>0?cancelers[0]:null;
                             if (null==canceler||canceler.cancel(true,"While cancel tap.")){
                                 dialog.dismiss();//Dismiss dialog while cancel succeed
                             }
                             if (null!=finish){
                                 finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
                             }
+                            break;
+                        case R.string.finished:
+                            dialog.dismiss();
                             break;
                     }
                     return true; })&&false;

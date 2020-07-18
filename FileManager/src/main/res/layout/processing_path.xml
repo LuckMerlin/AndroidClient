@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="path"
+            type="com.merlin.bean.Path" />
+        <import type="com.merlin.util.FileSize"/>
+        <import type="android.view.View"/>
+        <import type="com.merlin.api.What"/>
+    </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:gravity="center"
+            android:minLines="2"
+            android:maxLines="2"
+            android:text="@{path.name+`(`+path.volume+`)`}"
+            android:textStyle="bold"
+            style="@style/titleSubNormalTextView"/>
+        <TextView
+            android:singleLine="true"
+            android:text="@{path.mime}"
+            style="@style/titleSmallTextView"/>
+        <TextView
+            android:singleLine="true"
+            android:text="@{path.host}"
+            style="@style/titleSmallTextView"/>
+    </LinearLayout>
+</layout>

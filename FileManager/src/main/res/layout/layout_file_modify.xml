@@ -8,65 +8,65 @@
         <variable
             name="right"
             type="com.merlin.bean.Path" />
+        <variable
+            name="reply"
+            type="com.merlin.api.Reply" />
+        <variable
+            name="instant"
+            type="com.merlin.bean.Path" />
+        <variable
+            name="progress"
+            type="int" />
         <import type="android.view.View"/>
+        <import type="com.merlin.util.FileSize"/>
     </data>
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
-            android:orientation="horizontal"
+            android:visibility="@{null==reply?View.VISIBLE:View.GONE}"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_weight="1">
-                <TextView
-                    android:lines="2"
-                    android:gravity="center"
-                    android:text="@{left.name}"
-                    android:textStyle="bold"
-                    style="@style/titleSubNormalTextView"/>
-                <TextView
-                    android:singleLine="true"
-                    android:text="@{left.host}"
-                    style="@style/titleSmallTextView"/>
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <include
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:visibility="@{null!=left?View.VISIBLE:View.GONE}"
+                    layout="@layout/processing_path"
+                    binding:path="@{left}"
+                    android:layout_weight="1"/>
+                <include
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:visibility="@{null!=right?View.VISIBLE:View.GONE}"
+                    layout="@layout/processing_path"
+                    binding:path="@{right}"
+                    android:layout_weight="1"/>
             </LinearLayout>
             <TextView
-                android:text="--"
-                android:visibility="@{left!=null&amp;&amp;null!=right?View.VISIBLE:View.GONE}"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
+                android:text="@{instant.title??instant.name}"
+                android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="@{right!=null?View.VISIBLE:View.GONE}"
-                android:gravity="center"
-                android:layout_weight="1">
-                <TextView
-                    android:lines="2"
-                    android:gravity="center"
-                    android:text="@{right.name}"
-                    android:textStyle="bold"
-                    style="@style/titleSubNormalTextView"/>
-                <TextView
-                    android:singleLine="true"
-                    android:text="@{right.host}"
-                    style="@style/titleSmallTextView"/>
-            </LinearLayout>
+            <ProgressBar
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_gravity="center_horizontal"
+                android:progress="@{progress}"
+                android:minHeight="4dp"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
-        <ProgressBar
-            style="@android:style/Widget.ProgressBar.Horizontal"
+        <TextView
+            android:text="@{reply.note}"
             android:layout_gravity="center_horizontal"
-            android:progress="20"
-            android:minHeight="1dp"
-            android:layout_width="match_parent"
+            android:layout_marginBottom="5dp"
+            android:visibility="@{null!=reply?View.VISIBLE:View.GONE}"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-    </LinearLayout>
+    </FrameLayout>
 </layout>

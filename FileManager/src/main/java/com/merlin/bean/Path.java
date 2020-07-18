@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.file.R;
+import com.merlin.util.FileSize;
 
 import java.io.File;
 
@@ -150,6 +151,11 @@ public final class Path implements Parcelable {
     public final boolean isLocal() {
         String host=this.host;
         return null!=host&&host.equals(LOCAL_HOST);
+    }
+
+    public String getVolume(){
+        long size=getSize();
+        return size==What.WHAT_NOT_DIRECTORY? FileSize.formatSizeText(getLength()):""+size;
     }
 
     public final boolean applyNameChange(Reply<Path> reply){
