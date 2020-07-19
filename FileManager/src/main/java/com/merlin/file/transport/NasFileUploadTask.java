@@ -11,27 +11,37 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 
 public class NasFileUploadTask extends HttpUploadTask {
-    private final String mPath;
+    private final String mFolder;
+    private final String mName;
 
-    public NasFileUploadTask(String from, Path toFolder) {
-        this(null!=toFolder&&toFolder.isDirectory()?toFolder.getPath():null,from,
+    public NasFileUploadTask(String from, Path toFolder,String name) {
+        this(null!=toFolder&&toFolder.isDirectory()?toFolder.getParent():null,name,from,
                 null!=toFolder&&toFolder.isDirectory()?toFolder.getHostUri():null);
     }
 
-    private NasFileUploadTask(String targetFolder,String from,String to){
-        super(from,null!=to?to+"/file/upload":null);
-        mPath=targetFolder;
+    private NasFileUploadTask(String folder,String name,String from,String toUri){
+        super(from,null!=toUri?toUri+"/file/upload":null);
+        mFolder=folder;
+        mName=name;
     }
 
     @Override
     protected void onUploadPrepared(HttpURLConnection connection) {
         super.onUploadPrepared(connection);
         if (null!=connection){
-            String path=mPath;
-            if (null!=path&&path.length()>0){
+            String folder=mFolder;
+            if (null!=folder&&folder.length()>0){
                 try {
-                    Debug.D("AAAAAAAAAAA "+path);
-                    connection.setRequestProperty(Label.LABEL_PATH, URLEncoder.encode(path,"utf-8"));
+                    connection.setRequestProperty(Label.LABEL_PATH, URLEncoder.encode(folder,"utf-8"));
+                } catch (UnsupportedEncodingException e) {
+                    Debug.E("Exception set nas upload path to header."+e,e);
+                    e.printStackTrace();
+                }
+            }
+            String name=mName;
+            if (null!=name&&name.length()>0){
+                try {
+                    connection.setRequestProperty(Label.LABEL_NAME, URLEncoder.encode(name,"utf-8"));
                 } catch (UnsupportedEncodingException e) {
                     Debug.E("Exception set nas upload path to header."+e,e);
                     e.printStackTrace();

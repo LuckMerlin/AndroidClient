@@ -74,9 +74,10 @@ public class HttpUploadTask extends FileTransTask<String, String> {
             conn.setRequestProperty("connection", "Keep-Alive");
             conn.setUseCaches(false);
             conn.setRequestProperty("Charset", "UTF-8");
+            conn.setRequestProperty("content-length", Long.toString(fileLength));
             conn.setConnectTimeout(5000);
             conn.setRequestProperty("Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
-            conn.setRequestProperty("fileName",fileName);
+            conn.setRequestProperty("name",fileName);
             onUploadPrepared(conn);
             conn.connect();
             Debug.D("Uploading file "+fileLength+" "+toUriPath);

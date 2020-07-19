@@ -63,7 +63,7 @@ public class TaskActivity extends ModelActivity<TaskModel> {
 //        NasFileDownloadTask task=new NasFileDownloadTask(new Gson().fromJson(path,Path.class),"/sdcard/linqiang.mp3");
 //        task.setCover(Cover.COVER_REPLACE);
 //        boolean d=executor.add(task,null);
-        executor.add(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class)),null);
+        executor.add(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),null),null);
         boolean ddd=executor.start(null);
         Debug.D("AAAAAAAAAAa  "+ddd);
 
