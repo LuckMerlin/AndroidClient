@@ -15,7 +15,16 @@
         android:theme="@android:style/Theme.Wallpaper.NoTitleBar"
         android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true">
-        <activity android:name="com.merlin.browser.FileBrowserActivity"
+
+        <activity android:name="com.file.activity.TaskActivity" android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="dddd"/>
+            </intent-filter>
+        </activity>
+
+        <service android:name="com.merlin.task.TaskService"/>
+
+        <activity android:name="com.file.activity.FileBrowserActivity"
             android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

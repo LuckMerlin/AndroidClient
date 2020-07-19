@@ -50,4 +50,5 @@ public interface Label{
    String  LABEL_IMAGE="image";
    String  LABEL_WIDTH="width";
    String  LABEL_HEIGHT="height";
+   String  LABEL_CANCEL="cancel";
 }

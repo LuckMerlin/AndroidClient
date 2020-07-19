@@ -1,4 +1,4 @@
-package com.merlin.browser;
+package com.file.activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -13,7 +13,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.merlin.debug.Debug;
 import com.merlin.file.R;
-import com.merlin.browser.model.FileBrowserModel;
+import com.file.model.FileBrowserModel;
 import com.merlin.model.Model;
 import com.merlin.model.ModelActivity;
 

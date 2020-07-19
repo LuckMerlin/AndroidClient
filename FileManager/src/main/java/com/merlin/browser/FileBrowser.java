@@ -34,6 +34,7 @@ import com.merlin.retrofit.Retrofit;
 import com.merlin.retrofit.RetrofitCanceler;
 import com.merlin.server.Client;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import io.reactivex.Observable;
@@ -258,7 +259,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                         case R.string.sure:
                              dialog.setContentView(binding,false).title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）").left(null).message(null);//Clean message
                              binding.setRight(null);
-                             final FileProcess.OnProcessUpdate update=(Object note, Path from, Path to,Path instant, Integer progress)-> {
+                             final FileProcess.OnProcessUpdate update=(Object note, Path from, Path to, Path instant, Integer progress, List<Path> processed)-> {
                                  binding.setLeft(from);
                                  binding.setRight(to);
                                  binding.setInstant(instant);
@@ -281,10 +282,12 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             }
                             break;
                         case R.string.cancel:
-                            process.cancel(true,"After user cancel click.");
-                            if (null!=finish){
-                                finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
+                            if (!process.isProcessing()|| process.cancel(true,"After user cancel click.")){
+                                toast(R.string.canceled);
                             }
+//                            if (null!=finish){
+//                                finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
+//                            }
                             break;
                         case R.string.finished:
                             dialog.dismiss();

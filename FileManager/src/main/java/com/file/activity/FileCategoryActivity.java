@@ -1,4 +1,4 @@
-package com.merlin.browser;
+package com.file.activity;
 
 public class FileCategoryActivity {
 }

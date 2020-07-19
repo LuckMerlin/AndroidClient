@@ -1,4 +1,4 @@
-package com.merlin.browser.model;
+package com.file.model;
 
 import android.app.Activity;
 import android.content.Context;

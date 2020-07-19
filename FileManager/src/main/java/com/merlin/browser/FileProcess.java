@@ -15,9 +15,12 @@ import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -27,12 +30,6 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
     private boolean mProcessing=false;
     private boolean mCancel=false;
     private int mProcessingIndex;
-
-    private interface Api{
-        @POST("/file/processing")
-        @FormUrlEncoded
-        Call<Reply<Processing>> cancelProcess(@Field(Label.LABEL_ID) String processingId);
-    }
 
     public static class Interrupt{
         private int mWhat;
@@ -63,6 +60,10 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
         //Do nothing
     }
 
+    public final boolean isProcessing() {
+        return mProcessing;
+    }
+
     @Override
     public final boolean cancel(boolean cancel, String debug) {
         if (mCancel!=cancel){
@@ -91,12 +92,12 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
                     Reply reply=null;
                     mProcessing=true;
                     for (T pathObj:this) {
-                        if (isCancel()){
-//                            update.onProcessUpdate(R.string.canceled,pathObj,null, pathObj,null);
-                            return new Reply(true,What.WHAT_CANCEL,"Canceled.",null);
-                        }
                         mProcessingIndex+=1;
                         reply=onProcess(pathObj,update,retrofit);
+                        if (isCancel()){
+                            reply=new Reply(true,What.WHAT_CANCEL,"Canceled.",null);
+                            break;
+                        }
                     }
                     mProcessing=false;
                     return reply;
@@ -111,7 +112,7 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
     }
 
     public interface OnProcessUpdate {
-        void onProcessUpdate(Object note, Path from, Path to,Path instant, Integer progress);
+        void onProcessUpdate(Object note, Path from, Path to, Path instant, Integer progress, List<Path> processed);
     }
 
     public String getMessage(Context context){

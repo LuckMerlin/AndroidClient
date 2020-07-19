@@ -49,36 +49,40 @@ public class FileDeleteProcess extends FileProcess<Path> {
 
     private Reply deleteCloudFile(Retrofit retrofit, Path path, OnProcessUpdate update){
         try {
-            update.onProcessUpdate(R.string.delete,path,null, path,null);
+            update.onProcessUpdate(R.string.delete,path,null, path,null,null);
             Response<Reply<Processing>> response = null!=retrofit&&null!=path?retrofit.prepare(Api.class, path
                     .getHostUri(), null).delete(path.getPath()).execute():null;
             Reply<Processing> reply = null != response ? response.body() : null;
             if (null == reply) {
-                update.onProcessUpdate(R.string.deleteFail, path, null, null,0);
+                update.onProcessUpdate(R.string.deleteFail, path, null, null,0,null);
                 return new Reply(true,What.WHAT_FAIL_UNKNOWN,"Process return NUll",null);
             }
             if (isCancel()){
-
                 return new Reply(true,What.WHAT_CANCEL,"Delete cancel",null);
             }
             Processing processing = reply.getData();
             String processingId = null != processing && reply.isSuccess() && reply.getWhat() == What.WHAT_SUCCEED ? processing.getId() : null;
             if (null == processingId || processingId.length() <= 0) {//Delete launch fail
-                update.onProcessUpdate(reply.getNote(), path, null, null, null != processing ? processing.getPosition() : null);
+                update.onProcessUpdate(reply.getNote(), path, null, null, null != processing ? processing.getPosition() : null,null);
                 return reply;
             }
             ProcessingFetcher fetcher = new ProcessingFetcher(processingId) {
                 @Override
+                protected boolean isCanceled() {
+                    return FileDeleteProcess.this.isCancel();
+                }
+
+                @Override
                 protected void onProcessingUpdate(Processing<Path, Path, Reply<Path>> process) {
                     if (null!=process){
-                        update.onProcessUpdate(null, null , null, process.getPath(),process.getPosition());
+                        update.onProcessUpdate(null, null , null, process.getPath(),process.getPosition(),null);
                     }
                 }
             };
             return fetcher.delete(retrofit);
         } catch (Exception e) {
             Debug.E(getClass(), "Exception delete nas file.e=" + e, e);
-            update.onProcessUpdate(R.string.exception, path, null, null,null);
+            update.onProcessUpdate(R.string.exception, path, null, null,null,null);
             return new Reply(true, What.WHAT_ERROR_UNKNOWN, "Exception " + e, null);
         }
     }
