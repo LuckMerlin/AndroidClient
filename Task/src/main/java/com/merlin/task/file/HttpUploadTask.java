@@ -13,9 +13,11 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.File;
+import java.net.URLEncoder;
 
 
 public class HttpUploadTask extends FileTransTask<String, String> {
@@ -34,6 +36,19 @@ public class HttpUploadTask extends FileTransTask<String, String> {
 
     protected void onUploadPrepared(HttpURLConnection connection){
         //Do nothing
+    }
+
+    protected final boolean inflate(HttpURLConnection connection,String key,String value){
+        if (null!=connection&&null!=key&&key.length()>0&&null!=value){
+            try {
+                connection.setRequestProperty(key, URLEncoder.encode(value,"utf-8"));
+                return true;
+            } catch (UnsupportedEncodingException e) {
+                Debug.E("Exception set value to header."+e,e);
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     @Override
@@ -74,7 +89,9 @@ public class HttpUploadTask extends FileTransTask<String, String> {
             conn.setRequestProperty("connection", "Keep-Alive");
             conn.setUseCaches(false);
             conn.setRequestProperty("Charset", "UTF-8");
-            conn.setRequestProperty("content-length", Long.toString(fileLength));
+            String contentLength=Long.toString(fileLength);
+            conn.setRequestProperty("Content-Length", contentLength);
+            conn.setRequestProperty("length", contentLength);
             conn.setConnectTimeout(5000);
             conn.setRequestProperty("Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
             conn.setRequestProperty("name",fileName);

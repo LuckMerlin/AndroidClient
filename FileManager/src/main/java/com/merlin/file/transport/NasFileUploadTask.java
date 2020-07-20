@@ -29,24 +29,8 @@ public class NasFileUploadTask extends HttpUploadTask {
     protected void onUploadPrepared(HttpURLConnection connection) {
         super.onUploadPrepared(connection);
         if (null!=connection){
-            String folder=mFolder;
-            if (null!=folder&&folder.length()>0){
-                try {
-                    connection.setRequestProperty(Label.LABEL_PATH, URLEncoder.encode(folder,"utf-8"));
-                } catch (UnsupportedEncodingException e) {
-                    Debug.E("Exception set nas upload path to header."+e,e);
-                    e.printStackTrace();
-                }
-            }
-            String name=mName;
-            if (null!=name&&name.length()>0){
-                try {
-                    connection.setRequestProperty(Label.LABEL_NAME, URLEncoder.encode(name,"utf-8"));
-                } catch (UnsupportedEncodingException e) {
-                    Debug.E("Exception set nas upload path to header."+e,e);
-                    e.printStackTrace();
-                }
-            }
+            inflate(connection,Label.LABEL_PATH,mFolder);
+            inflate(connection,Label.LABEL_NAME,mName);
         }
     }
 }
