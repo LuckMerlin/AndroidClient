@@ -54,8 +54,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
         HttpURLConnection connection = null;
         try {
             notifyStatus(Status.PREPARE,"Prepare download file task "+fromUriPath);
-            URL fromUri=new URL(fromUriPath);
-            HttpURLConnection conn=null!=fromUri?createHttpConnect(fromUri,mMethod):null;
+            HttpURLConnection conn=null!=fromUriPath?createHttpConnect(fromUriPath,mMethod):null;
             if (null==conn){
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"Fail open connection for download target path");
                 return null;
@@ -115,7 +114,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
            }
            FileProgress progress=new FileProgress(currentLength,fileLength);
            Debug.D("Downloading file "+fileLength+" "+toPath);
-           notifyStatus(Status.DOING,"Doing download file task "+fromUri, progress);
+           notifyStatus(Status.DOING,"Doing download file task "+fromUriPath, progress);
            OutputStream out =outputStream= new FileOutputStream(toFile,currentLength<fileLength);
            long downloaded=currentLength;
            int size=0;
@@ -144,7 +143,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
             out.flush();
            if (what==What.WHAT_SUCCEED){
                Debug.D("Succeed download file. "+toFile.length()+"\n"+"From:"+fromUriPath+"\nTo:"+toPath);
-               notifyStatus(Status.FINISH,what,"Succeed download file "+fromUri, new FileDownloadResult(fromUriPath,toPath,fileLength));
+               notifyStatus(Status.FINISH,what,"Succeed download file "+fromUriPath, new FileDownloadResult(fromUriPath,toPath,fileLength));
                return null;
            }
             Debug.W("Fail download file task."+fileLength+" "+toPath);  //Download fail
@@ -152,7 +151,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                 Debug.D("Delete download fail file."+toFile.length()+" "+toPath);
                 toFile.delete();
             }
-            notifyStatus(Status.FINISH,what,"Fail download file "+fromUri, null);
+            notifyStatus(Status.FINISH,what,"Fail download file "+fromUriPath, null);
             return null;
         }catch (Exception e){
             Debug.E("Exception download file."+e,e);

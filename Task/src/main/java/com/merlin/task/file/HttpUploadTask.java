@@ -6,33 +6,38 @@ import com.merlin.task.Progress;
 import com.merlin.task.Status;
 import com.merlin.task.What;
 import com.task.debug.Debug;
-
-import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.io.File;
 import java.net.URLEncoder;
 
 
-public class HttpUploadTask extends HttpFileTransTask<String, String> {
+public abstract class HttpUploadTask extends HttpFileTransTask<String, String> {
+    private final String mToFolder;
+    private final String mToName;
 
-    public HttpUploadTask(String from, String to) {
-        this(from,to,null);
+    public HttpUploadTask(String from, String to,String toFolder,String toName) {
+        this(from,to,null,toFolder,toName);
     }
 
-    public HttpUploadTask(String from, String to,String method) {
+    public HttpUploadTask(String from, String to,String method,String toFolder,String toName) {
         super(from, to,method);
+        mToFolder=toFolder;
+        mToName=toName;
     }
 
-    protected long onResolveBreakPoint(String path){
-        return 0;
+    public final String getToFolder() {
+        return mToFolder;
     }
+
+    public final String getToName() {
+        return mToName;
+    }
+
+    protected abstract Long onResolveBreakPoint(File file) throws Exception;
 
     protected void onUploadPrepared(HttpURLConnection connection){
         //Do nothing
@@ -77,8 +82,14 @@ public class HttpUploadTask extends HttpFileTransTask<String, String> {
         try {
             Debug.W("Preparing upload file."+fromPath);
             notifyStatus(Status.PREPARE, What.WHAT_NONE,"Prepare upload file");
-            final long currentLength=onResolveBreakPoint(toUriPath);
-
+            final Long currentLength=onResolveBreakPoint(fromFile);
+            if (null==currentLength){
+                Debug.W("Can't upload file while break point resolve NULL.");
+                notifyStatus(Status.FINISH, What.WHAT_ERROR,"Break point resolve NULL "+fromPath);
+                return null;
+            }
+            createHttpConnect(,);
+//            Debug.D("AAAAAAAAAAA "+currentLength);
 //            final String fileName=fromFile.getName();
 //            URL url = new URL(toUriPath);
 //            HttpURLConnection conn = (HttpURLConnection) url.openConnection();

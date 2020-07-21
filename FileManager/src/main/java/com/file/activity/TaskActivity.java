@@ -58,12 +58,12 @@ public class TaskActivity extends ModelActivity<TaskModel> {
                 "        \"mime\":\"audio/mpeg\",\n" +
                 "        \"host\":\"192.168.0.6\",\n" +
                 "        \"createTime\":1571472865,\n" +
-                "        \"extension\":\".mp3\"\n" +
+                "        \"extension\":\"\"\n" +
                 "    }";
 //        NasFileDownloadTask task=new NasFileDownloadTask(new Gson().fromJson(path,Path.class),"/sdcard/linqiang.mp3");
 //        task.setCover(Cover.COVER_REPLACE);
 //        boolean d=executor.add(task,null);
-        executor.add(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),null),null);
+        executor.add(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),"linqiang.mp3"),null);
         boolean ddd=executor.start(null);
         Debug.D("AAAAAAAAAAa  "+ddd);
 
