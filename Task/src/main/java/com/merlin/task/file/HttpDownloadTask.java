@@ -15,7 +15,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class HttpDownloadTask extends FileTransTask<String, String> {
+public class HttpDownloadTask extends HttpFileTransTask<String, String> {
     private String mMethod;
 
     public HttpDownloadTask(String from, String to) {
@@ -53,16 +53,13 @@ public class HttpDownloadTask extends FileTransTask<String, String> {
         InputStream inputStream=null;
         HttpURLConnection connection = null;
         try {
+            notifyStatus(Status.PREPARE,"Prepare download file task "+fromUriPath);
             URL fromUri=new URL(fromUriPath);
-            notifyStatus(Status.PREPARE,"Prepare download file task "+fromUri);
-            HttpURLConnection conn=connection = (HttpURLConnection) fromUri.openConnection();
+            HttpURLConnection conn=null!=fromUri?createHttpConnect(fromUri,mMethod):null;
             if (null==conn){
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"Fail open connection for download target path");
                 return null;
             }
-            String method=mMethod;
-            conn.setRequestMethod(null!=method&&method.equalsIgnoreCase("post")?"POST":"GET");
-            conn.setRequestProperty("Charset", "UTF-8");
             final boolean isEnableBreakPoint=isEnableBreakPoint();
             final long currentLength=toFile.exists()?toFile.length():0;
             if (isEnableBreakPoint&&currentLength>0){

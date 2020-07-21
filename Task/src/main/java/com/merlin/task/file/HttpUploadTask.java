@@ -20,7 +20,7 @@ import java.io.File;
 import java.net.URLEncoder;
 
 
-public class HttpUploadTask extends FileTransTask<String, String> {
+public class HttpUploadTask extends HttpFileTransTask<String, String> {
 
     public HttpUploadTask(String from, String to) {
         this(from,to,null);
@@ -78,61 +78,62 @@ public class HttpUploadTask extends FileTransTask<String, String> {
             Debug.W("Preparing upload file."+fromPath);
             notifyStatus(Status.PREPARE, What.WHAT_NONE,"Prepare upload file");
             final long currentLength=onResolveBreakPoint(toUriPath);
-            final String fileName=fromFile.getName();
-            URL url = new URL(toUriPath);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setChunkedStreamingMode(1024 * 1024);
-            String method=getMethod();
-            conn.setRequestMethod(null!=method&&method.equalsIgnoreCase("post")?"POST":"GET");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setUseCaches(false);
-            conn.setRequestProperty("Charset", "UTF-8");
-            String contentLength=Long.toString(fileLength);
-            conn.setRequestProperty("Content-Length", contentLength);
-            conn.setRequestProperty("length", contentLength);
-            conn.setConnectTimeout(5000);
-            conn.setRequestProperty("Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
-            conn.setRequestProperty("name",fileName);
-            onUploadPrepared(conn);
-            conn.connect();
-            Debug.D("Uploading file "+fileLength+" "+toUriPath);
-            FileProgress progress=new FileProgress(currentLength,fileLength);
-            notifyStatus(Status.DOING,"Doing upload file "+fromPath, progress);
-            OutputStream out=outputStream = new DataOutputStream(conn.getOutputStream());
-            DataInputStream in=inputStream = new DataInputStream(new FileInputStream(fromFile));
-            int size = 0;
-            byte[] bufferOut = new byte[1024*1024];
-            int what=What.WHAT_SUCCEED;//Default succeed
-            long lastTime=System.nanoTime();
-            long uploaded=0;
-            double sec;
-            while ((size = in.read(bufferOut)) >=0) {
-                if (size>0){
-                    out.write(bufferOut, 0, size);
-                    long currentTime=System.nanoTime();
-                    uploaded += size;
-                    progress.setDone(uploaded);
-                    if ((sec=(((double) (currentTime-lastTime))/(1000000000)))>0){
-                        progress.setPerBytes((long)(size/sec));
-                    }
-                    notifyStatus(Status.DOING,null, progress);
-                    lastTime=currentTime;
-                }
-                if (isCanceled()){
-                    what=What.WHAT_CANCEL;
-                    Debug.D("Canceled upload file."+fromPath);
-                    break;
-                }
-            }
-            out.flush();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                System.out.println("---line---"+line);
-            }
-            Debug.D("Succeed upload file "+fileLength+" "+toUriPath);
+
+//            final String fileName=fromFile.getName();
+//            URL url = new URL(toUriPath);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setDoOutput(true);
+//            conn.setDoInput(true);
+//            conn.setChunkedStreamingMode(1024 * 1024);
+//            String method=getMethod();
+//            conn.setRequestMethod(null!=method&&method.equalsIgnoreCase("post")?"POST":"GET");
+//            conn.setRequestProperty("connection", "Keep-Alive");
+//            conn.setUseCaches(false);
+//            conn.setRequestProperty("Charset", "UTF-8");
+//            String contentLength=Long.toString(fileLength);
+//            conn.setRequestProperty("Content-Length", contentLength);
+//            conn.setRequestProperty("length", contentLength);
+//            conn.setConnectTimeout(5000);
+//            conn.setRequestProperty("Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
+//            conn.setRequestProperty("name",fileName);
+//            onUploadPrepared(conn);
+//            conn.connect();
+//            Debug.D("Uploading file "+fileLength+" "+toUriPath);
+//            FileProgress progress=new FileProgress(currentLength,fileLength);
+//            notifyStatus(Status.DOING,"Doing upload file "+fromPath, progress);
+//            OutputStream out=outputStream = new DataOutputStream(conn.getOutputStream());
+//            DataInputStream in=inputStream = new DataInputStream(new FileInputStream(fromFile));
+//            int size = 0;
+//            byte[] bufferOut = new byte[1024*1024];
+//            int what=What.WHAT_SUCCEED;//Default succeed
+//            long lastTime=System.nanoTime();
+//            long uploaded=0;
+//            double sec;
+//            while ((size = in.read(bufferOut)) >=0) {
+//                if (size>0){
+//                    out.write(bufferOut, 0, size);
+//                    long currentTime=System.nanoTime();
+//                    uploaded += size;
+//                    progress.setDone(uploaded);
+//                    if ((sec=(((double) (currentTime-lastTime))/(1000000000)))>0){
+//                        progress.setPerBytes((long)(size/sec));
+//                    }
+//                    notifyStatus(Status.DOING,null, progress);
+//                    lastTime=currentTime;
+//                }
+//                if (isCanceled()){
+//                    what=What.WHAT_CANCEL;
+//                    Debug.D("Canceled upload file."+fromPath);
+//                    break;
+//                }
+//            }
+//            out.flush();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//            String line = null;
+//            while ((line = reader.readLine()) != null) {
+//                System.out.println("---line---"+line);
+//            }
+//            Debug.D("Succeed upload file "+fileLength+" "+toUriPath);
         }catch (Exception e){
             Debug.E("Exception upload file."+e,e);
             e.printStackTrace();

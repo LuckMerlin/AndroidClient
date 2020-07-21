@@ -27,7 +27,7 @@ public class NasFileUploadTask extends HttpUploadTask {
 
     @Override
     protected long onResolveBreakPoint(String path) {
-        String uri="";
+        createHttpConnect();
         return super.onResolveBreakPoint(path);
     }
 
