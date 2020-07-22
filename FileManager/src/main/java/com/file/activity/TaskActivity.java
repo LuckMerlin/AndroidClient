@@ -9,17 +9,20 @@ import androidx.annotation.Nullable;
 import com.file.model.TaskModel;
 import com.google.gson.Gson;
 import com.merlin.bean.Path;
-import com.merlin.file.transport.NasFileDownloadTask;
 import com.merlin.file.transport.NasFileUploadTask;
 import com.merlin.model.ModelActivity;
+import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Task;
 import com.merlin.task.TaskExecutor;
-import com.merlin.task.file.Cover;
-import com.merlin.task.file.HttpDownloadTask;
-import com.merlin.task.file.HttpUploadTask;
 import com.task.debug.Debug;
 
 public class TaskActivity extends ModelActivity<TaskModel> {
+    OnTaskUpdate update=new OnTaskUpdate() {
+        @Override
+        public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
+                Debug.D("dddddd "+status+" "+what+" "+note+" "+obj+" "+task);
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,11 +49,11 @@ public class TaskActivity extends ModelActivity<TaskModel> {
                 "    }";
         String folder="{\n" +
                 "        \"modifyTime\":1549323360,\n" +
-                "        \"parent\":\"/volume1/\",\n" +
+                "        \"parent\":\"/volume1/MFiles/\",\n" +
                 "        \"size\":0,\n" +
                 "        \"mode\":33279,\n" +
                 "        \"permissions\":33279,\n" +
-                "        \"name\":\"music\",\n" +
+                "        \"name\":\"Music\",\n" +
                 "        \"accessTime\":1595076902,\n" +
                 "        \"length\":9322928,\n" +
                 "        \"port\":2018,\n" +
@@ -63,11 +66,9 @@ public class TaskActivity extends ModelActivity<TaskModel> {
 //        NasFileDownloadTask task=new NasFileDownloadTask(new Gson().fromJson(path,Path.class),"/sdcard/linqiang.mp3");
 //        task.setCover(Cover.COVER_REPLACE);
 //        boolean d=executor.add(task,null);
-        executor.add(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),"linqiang.mp3"),null);
+        executor.put(update,null);
+        executor.addTask(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),"linqiang.mp3"),null);
         boolean ddd=executor.start(null);
         Debug.D("AAAAAAAAAAa  "+ddd);
-
-
-
     }
 }

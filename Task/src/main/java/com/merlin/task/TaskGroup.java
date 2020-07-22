@@ -18,7 +18,6 @@ public class TaskGroup extends Task{
         return false;
     }
 
-
     @Override
     protected Canceler onExecute(Networker networker) {
         return null;

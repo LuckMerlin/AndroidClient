@@ -3,16 +3,24 @@ package com.merlin.file.transport;
 import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
+import com.merlin.task.Canceler;
+import com.merlin.task.Networker;
+import com.merlin.task.Status;
+import com.merlin.task.file.FileProgress;
 import com.merlin.task.file.HttpUploadTask;
 import com.task.debug.Debug;
 
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
 public class NasFileUploadTask extends HttpUploadTask {
@@ -36,8 +44,7 @@ public class NasFileUploadTask extends HttpUploadTask {
         return connection;
     }
 
-    @Override
-    protected Long onResolveBreakPoint(File file) throws Exception {
+    private Long onResolveBreakPoint(File file) throws Exception {
         HttpURLConnection connection=createHttpConnect(getTo(),GET);
         if (null==connection){
             throw new IllegalAccessException("Exception create connection to resolve upload break point.");
@@ -83,4 +90,124 @@ public class NasFileUploadTask extends HttpUploadTask {
         return null;
     }
 
+    @Override
+    protected Canceler onExecute(Networker networker) {
+        String toUriPath=getTo();
+        String fromPath=getFrom();
+        if (null==toUriPath||toUriPath.length()<=0||null==fromPath||fromPath.length()<=0){
+            Debug.W("Can't upload file while args invalid.");
+            notifyStatus(Status.FINISH,"Upload args invalid");
+            return null;
+        }
+        final File fromFile=new File(fromPath);
+        final long fileLength=fromFile.exists()?fromFile.length():-1;
+        if (fileLength<=0){
+            Debug.W("Can't upload file while file is EMPTY or NOT exist.");
+            notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_EMPTY,"File is EMPTY or NOT exist "+fromPath);
+            return null;
+        }
+        if (!fromFile.canRead()){
+            Debug.W("Can't upload file while file none read permission.");
+            notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_NONE_PERMISSION,"NONE read permission "+fromPath);
+            return null;
+        }
+        OutputStream outputStream=null;
+        DataInputStream inputStream=null;
+        BufferedReader bufferedReader=null;
+        try {
+            Debug.W("Preparing upload file."+fromPath);
+            notifyStatus(Status.PREPARE, com.merlin.task.What.WHAT_NONE,"Prepare upload file");
+            final Long currentLength=onResolveBreakPoint(fromFile);
+            if (null==currentLength){
+                Debug.W("Can't upload file while break point resolve NULL.");
+                notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_ERROR,"Break point resolve NULL "+fromPath);
+                return null;
+            }
+            HttpURLConnection connection=createHttpConnect(getTo(), POST);
+            if (null==connection){
+                Debug.W("Can't upload file while upload connection NULL.");
+                notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_ERROR,"Upload connection NULL"+fromPath);
+                return null;
+            }
+            String fileName=fromFile.getName();
+
+            inflate(connection,"connection","Keep-Alive");
+            String contentLength=Long.toString(fileLength);
+            inflate(connection,Label.LABEL_POSITION, Long.toString(currentLength));
+            inflate(connection,Label.LABEL_LENGTH,Long.toString(fileLength));
+            inflate(connection,"Content-Length", contentLength);
+            inflate(connection,"length", contentLength);
+            inflate(connection,"Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
+            inflate(connection,"name",fileName);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+            connection.setConnectTimeout(5000);
+            connection.setChunkedStreamingMode(1024 * 1024);
+            connection.connect();
+            Debug.D("Uploading file "+fileLength+" "+toUriPath);
+            FileProgress progress=new FileProgress(currentLength,fileLength);
+            notifyStatus(Status.DOING,"Doing upload file "+fromPath, progress);
+            OutputStream out=outputStream = new DataOutputStream(connection.getOutputStream());
+            DataInputStream in=inputStream = new DataInputStream(new FileInputStream(fromFile));
+            int size = 0;
+            byte[] bufferOut = new byte[1024*1024];
+            boolean canceled=false;
+            long lastTime=System.nanoTime();
+            long uploaded=0;
+            double sec;
+            if (null!=currentLength&&currentLength>0){
+                long skip=in.skip(currentLength);
+                Debug.D("Skip uploaded "+skip);
+            }
+            while ((size = in.read(bufferOut)) >=0) {
+                if (size>0){
+                    out.write(bufferOut, 0, size);
+                    long currentTime=System.nanoTime();
+                    uploaded += size;
+                    progress.setDone(uploaded);
+                    if ((sec=(((double) (currentTime-lastTime))/(1000000000)))>0){
+                        progress.setPerBytes((long)(size/sec));
+                    }
+                    notifyStatus(Status.DOING,null, progress);
+                    lastTime=currentTime;
+                }
+                if (isCanceled()){
+                    canceled=true;
+                    Debug.D("Canceled upload file."+fromPath);
+                    break;
+                }
+            }
+            out.flush();
+            BufferedReader reader =bufferedReader= new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuffer buffer=new StringBuffer();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+            }
+            String response=buffer.toString();
+            JSONObject json=null!=response&&response.length()>0&&response.startsWith("{")&&response.endsWith("}")?new JSONObject(response):null;
+            String note=null;
+            if (null!=json){//{"note": "File path invalid", "what": -1005, "success": true, "data": null}
+                boolean success=json.optBoolean(Label.LABEL_SUCCESS, false);
+                int what=json.optInt(Label.LABEL_WHAT, What.WHAT_ERROR_UNKNOWN);
+                note=json.optString(Label.LABEL_NOTE);
+                if (success&&what==What.WHAT_SUCCEED){
+                    Debug.D("Succeed upload file "+fileLength+" "+toUriPath);
+                    notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_SUCCEED,"Succeed upload file. ");
+                    return null;
+                }
+            }
+            Debug.D("Fail upload file "+note+" "+fileLength+" "+toUriPath);
+            notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_ERROR,note);
+        }catch (Exception e){
+            Debug.E("Exception upload file."+e,e);
+            e.printStackTrace();
+            notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_EXCEPTION,"Exception upload file task "+e);
+            return null;
+        }finally {
+            close(outputStream,inputStream,bufferedReader);
+        }
+        return null;
+    }
 }

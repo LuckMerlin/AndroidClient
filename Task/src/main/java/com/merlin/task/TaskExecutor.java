@@ -17,7 +17,7 @@ public final class TaskExecutor {
     private Networker mNetworker;
     private Executor mExecutor;
 
-    public boolean add(Task task,String debug){
+    public boolean addTask(Task task,String debug){
         List<Task> tasks=null!=task?mTasks:null;
         if (null!=tasks&&!tasks.contains(task)&&tasks.add(task)){
             notifyStatus(Status.ADD,What.WHAT_NONE,"Add task",null,task,null);
@@ -26,7 +26,7 @@ public final class TaskExecutor {
         return false;
     }
 
-    public int remove(Matcher matcher,int action,String debug){
+    public int removeTask(Matcher matcher,int action,String debug){
         List<Task> tasks=null!=matcher?getTasks(matcher,-1):null;
         int size=null!=tasks?tasks.size():-1;
         List<Task> list=mTasks;
@@ -46,6 +46,30 @@ public final class TaskExecutor {
             return size;
         }
         return -1;
+    }
+
+    public boolean put(OnTaskUpdate update, Matcher matcher){
+        WeakHashMap<OnTaskUpdate,Matcher> listener=null!=update?mListener:null;
+        if (null!=listener){
+            synchronized (listener){
+                listener.put(update,matcher);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean remove(OnTaskUpdate update){
+        WeakHashMap<OnTaskUpdate,Matcher> listener=null!=update?mListener:null;
+        if (null!=listener){
+            synchronized (listener){
+                if (listener.containsKey(update)) {
+                    listener.remove(update);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean start(String debug){

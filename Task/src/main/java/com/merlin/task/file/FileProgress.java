@@ -88,4 +88,9 @@ public class FileProgress implements Progress {
         BigDecimal result4 = new BigDecimal(teraBytes);
         return result4.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "T";
     }
+
+    @Override
+    public String toString() {
+        return  " done="+mDone+" total"+mTotal+" speed="+mPerBytes+" "+super.toString();
+    }
 }
