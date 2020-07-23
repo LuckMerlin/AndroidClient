@@ -113,8 +113,16 @@ public final class TaskExecutor {
         if (length>0){
             List<Task> result=new ArrayList<>(length);
             synchronized (tasks){
+                Boolean match=null;
                 for (Task child:tasks){
-                    if (null!=child&&(null==matcher||matcher.match(child))&&result.add(child)){
+                    if (null!=child){
+                        match=null!=matcher?matcher.match(child):true;
+                        if (null==match){
+                            break;
+                        }else if (!match){
+                            continue;
+                        }
+                        result.add(child);
                         if (max<0||result.size()>=max){
                             break;
                         }

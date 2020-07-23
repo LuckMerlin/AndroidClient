@@ -38,6 +38,10 @@ public abstract class Task implements Status{
 
   protected abstract Canceler onExecute(Networker networker);
 
+  public final  boolean isIdle(){
+      return getStatusCode()==Status.IDLE;
+  }
+
   public final boolean isDoing(){
       int code=getStatusCode();
       return code!=Status.FINISH&code!=Status.IDLE;
