@@ -9,11 +9,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 
 public class HttpDownloadTask extends HttpFileTransTask<String, String> {
     private String mMethod;
@@ -71,6 +69,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"Fail download path which content type invalid."+contentType+" "+fromUriPath);
                 return null;
             }
+
             String connHeaderLength = conn.getHeaderField("content-length");
             final long fileLength = null!=connHeaderLength&&connHeaderLength.length()>0?Long.parseLong(connHeaderLength):-1;
             if (fileLength<=0){

@@ -27,13 +27,18 @@ public class TaskModel extends BaseModel implements OnServiceBindChange, OnTaskU
 
     @Override
     public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
+        Debug.D("ss "+status+" "+what+" "+note);
         switch (status){
             case Status.ADD:
                 mAdapter.add(task,true,"After add status.");break;
             case Status.REMOVE:
                 mAdapter.remove(task,"After remove status.");break;
+            default:
+                if (null!=task){
+                    mAdapter.replace(task,"After task status update "+status);
+                }
+                break;
         }
-        Debug.D("********* "+status+" "+what+" "+note+" "+obj);
     }
 
     public TaskAdapter getAdapter() {
