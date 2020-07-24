@@ -65,23 +65,20 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
             onDownloadPrepared(conn,currentLength);
             conn.connect();
             String contentType=conn.getContentType();
-            if (null==contentType||!contentType.equalsIgnoreCase("application/octet-stream")){
-                notifyStatus(Status.FINISH, What.WHAT_ERROR,"Fail download path which content type invalid."+contentType+" "+fromUriPath);
-                return null;
-            }
-
             String connHeaderLength = conn.getHeaderField("content-length");
             final long fileLength = null!=connHeaderLength&&connHeaderLength.length()>0?Long.parseLong(connHeaderLength):-1;
             if (fileLength<=0){
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"Download file length is EMPTY "+fileLength);
                 return null;
             }
-
+            final FileProgress progress=new FileProgress(currentLength,fileLength);
+            final FileDownloadResult succeedResult=new FileDownloadResult(fromUriPath,toPath,fileLength,contentType);
             if (currentLength==fileLength){
                 int cover=getCover();
                 if (cover==Cover.COVER_SKIP||cover==Cover.COVER_NONE) {
                     Debug.D("File has been already downloaded. "+fileLength+" "+toPath);
-                    notifyStatus(Status.FINISH, What.WHAT_SKIP, "File has been already downloaded."+fileLength);
+                    notifyStatus(Status.DOING, What.WHAT_NONE, "File has been already downloaded."+fileLength, progress);
+                    notifyStatus(Status.FINISH, What.WHAT_NONE, "File has been already downloaded."+fileLength, succeedResult);
                     return null;
                 }
             }
@@ -111,7 +108,6 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                notifyStatus(Status.FINISH, What.WHAT_ERROR,"Target path NONE permission");
                return null;
            }
-           FileProgress progress=new FileProgress(currentLength,fileLength);
            Debug.D("Downloading file "+fileLength+" "+toPath);
            notifyStatus(Status.DOING,"Doing download file task "+fromUriPath, progress);
            OutputStream out =outputStream= new FileOutputStream(toFile,currentLength<fileLength);
@@ -142,7 +138,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
             out.flush();
            if (what==What.WHAT_SUCCEED){
                Debug.D("Succeed download file. "+toFile.length()+"\n"+"From:"+fromUriPath+"\nTo:"+toPath);
-               notifyStatus(Status.FINISH,what,"Succeed download file "+fromUriPath, new FileDownloadResult(fromUriPath,toPath,fileLength));
+               notifyStatus(Status.FINISH,what,"Succeed download file "+fromUriPath,succeedResult);
                return null;
            }
             Debug.W("Fail download file task."+fileLength+" "+toPath);  //Download fail
@@ -173,8 +169,10 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
         public final String mTo;
         public final String mFrom;
         public final long mLength;
+        public final String mContentType;
 
-        private FileDownloadResult(String from,String to,long length){
+        private FileDownloadResult(String from,String to,long length,String contentType){
+            mContentType=contentType;
             mFrom=from;
             mTo=to;
             mLength=length;
