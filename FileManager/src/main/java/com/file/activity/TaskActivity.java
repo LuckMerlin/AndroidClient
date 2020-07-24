@@ -59,7 +59,7 @@ public class TaskActivity extends ModelActivity<TaskModel> {
         lp.height = 900;//WindowManager.LayoutParams.WRAP_CONTENT;
         getWindow().setAttributes(lp);
         DataBindingUtil.setContentView(this, R.layout.activity_task);
-        TaskExecutor executor=new TaskExecutor();
+//        TaskExecutor executor=new TaskExecutor();
 
 //        String htt="http://sc1.111ttt.cn/2017/1/11/11/304112002493.mp3";
 //        Task task=new HttpDownloadTask(htt,"/sdcard/linqiangTest.mp3");

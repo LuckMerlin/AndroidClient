@@ -30,7 +30,7 @@ public class NasFileUploadTask extends HttpUploadTask {
                 null!=toFolder&&toFolder.isDirectory()?toFolder.getPath():null,toName);
     }
 
-    private NasFileUploadTask(String name,String from,String toUri,String toFolder,String toName){
+    private NasFileUploadTask(String name, String from, String toUri, String toFolder, String toName){
         super(name,from,null!=toUri?toUri+"/file/upload":null,toFolder,toName);
     }
 

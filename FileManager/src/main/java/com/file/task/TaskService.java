@@ -1,26 +1,28 @@
 package com.file.task;
 
-import android.content.Intent;
-import android.os.IBinder;
+import android.os.Handler;
+import android.os.Looper;
 
-import androidx.annotation.Nullable;
-
-import com.merlin.task.Matcher;
+import com.merlin.file.transport.NasFileUploadTask;
 import com.merlin.task.Task;
 
-import java.util.List;
-
 public class TaskService extends com.merlin.task.TaskService {
+    private Task mTask=new NasFileUploadTask("任务34242","",null,"");
 
-    @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return new TaskServiceBinder(){
+    public void onCreate() {
+        super.onCreate();
+//        Task dd=new NasFileUploadTask("1","",null,"");
+        mExecutor.addTask(new NasFileUploadTask("1werq","",null,""),"");
+        mExecutor.addTask(new NasFileUploadTask("2rwqr","",null,""),"");
+        mExecutor.addTask(new NasFileUploadTask("3wrqw","",null,""),"");
+        Handler handler= new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
             @Override
-            public List<Task> getTasks(Matcher matcher, int max) {
-                return TaskService.super.getTasks(matcher,max);
+            public void run() {
+                mExecutor.removeTask((d)->{ return true;},null,"");
+//                handler.postDelayed();
             }
-        };
+        },3000);
     }
-
 }

@@ -13,20 +13,25 @@ import java.util.WeakHashMap;
 public final class TaskExecutor {
     private final List<Task> mTasks=new ArrayList<>();
     private final WeakHashMap<OnTaskUpdate,Matcher> mListener=new WeakHashMap<>(1);
-    private final Handler mHandler=new Handler(Looper.getMainLooper());
+    private final Handler mHandler;
     private Networker mNetworker;
     private Executor mExecutor;
+
+    public TaskExecutor(Handler handler){
+        mHandler=null!=handler?handler:new Handler(Looper.getMainLooper());
+    }
 
     public boolean addTask(Task task,String debug){
         List<Task> tasks=null!=task?mTasks:null;
         if (null!=tasks&&!tasks.contains(task)&&tasks.add(task)){
+            Debug.D("Added task "+task+" "+(null!=debug?debug:"."));
             notifyStatus(Status.ADD,What.WHAT_NONE,"Add task",null,task,null);
             return true;
         }
         return false;
     }
 
-    public int removeTask(Matcher matcher,int action,String debug){
+    public int removeTask(Matcher matcher,Integer action,String debug){
         List<Task> tasks=null!=matcher?getTasks(matcher,-1):null;
         int size=null!=tasks?tasks.size():-1;
         List<Task> list=mTasks;
@@ -35,12 +40,15 @@ public final class TaskExecutor {
                 if (null==child){
                     continue;
                 }
-                switch (action){
-                    case Status.CANCEL:
-                        child.cancel(true,"Before remove task "+(null!=debug?debug:"."));
-                        break;
+                if (null!=action) {
+                    switch (action) {
+                        case Status.CANCEL:
+                            child.cancel(true, "Before remove task " + (null != debug ? debug : "."));
+                            break;
+                    }
                 }
                 list.remove(child);
+                Debug.D("Removed task "+child+" "+(null!=debug?debug:"."));
                 notifyStatus(Status.REMOVE,What.WHAT_NONE,"Remove task",null,child,null);
             }
             return size;
@@ -123,7 +131,7 @@ public final class TaskExecutor {
                             continue;
                         }
                         result.add(child);
-                        if (max<0||result.size()>=max){
+                        if (max>0&&(max<0||result.size()>=max)){
                             break;
                         }
                     }
