@@ -1,28 +1,26 @@
 package com.file.model;
 
-import android.view.View;
+import android.content.ComponentName;
+import android.os.IBinder;
 
+import com.file.task.TaskServiceBinder;
 import com.merlin.adapter.TaskAdapter;
-import com.merlin.file.transport.NasFileUploadTask;
+import com.merlin.model.OnServiceBindChange;
+import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Task;
-import com.task.debug.Debug;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TaskModel extends BaseModel {
+public class TaskModel extends BaseModel implements OnServiceBindChange, OnTaskUpdate {
     private final TaskAdapter mAdapter=new TaskAdapter();
+    private TaskServiceBinder mBinder;
 
     @Override
-    protected void onRootAttached(View root) {
-        super.onRootAttached(root);
-        List<Task> tasks=new ArrayList<>();
-        tasks.add(new NasFileUploadTask("测试1","",null,""));
-        tasks.add(new NasFileUploadTask("测试2","",null,""));
-        tasks.add(new NasFileUploadTask("测试3","",null,""));
-        tasks.add(new NasFileUploadTask("测试4","",null,""));
-        mAdapter.set(tasks,null);
-        Debug.D("aaaaaaaaaaa"+this);
+    public void onServiceBindChanged(ComponentName name, IBinder service) {
+        mBinder=null!=service&&service instanceof TaskServiceBinder?((TaskServiceBinder)service):null;
+    }
+
+    @Override
+    public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
+        TaskServiceBinder binder=mBinder;
     }
 
     public TaskAdapter getAdapter() {

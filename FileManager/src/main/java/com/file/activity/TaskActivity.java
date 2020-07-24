@@ -1,15 +1,25 @@
 package com.file.activity;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.view.WindowManager;
 
 
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 
 import com.file.model.TaskModel;
+import com.file.task.TaskService;
+import com.merlin.browser.Mode;
 import com.merlin.file.R;
+import com.merlin.model.Model;
 import com.merlin.model.ModelActivity;
+import com.merlin.model.OnServiceBindChange;
 import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Task;
 import com.merlin.task.TaskExecutor;
@@ -23,11 +33,34 @@ public class TaskActivity extends ModelActivity<TaskModel> {
         }
     };
 
+    private ServiceConnection mConnection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Model model=getModel();
+            if (null!=model&&model instanceof OnServiceBindChange){
+                ((OnServiceBindChange)model).onServiceBindChanged(name,service);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Model model=getModel();
+            if (null!=model&&model instanceof OnServiceBindChange){
+                ((OnServiceBindChange)model).onServiceBindChanged(name,null);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.height = 900;//WindowManager.LayoutParams.WRAP_CONTENT;
+        getWindow().setAttributes(lp);
         DataBindingUtil.setContentView(this, R.layout.activity_task);
         TaskExecutor executor=new TaskExecutor();
+
 //        String htt="http://sc1.111ttt.cn/2017/1/11/11/304112002493.mp3";
 //        Task task=new HttpDownloadTask(htt,"/sdcard/linqiangTest.mp3");
 //        Path path=new Path();
@@ -71,5 +104,12 @@ public class TaskActivity extends ModelActivity<TaskModel> {
 //        executor.addTask(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),"linqiang.mp3"),null);
 //        boolean ddd=executor.start(null);
 //        Debug.D("AAAAAAAAAAa  "+ddd);
+        bindService(new Intent(this, TaskService.class),mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
     }
 }
