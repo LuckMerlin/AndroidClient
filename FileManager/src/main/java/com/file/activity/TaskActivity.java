@@ -5,16 +5,14 @@ import android.os.Bundle;
 
 
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 
 import com.file.model.TaskModel;
-import com.google.gson.Gson;
-import com.merlin.bean.Path;
-import com.merlin.file.transport.NasFileUploadTask;
+import com.merlin.file.R;
 import com.merlin.model.ModelActivity;
 import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Task;
 import com.merlin.task.TaskExecutor;
-import com.merlin.task.TaskGroup;
 import com.task.debug.Debug;
 
 public class TaskActivity extends ModelActivity<TaskModel> {
@@ -28,6 +26,7 @@ public class TaskActivity extends ModelActivity<TaskModel> {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DataBindingUtil.setContentView(this, R.layout.activity_task);
         TaskExecutor executor=new TaskExecutor();
 //        String htt="http://sc1.111ttt.cn/2017/1/11/11/304112002493.mp3";
 //        Task task=new HttpDownloadTask(htt,"/sdcard/linqiangTest.mp3");
@@ -67,10 +66,10 @@ public class TaskActivity extends ModelActivity<TaskModel> {
 //        NasFileDownloadTask task=new NasFileDownloadTask(new Gson().fromJson(path,Path.class),"/sdcard/linqiang.mp3");
 //        task.setCover(Cover.COVER_REPLACE);
 //        boolean d=executor.add(task,null);
-        TaskGroup group=new TaskGroup(null);
-        executor.put(update,null);
-        executor.addTask(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),"linqiang.mp3"),null);
-        boolean ddd=executor.start(null);
-        Debug.D("AAAAAAAAAAa  "+ddd);
+//        TaskGroup group=new TaskGroup(null);
+//        executor.put(update,null);
+//        executor.addTask(new NasFileUploadTask("/sdcard/linqiang.mp3",new Gson().fromJson(folder,Path.class),"linqiang.mp3"),null);
+//        boolean ddd=executor.start(null);
+//        Debug.D("AAAAAAAAAAa  "+ddd);
     }
 }

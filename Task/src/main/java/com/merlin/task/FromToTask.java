@@ -4,7 +4,8 @@ public abstract class FromToTask<T,V> extends Task {
     private final T mFrom;
     private final V mTo;
 
-    public FromToTask(T from,V to){
+    public FromToTask(String name,T from,V to){
+        super(name);
         mFrom=from;
         mTo=to;
     }

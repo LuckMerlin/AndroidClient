@@ -13,7 +13,7 @@ public class NasFileDownloadTask extends HttpDownloadTask {
     private final String mPath;
 
     public NasFileDownloadTask(Path from, String to) {
-        super(null!=from?from.getHostUri():null, to);
+        super(from.getName(),from.getHostUri(), to);
         mPath=null!=from?from.getPath():null;
     }
 

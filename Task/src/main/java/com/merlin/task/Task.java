@@ -7,12 +7,17 @@ import com.task.debug.Debug;
 import java.util.WeakHashMap;
 
 public abstract class Task implements Status{
+  private final String mName;
   private final TaskStatus mStatus=new TaskStatus();
   private WeakHashMap<OnTaskUpdate,Long> mReference;
   private Result mResult;
   private Canceler mCanceler;
   private Progress mProgress;
   private OnTaskUpdate mOnTaskUpdate;
+
+  public Task(String name){
+      mName=name;
+  }
 
   public final TaskStatus getStatus(){
         return mStatus;
@@ -115,7 +120,11 @@ public abstract class Task implements Status{
         return false;
   }
 
-  public static class TaskStatus {
+    public String getName() {
+        return mName;
+    }
+
+    public static class TaskStatus {
         private int mStatus=Status.IDLE;
         private int mWhat;
         private String mNote;

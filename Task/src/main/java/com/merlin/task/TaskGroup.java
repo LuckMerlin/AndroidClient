@@ -9,7 +9,8 @@ public class TaskGroup extends Task{
     private final List<Task> mTasks=new ArrayList<>(1);
     private Task mExecuting=null;
 
-    public TaskGroup(List<Task> tasks){
+    public TaskGroup(String name,List<Task> tasks){
+        super(name);
         add(tasks);
     }
 

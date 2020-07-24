@@ -26,6 +26,11 @@ public class FileProgress implements Progress {
                 return null!=speed?speed+"/s":null;
             case PROGRESS:
                 return ""+getProgress();
+            case DONE_TOTAL:
+                String done=formatSizeText(mDone);
+                String total=formatSizeText(mTotal);
+                return null!=done&&null!=total?done+"/"+total:null;
+
         }
         return null;
     }

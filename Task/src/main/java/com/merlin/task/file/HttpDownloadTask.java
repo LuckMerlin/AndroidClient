@@ -18,12 +18,12 @@ import java.net.URL;
 public class HttpDownloadTask extends HttpFileTransTask<String, String> {
     private String mMethod;
 
-    public HttpDownloadTask(String from, String to) {
-        this(from,to,null);
+    public HttpDownloadTask(String name,String from, String to) {
+        this(name,from,to,null);
     }
 
-    public HttpDownloadTask(String from, String to,String method) {
-        super(from, to,method);
+    public HttpDownloadTask(String name,String from, String to,String method) {
+        super(name,from, to,method);
     }
 
     public final long getDownloadedLength(){

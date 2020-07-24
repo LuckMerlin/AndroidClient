@@ -3,6 +3,7 @@
     <dimen name="textMedium">15sp</dimen>
     <dimen name="textTitle">18sp</dimen>
     <dimen name="textTitleSub">14sp</dimen>
+    <dimen name="textTitleSmall">12sp</dimen>
     <dimen name="listItemNormal">55dp</dimen>
     <dimen name="listItemSmall">45dp</dimen>
     <dimen name="listIconNormal">40dp</dimen>

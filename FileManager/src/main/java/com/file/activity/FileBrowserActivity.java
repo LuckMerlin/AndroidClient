@@ -77,18 +77,6 @@ public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
         }
     }
 
-
-    @Override
-    public void onModelBind(Model model) {
-        super.onModelBind(model);
-//        setBinder(mBinder,"After model bind.");
-    }
-
-//    private boolean setBinder(ConveyorBinder binder, String debug){
-//        Model model=getModel();
-//        return null!=model&&model instanceof Model.OnBindChange &&((Model.OnBindChange)model).onBindChanged(binder,debug);
-//    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

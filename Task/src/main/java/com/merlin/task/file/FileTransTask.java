@@ -10,8 +10,8 @@ public abstract class FileTransTask<T,V> extends FromToTask<T,V> {
     private String mMethod;
     private boolean mBreakPoint=false;
 
-    public FileTransTask(T from, V to,String method) {
-        super(from, to);
+    public FileTransTask(String name,T from, V to,String method) {
+        super(name,from, to);
         mMethod=method;
     }
 

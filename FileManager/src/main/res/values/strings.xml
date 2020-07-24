@@ -61,6 +61,7 @@
     <string name="md5">MD5</string>
     <string name="file">文件</string>
     <string name="upload">上传</string>
+    <string name="uploading">上传中</string>
     <string name="paste">粘贴</string>
     <string name="items">(%1$d)个</string>
     <string name="processSure">确认%1$s %2$s 吗?</string>
@@ -113,7 +114,9 @@
     <string name="pleaseInput">请输入</string>
     <string name="id">ID</string>
     <string name="content">内容</string>
+    <string name="notStarted">未开始</string>
     <string name="photo">图片</string>
+    <string name="added">已添加</string>
     <string name="none">无</string>
     <string name="save">保存</string>
     <string name="title">标题</string>
@@ -122,6 +125,7 @@
     <string name="prepared">准备完成</string>
     <string name="canceled">已取消</string>
     <string name="started">已启动</string>
+    <string name="start">开始</string>
     <string name="paused">已暂停</string>
     <string name="finished">已完成</string>
     <string name="timeout">超时</string>

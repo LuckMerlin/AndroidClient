@@ -9,8 +9,8 @@ public abstract class HttpFileTransTask<T,V> extends FileTransTask<T,V>{
     protected final static String POST="POST";
     protected final static String GET="GET";
 
-    public HttpFileTransTask(T from, V to, String method) {
-        super(from, to, method);
+    public HttpFileTransTask(String name,T from, V to, String method) {
+        super(name,from, to, method);
     }
 
     protected HttpURLConnection createHttpConnect(String urlPath,String method) throws IOException {
