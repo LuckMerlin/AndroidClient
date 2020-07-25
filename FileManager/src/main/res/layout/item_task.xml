@@ -9,6 +9,7 @@
             name="statusText"
             type="String" />
         <import type="com.merlin.task.Progress"/>
+        <import type="com.merlin.click.Clicker"/>
     </data>
     <LinearLayout
         android:paddingRight="@dimen/contentGap"
@@ -70,6 +71,7 @@
             </LinearLayout>
         </LinearLayout>
         <TextView
+            binding:enableClick="@{Clicker.click(task)}"
             android:textColor="@color/textTitle"
             android:background="@drawable/selector_button"
             android:paddingLeft="15dp"

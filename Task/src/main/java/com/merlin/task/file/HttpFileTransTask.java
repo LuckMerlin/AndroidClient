@@ -8,6 +8,7 @@ public abstract class HttpFileTransTask<T,V> extends FileTransTask<T,V>{
 
     protected final static String POST="POST";
     protected final static String GET="GET";
+    protected final static String HEAD="HEAD";
 
     public HttpFileTransTask(String name,T from, V to, String method) {
         super(name,from, to, method);

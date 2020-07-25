@@ -10,8 +10,8 @@ public abstract class Task implements Status{
   private final String mName;
   private final TaskStatus mStatus=new TaskStatus();
   private WeakHashMap<OnTaskUpdate,Long> mReference;
+  private boolean mPaused=false;
   private Result mResult;
-  private Canceler mCanceler;
   private Progress mProgress;
   private OnTaskUpdate mOnTaskUpdate;
 
@@ -31,17 +31,7 @@ public abstract class Task implements Status{
       return mResult;
   }
 
-  public final boolean isCanceled(){
-      Canceler canceler=mCanceler;
-      return null!=canceler&&canceler.cancel(null,null);
-  }
-
-  public final boolean cancel(Boolean cancel,String debug){
-      Canceler canceler=mCanceler;
-      return null!=canceler&&canceler.cancel(cancel,debug);
-  }
-
-  protected abstract Canceler onExecute(Networker networker);
+  protected abstract void onExecute(Networker networker);
 
   public final  boolean isIdle(){
       return getStatusCode()==Status.IDLE;
@@ -52,7 +42,7 @@ public abstract class Task implements Status{
       return code!=Status.FINISH&code!=Status.IDLE;
   }
 
-  public final Canceler execute(Networker networker,OnTaskUpdate update){
+  public final void execute(Networker networker,OnTaskUpdate update){
       Looper mainLooper=Looper.getMainLooper();
       Thread mainThread=null!=mainLooper?mainLooper.getThread():null;
       Thread currentThread=Thread.currentThread();
@@ -60,13 +50,12 @@ public abstract class Task implements Status{
           throw new IllegalThreadStateException("Task can't execute in MAIN thread.");
       }
       if (isDoing()){//Already doing
-          return null;
+          return;
       }
       mOnTaskUpdate=update;
-      mCanceler=null;
       mProgress=null;
       mResult=null;
-      return mCanceler=onExecute(networker);
+      onExecute(networker);
   }
 
   public final int getStatusCode() {
@@ -82,6 +71,22 @@ public abstract class Task implements Status{
       return isFinished()&&null!=mResult;
   }
 
+  protected void onPaused(boolean current,boolean last,String debug){
+    //Do nothing
+  }
+
+  public final boolean pause(Boolean pause,String debug){
+        final boolean curr=mPaused;
+        if (null==pause){
+            return curr;
+        }else if (curr!=pause){
+            mPaused=pause;
+            onPaused(pause,curr,debug);
+            return true;
+        }
+        return false;
+  }
+
   protected final boolean notifyStatus(int status, String note){
       return notifyStatus(status,What.WHAT_NONE,note);
   }
@@ -90,7 +95,7 @@ public abstract class Task implements Status{
      return notifyStatus(status,what, note,null);
   }
 
-    protected final boolean notifyStatus(int status,String note,Object arg){
+  protected final boolean notifyStatus(int status,String note,Object arg){
         return notifyStatus(status,What.WHAT_NONE,note,arg);
     }
 
@@ -107,7 +112,6 @@ public abstract class Task implements Status{
         boolean finished=status==Status.FINISH;
         if (finished){//Clean while task finish
             mOnTaskUpdate=null;
-            mCanceler=null;
         }
         if (null!=arg){
             if (finished && arg instanceof Result){
@@ -120,11 +124,11 @@ public abstract class Task implements Status{
         return false;
   }
 
-    public String getName() {
+  public String getName() {
         return mName;
     }
 
-    public static class TaskStatus {
+  public static class TaskStatus {
         private int mStatus=Status.IDLE;
         private int mWhat;
         private String mNote;

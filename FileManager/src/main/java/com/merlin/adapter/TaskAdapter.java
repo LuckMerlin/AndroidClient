@@ -10,7 +10,7 @@ import com.merlin.task.Task;
 
 import java.util.List;
 
-public class TaskAdapter extends ListAdapter<Task>{
+public class TaskAdapter extends ListAdapter<Task> implements OnItemTouchResolver{
 
     @Override
     protected Integer onResolveViewTypeLayoutId(int viewType) {
@@ -41,5 +41,10 @@ public class TaskAdapter extends ListAdapter<Task>{
     @Override
     public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
         return new LinearLayoutManager(rv.getContext());
+    }
+
+    @Override
+    public Object onResolveItemTouch(RecyclerView recyclerView) {
+        return null;
     }
 }

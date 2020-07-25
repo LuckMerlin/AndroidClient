@@ -24,14 +24,14 @@ public class TaskGroup extends Task{
         return null!=global&&global.add(task);
     }
 
-    public final boolean remove(Object task,boolean cancel,String debug){
+    public final boolean remove(Object task,boolean pause,String debug){
         List<Task> global=null!=task?mTasks:null;
         int index=null!=global?global.indexOf(task):null;
         Task taskObj=index>=0&&index<global.size()?global.get(index):null;
         if (null!=taskObj&&global.remove(taskObj)){
             Debug.D("Remove task from group."+task);
-            if (cancel){
-                taskObj.cancel(true,"While remove from group.");
+            if (pause){
+                taskObj.pause(true,"While remove from group.");
             }
             return true;
         }
@@ -39,23 +39,22 @@ public class TaskGroup extends Task{
     }
 
     @Override
-    protected final Canceler onExecute(Networker networker) {
+    protected final void onExecute(Networker networker) {
         final List<Task> tasks=mTasks;
         if (null!=tasks&&tasks.size()>0){
             Task task=getNextUnFinishTask(mExecuting);
             if (null==task){
                 Debug.D("All task of group executed."+this);
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"All task of group executed");
-                return null;
+                return;
             }
-            final Canceler canceler=(mExecuting=task).execute(networker,
+            (mExecuting=task).execute(networker,
                     (int status, int what, String note, Object obj, Task child) ->{
                 super.notifyStatus(status, what, note, obj);
             });
             mExecuting=null;
-            return onExecute(networker);
+            onExecute(networker);
         }
-        return null;
     }
 
     public final int getFinishedSize(){

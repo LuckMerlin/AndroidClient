@@ -42,8 +42,8 @@ public final class TaskExecutor {
                 }
                 if (null!=action) {
                     switch (action) {
-                        case Status.CANCEL:
-                            child.cancel(true, "Before remove task " + (null != debug ? debug : "."));
+                        case Status.PAUSE:
+                            child.pause(true, "Before remove task " + (null != debug ? debug : "."));
                             break;
                     }
                 }
@@ -85,6 +85,18 @@ public final class TaskExecutor {
         return null!=task&&start(task,debug,null);
     }
 
+    public final boolean start(final Matcher matcher, String debug,OnTaskUpdate update){
+        List<Task> tasks=getTasks(matcher,-1);
+        if (null!=tasks&&tasks.size()>0){
+            for (Task child:tasks){
+                if (null!=child&&!child.isDoing()&&!child.isFinishSucceed()){
+                    start(child,debug,update);
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean start(final Task task, String debug,OnTaskUpdate update){
         if (null==task){
             Debug.W("Can't execute task which is NULL "+(null!=debug?debug:"."));
@@ -113,6 +125,32 @@ public final class TaskExecutor {
     public Task findNextUnFinish(){
         List<Task> tasks=getTasks((task)->null!=task&&task.getStatusCode()==Status.IDLE,1);
         return null!=tasks&&tasks.size()>0?tasks.get(0):null;
+    }
+
+    public boolean pause(Matcher matcher,String debug){
+        List<Task> tasks=getTasks(matcher,-1);
+        if (null!=tasks&&tasks.size()>0){
+            for (Task child:tasks){
+                if (null!=child&&child.isDoing()&&child instanceof PauseTask){
+                    ((PauseTask)child).pause(true,debug);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean cancel(Matcher matcher,String debug){
+        List<Task> tasks=getTasks(matcher,-1);
+        if (null!=tasks&&tasks.size()>0){
+            for (Task child:tasks){
+                if (null!=child&&child.isDoing()&&child instanceof CancelTask){
+                    ((CancelTask)child).cancel(true,debug);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public final List<Task> getTasks(Matcher matcher,int max){

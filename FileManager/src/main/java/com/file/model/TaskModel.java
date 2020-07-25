@@ -2,16 +2,18 @@ package com.file.model;
 
 import android.content.ComponentName;
 import android.os.IBinder;
+import android.view.View;
 
 import com.merlin.adapter.TaskAdapter;
+import com.merlin.click.OnTapClick;
+import com.merlin.file.R;
 import com.merlin.model.OnServiceBindChange;
 import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Status;
 import com.merlin.task.Task;
 import com.merlin.task.TaskBinder;
-import com.task.debug.Debug;
 
-public class TaskModel extends BaseModel implements OnServiceBindChange, OnTaskUpdate {
+public class TaskModel extends BaseModel implements OnServiceBindChange, OnTaskUpdate, OnTapClick {
     private final TaskAdapter mAdapter=new TaskAdapter();
     private TaskBinder mBinder;
 
@@ -26,8 +28,40 @@ public class TaskModel extends BaseModel implements OnServiceBindChange, OnTaskU
     }
 
     @Override
+    public final boolean onTapClick(View view, int clickCount, int resId, Object data) {
+        switch (resId){
+            default:
+                if (null!=data&&data instanceof Task){
+                    return pauseStart((Task)data,"After tap click.");
+                }
+                break;
+        }
+        return true;
+    }
+
+    private boolean pauseStart(Task task,String debug){
+        if (null!=task){
+            if (task.isFinishSucceed()){
+                return toast(getText(R.string.alreadyWhat,getText(R.string.succeed)))&&false;
+            }else if (!task.isDoing()){
+                return startTask(task,debug);
+            }
+        }
+        return false;
+    }
+
+    private boolean startTask(Task task,String debug){
+        TaskBinder binder=null!=task?mBinder:null;
+        return null!=binder&&!task.isDoing()&&binder.start((child)->null!=child&&child==task,debug,null);
+    }
+
+    private boolean pauseTask(Task task,String debug){
+        TaskBinder binder=null!=task?mBinder:null;
+        return null!=binder&&!task.isDoing()&&binder.pause((child)->null!=child&&child==task,debug);
+    }
+
+    @Override
     public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
-        Debug.D("ss "+status+" "+what+" "+note);
         switch (status){
             case Status.ADD:
                 mAdapter.add(task,true,"After add status.");break;

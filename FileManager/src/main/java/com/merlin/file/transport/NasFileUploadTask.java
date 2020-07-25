@@ -91,25 +91,25 @@ public class NasFileUploadTask extends HttpUploadTask {
     }
 
     @Override
-    protected Canceler onExecute(Networker networker) {
+    protected void onExecute(Networker networker) {
         String toUriPath=getTo();
         String fromPath=getFrom();
         if (null==toUriPath||toUriPath.length()<=0||null==fromPath||fromPath.length()<=0){
             Debug.W("Can't upload file while args invalid.");
             notifyStatus(Status.FINISH,"Upload args invalid");
-            return null;
+            return;
         }
         final File fromFile=new File(fromPath);
         final long fileLength=fromFile.exists()?fromFile.length():-1;
         if (fileLength<=0){
             Debug.W("Can't upload file while file is EMPTY or NOT exist.");
             notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_EMPTY,"File is EMPTY or NOT exist "+fromPath);
-            return null;
+            return;
         }
         if (!fromFile.canRead()){
             Debug.W("Can't upload file while file none read permission.");
             notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_NONE_PERMISSION,"NONE read permission "+fromPath);
-            return null;
+            return;
         }
         OutputStream outputStream=null;
         DataInputStream inputStream=null;
@@ -121,13 +121,13 @@ public class NasFileUploadTask extends HttpUploadTask {
             if (null==currentLength){
                 Debug.W("Can't upload file while break point resolve NULL.");
                 notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_ERROR,"Break point resolve NULL "+fromPath);
-                return null;
+                return;
             }
             HttpURLConnection connection=createHttpConnect(getTo(), POST);
             if (null==connection){
                 Debug.W("Can't upload file while upload connection NULL.");
                 notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_ERROR,"Upload connection NULL"+fromPath);
-                return null;
+                return;
             }
             String fileName=fromFile.getName();
 
@@ -172,7 +172,7 @@ public class NasFileUploadTask extends HttpUploadTask {
                     notifyStatus(Status.DOING,null, progress);
                     lastTime=currentTime;
                 }
-                if (isCanceled()){
+                if (pause(null,"Fetched pause status")){
                     canceled=true;
                     Debug.D("Canceled upload file."+fromPath);
                     break;
@@ -195,7 +195,7 @@ public class NasFileUploadTask extends HttpUploadTask {
                 if (success&&what==What.WHAT_SUCCEED){
                     Debug.D("Succeed upload file "+fileLength+" "+toUriPath);
                     notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_SUCCEED,"Succeed upload file. ");
-                    return null;
+                    return;
                 }
             }
             Debug.D("Fail upload file "+note+" "+fileLength+" "+toUriPath);
@@ -204,10 +204,10 @@ public class NasFileUploadTask extends HttpUploadTask {
             Debug.E("Exception upload file."+e,e);
             e.printStackTrace();
             notifyStatus(Status.FINISH, com.merlin.task.What.WHAT_EXCEPTION,"Exception upload file task "+e);
-            return null;
+            return;
         }finally {
             close(outputStream,inputStream,bufferedReader);
         }
-        return null;
+        return;
     }
 }

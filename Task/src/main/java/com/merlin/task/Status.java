@@ -9,6 +9,5 @@ public interface Status {
     int STOP=-1995;
     int ADD=-1996;
     int REMOVE=-1997;
-    int CANCEL=-1998;
-//    int PAUSE=-1999;
+    int PAUSE=-1999;
 }
