@@ -1,7 +1,10 @@
 package com.merlin.file.transport;
 
+import com.merlin.api.Label;
 import com.merlin.bean.Path;
 import com.merlin.task.file.HttpDownloadTask;
+
+import java.io.IOException;
 import java.net.HttpURLConnection;
 
 public class NasFileDownloadTask extends HttpDownloadTask {
@@ -13,7 +16,12 @@ public class NasFileDownloadTask extends HttpDownloadTask {
     }
 
     @Override
-    protected void onDownloadPrepared(HttpURLConnection connection,long currentLength) {
-        super.onDownloadPrepared(connection,currentLength);
+    protected HttpURLConnection createHttpConnect(String urlPath, String method) throws IOException {
+        HttpURLConnection connection= super.createHttpConnect(urlPath, method);
+        if (null!=connection){
+            inflateHeader(connection, Label.LABEL_PATH, mPath);
+        }
+        return connection;
     }
+
 }

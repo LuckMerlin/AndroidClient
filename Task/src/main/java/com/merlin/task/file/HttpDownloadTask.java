@@ -58,6 +58,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
             final long fileLength = null!=connHeaderLength&&connHeaderLength.length()>0?Long.parseLong(connHeaderLength):-1;
             Debug.D("Head fetched of download file."+contentType+" "+fileLength+" "+fromUriPath);
             if (fileLength<=0){
+                Debug.D("Fail download file which length is empty or EMPTY");
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"Download file length is EMPTY "+fileLength);
                 return;
             }
@@ -73,8 +74,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                     return;
                 }else{
                     toFile.delete();
-                    if (!toFile.exists()) {
-
+                    if (!toFile.exists()){
                         progress.setDone(currentLength=0);
                         Debug.D("Deleted already downloaded file while download with cover mode replace." + cover + " " + toPath);
                     }else{
@@ -150,6 +150,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                    Debug.D("Canceled download file."+toPath);
                    break;
                }
+               Thread.sleep(10);
             }
             out.flush();
            if (what==What.WHAT_SUCCEED){

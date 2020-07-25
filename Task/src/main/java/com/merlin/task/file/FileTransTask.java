@@ -6,7 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 public abstract class FileTransTask<T,V> extends FromToTask<T,V> {
-    private int mCover=Cover.COVER_NONE;
+    private int mCover=Cover.COVER_REPLACE;
     private String mMethod;
     private boolean mBreakPoint=false;
 

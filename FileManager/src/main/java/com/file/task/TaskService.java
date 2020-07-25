@@ -20,17 +20,17 @@ public class TaskService extends com.merlin.task.TaskService {
 //        String name,String from, String to,String method
         String path="{\n" +
                 "        \"modifyTime\":1549323360,\n" +
-                "        \"parent\":\"/volume1/music/\",\n" +
+                "        \"parent\":\"../../\",\n" +
                 "        \"size\":-10009,\n" +
                 "        \"mode\":33279,\n" +
                 "        \"permissions\":33279,\n" +
-                "        \"name\":\"张信哲、刘嘉玲 - 有一点动心\",\n" +
+                "        \"name\":\"rebot.zip\",\n" +
                 "        \"accessTime\":1595076902,\n" +
                 "        \"length\":9322928,\n" +
                 "        \"port\":2018,\n" +
                 "        \"md5\":null,\n" +
                 "        \"mime\":\"audio/mpeg\",\n" +
-                "        \"host\":\"192.168.0.6\",\n" +
+                "        \"host\":\"192.168.168.3\",\n" +
                 "        \"createTime\":1571472865,\n" +
                 "        \"extension\":\".mp3\"\n" +
                 "    }";
@@ -38,8 +38,10 @@ public class TaskService extends com.merlin.task.TaskService {
 
         Task task=new NasFileDownloadTask(new Gson().fromJson(path, Path.class),
 //                "http://192.168.168.3:2018/.jpg.source.jpg",
-                "/sdcard/LIN.jpg");
+                "/sdcard/LIN3.jpg");
+
         handler.postDelayed(new Runnable() {
+
             @Override
             public void run() {
                 mExecutor.addTask(task,"");
@@ -47,6 +49,6 @@ public class TaskService extends com.merlin.task.TaskService {
 //                mExecutor.removeTask((d)->{ return true;},null,"");
 //                handler.postDelayed();
             }
-        },5000);
+        },3000);
     }
 }

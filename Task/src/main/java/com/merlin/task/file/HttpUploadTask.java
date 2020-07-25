@@ -1,8 +1,4 @@
 package com.merlin.task.file;
-import com.task.debug.Debug;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URLEncoder;
 
 
 public abstract class HttpUploadTask extends HttpFileTransTask<String, String> {
@@ -25,19 +21,6 @@ public abstract class HttpUploadTask extends HttpFileTransTask<String, String> {
 
     public final String getToName() {
         return mToName;
-    }
-
-    protected final boolean inflate(HttpURLConnection connection,String key,String value){
-        if (null!=connection&&null!=key&&key.length()>0&&null!=value){
-            try {
-                connection.setRequestProperty(key, URLEncoder.encode(value,"utf-8"));
-                return true;
-            } catch (UnsupportedEncodingException e) {
-                Debug.E("Exception set value to header."+e,e);
-                e.printStackTrace();
-            }
-        }
-        return false;
     }
 
 }

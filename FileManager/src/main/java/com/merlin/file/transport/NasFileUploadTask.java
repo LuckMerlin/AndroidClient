@@ -131,14 +131,14 @@ public class NasFileUploadTask extends HttpUploadTask {
             }
             String fileName=fromFile.getName();
 
-            inflate(connection,"connection","Keep-Alive");
+            inflateHeader(connection,"connection","Keep-Alive");
             String contentLength=Long.toString(fileLength);
-            inflate(connection,Label.LABEL_POSITION, Long.toString(currentLength));
-            inflate(connection,Label.LABEL_LENGTH,Long.toString(fileLength));
-            inflate(connection,"Content-Length", contentLength);
-            inflate(connection,"length", contentLength);
-            inflate(connection,"Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
-            inflate(connection,"name",fileName);
+            inflateHeader(connection,Label.LABEL_POSITION, Long.toString(currentLength));
+            inflateHeader(connection,Label.LABEL_LENGTH,Long.toString(fileLength));
+            inflateHeader(connection,"Content-Length", contentLength);
+            inflateHeader(connection,"length", contentLength);
+            inflateHeader(connection,"Content-Type", "binary/octet-stream;boundary=*********LuckMelrin*****;file="+ fileName);
+            inflateHeader(connection,"name",fileName);
             connection.setDoInput(true);
             connection.setDoOutput(true);
             connection.setUseCaches(false);
