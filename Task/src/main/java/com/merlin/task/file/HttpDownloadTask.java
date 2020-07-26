@@ -53,6 +53,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                 notifyStatus(Status.FINISH, What.WHAT_EXCEPTION,"Fail create connect to fetch file head.");
                 return;
             }
+            conn.connect();
             String contentType=conn.getContentType();
             String connHeaderLength = conn.getHeaderField("content-length");
             final long fileLength = null!=connHeaderLength&&connHeaderLength.length()>0?Long.parseLong(connHeaderLength):-1;
@@ -150,7 +151,7 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                    Debug.D("Canceled download file."+toPath);
                    break;
                }
-               Thread.sleep(10);
+//               Thread.sleep(10);
             }
             out.flush();
            if (what==What.WHAT_SUCCEED){

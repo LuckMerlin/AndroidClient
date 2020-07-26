@@ -96,6 +96,8 @@ public class TaskActivity extends ModelActivity<TaskModel> {
                 "        \"createTime\":1571472865,\n" +
                 "        \"extension\":\"\"\n" +
                 "    }";
+
+
 //        NasFileDownloadTask task=new NasFileDownloadTask(new Gson().fromJson(path,Path.class),"/sdcard/linqiang.mp3");
 //        task.setCover(Cover.COVER_REPLACE);
 //        boolean d=executor.add(task,null);
