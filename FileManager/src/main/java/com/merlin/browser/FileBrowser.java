@@ -70,7 +70,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public interface Callback extends OnTapClick{
-        void onFolderPageLoaded(PageData page, String debug);
+        void onFolderPageLoaded(FolderData page, String debug);
     }
 
     public final Client getMeta() {
@@ -88,7 +88,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     @Override
-    protected final void onPageLoadSucceed(PageData page, String debug) {
+    protected final void onPageLoadSucceed(FolderData page, String debug) {
         super.onPageLoadSucceed(page, debug);
         Callback callback=mCallback;
         if (null!=callback){

@@ -19,11 +19,11 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMoreLoadable{
+public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter<T>  implements OnMoreLoadable{
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
-    private PageData<T> mLastPage;
+    private M mLastPage;
 
     public interface OnPageLoadUpdate{
         int UPDATE_PAGE_END=123;
@@ -33,7 +33,7 @@ public abstract class PageAdapter<D,T> extends ListAdapter<T>  implements OnMore
 
     protected abstract Canceler onPageLoad(D arg, int from, OnApiFinish<Reply<PageData<T>>> finish);
 
-    private final boolean fillPage(PageData<T> page,boolean reset){
+    private final boolean fillPage(M page,boolean reset){
         if (null==page){
             return false;
         }
