@@ -36,14 +36,6 @@ public final class Client implements Parcelable {
         meta.name="Local";
         meta.account="Local";
         meta.pathSep= File.pathSeparator;
-//        String path = Environment.getDataDirectory().getPath();
-//        if (null!=path&&path.length()>0){
-//            StatFs statFs = new StatFs(path);
-//            long blockSize = statFs.getBlockSize();
-//            long totalBlocks = statFs.getBlockCount();
-//            long availableBlocks = statFs.getAvailableBlocks();
-//            long rom_length = totalBlocks*blockSize;
-//        }
         return meta;
     }
 
@@ -118,8 +110,8 @@ public final class Client implements Parcelable {
         }
     };
 
-
     public boolean isLocalClient() {
-        return false;
+        String host=this.host;
+        return null!=host&&host.equals(LOCAL_URL);
     }
 }

@@ -70,16 +70,9 @@ public class NasFileBrowser extends FileBrowser {
 
     @Override
     protected boolean onReboot(String debug) {
-        Dialog dialog=new Dialog(getViewContext());
-        return dialog.create().title(R.string.reboot).left(R.string.sure).right(R.string.cancel).show((view, clickCount, resId, data)-> {
-            if (resId==R.string.sure){
-                Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
-                call(prepare(Api.class,null,null).rebootClient(),null,
-                        null,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
-            }
-            dialog.dismiss();
-            return true;
-        });
+        Debug.D(getClass(),"Reboot client meta "+(null!=debug?debug:"."));
+        return null!=call(prepare(Api.class,null,null).rebootClient(),null,
+                null,(OnApiFinish<Reply>)(what, note, data2, arg)-> toast(note));
     }
 
     @Override

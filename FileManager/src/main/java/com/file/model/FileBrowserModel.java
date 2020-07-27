@@ -14,7 +14,9 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
+import com.merlin.api.Reply;
 import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
@@ -70,9 +72,11 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
 //        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
-        Client testClient=new Client("算法",getServerUri(),"",null,"","/");
-//        ClientMeta testClient=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
+        Client testClient1=new Client("算法",getServerUri(),"",null,"","/");
+        Client testClient=Client.buildLocalClient(getContext());
+//        Client testClient2=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
         putClientMeta(testClient, "After mode create.");
+        putClientMeta(testClient1, "After mode create.");
         //
 //        refreshClientMeta("After
 //        mode create.");
@@ -240,7 +244,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     private boolean addTerminal(String debug){
         ViewDataBinding binding=null;
         return new Dialog(getViewContext()).setContentView(binding,true).show((View view, int clickCount, int resId, Object data) ->{
-
                 return false;
         },true);
     }
@@ -268,17 +271,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         }
         return entryMode(Mode.MODE_MOVE,new Collector(files),"While start move files "+(null!=debug?debug:"."));
     }
-
-//    private boolean applyCollectedFiles(int mode,ArrayList<FileMeta> files,int coverMode,String debug){
-//        if (null==files||files.size()<=0){
-//            return toast(R.string.noneDataToOperate)&&false;
-//        }else if (isMode(mode)){
-//            FileBrowser browser=getCurrentModel();
-//            FolderData data=mCurrentFolder.get();
-//            return null!=browser&&browser.executePathsModify(mode,files,null!=data?data.getPath():null,coverMode,debug)&&entryMode(Mode.MODE_NORMAL,null,"After start apply collect files "+(null!=debug?debug:"."));
-//        }
-//        return entryMode(mode,new Collector(files),"While start apply collect files "+(null!=debug?debug:"."));
-//    }
 
     private boolean upload(ArrayList<Path> files, int coverMode, String debug){
         if (null==files||files.size()<=0){
@@ -410,7 +402,15 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
 
     private boolean rebootClient(String debug){
         FileBrowser browser=getCurrentModel();
-        return null!=browser&&browser.reboot(debug);
+        Dialog dialog=new Dialog(getViewContext());
+        return null!=browser&&dialog.create().title(R.string.reboot).left(R.string.sure).
+                right(R.string.cancel).show((view, clickCount, resId, data)-> {
+            if (resId==R.string.sure){
+                browser.reboot(debug);
+            }
+            dialog.dismiss();
+            return true;
+        });
     }
 
     public final boolean isMode(int ...models){

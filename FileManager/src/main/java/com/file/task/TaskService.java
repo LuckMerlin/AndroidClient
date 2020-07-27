@@ -2,10 +2,6 @@ package com.file.task;
 
 import android.os.Handler;
 import android.os.Looper;
-
-import com.google.gson.Gson;
-import com.merlin.bean.Path;
-import com.merlin.file.transport.NasFileDownloadTask;
 import com.merlin.file.transport.NasFileUploadTask;
 import com.merlin.task.Task;
 import com.merlin.task.file.HttpDownloadTask;
@@ -36,12 +32,12 @@ public class TaskService extends com.merlin.task.TaskService {
                 "    }";
 
 
-        Task task=new NasFileDownloadTask(new Gson().fromJson(path, Path.class),
-//                "http://192.168.168.3:2018/.jpg.source.jpg",
-                "/sdcard/LIN3.jpg");
+//        Task task=new NasFileDownloadTask(new Gson().fromJson(path, Path.class),
+        Task task=new HttpDownloadTask("HHHS",
+                "http://192.168.168.3:2018/.jpg.source.jpg",
+                "/sdcard/LIN3.jpg", "POST");
 
         handler.postDelayed(new Runnable() {
-
             @Override
             public void run() {
                 mExecutor.addTask(task,"");

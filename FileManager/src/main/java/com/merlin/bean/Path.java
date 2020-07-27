@@ -29,7 +29,7 @@ public final class Path implements Parcelable {
     private long createTime;
     private String md5;
 
-    public static Path build(File file,boolean load){
+    public static Path build(File file){
         if (null!=file&&file.exists()){
             String name=file.getName();
             Path path=new Path();

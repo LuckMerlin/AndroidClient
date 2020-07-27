@@ -48,7 +48,6 @@
         <include layout="@layout/item_context_menu"
             binding:menu="@{ContextMenu.create(R.string.exit,folder)}"/>
         <include layout="@layout/item_context_menu"
-            android:visibility="@{client.localClient?View.GONE:View.VISIBLE}"
             binding:menu="@{ContextMenu.create(R.string.reboot,folder)}"/>
     </LinearLayout>
 </layout>
