@@ -15,6 +15,7 @@ import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
+import com.merlin.task.file.Cover;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,11 +61,42 @@ public class LocalFileBrowser extends FileBrowser {
 
     @Override
     protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
+
         return false;
     }
 
     @Override
     protected boolean onRenamePath(String path, String name, int coverMode, OnApiFinish<Reply<Path>> finish, String debug) {
+        if (null!=finish) {
+            Reply<Path> reply=null;
+            if (null == path || path.length() <= 0 || null == name || name.length() <= 0) {
+                reply=new Reply<>(true,What.WHAT_ARGS_INVALID,"Path or name invalid",null);
+            }else{
+                File file=new File(path);
+                if (!file.exists()){
+                    reply=new Reply<>(true,What.WHAT_NOT_EXIST,"Path not exist",null);
+                }else if (!file.canExecute()){
+                    reply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"Path none permission",null);
+                }else{
+                    File parent=file.getParentFile();
+                    if (null==parent){
+                        reply=new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Path none parent",null);
+                    }else if (new File(parent,name).exists()&&coverMode!= Cover.COVER_REPLACE){
+                        reply=new Reply<>(true,What.WHAT_ALREADY_DONE,"Path already exist",null);
+                    }else {
+                        file.renameTo(new File(parent,name));
+                        if (file.exists()){
+                            reply=new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Path rename fail",null);
+                        }else{
+                            reply=new Reply<>(true,What.WHAT_SUCCEED,"Path rename succeed",null);
+                        }
+                    }
+                }
+            }
+            reply=null!=reply?reply:new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Path rename fail",null);
+            finish.onApiFinish(reply.getWhat(),reply.getNote(),reply,null);
+            return true;
+        }
         return false;
     }
 
