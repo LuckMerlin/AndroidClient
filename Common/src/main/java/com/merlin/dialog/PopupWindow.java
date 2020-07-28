@@ -141,8 +141,8 @@ public class PopupWindow {
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&null!=view&&null==view.getParent()){
             Drawable drawable=mBackground;
-            drawable=null!=drawable?drawable:view.getContext().getResources()
-                    .getDrawable(R.drawable.round_corner_black);
+//            drawable=null!=drawable?drawable:view.getContext().getResources()
+//                    .getDrawable(R.drawable.round_corner_black);
             window.setBackgroundDrawable(drawable);
             window.setContentView(view);
             applyDismissFlag(mDismissFlag);

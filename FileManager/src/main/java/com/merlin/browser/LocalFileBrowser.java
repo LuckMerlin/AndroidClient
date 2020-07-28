@@ -81,6 +81,8 @@ public class LocalFileBrowser extends FileBrowser {
             reply=new Reply<>(true,What.WHAT_NOT_DIRECTORY,"Not directory",null);
         }else if (from<0){
             reply=new Reply<>(true,What.WHAT_ARGS_INVALID,"From index invalid",null);
+        }else if (!file.canRead()){
+            reply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"Folder none permission",null);
         }else{
             final File[] files=file.listFiles();
             final int length=null!=files?files.length:0;
@@ -91,7 +93,7 @@ public class LocalFileBrowser extends FileBrowser {
             pageData.setFree(total>0?total-file.getFreeSpace():0);
             pageData.setTotal(total);
             String parent=file.getParent();
-            pageData.setParent(null!=parent&&!parent.endsWith(File.separator)?File.separator:parent);
+            pageData.setParent(null!=parent&&!parent.endsWith(File.separator)?parent+File.separator:parent);
             pageData.setName(file.getName());
             if (length<=0){
                 reply=new Reply<>(true,What.WHAT_SUCCEED,"Directory empty",pageData);
