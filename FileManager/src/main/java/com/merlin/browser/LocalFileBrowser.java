@@ -10,6 +10,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.bean.FolderData;
 import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
@@ -83,8 +84,15 @@ public class LocalFileBrowser extends FileBrowser {
         }else{
             final File[] files=file.listFiles();
             final int length=null!=files?files.length:0;
-            final PageData<Path> pageData=new PageData<>();
+            final FolderData<Path> pageData=new FolderData<>();
             pageData.setLength(length);
+            pageData.setPathSep(File.separator);
+            long total=file.getTotalSpace();
+            pageData.setFree(total>0?total-file.getFreeSpace():0);
+            pageData.setTotal(total);
+            String parent=file.getParent();
+            pageData.setParent(null!=parent&&!parent.endsWith(File.separator)?File.separator:parent);
+            pageData.setName(file.getName());
             if (length<=0){
                 reply=new Reply<>(true,What.WHAT_SUCCEED,"Directory empty",pageData);
             }else if (from>=length){

@@ -32,6 +32,14 @@ public class FolderData<T extends Path> extends PageData<T> {
          return null!=sep&&null!=parent&&null!=name?parent+(parent.endsWith(sep)?"":sep)+name:null;
     }
 
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public void setFree(double free) {
+        this.free = free;
+    }
+
     public String getPathSep() {
         return pathSep;
     }

@@ -56,8 +56,8 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     private final ObservableField<Integer> mCurrentMultiChooseCount=new ObservableField<>();
     private final FileBrowser.Callback mBrowserCallback=new FileBrowser.Callback() {
         @Override
-        public void onFolderPageLoaded(FolderData page, String debug) {
-            mCurrentFolder.set(page);
+        public void onFolderPageLoaded(String arg,PageData page, String debug) {
+            mCurrentFolder.set(null!=page&&page instanceof FolderData?((FolderData)page):null);
         }
 
         @Override
