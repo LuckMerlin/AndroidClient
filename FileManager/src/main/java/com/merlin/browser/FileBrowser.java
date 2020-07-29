@@ -209,27 +209,21 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                 });
     }
 
-    protected FileProcess onCreateFileProcess(int mode,ArrayList<Path> files,String target,Integer coverMode,String debug){
-        switch (mode){
-            case MODE_DELETE:
-                return new FileDeleteProcess(getText(R.string.delete),files);
-        }
-        return null;
-    }
-
     public final boolean copyPaths(ArrayList<Path> files,String folder,int coverMode,String debug){
-        FileProcess process=onCreateFileProcess(Mode.MODE_COPY,files,folder,coverMode,debug);
+        FileProcess process= new FileCopyProcess(getText(R.string.copy),files);
         return null!=process?process(process,null):(toast(R.string.fail)&&false);
     }
 
     public final boolean movePaths(ArrayList<Path> files, String folder, int coverMode, String debug){
-        FileProcess process=onCreateFileProcess(Mode.MODE_MOVE,files,folder,coverMode,debug);
-        return null!=process?process(process,null):(toast(R.string.fail)&&false);
+//        FileProcess process=onCreateFileProcess(Mode.MODE_MOVE,files,folder,coverMode,debug);
+//        return null!=process?process(process,null):(toast(R.string.fail)&&false);
+        return false;
     }
 
     public final boolean deletePath(ArrayList<Path> paths,OnApiFinish<Reply<Path>> finish,String debug){
-        FileProcess process=onCreateFileProcess(Mode.MODE_DELETE,paths,null,null,debug);
-        return null!=process?process(process,finish):(toast(R.string.fail)&&false);
+//        FileProcess process=onCreateFileProcess(Mode.MODE_DELETE,paths,null,null,debug);
+//        return null!=process?process(process,finish):(toast(R.string.fail)&&false);
+        return false;
     }
 
     public final boolean deletePath(Path data,OnApiFinish<Reply<Path>> finish,String debug){
@@ -282,12 +276,15 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             }
                             break;
                         case R.string.cancel:
-                            if (!process.isProcessing()|| process.cancel(true,"After user cancel click.")){
-                                toast(R.string.canceled);
+                            if (!process.isProcessing()){
+                                if (process.cancel(true,"After user cancel click.")) {
+                                    toast(R.string.canceled);
+                                    dialog.dismiss();
+                                  if (null!=finish){
+                                        finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
+                                   }
+                                }
                             }
-//                            if (null!=finish){
-//                                finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
-//                            }
                             break;
                         case R.string.finished:
                             dialog.dismiss();

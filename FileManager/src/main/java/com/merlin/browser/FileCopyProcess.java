@@ -1,16 +1,14 @@
 package com.merlin.browser;
 
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
 import com.merlin.api.Processing;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
-import com.merlin.file.R;
 import com.merlin.debug.Debug;
-import com.merlin.lib.Cancel;
-import com.merlin.lib.Canceler;
+import com.merlin.file.R;
 import com.merlin.retrofit.Retrofit;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -20,20 +18,20 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
-public class FileDeleteProcess extends FileProcess<Path> {
+public class FileCopyProcess extends FileProcess<Path> {
 
-    public FileDeleteProcess(){
+    public FileCopyProcess(){
         this(null,null);
     }
 
-    public FileDeleteProcess(String title,ArrayList<Path> files){
+    public FileCopyProcess(String title, ArrayList<Path> files){
         super(title,files);
     }
 
     private interface Api{
         @POST("/file/delete")
         @FormUrlEncoded
-        Call<Reply<Processing>> delete(@Field(Label.LABEL_PATH) String path);
+        Call<Reply<Processing>> copy(@Field(Label.LABEL_PATH) String path);
     }
 
     @Override
@@ -69,7 +67,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
             ProcessingFetcher fetcher = new ProcessingFetcher(processingId) {
                 @Override
                 protected boolean isCanceled() {
-                    return FileDeleteProcess.this.isCancel();
+                    return FileCopyProcess.this.isCancel();
                 }
 
                 @Override

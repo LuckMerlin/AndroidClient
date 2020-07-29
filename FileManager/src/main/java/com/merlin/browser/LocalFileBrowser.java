@@ -51,18 +51,44 @@ public class LocalFileBrowser extends FileBrowser {
 
     @Override
     protected boolean onShowPathDetail(Path meta, String debug) {
+
         return false;
     }
 
     @Override
     protected boolean onSetAsHome(String path, OnApiFinish<Reply<String>> finish, String debug) {
+
         return false;
     }
 
     @Override
     protected boolean onCreatePath(boolean dir, int coverMode, String folder, String name, OnApiFinish<Reply<Path>> finish, String debug) {
-
-        return false;
+        Reply<Path>  reply=null;
+        if (null == folder || folder.length() <= 0 || null == name || name.length() <= 0) {
+            reply=new Reply<>(true,What.WHAT_ARGS_INVALID,"Path or name invalid",null);
+        }else{
+            File file=new File(folder,name);
+            if (file.exists()&&coverMode==Cover.COVER_REPLACE){
+                file.delete();
+            }
+            if (file.exists()){
+                reply = new Reply<>(true, What.WHAT_ALREADY_DONE, "Path already exist", null);
+            }else {
+                try {
+                    if ((dir? file.mkdirs():file.createNewFile())&&file.exists()){
+                        reply = new Reply<>(true, What.WHAT_SUCCEED, "Create path succeed", null);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    reply = new Reply<>(true, What.WHAT_ERROR_UNKNOWN, "Exception create path", null);
+                }
+            }
+        }
+        reply=null!=reply?reply:new Reply<>(true, What.WHAT_ERROR_UNKNOWN, "Fail create path", null);
+        if (null!=finish){
+            finish.onApiFinish(reply.getWhat(),reply.getNote(),reply,null);
+        }
+        return true;
     }
 
     @Override
@@ -75,7 +101,7 @@ public class LocalFileBrowser extends FileBrowser {
                 File file=new File(path);
                 if (!file.exists()){
                     reply=new Reply<>(true,What.WHAT_NOT_EXIST,"Path not exist",null);
-                }else if (!file.canExecute()){
+                }else if (!file.canWrite()){
                     reply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"Path none permission",null);
                 }else{
                     File parent=file.getParentFile();
@@ -154,11 +180,7 @@ public class LocalFileBrowser extends FileBrowser {
 
     @Override
     public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
-    }
 
-    @Override
-    protected FileProcess onCreateFileProcess(int mode, ArrayList<Path> files, String target, Integer coverMode, String debug) {
-        return null;
     }
 
     private String getHome(){
