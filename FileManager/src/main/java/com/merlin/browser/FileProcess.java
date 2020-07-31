@@ -14,6 +14,7 @@ import com.merlin.lib.Cancel;
 import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,6 +132,21 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
         if (null!=update){
 //            update.onProcessUpdate();
         }
+    }
+
+    protected final boolean close(Closeable ...closeables){
+        if (null!=closeables&&closeables.length>0){
+            for (Closeable child:closeables) {
+                if (null!=child){
+                    try {
+                        child.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     protected final String getText(Context context, int textResId, Object ...args){

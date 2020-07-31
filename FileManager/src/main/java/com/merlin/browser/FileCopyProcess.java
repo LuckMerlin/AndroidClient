@@ -11,6 +11,9 @@ import com.merlin.retrofit.Retrofit;
 import com.merlin.task.file.Cover;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -66,12 +69,13 @@ public class FileCopyProcess extends FileProcess<Path> {
 
     private Reply<Path> copyLocalFileToLocal(File from,File toFolder,int coverMode,OnProcessUpdate update){
         final String name=null!=from?from.getName():null;
+        final Path path=null!=from?Path.build(from):null;
         if (null==name||name.length()<=0||null==toFolder){
-            return new Reply(true,What.WHAT_INVALID,"File invalid",null);
+            return new Reply(true,What.WHAT_INVALID,"File invalid",path);
         }else if (!from.exists()){
-            return new Reply(true,What.WHAT_NOT_EXIST,"File not exist",null);
+            return new Reply(true,What.WHAT_NOT_EXIST,"File not exist",path);
         }else if (!from.canRead()){
-            return new Reply(true,What.WHAT_NONE_PERMISSION,"File none read permission",null);
+            return new Reply(true,What.WHAT_NONE_PERMISSION,"File none read permission",path);
         }
         final File toFile=new File(toFolder,name);
         if (toFile.exists()&&(from.isDirectory()==toFile.isDirectory())){
@@ -100,7 +104,26 @@ public class FileCopyProcess extends FileProcess<Path> {
             return copyResult;
         }
         if (from.isDirectory()){//Copy file
+            File[] children=from.listFiles();
+            if (null!=children&&children.length>0){
+                for (File child:children) {
+                    copyLocalFileToLocal(child,null,coverMode,update);
+                }
+            }
+        }else{
+            notifyProgress("Copying file",path,null,update);
+            FileInputStream inputStream=null;FileOutputStream outputStream=null;
+            try {
+                inputStream= new FileInputStream(from);
+                outputStream= new FileOutputStream(toFile);
+                byte[] buffer=new byte[1024*1024];
 
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return new Reply(true,What.WHAT_NOT_EXIST,"File not exist",null);
+            }finally {
+                close(outputStream,inputStream);
+            }
         }
         return null;
     }
@@ -108,7 +131,6 @@ public class FileCopyProcess extends FileProcess<Path> {
     private Reply downloadToLocal(String fromHostUri,String fromPath,File toFolder,int coverMode,OnProcessUpdate update,Retrofit retrofit){
         return null;
     }
-
 
     private Reply<Path> deleteFile(File file,OnProcessUpdate update) {
         if (file == null || !file.exists()) {
