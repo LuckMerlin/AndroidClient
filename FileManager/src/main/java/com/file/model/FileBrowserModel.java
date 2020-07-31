@@ -14,10 +14,8 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
-import com.merlin.api.Reply;
-import com.merlin.bean.FolderData;
+import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
 import com.merlin.browser.CoverMode;
@@ -48,7 +46,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     private final Map<String, FileBrowser> mAllClientMetas=new HashMap<>();
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
     private final ObservableField<FileBrowser> mCurrent=new ObservableField<>();
-    private final ObservableField<FolderData> mCurrentFolder=new ObservableField<>();
+    private final ObservableField<Folder> mCurrentFolder=new ObservableField<>();
     private final ObservableField<Integer> mCurrentMode=new ObservableField<>(FileBrowser.MODE_NORMAL);
     private final ObservableField<ListAdapter> mCurrentAdapter=new ObservableField<>();
     private final ObservableField<Client> mCurrentMeta=new ObservableField<>();
@@ -57,7 +55,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     private final FileBrowser.Callback mBrowserCallback=new FileBrowser.Callback() {
         @Override
         public void onFolderPageLoaded(String arg,PageData page, String debug) {
-            mCurrentFolder.set(null!=page&&page instanceof FolderData?((FolderData)page):null);
+            mCurrentFolder.set(null!=page&&page instanceof Folder ?((Folder)page):null);
         }
 
         @Override
@@ -115,7 +113,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
                          mCurrentAdapter.set(browser);
                          Debug.D(getClass(),"Change browser device "+client.getName()+" "+(null!=debug?debug:"."));
                          PageData page=null!=browser?browser.getLastPage():null;
-                         mCurrentFolder.set(null!=page&&page instanceof FolderData?(FolderData)page:null);
+                         mCurrentFolder.set(null!=page&&page instanceof Folder ?(Folder)page:null);
                          if (null==page){
                              browser.loadPage(client.getHome(),"While browser switched.");
                          }
@@ -253,36 +251,42 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
             return toast(R.string.noneDataToOperate)&&false;
         }else if (isMode(Mode.MODE_COPY)){
             FileBrowser browser=getCurrentModel();
-            FolderData data=mCurrentFolder.get();
-            return null!=browser&&browser.copyPaths(files,null!=data?data.getPath():null,coverMode,debug)&&
+            Folder folder=mCurrentFolder.get();
+            Path folderPath=null!=folder?folder.getPath():null;
+            if (null==folderPath||null==browser){
+                Debug.D(getClass(),"Can't copy file which model NULL or target not folder.");
+                return toast(R.string.fail)&&false;
+            }
+            return browser.copyPaths(files,folderPath,coverMode,debug)&&
                     entryMode(Mode.MODE_NORMAL,null,"After start copy files "+(null!=debug?debug:"."));
         }
         return entryMode(Mode.MODE_COPY,new Collector(files),"While copy files "+(null!=debug?debug:"."));
     }
 
     private boolean move(ArrayList<Path> files,int coverMode,String debug){
-        if (null==files||files.size()<=0){
-            return toast(R.string.noneDataToOperate)&&false;
-        }else if (isMode(Mode.MODE_MOVE)){
-            FileBrowser browser=getCurrentModel();
-            FolderData data=mCurrentFolder.get();
-            return null!=browser&&browser.movePaths(files,null!=data?data.getPath():null,coverMode,debug)
-                    && entryMode(Mode.MODE_NORMAL,null,"After start move files "+(null!=debug?debug:"."));
-        }
-        return entryMode(Mode.MODE_MOVE,new Collector(files),"While start move files "+(null!=debug?debug:"."));
+//        if (null==files||files.size()<=0){
+//            return toast(R.string.noneDataToOperate)&&false;
+//        }else if (isMode(Mode.MODE_MOVE)){
+//            FileBrowser browser=getCurrentModel();
+//            Folder data=mCurrentFolder.get();
+//            return null!=browser&&browser.movePaths(files,null!=data?data.getPath():null,coverMode,debug)
+//                    && entryMode(Mode.MODE_NORMAL,null,"After start move files "+(null!=debug?debug:"."));
+//        }
+//        return entryMode(Mode.MODE_MOVE,new Collector(files),"While start move files "+(null!=debug?debug:"."));
+        return false;
     }
 
     private boolean upload(ArrayList<Path> files, int coverMode, String debug){
-        if (null==files||files.size()<=0){
-            return toast(R.string.noneDataToOperate)&&false;
-        }
-        FolderData folder=mCurrentFolder.get();
-        String folderPath=null!=folder?folder.getPath():null;
-        Client meta=mCurrentMeta.get();
-        if (null==folderPath||folderPath.length()<=0||null==meta||meta.isLocalClient()){
-            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
-            return false;
-        }
+//        if (null==files||files.size()<=0){
+//            return toast(R.string.noneDataToOperate)&&false;
+//        }
+//        Folder folder=mCurrentFolder.get();
+//        String folderPath=null!=folder?folder.getPath():null;
+//        Client meta=mCurrentMeta.get();
+//        if (null==folderPath||folderPath.length()<=0||null==meta||meta.isLocalClient()){
+//            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
+//            return false;
+//        }
 //        final Convery binder=mTransportBinder;
 //        if (null==binder){
 //            toast(R.string.serverUnConnect);
@@ -297,17 +301,17 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     }
 
     private boolean download(ArrayList<Path> files, int coverMode, String debug){
-        Debug.D(getClass(),"下载 "+files);
-        if (null==files||files.size()<=0){
-            return toast(R.string.noneDataToOperate)&&false;
-        }
-        FolderData folder=mCurrentFolder.get();
-        String folderPath=null!=folder?folder.getPath():null;
-        Client meta=mCurrentMeta.get();
-        if (null==folderPath||folderPath.length()<=0||null==meta||!meta.isLocalClient()){
-            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
-            return false;
-        }
+//        Debug.D(getClass(),"下载 "+files);
+//        if (null==files||files.size()<=0){
+//            return toast(R.string.noneDataToOperate)&&false;
+//        }
+//        Folder folder=mCurrentFolder.get();
+//        String folderPath=null!=folder?folder.getPath():null;
+//        Client meta=mCurrentMeta.get();
+//        if (null==folderPath||folderPath.length()<=0||null==meta||!meta.isLocalClient()){
+//            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
+//            return false;
+//        }
 //        if (ConveyorService.download(getViewContext(),files,meta,folderPath,coverMode,debug)){
 ////            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
 ////            launchTransportList("");
@@ -573,7 +577,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         return mCurrentMode;
     }
 
-    public ObservableField<FolderData> getCurrentFolder(){
+    public ObservableField<Folder> getCurrentFolder(){
         return mCurrentFolder;
     }
 

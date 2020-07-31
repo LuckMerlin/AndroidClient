@@ -1,18 +1,13 @@
 package com.merlin.browser;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.PowerManager;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.FolderData;
+import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
-import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
 import com.merlin.task.file.Cover;
@@ -142,25 +137,17 @@ public class LocalFileBrowser extends FileBrowser {
         }else if (!file.canRead()){
             reply=new Reply<>(true,What.WHAT_NONE_PERMISSION,"Folder none permission",null);
         }else{
+            Path folderPath=Path.build(file);
             final File[] files=file.listFiles();
             final int length=null!=files?files.length:0;
-            final FolderData<Path> pageData=new FolderData<>();
-            pageData.setLength(length);
-            pageData.setPathSep(File.separator);
-            long total=file.getTotalSpace();
-            pageData.setFree(total>0?total-file.getFreeSpace():0);
-            pageData.setTotal(total);
-            String parent=file.getParent();
-            pageData.setParent(null!=parent&&!parent.endsWith(File.separator)?parent+File.separator:parent);
-            pageData.setName(file.getName());
+            final ArrayList<Path> list=new ArrayList<>();
+            Folder<Path> pageData=new Folder<>(folderPath,from,list,length);
             if (length<=0){
                 reply=new Reply<>(true,What.WHAT_SUCCEED,"Directory empty",pageData);
             }else if (from>=length){
                 reply=new Reply<>(true,What.WHAT_OUT_OF_BOUNDS,"Out of bounds",pageData);
             }else{
                 Arrays.sort(files,(File o1, File o2)->null!=o1&&o1.isDirectory()?0:-1);
-                ArrayList<Path> list=new ArrayList<>();
-                pageData.setData(list);
                 Path childPath=null;
                 for (int i = from; i < Math.min(length, from+50); i++) {
                     if (null!=(childPath=Path.build(files[i]))){

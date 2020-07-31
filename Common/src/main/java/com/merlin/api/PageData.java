@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PageData<T> {
-    private long length=-1;
+    private long length;
     private int from;
     private ArrayList<T> data;
 
@@ -27,14 +27,21 @@ public class PageData<T> {
         return from+(null!=list?list.size():0);
     }
 
+    /**
+     * @deprecated
+     */
     public void setFrom(int from) {
         this.from = from;
     }
-
+    /**
+     * @deprecated
+     */
     public void setLength(int length) {
         this.length = length;
     }
-
+    /**
+     * @deprecated
+     */
     public final void setData(ArrayList<T> data) {
         this.data = data;
     }
@@ -42,7 +49,9 @@ public class PageData<T> {
     public final ArrayList<T> getData() {
         return data;
     }
-
+    /**
+     * @deprecated
+     */
     public final int size(){
         return null!=data?data.size():0;
     }

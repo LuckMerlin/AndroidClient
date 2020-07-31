@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.PageData;
-import com.merlin.bean.FolderData;
+import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
 import com.merlin.browser.Thumbs;
@@ -105,9 +105,9 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
         return new LinearLayoutManager(rv.getContext());
     }
 
-    public final FolderData getLastFolder(){
+    public final Folder getLastFolder(){
         PageData pageData=getLastPage();
-        return null!=pageData&&pageData instanceof FolderData ?(FolderData)pageData:null;
+        return null!=pageData&&pageData instanceof Folder ?(Folder)pageData:null;
     }
 
     @Override

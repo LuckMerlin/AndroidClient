@@ -2,12 +2,10 @@ package com.merlin.browser;
 
 import android.view.View;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
-import com.merlin.bean.FolderData;
+import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 import com.merlin.dialog.Dialog;
@@ -17,10 +15,6 @@ import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
 
 import io.reactivex.Observable;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
-import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -28,15 +22,13 @@ import com.merlin.api.Label;
 
 import com.merlin.api.What;
 
-import java.io.IOException;
-
 public class NasFileBrowser extends FileBrowser {
 
     private interface Api{
         @POST("/file/browser")
         @FormUrlEncoded
-        Observable<Reply<FolderData<Path>>> queryFiles(@Field(Label.LABEL_PATH) String path, @Field(Label.LABEL_FROM) int from,
-                                                       @Field(Label.LABEL_TO) int to);
+        Observable<Reply<Folder<Path>>> queryFiles(@Field(Label.LABEL_PATH) String path, @Field(Label.LABEL_FROM) int from,
+                                                   @Field(Label.LABEL_TO) int to);
         @POST("/user/reboot")
         Observable<Reply> rebootClient();
 

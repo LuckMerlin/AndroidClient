@@ -6,7 +6,7 @@
         <import type="com.merlin.client.R"/>
         <variable
             name="folder"
-            type="com.merlin.bean.FolderData" />
+            type="com.merlin.bean.Folder" />
         <variable
             name="mode"
             type="Integer" />

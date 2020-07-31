@@ -56,7 +56,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <View
-                        android:background="@{meta.local?meta.syncColor():R.color.syncNull}"
                         android:visibility="@{meta.local?View.VISIBLE:View.GONE}"
                         android:alpha="0.9"
                         android:layout_marginTop="3dp"

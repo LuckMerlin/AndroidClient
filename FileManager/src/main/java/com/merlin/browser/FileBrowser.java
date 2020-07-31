@@ -18,7 +18,7 @@ import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
-import com.merlin.bean.FolderData;
+import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
 import com.merlin.browser.config.Config;
 import com.merlin.click.OnTapClick;
@@ -28,8 +28,6 @@ import com.merlin.dialog.PopupWindow;
 import com.merlin.file.R;
 import com.merlin.file.databinding.LayoutFileModifyBinding;
 import com.merlin.file.databinding.SingleEditTextBinding;
-import com.merlin.lib.Cancel;
-import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.retrofit.RetrofitCanceler;
 import com.merlin.server.Client;
@@ -103,10 +101,11 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
 
     public  final boolean browserParent(String debug){
         PageData current=getLastPage();
-        if (null!=current&&current instanceof FolderData){
-            FolderData folder=(FolderData)current;
-            String parent=folder.getParent();
-            String curr=folder.getPath();
+        Folder folder=null!=current&&current instanceof Folder?(Folder)current:null;
+        Path folderPath=null!=folder?folder.getPath():null;
+        if (null!=folderPath){
+            String parent=folderPath.getParent();
+            String curr=folderPath.getPath();
             if (null==parent||parent.length()<=0||(null!=curr&&curr.equals(parent))){
                 return false;
             }
@@ -135,7 +134,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public final boolean setAsHome(Object data,String debug){
-        String path=null!=data&&data instanceof FolderData?((FolderData)data).getPath():null;
+        Path folderPath=null!=data&&data instanceof Folder ?((Folder)data).getPath():null;
+        String path=null!=folderPath?folderPath.getPath():null;
         return (null==path||path.length()<=0)?(toast(R.string.fail)&&false):onSetAsHome(path,(what,note, data1, arg)->{
             boolean succeed=null!=data1&&data1.isSuccess()&&data1.getWhat()==What.WHAT_SUCCEED;
             toast(succeed?R.string.succeed:(null!=note&&note.length()>0?note:R.string.fail));
@@ -180,8 +180,9 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public final boolean createPath(boolean dir,String debug){
-        FolderData folderData=getLastFolder();
-        final String parent=null!=folderData?folderData.getPath():null;
+        Folder folderData=getLastFolder();
+        final Path parentPath=null!=folderData?folderData.getPath():null;
+        final String parent=null!=parentPath?parentPath.getPath():null;
         if (null==parent||parent.length()<=0){
             toast(R.string.pathNotExist);
             return false;
@@ -209,8 +210,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                 });
     }
 
-    public final boolean copyPaths(ArrayList<Path> files,String folder,int coverMode,String debug){
-        FileProcess process= new FileCopyProcess(getText(R.string.copy),files);
+    public final boolean copyPaths(ArrayList<Path> files,Path folder,int coverMode,String debug){
+        FileProcess process= new FileCopyProcess(getText(R.string.copy),folder,coverMode,files);
         return null!=process?process(process,null):(toast(R.string.fail)&&false);
     }
 

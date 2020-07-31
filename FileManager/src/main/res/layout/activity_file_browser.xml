@@ -82,7 +82,7 @@
                                 android:layout_width="10dp"
                                 android:layout_height="10dp"/>
                             <TextView
-                                android:text='@{""+FileSize.formatSizeText(vm.currentFolder.free)+"/"+FileSize.formatSizeText(vm.currentFolder.total)}'
+                                android:text='@{""+FileSize.formatSizeText(vm.currentFolder.path.free)+"/"+FileSize.formatSizeText(vm.currentFolder.path.total)}'
                                 style="@style/titleSubNormalTextView"
                                 android:layout_width="wrap_content"
                                 android:visibility="@{null==vm.currentMeta?View.GONE:View.VISIBLE}"
@@ -131,8 +131,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:text="@{vm.currentFolder.path}"
-                android:visibility="@{vm.currentFolder.path.length()>0?View.VISIBLE:View.GONE}"
+                android:text="@{vm.currentFolder.path.path}"
+                android:visibility="@{vm.currentFolder.path.path.length()>0?View.VISIBLE:View.GONE}"
                 android:layout_width="wrap_content"
                 android:singleLine="true"
                 android:textSize="@dimen/textSmall"
