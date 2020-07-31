@@ -127,6 +127,12 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
         return mTitle;
     }
 
+    protected final void notifyProgress(String note,Path instant,Float progress,OnProcessUpdate update){
+        if (null!=update){
+//            update.onProcessUpdate();
+        }
+    }
+
     protected final String getText(Context context, int textResId, Object ...args){
         return null!=context?context.getResources().getString(textResId,args):null;
     }

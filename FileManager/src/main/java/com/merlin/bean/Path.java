@@ -64,6 +64,8 @@ public final class Path implements Parcelable {
                 } catch (IOException e) {
                     //Do nothing
                 }
+            }else{
+
             }
             return path;
         }

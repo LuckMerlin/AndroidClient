@@ -174,13 +174,4 @@ public class LocalFileBrowser extends FileBrowser {
         return "/sdcard";
     }
 
-    private boolean execCommand(String[] shutdown){
-        try {
-            Process	 process = null!=shutdown&&shutdown.length>0?Runtime.getRuntime().exec(shutdown):null;
-            return null!=process;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 }

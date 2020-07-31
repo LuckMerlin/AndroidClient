@@ -291,7 +291,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             dialog.dismiss();
                             break;
                     }
-                    return true; })&&false;
+                    return true; });
     }
 
     protected abstract boolean onReboot(String debug);

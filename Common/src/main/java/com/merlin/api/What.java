@@ -3,7 +3,11 @@ package com.merlin.api;
 public interface What {
     int WHAT_INVALID = 0;
     int WHAT_SUCCEED = -1000;
-    int WHAT_ERROR_UNKNOWN = -1001;
+    int WHAT_ERROR = -1001;
+    /**
+     * @deprecated
+     */
+    int WHAT_ERROR_UNKNOWN = WHAT_ERROR;
     int WHAT_MEDIA_NOT_EXIST = -1002;
     int WHAT_SHEET_NOT_EXIST = -1003;
     int WHAT_ALREADY_DONE = -1004;
@@ -26,7 +30,11 @@ public interface What {
     int WHAT_NORMAL = - 1021;
     int WHAT_NOT_SUPPORT = - 1022;
     int WHAT_NOT_EXIST = - 1023;
-    int WHAT_FAIL_UNKNOWN = - 1024;
+    int WHAT_FAIL = - 1024;
+    /**
+     * @deprecated
+     */
+    int WHAT_FAIL_UNKNOWN = WHAT_FAIL;
     int WHAT_OUT_OF_BOUNDS = - 1025;
     int WHAT_MATCH_FAIL = - 1026;
     int WHAT_NONE_NETWORK = - 1027;

@@ -8,6 +8,7 @@ import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.merlin.retrofit.Retrofit;
+import com.merlin.task.file.Cover;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ public class FileCopyProcess extends FileProcess<Path> {
 
     @Override
     protected Reply onProcess(Path from,OnProcessUpdate update, Retrofit retrofit) {
-
         return copyFile(from,mFolder,mCoverMode,update,retrofit);
     }
 
@@ -64,8 +64,44 @@ public class FileCopyProcess extends FileProcess<Path> {
         return null;
     }
 
-    private Reply copyLocalFileToLocal(File from,File to,int coverMode,OnProcessUpdate update){
+    private Reply<Path> copyLocalFileToLocal(File from,File toFolder,int coverMode,OnProcessUpdate update){
+        final String name=null!=from?from.getName():null;
+        if (null==name||name.length()<=0||null==toFolder){
+            return new Reply(true,What.WHAT_INVALID,"File invalid",null);
+        }else if (!from.exists()){
+            return new Reply(true,What.WHAT_NOT_EXIST,"File not exist",null);
+        }else if (!from.canRead()){
+            return new Reply(true,What.WHAT_NONE_PERMISSION,"File none read permission",null);
+        }
+        final File toFile=new File(toFolder,name);
+        if (toFile.exists()&&(from.isDirectory()==toFile.isDirectory())){
+            if (coverMode!= Cover.COVER_REPLACE) {
+                return new Reply(true, What.WHAT_EXIST, "File already exist", null);
+            }
+            File temp=null;
+            while ((temp=new File(toFolder,"."+name+"_"+(Math.random()*10000)+".temp")).exists()){
+                    //Do nothing
+            }
+            toFile.renameTo(temp);//Move exist to temp
+            if (toFile.exists()){
+                return new Reply(true, What.WHAT_FAIL, "Fail delete already exist", null);
+            }
+            Reply<Path> copyResult=copyLocalFileToLocal(from,toFolder,coverMode,update);
+            if (null!=copyResult&&copyResult.isSuccess()&&copyResult.getWhat()==What.WHAT_SUCCEED){
+                notifyProgress("Deleting exist file ", Path.build(temp),0f,update);
+                deleteFile(temp,update);
+            }else{//Copy fail,Rollback just copied file(s)
+                notifyProgress("Rollback delete just copied file ", Path.build(temp),0f,update);
+                deleteFile(toFile,update);
+                if (!toFile.exists()&&temp.exists()){//Rollback delete succeed
+                    temp.renameTo(toFile);//Move backup back
+                }
+            }
+            return copyResult;
+        }
+        if (from.isDirectory()){//Copy file
 
+        }
         return null;
     }
 
@@ -73,5 +109,22 @@ public class FileCopyProcess extends FileProcess<Path> {
         return null;
     }
 
+
+    private Reply<Path> deleteFile(File file,OnProcessUpdate update) {
+        if (file == null || !file.exists()) {
+            return new Reply(true,What.WHAT_NOT_EXIST,"File not exist",null);
+        }
+        File[] files=file.isDirectory()?file.listFiles():null;
+        if (null!=files&&files.length>0){//Delete child
+            for (File child : files) {
+                deleteFile(child,update); // 递规的方式删除文件夹
+            }
+        }
+        Path path=Path.build(file);
+        notifyProgress("Deleting file ",path,null,update);
+        file.delete();
+        return file.exists()?new Reply(true,What.WHAT_EXCEPTION,"Fail delete file",path):
+                new Reply<>(true,What.WHAT_SUCCEED,"Succeed delete file",path);
+    }
 
 }
