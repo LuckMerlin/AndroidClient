@@ -22,8 +22,13 @@ public class LocalFileDelete extends FileAction{
             }
         }
         Path path=Path.build(file);
-        notify("Deleting file ",path,null,null,progress);
-        file.delete();
+        notify("Deleting file ",null,path,null,progress);
+//        file.delete();
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return file.exists()?new Reply(true,What.WHAT_EXCEPTION,"Fail delete file",path):
                 new Reply<>(true,What.WHAT_SUCCEED,"Succeed delete file",path);
     }

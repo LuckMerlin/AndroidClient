@@ -250,8 +250,9 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                              binding.setRight(null);
                              final ProcessProgress update=(Object note, Path instant,Float progress)-> {
 //                                 binding.setLeft(process.get);
-                                 binding.setRight(instant);
-//                                 binding.setInstant(instant);
+//                                 binding.setRight(instant);
+                                 binding.setNote(note);
+                                 binding.setInstant(instant);
                                  dialog.title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）");
                                  if (null != progress) {
                                      binding.setProgress(progress);

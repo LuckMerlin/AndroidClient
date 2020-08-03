@@ -17,6 +17,9 @@
         <variable
             name="progress"
             type="float" />
+        <variable
+            name="note"
+            type="Object" />
         <import type="android.view.View"/>
         <import type="com.merlin.util.FileSize"/>
     </data>
@@ -61,11 +64,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+
         <TextView
-            android:text="@{reply.note}"
+            android:text="@{reply.note??note}"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="5dp"
-            android:visibility="@{null!=reply?View.VISIBLE:View.GONE}"
+            android:singleLine="true"
+            android:visibility="@{null!=reply||null==note?View.VISIBLE:View.GONE}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </FrameLayout>
