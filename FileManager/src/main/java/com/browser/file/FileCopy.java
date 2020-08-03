@@ -3,9 +3,15 @@ package com.browser.file;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
+import com.merlin.debug.Debug;
 import com.merlin.task.file.Cover;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public final class FileCopy extends FileAction {
 
@@ -46,18 +52,57 @@ public final class FileCopy extends FileAction {
            }
            return reply;
         }
+        Path copyFrom=Path.build(from);
+        Path copyTo=Path.build(toFile);
+        notify("Copying ",copyFrom,copyTo,0f,progress);
         if (from.isDirectory()){
-            toFile.mkdirs();
             File[] files=from.listFiles();
+            Reply<Path> reply=null;
             if (null!=files&&files.length>0){
                 for (File child:files){
-
+                    String childName=child.getName();
+                    if (null==childName||childName.length()<=0){
+                        Debug.W(getClass(),"Skip copy one file which NONE name");
+                        continue;
+                    }
+                    reply=copy(child,toFile,childName,coverMode,progress);
                 }
+            }else{
+                toFile.mkdirs();
+                boolean succeed=toFile.exists();
+                reply= new Reply(true,succeed?What.WHAT_SUCCEED:What.WHAT_CREATE_FAILED,succeed?"Succeed create folder":"Fail create folder",path);
             }
+            return reply;
         }else{
-
+            InputStream inputStream=null;OutputStream outputStream=null;
+            try {
+                toFile.createNewFile();
+                if (!toFile.exists()){
+                    return new Reply(true,What.WHAT_CREATE_FAILED,"Fail create target path",path);
+                }
+                final long total=from.length();
+                outputStream=new FileOutputStream(toFile);
+                inputStream=new FileInputStream(from);
+                byte[] buffer=new byte[1024*1024];
+                int read=-1;long write=0;
+                String note="Copying file";
+                while ((read=inputStream.read(buffer))>=0){
+                    if (read>0){
+                        outputStream.write(buffer,0,read);
+                        write+=read;
+                        notify(note, copyFrom,copyTo,read*100.f/write,progress);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                toFile.delete();//Delete target file
+                return new Reply(true,What.WHAT_EXCEPTION,"Exception copy file",path);
+            }finally {
+                close(inputStream,outputStream);
+            }
+            return new Reply(true,What.WHAT_SUCCEED,"Copy succeed",path);
         }
-        return null;
+        return new Reply(true,What.WHAT_ERROR,"Error copy file",path);
     }
 
 }
