@@ -6,9 +6,9 @@ import com.merlin.bean.Path;
 
 import java.io.File;
 
-public final class FileDelete extends FileAction{
+public class LocalFileDelete extends FileAction{
 
-    public final Reply<Path> deleteFile(File file, Progress progress) {
+    public final Reply<Path> deleteFile(File file, ProcessProgress progress) {
         if (file == null || !file.exists()) {
             return new Reply(true, What.WHAT_NOT_EXIST,"File not exist",null);
         }
@@ -22,7 +22,7 @@ public final class FileDelete extends FileAction{
             }
         }
         Path path=Path.build(file);
-        notify("Deleting file ",path,null,progress);
+        notify("Deleting file ",path,null,null,progress);
         file.delete();
         return file.exists()?new Reply(true,What.WHAT_EXCEPTION,"Fail delete file",path):
                 new Reply<>(true,What.WHAT_SUCCEED,"Succeed delete file",path);

@@ -12,6 +12,9 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.browser.file.ProcessProgress;
+import com.browser.file.FileDeleteProcess;
+import com.browser.file.FileProcess;
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.ApiMap;
 import com.merlin.api.OnApiFinish;
@@ -211,8 +214,9 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public final boolean copyPaths(ArrayList<Path> files,Path folder,int coverMode,String debug){
-        FileProcess process= new FileCopyProcess(getText(R.string.copy),folder,coverMode,files);
-        return null!=process?process(process,null):(toast(R.string.fail)&&false);
+//        FileProcess process= new FileCopyProcess(getText(R.string.copy),folder,coverMode,files);
+//        return null!=process?process(process,null):(toast(R.string.fail)&&false);
+        return false;
     }
 
     public final boolean movePaths(ArrayList<Path> files, String folder, int coverMode, String debug){
@@ -222,18 +226,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public final boolean deletePath(ArrayList<Path> paths,OnApiFinish<Reply<Path>> finish,String debug){
-//        FileProcess process=onCreateFileProcess(Mode.MODE_DELETE,paths,null,null,debug);
-//        return null!=process?process(process,finish):(toast(R.string.fail)&&false);
-        return false;
-    }
-
-    public final boolean deletePath(Path data,OnApiFinish<Reply<Path>> finish,String debug){
-        if (null==data||!(data instanceof Path)){
-            return toast(R.string.pathInvalid)&&false;
-        }
-        ArrayList<Path> list=new ArrayList<>(1);
-        list.add(data);
-        return deletePath(list,finish, debug);
+        FileProcess process=new FileDeleteProcess(getText(R.string.delete),paths);
+        return null!=process?process(process,finish):(toast(R.string.fail)&&false);
     }
 
     public final boolean process(FileProcess process,OnApiFinish<Reply<Path>> finish){
@@ -254,10 +248,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                         case R.string.sure:
                              dialog.setContentView(binding,false).title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）").left(null).message(null);//Clean message
                              binding.setRight(null);
-                             final FileProcess.OnProcessUpdate update=(Object note, Path from, Path to, Path instant, Integer progress, List<Path> processed)-> {
-                                 binding.setLeft(from);
-                                 binding.setRight(to);
-                                 binding.setInstant(instant);
+                             final ProcessProgress update=(Object note, Path instant,Float progress)-> {
+//                                 binding.setLeft(process.get);
+                                 binding.setRight(instant);
+//                                 binding.setInstant(instant);
                                  dialog.title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）");
                                  if (null != progress) {
                                      binding.setProgress(progress);
@@ -387,7 +381,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
 
     protected final boolean invokeFinish(boolean succeed, Integer what, String note, OnApiFinish finish, Object data, Object arg){
         if (null!=finish){
-            what=null!=what?what:What.WHAT_ERROR_UNKNOWN;
+            what=null!=what?what:What.WHAT_ERROR;
             Reply reply=null!=data?new Reply<>(succeed,what,note,data):null;
             finish.onApiFinish(what,note,reply,arg);
             return true;
@@ -398,8 +392,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     @Override
     public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
         Path path=null!=data&&data instanceof Path?(Path)data:null;
-        if (null!=remover) {
-           deletePath(path, (int what, String note, Reply<Path> reply, Object arg) -> {
+        if (null!=remover&&null!=path) {
+            ArrayList<Path> paths=new ArrayList<>(1);
+           paths.add(path);
+           deletePath(paths, (int what, String note, Reply<Path> reply, Object arg) -> {
                 remover.remove(null != reply && reply.isSuccess() && reply.getWhat() == What.WHAT_SUCCEED);
             }, "While item slide remove.");
         }

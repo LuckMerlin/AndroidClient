@@ -1,30 +1,18 @@
-package com.merlin.browser;
+package com.browser.file;
 
 import android.content.Context;
 
-import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
-import com.merlin.api.Processing;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 import com.merlin.file.R;
-import com.merlin.lib.Cancel;
 import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
 
 public abstract class FileProcess<T extends Path> extends ArrayList<T> implements Canceler{
     private final String mTitle;
@@ -32,29 +20,13 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
     private boolean mCancel=false;
     private int mProcessingIndex;
 
-    public static class Interrupt{
-        private int mWhat;
-
-        public boolean setWhat(int what){
-            mWhat=what;
-            notifyAll();
-            return true;
-        }
-
-        public int getWhat() {
-            return mWhat;
-        }
-    }
-
     public FileProcess(){
         this(null,null);
     }
 
     public FileProcess(String title, ArrayList<T> files){
         mTitle=title;
-        if (null!=files&&files.size()>0){
-            addAll(files);
-        }
+        addAll(null!=files&&files.size()>0?files:new ArrayList<>(0));
     }
 
     protected void onCanceled(boolean cancel,String debug){
@@ -75,13 +47,13 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
         return false;
     }
 
-    public final boolean isCancel() {
+    public final boolean isCanceled() {
         return mCancel;
     }
 
-    protected abstract Reply onProcess(T pathObj, OnProcessUpdate update, Retrofit retrofit);
+    protected abstract Reply onProcess(T pathObj, ProcessProgress update, Retrofit retrofit);
 
-    public final Reply onProcess(OnProcessUpdate update, Retrofit retrofit) {
+    public final Reply onProcess(ProcessProgress update, Retrofit retrofit) {
         if (null==update){
             Debug.W(getClass(),"Can't process file delete with invalid args "+update);
             return null;
@@ -95,7 +67,7 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
                     for (T pathObj:this) {
                         mProcessingIndex+=1;
                         reply=onProcess(pathObj,update,retrofit);
-                        if (isCancel()){
+                        if (isCanceled()){
                             reply=new Reply(true,What.WHAT_CANCEL,"Canceled.",null);
                             break;
                         }
@@ -112,11 +84,7 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
         return mProcessingIndex;
     }
 
-    public interface OnProcessUpdate {
-        void onProcessUpdate(Object note, Path from, Path to, Path instant, Integer progress, List<Path> processed);
-    }
-
-    public String getMessage(Context context){
+    public final String getMessage(Context context){
         final int size=size();
         Path first=size>0?get(0):null;
         String name=null!=first?first.getName(false):null;
@@ -128,9 +96,9 @@ public abstract class FileProcess<T extends Path> extends ArrayList<T> implement
         return mTitle;
     }
 
-    protected final void notifyProgress(String note,Path instant,Float progress,OnProcessUpdate update){
+    protected final void notify(String note, Path instant, Float progress, ProcessProgress update){
         if (null!=update){
-//            update.onProcessUpdate();
+            update.onFileActionProgressChange(note,instant,progress);
         }
     }
 

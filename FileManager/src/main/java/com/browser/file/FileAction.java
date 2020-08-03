@@ -1,20 +1,16 @@
 package com.browser.file;
 
 import com.merlin.bean.Path;
+import com.merlin.lib.Cancel;
 
 import java.io.Closeable;
 import java.io.IOException;
 
-class FileAction {
-    private boolean mCanceled=false;
+abstract class FileAction extends Cancel {
 
-    public final boolean isCanceled() {
-        return mCanceled;
-    }
-
-    protected final void notify(String note, Path from,Path instant, Float progress, Progress callback){
+    protected final void notify(String note, Path from, Path instant, Float progress, ProcessProgress callback){
         if (null!=callback){
-            callback.onFileProgressChange(note,instant,progress);
+            callback.onFileActionProgressChange(note,instant,progress);
         }
      }
 

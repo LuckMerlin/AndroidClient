@@ -16,7 +16,7 @@
             type="com.merlin.bean.Path" />
         <variable
             name="progress"
-            type="int" />
+            type="float" />
         <import type="android.view.View"/>
         <import type="com.merlin.util.FileSize"/>
     </data>
@@ -55,7 +55,7 @@
             <ProgressBar
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_gravity="center_horizontal"
-                android:progress="@{progress}"
+                android:progress="@{(int)progress}"
                 android:minHeight="4dp"
                 android:visibility="gone"
                 android:layout_width="match_parent"
