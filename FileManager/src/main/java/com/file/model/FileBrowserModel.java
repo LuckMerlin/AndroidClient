@@ -14,7 +14,10 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Label;
+import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
+import com.merlin.api.Processing;
+import com.merlin.api.Reply;
 import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
@@ -39,6 +42,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import io.reactivex.Observable;
+import okhttp3.Request;
+import retrofit2.Call;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
 
 
 public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Model.OnBindChange,
@@ -66,6 +77,12 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
 
     private Collector mCollecting;
 
+    private interface Test{
+        @GET("/file/delete")
+//        @FormUrlEncoded
+        Observable<Reply> delete(@retrofit2.http.Query(Label.LABEL_PATH) String path);
+    }
+
     @Override
     protected void onRootAttached(View root) {
         super.onRootAttached(root);
@@ -78,12 +95,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         //
 //        refreshClientMeta("After
 //        mode create.");
-//        call(prepare(Api.class, Address.URL).checkFileSync("linqinagMD5"), new OnApiFinish<Void>() {
-//            @Override
-//            public void onApiFinish(int what, String note, Void data, Object arg) {
-//                Debug.D(getClass(),"AAAAAAAA "+what+" "+note+" "+arg );
-//            }
-//        });
+//        call(prepare(Test.class, null).delete("linqinagMD5"));
     }
 
     private boolean putClientMeta(Client meta,String debug){

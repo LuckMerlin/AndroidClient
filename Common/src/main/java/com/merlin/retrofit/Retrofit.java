@@ -7,6 +7,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.debug.Debug;
 
+import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -16,8 +17,13 @@ import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Call;
 import okhttp3.ConnectionPool;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import retrofit2.HttpException;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -25,12 +31,9 @@ public class Retrofit {
     private final retrofit2.Retrofit.Builder mBuilder;
 
     public Retrofit(){
-        OkHttpClient.Builder okHttp = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS)
-                .addInterceptor(new LogInterceptor()).connectionPool(new ConnectionPool(5,1,TimeUnit.SECONDS));
-        OkHttpClient client = okHttp.build();
-        mBuilder = new retrofit2.Retrofit.Builder().client(client).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create());
+        OkHttpClient client = createClient();
+        mBuilder = null!=client?new retrofit2.Retrofit.Builder().client(client).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create()):null;
     }
 
     public final <T>T prepare(Class<T>  cls,String url){
@@ -43,6 +46,29 @@ public class Retrofit {
     }
 
     public final <T>T prepare(Class<T>  cls,String url,Executor callbackExecutor){
+        retrofit2.Retrofit retrofit=createRetrofit(cls,url,callbackExecutor);
+        return null!=retrofit?retrofit.create(cls):null;
+    }
+
+    protected final WebSocket newWebSocket(String url, WebSocketListener listener){
+        url=null==url||url.length()<=0?onResolveUrl(null,null):url;
+        if (null==url||url.length()<=0){
+            Debug.E(getClass(),"None url to prepare.");
+            throw new RuntimeException("None url to prepare.");
+        }
+        OkHttpClient client=createClient();
+        Request request = null!=client?new Request.Builder().url(url).build():null;
+        return null!=request?client.newWebSocket(request,listener):null;
+    }
+
+    protected final OkHttpClient createClient(){
+        OkHttpClient.Builder okHttp = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS)
+                .addInterceptor(new LogInterceptor()).connectionPool(new ConnectionPool(5,1,TimeUnit.SECONDS));
+        return null!=okHttp?okHttp.build():null;
+    }
+
+    protected final <T> retrofit2.Retrofit createRetrofit(Class<T>  cls,String url,Executor callbackExecutor){
         url=null==url||url.length()<=0?onResolveUrl(cls,callbackExecutor):url;
         if (null==url||url.length()<=0){
             Debug.E(getClass(),"None url to prepare.");
@@ -53,8 +79,7 @@ public class Retrofit {
         if (null!=callbackExecutor&&null!=builder){
             builder.callbackExecutor(callbackExecutor);
         }
-        retrofit2.Retrofit retrofit=null!=builder?builder.build():null;
-        return null!=retrofit?retrofit.create(cls):null;
+        return null!=builder?builder.build():null;
     }
 
     public final<T> RetrofitCanceler call(Observable<T> observable, Callback ...callbacks){
