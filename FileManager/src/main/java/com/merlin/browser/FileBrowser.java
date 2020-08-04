@@ -246,40 +246,50 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                 message(getText(R.string.processSure,title,message)).left(R.string.sure).right(R.string.cancel).show((view,clickCount,resId, data)->{
                     switch (resId){
                         case R.string.sure:
-                             dialog.setContentView(binding,false).title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）").left(null).message(null);//Clean message
-                             binding.setRight(null);
-                             final ProcessProgress update=(Object note, Path instant,Float progress)-> {
+                            if (process.isCanceled()){
+                                dialog.dismiss();
+                            }else {
+                                dialog.setContentView(binding, false).title(title + "(" + process.getProcessingIndex() + "/" + process.size() + "）").left(null).message(null);//Clean message
+                                binding.setRight(null);
+                                final ProcessProgress update = (Object note, Path instant, Float progress) -> {
 //                                 binding.setLeft(process.get);
 //                                 binding.setRight(instant);
-                                 binding.setNote(note);
-                                 binding.setInstant(instant);
-                                 dialog.title(title+"("+process.getProcessingIndex()+"/"+process.size()+"）");
-                                 if (null != progress) {
-                                     binding.setProgress(progress);
-                                 }};
-                            if (null==call(prepare(Api.class, "http://None.request.Url", null).noneRequest().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
-                                if (!disposable.isDisposed()){
-                                    disposable.dispose();//Cancel none request
-                                    Reply reply=process.onProcess(update,mRetrofit);
-                                    binding.setReply(reply);
-                                    dialog.right(R.string.finished);
-                                }else {
-                                    post(()->{dialog.dismiss();toast(R.string.canceled);},1000);
+//                                    binding.setNote(note);
+                                    binding.setInstant(instant);
+                                    dialog.title(title + "(" + process.getProcessingIndex() + "/" + process.size() + "）");
+                                    if (null != progress) {
+                                        binding.setProgress(progress);
+                                    }
+                                };
+                                if (null == call(prepare(Api.class, "http://None.request.Url", null).noneRequest().subscribeOn(Schedulers.io()).doOnSubscribe((disposable -> {
+                                    if (!disposable.isDisposed()) {
+                                        disposable.dispose();//Cancel none request
+                                        Reply reply = process.onProcess(update, mRetrofit);
+                                        binding.setReply(reply);
+                                        dialog.right(R.string.finished);
+                                    } else {
+                                        post(() -> {
+                                            dialog.dismiss();
+                                            toast(R.string.canceled);
+                                        }, 1000);
+                                    }
+                                })), null, null)) {
+                                    dialog.dismiss();
+                                    toast(R.string.fail);
                                 }
-                            })), null, null)){
-                                dialog.dismiss();
-                                toast(R.string.fail);
                             }
                             break;
                         case R.string.cancel:
-                            if (!process.isProcessing()){
+                            if (process.isProcessing()){
                                 if (process.cancel(true,"After user cancel click.")) {
+                                    dialog.right(R.string.sure);
                                     toast(R.string.canceled);
-                                    dialog.dismiss();
                                   if (null!=finish){
                                         finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
                                    }
                                 }
+                            }else{
+                                dialog.dismiss();
                             }
                             break;
                         case R.string.finished:

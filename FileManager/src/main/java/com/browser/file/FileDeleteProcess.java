@@ -5,6 +5,7 @@ import com.merlin.api.Processing;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
+import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
 import java.io.File;
@@ -35,6 +36,10 @@ public class FileDeleteProcess extends FileProcess<Path> {
     @Override
     protected void onCanceled(boolean cancel, String debug) {
         super.onCanceled(cancel, debug);
+        Canceler canceler=mCanceler;
+        if (null!=canceler){
+            canceler.cancel(cancel,debug);
+        }
     }
 
     @Override

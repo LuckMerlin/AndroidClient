@@ -17,18 +17,16 @@ public class LocalFileDelete extends FileAction{
         }
         File[] files=file.isDirectory()?file.listFiles():null;
         if (null!=files&&files.length>0){//Delete child
-            for (File child : files) {
-                deleteFile(child,progress); // 递规的方式删除文件夹
+            Reply reply=null;
+            for (File child : files) {// 递规的方式删除文件夹
+                if (null!=(reply=deleteFile(child,progress))&&reply.getWhat()==What.WHAT_CANCEL){
+                    return reply;
+                }
             }
         }
         Path path=Path.build(file);
         notify("Deleting file ",null,path,null,progress);
-//        file.delete();
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        file.delete();
         return file.exists()?new Reply(true,What.WHAT_EXCEPTION,"Fail delete file",path):
                 new Reply<>(true,What.WHAT_SUCCEED,"Succeed delete file",path);
     }

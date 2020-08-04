@@ -17,9 +17,6 @@
         <variable
             name="progress"
             type="float" />
-        <variable
-            name="note"
-            type="Object" />
         <import type="android.view.View"/>
         <import type="com.merlin.util.FileSize"/>
     </data>
@@ -50,11 +47,6 @@
                     binding:path="@{right}"
                     android:layout_weight="1"/>
             </LinearLayout>
-            <TextView
-                android:text="@{instant.title??instant.name}"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
             <ProgressBar
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_gravity="center_horizontal"
@@ -66,11 +58,11 @@
         </LinearLayout>
 
         <TextView
-            android:text="@{reply.note??note}"
+            android:text="@{reply.note??instant.name}"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="5dp"
-            android:singleLine="true"
-            android:visibility="@{null!=reply||null==note?View.VISIBLE:View.GONE}"
+            android:maxLines="1"
+            android:visibility="@{null!=reply||null!=instant.name?View.VISIBLE:View.GONE}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </FrameLayout>
