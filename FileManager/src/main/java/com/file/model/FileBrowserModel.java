@@ -77,11 +77,11 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
 
     private Collector mCollecting;
 
-    private interface Test{
-        @GET("/file/delete")
-//        @FormUrlEncoded
-        Observable<Reply> delete(@retrofit2.http.Query(Label.LABEL_PATH) String path);
-    }
+//    private interface Test{
+//        @GET("/file/delete")
+////        @FormUrlEncoded
+//        Observable<Reply> delete(@retrofit2.http.Query(Label.LABEL_PATH) String path);
+//    }
 
     @Override
     protected void onRootAttached(View root) {

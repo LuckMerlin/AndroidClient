@@ -43,7 +43,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
     }
 
     @Override
-    protected Reply onProcess(Path pathObj, ProcessProgress update, Retrofit retrofit) {
+    protected Reply<Path>  onProcess(Path pathObj, ProcessProgress update, Retrofit retrofit) {
         Reply<Path> reply;
         final String path=null!=pathObj?pathObj.getPath():null;
         if (null==path|path.length()<=0){
@@ -59,7 +59,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
         return reply;
     }
 
-    private Reply deleteCloudFile(Retrofit retrofit, Path path, ProcessProgress update){
+    private Reply<Path>  deleteCloudFile(Retrofit retrofit, Path path, ProcessProgress update){
 //        try {
 //            update.onProcessUpdate(R.string.delete,path,null, path,null,null);
 //            Response<Reply<Processing>> response = null!=retrofit&&null!=path?retrofit.prepare(Api.class, path
