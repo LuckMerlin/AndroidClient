@@ -249,11 +249,11 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             if (process.isCanceled()){
                                 dialog.dismiss();
                             }else {
-                                dialog.setContentView(binding, false).title(title + "(" + process.getProcessingIndex() + "/" + process.size() + "）").left(null).message(null);//Clean message
+                                dialog.setContentView(binding, false).title(title + "(" + process.getProcessedCount() + "/" + process.size() + "）").left(null).message(null);//Clean message
                                 binding.setRight(null);
                                 final ProcessProgress update = (Object note, Path instant, Float progress) -> {
                                     binding.setInstant(instant);
-                                    dialog.title(title + "(" + process.getProcessingIndex() + "/" + process.size() + "）");
+                                    dialog.title(title + "(" + process.getProcessedCount() + "/" + process.size() + "）");
                                     if (null != progress) {
                                         binding.setProgress(progress);
                                     }

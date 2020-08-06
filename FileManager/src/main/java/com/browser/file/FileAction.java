@@ -1,5 +1,6 @@
 package com.browser.file;
 
+import com.merlin.api.OnProcessChange;
 import com.merlin.bean.Path;
 import com.merlin.lib.Cancel;
 
@@ -8,9 +9,9 @@ import java.io.IOException;
 
 abstract class FileAction extends Cancel {
 
-    protected final void notify(String note, Path from, Path instant, Float progress, ProcessProgress callback){
+    protected final void notify(String note, Path from, Path instant, Float progress, OnProcessChange callback){
         if (null!=callback){
-            callback.onFileActionProgressChange(note,instant,progress);
+            callback.onProcessChanged(progress,note,instant,progress);
         }
      }
 

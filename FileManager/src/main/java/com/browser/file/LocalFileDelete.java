@@ -1,5 +1,6 @@
 package com.browser.file;
 
+import com.merlin.api.OnProcessChange;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
@@ -8,7 +9,7 @@ import java.io.File;
 
 public class LocalFileDelete extends FileAction{
 
-    public final Reply<Path> deleteFile(File file, ProcessProgress progress) {
+    public final Reply<Path> deleteFile(File file, OnProcessChange progress) {
         if (file == null || !file.exists()) {
             return new Reply(true, What.WHAT_NOT_EXIST,"File not exist",null);
         }

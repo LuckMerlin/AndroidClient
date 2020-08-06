@@ -1,11 +1,14 @@
 package com.merlin.api;
 
-public final class Processing {
+import java.util.List;
+
+public final class Processing<T> {
     private String id;
     private int position;
     private long time;
     private long createTime;
     private int duration;
+    private List<T> data;
 
     public String getId() {
         return id;
@@ -25,5 +28,9 @@ public final class Processing {
 
     public int getDuration() {
         return duration;
+    }
+
+    public List<T> getData() {
+        return data;
     }
 }

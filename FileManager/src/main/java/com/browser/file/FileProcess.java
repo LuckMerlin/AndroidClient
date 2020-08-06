@@ -2,6 +2,8 @@ package com.browser.file;
 
 import android.content.Context;
 
+import com.merlin.api.OnProcessChange;
+import com.merlin.api.ProcessingFetcher;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
@@ -54,7 +56,7 @@ public abstract class FileProcess<T extends Path> extends FileAction{
         return null!=mProcessing;
     }
 
-    protected abstract Reply<Path> onProcess(T pathObj, ProcessProgress processProgress, Retrofit retrofit);
+    protected abstract Reply<Path> onProcess(T pathObj, OnProcessChange processProgress, Retrofit retrofit);
 
     public final Reply<Path> onProcess(ProcessProgress update, Retrofit retrofit) {
         if (null==update){
@@ -70,14 +72,20 @@ public abstract class FileProcess<T extends Path> extends FileAction{
             return new Reply<>(true,What.WHAT_ALREADY_DONE,"All process file finished",null);
         }
         mProcessing=next;
-        Reply<Path> childReply=onProcess(next,update,retrofit);
+        Reply<Path> childReply=onProcess(next,null,retrofit);
+        childReply=null!=childReply?childReply:new Reply<>(true,What.WHAT_ERROR,"Unknown process fail", null);
         mProcessing=null;
+        switch (childReply.getWhat()){
+            case What.WHAT_CANCEL://Cancel reply,Give up process next
+            case What.WHAT_INTERRUPT://Interrupt reply,Give up process next
+                return childReply;
+        }
+
         Map<T,Reply> map=mFileMap;
         if (null!=map){
             synchronized (map){
                 if (map.containsKey(next)){
-                    map.put(next,null!=childReply?childReply:new Reply<>(true,
-                            What.WHAT_INVALID,"Unknown reply",null));
+                    map.put(next,childReply);
                 }
             }
         }
