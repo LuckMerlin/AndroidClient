@@ -62,12 +62,12 @@ public abstract class FileProcess<T extends Path> extends FileAction{
             return null;
         }
         if (null!=mProcessing){//Already processing
-            return null;
+            return new Reply<>(true,What.WHAT_ALREADY_DOING,"Already processing",null);
         }
         final T next=randomNextUnFinish();
         if (null==next){
             Debug.W(getClass(),"All process file finished."+size());
-            return new Reply<>;
+            return new Reply<>(true,What.WHAT_ALREADY_DONE,"All process file finished",null);
         }
         mProcessing=next;
         Reply<Path> childReply=onProcess(next,update,retrofit);
@@ -81,7 +81,7 @@ public abstract class FileProcess<T extends Path> extends FileAction{
                 }
             }
         }
-        return null;
+        return onProcess(update,retrofit);
     }
 
     public final T randomNextUnFinish(){
@@ -99,13 +99,6 @@ public abstract class FileProcess<T extends Path> extends FileAction{
             }
         }
         return null;
-    }
-
-    /**
-     * @deprecated
-     */
-    public final int getProcessingIndex() {
-        return getProcessedCount();
     }
 
     public final T getAnyone(){

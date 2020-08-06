@@ -30,12 +30,12 @@ public class FileDeleteProcess extends FileProcess<Path> {
     private interface Api{
         @POST("/file/delete")
         @FormUrlEncoded
-        Call<Reply<Processing>> delete(@Field(Label.LABEL_PATH) String path);
+        Call<Reply<Processing>> delete(@Field(Label.LABEL_WHAT) Integer what,@Field(Label.LABEL_PATH) String ...paths);
     }
 
     @Override
-    protected void onCanceled(boolean cancel, String debug) {
-        super.onCanceled(cancel, debug);
+    protected void onCancelChange(boolean cancel, String debug) {
+        super.onCancelChange(cancel, debug);
         Canceler canceler=mCanceler;
         if (null!=canceler){
             canceler.cancel(cancel,debug);
@@ -60,6 +60,10 @@ public class FileDeleteProcess extends FileProcess<Path> {
     }
 
     private Reply<Path>  deleteCloudFile(Retrofit retrofit, Path path, ProcessProgress update){
+        if (null==retrofit||null==path||path.isLocal()){
+            return new Reply<>(true,What.WHAT_ARGS_INVALID,"Retrofit or path invalid",null);
+        }
+
 //        try {
 //            update.onProcessUpdate(R.string.delete,path,null, path,null,null);
 //            Response<Reply<Processing>> response = null!=retrofit&&null!=path?retrofit.prepare(Api.class, path
