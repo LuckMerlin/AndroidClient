@@ -19,6 +19,10 @@ public final class ProcessingFetcher<T> extends Cancel {
         if (null==call){
             return new Reply<>(true,What.WHAT_ARGS_INVALID,"Processing fetch call invalid.",null);
         }
+        if (isCanceled()){
+            Debug.D(getClass(),"Finish fetch process while canceled");
+            return new Reply<>(true,What.WHAT_CANCEL,"Process canceled",null);
+        }
         Reply<Processing<T>> processingReply=null;
         try {
             Response<Reply<Processing<T>>> response=call.execute();
@@ -30,12 +34,17 @@ public final class ProcessingFetcher<T> extends Cancel {
                     return processingReply;
                 }
                 Processing processing=reply.getData();
-                int delay=null!=processing?processing.getPosition():1000;
-                if (delay>0){
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                if (null==processing){
+                    Debug.D(getClass(),"Finish fetch process while reply processing NULL ");
+                    processingReply= new Reply<>(reply.isSuccess(),reply.getWhat(),reply.getNote(),null);
+                }else{
+                    int delay=processing.getPosition();
+                    if (delay>0){
+                        try {
+                            Thread.sleep(delay);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }

@@ -18,6 +18,7 @@
             name="progress"
             type="float" />
         <import type="android.view.View"/>
+
         <import type="com.merlin.util.FileSize"/>
     </data>
     <FrameLayout

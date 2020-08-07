@@ -58,18 +58,16 @@ public abstract class FileProcess<T extends Path> extends FileAction{
 
     protected abstract Reply<Path> onProcess(T pathObj, OnProcessChange processProgress, Retrofit retrofit);
 
-    public final Reply<Path> onProcess(ProcessProgress update, Retrofit retrofit) {
-        if (null==update){
-            Debug.W(getClass(),"Can't process file delete with invalid args "+update);
-            return null;
-        }
+    public final Reply<Path> onProcess(OnProcessChange update, Retrofit retrofit) {
         if (null!=mProcessing){//Already processing
             return new Reply<>(true,What.WHAT_ALREADY_DOING,"Already processing",null);
         }
-        final T next=randomNextUnFinish();
+        final Reply[] oneFailReply=new Reply[1];
+        final T next=randomNextUnFinish(oneFailReply);
         if (null==next){
+            Reply reply=null!=oneFailReply&&oneFailReply.length>0?oneFailReply[0]:null;
             Debug.W(getClass(),"All process file finished."+size());
-            return new Reply<>(true,What.WHAT_ALREADY_DONE,"All process file finished",null);
+            return null!=reply?reply:new Reply<>(true,What.WHAT_ALREADY_DONE,"All process file finished",null);
         }
         mProcessing=next;
         Reply<Path> childReply=onProcess(next,null,retrofit);
@@ -80,7 +78,6 @@ public abstract class FileProcess<T extends Path> extends FileAction{
             case What.WHAT_INTERRUPT://Interrupt reply,Give up process next
                 return childReply;
         }
-
         Map<T,Reply> map=mFileMap;
         if (null!=map){
             synchronized (map){
@@ -92,15 +89,22 @@ public abstract class FileProcess<T extends Path> extends FileAction{
         return onProcess(update,retrofit);
     }
 
-    public final T randomNextUnFinish(){
+    public final T randomNextUnFinish(Reply[] oneFailReply){
         Map<T,Reply> map=mFileMap;
         if (null!=map){
             synchronized (map){
                 Set<T> set=map.keySet();
                 if (null!=set){
+                    Reply childReply=null;
                     for (T child:set) {
-                        if (null!=child&&null==map.get(child)){
-                            return child;
+                        if (null!=child){
+                            childReply=map.get(child);
+                            if (null==childReply){
+                                return child;
+                            }
+                            if (null!=oneFailReply&&oneFailReply.length>0&&childReply.getWhat()!=What.WHAT_SUCCEED){
+                                oneFailReply[0]=childReply;
+                            }
                         }
                     }
                 }

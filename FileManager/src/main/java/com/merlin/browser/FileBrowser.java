@@ -12,12 +12,12 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.browser.file.ProcessProgress;
 import com.browser.file.FileDeleteProcess;
 import com.browser.file.FileProcess;
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.ApiMap;
 import com.merlin.api.OnApiFinish;
+import com.merlin.api.OnProcessChange;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
 import com.merlin.api.What;
@@ -251,8 +251,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             }else {
                                 dialog.setContentView(binding, false).title(title + "(" + process.getProcessedCount() + "/" + process.size() + "）").left(null).message(null);//Clean message
                                 binding.setRight(null);
-                                final ProcessProgress update = (Object note, Path instant, Float progress) -> {
-                                    binding.setInstant(instant);
+                                final OnProcessChange update = (Float progress,String note,Object instant, List processed) -> {
+                                    binding.setInstant(null!=instant&&instant instanceof Path?(Path)instant:null);
                                     dialog.title(title + "(" + process.getProcessedCount() + "/" + process.size() + "）");
                                     if (null != progress) {
                                         binding.setProgress(progress);

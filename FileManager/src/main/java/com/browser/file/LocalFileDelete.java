@@ -26,8 +26,8 @@ public class LocalFileDelete extends FileAction{
             }
         }
         Path path=Path.build(file);
-        notify("Deleting file ",null,path,null,progress);
         file.delete();
+        notify(null,"Deleting file ",path,null,progress);
         return file.exists()?new Reply(true,What.WHAT_EXCEPTION,"Fail delete file",path):
                 new Reply<>(true,What.WHAT_SUCCEED,"Succeed delete file",path);
     }
