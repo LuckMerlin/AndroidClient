@@ -34,7 +34,7 @@ public class FileDeleteProcess extends FileProcess<Path> {
     private interface Api{
         @POST("/file/delete")
         @FormUrlEncoded
-        Call<Reply<Processing<Reply<Path>>>> delete(@Field(Label.LABEL_WHAT) Integer what,@Field(Label.LABEL_PATH) String ...paths);
+        Call<Reply<Processing>> delete(@Field(Label.LABEL_WHAT) Integer what,@Field(Label.LABEL_PATH) String ...paths);
     }
 
     @Override
@@ -63,13 +63,13 @@ public class FileDeleteProcess extends FileProcess<Path> {
             }else if (null==retrofit){
                 reply= new Reply<>(true,What.WHAT_INTERRUPT,"Retrofit invalid",pathObj);
             }else{
-                Call<Reply<Processing<Reply<Path>>>> call=retrofit.prepare(Api.class,hostUri).delete(null,filePath);
+                Call<Reply<Processing>> call=retrofit.prepare(Api.class,hostUri).delete(null,filePath);
                 if (null==call){
                     reply= new Reply<>(true,What.WHAT_INTERRUPT,"Cloud path delete call NULL",pathObj);
                 }else{
-                    ProcessingFetcher fetcher=new ProcessingFetcher<Reply<Path>>();
+                    final ProcessingFetcher fetcher=new ProcessingFetcher();
                     mCanceler=fetcher;
-                    Reply<Processing<Reply<Path>>> processingReply=fetcher.fetch(call,null);
+                    Reply<Processing> processingReply=fetcher.fetch(call,null);
                     reply=null!=processingReply?new Reply<>(processingReply.isSuccess(),
                             processingReply.getWhat(),processingReply.getNote(),pathObj):
                             new Reply<>(true,What.WHAT_UNKNOWN_INVALID, "Unknown process reply",pathObj);

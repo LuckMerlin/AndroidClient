@@ -8,13 +8,13 @@ import java.io.IOException;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public final class ProcessingFetcher<T> extends Cancel {
+public final class ProcessingFetcher extends Cancel {
 
-    public interface OnProcessingFetch<T>{
-        void onProcessingFetched(Reply<Processing<T>> reply);
+    public interface OnProcessingFetch{
+        void onProcessingFetched(Reply<Processing> reply);
     }
 
-    public final Reply<Processing<T>> fetch(Call<Reply<Processing<T>>> call,OnProcessingFetch callback){
+    public final Reply<Processing> fetch(Call<Reply<Processing>> call, OnProcessingFetch callback){
         call=null!=call?call.isExecuted()?call.clone():call:null;
         if (null==call){
             return new Reply<>(true,What.WHAT_ARGS_INVALID,"Processing fetch call invalid.",null);
@@ -23,10 +23,10 @@ public final class ProcessingFetcher<T> extends Cancel {
             Debug.D(getClass(),"Finish fetch process while canceled");
             return new Reply<>(true,What.WHAT_CANCEL,"Process canceled",null);
         }
-        Reply<Processing<T>> processingReply=null;
+        Reply<Processing> processingReply=null;
         try {
-            Response<Reply<Processing<T>>> response=call.execute();
-            Reply<Processing<T>> reply=processingReply=null!=response?response.body():null;
+            Response<Reply<Processing>> response=call.execute();
+            Reply<Processing> reply=processingReply=null!=response?response.body():null;
             if (null!=reply){
                 notify(reply,callback);
                 int what=reply.getWhat();
@@ -55,7 +55,7 @@ public final class ProcessingFetcher<T> extends Cancel {
         return null!=processingReply?processingReply:fetch(call,callback);
     }
 
-    protected final void notify(Reply<Processing<T>> reply,OnProcessingFetch<T> callback){
+    protected final void notify(Reply<Processing> reply,OnProcessingFetch callback){
         if (null!=callback){
             callback.onProcessingFetched(reply);
         }
