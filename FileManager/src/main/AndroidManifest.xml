@@ -24,7 +24,7 @@
         </activity>
 
         <service android:name="com.merlin.task.TaskService"/>
-
+        <service android:name=".transport.FileTaskService"/>
         <activity android:name="com.file.activity.FileBrowserActivity"
             android:launchMode="singleInstance">
             <intent-filter>

@@ -171,10 +171,10 @@
                         android:visibility="@{((vm.mode==Model.MODE_DOWNLOAD||vm.mode==Model.MODE_MULTI_CHOOSE))?View.VISIBLE:View.GONE}"
                         binding:menu="@{ContextMenu.create(R.string.download)}"/>
                     <include layout="@layout/item_browser_bottom_menu"
-                        android:visibility="@{(vm.mode==Model.MODE_MOVE||vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        android:visibility="@{(vm.mode==Model.MODE_MOVE||vm.mode==Model.MODE_MULTI_CHOOSE)?View.GONE:View.GONE}"
                         binding:menu="@{ContextMenu.create(R.string.move)}"/>
                     <include layout="@layout/item_browser_bottom_menu"
-                        android:visibility="@{(vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"
+                        android:visibility="@{(vm.mode==Model.MODE_COPY||vm.mode==Model.MODE_MULTI_CHOOSE)?View.GONE:View.GONE}"
                         binding:menu="@{ContextMenu.create(R.string.copy)}"/>
                     <include layout="@layout/item_browser_bottom_menu"
                         android:visibility="@{(vm.mode==Model.MODE_MULTI_CHOOSE)?View.VISIBLE:View.GONE}"

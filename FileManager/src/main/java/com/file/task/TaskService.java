@@ -2,12 +2,12 @@ package com.file.task;
 
 import android.os.Handler;
 import android.os.Looper;
-import com.merlin.file.transport.NasFileUploadTask;
+import com.merlin.file.transport.FileUploadNasTask;
 import com.merlin.task.Task;
 import com.merlin.task.file.HttpDownloadTask;
 
 public class TaskService extends com.merlin.task.TaskService {
-    private Task mTask=new NasFileUploadTask("任务34242","",null,"");
+    private Task mTask=new FileUploadNasTask("任务34242","",null,"");
 
     @Override
     public void onCreate() {

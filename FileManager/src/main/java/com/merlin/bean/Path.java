@@ -72,7 +72,11 @@ public final class Path implements Parcelable {
         return null;
     }
 
-    public final String getName(boolean format) {
+    public final String getName(boolean includeExtension) {
+        String ext=includeExtension?extension:null;
+        if (null!=ext&&ext.length()>0){
+           return null!=name?name+ext:null;
+        }
         return name;
     }
 

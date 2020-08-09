@@ -3,7 +3,6 @@ package com.merlin.file.transport;
 import com.merlin.api.Label;
 import com.merlin.api.What;
 import com.merlin.bean.Path;
-import com.merlin.task.Canceler;
 import com.merlin.task.Networker;
 import com.merlin.task.Status;
 import com.merlin.task.file.FileProgress;
@@ -23,14 +22,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
-public class NasFileUploadTask extends HttpUploadTask {
+public class FileUploadNasTask extends HttpUploadTask {
 
-    public NasFileUploadTask(String name,String from, Path toFolder,String toName) {
+    public FileUploadNasTask(String name, String from, Path toFolder, String toName) {
         this(name,from,null!=toFolder&&toFolder.isDirectory()?toFolder.getHostUri():null,
                 null!=toFolder&&toFolder.isDirectory()?toFolder.getPath():null,toName);
     }
 
-    private NasFileUploadTask(String name, String from, String toUri, String toFolder, String toName){
+    private FileUploadNasTask(String name, String from, String toUri, String toFolder, String toName){
         super(name,from,null!=toUri?toUri+"/file/upload":null,toFolder,toName);
     }
 

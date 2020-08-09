@@ -30,8 +30,10 @@
 <!--            binding:menu="@{ContextMenu.create(R.string.sync,file)}"/>-->
 <!--        android:visibility="@{mode==Mode.MODE_MULTI_CHOOSE?View.GONE:View.VISIBLE}"-->
         <include layout="@layout/item_context_menu"
+            android:visibility="gone"
             binding:menu="@{ContextMenu.create(R.string.move,file)}"/>
         <include layout="@layout/item_context_menu"
+            android:visibility="gone"
             binding:menu="@{ContextMenu.create(R.string.copy,file)}"/>
         <include layout="@layout/item_context_menu"
             binding:menu="@{ContextMenu.create(R.string.delete,file)}"/>

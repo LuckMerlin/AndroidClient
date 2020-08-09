@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 import com.merlin.adapter.ListAdapter;
+import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Label;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
@@ -36,8 +37,10 @@ import com.merlin.file.databinding.FileBrowserMenuBinding;
 import com.merlin.file.databinding.FileContextMenuBinding;
 import com.merlin.file.databinding.SingleEditTextBinding;
 import com.merlin.browser.FileBrowser;
+import com.merlin.file.transport.FileTaskService;
 import com.merlin.model.Model;
 import com.merlin.server.Client;
+import com.merlin.task.TaskGroup;
 import com.merlin.util.FileSize;
 
 import java.util.ArrayList;
@@ -217,13 +220,13 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         }
         switch (resId){
             case R.string.move:
-                return isMode(Mode.MODE_MOVE) ? move(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                return isMode(Mode.MODE_MOVE) ? movePaths(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_MOVE, data, null,"After tap click.");
             case R.string.upload:
-                return isMode(Mode.MODE_UPLOAD) ? upload(getCollected(Path.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                return isMode(Mode.MODE_UPLOAD) ? uploadPaths(getCollected(Path.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_UPLOAD, data, Path.class,"After tap click.");
             case R.string.download:
-                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? download(getCollected(Path.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
+                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? downloadPaths(getCollected(Path.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
                         : collectFile(Mode.MODE_DOWNLOAD, data, Path.class,"After tap click.");
             case R.string.copy:
                 return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY) ? copy(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
@@ -275,63 +278,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
                     entryMode(Mode.MODE_NORMAL,null,"After start copy files "+(null!=debug?debug:"."));
         }
         return entryMode(Mode.MODE_COPY,new Collector(files),"While copy files "+(null!=debug?debug:"."));
-    }
-
-    private boolean move(ArrayList<Path> files,int coverMode,String debug){
-//        if (null==files||files.size()<=0){
-//            return toast(R.string.noneDataToOperate)&&false;
-//        }else if (isMode(Mode.MODE_MOVE)){
-//            FileBrowser browser=getCurrentModel();
-//            Folder data=mCurrentFolder.get();
-//            return null!=browser&&browser.movePaths(files,null!=data?data.getPath():null,coverMode,debug)
-//                    && entryMode(Mode.MODE_NORMAL,null,"After start move files "+(null!=debug?debug:"."));
-//        }
-//        return entryMode(Mode.MODE_MOVE,new Collector(files),"While start move files "+(null!=debug?debug:"."));
-        return false;
-    }
-
-    private boolean upload(ArrayList<Path> files, int coverMode, String debug){
-//        if (null==files||files.size()<=0){
-//            return toast(R.string.noneDataToOperate)&&false;
-//        }
-//        Folder folder=mCurrentFolder.get();
-//        String folderPath=null!=folder?folder.getPath():null;
-//        Client meta=mCurrentMeta.get();
-//        if (null==folderPath||folderPath.length()<=0||null==meta||meta.isLocalClient()){
-//            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
-//            return false;
-//        }
-//        final Convery binder=mTransportBinder;
-//        if (null==binder){
-//            toast(R.string.serverUnConnect);
-//            return false;
-//        }
-//        if (binder.run(Status.ADD,null,"While upload file.",new LocalFileUploadConvey(files,meta.getUrl()
-//                ,folder.getPath(),coverMode))){
-//            entryMode(FileBrowser.MODE_NORMAL,null,"After upload start succeed.");
-//            return toast(R.string.succeed)||true;
-//        }
-        return toast(R.string.fail);
-    }
-
-    private boolean download(ArrayList<Path> files, int coverMode, String debug){
-//        Debug.D(getClass(),"下载 "+files);
-//        if (null==files||files.size()<=0){
-//            return toast(R.string.noneDataToOperate)&&false;
-//        }
-//        Folder folder=mCurrentFolder.get();
-//        String folderPath=null!=folder?folder.getPath():null;
-//        Client meta=mCurrentMeta.get();
-//        if (null==folderPath||folderPath.length()<=0||null==meta||!meta.isLocalClient()){
-//            toast(null==meta?R.string.canNotOperateHere:R.string.targetFolderInvalid);
-//            return false;
-//        }
-//        if (ConveyorService.download(getViewContext(),files,meta,folderPath,coverMode,debug)){
-////            entryMode(FileBrowser.MODE_NORMAL,null,"After download start succeed.");
-////            launchTransportList("");
-//            return toast(R.string.succeed)||true;
-//        }
-        return toast(R.string.fail);
     }
 
     private boolean collectFile(int mode,Object obj,Class<? extends Path> targetCls,String debug){
@@ -388,6 +334,40 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         ArrayList<Path> list=new ArrayList<>(1);
         list.add((Path)data);
         return deletePaths(list,debug);
+    }
+
+    private boolean uploadPaths(ArrayList<Path> files,int coverMode,String debug){
+        if (null==files||files.size()<=0){
+            return toast(R.string.noneDataToOperate)&&false;
+        }
+        Path currentFolder=getCurrentFolderPath();
+        if (null==currentFolder||currentFolder.isLocal()){
+            return toast(R.string.noneSupportOpenFileType)&&false;
+        }
+        return FileTaskService.uploadPaths(getContext(),files,currentFolder,coverMode,debug);
+    }
+
+    private boolean downloadPaths(ArrayList<Path> files,int coverMode,String debug){
+        if (null==files||files.size()<=0){
+            return toast(R.string.noneDataToOperate)&&false;
+        }
+        Path currentFolder=getCurrentFolderPath();
+        if (null==currentFolder||!currentFolder.isLocal()){
+            return toast(R.string.noneSupportOpenFileType)&&false;
+        }
+        return FileTaskService.downloadPaths(getContext(),files,currentFolder,coverMode,debug);
+    }
+
+    private boolean movePaths(ArrayList<Path> files,int coverMode,String debug){
+        if (null==files||files.size()<=0){
+            return toast(R.string.noneDataToOperate)&&false;
+        }
+        Path currentFolder=getCurrentFolderPath();
+        FileBrowser browser=null!=currentFolder?getCurrentModel():null;
+        if (null==browser){
+            return toast(R.string.noneSupportOpenFileType)&&false;
+        }
+        return browser.movePaths(files,currentFolder,coverMode,null,debug);
     }
 
     private boolean deletePaths(ArrayList<Path> files,String debug){
@@ -467,10 +447,16 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         return false;
     }
 
+    protected final Path getCurrentFolderPath(){
+        ObservableField<Folder> currentFolder=getCurrentFolder();
+        Folder folder=null!=currentFolder?currentFolder.get():null;
+        return null!=folder?folder.getPath():null;
+    }
+
     private boolean showClientMenu(TextView tv,String debug){
-        if (isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY,Mode.MODE_MOVE)){
-            return toast(R.string.currentModeNotSupport)&&false;
-        }
+//        if (isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY,Mode.MODE_MOVE)){
+//            return toast(R.string.currentModeNotSupport)&&false;
+//        }
         Map<String,FileBrowser> map=mAllClientMetas;
         Context context=null!=tv?tv.getContext():null;
         Set<String> set=null!=map?map.keySet():null;

@@ -1,5 +1,8 @@
 package com.merlin.browser;
 
+/**
+ * @deprecated
+ */
 public interface CoverMode {
     public final static int NONE=0x00; //0000 0000
     public final static int REPLACE=0x01;//0000 0001

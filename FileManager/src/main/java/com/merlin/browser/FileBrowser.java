@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.browser.file.FileCopyProcess;
 import com.browser.file.FileDeleteProcess;
+import com.browser.file.FileMoveProcess;
 import com.browser.file.FileProcess;
 import com.browser.file.OnProcessUpdate;
 import com.merlin.adapter.BrowserAdapter;
@@ -219,10 +220,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         return process(new FileCopyProcess(getText(R.string.copy),files,folder,coverMode),callback);
     }
 
-    public final boolean movePaths(ArrayList<Path> files, String folder, int coverMode, String debug){
-//        FileProcess process=onCreateFileProcess(Mode.MODE_MOVE,files,folder,coverMode,debug);
-//        return null!=process?process(process,null):(toast(R.string.fail)&&false);
-        return false;
+    public final boolean movePaths(ArrayList<Path> files, Path folder, int coverMode,OnProcessUpdate callback, String debug){
+        return process(new FileMoveProcess(getText(R.string.move),files,folder,coverMode),callback);
     }
 
     public final boolean deletePath(ArrayList<Path> paths, OnProcessUpdate callback, String debug){
