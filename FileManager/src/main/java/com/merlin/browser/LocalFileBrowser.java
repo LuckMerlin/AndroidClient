@@ -1,5 +1,11 @@
 package com.merlin.browser;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.merlin.api.OnApiFinish;
@@ -8,6 +14,7 @@ import com.merlin.api.Reply;
 import com.merlin.api.What;
 import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
+import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
 import com.merlin.task.file.Cover;
@@ -41,6 +48,28 @@ public class LocalFileBrowser extends FileBrowser {
 
     @Override
     protected boolean onOpenPath(Path meta, String debug) {
+        String path=null!=meta&&meta.isLocal()?meta.getPath():null;
+        final Context context=getContext();
+        if (null!=path&&path.length()>0){
+            String mime=meta.getMime();
+            Intent intent = new Intent("android.intent.action.VIEW");
+            intent.addCategory("android.intent.category.DEFAULT");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                uri = FileProvider.getUriForFile(context, "com.merlin.browser.fileProvider", new File(path));
+            } else {
+                uri = Uri.fromFile(new File(path));
+            }
+            intent.setDataAndType(uri, null!=mime&&mime.length()>2?mime:"*/*");
+            try {
+                context.startActivity(intent);
+                return true;
+            }catch (Exception e){
+                //Do nothing
+            }
+        }
         return false;
     }
 

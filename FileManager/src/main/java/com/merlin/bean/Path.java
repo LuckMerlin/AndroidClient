@@ -6,6 +6,7 @@ import android.os.Parcelable;
 
 import com.merlin.api.Reply;
 import com.merlin.api.What;
+import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.merlin.util.FileSize;
 
@@ -46,10 +47,11 @@ public final class Path implements Parcelable {
             path.pathSep=File.separator;
             path.parent=parent;
             String name=file.getName();
+            path.title=name;
             path.name=name;
             int extensionIndex=null!=name&&name.length()>1?name.indexOf("."):-1;
             if (extensionIndex>0){
-                path.title = name.substring(0,extensionIndex);
+                path.name = name.substring(0,extensionIndex);
                 path.extension = name.substring(extensionIndex);
             }
             path.modifyTime = file.lastModified();

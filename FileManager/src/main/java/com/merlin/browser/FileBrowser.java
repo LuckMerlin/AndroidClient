@@ -375,6 +375,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         return null!=retrofit?retrofit.call(observable,subscribeOn,observeOn,callbacks):null;
     }
 
+    protected final Context getContext(){
+        return getViewContext();
+    }
+
     protected final Context getViewContext(){
         return getAdapterContext();
     }

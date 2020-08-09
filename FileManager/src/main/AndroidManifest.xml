@@ -37,9 +37,19 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.file.activity.PhotoPreviewActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+        </activity>
+
         <service android:name="com.file.task.TaskService"/>
         <provider android:name="androidx.core.content.FileProvider"
-            android:authorities="com.merlin.client.fileProvider"
+            android:authorities="com.merlin.browser.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
