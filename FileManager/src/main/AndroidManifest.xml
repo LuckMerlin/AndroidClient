@@ -25,6 +25,18 @@
 
         <service android:name="com.merlin.task.TaskService"/>
         <service android:name=".transport.FileTaskService"/>
+        <activity android:name="com.file.activity.MediaChooseActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="merlin.intent.action.FILE_SELECT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="com.file.activity.FileBrowserActivity"
             android:launchMode="singleInstance">
             <intent-filter>

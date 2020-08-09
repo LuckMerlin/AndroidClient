@@ -477,7 +477,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null!=reference?reference.get():null;
   }
 
-  @Override
+    @Override
+    public RecyclerView.LayoutManager onResolveLayoutManager(RecyclerView rv) {
+        return new LinearLayoutManager(rv.getContext(),RecyclerView.VERTICAL,false);
+    }
+
+    @Override
   public final void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
      super.onAttachedToRecyclerView(recyclerView);
      WeakReference<RecyclerView> view=mRecyclerView;
