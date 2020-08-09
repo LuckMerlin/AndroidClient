@@ -270,10 +270,13 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         if (size>0){
             list=null!=list?list:(mData=new ArrayList<>(size));
             int currentSize=list.size();
+            if (currentSize > size){
+                list.removeAll(list.subList(size,currentSize));
+                notifyItemRangeRemoved(size, currentSize);
+            }
             list.clear();
-            notifyItemRangeRemoved(0,currentSize);
             list.addAll(data);
-           notifyItemRangeInserted(0,size);
+            notifyItemRangeChanged(0,size,"Set");
         }else if(null!=list){
             list.clear();
             mData=null;

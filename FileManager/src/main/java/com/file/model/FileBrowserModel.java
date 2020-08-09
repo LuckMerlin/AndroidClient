@@ -38,6 +38,8 @@ import com.merlin.file.databinding.SingleEditTextBinding;
 import com.merlin.browser.FileBrowser;
 import com.merlin.model.Model;
 import com.merlin.server.Client;
+import com.merlin.util.FileSize;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,8 +92,8 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         Client testClient1=new Client("算法",getServerUri(),"",null,"","/");
         Client testClient=Client.buildLocalClient(getContext());
 //        Client testClient2=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
-        putClientMeta(testClient, "After mode create.");
         putClientMeta(testClient1, "After mode create.");
+        putClientMeta(testClient, "After mode create.");
         //
 //        refreshClientMeta("After
 //        mode create.");
@@ -269,7 +271,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
                 Debug.D(getClass(),"Can't copy file which model NULL or target not folder.");
                 return toast(R.string.fail)&&false;
             }
-            return browser.copyPaths(files,folderPath,coverMode,debug)&&
+            return browser.copyPaths(files,folderPath,coverMode,null,debug)&&
                     entryMode(Mode.MODE_NORMAL,null,"After start copy files "+(null!=debug?debug:"."));
         }
         return entryMode(Mode.MODE_COPY,new Collector(files),"While copy files "+(null!=debug?debug:"."));

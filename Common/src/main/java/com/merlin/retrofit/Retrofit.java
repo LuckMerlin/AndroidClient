@@ -32,17 +32,12 @@ public class Retrofit {
 
     public Retrofit(){
         OkHttpClient client = createClient();
-        mBuilder = null!=client?new retrofit2.Retrofit.Builder().client(client)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        mBuilder = null!=client?new retrofit2.Retrofit.Builder().client(client).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create()):null;
     }
 
-    public final <T>T prepare(Class<T>  cls){
-        return prepare(cls,null);
-    }
-
     public final <T>T prepare(Class<T>  cls,String url){
-        return prepare(cls,url,null);
+            return prepare(cls,url,null);
     }
 
     protected String onResolveUrl(Class<?> cls,Executor callbackExecutor){

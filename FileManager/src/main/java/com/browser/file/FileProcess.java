@@ -27,6 +27,7 @@ public abstract class FileProcess<T extends Path> extends FileAction{
     private Map<T,Reply> mFileMap;
     private final String mTitle;
     private T mProcessing=null;
+    private List<Reply<Path>> mProcessed;
 
     public FileProcess(){
         this(null,null);
@@ -56,9 +57,9 @@ public abstract class FileProcess<T extends Path> extends FileAction{
         return null!=mProcessing;
     }
 
-    protected abstract Reply<Path> onProcess(T pathObj, OnProcessChange processProgress, Retrofit retrofit);
+    protected abstract Reply<Path> onProcess(T pathObj, OnProcessChange<T> processProgress, Retrofit retrofit);
 
-    public final Reply<Path> onProcess(OnProcessChange update, Retrofit retrofit) {
+    public final Reply<Path> onProcess(OnProcessChange<T> update, Retrofit retrofit) {
         if (null!=mProcessing){//Already processing
             return new Reply<>(true,What.WHAT_ALREADY_DOING,"Already processing",null);
         }
@@ -70,7 +71,8 @@ public abstract class FileProcess<T extends Path> extends FileAction{
             return null!=reply?reply:new Reply<>(true,What.WHAT_ALREADY_DONE,"All process file finished",null);
         }
         mProcessing=next;
-        Reply<Path> childReply=onProcess(next,null,retrofit);
+        notify(null,"Processing ",next,null,update);
+        Reply<Path> childReply=onProcess(next,update,retrofit);
         childReply=null!=childReply?childReply:new Reply<>(true,What.WHAT_ERROR,"Unknown process fail", null);
         mProcessing=null;
         switch (childReply.getWhat()){
@@ -86,6 +88,7 @@ public abstract class FileProcess<T extends Path> extends FileAction{
                 }
             }
         }
+        notify(null,"Processed",next,null,update);
         return onProcess(update,retrofit);
     }
 

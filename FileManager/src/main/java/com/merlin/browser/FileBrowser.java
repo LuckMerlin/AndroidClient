@@ -12,8 +12,10 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.browser.file.FileCopyProcess;
 import com.browser.file.FileDeleteProcess;
 import com.browser.file.FileProcess;
+import com.browser.file.OnProcessUpdate;
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.api.ApiMap;
 import com.merlin.api.OnApiFinish;
@@ -213,10 +215,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                 });
     }
 
-    public final boolean copyPaths(ArrayList<Path> files,Path folder,int coverMode,String debug){
-//        FileProcess process= new FileCopyProcess(getText(R.string.copy),folder,coverMode,files);
-//        return null!=process?process(process,null):(toast(R.string.fail)&&false);
-        return false;
+    public final boolean copyPaths(ArrayList<Path> files, Path folder, int coverMode, OnProcessUpdate callback, String debug){
+        return process(new FileCopyProcess(getText(R.string.copy),files,folder,coverMode),callback);
     }
 
     public final boolean movePaths(ArrayList<Path> files, String folder, int coverMode, String debug){
@@ -225,17 +225,13 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         return false;
     }
 
-    public final boolean deletePath(ArrayList<Path> paths,OnApiFinish<Reply<Path>> finish,String debug){
-        FileProcess process=new FileDeleteProcess(getText(R.string.delete),paths);
-        return null!=process?process(process,finish):(toast(R.string.fail)&&false);
+    public final boolean deletePath(ArrayList<Path> paths, OnProcessUpdate callback, String debug){
+        return process(new FileDeleteProcess(getText(R.string.delete),paths),callback);
     }
 
-    public final boolean process(FileProcess process,OnApiFinish<Reply<Path>> finish){
+    public final boolean process(FileProcess process,OnProcessUpdate finish){
         final int length=null!=process?process.size():-1;
         if (length<=0){
-            if (null!=finish){
-                finish.onApiFinish(What.WHAT_EMPTY,"None file to process",null,process);
-            }
             return toast(R.string.listEmpty)&&false;
         }
         String message=process.getMessage(getAdapterContext());
@@ -251,8 +247,8 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             }else {
                                 dialog.setContentView(binding, false).title(title + "(" + process.getProcessedCount() + "/" + process.size() + "）").left(null).message(null);//Clean message
                                 binding.setRight(null);
-                                final OnProcessChange update = (Float progress,String note,Object instant, List processed) -> {
-                                    binding.setInstant(null!=instant&&instant instanceof Path?(Path)instant:null);
+                                final OnProcessChange update = (OnProcessChange<Path>) (Float progress,String note,Path instant, List<Path> processed) -> {
+                                    binding.setInstant(instant);
                                     dialog.title(title + "(" + process.getProcessedCount() + "/" + process.size() + "）");
                                     if (null != progress) {
                                         binding.setProgress(progress);
@@ -281,9 +277,6 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                                 if (process.cancel(true,"After user cancel click.")) {
                                     dialog.right(R.string.sure);
                                     toast(R.string.canceled);
-                                  if (null!=finish){
-                                        finish.onApiFinish(What.WHAT_CANCEL,"Cancel process file.",null,process);
-                                   }
                                 }
                             }else{
                                 dialog.dismiss();
@@ -401,11 +394,13 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
         Path path=null!=data&&data instanceof Path?(Path)data:null;
         if (null!=remover&&null!=path) {
-            ArrayList<Path> paths=new ArrayList<>(1);
+           ArrayList<Path> paths=new ArrayList<>(1);
            paths.add(path);
-           deletePath(paths, (int what, String note, Reply<Path> reply, Object arg) -> {
-                remover.remove(null != reply && reply.isSuccess() && reply.getWhat() == What.WHAT_SUCCEED);
-            }, "While item slide remove.");
+           deletePath(paths,(boolean succeed, Path chilPath)-> {
+               if (succeed){
+//                   remover.remove();
+               }
+           },"While item slide remove.");
         }
     }
 

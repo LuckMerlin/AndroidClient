@@ -4,19 +4,16 @@ import com.merlin.debug.Debug;
 import com.merlin.lib.Cancel;
 
 import java.io.IOException;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
-public abstract class ProcessingFetcher<T> extends Cancel {
+public abstract class ProcessingFetcher<T,M> extends Cancel {
 
-    public interface OnProcessingFetch<T>{
-        void onProcessingFetched(Reply<Processing<T>> reply);
-    }
+    protected abstract Reply<Processing<T,M> > onFetchProgressing(String processingId)throws IOException;
 
-    protected abstract Reply<Processing<T> > onFetchProgressing(String processingId)throws IOException;
-
-    public final Reply<Processing<T>> fetch(Call<Reply<Processing>> call, OnProcessingFetch callback){
+    public final Reply<M> fetch(Call<Reply<Processing>> call, OnProcessChange callback){
         call=null!=call&&call.isExecuted()?call.clone():call;
         if (null==call){
             return new Reply<>(true,What.WHAT_ARGS_INVALID,"Processing fetch call invalid.",null);
@@ -49,22 +46,23 @@ public abstract class ProcessingFetcher<T> extends Cancel {
         }
     }
 
-    public final Reply<Processing<T>> fetch(String processingId,OnProcessingFetch callback){
-        Reply<Processing<T> > response= null;
+    public final Reply<M> fetch(String processingId,OnProcessChange callback){
+        Reply<Processing<T,M> > response= null;
         try {
             response = onFetchProgressing(processingId);
             if (null!=response){
-                notify(response,callback);
                 int what=response.getWhat();
                 if (what==What.WHAT_NOT_EXIST){
-                    return response;
+                    return new Reply<>(true,What.WHAT_NOT_EXIST,"Processing not exist",null);
                 }
                 Processing processing=response.getData();
-                if (null==processing){
-                    Debug.D(getClass(),"Finish fetch process while reply processing NULL ");
-                    return new Reply<>(response.isSuccess(),response.getWhat(),response.getNote(),null);
-                }else{
-                    int delay=processing.getPosition();
+                if (null!=processing){
+                    notify(processing.getPosition(),processing.getData(),callback);
+                    Reply<M> reply=processing.getTerminal();
+                    if (null!=reply){//Terminal attached
+                        return reply;
+                    }
+                    int delay=processing.getDuration();
                     if (delay>0){
                         try {
                             Thread.sleep(delay);
@@ -77,12 +75,12 @@ public abstract class ProcessingFetcher<T> extends Cancel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return response;
+        return fetch(processingId,callback);
     }
 
-    protected final void notify(Reply<Processing<T>> reply,OnProcessingFetch callback){
+    protected final void notify(Float progress,List<T> processed, OnProcessChange callback){
         if (null!=callback){
-            callback.onProcessingFetched(reply);
+            callback.onProcessChanged(progress,null,null!=processed&&processed.size()>0?processed.get(0):null,processed);
         }
     }
 }

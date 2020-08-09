@@ -33,14 +33,8 @@ public class FileDeleteProcess extends FileProcess<Path> {
 
     private interface Api{
         @POST("/file/delete")
-
         @FormUrlEncoded
-        Call<Reply<Processing>> delete(@Field(Label.LABEL_PATH) String ...paths);
-
-        @POST("/file/processing")
-        @FormUrlEncoded
-        Call<Reply<Processing<Path>>> fetchProcessing(@Field(Label.LABEL_ID) String processId,@Field(Label.LABEL_WHAT) Integer what);
-
+        Call<Reply<Path>> delete(@Field(Label.LABEL_PATH) String path);
     }
 
     @Override
@@ -69,23 +63,13 @@ public class FileDeleteProcess extends FileProcess<Path> {
             }else if (null==retrofit){
                 reply= new Reply<>(true,What.WHAT_INTERRUPT,"Retrofit invalid",pathObj);
             }else{
-                Call<Reply<Processing>> call=retrofit.prepare(Api.class,hostUri).delete(filePath);
-                if (null==call){
-                    reply= new Reply<>(true,What.WHAT_INTERRUPT,"Cloud path delete call NULL",pathObj);
-                }else{
-                    final ProcessingFetcher fetcher= new ProcessingFetcher<Path>() {
-                        @Override
-                        protected Reply<Processing<Path>> onFetchProgressing(String processingId) throws IOException {
-                            Response<Reply<Processing<Path>>> response= retrofit.prepare(Api.class,hostUri).
-                                    fetchProcessing(processingId,super.isCanceled()?What.WHAT_CANCEL:null).execute();
-                            return null!=response?response.body():null;
-                        }
-                    };
-                    mCanceler=fetcher;
-                    Reply<Processing> processingReply=fetcher.fetch(call,null);
-                    reply=null!=processingReply?new Reply<>(processingReply.isSuccess(),
-                            processingReply.getWhat(),processingReply.getNote(),pathObj):
-                            new Reply<>(true,What.WHAT_UNKNOWN_INVALID, "Unknown process reply",pathObj);
+                Call<Reply<Path>> call=retrofit.prepare(Api.class,hostUri).delete(filePath);
+                try {
+                   Response<Reply<Path>> response= null!=call?call.execute():null;
+                   reply=null!=response?response.body():null;
+                } catch (IOException e) {
+                    reply= new Reply<>(true, What.WHAT_EXCEPTION, "Exception delete", null);
+                    e.printStackTrace();
                 }
             }
         }
