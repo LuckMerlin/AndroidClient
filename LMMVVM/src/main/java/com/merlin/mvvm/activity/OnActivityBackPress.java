@@ -1,4 +1,4 @@
-package com.merlin.mvvm;
+package com.merlin.mvvm.activity;
 
 import android.app.Activity;
 

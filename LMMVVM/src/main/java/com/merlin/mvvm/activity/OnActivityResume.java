@@ -1,8 +1,8 @@
-package com.merlin.mvvm;
+package com.merlin.mvvm.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 
 public interface OnActivityResume {
-    void onActivityResume(Activity activity, Intent intent);
+    void onActivityResume(Activity activity);
 }

@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,8 +19,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-public class Model {
+public abstract class Model implements ModelLayoutResolver{
     private WeakReference<View> mRootView=null;
+//    private Object mOnAttachStateChangeListener;
 
     protected final View getRoot() {
         WeakReference<View> reference=mRootView;
@@ -32,26 +32,9 @@ public class Model {
         //Do nothing
     }
 
-    boolean initialRoot(View root){
+    final boolean initialRoot(View root){
         if (null!=root){
             mRootView=new WeakReference<>(root);
-//            ViewTreeObserver observer=root.getViewTreeObserver();
-            root.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    if (Model.this instanceof OnAttachedToWindow){
-                        ((OnAttachedToWindow)Model.this).onAttachedToWindow(v,Model.this);
-                    }
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    if (Model.this instanceof OnDetachedToWindow){
-                        ((OnDetachedToWindow)Model.this).onDetachedToWindow(v,Model.this);
-                    }
-                    root.removeOnAttachStateChangeListener(this);
-                }
-            });
             onRootAttached(root);
             return true;
         }
