@@ -32,7 +32,8 @@ public class Retrofit {
 
     public Retrofit(){
         OkHttpClient client = createClient();
-        mBuilder = null!=client?new retrofit2.Retrofit.Builder().client(client).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        mBuilder = null!=client?new retrofit2.Retrofit.Builder().client(client)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create()):null;
     }
 

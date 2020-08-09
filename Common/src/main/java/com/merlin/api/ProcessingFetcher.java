@@ -8,14 +8,16 @@ import java.io.IOException;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public final class ProcessingFetcher extends Cancel {
+public abstract class ProcessingFetcher<T> extends Cancel {
 
-    public interface OnProcessingFetch{
-        void onProcessingFetched(Reply<Processing> reply);
+    public interface OnProcessingFetch<T>{
+        void onProcessingFetched(Reply<Processing<T>> reply);
     }
 
-    public final Reply<Processing> fetch(Call<Reply<Processing>> call, OnProcessingFetch callback){
-        call=null!=call?call.isExecuted()?call.clone():call:null;
+    protected abstract Reply<Processing<T> > onFetchProgressing(String processingId)throws IOException;
+
+    public final Reply<Processing<T>> fetch(Call<Reply<Processing>> call, OnProcessingFetch callback){
+        call=null!=call&&call.isExecuted()?call.clone():call;
         if (null==call){
             return new Reply<>(true,What.WHAT_ARGS_INVALID,"Processing fetch call invalid.",null);
         }
@@ -23,20 +25,44 @@ public final class ProcessingFetcher extends Cancel {
             Debug.D(getClass(),"Finish fetch process while canceled");
             return new Reply<>(true,What.WHAT_CANCEL,"Process canceled",null);
         }
-        Reply<Processing> processingReply=null;
         try {
             Response<Reply<Processing>> response=call.execute();
-            Reply<Processing> reply=processingReply=null!=response?response.body():null;
-            if (null!=reply){
-                notify(reply,callback);
-                int what=reply.getWhat();
+            if (null==response){
+                return fetch(call,callback);
+            }
+            Reply<Processing> reply=response.body();
+            if (null==reply){
+                Debug.D(getClass(),"Finish fetch process while reply NULL");
+                return new Reply<>(true,What.WHAT_ERROR,"Process reply NULL",null);
+            }
+            Processing processing=reply.getData();
+            final String processingId=null!=processing?processing.getId():null;
+            if (null==processingId||processingId.length()<=0){
+                Debug.D(getClass(),"Finish fetch process while reply processing ID invalid");
+                return new Reply<>(true,What.WHAT_ERROR,"Reply processing ID invalid",null);
+            }
+            return fetch(processingId,callback);
+        } catch (IOException e) {
+            Debug.D(getClass(),"Exception fetch processing.e="+e);
+            e.printStackTrace();
+            return new Reply<>(true,What.WHAT_ERROR,"Reply Exception "+e,null);
+        }
+    }
+
+    public final Reply<Processing<T>> fetch(String processingId,OnProcessingFetch callback){
+        Reply<Processing<T> > response= null;
+        try {
+            response = onFetchProgressing(processingId);
+            if (null!=response){
+                notify(response,callback);
+                int what=response.getWhat();
                 if (what==What.WHAT_NOT_EXIST){
-                    return processingReply;
+                    return response;
                 }
-                Processing processing=reply.getData();
+                Processing processing=response.getData();
                 if (null==processing){
                     Debug.D(getClass(),"Finish fetch process while reply processing NULL ");
-                    processingReply= new Reply<>(reply.isSuccess(),reply.getWhat(),reply.getNote(),null);
+                    return new Reply<>(response.isSuccess(),response.getWhat(),response.getNote(),null);
                 }else{
                     int delay=processing.getPosition();
                     if (delay>0){
@@ -49,13 +75,12 @@ public final class ProcessingFetcher extends Cancel {
                 }
             }
         } catch (IOException e) {
-            Debug.D(getClass(),"Exception fetch processing.e="+e);
             e.printStackTrace();
         }
-        return null!=processingReply?processingReply:fetch(call,callback);
+        return response;
     }
 
-    protected final void notify(Reply<Processing> reply,OnProcessingFetch callback){
+    protected final void notify(Reply<Processing<T>> reply,OnProcessingFetch callback){
         if (null!=callback){
             callback.onProcessingFetched(reply);
         }
