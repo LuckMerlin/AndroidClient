@@ -1,5 +1,6 @@
 package com.merlin.mvvm;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.ColorSpace;
 import android.view.Display;
@@ -97,8 +98,15 @@ class ModelBinder {
 
     protected final boolean bindViewModel(Model model,View view){
         if (null!=model&&null!=view){
+            if (!model.isRootAttached()){
+                Context context=view.getContext();
+                if (null!=context){
+                    if (context instanceof Activity){
+                        new LifecycleBinder((Activity) context,model).bind();
+                    }
+                }
+            }
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
-            Debug.D("AAAAAAAAAAAa "+binding);
             Class cls=null!=binding?binding.getClass():null;
             Method[] methods=null!=cls?cls.getDeclaredMethods():null;
             Class modelClass=model.getClass();
@@ -106,16 +114,13 @@ class ModelBinder {
                 for (Method method:methods) {
                     Type[] types=null!=method?method.getParameterTypes():null;
                     Type type=null!=types&&types.length==1?types[0]:null;
-                    Debug.D("ASDSFADA  "+method.getName()
-                    );
                     if (null!=type&&type.equals(modelClass)){
                         try {
-                            Debug.D("Succeed bind view model."+method.getName()+" "+type+" "+modelClass);
-                            method.invoke(model);
+                            method.invoke(binding,model);
                             Debug.D("Succeed bind view model."+view);
                             return true;
                         } catch (Exception e) {
-                            Debug.D("Succeed bind view model."+e);
+
                             e.printStackTrace();
                         }
                     }

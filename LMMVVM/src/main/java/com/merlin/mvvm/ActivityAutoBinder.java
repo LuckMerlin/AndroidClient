@@ -28,7 +28,7 @@ final class ActivityAutoBinder extends ModelBinder implements Application.Activi
    View view=null!=modelLayout?createModelView(activity,modelLayout):null;
    if (null!=view){
        activity.setContentView(view);//Set activity model
-       if (model.initialRoot(view)&&bindViewModel(model,view)){
+       if (model.attachRoot(view)&&bindViewModel(model,view)){
            Map<Activity,Model> models=mModels;
            models=null!=models?models:(mModels=new WeakHashMap<>());
            models.put(activity,model);

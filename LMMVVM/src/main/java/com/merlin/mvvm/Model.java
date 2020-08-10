@@ -23,6 +23,10 @@ public abstract class Model implements ModelLayoutResolver{
     private WeakReference<View> mRootView=null;
 //    private Object mOnAttachStateChangeListener;
 
+    protected final boolean isRootAttached(){
+        return null!=getRoot();
+    }
+
     protected final View getRoot() {
         WeakReference<View> reference=mRootView;
         return null!=reference?reference.get():null;
@@ -32,7 +36,7 @@ public abstract class Model implements ModelLayoutResolver{
         //Do nothing
     }
 
-    final boolean initialRoot(View root){
+    final boolean attachRoot(View root){
         if (null!=root){
             mRootView=new WeakReference<>(root);
             onRootAttached(root);
