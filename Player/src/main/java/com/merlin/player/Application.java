@@ -7,6 +7,6 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LMBinder.autoBindActivityModel(this);
+//        LMBinder.autoBindActivityModel(this);
     }
 }

@@ -1,9 +1,12 @@
 package com.merlin.mvvm;
 
 import android.content.Context;
+import android.graphics.ColorSpace;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
@@ -16,24 +19,39 @@ import java.lang.reflect.Type;
 
 class ModelBinder {
 
-    protected final Class<? extends Model> findModelClass(Class cls){
-        while (true){
-            if (null==cls){
-                break;
+    protected final Class<? extends Model> getModelClass(Object object){
+        if (null!=object){
+            if (object instanceof String){
+                try {
+                    object=Class.forName((String)object);
+                } catch (ClassNotFoundException e) {
+                    //Do nothing
+                }
             }
-            if (cls.equals(Model.class)){
-                return cls;
+            Class cls=null!=object&&object instanceof Class?(Class)object:null;
+            while (true){
+                if (null==cls){
+                    break;
+                }
+                if (cls.equals(Model.class)){
+                    return (Class)object;
+                }
+                cls=cls.getSuperclass();
             }
-            cls=cls.getSuperclass();
         }
         return null;
     }
 
-    protected final Model createDeclaredModel(Object object){
-        Object model=null!=object&&object instanceof ModelResolver ?((ModelResolver)object).onResolveModel():null;
-        if (null!=model){
-            if (model instanceof Class){
-                Constructor[] constructors=null!=findModelClass((Class)model)?((Class) model).getDeclaredConstructors():null;
+    protected final Model createDeclaredModel(Object object) {
+        Object model = null != object && object instanceof ModelResolver ? ((ModelResolver) object).onResolveModel() : null;
+        return null!=model?createModel(model):null;
+    }
+
+    protected final Model createModel(Object object){
+        if (null!=object){
+            object=object instanceof String?getModelClass((String)object):object;
+            if (object instanceof Class){
+                Constructor[] constructors=null!=getModelClass((Class)object)?((Class) object).getDeclaredConstructors():null;
                 if (null!=constructors&&constructors.length>0){
                     Constructor constructor=null;
                     for (Constructor child:constructors) {
@@ -45,14 +63,14 @@ class ModelBinder {
                     }
                     if (null!=constructor){//Found model constructor,Now create ir
                         try {
-                            model=constructor.newInstance();
+                            object=constructor.newInstance();
                         } catch (Exception e) {
                             //Do nothing
                         }
                     }
                 }
             }
-            return null!=model&&model instanceof Model?((Model)model):null;
+            return null!=object&&object instanceof Model?((Model)object):null;
         }
         return null;
     }
@@ -80,6 +98,7 @@ class ModelBinder {
     protected final boolean bindViewModel(Model model,View view){
         if (null!=model&&null!=view){
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
+            Debug.D("AAAAAAAAAAAa "+binding);
             Class cls=null!=binding?binding.getClass():null;
             Method[] methods=null!=cls?cls.getDeclaredMethods():null;
             Class modelClass=model.getClass();
@@ -87,12 +106,16 @@ class ModelBinder {
                 for (Method method:methods) {
                     Type[] types=null!=method?method.getParameterTypes():null;
                     Type type=null!=types&&types.length==1?types[0]:null;
+                    Debug.D("ASDSFADA  "+method.getName()
+                    );
                     if (null!=type&&type.equals(modelClass)){
                         try {
-                            Debug.D("Bind view model");
+                            Debug.D("Succeed bind view model."+method.getName()+" "+type+" "+modelClass);
                             method.invoke(model);
+                            Debug.D("Succeed bind view model."+view);
                             return true;
                         } catch (Exception e) {
+                            Debug.D("Succeed bind view model."+e);
                             e.printStackTrace();
                         }
                     }
