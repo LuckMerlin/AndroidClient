@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+        <data>
+            <variable
+                name="nammodel"
+                type="com.merlin.player.TestModel" />
+            <import type="com.merlin.player.TestModel"/>
+        </data>
+<!--    bind:bindModel="@{true}"-->
+
+    <RelativeLayout
+        bind:bindModel="@{true}"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+</layout>

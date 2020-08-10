@@ -4,6 +4,7 @@ import android.view.View;
 
 import androidx.databinding.ObservableField;
 
+import com.merlin.core.debug.Debug;
 import com.merlin.mvvm.Model;
 
 public class TestModel extends Model {
@@ -12,10 +13,6 @@ public class TestModel extends Model {
     @Override
     protected void onRootAttached(View view) {
         super.onRootAttached(view);
-    }
-
-    @Override
-    public Object onResolveModelLayout() {
-        return R.layout.cd;
+        Debug.D("AAAAAAAAAAAAA  "+view);
     }
 }

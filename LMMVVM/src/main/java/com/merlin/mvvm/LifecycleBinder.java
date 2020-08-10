@@ -10,6 +10,9 @@ import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * @deprecated
+ */
 class LifecycleBinder implements Application.ActivityLifecycleCallbacks{
     private final Model mModel;
     private final WeakReference<Activity> mLifeObj;

@@ -19,9 +19,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-public abstract class Model implements ModelLayoutResolver{
+public abstract class Model{
     private WeakReference<View> mRootView=null;
-//    private Object mOnAttachStateChangeListener;
 
     protected final boolean isRootAttached(){
         return null!=getRoot();
