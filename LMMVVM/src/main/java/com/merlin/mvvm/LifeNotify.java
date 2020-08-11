@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.merlin.core.debug.Debug;
 import com.merlin.mvvm.activity.OnActivityCreate;
 import com.merlin.mvvm.activity.OnActivityDestroyed;
 import com.merlin.mvvm.activity.OnActivityPause;

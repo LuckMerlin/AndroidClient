@@ -4,8 +4,6 @@ import android.view.View;
 
 import androidx.databinding.ViewDataBinding;
 
-import com.merlin.core.debug.Debug;
-
 
 public final class BindingAdapter {
 

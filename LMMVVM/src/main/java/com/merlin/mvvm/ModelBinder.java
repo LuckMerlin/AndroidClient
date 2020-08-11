@@ -6,7 +6,7 @@ import android.view.View;
 
 import androidx.databinding.ViewDataBinding;
 
-import com.merlin.core.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

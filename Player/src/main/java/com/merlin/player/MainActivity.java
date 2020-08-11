@@ -3,12 +3,9 @@ package com.merlin.player;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
 
-import com.merlin.core.debug.Debug;
 import com.merlin.mvvm.ActivityLifeBinder;
 import com.merlin.mvvm.OnModelLayoutResolve;
 import com.merlin.mvvm.OnModelResolve;

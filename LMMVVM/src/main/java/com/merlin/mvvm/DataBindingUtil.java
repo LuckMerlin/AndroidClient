@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.databinding.ViewDataBinding;
 
-import com.merlin.core.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 
 /**
  * Create LuckMerlin

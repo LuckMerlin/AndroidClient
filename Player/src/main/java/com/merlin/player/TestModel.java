@@ -4,7 +4,7 @@ import android.view.View;
 
 import androidx.databinding.ObservableField;
 
-import com.merlin.core.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 import com.merlin.mvvm.Model;
 
 public class TestModel extends Model {

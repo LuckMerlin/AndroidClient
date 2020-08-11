@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 29
@@ -14,10 +15,24 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled true
+            proguardFiles 'proguard-rules.pro'
         }
     }
+}
 
+publish{
+    userOrg = 'luckmerlin'
+    groupId = 'com.luckmerlin'
+    //    groupId = 'com.luckmerlin.library'
+    artifactId = 'Core'
+    publishVersion = '0.0.6'
+    repoName="luckmerlin"
+    desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer of total frame'
+    website = 'https://www.luckmerlin.com'
 }
 
 dependencies {

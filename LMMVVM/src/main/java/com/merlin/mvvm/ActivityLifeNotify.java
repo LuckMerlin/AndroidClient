@@ -7,7 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.merlin.core.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 
 /**
  * Create LuckMerlin

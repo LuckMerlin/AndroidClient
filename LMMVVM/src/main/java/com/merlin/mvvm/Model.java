@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.merlin.core.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 
 import java.io.Closeable;
 import java.io.IOException;
