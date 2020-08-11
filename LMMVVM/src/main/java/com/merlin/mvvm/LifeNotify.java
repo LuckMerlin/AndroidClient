@@ -2,7 +2,9 @@ package com.merlin.mvvm;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +23,7 @@ import com.merlin.mvvm.activity.OnActivityStop;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-final class LifeNotify implements Application.ActivityLifecycleCallbacks{
+final class LifeNotify implements Application.ActivityLifecycleCallbacks {
     private static LifeNotify mLifeNotify;
     private Map<Object,Model> mModelMaps;
 
@@ -52,10 +54,9 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks{
             Model model=binder.createModel(activity);
             Object actDeclareModel=null!=model&&activity instanceof OnModelLayoutResolve?((OnModelLayoutResolve)activity).onResolveModeLayout():null;
             final View modelView= binder.createModelView(activity,model,actDeclareModel);
-            if (null!=modelView&&binder.attachModel(modelView,model)){
-                addModel(activity,model,"While activity onCreate");
-                activity.setContentView(modelView,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
+            if (null!=modelView&&binder.attachModel(modelView,model)&&addModel(activity,model,"While activity onCreate")){
+                activity.setContentView(modelView,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
             }
             if (null!=model&&model instanceof OnActivityCreate) {
                 ((OnActivityCreate)model).onActivityCreated(activity,savedInstanceState);
@@ -141,4 +142,5 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks{
         }
         return removed;
     }
+
 }

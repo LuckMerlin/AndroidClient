@@ -29,7 +29,7 @@ publish{
     groupId = 'com.luckmerlin'
     //    groupId = 'com.luckmerlin.library'
     artifactId = 'Core'
-    publishVersion = '0.0.6'
+    publishVersion = '0.0.7'
     repoName="luckmerlin"
     desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer of total frame'
     website = 'https://www.luckmerlin.com'
