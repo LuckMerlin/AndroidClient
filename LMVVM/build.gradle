@@ -1,0 +1,49 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles  'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+}
+
+publish{
+    userOrg = 'luckmerlin'
+    groupId = 'com.luckmerlin.library'
+    artifactId = 'mvvm'
+    publishVersion = '0.0.0'
+    repoName="luckmerlin"
+    desc = 'This is a android(Java) mvvm base framework with android databinding mode'
+    website = 'https://www.luckmerlin.com'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':LMCore')
+}
