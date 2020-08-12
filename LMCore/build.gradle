@@ -24,15 +24,15 @@ android {
     }
 }
 
-publish{
-    userOrg = 'luckmerlin'
-    groupId = 'com.luckmerlin.library'
-    artifactId = 'core'
-    publishVersion = '0.0.0'
-    repoName="luckmerlin"
-    desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer for total framework'
-    website = 'https://www.luckmerlin.com'
-}
+//publish{
+//    userOrg = 'luckmerlin'
+//    groupId = 'com.luckmerlin.library'
+//    artifactId = 'core'
+//    publishVersion = '0.0.0'
+//    repoName="luckmerlin"
+//    desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer for total framework'
+//    website = 'https://www.luckmerlin.com'
+//}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

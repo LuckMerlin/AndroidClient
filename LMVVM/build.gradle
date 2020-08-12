@@ -33,15 +33,15 @@ android {
     }
 }
 
-publish{
-    userOrg = 'luckmerlin'
-    groupId = 'com.luckmerlin.library'
-    artifactId = 'mvvm'
-    publishVersion = '0.0.0'
-    repoName="luckmerlin"
-    desc = 'This is a android(Java) mvvm base framework with android databinding mode'
-    website = 'https://www.luckmerlin.com'
-}
+//publish{
+//    userOrg = 'luckmerlin'
+//    groupId = 'com.luckmerlin.library'
+//    artifactId = 'mvvm'
+//    publishVersion = '0.0.0'
+//    repoName="luckmerlin"
+//    desc = 'This is a android(Java) mvvm base framework with android databinding mode'
+//    website = 'https://www.luckmerlin.com'
+//}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
