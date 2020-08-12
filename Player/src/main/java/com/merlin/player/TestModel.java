@@ -7,14 +7,14 @@ import android.view.View;
 import androidx.databinding.ObservableField;
 
 import com.luckmerlin.core.debug.Debug;
-import com.merlin.mvvm.Model;
-import com.merlin.mvvm.OnModelLayoutResolve;
-import com.merlin.mvvm.activity.OnActivityCreate;
-import com.merlin.mvvm.activity.OnActivityDestroyed;
-import com.merlin.mvvm.activity.OnActivityPause;
-import com.merlin.mvvm.activity.OnActivityResume;
-import com.merlin.mvvm.activity.OnActivityStart;
-import com.merlin.mvvm.activity.OnActivityStop;
+import com.luckmerlin.mvvm.Model;
+import com.luckmerlin.mvvm.OnModelLayoutResolve;
+import com.luckmerlin.mvvm.activity.OnActivityCreate;
+import com.luckmerlin.mvvm.activity.OnActivityDestroyed;
+import com.luckmerlin.mvvm.activity.OnActivityPause;
+import com.luckmerlin.mvvm.activity.OnActivityResume;
+import com.luckmerlin.mvvm.activity.OnActivityStart;
+import com.luckmerlin.mvvm.activity.OnActivityStop;
 
 public class TestModel extends Model implements OnModelLayoutResolve,
         OnActivityCreate, OnActivityStart, OnActivityResume, OnActivityPause, OnActivityStop,

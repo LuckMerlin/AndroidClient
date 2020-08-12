@@ -26,12 +26,11 @@ android {
 
 publish{
     userOrg = 'luckmerlin'
-    groupId = 'com.luckmerlin'
-    //    groupId = 'com.luckmerlin.library'
-    artifactId = 'Core'
-    publishVersion = '0.0.7'
+    groupId = 'com.luckmerlin.library'
+    artifactId = 'core'
+    publishVersion = '0.0.0'
     repoName="luckmerlin"
-    desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer of total frame'
+    desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer for total framework'
     website = 'https://www.luckmerlin.com'
 }
 

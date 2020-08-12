@@ -18,23 +18,17 @@
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
--dontusemixedcaseclassnames
 -dontskipnonpubliclibraryclasses
 -dontskipnonpubliclibraryclassmembers
 -dontpreverify
 -verbose
 -printmapping proguardMapping.txt
 -optimizations !code/simplification/cast,!field/*,!class/merging/*
--keepattributes *Annotation*,InnerClasses
--keepattributes Signature
--keepattributes SourceFile,LineNumberTable
 #########################################
--keep public interface com.luckmerlin.proguard.PublishMethods{public *;}
--keep public interface com.luckmerlin.proguard.PublishFields{public *;}
--keep class * implements com.luckmerlin.proguard.PublishMethods {
-      public <methods>;
-}
--keep class * implements com.luckmerlin.proguard.PublishFields {
+-keep class * implements com.luckmerlin.core.proguard.PublishMethods {
+       public <methods>;
+ }
+
+-keep class * implements com.luckmerlin.core.proguard.PublishFields {
       public <fields>;
-}
+ }
