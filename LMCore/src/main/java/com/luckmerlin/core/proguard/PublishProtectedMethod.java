@@ -2,9 +2,8 @@ package com.luckmerlin.core.proguard;
 
 /**
  * Create LuckMerlin
- * Date 13:53 2018/5/12
+ * Date 11:08 2020/8/13
  * TODO
  */
-public interface PublishFields{
-
+public interface PublishProtectedMethod {
 }

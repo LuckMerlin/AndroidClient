@@ -22,13 +22,24 @@
 -dontskipnonpubliclibraryclassmembers
 -dontpreverify
 -verbose
+-keepattributes Exceptions
+-keepattributes Signature
+-keepattributes InnerClasses
 -printmapping proguardMapping.txt
 -optimizations !code/simplification/cast,!field/*,!class/merging/*
 #########################################
+-keep interface com.luckmerlin.core.proguard.PublishMethods { *; }
+-keep interface com.luckmerlin.core.proguard.PublishFields { *; }
+-keep interface com.luckmerlin.core.proguard.PublishProtectedMethod { *; }
+
 -keep class * implements com.luckmerlin.core.proguard.PublishMethods {
        public <methods>;
  }
 
 -keep class * implements com.luckmerlin.core.proguard.PublishFields {
       public <fields>;
+ }
+
+ -keep class * implements com.luckmerlin.core.proguard.PublishProtectedMethod {
+      protected <fields>;
  }
