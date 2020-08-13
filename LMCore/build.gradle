@@ -1,5 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+def buildVersion="#0.0.0"
+if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")){
+    apply plugin: 'com.novoda.bintray-release'
+}
 
 android {
     compileSdkVersion 29
@@ -24,15 +27,17 @@ android {
     }
 }
 
-//publish{
-//    userOrg = 'luckmerlin'
-//    groupId = 'com.luckmerlin.library'
-//    artifactId = 'core'
-//    publishVersion = '0.0.0'
-//    repoName="luckmerlin"
-//    desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer for total framework'
-//    website = 'https://www.luckmerlin.com'
-//}
+if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
+    publish {
+        userOrg = 'luckmerlin'
+        groupId = 'com.luckmerlin.library'
+        artifactId = 'core'
+        publishVersion = buildVersion
+        repoName = "luckmerlin"
+        desc = 'This is a android(Java) core library of LuckMerlin,Include all common abstract layer for total framework'
+        website = 'https://www.luckmerlin.com'
+    }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
