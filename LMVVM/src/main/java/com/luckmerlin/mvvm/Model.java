@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 public abstract class Model implements PublishMethods, PublishProtectedMethod {
-    public static WeakReference<View> mRootView=null;
+    private WeakReference<View> mRootView=null;
 
     public Model(){
 

@@ -39,8 +39,8 @@ import java.util.WeakHashMap;
 
 final class LifeNotify implements Application.ActivityLifecycleCallbacks,ComponentCallbacks{
     private static LifeNotify mLifeNotify;
-    public static  Map<Object,Model> mModelMaps;
-    public static  Map<Object,Activity> mActivityRegister;
+    private  Map<Object,Model> mModelMaps;
+    private  Map<Object,Activity> mActivityRegister;
 
     private interface OnIterate{
         boolean onIterated(Object value);
