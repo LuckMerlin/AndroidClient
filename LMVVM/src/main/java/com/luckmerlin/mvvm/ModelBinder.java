@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 
@@ -169,17 +170,34 @@ class ModelBinder {
         return false;
     }
 
-    protected final boolean unbindViewModel(View view,String debug){
-        Map<View,Model> boundMap=mBoundedMap;
-        Model model=null!=view?boundMap.remove(view):null;
-        if (null!=model){
-            Debug.D("Unbind view model "+(null!=debug?debug:".")+model);
-            model.dettachRoot(debug);
+    protected final int unbindViewModel(String debug,Object ...objects){
+        final Map<View,Model> boundMap=mBoundedMap;
+        int count=0;
+        if (null!=objects&&objects.length>0){
+            if (null!=boundMap&&boundMap.size()>0) {
+                for (Object object:objects) {
+                    synchronized (boundMap){
+                        Set<View> set=boundMap.keySet();
+                        if (null!=set&&set.size()>0){
+                            for (View child:set) {
+                                if (null!=child){
+                                    Model value=boundMap.get(child);
+                                    if (null!=value&&(child==object||value==object)){
+                                        Debug.D("Unbind view model "+(null!=debug?debug:".")+value);
+                                        boundMap.remove(child);
+                                        value.dettachRoot(debug);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         if (null!=boundMap&&boundMap.size()<=0){
             mBoundedMap=null;
         }
-        return null!=model;
+        return count;
     }
 
     protected final boolean bindViewModel(View view,String debug){
@@ -201,7 +219,8 @@ class ModelBinder {
             if (model.isRootAttached()){
                 return false;//Model already attached view
             }
-            final Map<View,Model> boundMap=mBoundedMap;
+            Map<View,Model> boundMap=mBoundedMap;
+            boundMap=null!=boundMap?boundMap:(mBoundedMap=new WeakHashMap<View,Model>());
             Model existModel=null!=boundMap?boundMap.get(view):null;
             if (null!=existModel){
                 return false;//Already bound

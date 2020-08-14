@@ -229,7 +229,7 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks,Compone
     @Override
     public void onActivityDestroyed( Activity activity) {
         if(null!=activity){
-            Model model=removeModel(activity);
+            Model model=removeModel(activity,"While activity onDestroy.");
             if (null!=model&&model instanceof OnActivityDestroyed) {
                 ((OnActivityDestroyed)model).onActivityDestroyed(activity);
             }
@@ -256,12 +256,13 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks,Compone
         return null!=modelMap?modelMap.get(object):null;
     }
 
-    private Model removeModel(Context context){
+    private Model removeModel(Context context,String debug){
         Map<Object,Model> modelMap=null!=context?mModelMaps:null;
         Model removed=null;
         if (null!=modelMap){
             removed=modelMap.remove(context);
         }
+        new ModelBinder().unbindViewModel(debug,removed,context);
         if (null!=modelMap&&modelMap.size()<=0){
             mModelMaps=null;
         }
