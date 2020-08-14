@@ -5,8 +5,10 @@
         <variable
             name="ddd"
             type="com.merlin.player.TestModel" />
+        <import type="com.luckmerlin.databinding.view.Value"/>
     </data>
     <LinearLayout
+        app:viewValue="@{Value.text()}"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

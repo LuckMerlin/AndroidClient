@@ -38,4 +38,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':LMVVM')
     implementation project(path: ':LMCore')
+    implementation project(path: ':LMDatabinding')
 }

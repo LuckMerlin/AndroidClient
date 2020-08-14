@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+def buildVersion="#0.0.0"
+if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
+    apply plugin: 'com.novoda.bintray-release'
+}
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+    }
+
+
+    buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles  'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+}
+
+
+if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
+    publish {
+        userOrg = 'luckmerlin'
+        groupId = 'com.luckmerlin.library'
+        artifactId = 'databinding'
+        publishVersion = buildVersion
+        repoName = "luckmerlin"
+        desc = 'This is a android(Java) event framework for touch click,long click and so on.'
+        website = 'https://www.luckmerlin.com'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly project(path: ':LMCore')
+}

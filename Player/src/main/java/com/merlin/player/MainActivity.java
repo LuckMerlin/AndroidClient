@@ -14,17 +14,17 @@ public class MainActivity extends Activity implements OnModelResolve {
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
         LifeBinder.bindActivityLife(true,this);
-        new Thread(()->{
-            while (true){
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                new Test().test();
-                Debug.D("\n");
-            }
-        }).start();
+//        new Thread(()->{
+//            while (true){
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                new Test().test();
+//                Debug.D("\n");
+//            }
+//        }).start();
     }
 
     @Override

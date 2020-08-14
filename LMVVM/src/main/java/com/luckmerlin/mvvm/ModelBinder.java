@@ -20,7 +20,7 @@ import java.util.WeakHashMap;
 
 
 class ModelBinder {
-    private Map<View,Model> mBoundedMap;
+    private static Map<View,Model> mBoundedMap;
 
     protected final boolean bindFromAdapter(View view, Object modelObj,String debug){
         if (null!=view&&null!=modelObj){
