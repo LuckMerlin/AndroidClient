@@ -12,17 +12,14 @@ import android.widget.TextView;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
+
+import com.file.activity.TaskActivity;
 import com.merlin.adapter.ListAdapter;
-import com.merlin.adapter.PageAdapter;
 import com.merlin.api.Label;
-import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
-import com.merlin.api.Processing;
-import com.merlin.api.Reply;
 import com.merlin.bean.Folder;
 import com.merlin.bean.Path;
 import com.merlin.browser.Collector;
-import com.merlin.browser.CoverMode;
 import com.merlin.browser.LocalFileBrowser;
 import com.merlin.browser.Mode;
 import com.merlin.browser.NasFileBrowser;
@@ -40,21 +37,12 @@ import com.merlin.browser.FileBrowser;
 import com.merlin.file.transport.FileTaskService;
 import com.merlin.model.Model;
 import com.merlin.server.Client;
-import com.merlin.task.TaskGroup;
-import com.merlin.util.FileSize;
+import com.merlin.task.file.Cover;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import io.reactivex.Observable;
-import okhttp3.Request;
-import retrofit2.Call;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
 
 
 public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Model.OnBindChange,
@@ -81,12 +69,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     };
 
     private Collector mCollecting;
-
-//    private interface Test{
-//        @GET("/file/delete")
-////        @FormUrlEncoded
-//        Observable<Reply> delete(@retrofit2.http.Query(Label.LABEL_PATH) String path);
-//    }
 
     @Override
     protected void onRootAttached(View root) {
@@ -163,9 +145,9 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
                     case R.string.setAsHome:
                         return setAsHome(data,"After set as home tap click.");
                     case R.string.rename:
-                        return null!=data&&data instanceof Path &&renamePath((Path)data, CoverMode.NONE,"After rename tap click.");
+                        return null!=data&&data instanceof Path &&renamePath((Path)data, Cover.COVER_NONE,"After rename tap click.");
                     case R.string.transportList:
-                        return launchTransportList("After transport list tap click.");
+                        return startActivity(TaskActivity.class,"After transport list tap click.");
                     case R.string.multiChoose:
                         return (!isMode(Mode.MODE_MULTI_CHOOSE)&&entryMode(Mode.MODE_MULTI_CHOOSE,
                                 new Collector(null,null,null),"After multi choose tap click."))||true;
@@ -220,17 +202,17 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         }
         switch (resId){
             case R.string.move:
-                return isMode(Mode.MODE_MOVE) ? movePaths(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_MOVE, data, null,"After tap click.");
+                return isMode(Mode.MODE_MOVE) ? movePaths(getCollected(null),Cover.tapClickCountToMode(clickCount), "After tap click.")
+                        &&entryMode(Mode.MODE_NORMAL,null,"After move process."): collectFile(Mode.MODE_MOVE, data, null,"After tap click.");
             case R.string.upload:
-                return isMode(Mode.MODE_UPLOAD) ? uploadPaths(getCollected(Path.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_UPLOAD, data, Path.class,"After tap click.");
+                return isMode(Mode.MODE_UPLOAD) ? uploadPaths(getCollected(Path.class),Cover.tapClickCountToMode(clickCount), "After tap click.")
+                        &&entryMode(Mode.MODE_NORMAL,null,"After upload process."): collectFile(Mode.MODE_UPLOAD, data, Path.class,"After tap click.");
             case R.string.download:
-                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? downloadPaths(getCollected(Path.class),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_DOWNLOAD, data, Path.class,"After tap click.");
+                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? downloadPaths(getCollected(Path.class),Cover.tapClickCountToMode(clickCount), "After tap click.")
+                        &&entryMode(Mode.MODE_NORMAL,null,"After download process."): collectFile(Mode.MODE_DOWNLOAD, data, Path.class,"After tap click.");
             case R.string.copy:
-                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY) ? copy(getCollected(null),CoverMode.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_COPY, data, null,"After tap click.");
+                return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY) ? copy(getCollected(null),Cover.tapClickCountToMode(clickCount), "After tap click.")
+                        &&entryMode(Mode.MODE_NORMAL,null,"After copy process."): collectFile(Mode.MODE_COPY, data, null,"After tap click.");
             case R.string.delete:
                 return (isMode(Mode.MODE_MULTI_CHOOSE)?deletePaths(getCollected(null),"After delete tap click")
                         &&entryMode(Mode.MODE_NORMAL,null,"After delete tap click"):
@@ -454,9 +436,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
     }
 
     private boolean showClientMenu(TextView tv,String debug){
-//        if (isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_COPY,Mode.MODE_MOVE)){
-//            return toast(R.string.currentModeNotSupport)&&false;
-//        }
         Map<String,FileBrowser> map=mAllClientMetas;
         Context context=null!=tv?tv.getContext():null;
         Set<String> set=null!=map?map.keySet():null;
@@ -497,17 +476,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
             binding.setClient(getCurrentModelMeta());
             return showAtLocationAsContext(view,binding);
         }
-        return false;
-    }
-
-    private boolean launchTransportList(String debug){
-//        Context context=getContext();
-//        if (null!=context){
-//            Intent intent=new Intent(context, ConveyorActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            context.startActivity(intent);
-//            return true;
-//        }
         return false;
     }
 

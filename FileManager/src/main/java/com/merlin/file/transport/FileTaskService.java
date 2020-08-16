@@ -3,6 +3,7 @@ package com.merlin.file.transport;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
 
 import com.merlin.api.Label;
@@ -25,9 +26,10 @@ public class FileTaskService extends TaskService {
             Task task=createFileTask(bundle);
             if (null!=task){
                 super.execute(task,null,"While service onStart.");
-                Debug.D(getClass(),"EEEEEEEEEE "+task);
+
             }
         }
+//        super.execute(new TestTask("测试"),null,"");
         return super.onStartCommand(intent, flags, startId);
     }
 

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 public final class TaskExecutor {
-    private final List<Task> mTasks=new ArrayList<>();
+    private List<Task> mTasksList;
     private final WeakHashMap<OnTaskUpdate,Matcher> mListener=new WeakHashMap<>(1);
     private final Handler mHandler;
     private Networker mNetworker;
@@ -21,37 +21,44 @@ public final class TaskExecutor {
         mHandler=null!=handler?handler:new Handler(Looper.getMainLooper());
     }
 
-    public boolean addTask(Task task,String debug){
-        List<Task> tasks=null!=task?mTasks:null;
-        if (null!=tasks&&!tasks.contains(task)&&tasks.add(task)){
-            Debug.D("Added task "+task+" "+(null!=debug?debug:"."));
-            notifyStatus(Status.ADD,What.WHAT_NONE,"Add task",null,task,null);
-            return true;
+    public boolean addTask(Task task,String debug) {
+        if (null!=task){
+            List<Task> tasks=mTasksList;
+            if (!(null!=tasks?tasks:(tasks=mTasksList=new ArrayList<>(1))).contains(task)&&tasks.add(task)){
+                Debug.D("Added task "+task+" "+(null!=debug?debug:".")+" "+this);
+                notifyStatus(Status.ADD,What.WHAT_NONE,"Add task",null,task,null);
+                return true;
+            }
         }
         return false;
     }
 
-    public int removeTask(Matcher matcher,Integer action,String debug){
+    public synchronized int removeTask(Matcher matcher,Integer action,String debug){
         List<Task> tasks=null!=matcher?getTasks(matcher,-1):null;
         int size=null!=tasks?tasks.size():-1;
-        List<Task> list=mTasks;
+        List<Task> list=mTasksList;
         if (size>0&&null!=list){
-            for (Task child:tasks) {
-                if (null==child){
-                    continue;
-                }
-                if (null!=action) {
-                    switch (action) {
-                        case Status.PAUSE:
-                            child.pause(true, "Before remove task " + (null != debug ? debug : "."));
-                            break;
+            synchronized (list) {
+                for (Task child : tasks) {
+                    if (null == child) {
+                        continue;
                     }
+                    if (null != action) {
+                        switch (action) {
+                            case Status.PAUSE:
+                                child.pause(true, "Before remove task " + (null != debug ? debug : "."));
+                                break;
+                        }
+                    }
+                    list.remove(child);
+                    if (list.size() <= 0) {
+                        mTasksList = null;
+                    }
+                    Debug.D("Removed task " + child + " " + (null != debug ? debug : "."));
+                    notifyStatus(Status.REMOVE, What.WHAT_NONE, "Remove task", null, child, null);
                 }
-                list.remove(child);
-                Debug.D("Removed task "+child+" "+(null!=debug?debug:"."));
-                notifyStatus(Status.REMOVE,What.WHAT_NONE,"Remove task",null,child,null);
+                return size;
             }
-            return size;
         }
         return -1;
     }
@@ -153,12 +160,12 @@ public final class TaskExecutor {
         return false;
     }
 
-    public final List<Task> getTasks(Matcher matcher,int max){
-        List<Task> tasks=mTasks;
-        int length=null!=tasks?tasks.size():-1;
-        if (length>0){
-            List<Task> result=new ArrayList<>(length);
+    public final List<Task> getTasks(Matcher matcher,int max) {
+        List<Task> tasks=mTasksList;
+        if (null!=tasks){
             synchronized (tasks){
+                int length=tasks.size();
+                List<Task> result=new ArrayList<>(length);
                 Boolean match=null;
                 for (Task child:tasks){
                     if (null!=child){
@@ -174,8 +181,8 @@ public final class TaskExecutor {
                         }
                     }
                 }
+                return result;
             }
-            return result;
         }
         return null;
     }

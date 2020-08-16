@@ -2,6 +2,7 @@ package com.file.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,8 +15,10 @@ import androidx.databinding.DataBindingUtil;
 import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.file.model.FileBrowserModel;
+import com.merlin.file.transport.FileTaskService;
 import com.merlin.model.Model;
 import com.merlin.model.ModelActivity;
+import com.merlin.task.TaskService;
 
 
 public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
@@ -27,25 +30,8 @@ public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
         DataBindingUtil.setContentView(this, R.layout.activity_file_browser);
         checkPermission(this);
         if (null==mConnection) {
-//            Intent intent = new Intent(this, TransportService.class);
-//            startService(intent);
-//            bindService(intent, mConnection = new ServiceConnection() {
-//                @Override
-//                public void onServiceConnected(ComponentName name, IBinder service) {
-////                    if (null!=service&&service instanceof ConveyorBinder){
-////                        ConveyorBinder downloader=(ConveyorBinder)service;
-////                        mBinder=downloader;
-////                        setBinder(downloader,"After bind succeed");
-////                    }
-//                }
-//
-//                @Override
-//                public void onServiceDisconnected(ComponentName name) {
-////                    mBinder=null;
-////                    setBinder(null,"After bind disconnected");
-//                    Debug.D(getClass(),"####BrowserActivity####  onServiceDisconnected");
-//                }
-//            }, Context.BIND_AUTO_CREATE);
+//            startService(new Intent(this,FileTaskService.class));
+//            startActivity(new Intent(this,TaskActivity.class));
         }
     }
 

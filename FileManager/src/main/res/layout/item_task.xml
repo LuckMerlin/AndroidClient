@@ -14,14 +14,18 @@
     <LinearLayout
         android:paddingRight="@dimen/contentGap"
         android:paddingLeft="@dimen/contentGap"
-        android:background="#55ffffff"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:clickable="true"
+        android:background="@drawable/selector_task_item_background"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_marginBottom="1dp"
         android:layout_height="@dimen/listItemNormal">
         <ImageView
             android:src="@drawable/hidisk_icon_ppt"
-            android:padding="5dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
             android:layout_width="60dp"
             android:layout_height="60dp"/>
         <LinearLayout
@@ -71,6 +75,7 @@
             </LinearLayout>
         </LinearLayout>
         <TextView
+            android:id="@+id/itemTask_statusTV"
             binding:enableClick="@{Clicker.click(task)}"
             android:textColor="@color/textTitle"
             android:background="@drawable/selector_button"

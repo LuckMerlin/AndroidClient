@@ -2,12 +2,15 @@ package com.merlin.task;
 
 import android.os.Binder;
 
+import com.task.debug.Debug;
+
 import java.util.List;
 
 public class TaskBinder extends Binder {
     private final TaskExecutor mExecutor;
 
-    public TaskBinder(TaskExecutor executor){
+    public
+    TaskBinder(TaskExecutor executor){
         mExecutor=executor;
     }
 

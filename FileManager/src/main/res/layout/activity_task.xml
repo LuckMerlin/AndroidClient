@@ -6,16 +6,23 @@
             name="vm"
             type="com.file.model.TaskModel" />
     </data>
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <androidx.recyclerview.widget.RecyclerView
+        binding:adapter="@{vm.adapter}"
         binding:createModel="@{true}"
+        android:padding="10dp"
         android:background="@drawable/round_corner_gray"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="25dp">
-        <androidx.recyclerview.widget.RecyclerView
-            binding:adapter="@{vm.adapter}"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        android:layout_width="300dp"
+        android:layout_height="300dp"/>
+<!--    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
+<!--        binding:createModel="@{true}"-->
+<!--        android:background="@drawable/round_corner_gray"-->
+<!--        android:orientation="vertical"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="300dp"-->
+<!--        android:padding="10dp">-->
+<!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            binding:adapter="@{vm.adapter}"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"/>-->
+<!--    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
 </layout>

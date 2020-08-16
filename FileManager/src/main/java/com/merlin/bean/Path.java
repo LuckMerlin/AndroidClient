@@ -86,7 +86,6 @@ public final class Path implements Parcelable {
     public String generateChildPath(String childName) {
         String path=isDirectory()&&null!=childName&&childName.length()>0?getPath():null;
         String pathSep=null!=path&&path.length()>0?this.pathSep:null;
-        Debug.D(getClass(),"DDDDDDDDDDD "+path+" "+pathSep+" "+childName);
         return null!=pathSep?path+pathSep+childName:null;
     }
 

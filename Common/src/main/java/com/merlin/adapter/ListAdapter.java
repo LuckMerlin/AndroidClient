@@ -358,7 +358,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
                         if (index<list.size()){
                             list.remove(list.get(index));
                             list.add(index,child);
-                            notifyItemChanged(index);
+                            notifyItemChanged(index,"Item replaced");
                         }else{
                             list.add(child);
                             notifyItemInserted(index);

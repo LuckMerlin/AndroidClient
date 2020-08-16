@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.merlin.adapter.TaskAdapter;
 import com.merlin.click.OnTapClick;
+import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.merlin.model.OnServiceBindChange;
 import com.merlin.task.OnTaskUpdate;
@@ -30,10 +31,12 @@ public class TaskModel extends BaseModel implements OnServiceBindChange, OnTaskU
     @Override
     public final boolean onTapClick(View view, int clickCount, int resId, Object data) {
         switch (resId){
-            default:
+            case R.id.itemTask_statusTV:
                 if (null!=data&&data instanceof Task){
                     return pauseStart((Task)data,"After tap click.");
                 }
+                break;
+            default:
                 break;
         }
         return true;

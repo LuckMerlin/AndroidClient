@@ -37,6 +37,8 @@ import com.merlin.file.databinding.SingleEditTextBinding;
 import com.merlin.retrofit.Retrofit;
 import com.merlin.retrofit.RetrofitCanceler;
 import com.merlin.server.Client;
+import com.merlin.task.file.Cover;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -203,7 +205,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                             return true;
                         }else{
                             dialog.dismiss();
-                            return onCreatePath(dir, CoverMode.NONE,parent,input,(what, note, data2, arg)->{
+                            return onCreatePath(dir, Cover.COVER_NONE,parent,input,(what, note, data2, arg)->{
                                 toast(note);
                                 if (what==What.WHAT_SUCCEED){
                                     resetAdapter("After path create succeed.");

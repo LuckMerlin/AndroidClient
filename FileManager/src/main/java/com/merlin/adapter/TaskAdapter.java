@@ -45,6 +45,6 @@ public class TaskAdapter extends ListAdapter<Task> implements OnItemTouchResolve
 
     @Override
     public Object onResolveItemTouch(RecyclerView recyclerView) {
-        return null;
+        return new ItemSlideRemover();
     }
 }
