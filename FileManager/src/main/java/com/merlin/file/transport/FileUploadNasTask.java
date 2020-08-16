@@ -23,14 +23,16 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
 public class FileUploadNasTask extends HttpUploadTask {
+    private Integer mMode;
 
-    public FileUploadNasTask(String name, String from, Path toFolder, String toName) {
+    public FileUploadNasTask(String name, String from, Path toFolder, String toName,Integer mode) {
         this(name,from,null!=toFolder&&toFolder.isDirectory()?toFolder.getHostUri():null,
-                null!=toFolder&&toFolder.isDirectory()?toFolder.getPath():null,toName);
+                null!=toFolder&&toFolder.isDirectory()?toFolder.getPath():null,toName,mode);
     }
 
-    private FileUploadNasTask(String name, String from, String toUri, String toFolder, String toName){
+    private FileUploadNasTask(String name, String from, String toUri, String toFolder, String toName,Integer mode){
         super(name,from,null!=toUri?toUri+"/file/upload":null,toFolder,toName);
+        mMode=mode;
     }
 
     @Override

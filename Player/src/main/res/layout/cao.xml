@@ -5,19 +5,23 @@
         <variable
             name="ddd"
             type="com.merlin.player.TestModel" />
-        <import type="com.luckmerlin.databinding.view.Value"/>
+        <import type="com.luckmerlin.databinding.view.Values"/>
+       <import type="com.merlin.player.R"/>
     </data>
     <LinearLayout
-        app:viewValue="@{Value.text()}"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <EditText android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/icon"
             android:layout_weight="1"
-            android:src="?android:attr/textSelectHandle" />
+            app:viewValue="@{Values.tag(`sdfas`)}" />
 
         <SeekBar
             android:id="@+id/seekBar"

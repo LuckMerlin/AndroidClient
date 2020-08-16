@@ -228,12 +228,14 @@ class ModelBinder {
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
             Method method=null!=binding?findModelClassSetMethod(binding, model.getClass()):null;
             try {
-                method.invoke(binding,model);
-                Debug.D("Bind view model "+(null!=debug?debug:".")+model);
-                if (null!=boundMap){
-                    boundMap.put(view, model);
+                if (null!=method) {
+                    method.invoke(binding, model);
+                    Debug.D("Bind view model " + (null != debug ? debug : ".") + model);
+                    if (null != boundMap) {
+                        boundMap.put(view, model);
+                    }
+                    return true;
                 }
-                return true;
             } catch (Exception e) {
                 //Do nothing
             }

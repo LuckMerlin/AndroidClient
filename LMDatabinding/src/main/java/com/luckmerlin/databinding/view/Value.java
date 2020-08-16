@@ -1,8 +1,5 @@
 package com.luckmerlin.databinding.view;
 
-public class Value {
-
-    public static final Text text(){
-        return new Text();
-    }
+public abstract class Value {
+    public abstract Values values();
 }

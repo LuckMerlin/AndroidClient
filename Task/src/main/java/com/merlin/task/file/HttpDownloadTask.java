@@ -33,12 +33,14 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
         final String toPath=getTo();
         final String fromUriPath=getFrom();
         if (null==toPath||toPath.length()<=0||null==fromUriPath||fromUriPath.length()<=0){
+            Debug.D("Can't download while args invalid."+toPath);
             notifyStatus(Status.FINISH,"Download args invalid");
             return;
         }
         final File toFile=new File(toPath);
         final File parent=toFile.getParentFile();
         if (null==parent){
+            Debug.D("Can't download while parent is NULL.");
             notifyStatus(Status.FINISH, What.WHAT_ERROR,"Fail download file while parent is NULL.");
             return;
         }
@@ -99,6 +101,12 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                 notifyStatus(Status.FINISH, What.WHAT_ERROR,"Fail open connection response code invalid."+responseCode);
                 return;
             }
+            contentType=conn.getContentType();
+            if (null==contentType||contentType.length()<=0||!contentType.contains("binary/")){
+                Debug.W("Can't download file while server response content type invalid."+contentType);
+                notifyStatus(Status.FINISH, What.WHAT_ERROR,"Connect response content type invalid."+contentType);
+                return;
+            }
            final InputStream input=inputStream= conn.getInputStream();
            if (null==input){
                notifyStatus(Status.FINISH, What.WHAT_ERROR,"Stream is NULL ");
@@ -151,7 +159,6 @@ public class HttpDownloadTask extends HttpFileTransTask<String, String> {
                    Debug.D("Canceled download file."+toPath);
                    break;
                }
-//               Thread.sleep(10);
             }
             out.flush();
            if (what==What.WHAT_SUCCEED){

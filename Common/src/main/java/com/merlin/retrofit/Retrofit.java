@@ -64,7 +64,8 @@ public class Retrofit {
     protected final OkHttpClient createClient(){
         OkHttpClient.Builder okHttp = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS)
-                .addInterceptor(new LogInterceptor()).connectionPool(new ConnectionPool(5,1,TimeUnit.SECONDS));
+                .addInterceptor(new LogInterceptor())
+                .connectionPool(new ConnectionPool(5,1,TimeUnit.SECONDS));
         return null!=okHttp?okHttp.build():null;
     }
 

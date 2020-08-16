@@ -7,7 +7,7 @@ import com.merlin.task.Task;
 import com.merlin.task.file.HttpDownloadTask;
 
 public class TaskService extends com.merlin.task.TaskService {
-    private Task mTask=new FileUploadNasTask("任务34242","",null,"");
+    private Task mTask=new FileUploadNasTask("任务34242","",null,"",null);
 
     @Override
     public void onCreate() {

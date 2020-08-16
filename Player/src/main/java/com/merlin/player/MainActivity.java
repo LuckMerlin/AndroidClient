@@ -2,8 +2,20 @@ package com.merlin.player;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.WindowManager;
+import android.widget.Button;
+
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.core.debug.Debug;
+import com.luckmerlin.databinding.DataBinding;
 import com.luckmerlin.mvvm.LifeBinder;
 import com.luckmerlin.mvvm.OnModelResolve;
 import com.luckmerlin.mvvm.Test;

@@ -24,38 +24,37 @@ public class TestModel extends Model implements OnModelLayoutResolve,
     @Override
     protected void onRootAttached(View view) {
         super.onRootAttached(view);
-        Debug.D("AAAAAAAAAAAAA  "+view);
     }
 
     @Override
     public Object onResolveModeLayout() {
-        return R.layout.caobi;
+        return R.layout.cao;
     }
 
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-        Debug.D("AAAAAonActivityCreatedAAAAAAAA  "+activity);
+//        Debug.D("AAAAAonActivityCreatedAAAAAAAA  "+activity);
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        Debug.D("onActivityDestroyed  "+activity);
+//        Debug.D("onActivityDestroyed  "+activity);
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
-        Debug.D("onActivityPaused  "+activity);
+//        Debug.D("onActivityPaused  "+activity);
     }
 
     @Override
     public void onActivityResume(Activity activity) {
-        Debug.D("onActivityResume  "+activity);
+//        Debug.D("onActivityResume  "+activity);
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
-        Debug.D("onActivityStarted  "+activity);
+//        Debug.D("onActivityStarted  "+activity);
     }
 
     @Override

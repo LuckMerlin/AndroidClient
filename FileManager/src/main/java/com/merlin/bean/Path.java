@@ -76,14 +76,18 @@ public final class Path implements Parcelable {
 
     public final String getName(boolean includeExtension) {
         String ext=includeExtension?extension:null;
-        if (null!=ext&&ext.length()>0){
-           return null!=name?name+ext:null;
-        }
-        return name;
+        return null!=ext&&ext.length()>0?(null!=name?name+ext:ext):name;
     }
 
     public final String getName() {
         return getName(true);
+    }
+
+    public String generateChildPath(String childName) {
+        String path=isDirectory()&&null!=childName&&childName.length()>0?getPath():null;
+        String pathSep=null!=path&&path.length()>0?this.pathSep:null;
+        Debug.D(getClass(),"DDDDDDDDDDD "+path+" "+pathSep+" "+childName);
+        return null!=pathSep?path+pathSep+childName:null;
     }
 
     public String getParent() {
@@ -245,20 +249,21 @@ public final class Path implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getHost());
-        dest.writeString(getParent());
-        dest.writeString(getName());
-        dest.writeString(getExtension());
-        dest.writeString(getMime());
-        dest.writeString(getMd5());
-        dest.writeString(getTitle());
-        dest.writeLong(getAccessTime());
-        dest.writeLong(getCreateTime());
-        dest.writeLong(getModifyTime());
-        dest.writeLong(getLength());
-        dest.writeLong(getSize());
-        dest.writeInt(getPermissions());
-        dest.writeInt(getPort());
+        dest.writeString(host);
+        dest.writeString(parent);
+        dest.writeString(name);
+        dest.writeString(extension);
+        dest.writeString(mime);
+        dest.writeString(md5);
+        dest.writeString(title);
+        dest.writeString(pathSep);
+        dest.writeLong(accessTime);
+        dest.writeLong(createTime);
+        dest.writeLong(modifyTime);
+        dest.writeLong(length);
+        dest.writeLong(size);
+        dest.writeInt(permissions);
+        dest.writeInt(port);
     }
 
     private Path(){
@@ -272,8 +277,9 @@ public final class Path implements Parcelable {
             name=parcel.readString();
             extension=parcel.readString();
             mime=parcel.readString();
-            title=parcel.readString();
             md5=parcel.readString();
+            title=parcel.readString();
+            pathSep=parcel.readString();
             accessTime=parcel.readLong();
             createTime=parcel.readLong();
             modifyTime=parcel.readLong();

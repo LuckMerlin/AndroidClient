@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskGroup extends Task{
-    private final List<Task> mTasks=new ArrayList<>(1);
+    private List<Task> mTasks;
     private Task mExecuting=null;
 
     public TaskGroup(String name){
@@ -19,12 +19,14 @@ public class TaskGroup extends Task{
     }
 
     public final boolean add(List<Task> tasks){
-        List<Task> global=null!=tasks&&tasks.size()>0?mTasks:null;
+        List<Task> current=mTasks;
+        List<Task> global=null!=tasks&&tasks.size()>0?(null!=current?current:(mTasks=new ArrayList<>())):null;
         return null!=global&&global.addAll(tasks);
     }
 
     public final boolean add(Task task){
-        List<Task> global=null!=task?mTasks:null;
+        List<Task> current=mTasks;
+        List<Task> global=null!=task?(null!=current?current:(mTasks=new ArrayList<>(1))):null;
         return null!=global&&global.add(task);
     }
 
@@ -66,17 +68,18 @@ public class TaskGroup extends Task{
        return null!=tasks?tasks.size():-1;
     }
 
-    public final int getSize(){
+    public final int size(){
         List<Task> tasks=mTasks;
         return null!=tasks?tasks.size():-1;
     }
 
     public final Task getNextUnFinishTask(Task task){
-        List<Task> tasks=null!=task?mTasks:null;
+        List<Task> tasks=mTasks;
         if (null!=tasks){
             synchronized (tasks){
-                int currIndex=tasks.indexOf(task);
+                int currIndex=null!=task?tasks.indexOf(task):0;
                 int size=tasks.size();
+
                 if (currIndex>=0&&currIndex<size){
                     for (int i = currIndex; i < size; i++) {
                         if (null!=(task=tasks.get(i))&&task.isIdle()){

@@ -15,4 +15,9 @@ public class TaskService extends Service {
     public IBinder onBind(Intent intent) {
         return new TaskBinder(mExecutor);
     }
+
+    protected final boolean execute(Task task,OnTaskUpdate callback,String debug){
+        TaskExecutor executor=null!=task?mExecutor:null;
+        return null!=executor&&executor.start(task,debug,callback);
+    }
 }

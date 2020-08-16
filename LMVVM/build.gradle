@@ -51,4 +51,5 @@ if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly project(path: ':LMCore')
+    compileOnly project(path: ':LMDatabinding')
 }

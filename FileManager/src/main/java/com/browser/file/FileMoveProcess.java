@@ -53,11 +53,11 @@ public class FileMoveProcess extends FileProcess<Path> {
         return reply;
     }
 
-    private Reply<Path> downloadFile(Path cloudFile,File target,int coveMode){
+    private Reply<Path> downloadFile(Path cloudFile,File target,Integer coveMode){
         if (null==cloudFile||null==target){
             return new Reply(true, What.WHAT_ARGS_INVALID,"File invalid",null);
         }
-        HttpDownloadTask task=new NasFileDownloadTask(cloudFile,target.getAbsolutePath());
+        HttpDownloadTask task=new NasFileDownloadTask(cloudFile,target.getAbsolutePath(),coveMode);
         task.enableBreakPoint(true,"While download cloud file");
         task.execute(null,null);
         Result result=task.getResult();

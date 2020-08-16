@@ -97,18 +97,18 @@ public class LocalFileBrowser extends FileBrowser {
             }
             if (file.exists()){
                 reply = new Reply<>(true, What.WHAT_ALREADY_DONE, "Path already exist", null);
-            }else {
+            } else {
                 try {
                     if ((dir? file.mkdirs():file.createNewFile())&&file.exists()){
                         reply = new Reply<>(true, What.WHAT_SUCCEED, "Create path succeed", null);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    reply = new Reply<>(true, What.WHAT_ERROR_UNKNOWN, "Exception create path", null);
+                    reply = new Reply<>(true, What.WHAT_FAIL, "Exception create path", null);
                 }
             }
         }
-        reply=null!=reply?reply:new Reply<>(true, What.WHAT_ERROR_UNKNOWN, "Fail create path", null);
+        reply=null!=reply?reply:new Reply<>(true, What.WHAT_FAIL, "Fail create path", null);
         if (null!=finish){
             finish.onApiFinish(reply.getWhat(),reply.getNote(),reply,null);
         }
@@ -176,20 +176,20 @@ public class LocalFileBrowser extends FileBrowser {
             }else if (from>=length){
                 reply=new Reply<>(true,What.WHAT_OUT_OF_BOUNDS,"Out of bounds",pageData);
             }else{
-                Arrays.sort(files,(File o1, File o2)->null!=o1&&o1.isDirectory()?0:-1);
+                Arrays.sort(files,(File o1, File o2)->null!=o1&&o1.isDirectory()?-1:null!=o2&&o2.isDirectory()?1:0);
                 Path childPath=null;
                 for (int i = from; i < Math.min(length, from+50); i++) {
                     if (null!=(childPath=Path.build(files[i]))){
                         list.add(childPath);
                     }else{
-                        reply=new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"One child path generate fail",pageData);
+                        reply=new Reply<>(true,What.WHAT_FAIL,"One child path generate fail",pageData);
                         break;
                     }
                 }
                 reply=null!=reply?reply:new Reply<>(true,What.WHAT_SUCCEED,"Load succeed",pageData);
             }
         }
-        reply=null!=reply?reply:new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Error unknown.",null);
+        reply=null!=reply?reply:new Reply<>(true,What.WHAT_FAIL,"Error unknown.",null);
         finish.onApiFinish(reply.getWhat(), reply.getNote(), reply, null);
         return (cancel,debug)->false;
     }
