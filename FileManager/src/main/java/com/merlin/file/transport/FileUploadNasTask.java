@@ -69,6 +69,7 @@ public class FileUploadNasTask extends HttpUploadTask {
                 buffer.append(line);
             }
             String response=buffer.toString();
+            Debug.D("QQQQQQQQQQQQQ "+response);
             JSONObject json=null!=response&&response.length()>0&&response.startsWith("{")&&response.endsWith("}")?new JSONObject(response):null;
             if (null!=json){//{"note": "File path invalid", "what": -1005, "success": true, "data": null}
                 boolean success=json.optBoolean(Label.LABEL_SUCCESS, false);

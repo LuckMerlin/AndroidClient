@@ -29,7 +29,6 @@ public class FileTaskService extends TaskService {
 
             }
         }
-//        super.execute(new TestTask("测试"),null,"");
         return super.onStartCommand(intent, flags, startId);
     }
 
