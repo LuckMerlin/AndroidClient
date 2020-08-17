@@ -73,7 +73,7 @@ public class FileUploadNasTask extends HttpUploadTask {
             JSONObject json=null!=response&&response.length()>0&&response.startsWith("{")&&response.endsWith("}")?new JSONObject(response):null;
             if (null!=json){//{"note": "File path invalid", "what": -1005, "success": true, "data": null}
                 boolean success=json.optBoolean(Label.LABEL_SUCCESS, false);
-                int what=json.optInt(Label.LABEL_WHAT, What.WHAT_ERROR_UNKNOWN);
+                int what=json.optInt(Label.LABEL_WHAT, What.WHAT_ERROR);
                 if (success){
                     if (what== What.WHAT_NOT_EXIST||what== What.WHAT_FILE_NOT_EXIST){
                         return 0l;

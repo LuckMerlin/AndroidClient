@@ -206,7 +206,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
                         &&entryMode(Mode.MODE_NORMAL,null,"After move process."): collectFile(Mode.MODE_MOVE, data, null,"After tap click.");
             case R.string.upload:
                 return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_UPLOAD) ? uploadPaths(getCollected(Path.class),Cover.tapClickCountToMode(clickCount), "After tap click.")
-                        : collectFile(Mode.MODE_UPLOAD, data, Path.class,"After tap click.");
+                        &&entryMode(Mode.MODE_NORMAL,null,"After upload process."): collectFile(Mode.MODE_UPLOAD, data, Path.class,"After tap click.");
             case R.string.download:
                 return isMode(Mode.MODE_MULTI_CHOOSE,Mode.MODE_DOWNLOAD) ? downloadPaths(getCollected(Path.class),Cover.tapClickCountToMode(clickCount), "After tap click.")
                         &&entryMode(Mode.MODE_NORMAL,null,"After download process."): collectFile(Mode.MODE_DOWNLOAD, data, Path.class,"After tap click.");

@@ -71,14 +71,16 @@ public class FileTaskService extends TaskService {
             for (Parcelable child : fromList) {
                 if (null != child && child instanceof Path) {
                     Path path = (Path) child;
+                    String toName=toPath.generateChildPath(path.getName(true));
+                    if (null==toName||toName.length()<=0){
+                        Debug.D(getClass(),"Skip create file task while name is invalid."+path);
+                        continue;
+                    }
+
                     if (whatObj.equals(Label.LABEL_DOWNLOAD)) {
-                        String toName=toPath.generateChildPath(path.getName(true));
-                        if (null==toName||toName.length()<=0){
-                            continue;
-                        }
                         taskGroup.add(new NasFileDownloadTask(path, toName, mode));
                     } else if (whatObj.equals(Label.LABEL_UPLOAD)) {
-                        taskGroup.add(new FileUploadNasTask(path.getName(), path.getPath(), toPath, null, mode));
+                        taskGroup.add(new FileUploadNasTask(path.getName(false), path.getPath(), toPath, toName, mode));
                     }
                 }
             }
