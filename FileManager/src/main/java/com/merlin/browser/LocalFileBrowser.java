@@ -17,6 +17,8 @@ import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
 import com.merlin.lib.Canceler;
 import com.merlin.server.Client;
+import com.merlin.task.OnTaskUpdate;
+import com.merlin.task.Task;
 import com.merlin.task.file.Cover;
 
 import java.io.File;
@@ -24,7 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class LocalFileBrowser extends FileBrowser {
+public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
     public LocalFileBrowser(Client meta, Callback callback) {
         super(meta, callback);
     }
@@ -197,6 +199,11 @@ public class LocalFileBrowser extends FileBrowser {
     @Override
     public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
 
+    }
+
+    @Override
+    public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
+//            null!=task?task.getProgress()
     }
 
     private String getHome(){

@@ -6,7 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 public abstract class FileTransTask<T,V> extends FromToTask<T,V> {
-    private int mCover=Cover.COVER_REPLACE;
+    private Integer mCover;
     private String mMethod;
     private boolean mBreakPoint=false;
 
@@ -23,16 +23,14 @@ public abstract class FileTransTask<T,V> extends FromToTask<T,V> {
         return mMethod;
     }
 
-    public final boolean setCover(int cover) {
-        if (cover!=mCover){
-            mCover=cover;
-            return true;
-        }
-        return false;
+    public final boolean setCover(Integer cover) {
+        mCover=cover;
+        return true;
     }
 
     public final int getCover() {
-        return mCover;
+        Integer cover=mCover;
+        return null!=cover?cover:Cover.COVER_NONE;
     }
 
     public final boolean enableBreakPoint(boolean enable, String debug){

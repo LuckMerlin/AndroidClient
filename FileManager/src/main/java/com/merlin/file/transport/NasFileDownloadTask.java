@@ -9,12 +9,11 @@ import java.net.HttpURLConnection;
 
 public class NasFileDownloadTask extends HttpDownloadTask {
     private final String mPath;
-    private final Integer mMode;
 
     public NasFileDownloadTask(Path from, String to,Integer mode) {
         super(from.getName(),from.getHostUri(), to,POST);
         mPath=null!=from?from.getPath():null;
-        mMode=mode;
+        setCover(mode);
     }
 
     @Override

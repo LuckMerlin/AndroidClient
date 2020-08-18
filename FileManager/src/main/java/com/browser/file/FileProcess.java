@@ -116,6 +116,23 @@ public abstract class FileProcess<T extends Path> extends FileAction{
         return null;
     }
 
+    public final List<T> getAllUnFinish(){
+        Map<T,Reply> map=mFileMap;
+        if (null!=map){
+            synchronized (map){
+                Set<T> set=map.size()>0?map.keySet():null;
+                if (null!=set){
+                    for (T child:set) {
+                        if (null!=child){
+                            return child;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public final T getAnyone(){
         Map<T,Reply> map=mFileMap;
         if (null!=map){

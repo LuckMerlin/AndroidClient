@@ -16,13 +16,17 @@ import androidx.annotation.RequiresApi;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.merlin.api.Label;
 import com.merlin.api.Res;
@@ -79,12 +83,7 @@ public class PathGlider {
                     return false;
                 }
                 String mime=path.getMime();
-                Integer iconId=null;
-                if (null == mime || mime.length() <= 0) {
-                    iconId = R.drawable.hidisk_icon_unknown;
-                }else{
-                    iconId=new FileDefaultThumb().thumb(mime);
-                }
+                final Integer iconDefId=(null != mime && mime.length() >0)?new FileDefaultThumb().thumb(mime):null;
                 if (null!=mime&&mime.length()>0){
                     String pathValue=path.getPath();
                     if (null!=pathValue&&pathValue.length()>0){
@@ -105,8 +104,7 @@ public class PathGlider {
                                     }
                                 }
                             }else{
-                                Debug.D(getClass(),"QQQQQQQQQQQQQ "+mime+" "+path);
-                                return loadCloudFileThumb((ImageView)view, path,iconId);
+                                return loadCloudFileThumb((ImageView)view, path,iconDefId);
                             }
                         }else if (mime.startsWith("image/")||mime.startsWith("video/")){
                               if (path.isLocal()){
@@ -116,13 +114,12 @@ public class PathGlider {
                                       return true;
                                   }
                               }else{
-                                  Debug.D(getClass(),"aaaaaaaaaaaaa "+mime+" "+path);
-                                  return loadCloudFileThumb((ImageView)view, path,iconId);
+                                  return loadCloudFileThumb((ImageView)view, path,iconDefId);
                               }
                         }
                     }
                 }
-                ((ImageView)view).setImageResource(null!=iconId?iconId:R.drawable.hidisk_icon_unknown);
+                ((ImageView)view).setImageResource(null!=iconDefId?iconDefId:R.drawable.hidisk_icon_unknown);
                 return true;
             }
             return false;
@@ -136,9 +133,6 @@ public class PathGlider {
             String filePath=path.getPath();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 try {
-                    if (null!=iconId) {
-                        view.setImageResource(iconId);
-                    }
                     int width = view.getWidth();
                     int height = view.getHeight();
                     GlideUrl glideUrl = new GlideUrl(hostUri, new LazyHeaders.Builder()
@@ -148,7 +142,7 @@ public class PathGlider {
                         RoundedCorners roundedCorners = new RoundedCorners(1);
                         RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(width, height);
                         Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE).
-                                centerCrop().apply(options).thumbnail(1f).into(view);
+                                centerCrop().apply(options).thumbnail(1f).error(null!=iconId?iconId:R.drawable.hidisk_icon_unknown).into(view);
                     }
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();

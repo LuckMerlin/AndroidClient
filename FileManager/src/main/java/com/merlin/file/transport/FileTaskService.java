@@ -69,6 +69,7 @@ public class FileTaskService extends TaskService {
             Path toPath = (Path) toPathObj;
             TaskGroup taskGroup = new TaskGroup("");
             for (Parcelable child : fromList) {
+
                 if (null != child && child instanceof Path) {
                     Path path = (Path) child;
                     String toName=toPath.generateChildPath(path.getName(true));

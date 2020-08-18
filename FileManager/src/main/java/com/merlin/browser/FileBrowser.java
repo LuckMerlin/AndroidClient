@@ -18,6 +18,7 @@ import com.browser.file.FileMoveProcess;
 import com.browser.file.FileProcess;
 import com.browser.file.OnProcessUpdate;
 import com.merlin.adapter.BrowserAdapter;
+import com.merlin.adapter.ItemTouchInterrupt;
 import com.merlin.api.ApiMap;
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.OnProcessChange;
@@ -230,7 +231,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         return process(new FileDeleteProcess(getText(R.string.delete),paths),callback);
     }
 
-    public final boolean process(FileProcess process,OnProcessUpdate finish){
+    public final boolean process(FileProcess process,final OnProcessUpdate callback){
         final int length=null!=process?process.size():-1;
         if (length<=0){
             return toast(R.string.listEmpty)&&false;
@@ -278,6 +279,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                                 if (process.cancel(true,"After user cancel click.")) {
                                     dialog.right(R.string.sure);
                                     toast(R.string.canceled);
+                                    process.getAnyone();
+//                                    if (null!=callback){
+//                                        callback.onProcessUpdate(false,);
+//                                    }
                                 }
                             }else{
                                 dialog.dismiss();
@@ -397,16 +402,25 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
 
     @Override
     public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
-        Path path=null!=data&&data instanceof Path?(Path)data:null;
-        if (null!=remover&&null!=path) {
-           ArrayList<Path> paths=new ArrayList<>(1);
-           paths.add(path);
-           deletePath(paths,(boolean succeed, Path chilPath)-> {
-               if (succeed){
-//                   remover.remove();
+       switch (direction){
+           case ItemTouchInterrupt.LEFT:
+               Path path=null!=data&&data instanceof Path?(Path)data:null;
+               if (null!=remover&&null!=path) {
+                   ArrayList<Path> paths=new ArrayList<>(1);
+                   paths.add(path);
+                   deletePath(paths,(boolean succeed, Path chilPath)-> {
+                       Debug.D(getClass(),"AAAAAAAAAAAAA "+chilPath);
+                   },"While item slide remove.");
                }
-           },"While item slide remove.");
-        }
+               break;
+           case ItemTouchInterrupt.RIGHT:
+               Path playPath=null!=data&&data instanceof Path?(Path)data:null;
+               if (null!=playPath) {
+                   toast("播放 "+playPath.getName());
+                   add(position,playPath, true, "While slide move to play.");
+               }
+               break;
+       }
     }
 
 }

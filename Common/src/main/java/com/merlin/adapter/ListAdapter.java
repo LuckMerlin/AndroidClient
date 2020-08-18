@@ -295,6 +295,15 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     return add(-1,data,exceptExist,debug);
   }
 
+  public final boolean add(int index,T data,boolean exceptExist,String debug) {
+        if (null!=data){
+            List<T> list=new ArrayList<T>(1);
+            list.add(data);
+            return add(index,list,exceptExist,debug);
+        }
+        return false;
+  }
+
   public final boolean add(int index,List<T> data,boolean exceptExist,String debug) {
         if (null!=data&&data.size()>0){
             List<T> list=mData;

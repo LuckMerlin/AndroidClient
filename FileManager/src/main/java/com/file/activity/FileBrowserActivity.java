@@ -2,10 +2,13 @@ package com.file.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -18,6 +21,7 @@ import com.file.model.FileBrowserModel;
 import com.merlin.file.transport.FileTaskService;
 import com.merlin.model.Model;
 import com.merlin.model.ModelActivity;
+import com.merlin.model.OnServiceBindChange;
 import com.merlin.task.TaskService;
 
 
@@ -30,8 +34,23 @@ public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
         DataBindingUtil.setContentView(this, R.layout.activity_file_browser);
         checkPermission(this);
         if (null==mConnection) {
-//            startService(new Intent(this,FileTaskService.class));
-//            startActivity(new Intent(this,TaskActivity.class));
+            bindService(new Intent(this,FileTaskService.class),mConnection=new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    Model model=getModel();
+                    if (null!=model&&model instanceof OnServiceBindChange){
+                        ((OnServiceBindChange)model).onServiceBindChanged(name,service);
+                    }
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    Model model=getModel();
+                    if (null!=model&&model instanceof OnServiceBindChange){
+                        ((OnServiceBindChange)model).onServiceBindChanged(name,null);
+                    }
+                }
+            }, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -68,12 +87,14 @@ public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
         super.onDestroy();
         Debug.D(getClass(),"####BrowserActivity####  onDestroy");
         ServiceConnection connection=mConnection;
-//        setBinder(null,"After activity destroy.");
         if (null!=connection){
             mConnection=null;
             unbindService(connection);
+            Model model=getModel();
+            if (null!=model&&model instanceof OnServiceBindChange){
+                ((OnServiceBindChange)model).onServiceBindChanged(null,null);
+            }
         }
-//        mBinder=null;
     }
 
 }
