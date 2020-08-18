@@ -105,7 +105,8 @@ public class PathGlider {
                                     }
                                 }
                             }else{
-                                return loadCloudFileThumb((ImageView)view, path);
+                                Debug.D(getClass(),"QQQQQQQQQQQQQ "+mime+" "+path);
+                                return loadCloudFileThumb((ImageView)view, path,iconId);
                             }
                         }else if (mime.startsWith("image/")||mime.startsWith("video/")){
                               if (path.isLocal()){
@@ -115,7 +116,8 @@ public class PathGlider {
                                       return true;
                                   }
                               }else{
-                                  return loadCloudFileThumb((ImageView)view, path);
+                                  Debug.D(getClass(),"aaaaaaaaaaaaa "+mime+" "+path);
+                                  return loadCloudFileThumb((ImageView)view, path,iconId);
                               }
                         }
                     }
@@ -123,74 +125,25 @@ public class PathGlider {
                 ((ImageView)view).setImageResource(null!=iconId?iconId:R.drawable.hidisk_icon_unknown);
                 return true;
             }
-//            Context context=view.getContext();
-//            if (null!=path&&path instanceof Path &&null!=context){
-//                Path imagePath=(Path)path;
-//                String nasPath=imagePath.getPath();
-//                String host=imagePath.getHost();
-//                int port=imagePath.getPort();
-//                Debug.D(getClass(),"AAAAAAAAAAAA "+nasPath+" "+host+" "+port);
-//                RequestBuilder<Drawable> builder=null;
-//                if (null!=nasPath&&nasPath.length()>0){
-//                    if (null!=host&&host.length()>0&&!imagePath.isLocal()){
-//                        GlideUrl glideUrl = null;
-//                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-////                            try {
-////                                new LazyHeaders.Builder().addHeader(Label.LABEL_PATH, Base64.getEncoder()
-////                                        .encode(nasPath.getBytes("utf-8"))).build();
-//
-////                                glideUrl = new GlideUrl(host, new LazyHeaders.Builder().addHeader(Label
-////                                        .LABEL_PATH, Base64.getEncoder().encode(nasPath.getBytes("utf-8")));
-////                            } catch (UnsupportedEncodingException e) {
-////                                e.printStackTrace();
-////                            }
-//                        }
-//                        builder= Glide.with(context).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE);
-//                    }else{
-//                        builder=Glide.with(context).load(new File(nasPath));
-//                    }
-//                }
-//                if (null!=builder){
-//                    RoundedCorners roundedCorners = new RoundedCorners(1);
-//                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(view.getWidth(),
-//                            view.getHeight());
-//                    CustomTarget<Drawable> simpleTarget = new CustomTarget<Drawable>() {
-//                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-//                        @Override
-//                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-//                            set(view,resource,background);
-//                        }
-//
-//                        @Override
-//                        public void onLoadCleared(@Nullable Drawable placeholder) {
-//
-//                        }
-//                    };
-//
-//                    builder.centerCrop().apply(options).thumbnail(1f)
-////                                .transform(new BlurMaskFilter)
-////                                .bitmapTransform(new BlurTransformation(context, 5),//模糊转换
-////                                new TopCropTransformation(context))
-//                                .into(simpleTarget);
-//                }
-//            }
             return false;
         }
         return false;
     }
 
-    private boolean loadCloudFileThumb(ImageView view, Path path){
+    private boolean loadCloudFileThumb(ImageView view, Path path,Integer iconId){
         String hostUri=null!=path&&null!=view?path.getHostUri():null;
         if (null!=hostUri&&hostUri.length()>0){
             String filePath=path.getPath();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 try {
-                    //ByteArrayOutputStream dd=new ByteArrayOutputStream();
+                    if (null!=iconId) {
+                        view.setImageResource(iconId);
+                    }
                     int width = view.getWidth();
                     int height = view.getHeight();
                     GlideUrl glideUrl = new GlideUrl(hostUri, new LazyHeaders.Builder()
                             .addHeader(Label.LABEL_PATH, URLEncoder.encode(filePath,"utf-8")).addHeader(Label.LABEL_WIDTH,
-                            Integer.toString(width)).addHeader(Label.LABEL_HEIGHT, Integer.toString(height)).build());
+                            Integer.toString(width<=0?50:width)).addHeader(Label.LABEL_HEIGHT, Integer.toString(height<=0?50:height)).build());
                     if (null != glideUrl) {
                         RoundedCorners roundedCorners = new RoundedCorners(1);
                         RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(width, height);

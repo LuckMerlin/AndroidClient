@@ -76,7 +76,6 @@ public class FileTaskService extends TaskService {
                         Debug.D(getClass(),"Skip create file task while name is invalid."+path);
                         continue;
                     }
-
                     if (whatObj.equals(Label.LABEL_DOWNLOAD)) {
                         taskGroup.add(new NasFileDownloadTask(path, toName, mode));
                     } else if (whatObj.equals(Label.LABEL_UPLOAD)) {
