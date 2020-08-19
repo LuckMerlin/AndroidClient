@@ -23,6 +23,7 @@ import com.merlin.server.Client;
 import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Task;
 import com.merlin.task.file.Cover;
+import com.merlin.util.Preference;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
-    private final static String LABEL_HOME="homePath";
+    public final static String LABEL_HOME="homePath";
+
     public LocalFileBrowser(Client meta, Callback callback) {
         super(meta, callback);
     }
@@ -90,7 +92,7 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
         boolean succeed= null!=file&&file.exists()&&file.canRead()&&new Preference(getContext()).putString(LABEL_HOME,path);
         if (null!=callback){
             int what=succeed?What.WHAT_SUCCEED:What.WHAT_FAIL;
-            callback.onApiFinish(what,null,new Reply<>(true,what,null,path),null);
+            callback.onApiFinish(what,null,new Reply<>(succeed,what,null,path),null);
         }
         return succeed;
     }

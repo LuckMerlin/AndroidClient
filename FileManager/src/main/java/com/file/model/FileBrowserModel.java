@@ -44,6 +44,7 @@ import com.merlin.task.OnTaskUpdate;
 import com.merlin.task.Task;
 import com.merlin.task.TaskBinder;
 import com.merlin.task.file.Cover;
+import com.merlin.util.Preference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,8 +84,9 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
 //        putClientMeta(ClientMeta.buildLocalClient(getContext()), "After mode create.");
         Client testClient1=new Client("算法",getServerUri(),"",null,"","/");
         Client testClient=Client.buildLocalClient(getContext());
+        testClient.setHome(new Preference(getContext()).getString(LocalFileBrowser.LABEL_HOME,"/sdcard"));
 //        Client testClient2=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
-        putClientMeta(testClient1, "After mode create.");
+//        putClientMeta(testClient1, "After mode create.");
         putClientMeta(testClient, "After mode create.");
         //
 //        refreshClientMeta("After

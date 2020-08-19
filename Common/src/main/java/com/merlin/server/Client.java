@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StatFs;
+import android.preference.Preference;
 
 import java.io.File;
 
@@ -17,6 +18,7 @@ public final class Client implements Parcelable {
     private String platform;
     private String folder;
     private String pathSep;
+    private String home;
     private final static String LOCAL_URL="http://127.0.0.1";
 
     public Client(String name, String host, String account, String imageUrl, String folder, String pathSep){
@@ -37,6 +39,10 @@ public final class Client implements Parcelable {
         meta.account="Local";
         meta.pathSep= File.pathSeparator;
         return meta;
+    }
+
+    public void setHome(String home) {
+        this.home = home;
     }
 
     public boolean isDeviceType(String type){
@@ -70,6 +76,7 @@ public final class Client implements Parcelable {
             this.platform = in.readString();
             this.folder=in.readString();
             this.pathSep=in.readString();
+            this.home=in.readString();
         }
     }
 
@@ -78,7 +85,7 @@ public final class Client implements Parcelable {
     }
 
     public String getHome(){
-        return null;
+        return home;
     }
 
     @Override
@@ -91,6 +98,7 @@ public final class Client implements Parcelable {
         dest.writeString(platform);
         dest.writeString(folder);
         dest.writeString(pathSep);
+        dest.writeString(home);
     }
 
     @Override

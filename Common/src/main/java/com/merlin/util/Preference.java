@@ -1,4 +1,4 @@
-package com.merlin.browser;
+package com.merlin.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

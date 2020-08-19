@@ -53,6 +53,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     private final Client mMeta;
     private final Callback mCallback;
     private PopupWindow mPopWindow;
+
     private final Retrofit mRetrofit=new Retrofit(){
         @Override
         protected String onResolveUrl(Class<?> cls, Executor callbackExecutor) {
