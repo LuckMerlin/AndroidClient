@@ -197,11 +197,6 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
     }
 
     @Override
-    public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
-
-    }
-
-    @Override
     public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
 //            null!=task?task.getProgress()
     }

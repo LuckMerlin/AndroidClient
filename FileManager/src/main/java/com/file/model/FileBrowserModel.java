@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Model.OnBindChange,
+public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
         OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress, OnTaskUpdate, OnServiceBindChange,Model.OnActivityIntentChange {
     private final Map<String, FileBrowser> mAllClientMetas=new HashMap<>();
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
@@ -200,6 +200,8 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
                      case R.id.fileBrowser_deviceNameTV:
                          return (null != view && null != data && data instanceof Client &&
                                  showClientDetail(view, (Client) data, "After tap click.")) || true;
+                     case R.drawable.selector_menu:
+                         return startActivity(TaskActivity.class,"After menu double tap click.");
                          default:
                              if (null!=data&&data instanceof Path){
                                  return showFileContextMenu((Path)data,"After 2 tap click.");
@@ -590,12 +592,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, Mo
         if (null!=browser&&browser instanceof OnTaskUpdate){
             ((OnTaskUpdate)browser).onTaskUpdate(status,what,note,obj,task);
         }
-    }
-
-    @Override
-    public boolean onBindChanged(Object obj, String debug) {
-//        mTransportBinder=null!=obj&&obj instanceof ConveyorBinder?(ConveyorBinder)obj:null;
-        return true;
     }
 
     @Override

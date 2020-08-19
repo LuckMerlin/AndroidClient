@@ -69,8 +69,7 @@ public class NasFileBrowser extends FileBrowser {
 
     @Override
     protected boolean onOpenPath(Path meta, String debug) {
-
-        return false;
+        return toast(getText(R.string.whatFail,getText(R.string.open)))&&false;
     }
 
     @Override

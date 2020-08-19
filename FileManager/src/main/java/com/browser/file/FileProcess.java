@@ -12,6 +12,7 @@ import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.merlin.lib.Canceler;
 import com.merlin.retrofit.Retrofit;
+import com.merlin.task.Matcher;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -31,6 +32,10 @@ public abstract class FileProcess<T extends Path> extends FileAction{
 
     public FileProcess(){
         this(null,null);
+    }
+
+    public interface OnIterate{
+        void onIterate(Object key,Reply reply);
     }
 
     public FileProcess(String title, ArrayList<T> files){
@@ -116,21 +121,22 @@ public abstract class FileProcess<T extends Path> extends FileAction{
         return null;
     }
 
-    public final List<T> getAllUnFinish(){
+    public final boolean iterateAllUnFinish(OnIterate callback){
         Map<T,Reply> map=mFileMap;
-        if (null!=map){
+        if (null!=map&&null!=callback){
             synchronized (map){
                 Set<T> set=map.size()>0?map.keySet():null;
                 if (null!=set){
                     for (T child:set) {
                         if (null!=child){
-                            return child;
+                            callback.onIterate(child,map.get(child));
                         }
                     }
                 }
             }
+            return true;
         }
-        return null;
+        return false;
     }
 
     public final T getAnyone(){

@@ -104,8 +104,12 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
     }
 
     public final boolean openPath(Path file,String debug){
-        return null!=file&&(file.isDirectory()?browserPath(file.getPath(),
-                "While open path "+(null!=debug?debug:".")):onOpenPath(file,debug));
+        if (null!=file){
+            if(file.isDirectory()?browserPath(file.getPath(), "While open path "+(null!=debug?debug:".")):onOpenPath(file,debug)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public  final boolean browserParent(String debug){
@@ -279,13 +283,16 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                                 if (process.cancel(true,"After user cancel click.")) {
                                     dialog.right(R.string.sure);
                                     toast(R.string.canceled);
-                                    process.getAnyone();
-//                                    if (null!=callback){
-//                                        callback.onProcessUpdate(false,);
-//                                    }
                                 }
                             }else{
                                 dialog.dismiss();
+                            }
+                            if (null!=callback) {
+                                process.iterateAllUnFinish((Object key, Reply reply) -> {
+                                    if (null == reply && null != key && key instanceof Path) {
+                                        callback.onProcessUpdate(false,(Path)key);
+                                    }
+                                });
                             }
                             break;
                         case R.string.finished:
@@ -402,22 +409,26 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
 
     @Override
     public void onItemSlideRemove(int position, Object data, int direction, RecyclerView.ViewHolder viewHolder, Remover remover) {
-       switch (direction){
+        switch (direction){
            case ItemTouchInterrupt.LEFT:
                Path path=null!=data&&data instanceof Path?(Path)data:null;
                if (null!=remover&&null!=path) {
                    ArrayList<Path> paths=new ArrayList<>(1);
                    paths.add(path);
-                   deletePath(paths,(boolean succeed, Path chilPath)-> {
-                       Debug.D(getClass(),"AAAAAAAAAAAAA "+chilPath);
+                   deletePath(paths,(boolean succeed, Path childPath)-> {
+                       if (!succeed&&null!=childPath&&childPath.equals(data)){
+                           add(position,path, true, "After delete fail.");
+                       }
                    },"While item slide remove.");
                }
                break;
            case ItemTouchInterrupt.RIGHT:
-               Path playPath=null!=data&&data instanceof Path?(Path)data:null;
-               if (null!=playPath) {
-                   toast("播放 "+playPath.getName());
-                   add(position,playPath, true, "While slide move to play.");
+               Path openPath=null!=data&&data instanceof Path?(Path)data:null;
+               if (null!=openPath) {
+                   add(position,openPath, true, "While slide move to open.");
+                   if(!openPath(openPath,"While slide move to open.")){
+                       toast(getText(R.string.whatFail,getText(R.string.open)));
+                   }
                }
                break;
        }
