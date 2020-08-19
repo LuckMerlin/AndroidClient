@@ -1,7 +1,10 @@
 package com.merlin.browser;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 
@@ -27,24 +30,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
+    private final static String LABEL_HOME="homePath";
     public LocalFileBrowser(Client meta, Callback callback) {
         super(meta, callback);
     }
 
     @Override
     protected boolean onReboot(String debug) {
-//        String[] arrayRestart = {"su","-c","reboot"};
-        String[] arrayShutDown = {"su","-c","reboot -p"};
-//        return execCommand(arrayShutDown);
-//        Debug.D(getClass(),"EEEEEEEEEE "+getAdapterContext());
-//        PowerManager pManager=(PowerManager) getAdapterContext().getSystemService(Context.POWER_SERVICE);
-//        pManager.reboot("重启");
-//        Intent reboot = new Intent(Intent.ACTION_REBOOT);
-//        reboot.putExtra("nowait", 1);
-//        reboot.putExtra("interval", 1);
-//        reboot.putExtra("window", 0);
-//        Context context=getAdapterContext();
-//        context.sendBroadcast(reboot);
+        Context context=getAdapterContext();
+        PackageManager manager=null!=context?context.getPackageManager():null;
+        Intent intent=null!=manager?manager.getLaunchIntentForPackage(context.getPackageName()):null;
+        PendingIntent pendingIntent=null!=intent?PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_ONE_SHOT):null;
+        AlarmManager alarmManager=null!=pendingIntent?(AlarmManager) context.getSystemService(Context.ALARM_SERVICE):null;
+        if (null!=alarmManager){
+            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 5,pendingIntent);
+            System.exit(1);
+            return true;
+        }
         return false;
     }
 
@@ -69,6 +71,7 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
                 context.startActivity(intent);
                 return true;
             }catch (Exception e){
+                Debug.D(getClass(),"None match activity found.e="+e);
                 //Do nothing
             }
         }
@@ -82,9 +85,14 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
     }
 
     @Override
-    protected boolean onSetAsHome(String path, OnApiFinish<Reply<String>> finish, String debug) {
-
-        return false;
+    protected boolean onSetAsHome(String path, OnApiFinish<Reply<String>> callback, String debug) {
+        File file=null!=path&&path.length()>0?new File(path):null;
+        boolean succeed= null!=file&&file.exists()&&file.canRead()&&new Preference(getContext()).putString(LABEL_HOME,path);
+        if (null!=callback){
+            int what=succeed?What.WHAT_SUCCEED:What.WHAT_FAIL;
+            callback.onApiFinish(what,null,new Reply<>(true,what,null,path),null);
+        }
+        return succeed;
     }
 
     @Override
@@ -202,7 +210,7 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
     }
 
     private String getHome(){
-        return "/sdcard";
+        return new Preference(getContext()).getString(LABEL_HOME,"/sdcard");
     }
 
 }
