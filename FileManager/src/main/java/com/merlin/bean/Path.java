@@ -141,6 +141,11 @@ public final class Path implements Parcelable {
         return size>=0;
     }
 
+    public final boolean isImage(){
+        String  mime=this.mime;
+        return null!=mime&&mime.startsWith("image/");
+    }
+
     public final String getHostUri(){
         return getHostUri(null);
     }

@@ -17,6 +17,7 @@ import com.browser.file.FileDeleteProcess;
 import com.browser.file.FileMoveProcess;
 import com.browser.file.FileProcess;
 import com.browser.file.OnProcessUpdate;
+import com.file.activity.PhotoPreviewActivity;
 import com.merlin.adapter.BrowserAdapter;
 import com.merlin.adapter.ItemTouchInterrupt;
 import com.merlin.api.ApiMap;
@@ -108,6 +109,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         if (null!=file){
             if(file.isDirectory()?browserPath(file.getPath(), "While open path "+(null!=debug?debug:".")):onOpenPath(file,debug)){
                 return true;
+            }
+            if (file.isImage()){
+                ArrayList<Path> list=new ArrayList<>(1);
+                return PhotoPreviewActivity.start(getContext(),list,0,debug);
             }
         }
         return false;
