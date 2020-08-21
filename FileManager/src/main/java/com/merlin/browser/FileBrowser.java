@@ -107,13 +107,17 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
 
     public final boolean openPath(Path file,String debug){
         if (null!=file){
-            if(file.isDirectory()?browserPath(file.getPath(), "While open path "+(null!=debug?debug:".")):onOpenPath(file,debug)){
-                return true;
+            if (file.isDirectory()){
+                return browserPath(file.getPath(), "While open path "+(null!=debug?debug:"."));
             }
             if (file.isImage()){
                 ArrayList<Path> list=new ArrayList<>(1);
-                return PhotoPreviewActivity.start(getContext(),list,0,debug);
+                list.add(file);
+                if(PhotoPreviewActivity.start(getContext(),list,0,debug)){
+                    return true;
+                }
             }
+            return onOpenPath(file,debug);
         }
         return false;
     }

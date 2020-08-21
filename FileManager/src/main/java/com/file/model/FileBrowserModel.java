@@ -203,13 +203,19 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
                          return (null != view && null != data && data instanceof Client &&
                                  showClientDetail(view, (Client) data, "After tap click.")) || true;
                      case R.drawable.selector_menu:
-                         return startActivity(TaskActivity.class,"After menu double tap click.");
+                         return searchCurrentFolder(view,"After tap click.");
                          default:
                              if (null!=data&&data instanceof Path){
                                  return showFileContextMenu((Path)data,"After 2 tap click.");
                              }
                          break;
                  }
+            case 3:
+                switch (resId){
+                    case R.drawable.selector_menu:
+                        return startActivity(TaskActivity.class,"After menu double tap click.");
+                }
+
         }
         switch (resId){
             case R.string.move:
@@ -318,6 +324,10 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
                     dialog.dismiss();
                 return true;
         });
+    }
+
+    private boolean searchCurrentFolder(View view,String debug){
+        return false;
     }
 
     private boolean deletePath(Object data,String debug){

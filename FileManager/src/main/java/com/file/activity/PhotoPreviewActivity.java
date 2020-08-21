@@ -22,6 +22,8 @@ public class PhotoPreviewActivity extends ModelActivity<PhotoPreViewModel> {
         setModelContentView(R.layout.activity_photo_preview);
     }
 
+
+
     public static boolean startActivity(Context context, ArrayList<String> data, int index, String debug){
             if(null!=context&&null!=data&&data.size()>0){
                 Intent intent=new Intent(context,PhotoPreviewActivity.class);
@@ -36,12 +38,12 @@ public class PhotoPreviewActivity extends ModelActivity<PhotoPreViewModel> {
 
     public static boolean start(Context context, ArrayList<?extends Parcelable> data, int index, String debug){
             if(null!=context&&null!=data&&data.size()>0){
-            Intent intent=new Intent(context,PhotoPreviewActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putParcelableArrayListExtra(Label.LABEL_DATA,data);
-            intent.putExtra(Label.LABEL_POSITION,index);
-            context.startActivity(intent);
-            return true;
+                Intent intent=new Intent(context,PhotoPreviewActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putParcelableArrayListExtra(Label.LABEL_DATA,data);
+                intent.putExtra(Label.LABEL_POSITION,index);
+                context.startActivity(intent);
+                return true;
             }
             return false;
     }
