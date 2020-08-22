@@ -1,6 +1,8 @@
 package com.luckmerlin.databinding.view;
 
 import com.luckmerlin.core.proguard.PublishMethods;
+import com.luckmerlin.databinding.Array2List;
+
 import java.util.List;
 
 public class Text extends Value implements PublishMethods {

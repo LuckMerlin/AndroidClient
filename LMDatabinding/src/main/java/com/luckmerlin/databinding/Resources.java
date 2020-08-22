@@ -1,4 +1,4 @@
-package com.luckmerlin.databinding.view;
+package com.luckmerlin.databinding;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -7,7 +7,7 @@ import android.os.Build;
 
 import com.luckmerlin.core.proguard.PublishMethods;
 
-public final class Resources implements PublishMethods {
+public final class Resources {
 
     public CharSequence getText(android.content.res.Resources resources, int textId, CharSequence def){
         return null!=resources?resources.getText(textId,def):null;

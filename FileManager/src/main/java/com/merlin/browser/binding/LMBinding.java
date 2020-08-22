@@ -1,5 +1,6 @@
 package com.merlin.browser.binding;
 
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.databinding.BindingAdapter;

@@ -1,5 +1,5 @@
 package com.luckmerlin.databinding.view;
- class Tag extends Value {
+ public class Tag extends Value {
     private Object mObject;
 
     public final Tag tag(Object object){

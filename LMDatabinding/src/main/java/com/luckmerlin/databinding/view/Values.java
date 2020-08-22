@@ -1,5 +1,8 @@
 package com.luckmerlin.databinding.view;
 
+/**
+ * @deprecated
+ */
 public final class Values {
     private Text mText;
     private Image mImage;

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -16,6 +17,9 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 
 import com.file.activity.TaskActivity;
+import com.luckmerlin.databinding.text.OnEditActionChange;
+import com.luckmerlin.databinding.text.OnTextChangeBefore;
+import com.luckmerlin.databinding.text.OnTextChanged;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Label;
 import com.merlin.api.PageData;
@@ -34,6 +38,7 @@ import com.merlin.file.databinding.ClientDetailBinding;
 import com.merlin.file.databinding.DeviceTextBinding;
 import com.merlin.file.databinding.FileBrowserMenuBinding;
 import com.merlin.file.databinding.FileContextMenuBinding;
+import com.merlin.file.databinding.SearchFolderBinding;
 import com.merlin.file.databinding.SingleEditTextBinding;
 import com.merlin.browser.FileBrowser;
 import com.merlin.file.transport.FileTaskService;
@@ -203,7 +208,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
                          return (null != view && null != data && data instanceof Client &&
                                  showClientDetail(view, (Client) data, "After tap click.")) || true;
                      case R.drawable.selector_menu:
-                         return searchCurrentFolder(view,"After tap click.");
+                         return searchCurrentFolder("After tap click.");
                          default:
                              if (null!=data&&data instanceof Path){
                                  return showFileContextMenu((Path)data,"After 2 tap click.");
@@ -326,7 +331,14 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
         });
     }
 
-    private boolean searchCurrentFolder(View view,String debug){
+    private boolean searchCurrentFolder(String debug){
+        Dialog dialog=new Dialog(getViewContext());
+        ViewDataBinding binding=DataBindingUtil.inflate(LayoutInflater.from(getViewContext()),R.layout.search_folder,null,false);
+        if (null!=binding&&binding instanceof SearchFolderBinding){
+            SearchFolderBinding folderBinding=((SearchFolderBinding)binding);
+//            folderBinding.setOnTextChanged(new Test());
+            return dialog.setDimAmount(0).setContentView(binding,false).show();
+        }
         return false;
     }
 

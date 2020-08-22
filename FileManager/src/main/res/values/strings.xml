@@ -129,6 +129,7 @@
     <string name="started">已启动</string>
     <string name="start">开始</string>
     <string name="paused">已暂停</string>
+    <string name="input">输入关键字</string>
     <string name="finished">已完成</string>
     <string name="timeout">超时</string>
     <string name="conveying">传输中</string>

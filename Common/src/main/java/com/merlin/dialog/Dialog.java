@@ -70,6 +70,16 @@ public class Dialog implements View.OnClickListener{
         }
     }
 
+    public final Dialog setDimAmount(float dimAmount){
+        android.app.Dialog dialog=mDialog;
+        Window window=null!=dialog?dialog.getWindow():null;
+        if (null!=window){
+            window.setDimAmount(dimAmount);
+        }
+        return this;
+    }
+
+
     public final Dialog setContentView(int layoutId,boolean recreate){
         Context context=getContext();
         if (null!=context){

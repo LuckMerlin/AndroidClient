@@ -1,11 +1,11 @@
-package com.luckmerlin.databinding.view;
+package com.luckmerlin.databinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class Array2List {
 
-    public List toList(List<Object> pre,Object ...objects){
+    public List<Object> toList(List<Object> pre,Object ...objects){
         int length=null!=objects?objects.length:-1;
         if (length>0){
             pre=null!=pre?pre:new ArrayList<>(length);

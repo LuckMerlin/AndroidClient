@@ -10,9 +10,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.luckmerlin.databinding.Resources;
+
 import java.util.List;
 import java.util.WeakHashMap;
 
+/**
+ * @deprecated
+ */
 public final class ViewValuer {
     private static WeakHashMap<View,Object> mTagMaps;
 
