@@ -2,38 +2,37 @@ package com.luckmerlin.databinding.view;
 
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.Array2List;
+import com.luckmerlin.databinding.BindingObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Text extends Value implements PublishMethods {
+public class Text implements BindingObject,PublishMethods {
     private List<Object> mObjects;
-    private Integer mColor;
+    private final Float[] mSize=new Float[2];
+    private Object mColor;
     private Text mHint;
 
-    Text(Object ...stringObjects){
-        this(null,stringObjects);
-    }
-
-    Text(Integer color,Object ...stringObjects){
+    Text(Object color,Object text){
         mColor=color;
-        mObjects=new Array2List().toList(null,stringObjects);
+        append(text);
     }
 
-    public static Text text(Object ...stringObjects){
-        return text(null,stringObjects);
+    public static Text text(Object text){
+        return text(null,text);
     }
 
-    public static Text text(Integer color,Object ...stringObjects){
-        return new Text(color,stringObjects);
+    public static Text text(Object text,Object color){
+        return new Text(color,text);
     }
 
-    public Text color(Integer color){
+    public Text color(Object color){
         mColor=color;
         return this;
     }
 
-    public Text hint(Integer hintColor,Object... hints){
-        return hint(new Text(hintColor,hints));
+    public Text hint(Object hintColor,Object text){
+        return hint(new Text(hintColor,text));
     }
 
     public Text hint(Text text){
@@ -41,8 +40,22 @@ public class Text extends Value implements PublishMethods {
         return this;
     }
 
-    public Text append(Object ...stringObjects){
-        mObjects=null!=stringObjects&&stringObjects.length>0?new Array2List().toList(mObjects,stringObjects):null;
+    public final Integer getSizeUnit(Integer def) {
+        Float current=mSize[0];
+        return null==current?def:(int)((float)current);
+    }
+
+    public final float getSize(float def) {
+        Float current=mSize[1];
+        return null==current?def:current;
+    }
+
+    public Text append(Object text){
+        if (null!=text){
+            List<Object> objects=mObjects;
+            objects=null!=objects?objects:(mObjects=new ArrayList<>(1));
+            objects.add(text);
+        }
         return this;
     }
 
@@ -65,12 +78,7 @@ public class Text extends Value implements PublishMethods {
         return mHint;
     }
 
-    public Integer getColor() {
+    public Object getColor() {
         return mColor;
-    }
-
-    @Override
-    public Values values() {
-        return null;
     }
 }

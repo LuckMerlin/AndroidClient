@@ -1,8 +1,9 @@
 package com.luckmerlin.databinding.view;
 
 import com.luckmerlin.core.proguard.PublishMethods;
+import com.luckmerlin.databinding.BindingObject;
 
-public class Image extends Value implements PublishMethods {
+public class Image implements BindingObject,PublishMethods {
     private Object mSrc;
     private Object mBackground;
 
@@ -39,10 +40,5 @@ public class Image extends Value implements PublishMethods {
 
     public Object getSrc() {
         return mSrc;
-    }
-
-    @Override
-    public Values values() {
-        return null;
     }
 }

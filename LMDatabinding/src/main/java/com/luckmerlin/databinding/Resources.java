@@ -1,19 +1,18 @@
 package com.luckmerlin.databinding;
 
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 
-import com.luckmerlin.core.proguard.PublishMethods;
-
-public final class Resources {
+ final class Resources {
 
     public CharSequence getText(android.content.res.Resources resources, int textId, CharSequence def){
         return null!=resources?resources.getText(textId,def):null;
     }
 
-    public Integer getTextColor(String colorText, Integer def){
+    public Integer getColorFromText(String colorText, Integer def){
         try {
             return null!=colorText&&colorText.length()>0? Color.parseColor(colorText):def;
         }catch (Exception e){
@@ -22,10 +21,14 @@ public final class Resources {
         return def;
     }
 
-    public int getColor(android.content.res.Resources resources, int colorId, int def){
+     public ColorStateList getColor(String pkgName,android.content.res.Resources resources, String colorResName, ColorStateList def){
+         return null!=colorResName&&null!=pkgName&&null!=resources?getColor(resources,resources.getIdentifier(colorResName,"color",pkgName),def):def;
+     }
+
+    public ColorStateList getColor(android.content.res.Resources resources, int colorId, ColorStateList def){
         try {
             return null!=resources?Build.VERSION.SDK_INT >= Build.VERSION_CODES.M?
-                    resources.getColor(colorId,null):resources.getColor(colorId):def;
+                    resources.getColorStateList(colorId,null):resources.getColorStateList(colorId):def;
         }catch (Exception e){
             //Do nothing
         }
@@ -33,14 +36,17 @@ public final class Resources {
     }
 
     public Drawable getColorDrawable(android.content.res.Resources resources, int colorId, Drawable def){
-        Integer color=null!=resources?getColor(resources,colorId,0):null;
-        return null!=color&&color!=0?new ColorDrawable(color):def;
+        ColorStateList color=null!=resources?getColor(resources,colorId,null):null;
+        return null!=color?new ColorDrawable(color.getDefaultColor()):def;
     }
 
+     public Drawable getDrawable(String pkgName,android.content.res.Resources resources, String drawableName, Drawable def){
+        return null!=drawableName&&null!=pkgName&&null!=resources?getDrawable(resources,resources.getIdentifier(drawableName,"drawable",pkgName),def):def;
+    }
 
     public Drawable getDrawable(android.content.res.Resources resources, int drawableId, Drawable def){
         try {
-            return null!=resources?Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP?
+            return null!=resources&&drawableId!=-1&&drawableId!=0?Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP?
                     resources.getDrawable(drawableId,null):resources.getDrawable(drawableId):def;
         }catch (Exception e){
             //Do nothing

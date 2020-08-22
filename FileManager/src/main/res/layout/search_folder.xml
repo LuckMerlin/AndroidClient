@@ -19,7 +19,6 @@
             android:layout_height="wrap_content"/>
 
         <EditText
-            binding:lmBinding="@{Touch.touch(Touch.CLICK)}"
             android:hint="@string/input"
             style="@style/editTextNormal"/>
     </LinearLayout>
