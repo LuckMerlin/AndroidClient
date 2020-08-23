@@ -54,7 +54,7 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
         return false;
     }
 
-    final boolean dettachRoot(String debug){
+    final boolean detachRoot(String debug){
         WeakReference<View> reference=mRootView;
         if (null!=reference){
             View root=reference.get();

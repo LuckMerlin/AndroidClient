@@ -1,7 +1,6 @@
 package com.luckmerlin.databinding;
 
 import android.view.View;
-
 import com.luckmerlin.core.proguard.PublishMethods;
 
 public class BindingAdapter implements PublishMethods {

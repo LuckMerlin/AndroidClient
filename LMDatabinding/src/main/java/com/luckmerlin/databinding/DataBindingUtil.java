@@ -1,10 +1,12 @@
 package com.luckmerlin.databinding;
 
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingComponent;
 import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.core.debug.Debug;
@@ -23,6 +25,14 @@ import com.luckmerlin.core.proguard.PublishMethods;
 
     public static ViewDataBinding inflate(LayoutInflater inflater, int layoutId, @Nullable ViewGroup parent, boolean attachToParent){
         return null!=inflater&&checkDataBindingEnable(true)?androidx.databinding.DataBindingUtil.inflate(inflater,layoutId,parent,attachToParent):null;
+    }
+
+    public static ViewDataBinding setContentView(Activity activity, int layoutId){
+        return null!=activity&&checkDataBindingEnable(true)?androidx.databinding.DataBindingUtil.setContentView(activity,layoutId):null;
+    }
+
+    public static ViewDataBinding setContentView(Activity activity, int layoutId, DataBindingComponent bindingComponent){
+        return null!=activity&&checkDataBindingEnable(true)?androidx.databinding.DataBindingUtil.setContentView(activity,layoutId,bindingComponent):null;
     }
 
     public static final boolean checkDataBindingEnable(boolean print){

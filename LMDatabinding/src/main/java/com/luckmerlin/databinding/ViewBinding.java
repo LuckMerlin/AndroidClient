@@ -54,6 +54,9 @@ final class ViewBinding {
                 }
                 continue;
             }
+            if (binding instanceof CustomBinding){
+                ((CustomBinding)binding).onBind(view);
+            }
             if (view instanceof TextView){
                 TextView textView=(TextView)view;
                 if (binding instanceof Text){

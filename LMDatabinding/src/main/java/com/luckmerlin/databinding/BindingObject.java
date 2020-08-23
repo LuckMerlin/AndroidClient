@@ -1,4 +1,6 @@
 package com.luckmerlin.databinding;
 
-public interface BindingObject {
+import com.luckmerlin.core.proguard.PublishMethods;
+
+ public interface BindingObject extends PublishMethods {
 }

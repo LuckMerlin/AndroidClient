@@ -1,8 +1,6 @@
 package com.luckmerlin.mvvm;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -186,7 +184,7 @@ class ModelBinder {
                                     if (null!=value&&(child==object||value==object)){
                                         Debug.D("Unbind view model "+(null!=debug?debug:".")+value);
                                         boundMap.remove(child);
-                                        value.dettachRoot(debug);
+                                        value.detachRoot(debug);
                                     }
                                 }
                             }

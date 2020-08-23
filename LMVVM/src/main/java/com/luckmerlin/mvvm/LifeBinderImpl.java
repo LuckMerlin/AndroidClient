@@ -37,8 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-final class LifeNotify implements Application.ActivityLifecycleCallbacks,ComponentCallbacks{
-    private static LifeNotify mLifeNotify;
+final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,ComponentCallbacks{
+    private static LifeBinderImpl mLifeNotify;
     private  Map<Object,Model> mModelMaps;
     private  Map<Object,Activity> mActivityRegister;
 
@@ -47,10 +47,10 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks,Compone
     }
 
     private interface OnLifeBind{
-        void onLifeBind(Application application, boolean enable, LifeNotify notify);
+        void onLifeBind(Application application, boolean enable, LifeBinderImpl notify);
     }
 
-    private LifeNotify(){
+    private LifeBinderImpl(){
 
     }
 
@@ -58,8 +58,8 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks,Compone
         if (null!=onLifeBind){
             context=null!=context?context.getApplicationContext():null;
             if (null!=context&&context instanceof Application){
-                LifeNotify lifeNotify=mLifeNotify;
-                lifeNotify=enable&&null==lifeNotify?(mLifeNotify=new LifeNotify()):lifeNotify;
+                LifeBinderImpl lifeNotify=mLifeNotify;
+                lifeNotify=enable&&null==lifeNotify?(mLifeNotify=new LifeBinderImpl()):lifeNotify;
                 if (null!=lifeNotify){
                     onLifeBind.onLifeBind((Application)context,enable,lifeNotify);
                 }
@@ -69,7 +69,7 @@ final class LifeNotify implements Application.ActivityLifecycleCallbacks,Compone
         return false;
     }
 
-    public static synchronized boolean bindActivityLife(boolean enable,Context context){
+    public static synchronized boolean bindActivityLife(boolean enable,Activity context){
         return bindLife(context,enable,(app,en,life)->{
             app.unregisterActivityLifecycleCallbacks(life);
             if (enable){ app.registerActivityLifecycleCallbacks(life); }

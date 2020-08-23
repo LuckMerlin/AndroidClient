@@ -15,11 +15,13 @@
         <import type="com.merlin.browser.Mode" alias="Model"/>
         <import type="android.text.Html"/>
         <import type="com.merlin.browser.binding.ContextMenu"/>
+        <import type="com.luckmerlin.mvvm.ModelBinding"/>
     </data>
     <LinearLayout
         binding:createModel="@{true}"
         android:background="@drawable/round_corner_gray"
         android:orientation="vertical"
+        binding:lmBinding="@{ModelBinding.arg(`dddd`)}"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="10dp">
