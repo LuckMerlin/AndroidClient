@@ -5,6 +5,9 @@ import android.view.View;
 import com.luckmerlin.databinding.CustomArgBinding;
 
 public final class ModelBinding extends CustomArgBinding {
+    private ModelBinding(){
+
+    }
 
     public static ModelBinding arg(Object arg){
         ModelBinding binding=new ModelBinding();
