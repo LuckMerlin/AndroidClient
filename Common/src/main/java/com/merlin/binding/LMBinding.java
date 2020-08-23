@@ -30,8 +30,6 @@ import com.merlin.model.ModelBinder;
 
 import java.util.Collection;
 
-import static com.merlin.adapter.PageAdapter.OnPageLoadUpdate.UPDATE_PAGE_START;
-
 public class LMBinding {
 
     @BindingAdapter("text")

@@ -15,7 +15,6 @@
         <import type="com.merlin.browser.Mode" alias="Model"/>
         <import type="android.text.Html"/>
         <import type="com.merlin.browser.binding.ContextMenu"/>
-        <import type="com.luckmerlin.databinding.view.Text"/>
     </data>
     <LinearLayout
         binding:createModel="@{true}"
@@ -135,9 +134,10 @@
 <!--            android:visibility="@{vm.currentFolder.path.path.length()>0?View.VISIBLE:View.GONE}"-->
             <TextView
                 android:layout_width="wrap_content"
-                android:text="@{Text.text(`沙发上`,`#34ff0000`)}"
                 android:singleLine="true"
                 android:textSize="@dimen/textSmall"
+                android:text="@{vm.currentFolder.path.path}"
+                android:visibility="@{vm.currentFolder.path.path.length()>0?View.VISIBLE:View.GONE}"
                 android:layout_height="wrap_content"/>
         </HorizontalScrollView>
         <View

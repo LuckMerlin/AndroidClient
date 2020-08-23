@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -25,7 +27,7 @@ import com.merlin.model.OnServiceBindChange;
 import com.merlin.task.TaskService;
 
 
-public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
+public final class FileBrowserActivity extends ModelActivity<FileBrowserModel>     {
     private static ServiceConnection mConnection;
 
     @Override

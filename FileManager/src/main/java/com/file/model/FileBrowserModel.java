@@ -17,10 +17,6 @@ import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 
 import com.file.activity.TaskActivity;
-import com.luckmerlin.databinding.text.OnEditActionChange;
-import com.luckmerlin.databinding.text.OnTextChangeBefore;
-import com.luckmerlin.databinding.text.OnTextChanged;
-import com.luckmerlin.databinding.touch.OnViewClick;
 import com.merlin.adapter.ListAdapter;
 import com.merlin.api.Label;
 import com.merlin.api.PageData;
@@ -58,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class FileBrowserModel extends BaseModel implements Label, OnTapClick, OnViewClick,
+public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
         OnLongClick, Model.OnActivityResume,Model.OnActivityBackPress, OnTaskUpdate, OnServiceBindChange,Model.OnActivityIntentChange {
     private final Map<String, FileBrowser> mAllClientMetas=new HashMap<>();
     private final ObservableField<Integer> mClientCount=new ObservableField<>();
@@ -83,11 +79,6 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick, On
     };
 
     private Collector mCollecting;
-
-    @Override
-    public void onViewClick(View view, int count, Object tag) {
-        Debug.D(getClass(),"QQQQQQQQQQ  "+count+"  "+view+" "+tag);
-    }
 
     @Override
     protected void onRootAttached(View root) {

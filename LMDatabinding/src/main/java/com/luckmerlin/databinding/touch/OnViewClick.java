@@ -6,5 +6,5 @@ import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.BindingObject;
 
 public interface OnViewClick extends PublishMethods, BindingObject {
-    void onViewClick(View view,int count,Object tag);
+    boolean onViewClick(View view,int count,Object tag);
 }

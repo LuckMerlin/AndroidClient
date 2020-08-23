@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-def buildVersion="#0.0.0"
+def buildVersion="0.0.1"
 if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
     apply plugin: 'com.novoda.bintray-release'
 }
@@ -37,7 +37,6 @@ android {
     }
 
 }
-
 
 if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
     publish {

@@ -5,7 +5,6 @@
         <variable
             name="ddd"
             type="com.merlin.player.TestModel" />
-        <import type="com.luckmerlin.databinding.view.Values"/>
        <import type="com.merlin.player.R"/>
     </data>
     <LinearLayout
@@ -20,8 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/icon"
-            android:layout_weight="1"
-            app:viewValue="@{Values.tag(`sdfas`)}" />
+            android:layout_weight="1" />
 
         <SeekBar
             android:id="@+id/seekBar"

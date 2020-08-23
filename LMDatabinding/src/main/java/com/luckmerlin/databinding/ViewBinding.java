@@ -9,13 +9,16 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.ColorStateListDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.databinding.ViewDataBinding;
+
 import com.luckmerlin.databinding.text.OnEditActionChange;
 import com.luckmerlin.databinding.text.OnEditActionChangeListener;
 import com.luckmerlin.databinding.text.OnEditTextChange;
@@ -28,9 +31,14 @@ import com.luckmerlin.databinding.view.Text;
 import com.luckmerlin.databinding.view.Touch;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.List;
 
 final class ViewBinding {
+
+    private interface OnIterate{
+        Boolean onIterated(View view,Object obj);
+    }
 
     boolean bind(View view, BindingObject ...bindings){
         if (null==view||null==bindings||bindings.length<=0){
@@ -73,7 +81,7 @@ final class ViewBinding {
             return false;
         }
         Object object=touch.getObject();
-        if (null==object||(object instanceof Boolean&&!(Boolean)object)){
+        if (null!=object&&object instanceof Boolean&&!(Boolean)object){
             return false;
         }
         Object tagObject=touch.getTag();
@@ -82,18 +90,36 @@ final class ViewBinding {
                 tagObject=new WeakReference<>(tagObject);
             }
         }
+        Integer dispatch=touch.isDispatchEnable();
+        final int dispatchEvent=null!=dispatch?dispatch:Touch.NONE;
         final Object finalTagObject=tagObject;
-        if (object instanceof OnViewTouch){
-            view.setOnTouchListener((View v, MotionEvent event)->((OnViewTouch)object).onViewTouched(view,event,getTagObject(finalTagObject)));
+        final boolean dispatchTouch=(dispatchEvent&Touch.TOUCH)!=0;
+        if (dispatchTouch||(null!=object&&object instanceof OnViewTouch)){
+            view.setOnTouchListener((View v, MotionEvent event)->{
+                final Object finalObject=getTagObject(finalTagObject);
+                return dispatchEvent(view, object,dispatchTouch,(View child,Object obj)-> null!=obj&&obj instanceof
+                        OnViewTouch&&((OnViewTouch)obj).onViewTouched(view, event,finalObject));
+                });
         }
-        if (object instanceof OnViewClick){
+        final boolean dispatchLongClick=(dispatchEvent&Touch.LONG_CLICK)!=0;
+        if (dispatchTouch||(null!=object&&object instanceof OnViewLongClick)){
+            view.setOnLongClickListener((View v)->{
+                final Object finalObject=getTagObject(finalTagObject);
+                return dispatchEvent(view, object,dispatchLongClick,(View child,Object obj)-> null!=obj&&obj instanceof
+                        OnViewLongClick&&((OnViewLongClick)obj).onViewLongClick(view,finalObject));
+            });
+        }
+        final boolean dispatchClick=(dispatchEvent&Touch.CLICK)!=0;
+        if (dispatchClick||(null!=object&&object instanceof OnViewClick)){
             int dither=touch.getClickDither();
             final int finalDither=dither<0?400:dither;
             final Object[] ditherObject=new Object[2];
             final View.OnClickListener clickListener=(View v)->{
                 Object clickCount=ditherObject[1];
-                ((OnViewClick)object).onViewClick(view, null!=clickCount&&clickCount instanceof Integer
-                        &&((Integer)clickCount)>0?(Integer) clickCount:0, getTagObject(finalTagObject));
+                final int finalClickCount=null!=clickCount&&clickCount instanceof Integer &&((Integer)clickCount)>0?(Integer) clickCount:0;
+                final Object finalObject=getTagObject(finalTagObject);
+                dispatchEvent(view, object,dispatchClick,(View child,Object obj)-> null!=obj&&obj instanceof
+                        OnViewClick&&((OnViewClick)obj).onViewClick(view, finalClickCount,finalObject));
             };
             view.setOnClickListener((View v)-> {
                 if (finalDither>0){
@@ -115,9 +141,6 @@ final class ViewBinding {
                     clickListener.onClick(v);
                 }
             });
-        }
-        if (object instanceof OnViewLongClick){
-            view.setOnLongClickListener((View v)->((OnViewLongClick)object).onViewLongClick(v,getTagObject(finalTagObject)));
         }
         return true;
     }
@@ -167,7 +190,7 @@ final class ViewBinding {
             textView.setText(getText(resources,res,text.getObjects()));
             textView.setTextColor(getColor(context,resources,text.getColor(),textView.getTextColors()));
             float textSize=text.getSize(textView.getTextSize());
-            Integer sizeUnit=text.getSizeUnit(null);
+            Integer sizeUnit=text.getSizeUnit();
             if (null!=sizeUnit) {
                 textView.setTextSize(sizeUnit, textSize);
             }else{
@@ -226,5 +249,61 @@ final class ViewBinding {
                 resources.getColorDrawable(res,(Integer)image,new ColorDrawable((Integer)image))):image;
         image=null!=image&&image instanceof Bitmap ?new BitmapDrawable((Bitmap) image):image;
         return null!=image&&image instanceof Drawable?((Drawable)image):def;
+    }
+
+    private boolean dispatchEvent(View view,Object object,boolean dispatch,OnIterate callback){
+        if (null!=callback&&null!=view){
+            if ((null!=object&&callback.onIterated(view,object))){
+                return true;
+            }
+            if (!dispatch){
+                return false;
+            }
+            if (dispatchEventToViewModel(view,callback)){
+                return true;
+            }
+            Context context=view.getContext();
+            if (null!=context&&callback.onIterated(view,context)){
+                return true;
+            }
+            context=null!=context?context.getApplicationContext():null;
+            if (null!=context&&callback.onIterated(view,context)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean dispatchEventToViewModel(View view,OnIterate callback){
+        if (null!=view&&null!=callback){
+            ViewDataBinding binding=DataBindingUtil.getBinding(view);
+            final Class bindingClass=null!=binding?binding.getClass().getSuperclass():null;
+            Method[] methods=null!=bindingClass?bindingClass.getDeclaredMethods():null;
+            if (null!=methods&&methods.length>0){
+                String methodName=null;
+                for (int i = 0; i < methods.length; i++) {
+                    Method method=methods[i];
+                    if (null==(methodName=null!=method?method.getName():null)||!methodName.startsWith("set")){
+                        continue;
+                    }
+                    Class[] types=method.getParameterTypes();
+                    if (null==types||types.length!=1){
+                        continue;
+                    }
+                    try {
+                        Method getMethod=bindingClass.getDeclaredMethod(methodName.replaceFirst("set","get"));
+                        Object result=null!=getMethod?getMethod.invoke(binding):null;
+                        if (null!=result&&callback.onIterated(view,result)){
+                            return true;
+                        }
+                    } catch (Exception e) {
+                        //Do nothing
+                    }
+                }
+            }
+            ViewParent parent=view.getParent();
+            return null!=parent&&parent instanceof View&&dispatchEventToViewModel((View)parent,callback);
+        }
+        return false;
     }
 }

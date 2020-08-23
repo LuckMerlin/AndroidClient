@@ -7,11 +7,11 @@ public class Image implements BindingObject,PublishMethods {
     private Object mSrc;
     private Object mBackground;
 
-    public Image(){
+    Image(){
         this(null,null);
     }
 
-    public Image(Object image,Object background){
+    Image(Object image,Object background){
         mBackground=background;
         mSrc=image;
     }

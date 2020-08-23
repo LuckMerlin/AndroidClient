@@ -9,6 +9,7 @@ import android.view.View;
 import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.core.debug.Debug;
+import com.luckmerlin.databinding.DataBindingUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -225,7 +226,7 @@ class ModelBinder {
             if (null!=existModel){
                 return false;//Already bound
             }
-            ViewDataBinding binding=DataBindingUtil.getBinding(view);
+            ViewDataBinding binding= DataBindingUtil.getBinding(view);
             Method method=null!=binding?findModelClassSetMethod(binding, model.getClass()):null;
             try {
                 if (null!=method) {
