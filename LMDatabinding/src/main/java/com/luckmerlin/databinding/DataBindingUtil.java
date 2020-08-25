@@ -23,7 +23,11 @@ import com.luckmerlin.core.proguard.PublishMethods;
         return null!=view&&checkDataBindingEnable(false)?androidx.databinding.DataBindingUtil.getBinding(view):null;
     }
 
-    public static ViewDataBinding inflate(LayoutInflater inflater, int layoutId, @Nullable ViewGroup parent, boolean attachToParent){
+    public static ViewDataBinding inflate(LayoutInflater inflater, int layoutId){
+        return null!=inflater?inflate(inflater,layoutId,null,false):null;
+    }
+
+    public static ViewDataBinding inflate(LayoutInflater inflater, int layoutId, ViewGroup parent, boolean attachToParent){
         return null!=inflater&&checkDataBindingEnable(true)?androidx.databinding.DataBindingUtil.inflate(inflater,layoutId,parent,attachToParent):null;
     }
 

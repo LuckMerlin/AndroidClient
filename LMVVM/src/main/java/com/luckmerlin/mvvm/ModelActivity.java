@@ -3,15 +3,18 @@ package com.luckmerlin.mvvm;
 import android.app.Activity;
 import android.content.Context;
 
+/**
+ * @deprecated
+ */
 public class ModelActivity extends Activity {
-    private
+//    private
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        if (this instanceof OnModelResolve){
-
-        }
+//        if (this instanceof OnModelResolve){
+//
+//        }
     }
 
 

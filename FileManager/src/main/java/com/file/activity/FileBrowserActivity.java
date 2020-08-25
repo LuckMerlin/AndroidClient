@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 
+import com.luckmerlin.mvvm.LifeBinder;
+import com.luckmerlin.mvvm.OnModelResolve;
 import com.merlin.debug.Debug;
 import com.merlin.file.R;
 import com.file.model.FileBrowserModel;
@@ -27,7 +29,7 @@ import com.merlin.model.OnServiceBindChange;
 import com.merlin.task.TaskService;
 
 
-public final class FileBrowserActivity extends ModelActivity<FileBrowserModel>     {
+public final class FileBrowserActivity extends ModelActivity<FileBrowserModel> {
     private static ServiceConnection mConnection;
 
     @Override

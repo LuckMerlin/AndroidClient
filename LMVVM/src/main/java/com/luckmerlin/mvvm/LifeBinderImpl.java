@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
 
 import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.mvvm.activity.OnActivityCreate;
@@ -39,8 +40,8 @@ import java.util.WeakHashMap;
 
 final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,ComponentCallbacks{
     private static LifeBinderImpl mLifeNotify;
-    private  Map<Object,Model> mModelMaps;
-    private  Map<Object,Activity> mActivityRegister;
+    private Map<Object,Model> mModelMaps;
+    private Map<Object,Activity> mActivityRegister;
 
     private interface OnIterate{
         boolean onIterated(Object value);
@@ -163,26 +164,34 @@ final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,Com
     }
 
     @Override
-    public void onActivityCreated(Activity activity,  Bundle savedInstanceState) {
+    public void onActivityCreated(final Activity activity,  Bundle savedInstanceState) {
         if (null!=activity){
             ModelBinder binder=new ModelBinder();
-            Model model=binder.createModel(activity);
-            Object actDeclareModel=null!=model&&activity instanceof OnModelLayoutResolve?((OnModelLayoutResolve)activity).onResolveModeLayout():null;
-            final View modelView= binder.createModelView(activity,model,actDeclareModel);
-            if (null!=modelView&&binder.attachModel(modelView,model,"While activity onCreate.")&&addActivityLife(activity,model,"While activity onCreate")){
-                activity.setContentView(modelView,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                //Collection register broadcasts
-                List<IntentFilter> intentFilters=model instanceof OnModelBroadcastResolve?((OnModelBroadcastResolve)model).onBroadcastResolve(null):null;
-                intentFilters=activity instanceof OnModelBroadcastResolve?((OnModelBroadcastResolve)actDeclareModel).onBroadcastResolve(intentFilters):intentFilters;
-                registerActivityBroadcast(activity,model,intentFilters,"While activity onCreate");
-                //Collection bind service
-                List<Intent> intents=model instanceof OnModelServiceResolve ?((OnModelServiceResolve)model).onServiceResolved(null):null;
-                intents=activity instanceof OnModelServiceResolve?((OnModelServiceResolve)actDeclareModel).onServiceResolved(intents):intents;
-                bindActivityService(activity,model,intents,"While activity onCreate");
+            ModelBinder.Created created=binder.createModel(activity instanceof OnModelResolve?binder.getIfNotNull(
+                    binder.createModel(((OnModelResolve)activity).onResolveModel()),activity):activity);
+            Model model=null;
+            if (null!=created){
+                model=created.mModel;
+                View root=created.mRoot;
+                if (null!=root){
+                    if (null==model||binder.attachModel(root,model,"While activity onCreate.")){//Normal view
+                        activity.setContentView(root,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT));
+                    }
+                }
             }
+            //Call onCreate
             if (null!=model&&model instanceof OnActivityCreate) {
                 ((OnActivityCreate)model).onActivityCreated(activity,savedInstanceState);
             }
+            //Collection register broadcasts
+            List<IntentFilter> intentFilters=null!=model&&model instanceof OnModelBroadcastResolve?((OnModelBroadcastResolve)model).onBroadcastResolve(null):null;
+            intentFilters=activity instanceof OnModelBroadcastResolve?((OnModelBroadcastResolve)activity).onBroadcastResolve(intentFilters):intentFilters;
+            registerActivityBroadcast(activity,model,intentFilters,"While activity onCreate");
+            //Collection bind service
+            List<Intent> intents=null!=model&&model instanceof OnModelServiceResolve ?((OnModelServiceResolve)model).onServiceResolved(null):null;
+            intents=activity instanceof OnModelServiceResolve?((OnModelServiceResolve)activity).onServiceResolved(intents):intents;
+            bindActivityService(activity,model,intents,"While activity onCreate");
         }
     }
 

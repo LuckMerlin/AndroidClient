@@ -1,8 +1,10 @@
 package com.luckmerlin.mvvm;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.databinding.ViewDataBinding;
 
@@ -21,20 +23,28 @@ import java.util.WeakHashMap;
 class ModelBinder {
     private static Map<View,Model> mBoundedMap;
 
+    static final class Created{
+        final Model mModel;
+        final View mRoot;
+        Created(Model model,View root){
+            mModel=model;
+            mRoot=root;
+        }
+    }
+
     protected final boolean bindFromAdapter(View view, Object modelObj,String debug){
         if (null!=view&&null!=modelObj){
             if (null!=getViewModel(view)){
                 return false;//Already bound
             }
-            final ModelBinder binder=new ModelBinder();
             if (modelObj instanceof Boolean){
                 if (!(Boolean)modelObj){
                     return false;//Not need bind model
                 }
-                ViewDataBinding binding=DataBindingUtil.getBinding(view);
-                modelObj=null!=binding?binder.findBindingModelClass(binding):null;
             }
-            Model model=null!=modelObj?binder.createModel(modelObj):null;
+            final ModelBinder binder=new ModelBinder();
+            Created created=null!=modelObj?binder.createModel(null,modelObj):null;
+            Model model=null!=created?created.mModel:null;
             if (null!=model&&binder.attachModel(view,model,debug)){
                 return true;
             }
@@ -71,12 +81,30 @@ class ModelBinder {
         return false;
     }
 
-    protected final Model createModel(Object object) {
+    protected final Created createModel(Object object) {
+        return createModel(null,object);
+    }
+
+    protected final Created createModel(Context context,Object object) {
         if (null!=object){
-            object=object instanceof OnModelResolve ?((OnModelResolve)object).onResolveModel():object;
-            object=object instanceof ViewDataBinding?findBindingModelClass((ViewDataBinding)object):object;
-            object=object instanceof String?getModelClass((String)object):object;
-            if (object instanceof Class){
+            object=object instanceof OnModelResolve ?getIfNotNull(((OnModelResolve)object).onResolveModel(),object):object;
+            object=null!=object&&object instanceof Activity?getIfNotNull(getActivityFirstRoot((Activity)object),object):object;
+            if (null!=context&&null!=object&&object instanceof Integer){
+               object= getIfNotNull(createLayoutView(context,(Integer)object),object);
+            }
+            View root=null;
+            if (null!=object&&object instanceof View){
+                root=(View)object;
+                object=DataBindingUtil.getBinding(root);
+            }
+            object= null!=object&&object instanceof View?getIfNotNull(DataBindingUtil.getBinding((View)object),object):object;
+            if (null!=object&&object instanceof ViewDataBinding){
+                ViewDataBinding binding=(ViewDataBinding)object;
+                root=binding.getRoot();
+                object=getIfNotNull(findBindingModelClass((ViewDataBinding)object),object);
+            }
+            object=null!=object&&object instanceof String?getIfNotNull(getModelClass((String)object),object):object;
+            if (null!=object&&object instanceof Class){
                 if (!Modifier.isAbstract(((Class)object).getModifiers())) {
                     Constructor[] constructors = null != getModelClass((Class) object) ? ((Class) object).getDeclaredConstructors() : null;
                     if (null != constructors && constructors.length > 0) {
@@ -88,7 +116,7 @@ class ModelBinder {
                                 break;
                             }
                         }
-                        if (null != constructor) {//Found model constructor,Now create ir
+                        if (null != constructor) {//Found model constructor,Now create it
                             try {
                                 object = constructor.newInstance();
                             } catch (Exception e) {
@@ -98,37 +126,32 @@ class ModelBinder {
                     }
                 }
             }
-            return null!=object&&object instanceof Model?((Model)object):null;
+            return null!=object&&object instanceof Model?new Created(((Model)object),root):null;
         }
         return null;
     }
 
-    protected final View createModelView(Context context, Object ...objects) {
-        if (null!=context&&null!=objects&&objects.length>0){
-            for (Object object:objects) {
-                if (null!=object){
-                    object= object instanceof OnModelLayoutResolve?((OnModelLayoutResolve)object).onResolveModeLayout():object;
-                    if (object instanceof Integer){//Found as layout id
-                        try {
-                            boolean isViewDataBindLayout=true;
-                            if (isViewDataBindLayout) {
-                                ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), (Integer) object, null, false);
-                                object = null != binding ? binding.getRoot() : object;
-                            }
-                        }catch (Exception e){
-                            //Do nothing
-                        }
-                        try {
-                            object=null!=object&&object instanceof Integer?View.inflate(context,(Integer)object,null):object;
-                        }catch (Exception e){
-                            //Do nothing
-                        }
+    protected final View createLayoutView(Context context,final Integer layoutId){
+        if (null!=context&&null!=layoutId){
+            View view=null;
+                try {
+                    boolean isViewDataBindLayout=true;
+                    if (isViewDataBindLayout) {
+                        ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), layoutId, null, false);
+                        view = null != binding ? binding.getRoot() : null;
                     }
-                    if (null!=object&&object instanceof View&&((View)object).getParent()==null){
-                        return (View)object;
+                    }catch (Exception e){
+                        //Do nothing
                     }
-                }
+                    try {
+                        view=null==view?View.inflate(context,layoutId,null):view;
+                    }catch (Exception e){
+                        //Do nothing
+                    }
+            if (null!=view&&view.getParent()==null){
+                return view;
             }
+            return null;
         }
         return null;
     }
@@ -199,11 +222,11 @@ class ModelBinder {
         return count;
     }
 
-    protected final boolean bindViewModel(View view,String debug){
-        ViewDataBinding binding=null!=view?DataBindingUtil.getBinding(view):null;
-        Model model=null!=binding?createModel(binding):null;
-        return null!=model&&bindViewModel(view,model,debug);
-    }
+//    protected final boolean bindViewModel(View view,String debug){
+//        ViewDataBinding binding=null!=view?DataBindingUtil.getBinding(view):null;
+//        Model model=null!=binding?createModel(binding):null;
+//        return null!=model&&bindViewModel(view,model,debug);
+//    }
 
     public static Model getViewModel(View view){
         Map<View,Model> boundMap=mBoundedMap;
@@ -242,4 +265,13 @@ class ModelBinder {
         return false;
     }
 
+    protected final Object getIfNotNull(Object arg,Object def){
+        return null!=arg?arg:def;
+    }
+
+    protected final View getActivityFirstRoot(Activity activity){
+        View content=null!=activity?activity.findViewById(android.R.id.content):null;
+        return null!=content&&content instanceof ViewGroup&&((ViewGroup)content).
+                getChildCount()>0?((ViewGroup)content).getChildAt(0):null;
+    }
 }
