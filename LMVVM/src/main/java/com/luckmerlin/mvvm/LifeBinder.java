@@ -1,6 +1,5 @@
 package com.luckmerlin.mvvm;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.luckmerlin.core.proguard.PublishMethods;
@@ -16,8 +15,8 @@ public final class LifeBinder implements PublishMethods {
 
     }
 
-    public static boolean bindActivityLife(boolean enable, Activity activity){
-        return LifeBinderImpl.bindActivityLife(enable, activity);
+    public static boolean bindActivityLife(boolean enable, Context context){
+        return LifeBinderImpl.bindActivityLife(enable, context);
     }
 
     public static boolean bindComponentLife(boolean enable, Context context){

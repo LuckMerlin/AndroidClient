@@ -70,7 +70,7 @@ final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,Com
         return false;
     }
 
-    public static synchronized boolean bindActivityLife(boolean enable,Activity context){
+    public static synchronized boolean bindActivityLife(boolean enable,Context context){
         return bindLife(context,enable,(app,en,life)->{
             app.unregisterActivityLifecycleCallbacks(life);
             if (enable){ app.registerActivityLifecycleCallbacks(life); }
@@ -168,15 +168,17 @@ final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,Com
         if (null!=activity){
             ModelBinder binder=new ModelBinder();
             ModelBinder.Created created=binder.createModel(activity instanceof OnModelResolve?binder.getIfNotNull(
-                    binder.createModel(((OnModelResolve)activity).onResolveModel()),activity):activity);
+                    binder.createModel(activity,((OnModelResolve)activity).onResolveModel()),activity):activity);
             Model model=null;
             if (null!=created){
                 model=created.mModel;
                 View root=created.mRoot;
                 if (null!=root){
                     if (null==model||binder.attachModel(root,model,"While activity onCreate.")){//Normal view
-                        activity.setContentView(root,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT));
+                        activity.setContentView(root,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        if (null!=model){
+                            addActivityLife(activity,model,"While activity onCreate.");
+                        }
                     }
                 }
             }
@@ -196,7 +198,7 @@ final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,Com
     }
 
     @Override
-    public void onActivityStarted( Activity activity) {
+    public void onActivityStarted(Activity activity) {
         Model model=findActivityModel(activity);
         if (null!=model&&model instanceof OnActivityStart) {
             ((OnActivityStart)model).onActivityStarted(activity);

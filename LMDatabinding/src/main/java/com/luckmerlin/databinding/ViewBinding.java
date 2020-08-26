@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -75,8 +76,23 @@ final class ViewBinding {
             if (binding instanceof Touch){
                 applyViewTouch(view,(Touch)binding);
             }
+            if (binding instanceof com.luckmerlin.databinding.view.View){
+                applyViewBinding(view,(com.luckmerlin.databinding.view.View)binding);
+            }
         }
         return true;
+    }
+
+    private boolean applyViewBinding(View view, com.luckmerlin.databinding.view.View binding){
+        if (null!=view&&null!=binding){
+            int type=binding.getType();
+            switch (type){
+                case com.luckmerlin.databinding.view.View.ADD:
+
+                    break;
+            }
+        }
+        return false;
     }
 
     private boolean applyViewTouch(View view,Touch touch){

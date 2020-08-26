@@ -1,5 +1,7 @@
 package com.luckmerlin.mvvm;
 
-public interface OnModelResolve {
+import com.luckmerlin.core.proguard.PublishMethods;
+
+public interface OnModelResolve extends PublishMethods {
     Object onResolveModel();
 }

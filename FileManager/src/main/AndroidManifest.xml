@@ -67,6 +67,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <activity android:name="com.file.activity.Test">
+            <intent-filter>
+                <action android:name="ddddd"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

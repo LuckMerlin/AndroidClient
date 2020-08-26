@@ -87,6 +87,9 @@ class ModelBinder {
 
     protected final Created createModel(Context context,Object object) {
         if (null!=object){
+            if (object instanceof Created){
+                return (Created)object;
+            }
             object=object instanceof OnModelResolve ?getIfNotNull(((OnModelResolve)object).onResolveModel(),object):object;
             object=null!=object&&object instanceof Activity?getIfNotNull(getActivityFirstRoot((Activity)object),object):object;
             if (null!=context&&null!=object&&object instanceof Integer){
@@ -126,7 +129,8 @@ class ModelBinder {
                     }
                 }
             }
-            return null!=object&&object instanceof Model?new Created(((Model)object),root):null;
+            Model model=null!=object&&object instanceof Model?(Model)object:null;
+            return null!=root||null!=model?new Created(model,root):null;
         }
         return null;
     }
@@ -221,12 +225,6 @@ class ModelBinder {
         }
         return count;
     }
-
-//    protected final boolean bindViewModel(View view,String debug){
-//        ViewDataBinding binding=null!=view?DataBindingUtil.getBinding(view):null;
-//        Model model=null!=binding?createModel(binding):null;
-//        return null!=model&&bindViewModel(view,model,debug);
-//    }
 
     public static Model getViewModel(View view){
         Map<View,Model> boundMap=mBoundedMap;
