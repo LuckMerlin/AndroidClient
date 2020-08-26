@@ -1,4 +1,4 @@
-package com.luckmerlin.mvvm.dialog;
+package com.luckmerlin.databinding.dialog;
 
 import android.app.Activity;
 import android.app.Service;
@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -16,13 +17,18 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.databinding.touch.OnViewClick;
-import com.luckmerlin.mvvm.Model;
 
-public final class Dialog {
+ abstract class Dialog {
     private final android.app.Dialog mDialog;
+    private ViewGroup mRoot;
 
-    public Dialog(Context context,Integer windowType){
-        android.app.Dialog dialog=mDialog=null!=context?new android.app.Dialog(context):null;
+    public Dialog(android.app.Dialog dialog){
+        mDialog=dialog;
+    }
+
+    public Dialog(Context context, Integer windowType){
+        this(new android.app.Dialog(context));
+        android.app.Dialog dialog=mDialog;
         if (null!=dialog){
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             Window window=dialog.getWindow();
@@ -35,11 +41,7 @@ public final class Dialog {
         }
     }
 
-    public Dialog(android.app.Dialog dialog){
-        mDialog=dialog;
-    }
-
-    public Window getWindow(){
+    public final Window getWindow(){
         android.app.Dialog dialog=mDialog;
         return null!=dialog?dialog.getWindow():null;
     }
@@ -81,55 +83,21 @@ public final class Dialog {
     public final Dialog setContentView(View view,boolean recreate,int[] padding){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
-//            if (!isCreated()||recreate) {
-//                create(padding);
-//            }
-//            DialogLayoutBinding binding=mBinding;
-//            if (null!=binding){
+            if (!isCreated()||recreate) {
+                onCreate(padding);
+            }
+            ViewGroup root=mRoot;
+            if (null!=root){
 //                binding.setContentLayout(view);
-//            }
+            }
         }
         return this;
     }
 
-    public final Dialog title(Object title){
-//        DialogLayoutBinding binding=mBinding;
-//        if (null!=binding){
-//            binding.setTitleText(title);
-//        }
-        return this;
-    }
+    protected abstract ViewGroup onCreate(int[] padding);
 
-    public final Dialog message(Object msgTextId){
-//        DialogLayoutBinding binding=mBinding;
-//        if (null!=binding){
-//            binding.setMessageText(msgTextId);
-//        }
-        return this;
-    }
-
-    public final Dialog left(Object leftTextId){
-//        DialogLayoutBinding binding=mBinding;
-//        if (null!=binding){
-//            binding.setLeftText(leftTextId);
-//        }
-        return this;
-    }
-
-    public final Dialog center(Object centerTextId){
-//        DialogLayoutBinding binding=mBinding;
-//        if (null!=binding){
-//            binding.setCenterText(centerTextId);
-//        }
-        return this;
-    }
-
-    public final Dialog right(Object rightTextId){
-//        DialogLayoutBinding binding=mBinding;
-//        if (null!=binding){
-//            binding.setRightText(rightTextId);
-//        }
-        return this;
+    public final boolean isCreated(){
+        return null!=mRoot;
     }
 
     public final boolean show(){
@@ -193,12 +161,12 @@ public final class Dialog {
         return this;
     }
 
-    public WindowManager.LayoutParams getAttributes(){
+    public final WindowManager.LayoutParams getAttributes(){
         Window window=getWindow();
        return null!=window?window.getAttributes():null;
     }
 
-    public Dialog setAttributes(WindowManager.LayoutParams params){
+    public final Dialog setAttributes(WindowManager.LayoutParams params){
         Window window=getWindow();
         if (null!=params){
             window.setAttributes(params);
@@ -223,12 +191,5 @@ public final class Dialog {
         android.app.Dialog dialog=mDialog;
         return null!=dialog?dialog.getContext():null;
     }
-
-    public final View getRootView() {
-//        ViewDataBinding binding=mBinding;
-//        return null!=binding?binding.getRoot():null;
-        return null;
-    }
-
 
 }
