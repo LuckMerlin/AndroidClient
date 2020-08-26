@@ -1,34 +1,44 @@
 package com.luckmerlin.databinding.view;
 
+import android.view.ViewGroup;
+
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.BindingObject;
 
 public final class View implements BindingObject, PublishMethods {
     public final static int ADD=2011;
     public final static int REPLACE=2012;
+    public final static int SET=2013;
     private Object mView;
-    private Object mParms;
+    private int mPosition;
+    private ViewGroup.LayoutParams mParms;
     private int mType=REPLACE;
 
-    private View(Object view,Object parms){
+    private View(Object view,int type,ViewGroup.LayoutParams parms){
         mView=view;
+        mType=type;
         mParms=parms;
     }
 
-    public static View v(Object view){
-        return v(view,null);
+    public static View view(Object view,int type){
+        return view(view,type,null);
     }
 
-    public static View v(Object view,Object parms){
-        return new View(view,parms);
+    public static View view(Object view,int type,ViewGroup.LayoutParams parms){
+        return new View(view,type,parms);
     }
 
-    public View view(Object view){
+    public View setView(Object view){
         mView=view;
         return this;
     }
 
-    public View parms(Object parms){
+    public View position(int position){
+        mPosition=position;
+        return this;
+    }
+
+    public View parms(ViewGroup.LayoutParams parms){
         mParms=parms;
         return this;
     }
@@ -38,11 +48,15 @@ public final class View implements BindingObject, PublishMethods {
         return this;
     }
 
+    public int getPosition() {
+        return mPosition;
+    }
+
     public Object getView() {
         return mView;
     }
 
-    public Object getParms() {
+    public final ViewGroup.LayoutParams getParms() {
         return mParms;
     }
 

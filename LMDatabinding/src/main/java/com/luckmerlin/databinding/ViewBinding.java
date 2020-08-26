@@ -85,11 +85,62 @@ final class ViewBinding {
 
     private boolean applyViewBinding(View view, com.luckmerlin.databinding.view.View binding){
         if (null!=view&&null!=binding){
+            Object viewObject=binding.getView();
+            View viewChild=null!=viewObject?new ViewCreator().create(view.getContext(),viewObject):null;
+            if (null==viewChild||viewChild.getParent()!=null){
+                return false;
+            }
             int type=binding.getType();
             switch (type){
                 case com.luckmerlin.databinding.view.View.ADD:
-
-                    break;
+                    if (view instanceof ViewGroup){
+                        int index=binding.getPosition();
+                        ViewGroup viewGroup=((ViewGroup)view);
+                        ViewGroup.LayoutParams layoutParams=binding.getParms();
+                        int count=viewGroup.getChildCount();
+                        index=index>=0&&index<=count?index:count;
+                        ((ViewGroup)view).addView(viewChild,index,null!=layoutParams?layoutParams: new
+                                ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+                        return true;
+                    }
+                    return false;
+                case com.luckmerlin.databinding.view.View.SET:
+                    if (view instanceof ViewGroup){
+                        ViewGroup viewGroup=((ViewGroup)view);
+                        View firstChild=viewGroup.getChildCount()>0?viewGroup.getChildAt(0):null;
+                        ViewGroup.LayoutParams firstChildParms=null!=firstChild?firstChild.getLayoutParams():null;
+                        viewGroup.removeAllViews();
+                        firstChildParms=null!=firstChildParms?firstChildParms:binding.getParms();
+                        viewGroup.addView(viewChild,null!=firstChildParms?firstChildParms:
+                                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+                        return true;
+                    }
+                    return false;
+                case com.luckmerlin.databinding.view.View.REPLACE:
+                    ViewParent parent=view.getParent();
+                    if (null!=parent&&parent instanceof ViewGroup){
+                        ViewGroup vg=(ViewGroup)parent;
+                        int count=vg.getChildCount();
+                        int index=-1;
+                        View child=null;
+                        ViewGroup.LayoutParams params=null;
+                        for (int i = 0; i < count; i++) {
+                            if (null!=(child=vg.getChildAt(i))&&child==view){
+                                index=i;
+                                params=child.getLayoutParams();
+                                break;
+                            }
+                        }
+                        if (index>=0){
+                            vg.removeViewAt(index);
+                            params=null!=params?params:binding.getParms();
+                            vg.addView(viewChild,index,null!=params?params: new ViewGroup.LayoutParams
+                                    (ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+                            return true;
+                        }
+                        return false;
+                    }
+                    return false;
             }
         }
         return false;

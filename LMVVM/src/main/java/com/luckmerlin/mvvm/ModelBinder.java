@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.databinding.DataBindingUtil;
+import com.luckmerlin.databinding.ViewCreator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -93,7 +94,7 @@ class ModelBinder {
             object=object instanceof OnModelResolve ?getIfNotNull(((OnModelResolve)object).onResolveModel(),object):object;
             object=null!=object&&object instanceof Activity?getIfNotNull(getActivityFirstRoot((Activity)object),object):object;
             if (null!=context&&null!=object&&object instanceof Integer){
-               object= getIfNotNull(createLayoutView(context,(Integer)object),object);
+               object= getIfNotNull(new ViewCreator().create(context,(Integer)object),object);
             }
             View root=null;
             if (null!=object&&object instanceof View){
@@ -131,31 +132,6 @@ class ModelBinder {
             }
             Model model=null!=object&&object instanceof Model?(Model)object:null;
             return null!=root||null!=model?new Created(model,root):null;
-        }
-        return null;
-    }
-
-    protected final View createLayoutView(Context context,final Integer layoutId){
-        if (null!=context&&null!=layoutId){
-            View view=null;
-                try {
-                    boolean isViewDataBindLayout=true;
-                    if (isViewDataBindLayout) {
-                        ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), layoutId, null, false);
-                        view = null != binding ? binding.getRoot() : null;
-                    }
-                    }catch (Exception e){
-                        //Do nothing
-                    }
-                    try {
-                        view=null==view?View.inflate(context,layoutId,null):view;
-                    }catch (Exception e){
-                        //Do nothing
-                    }
-            if (null!=view&&view.getParent()==null){
-                return view;
-            }
-            return null;
         }
         return null;
     }
