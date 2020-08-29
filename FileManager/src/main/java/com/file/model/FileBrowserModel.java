@@ -88,7 +88,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
         Client testClient=Client.buildLocalClient(getContext());
         testClient.setHome(new Preference(getContext()).getString(LocalFileBrowser.LABEL_HOME,"/sdcard"));
 //        Client testClient2=new ClientMeta("算法","/volume1",Address.URL,null,"","/");
-//        putClientMeta(testClient1, "After mode create.");
+        putClientMeta(testClient1, "After mode create.");
         putClientMeta(testClient, "After mode create.");
         //
 //        refreshClientMeta("After
@@ -156,7 +156,7 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
                     case R.string.setAsHome:
                         return setAsHome(data,"After set as home tap click.");
                     case R.string.rename:
-                        return null!=data&&data instanceof Path &&renamePath((Path)data, Cover.COVER_NONE,"After rename tap click.");
+                        return null!=data&&data instanceof Path &&renamePath((Path)data, false,Cover.COVER_NONE,"After rename tap click.");
                     case R.string.transportList:
                         return startActivity(TaskActivity.class,"After transport list tap click.");
                     case R.string.multiChoose:
@@ -390,9 +390,9 @@ public class FileBrowserModel extends BaseModel implements Label, OnTapClick,
         return null!=browser&&browser.deletePath(files,null,debug);
     }
 
-    private boolean renamePath(Path meta,int coverMode,String debug){
+    private boolean renamePath(Path meta,boolean full,int coverMode,String debug){
         FileBrowser browser=getCurrentBrowser();
-        return null!=browser&&browser.renamePath(meta,coverMode,debug);
+        return null!=browser&&browser.renamePath(meta,full,coverMode,debug);
     }
 
     private boolean createPath(boolean directory,String debug){

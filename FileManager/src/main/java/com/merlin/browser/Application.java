@@ -1,8 +1,10 @@
 package com.merlin.browser;
 
 
-import com.luckmerlin.mvvm.LifeBinder;
+import android.content.Intent;
+
 import com.merlin.browser.config.Config;
+import com.merlin.file.transport.FileTaskService;
 
 public class Application extends android.app.Application {
     private final Config mConfig=new Config();
@@ -14,6 +16,6 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LifeBinder.bindActivityLife(true,this);
+//        startService(new Intent(this, FileTaskService.class));
     }
 }

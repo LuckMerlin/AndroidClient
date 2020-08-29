@@ -9,9 +9,11 @@ import android.os.Parcelable;
 import com.merlin.api.Label;
 import com.merlin.bean.Path;
 import com.merlin.debug.Debug;
+import com.merlin.task.Networker;
 import com.merlin.task.Task;
 import com.merlin.task.TaskGroup;
 import com.merlin.task.TaskService;
+import com.merlin.task.file.FileProgress;
 
 import java.util.ArrayList;
 
@@ -26,9 +28,20 @@ public class FileTaskService extends TaskService {
             Task task=createFileTask(bundle);
             if (null!=task){
                 super.execute(task,null,"While service onStart.");
-
             }
         }
+//        super.execute(new Task("验证") {
+//            @Override
+//            protected void onExecute(Networker networker) {
+//                notifyStatus(DOING,"");
+//                FileProgress progress=new FileProgress(0,100);
+//                while (true){
+//                    notifyStatus(DOING,"",progress);
+//                    long doen=progress.getDone();
+//                    progress.setDone(doen+10>100?0:doen+10);
+//                }
+//            }
+//        },null,"");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -69,7 +82,6 @@ public class FileTaskService extends TaskService {
             Path toPath = (Path) toPathObj;
             TaskGroup taskGroup = new TaskGroup("");
             for (Parcelable child : fromList) {
-
                 if (null != child && child instanceof Path) {
                     Path path = (Path) child;
                     String toName=toPath.generateChildPath(path.getName(true));

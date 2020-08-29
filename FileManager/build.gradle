@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.merlin.browser"
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.wang.avi:library:2.1.3'
     implementation files('libs/py4j.jar')
     implementation project(path: ':Task')
-    implementation project(path: ':LMVVM')
-    implementation project(path: ':LMDatabinding')
-    implementation project(path: ':LMCore')
+//    implementation project(path: ':LMVVM')
+//    implementation project(path: ':LMDatabinding')
+//    implementation project(path: ':LMCore')
 }

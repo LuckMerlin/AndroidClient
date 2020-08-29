@@ -3,6 +3,7 @@ package com.luckmerlin.databinding.dialog;
 import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -54,69 +55,65 @@ import com.luckmerlin.databinding.touch.OnViewClick;
         return this;
     }
 
-    public final Dialog setContentView(int layoutId,boolean recreate){
+    public final Dialog setContentView(int layoutId){
         Context context=getContext();
         if (null!=context){
             LayoutInflater inflater=LayoutInflater.from(context);
             ViewDataBinding binding= DataBindingUtil.inflate(inflater,layoutId,null,false);
             if (null!=binding){
-                return setContentView(binding,recreate);
+                return setContentView(binding);
             }
-            return setContentView(inflater.inflate(layoutId,null,false),recreate);
+            return setContentView(inflater.inflate(layoutId,null,false));
         }
         return this;
     }
 
-    public final Dialog setContentView(ViewDataBinding binding, boolean recreate){
-        return setContentView(binding,recreate,null);
+    public final Dialog setContentView(ViewDataBinding binding){
+        return setContentView(binding,null);
     }
 
-    public final Dialog setContentView(ViewDataBinding binding, boolean recreate,int[] padding){
+    public final Dialog setContentView(ViewDataBinding binding,int[] padding){
         View view=null!=binding?binding.getRoot():null;
-        return null!=view?setContentView(view,recreate,padding):this;
+        return null!=view?setContentView(view,padding):this;
     }
 
-    public final Dialog setContentView(View view,boolean recreate){
-        return setContentView(view,recreate,null);
+    public final Dialog setContentView(View view){
+        return setContentView(view,null);
     }
 
-    public final Dialog setContentView(View view,boolean recreate,int[] padding){
+    public final Dialog setContentView(View view,int[] padding){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
-            if (!isCreated()||recreate) {
-                onCreate(padding);
+            if (null!=padding&&padding.length==4){
+                view.setPadding(padding[0],padding[1],padding[2],padding[3]);
             }
-            ViewGroup root=mRoot;
-            if (null!=root){
-//                binding.setContentLayout(view);
-            }
+            dialog.setContentView(view,new ViewGroup.LayoutParams
+                    (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
         return this;
     }
 
-    protected abstract ViewGroup onCreate(int[] padding);
+    public final View getWindowRoot() {
+         Window window=getWindow();
+         return null!=window?window.getDecorView():null;
+     }
 
-    public final boolean isCreated(){
-        return null!=mRoot;
-    }
+    public final View getRoot() {
+         return mRoot;
+     }
 
     public final boolean show(){
         return show(null,true);
     }
 
     public final boolean show(OnViewClick click){
-        return show(click,null!=click&&(click instanceof Model ||click instanceof Activity ||
+        return show(click,null!=click&&(click instanceof ContentProvider ||click instanceof Activity ||
                 click instanceof Service ||click instanceof BroadcastReceiver));
     }
 
     public final boolean show(OnViewClick click, boolean weak){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&!dialog.isShowing()){
-//            DialogLayoutBinding binding=mBinding;
-//            View root=null!=binding?binding.getRoot():null;
-//            if (null!=root){
-//                Clicker.setInterrupterTag(root,click,weak);
-//            }
             dialog.show();
             return true;
         }

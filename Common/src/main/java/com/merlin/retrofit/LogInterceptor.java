@@ -2,11 +2,19 @@ package com.merlin.retrofit;
 
 import android.util.Log;
 
+import com.merlin.debug.Debug;
+
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Locale;
 
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
+import retrofit2.Response;
 
 public class LogInterceptor implements Interceptor {
 
@@ -26,7 +34,13 @@ public class LogInterceptor implements Interceptor {
 
         Log.e(TAG,"request:" + request.toString());
         okhttp3.Response response = chain.proceed(chain.request());
-        okhttp3.MediaType mediaType = response.body().contentType();
+        ResponseBody responseBody = response.body();
+        MediaType mediaType=responseBody.contentType();
+        String content=null;
+        final String charset="UTF-8";
+        try (BufferedSource source =(null!=responseBody?responseBody.source():null)) {
+            content=source.readString(Charset.forName(charset));
+        }
         String contentType=null!=mediaType?mediaType.toString():null;
         if (null!=contentType&&contentType.equals("application/octet-stream")){
             return response;
@@ -35,10 +49,11 @@ public class LogInterceptor implements Interceptor {
         long t2 = System.nanoTime();
         Log.e(TAG,String.format(Locale.getDefault(), "Received response for %s in %.1fms%n%s",
                 response.request().url(), (t2 - t1) / 1e6d, response.headers()));
-        String content = response.body().string();
+//        String content = response.body().string();
         Log.e(TAG, "response body:"+contentType+" " + content);
+        byte[] bytes=null!=content?content.getBytes(charset):null;
         return response.newBuilder()
-                .body(okhttp3.ResponseBody.create(mediaType, content))
+                .body(okhttp3.ResponseBody.create(mediaType, bytes))
 //                .header("Authorization", Your.sToken)
                 .build();
     }

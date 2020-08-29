@@ -10,11 +10,6 @@ public class LMDialog extends Dialog {
         super(context, windowType);
     }
 
-    @Override
-    protected ViewGroup onCreate(int[] padding) {
-        return null;
-    }
-
 
     public final Dialog title(Object title){
 //        DialogLayoutBinding binding=mBinding;
@@ -63,8 +58,4 @@ public class LMDialog extends Dialog {
         return null;
     }
 
-    @Override
-    protected ViewGroup onCreate() {
-        return null;
-    }
 }

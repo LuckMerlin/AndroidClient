@@ -142,20 +142,20 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
                 }else{
                     File parent=file.getParentFile();
                     if (null==parent){
-                        reply=new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Path none parent",null);
+                        reply=new Reply<>(true,What.WHAT_ERROR,"Path none parent",null);
                     }else if (new File(parent,name).exists()&&coverMode!= Cover.COVER_REPLACE){
                         reply=new Reply<>(true,What.WHAT_ALREADY_DONE,"Path already exist",null);
                     }else {
                         file.renameTo(new File(parent,name));
                         if (file.exists()){
-                            reply=new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Path rename fail",null);
+                            reply=new Reply<>(true,What.WHAT_ERROR,"Path rename fail",null);
                         }else{
                             reply=new Reply<>(true,What.WHAT_SUCCEED,"Path rename succeed",null);
                         }
                     }
                 }
             }
-            reply=null!=reply?reply:new Reply<>(true,What.WHAT_ERROR_UNKNOWN,"Path rename fail",null);
+            reply=null!=reply?reply:new Reply<>(true,What.WHAT_ERROR,"Path rename fail",null);
             finish.onApiFinish(reply.getWhat(),reply.getNote(),reply,null);
             return true;
         }
@@ -208,7 +208,7 @@ public class LocalFileBrowser extends FileBrowser implements OnTaskUpdate {
 
     @Override
     public void onTaskUpdate(int status, int what, String note, Object obj, Task task) {
-//            null!=task?task.getProgress()
+
     }
 
     private String getHome(){

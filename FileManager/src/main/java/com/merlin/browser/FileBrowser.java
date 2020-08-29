@@ -169,7 +169,7 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
         return onReboot(debug);
     }
 
-    public final boolean renamePath(Path pathObj, int coverMode, String debug){
+    public final boolean renamePath(Path pathObj,boolean full, int coverMode, String debug){
         final String path=null!=pathObj?pathObj.getPath():null;
         if (null!=path&&path.length()>0){
             final String name=pathObj.getName(true);
@@ -186,6 +186,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                                 toast(R.string.noneChanged);
                             }else{
                                 dialog.dismiss();
+                                if (!full){
+                                    int postfixIndex=path.lastIndexOf(".");
+                                    text=postfixIndex>0?text+path.substring(postfixIndex):text;
+                                }
                                 onRenamePath(path,text,coverMode,(what, note, data1, arg)->{
                                     boolean succeed=what== What.WHAT_SUCCEED;
                                     if (succeed&&pathObj.applyNameChange(data1)){
@@ -195,6 +199,10 @@ public abstract class FileBrowser extends BrowserAdapter<Path> implements OnTapC
                                 },debug);
                             }
                             break;
+                        case R.string.cancel:
+                            dialog.dismiss();
+                            break;
+
                     }
                 return true; });
         }
