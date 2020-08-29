@@ -15,10 +15,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.AbsListView;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.databinding.ViewDataBinding;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.luckmerlin.databinding.text.OnEditActionChange;
 import com.luckmerlin.databinding.text.OnEditActionChangeListener;
@@ -330,6 +334,14 @@ final class ViewBinding {
                 return false;
             }
             if (dispatchEventToViewModel(view,callback)){
+                return true;
+            }
+            Adapter adapter=view instanceof AdapterView?((AdapterView)view).getAdapter():null;
+            if (null!=adapter&&callback.onIterated(view,adapter)){
+                return true;
+            }
+            Object reAdapter=view instanceof RecyclerView ?((RecyclerView)view).getAdapter():null;
+            if (null!=reAdapter&&callback.onIterated(view,reAdapter)){
                 return true;
             }
             Context context=view.getContext();

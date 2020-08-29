@@ -17,11 +17,14 @@ import android.widget.TextView;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.touch.OnViewClick;
 
- abstract class Dialog {
+import java.lang.ref.WeakReference;
+
+public class Dialog {
     private final android.app.Dialog mDialog;
-    private ViewGroup mRoot;
+    private WeakReference<View> mRoot;
 
     public Dialog(android.app.Dialog dialog){
         mDialog=dialog;
@@ -74,23 +77,32 @@ import com.luckmerlin.databinding.touch.OnViewClick;
 
     public final Dialog setContentView(ViewDataBinding binding,int[] padding){
         View view=null!=binding?binding.getRoot():null;
-        return null!=view?setContentView(view,padding):this;
+        return null!=view?setContentView(view,padding,null):this;
     }
 
     public final Dialog setContentView(View view){
-        return setContentView(view,null);
+        return setContentView(view,null,null);
     }
 
-    public final Dialog setContentView(View view,int[] padding){
+    public final Dialog setContentView(View view, int[] padding, ViewGroup.LayoutParams params){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
             if (null!=padding&&padding.length==4){
                 view.setPadding(padding[0],padding[1],padding[2],padding[3]);
             }
-            dialog.setContentView(view,new ViewGroup.LayoutParams
-                    (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            if (null!=(view=onSetContentView(view))){
+                if (view.getParent()==null){
+                    mRoot=new WeakReference<>(view);
+                    dialog.setContentView(view,null!=params?params:new ViewGroup.LayoutParams
+                            (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                }
+            }
         }
         return this;
+    }
+
+    protected View onSetContentView(View view){
+        return view;
     }
 
     public final View getWindowRoot() {
@@ -98,8 +110,9 @@ import com.luckmerlin.databinding.touch.OnViewClick;
          return null!=window?window.getDecorView():null;
      }
 
-    public final View getRoot() {
-         return mRoot;
+    public final View getRoot(){
+        WeakReference<View> reference=mRoot;
+         return null!=reference?reference.get():null;
      }
 
     public final boolean show(){

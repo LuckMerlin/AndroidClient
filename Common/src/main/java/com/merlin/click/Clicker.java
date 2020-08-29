@@ -2,6 +2,7 @@ package com.merlin.click;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
@@ -168,7 +170,8 @@ public final class Clicker {
         return false;
     }
 
-    public boolean attach(View root,Click click){
+    @RequiresApi(api = Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+    public boolean attach(View root, Click click){
             if (null==root||null==click){
                 return false;
             }

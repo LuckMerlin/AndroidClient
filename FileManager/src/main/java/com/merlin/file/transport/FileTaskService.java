@@ -30,18 +30,6 @@ public class FileTaskService extends TaskService {
                 super.execute(task,null,"While service onStart.");
             }
         }
-//        super.execute(new Task("验证") {
-//            @Override
-//            protected void onExecute(Networker networker) {
-//                notifyStatus(DOING,"");
-//                FileProgress progress=new FileProgress(0,100);
-//                while (true){
-//                    notifyStatus(DOING,"",progress);
-//                    long doen=progress.getDone();
-//                    progress.setDone(doen+10>100?0:doen+10);
-//                }
-//            }
-//        },null,"");
         return super.onStartCommand(intent, flags, startId);
     }
 

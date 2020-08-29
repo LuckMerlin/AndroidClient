@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-def buildVersion="#0.0.1"
+def buildVersion="#0.0.2"
 if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")){
     apply plugin: 'com.novoda.bintray-release'
 }
@@ -17,11 +17,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles 'proguard-rules.pro'
         }
     }
