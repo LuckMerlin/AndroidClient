@@ -3,7 +3,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 
-import com.merlin.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public abstract class Player implements Action {
             try {
                 cacheFile = File.createTempFile("player","cache");
             } catch (IOException e) {
-                Debug.E(getClass(),"Can't run player while cache file create exception.e="+e,e);
+                Debug.E("Can't run player while cache file create exception.e="+e,e);
                 e.printStackTrace();
                 notifyStatusChange(DESTROY,getPlaying(null),null,"Cache file create exception.");
                 return false;
@@ -68,7 +68,7 @@ public abstract class Player implements Action {
             cacheFile=new File(cachePath);
         }
         if (null==cacheFile){
-            Debug.W(getClass(),"Can't run player while cache file NULL.");
+            Debug.W("Can't run player while cache file NULL.");
             notifyStatusChange(DESTROY,getPlaying(null),null,"Cache file NULL.");
             return false;
         }
@@ -83,11 +83,11 @@ public abstract class Player implements Action {
                 }
                 final int playerBufferLength=null!=playerBuffer?playerBuffer.length:-1;
                 if (playerBufferLength<=0||playerOffset<0){//Buffer or offset not invalid
-                    Debug.W(getClass(),"Can't play media which player buffer or offset invalid.");
+                    Debug.W("Can't play media which player buffer or offset invalid.");
                     return FATAL_ERROR;
                 }
                 if (null==mCacheAccess){//Player has been stopped
-                    Debug.W(getClass(),"Can't play media which cache access is NULL.");
+                    Debug.W("Can't play media which cache access is NULL.");
                     return FATAL_ERROR;
                 }
                 if (playerOffset>=playerBufferLength){//Already full
@@ -101,13 +101,13 @@ public abstract class Player implements Action {
                 }
                 Media media=playing.getMedia();
                 if (null==media){
-                    Debug.W(getClass(),"Can't play media which is NULL."+playing);
+                    Debug.W("Can't play media which is NULL."+playing);
                     stop("While media is NULL.");
                     return NORMAL;
                 }
                 if (!media.isOpened()){
                     if (!media.open(this)){
-                        Debug.W(getClass(),"Can't play media which open fail."+playing);
+                        Debug.W("Can't play media which open fail."+playing);
                         stop("While media open fail.");
                         return NORMAL;
                     }
@@ -116,7 +116,7 @@ public abstract class Player implements Action {
                 Meta meta=media.getMeta();
                 long totalLength=null!=meta?meta.getLength():-1;
                 if (totalLength<=0){
-                    Debug.W(getClass(),"Can't play media which total length invalid."+totalLength);
+                    Debug.W("Can't play media which total length invalid."+totalLength);
                     stop("While media total length invalid."+totalLength);
                     return NORMAL;
                 }
@@ -150,7 +150,7 @@ public abstract class Player implements Action {
                                 int read=inputStream.read(cacheBuffer,0,cacheBuffer.length);
                                 if (read<0){
                                     playing.setCacheOver(true);
-                                    Debug.D(getClass(),"Cache media finish."+totalWritten+" "+cacheAccess.length());
+                                    Debug.D("Cache media finish."+totalWritten+" "+cacheAccess.length());
                                     break;
                                 }
                                 if (read>0) {
@@ -170,12 +170,12 @@ public abstract class Player implements Action {
                                 }
                             }while(true);
                         }catch (Exception  e){
-                            Debug.E(getClass(),"Exception while read cache bytes.e="+e,e);
+                            Debug.E("Exception while read cache bytes.e="+e,e);
                             e.printStackTrace();
                             stop( null,"After read cache bytes exception.e="+e);
                         }
                     })){
-                        Debug.W(getClass(),"Can't play media which cache fail."+playing);
+                        Debug.W("Can't play media which cache fail."+playing);
                         stop(null,"While media cache fail.");
                         return NORMAL;
                     }
@@ -218,7 +218,7 @@ public abstract class Player implements Action {
             }).start();
             return true;
         } catch (FileNotFoundException e) {
-            Debug.E(getClass(),"Can't run player while run exception.e="+e,e);
+            Debug.E("Can't run player while run exception.e="+e,e);
             e.printStackTrace();
             notifyStatusChange(DESTROY,getPlaying(null),null,"Exception player."+e);
             return false;
@@ -238,7 +238,7 @@ public abstract class Player implements Action {
         if (null==accessFile){
             return false;
         }
-        Debug.D(getClass(),"Release player "+(null!=debug?debug:"."));
+        Debug.D("Release player "+(null!=debug?debug:"."));
         mCacheAccess=null;
         stop(null,"While release player.");
         notify(accessFile,"While release player.");
@@ -279,7 +279,7 @@ public abstract class Player implements Action {
     public final boolean pause(Object arg,String debug){
         if (null==arg||isPlaying(arg)){
             if (!mPaused) {
-                Debug.D(getClass(),"Pause play media "+(null!=debug?debug:"."));
+                Debug.D("Pause play media "+(null!=debug?debug:"."));
                 mPaused = true;
                 notifyStatusChange(PAUSE,getPlaying(null),arg,debug);
                 return true;
@@ -295,7 +295,7 @@ public abstract class Player implements Action {
                 mPaused = false;
                 mStopped=false;
                 synchronized (cacheAccess) {
-                    Debug.D(getClass(),"Resume start play media "+(null!=debug?debug:"."));
+                    Debug.D("Resume start play media "+(null!=debug?debug:"."));
                     cacheAccess.notifyAll();
                     notifyStatusChange(START,getPlaying(null),null,debug);
                     return true;
@@ -362,16 +362,16 @@ public abstract class Player implements Action {
 
     public boolean play(Media playable, double seek){
         if (playable==null){
-            Debug.W(getClass(),"Can't play media while media is NULL.");
+            Debug.W("Can't play media while media is NULL.");
             return false;
         }
         final RandomAccessFile cacheAccess=mCacheAccess;
         if (null==cacheAccess){
-            Debug.W(getClass(),"Can't play media while player not start.");
+            Debug.W("Can't play media while player not start.");
             return false;
         }
         if (!isRunning()){
-            Debug.W(getClass(),"Can't play media while player not run.");
+            Debug.W("Can't play media while player not run.");
             return false;
         }
         stop(null,"While play new media."+playable);
@@ -436,7 +436,7 @@ public abstract class Player implements Action {
         if (null!=accessFile){
             try {
                 accessFile.setLength(0);
-                Debug.D(getClass(),"Clean player cached "+(null!=debug?debug:"."));
+                Debug.D("Clean player cached "+(null!=debug?debug:"."));
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -469,7 +469,7 @@ public abstract class Player implements Action {
     private void notify(RandomAccessFile cache,String debug) {
         if (null!=cache) {
             synchronized (cache) {
-                Debug.D(getClass(), "Notify "+(null!=debug?debug:"."));
+                Debug.D("Notify "+(null!=debug?debug:"."));
                 cache.notifyAll();
             }
         }
@@ -478,12 +478,12 @@ public abstract class Player implements Action {
     private void wait(RandomAccessFile cache,String debug) throws InterruptedException {
         if (null!=cache) {
             synchronized (cache) {
-                Debug.D(getClass(), "Wait "+(null!=debug?debug:"."));
+                Debug.D("Wait "+(null!=debug?debug:"."));
                 mWaiting=true;
                 notifyStatusChange(WAITING,getPlaying(null),null,"Cache file NULL.");
                 cache.wait();
                 mWaiting=false;
-                Debug.D(getClass(), "Wake up after "+(null!=debug?debug:"."));
+                Debug.D("Wake up after "+(null!=debug?debug:"."));
             }
         }
     }

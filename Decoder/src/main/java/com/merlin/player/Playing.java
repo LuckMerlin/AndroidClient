@@ -1,8 +1,5 @@
 package com.merlin.player;
-
-
-
-import com.merlin.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 import com.merlin.id3.ID3;
 
 final class Playing {
@@ -51,10 +48,6 @@ final class Playing {
 
     private long lengthToTime(long length){
         int sampleRate=length>0?mSampleRate:0;
-        //        mp3 每帧均为1152个字节， 则：
-//        frame_duration = 1152 * 1000000 / sample_rate
-//        sample_rate = 44100HZ时， 计算出的时长为26.122ms，这就是经常听到的mp3每帧播放时间固定为26ms的由来。
-//        Debug.D(getClass(),"AAAAAAAAa ");
         return sampleRate<=0?0:(length * 1000 / sampleRate);
     }
 
@@ -112,7 +105,7 @@ final class Playing {
                 long seekTo = resolveSeekPosition(mSeek, length, null);
                 mSeek=null;
                 if (seekTo >= 0) {
-                    Debug.D(getClass(), "Seeking to " + seekTo);
+                    Debug.D( "Seeking to " + seekTo);
                     mCursor=seekTo;
                 }
             }
@@ -133,7 +126,7 @@ final class Playing {
 
     private long resolveSeekPosition(double seek, long length, String debug){
         if (length<=0){
-            Debug.W(getClass(),"Can't resolve seek position while length invalid "+(null!=debug?debug:"."));
+            Debug.W("Can't resolve seek position while length invalid "+(null!=debug?debug:"."));
             return -1;
         }
         return (long)((seek=seek<-1?0:seek)<0?length*-seek:seek);

@@ -131,22 +131,20 @@ public class PathGlider {
         String hostUri=null!=path&&null!=view?path.getHostUri():null;
         if (null!=hostUri&&hostUri.length()>0){
             String filePath=path.getPath();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                try {
-                    int width = view.getWidth();
-                    int height = view.getHeight();
-                    GlideUrl glideUrl = new GlideUrl(hostUri, new LazyHeaders.Builder()
-                            .addHeader(Label.LABEL_PATH, URLEncoder.encode(filePath,"utf-8")).addHeader(Label.LABEL_WIDTH,
-                            Integer.toString(width<=0?50:width)).addHeader(Label.LABEL_HEIGHT, Integer.toString(height<=0?50:height)).build());
-                    if (null != glideUrl) {
-                        RoundedCorners roundedCorners = new RoundedCorners(1);
-                        RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(width, height);
-                        Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE).
-                                centerCrop().apply(options).thumbnail(1f).error(null!=iconId?iconId:R.drawable.hidisk_icon_unknown).into(view);
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+            try {
+                int width = view.getWidth();
+                int height = view.getHeight();
+                GlideUrl glideUrl = new GlideUrl(hostUri, new LazyHeaders.Builder().addHeader(Label.LABEL_THUMB,Boolean.toString(true))
+                        .addHeader(Label.LABEL_PATH, URLEncoder.encode(filePath,"utf-8")).addHeader(Label.LABEL_WIDTH,
+                        Integer.toString(width<=0?50:width)).addHeader(Label.LABEL_HEIGHT, Integer.toString(height<=0?50:height)).build());
+                if (null != glideUrl) {
+                    RoundedCorners roundedCorners = new RoundedCorners(1);
+                    RequestOptions options = RequestOptions.bitmapTransform(roundedCorners).override(width, height);
+                    Glide.with(view.getContext()).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.NONE).
+                            centerCrop().apply(options).thumbnail(1f).error(null!=iconId?iconId:R.drawable.hidisk_icon_unknown).into(view);
                 }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
         return false;

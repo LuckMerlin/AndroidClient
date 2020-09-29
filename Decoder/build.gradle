@@ -6,12 +6,10 @@ android {
 
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 14
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
-        consumerProguardFiles 'consumer-rules.pro'
 
         sourceSets.main {
             jni.srcDirs = []
@@ -52,4 +50,5 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/jid3lib-0.6.1-SNAPSHOT.jar')
+    compileOnly project(path: ':LMCore')
 }

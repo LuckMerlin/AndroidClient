@@ -1,6 +1,6 @@
 package com.merlin.player;
 
-import com.merlin.debug.Debug;
+import com.luckmerlin.core.debug.Debug;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,7 +20,7 @@ public abstract class FileMedia implements BytesMedia {
     public final boolean open(Player player) {
         final String mediaPath=mPath;
         if (null==mediaPath||mediaPath.length()<=0){
-            Debug.W(getClass(),"Can't open media file which path is invalid."+mediaPath);
+            Debug.W("Can't open media file which path is invalid."+mediaPath);
             return false;
         }
         RandomAccessFile input=mInput;
@@ -34,14 +34,14 @@ public abstract class FileMedia implements BytesMedia {
             mMeta=new Meta(length,name,null!=name?name.replace("*.",""):null,null);
             if (length<=0){
 
-                Debug.W(getClass(),"Can't open media file which length is invalid."+mediaPath);
+                Debug.W("Can't open media file which length is invalid."+mediaPath);
                 return false;
             }
             mInput=new RandomAccessFile(file,"r");
-            Debug.D(getClass(),"Opened media file."+mediaPath);
+            Debug.D("Opened media file."+mediaPath);
             return true;
         } catch (FileNotFoundException e) {
-            Debug.E(getClass(),"Exception while open file media.e="+e+" "+mediaPath,e);
+            Debug.E("Exception while open file media.e="+e+" "+mediaPath,e);
             e.printStackTrace();
             return false;
         }
@@ -69,7 +69,7 @@ public abstract class FileMedia implements BytesMedia {
         RandomAccessFile input=mInput;
         int length=null!=buffer?buffer.length:-1;
         if (null==input||length<0||offset<0||offset>length){
-            Debug.W(getClass(),"Fail read media file bytes which input is NULL.");
+            Debug.W("Fail read media file bytes which input is NULL.");
             return Player.FATAL_ERROR;
         }
         Meta meta=mMeta;
@@ -86,10 +86,10 @@ public abstract class FileMedia implements BytesMedia {
             mInput=null;
             try {
                 input.close();
-                Debug.D(getClass(),"Closed media file."+this);
+                Debug.D("Closed media file."+this);
                 return true;
             } catch (IOException e) {
-                Debug.E(getClass(),"Exception while close media file.e="+e+" "+this,e);
+                Debug.E("Exception while close media file.e="+e+" "+this,e);
                 e.printStackTrace();
                 return false;
             }

@@ -6,7 +6,7 @@
             name="vm"
             type="com.merlin.model.MediaModel" />
         <import type="com.merlin.player.Action"/>
-        <import type="com.merlin.player.Time"/>
+        <import type="com.merlin.player.MediaTime"/>
         <import type="com.merlin.binding.StatusBar"/>
         <import type="com.merlin.client.R"/>
         <import type="android.view.View"/>

@@ -112,19 +112,29 @@ class ModelBinder {
                 if (!Modifier.isAbstract(((Class)object).getModifiers())) {
                     Constructor[] constructors = null != getModelClass((Class) object) ? ((Class) object).getDeclaredConstructors() : null;
                     if (null != constructors && constructors.length > 0) {
-                        Constructor constructor = null;
                         for (Constructor child : constructors) {
                             Class[] types = null != child ? child.getParameterTypes() : null;
-                            if (null != types && types.length == 0) {
-                                constructor = child;
-                                break;
-                            }
-                        }
-                        if (null != constructor) {//Found model constructor,Now create it
-                            try {
-                                object = constructor.newInstance();
-                            } catch (Exception e) {
-                                //Do nothing
+                            if (null != types) {
+                                boolean access=child.isAccessible();
+                                try {
+                                    child.setAccessible(true);
+                                    if (types.length == 0) {
+                                        if (null!=(object = child.newInstance())){//Found model constructor,Now create it
+                                            break;
+                                        }
+                                    }else if (types.length == 1) {
+                                        Class typeClass=types[0];
+                                        if (null!=typeClass&&typeClass.getName().equals(Context.class.getName())){
+                                            if (null!=(object = child.newInstance(context))){//Found model constructor,Now create it
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    //Do nothing
+                                }finally {
+                                    child.setAccessible(access);
+                                }
                             }
                         }
                     }

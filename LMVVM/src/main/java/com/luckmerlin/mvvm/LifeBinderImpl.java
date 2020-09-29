@@ -57,7 +57,11 @@ final class LifeBinderImpl implements Application.ActivityLifecycleCallbacks,Com
 
     private static boolean bindLife(Context context,boolean enable,OnLifeBind onLifeBind){
         if (null!=onLifeBind){
-            context=null!=context?context.getApplicationContext():null;
+            try {
+                context=null!=context?context.getApplicationContext():null;
+            }catch (Exception e){
+                Debug.D("Can't bind model life! You must make register after call activity's super.attachBaseContext(newBase)");
+            }
             if (null!=context&&context instanceof Application){
                 LifeBinderImpl lifeNotify=mLifeNotify;
                 lifeNotify=enable&&null==lifeNotify?(mLifeNotify=new LifeBinderImpl()):lifeNotify;

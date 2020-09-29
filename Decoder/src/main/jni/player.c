@@ -106,6 +106,7 @@ static inline void onFrameDecode(jobject player,int mediaType,mad_timer_t timer,
         JNIEnv *jniEnv;
         int res = (*VM)->GetEnv(VM,(void **) &jniEnv, JNI_VERSION_1_6);
         if(res==JNI_OK){
+
             jclass callbackClass = (*jniEnv)->FindClass(jniEnv,"com/merlin/player/Player");
             jmethodID callbackMethod = (*jniEnv)->GetMethodID(jniEnv,callbackClass,"onMediaFrameDecodeFinish",
                                                               "(I[BBII)V");
@@ -141,7 +142,11 @@ Java_com_merlin_player_Player_create(JNIEnv *env, jobject player, jobject loader
         LOGW("Not need create media player which already started.");
         return JNI_FALSE;
     }
-    JNIEnv *jniEnv;
+
+
+
+
+
     int res = (*VM)->GetEnv(VM, (void **) &jniEnv, JNI_VERSION_1_6);
     if (res != JNI_OK) {
         LOGW("Can't create media player while create vm fail.");

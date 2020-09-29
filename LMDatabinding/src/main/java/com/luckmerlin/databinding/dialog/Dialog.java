@@ -30,6 +30,10 @@ public class Dialog {
         mDialog=dialog;
     }
 
+    public Dialog(Context context){
+        this(context,null);
+    }
+
     public Dialog(Context context, Integer windowType){
         this(new android.app.Dialog(context));
         android.app.Dialog dialog=mDialog;
@@ -84,25 +88,25 @@ public class Dialog {
         return setContentView(view,null,null);
     }
 
+    public final LayoutInflater inflater(){
+        Context context=getContext();
+        return null!=context?LayoutInflater.from(context):null;
+    }
+
+
     public final Dialog setContentView(View view, int[] padding, ViewGroup.LayoutParams params){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
             if (null!=padding&&padding.length==4){
                 view.setPadding(padding[0],padding[1],padding[2],padding[3]);
             }
-            if (null!=(view=onSetContentView(view))){
-                if (view.getParent()==null){
-                    mRoot=new WeakReference<>(view);
-                    dialog.setContentView(view,null!=params?params:new ViewGroup.LayoutParams
-                            (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                }
+            if (view.getParent()==null){
+                mRoot=new WeakReference<>(view);
+                dialog.setContentView(view,null!=params?params:new ViewGroup.LayoutParams
+                        (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }
         }
         return this;
-    }
-
-    protected View onSetContentView(View view){
-        return view;
     }
 
     public final View getWindowRoot() {
@@ -124,9 +128,18 @@ public class Dialog {
                 click instanceof Service ||click instanceof BroadcastReceiver));
     }
 
+    protected void onDialogShow(){
+        //Do nothing
+    }
+
+    protected void onDialogDismiss(){
+        //Do nothing
+    }
+
     public final boolean show(OnViewClick click, boolean weak){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&!dialog.isShowing()){
+            onDialogShow();
             dialog.show();
             return true;
         }
@@ -137,6 +150,7 @@ public class Dialog {
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&dialog.isShowing()){
             dialog.dismiss();
+            onDialogDismiss();
         }
         return this;
     }
