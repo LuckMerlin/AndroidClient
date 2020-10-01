@@ -18,6 +18,7 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://dl.bintray.com/luckmerlin/luckmerlin/' }
     }
 
     tasks.withType(Javadoc) {
@@ -25,6 +26,7 @@ allprojects {
         options.addStringOption('encoding', 'UTF-8')
     }
 //    tasks.getByPath(":LMDatabinding:javadocRelease").enabled = false
+    tasks.getByPath(":LMDRAdapter:javadocRelease").enabled = false
 }
 
 task clean(type: Delete) {

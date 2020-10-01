@@ -1,11 +1,15 @@
 apply plugin: 'com.android.library'
+def buildVersion="0.0.8"
+if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
+    apply plugin: 'com.novoda.bintray-release'
+}
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 14
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -32,9 +36,21 @@ android {
     }
 }
 
+if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
+    publish {
+        userOrg = 'luckmerlin'
+        groupId = 'com.luckmerlin.library'
+        artifactId = 'adapter'
+        publishVersion = buildVersion
+        repoName = "luckmerlin"
+        desc = 'This is a android(Java) list adapter uitl framework.'
+        website = 'https://www.luckmerlin.com'
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly 'androidx.recyclerview:recyclerview:1.0.0'
-    compileOnly project(path: ':LMCore')
-    compileOnly project(path: ':LMDatabinding')
+    compileOnly 'com.luckmerlin.library:core:0.0.4'
+    compileOnly 'com.luckmerlin.library:databinding:0.0.10'
 }

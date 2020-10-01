@@ -1,9 +1,11 @@
-package com.luckmerlin.databinding.adapter;
+package com.luckmerlin.adapter.recycleview;
+
+import com.luckmerlin.core.proguard.PublishMethods;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageData<T> {
+public class PageData<T> implements PublishMethods {
     private long length;
     private int from;
     private ArrayList<T> data;
@@ -18,11 +20,11 @@ public class PageData<T> {
         this.data=data;
     }
 
-    public int getFrom() {
+    public final int getFrom() {
         return from;
     }
 
-    public int getTo() {
+    public final int getTo() {
         List<T>  list=from>=0?data:null;
         return from+(null!=list?list.size():0);
     }

@@ -35,4 +35,6 @@ dependencies {
     implementation project(path: ':LMVVM')
     implementation project(path: ':LMDatabinding')
     implementation project(path: ':LMCore')
+    implementation project(path: ':LMDRAdapter')
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
 }

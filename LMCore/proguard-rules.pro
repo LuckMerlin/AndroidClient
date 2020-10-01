@@ -42,5 +42,5 @@
  }
 
  -keep class * implements com.luckmerlin.core.proguard.PublishProtectedMethod {
-      protected <fields>;
+      protected <methods>;
  }

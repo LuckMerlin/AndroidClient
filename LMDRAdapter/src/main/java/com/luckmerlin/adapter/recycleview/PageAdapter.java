@@ -1,4 +1,4 @@
-package com.luckmerlin.databinding.adapter;
+package com.luckmerlin.adapter.recycleview;
 
 import android.view.View;
 
@@ -8,18 +8,33 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.luckmerlin.adapter.OnPageLoadFinish;
 import com.luckmerlin.core.Canceler;
 import com.luckmerlin.core.debug.Debug;
+import com.luckmerlin.core.proguard.PublishMethods;
+import com.luckmerlin.core.proguard.PublishProtectedMethod;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter<T>  implements OnMoreLoadable{
+public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter<T>
+        implements OnMoreLoadable, PublishMethods, PublishProtectedMethod {
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
     private PageData<T> mLastPage;
+
+
+    public PageAdapter(T  ...values){
+        this(null!=values&&values.length>0? Arrays.asList(values):null);
+    }
+
+    public PageAdapter(Collection<T> list){
+        super(list);
+    }
 
     public interface OnPageLoadUpdate{
         int UPDATE_PAGE_END=123;
