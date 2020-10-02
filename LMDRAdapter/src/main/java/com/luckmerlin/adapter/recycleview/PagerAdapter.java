@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.luckmerlin.core.proguard.PublishProtectedMethod;
+import com.luckmerlin.databinding.DataBindingUtil;
+import com.luckmerlin.databinding.ModelBinder;
 
 import java.util.List;
 
@@ -36,6 +38,18 @@ public class PagerAdapter<T> extends SnapAdapter<T> implements PublishProtectedM
         Integer orientation=onResolveLayoutOrientation();
         return null!=context?new LinearLayoutManager(context, null==orientation||(orientation!=
                 RecyclerView.HORIZONTAL&&orientation!=RecyclerView.VERTICAL)?RecyclerView.HORIZONTAL:orientation,false):null;
+    }
+
+    protected final boolean tryBindBindingView(RecyclerView.ViewHolder holder,String debug){
+        View itemRoot=null!=holder?holder instanceof PageViewHolder?((PageViewHolder)holder).getRoot():holder.itemView:null;
+        ViewDataBinding binding=null!=itemRoot? DataBindingUtil.getBinding(itemRoot):null;
+        return null!= binding&&null!=new ModelBinder().bindModelForObject(itemRoot.getContext(),binding,debug);
+    }
+
+    @Override
+    protected void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding) {
+        super.onViewAttachedToWindow(holder, view, binding);
+        tryBindBindingView(holder,"While page adapter item view attach to window.");
     }
 
     @Override

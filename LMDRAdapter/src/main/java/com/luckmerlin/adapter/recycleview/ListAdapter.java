@@ -395,7 +395,21 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null!=data&&index(data)>=0;
     }
 
-    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder,View view,ViewDataBinding binding){
+    protected void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding){
+        //Do nothing
+    }
+
+    @Override
+    public final void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (null!=holder){
+            View view=holder.itemView;
+            ViewDataBinding binding=null!=view? DataBindingUtil.getBinding(view):null;
+            onViewAttachedToWindow(holder,view,binding);
+        }
+    }
+
+    protected void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding){
         //Do nothing
     }
 

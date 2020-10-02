@@ -5,12 +5,9 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
-import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.luckmerlin.core.proguard.PublishMethods;
-import com.luckmerlin.databinding.DataBindingUtil;
-import com.luckmerlin.databinding.ModelBinder;
 import com.luckmerlin.databinding.ViewCreator;
 
 public class PageViewHolder extends ViewHolder implements PublishMethods {
@@ -23,12 +20,14 @@ public class PageViewHolder extends ViewHolder implements PublishMethods {
         }
     }
 
-    private boolean tryBindBindingView(View view,String debug){
-        ViewDataBinding binding=null!=view?DataBindingUtil.getBinding(view):null;
-        return null!= binding&&null!=new ModelBinder().bindModelForObject(view.getContext(),binding,debug);
+    public final View getRoot(){
+        View root=itemView;
+        ViewGroup vg=null!=root&&root instanceof ViewGroup?((ViewGroup)root):null;
+        int count=null!=vg?vg.getChildCount():0;
+        return count==1?vg.getChildAt(0):null;
     }
 
-    public boolean inflateLayout(Object pageLayout) {
+    public final boolean inflateLayout(Object pageLayout) {
         View root=itemView;
         ViewGroup vg=null!=root&&root instanceof ViewGroup?((ViewGroup)root):null;
         if (null!=vg){
@@ -41,8 +40,7 @@ public class PageViewHolder extends ViewHolder implements PublishMethods {
                         ((ViewGroup) parent).removeView(layoutView);
                     }
                     if (null == layoutView.getParent()) {
-                        tryBindBindingView(layoutView,null);
-                        vg.addView((View) pageLayout, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        vg.addView(layoutView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                         return true;
                     }
                 }
