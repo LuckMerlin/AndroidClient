@@ -4,6 +4,6 @@ import android.content.res.Configuration;
 
 import com.luckmerlin.core.proguard.PublishMethods;
 
-public interface OnConfigurationChange extends PublishMethods {
+public interface OnConfigurationChange {
     boolean onConfigurationChanged(Configuration newConfig);
 }

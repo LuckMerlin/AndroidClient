@@ -3,8 +3,14 @@ package com.luckmerlin.mvvm;
 import android.view.View;
 
 import com.luckmerlin.databinding.CustomArgBinding;
+import com.luckmerlin.databinding.ViewBindingBinder;
 
-public final class ModelBinding extends CustomArgBinding {
+
+/**
+ * @deprecated
+ */
+final class ModelBinding extends CustomArgBinding {
+
     private ModelBinding(){
 
     }
@@ -19,8 +25,7 @@ public final class ModelBinding extends CustomArgBinding {
     public final void onBind(View view) {
         Object modelObj=null!=view?getArg():null;
         if (null!=modelObj){
-            final ModelBinder binder=new ModelBinder();
-            binder.bindFromAdapter(view,modelObj,"While binding adapter called.");
+//            new ViewBindingBinder().bind(view,this);
         }
     }
 }

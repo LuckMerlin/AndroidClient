@@ -8,14 +8,23 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public class SnapAdapter<T> extends ListAdapter<T> implements PublishMethods {
-    private final PagerSnapHelper mHelper=new PagerSnapHelper();
+    private final PagerSnapHelper mHelper;
 
     public SnapAdapter(T  ...values){
-        this(null!=values&&values.length>0? Arrays.asList(values):null);
+        this(null,values);
+    }
+
+    public SnapAdapter(PagerSnapHelper snapHelper,T  ...values){
+        this(snapHelper,null!=values&&values.length>0? Arrays.asList(values):null);
     }
 
     public SnapAdapter(Collection<T> list){
+        this(null,list);
+    }
+
+    public SnapAdapter(PagerSnapHelper snapHelper,Collection<T> list){
         super(list);
+        mHelper=null!=snapHelper?snapHelper:new PagerSnapHelper();
     }
 
     private boolean attachSnapHelper(RecyclerView recyclerView){
