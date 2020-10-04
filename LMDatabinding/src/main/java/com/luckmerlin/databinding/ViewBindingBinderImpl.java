@@ -23,15 +23,20 @@ import android.widget.TextView;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.databinding.text.OnEditActionChange;
 import com.luckmerlin.databinding.text.OnEditActionChangeListener;
 import com.luckmerlin.databinding.text.OnEditTextChange;
 import com.luckmerlin.databinding.text.OnEditTextChangeListener;
+import com.luckmerlin.databinding.touch.OnSingleTapClick;
 import com.luckmerlin.databinding.touch.OnViewClick;
 import com.luckmerlin.databinding.touch.OnViewLongClick;
 import com.luckmerlin.databinding.touch.OnViewTouch;
+import com.luckmerlin.databinding.touch.TouchListener;
 import com.luckmerlin.databinding.view.Image;
+import com.luckmerlin.databinding.view.ImageResTag;
 import com.luckmerlin.databinding.view.Text;
+import com.luckmerlin.databinding.view.TextResTag;
 import com.luckmerlin.databinding.view.Touch;
 import com.luckmerlin.match.Matchable;
 
@@ -260,33 +265,48 @@ final class ViewBindingBinderImpl {
             return false;
         }
         Object tagObject=touch.getTag();
+        Integer resTagId=null;
         if (null!=tagObject){
-            if (tagObject instanceof Activity ||tagObject instanceof Service || tagObject instanceof BroadcastReceiver ||tagObject instanceof ContentProvider){
-                tagObject=new WeakReference<>(tagObject);
+            if (tagObject instanceof Activity ||tagObject instanceof Service || tagObject instanceof BroadcastReceiver ||tagObject instanceof ContentProvider) {
+                tagObject = new WeakReference<>(tagObject);
+            }
+            if (tagObject instanceof TextResTag&&view instanceof TextView){
+                if (applyViewText((TextView)view,(TextResTag)tagObject)){
+                    resTagId=null!=resTagId?resTagId:((TextResTag)tagObject).getResTagId();
+                    tagObject=((TextResTag)tagObject).getTag();
+                }
+            }
+            if (tagObject instanceof ImageResTag&&applyViewImage(view,(ImageResTag)tagObject)){
+                resTagId=null!=resTagId?resTagId:((ImageResTag)tagObject).getResTagId();
+                tagObject=((ImageResTag)tagObject).getTag();
             }
         }
         Integer dispatch=touch.isDispatchEnable();
         final int dispatchEvent=null!=dispatch?dispatch:Touch.NONE;
         final Object finalTagObject=tagObject;
         final boolean dispatchTouch=(dispatchEvent&Touch.TOUCH)!=0;
+        final int finalResTagId=null!=resTagId?resTagId:0;
         if (dispatchTouch||(null!=object&&object instanceof OnViewTouch)){
             view.setOnTouchListener((View v, MotionEvent event)->{
                 final Object finalObject=getTagObject(finalTagObject);
-                return dispatchEvent(view, object,dispatchTouch,(Object argObject)-> null!=argObject&&argObject instanceof
-                        OnViewTouch&&((OnViewTouch)argObject).onViewTouched(view, event,finalObject)?Matchable.BREAK:Matchable.CONTINUE);
+                final Matchable matchable=(Object argObject)-> null!=argObject&&argObject instanceof
+                        OnViewTouch&&((OnViewTouch)argObject).onViewTouched(view, finalResTagId,event,finalObject)?Matchable.BREAK:Matchable.CONTINUE;
+                TouchListener touchListener=touch.getListener();
+                return (null!=touchListener&&dispatchEvent(view,touchListener,false,matchable))||dispatchEvent(view, object,dispatchTouch,matchable);
             });
         }
         final boolean dispatchLongClick=(dispatchEvent&Touch.LONG_CLICK)!=0;
         if (dispatchTouch||(null!=object&&object instanceof OnViewLongClick)){
             view.setOnLongClickListener((View v)->{
                 final Object finalObject=getTagObject(finalTagObject);
-                return dispatchEvent(view, object,dispatchLongClick,(Object argObject)->
-                        null!=argObject&&argObject instanceof OnViewLongClick&& ((OnViewLongClick)argObject)
-                                .onViewLongClick(view,finalObject)?Matchable.BREAK:Matchable.CONTINUE);
+                Matchable matchable=(Object argObject)-> null!=argObject&&argObject instanceof OnViewLongClick&&
+                        ((OnViewLongClick)argObject).onViewLongClick(view,finalResTagId,finalObject)?Matchable.BREAK:Matchable.CONTINUE;
+                TouchListener listener=touch.getListener();
+                return (null!=listener&&dispatchEvent(view,listener,false,matchable))||dispatchEvent(view, object,dispatchLongClick,matchable);
             });
         }
         final boolean dispatchClick=(dispatchEvent&Touch.CLICK)!=0;
-        if (dispatchClick||(null!=object&&object instanceof OnViewClick)){
+        if (dispatchClick||(null!=object&&(object instanceof OnViewClick||object instanceof OnSingleTapClick))){
             int dither=touch.getClickDither();
             final int finalDither=dither<0?400:dither;
             final Object[] ditherObject=new Object[2];
@@ -294,8 +314,20 @@ final class ViewBindingBinderImpl {
                 Object clickCount=ditherObject[1];
                 final int finalClickCount=null!=clickCount&&clickCount instanceof Integer &&((Integer)clickCount)>0?(Integer) clickCount:0;
                 final Object finalObject=getTagObject(finalTagObject);
-                dispatchEvent(view, object,dispatchClick,(Object argObj)-> null!=argObj&&argObj instanceof
-                        OnViewClick&&((OnViewClick)argObj).onViewClick(view, finalClickCount,finalObject)?Matchable.MATCHED:Matchable.CONTINUE);
+                if (finalClickCount==1){
+                    final Matchable matchable=(Object argObj)-> null!=argObj&&argObj instanceof
+                            OnSingleTapClick&&((OnSingleTapClick)argObj).onViewSingleTap(view, finalResTagId,finalObject)?Matchable.MATCHED:Matchable.CONTINUE;
+                    TouchListener listener=touch.getListener();
+                    if ((null!=listener&&dispatchEvent(view,listener,false,matchable))|| dispatchEvent(view, object,dispatchClick,matchable)){
+                        return;
+                    }
+                }
+                final Matchable matchable=(Object argObj)-> null!=argObj&&argObj instanceof
+                        OnViewClick&&((OnViewClick)argObj).onViewClick(view, finalResTagId,finalClickCount,finalObject)?Matchable.MATCHED:Matchable.CONTINUE;
+                TouchListener listener=touch.getListener();
+                if ((null!=listener&&dispatchEvent(view,listener,false,matchable))||dispatchEvent(view, object,dispatchClick,matchable)){
+                    //Do nothing
+                }
             };
             view.setOnClickListener((View v)-> {
                 if (finalDither>0){
@@ -359,7 +391,7 @@ final class ViewBindingBinderImpl {
     private boolean dispatchEventToViewModel(View view, Matchable matchable){
         if (null!=view&&null!=matchable){
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
-            if (null!=(null!=binding?new ModelClassFinder().find(binding,(o)->{
+            if (null!=(null!=binding?new ModelClassFinder().findModel(binding,(o)->{
                 MatchBinding matchBinding=null!=o&&o instanceof MatchBinding?(MatchBinding)o:null;
                 Object current=null!=matchBinding?matchBinding.getCurrent():null;
                 return null!=current?matchable.onMatch(current):null;

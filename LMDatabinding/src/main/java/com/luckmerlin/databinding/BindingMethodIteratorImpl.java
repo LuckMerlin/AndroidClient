@@ -10,18 +10,22 @@ class BindingMethodIteratorImpl {
 
     public final MatchBinding iterate(ViewDataBinding binding, Matchable matchable){
         final Class bindingClass=null!=binding?binding.getClass().getSuperclass():null;
-        MatchBinding matchBinding= null!=bindingClass?iterate(bindingClass,matchable):null;
+        MatchBinding matchBinding= null!=bindingClass?iterate(bindingClass,null):null;
         if (null!=matchBinding){
             Method getMethod=matchBinding.mGetMethod;
             if (null!=getMethod){
                 boolean access=getMethod.isAccessible();
-                getMethod.setAccessible(true);
                 try {
+                    getMethod.setAccessible(true);
                     Object result=getMethod.invoke(binding);
                     matchBinding.setCurrent(result);
+                    Integer matched=null!=matchable?matchable.onMatch(matchBinding):null;
+                    if (null==matched||matched!=Matchable.MATCHED){
+                        return null;
+                    }
                 } catch (Exception e) {
                     Debug.E("Exception iterate binding model.e="+e,e);
-                    //Do nothing
+                    return null;
                 }finally {
                     getMethod.setAccessible(access);
                 }
@@ -49,14 +53,16 @@ class BindingMethodIteratorImpl {
                         Method getMethod=bindingClass.getDeclaredMethod(methodName.replaceFirst("set","get"));
                         if (null!=getMethod){
                             MatchBinding matchBinding=new MatchBinding(method,getMethod,type,null,null);
-                            Integer matched=null==matchable?Matchable.MATCHED:null;
-                            matched=null!=matched?matched:matchable.onMatch(matchBinding);
+                            Integer matched=Matchable.MATCHED;
+                            if (null!=matchable){
+                                matched=matchable.onMatch(matchBinding);
+                            }
                             if (null!=matched&&matched==Matchable.MATCHED){
                                 return matchBinding;
                             }
                         }
                     } catch (Exception e) {
-                        //Do nothing
+                        Debug.E("Exception iterate match binding."+e,e);
                     }
                 }
             }

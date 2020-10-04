@@ -23,12 +23,13 @@ class ModelClassFinderImpl extends BindingMethodIterator {
             Class matchClass=matchBinding.mType;
             if (null==cls||(null!=matchClass&&isExistClass(matchClass,cls.getName()))){
                 if (null==matchable){
-                    return Matchable.MATCHED;
+                    return Matchable.MATCHED;//Must keep return not NULL
                 }
-                return matchable.onMatch(matchBinding);
+                Integer matched= matchable.onMatch(matchBinding);
+                return null!=matched?matched:Matchable.CONTINUE;//Must keep return not NULL
             }
         }
-        return null;
+        return Matchable.CONTINUE;//Must keep return not NULL
     }
 
     public final MatchBinding findModel(ViewDataBinding binding,Matchable matchable){

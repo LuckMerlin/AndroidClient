@@ -234,7 +234,7 @@ public abstract class LModel implements PublishMethods, PublishProtectedMethod {
 
     final boolean attachRoot(View root,String debug){
         if (null!=root){
-            Debug.D("Attach model root "+(null!=debug?debug:"."));
+            Debug.D("Attach model root "+this+" "+(null!=debug?debug:"."));
             mRootView=new WeakReference<>(root);
             onRootAttached(root);
             root.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
@@ -267,7 +267,7 @@ public abstract class LModel implements PublishMethods, PublishProtectedMethod {
     final boolean detachRoot(String debug){
         WeakReference<View> reference=mRootView;
         if (null!=reference){
-            Debug.D("Detach model root "+(null!=debug?debug:"."));
+            Debug.D("Detach model root "+this+" "+(null!=debug?debug:"."));
             View root=reference.get();
             reference.clear();
             mRootView=null;

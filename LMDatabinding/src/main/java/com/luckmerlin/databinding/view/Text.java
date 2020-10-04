@@ -9,7 +9,7 @@ import com.luckmerlin.databinding.BindingObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Text implements BindingObject,PublishMethods, PublishFields {
+public class Text implements BindingObject,PublishMethods, PublishFields {
     public final static int UNIT_DIP= TypedValue.COMPLEX_UNIT_DIP;
     public final static int UNIT_IN= TypedValue.COMPLEX_UNIT_IN;
     public final static int UNIT_MM= TypedValue.COMPLEX_UNIT_MM;
@@ -73,7 +73,7 @@ public final class Text implements BindingObject,PublishMethods, PublishFields {
         return null==current?def:current;
     }
 
-    public Text append(Object text){
+    public final Text append(Object text){
         if (null!=text){
             List<Object> objects=mObjects;
             objects=null!=objects?objects:(mObjects=new ArrayList<>(1));
@@ -82,7 +82,7 @@ public final class Text implements BindingObject,PublishMethods, PublishFields {
         return this;
     }
 
-    public Text clean(){
+    public final Text clean(){
         List<Object> objects=mObjects;
         mObjects=null;
         mHint=null;

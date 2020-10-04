@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:binding="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
             name="vm"
             type="com.luckmerlin.test.TestModel" />
+        <import type="com.luckmerlin.databinding.view.Touch"/>
+        <import type="com.luckmerlin.test.R"/>
     </data>
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <TextView
-
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{vm.ddd}" />
@@ -19,5 +20,20 @@
             android:adapter="@{vm.snapAdapter}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                binding:lmBinding="@{Touch.imageRes(R.drawable.ic_menu_normal,`TA测试`,Touch.CLICK)}"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+            <Button
+                binding:lmBinding="@{Touch.textRes(R.string.test,`TA测试`,Touch.CLICK)}"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
     </FrameLayout>
 </layout>

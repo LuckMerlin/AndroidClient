@@ -24,21 +24,21 @@ public class Image implements BindingObject,PublishMethods {
         return new Image(image,background);
     }
 
-    public Image src(Object image){
+    public final Image src(Object image){
         mSrc=image;
         return this;
     }
 
-    public Image background(Object object){
+    public final Image background(Object object){
         mBackground=object;
         return this;
     }
 
-    public Object getBackground() {
+    public final Object getBackground() {
         return mBackground;
     }
 
-    public Object getSrc() {
+    public final Object getSrc() {
         return mSrc;
     }
 }

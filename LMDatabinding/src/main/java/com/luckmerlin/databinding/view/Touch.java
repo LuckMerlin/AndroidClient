@@ -3,6 +3,9 @@ package com.luckmerlin.databinding.view;
 import com.luckmerlin.core.proguard.PublishFields;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.BindingObject;
+import com.luckmerlin.databinding.touch.TouchListener;
+
+import java.lang.ref.WeakReference;
 
 public final class Touch implements BindingObject,PublishMethods, PublishFields {
     public final static int NONE=0; //0x 0000 0000
@@ -13,6 +16,7 @@ public final class Touch implements BindingObject,PublishMethods, PublishFields 
     private final Object mObject;
     private Integer mDispatch;
     private Object mTag;
+    private WeakReference<TouchListener> mListener;
 
     Touch(Object object,Object tag,int clickDither){
         mClickDither=clickDither;
@@ -52,9 +56,42 @@ public final class Touch implements BindingObject,PublishMethods, PublishFields 
         return new Touch(object,tag,clickDither).enableDispatch(dispatch);
     }
 
+    public static Touch imageRes(Object image,Object tag,Integer dispatch){
+        return imageRes(image,null,tag,dispatch,null,-1);
+    }
+
+    public static Touch imageRes(Object image,Object background,Object tag,Integer dispatch,Object object,int clickDither){
+        return new Touch(object,null!=image||null!=background?new ImageResTag(image,background,tag):null,clickDither).enableDispatch(dispatch);
+    }
+
+    public static Touch textRes(Object textResId, Object tag,Integer dispatch){
+        return textRes(textResId,null,tag,dispatch,null,-1);
+    }
+
+    public static Touch textRes(Object textResId, Object color,Object tag,Integer dispatch,Object object,int clickDither){
+        return new Touch(object,null!=textResId||null!=color?new TextResTag(textResId,color,tag):null,clickDither).enableDispatch(dispatch);
+    }
+
+    public Touch listener(TouchListener runnable){
+        WeakReference<TouchListener> reference=mListener;
+        mListener=null;
+        if (null!=reference){
+            reference.clear();
+        }
+        if (null!=runnable){
+            mListener=new WeakReference<>(runnable);
+        }
+        return this;
+    }
+
     public final Touch enableDispatch(Integer dispatch){
         mDispatch=dispatch;
         return this;
+    }
+
+    public TouchListener getListener() {
+        WeakReference<TouchListener> reference=mListener;
+        return null!=reference?reference.get():null;
     }
 
     public Object getObject() {
