@@ -16,12 +16,6 @@ import com.luckmerlin.databinding.OnModelResolve;
 import com.luckmerlin.databinding.touch.OnSingleTapClick;
 import com.luckmerlin.databinding.touch.OnViewClick;
 import com.luckmerlin.mvvm.Model;
-import com.luckmerlin.mvvm.activity.OnActivityBackPress;
-import com.luckmerlin.mvvm.activity.OnActivityCreate;
-import com.luckmerlin.mvvm.activity.OnActivityDestroyed;
-import com.luckmerlin.mvvm.activity.OnActivityPause;
-import com.luckmerlin.mvvm.activity.OnActivityResume;
-import com.luckmerlin.mvvm.activity.OnActivityStart;
 
 
 public class TestModel extends Model implements OnModelResolve, OnSingleTapClick,OnViewClick {

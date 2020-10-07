@@ -9,23 +9,18 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
-    compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
     }
 
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'com.luckmerlin.library:core:0.0.6'
-    compileOnly 'com.luckmerlin.library:databinding:0.0.25'
 }

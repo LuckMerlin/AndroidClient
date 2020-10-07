@@ -5,5 +5,5 @@ import android.view.View;
 import com.luckmerlin.core.proguard.PublishMethods;
 
 public interface CustomBinding extends PublishMethods,BindingObject {
-    void onBind(View view);
+    boolean onBind(View view);
 }

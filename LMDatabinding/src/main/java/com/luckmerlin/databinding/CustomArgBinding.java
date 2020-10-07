@@ -1,6 +1,10 @@
 package com.luckmerlin.databinding;
 
-public abstract class CustomArgBinding implements CustomBinding {
+import android.view.View;
+
+import java.lang.ref.WeakReference;
+
+public class CustomArgBinding implements CustomBinding {
     private Object mArg;
 
     public final CustomArgBinding setArg(Object arg){
@@ -9,6 +13,26 @@ public abstract class CustomArgBinding implements CustomBinding {
     }
 
     public final Object getArg(){
-        return mArg;
+        Object arg=mArg;
+        if (null!=arg&&arg instanceof WeakReference){
+            if (null==(arg=((WeakReference)arg).get())){
+                mArg=null;
+            }
+        }
+        return arg;
+    }
+
+    @Override
+    public boolean onBind(View view) {
+        //Do nothing
+        return false;
+    }
+
+    public static CustomArgBinding arg(Object arg){
+        return arg(arg,true);
+    }
+
+    public static CustomArgBinding arg(Object arg,boolean lifeWeak){
+        return new CustomArgBinding().setArg(lifeWeak?new LifeObjectPackager().pack(arg):arg);
     }
 }

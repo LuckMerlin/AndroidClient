@@ -57,7 +57,7 @@ public class Text implements BindingObject,PublishMethods, PublishFields {
     }
 
     public final Integer getSizeUnit() {
-        return getSizeUnit(UNIT_SP);
+        return getSizeUnit(UNIT_PX);
     }
 
     public final Integer getSizeUnit(Integer def) {

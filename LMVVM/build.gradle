@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-def buildVersion="#0.0.29"
+def buildVersion="0.0.31"
 if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
     apply plugin: 'com.novoda.bintray-release'
 }
@@ -52,5 +52,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly 'com.luckmerlin.library:core:0.0.6'
 //    compileOnly project(path: ':LMDatabinding')
-    compileOnly 'com.luckmerlin.library:databinding:0.0.23'
+    compileOnly 'com.luckmerlin.library:databinding:0.0.25'
 }

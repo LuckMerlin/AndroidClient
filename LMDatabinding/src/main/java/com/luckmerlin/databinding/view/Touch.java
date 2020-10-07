@@ -69,7 +69,8 @@ public final class Touch implements BindingObject,PublishMethods, PublishFields 
     }
 
     public static Touch textRes(Object textResId, Object color,Object tag,Integer dispatch,Object object,int clickDither){
-        return new Touch(object,null!=textResId||null!=color?new TextResTag(textResId,color,tag):null,clickDither).enableDispatch(dispatch);
+        return new Touch(object,null!=textResId||null!=color?new TextResTag(textResId,color,tag):
+                null,clickDither).enableDispatch(dispatch);
     }
 
     public Touch listener(TouchListener runnable){

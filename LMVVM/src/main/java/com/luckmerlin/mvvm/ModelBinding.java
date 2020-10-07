@@ -22,10 +22,11 @@ final class ModelBinding extends CustomArgBinding {
     }
 
     @Override
-    public final void onBind(View view) {
+    public final boolean onBind(View view) {
         Object modelObj=null!=view?getArg():null;
         if (null!=modelObj){
 //            new ViewBindingBinder().bind(view,this);
         }
+        return false;
     }
 }

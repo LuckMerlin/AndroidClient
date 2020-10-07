@@ -41,20 +41,22 @@ import com.luckmerlin.databinding.view.Touch;
 import com.luckmerlin.match.Matchable;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.List;
 
 final class ViewBindingBinderImpl {
+    private final LifeObjectPackager mLifePackager=new LifeObjectPackager();
 
     public boolean bind(View view, BindingObject ...bindings){
         if (null==view||null==bindings||bindings.length<=0){
             return false;
         }
         for (BindingObject binding:bindings) {
-            if (binding instanceof BindingList){
-                BindingList list=(BindingList)binding;
-                if (null!=list&&list.size()>0){
-                    for (BindingObject child:list) {
-                        bind(view,child);
+            if (binding instanceof Collection){
+                Collection list=(Collection)binding;
+                for (Object child:list) {
+                    if (null!=child&&child instanceof BindingObject){
+                        bind(view,(BindingObject)child);
                     }
                 }
                 continue;
@@ -162,6 +164,7 @@ final class ViewBindingBinderImpl {
             //Apply text color
             textView.setText(getText(resources,res,text.getObjects()));
             textView.setTextColor(getColor(context,resources,text.getColor(),textView.getTextColors()));
+            //Apply textSize
             float textSize=text.getSize(textView.getTextSize());
             Integer sizeUnit=text.getSizeUnit();
             if (null!=sizeUnit) {
@@ -267,9 +270,7 @@ final class ViewBindingBinderImpl {
         Object tagObject=touch.getTag();
         Integer resTagId=null;
         if (null!=tagObject){
-            if (tagObject instanceof Activity ||tagObject instanceof Service || tagObject instanceof BroadcastReceiver ||tagObject instanceof ContentProvider) {
-                tagObject = new WeakReference<>(tagObject);
-            }
+            tagObject=mLifePackager.pack(tagObject);
             if (tagObject instanceof TextResTag&&view instanceof TextView){
                 if (applyViewText((TextView)view,(TextResTag)tagObject)){
                     resTagId=null!=resTagId?resTagId:((TextResTag)tagObject).getResTagId();
@@ -311,6 +312,7 @@ final class ViewBindingBinderImpl {
             final int finalDither=dither<0?400:dither;
             final Object[] ditherObject=new Object[2];
             final View.OnClickListener clickListener=(View v)->{
+                Debug.D("Click");
                 Object clickCount=ditherObject[1];
                 final int finalClickCount=null!=clickCount&&clickCount instanceof Integer &&((Integer)clickCount)>0?(Integer) clickCount:0;
                 final Object finalObject=getTagObject(finalTagObject);
