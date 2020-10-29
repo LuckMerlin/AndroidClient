@@ -7,6 +7,7 @@ import android.content.ContentProvider;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,26 +18,32 @@ import android.widget.TextView;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
+import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
+import com.luckmerlin.databinding.MatchBinding;
+import com.luckmerlin.databinding.Model;
+import com.luckmerlin.databinding.ModelBinder;
 import com.luckmerlin.databinding.touch.OnViewClick;
 
 import java.lang.ref.WeakReference;
 
-public class Dialog {
+public class Dialog implements PublishMethods{
     private final android.app.Dialog mDialog;
-    private WeakReference<View> mRoot;
-
-    public Dialog(android.app.Dialog dialog){
-        mDialog=dialog;
-    }
 
     public Dialog(Context context){
         this(context,null);
     }
 
     public Dialog(Context context, Integer windowType){
-        this(new android.app.Dialog(context));
-        android.app.Dialog dialog=mDialog;
+        this(context,windowType,null);
+    }
+
+    public Dialog(Context context,Integer windowType, Drawable background){
+        this(null!=context?new android.app.Dialog(context):null,windowType,background);
+    }
+
+    public Dialog(android.app.Dialog dialog,Integer windowType, Drawable background){
+        mDialog=dialog;
         if (null!=dialog){
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             Window window=dialog.getWindow();
@@ -44,7 +51,7 @@ public class Dialog {
                 if (null!=windowType){
                     window.setType(windowType);
                 }
-                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                window.setBackgroundDrawable(null!=background?background:new ColorDrawable(Color.TRANSPARENT));
             }
         }
     }
@@ -52,6 +59,14 @@ public class Dialog {
     public final Window getWindow(){
         android.app.Dialog dialog=mDialog;
         return null!=dialog?dialog.getWindow():null;
+    }
+
+    public final Dialog setSoftInputMode(int mode){
+        Window window=getWindow();
+        if (null!=window){
+            window.setSoftInputMode(mode);
+        }
+        return this;
     }
 
     public final Dialog setDimAmount(float dimAmount){
@@ -75,6 +90,18 @@ public class Dialog {
         return this;
     }
 
+    public final Dialog setContentView(Model model){
+        Context context=null!=model&&!model.isRootAttached()?getContext():null;
+        MatchBinding matchBinding=null!=context?new ModelBinder().bindModelForObject(context,model,"While set dialog content view."):null;
+        View dialogView=null!=matchBinding?matchBinding.getRoot():null;
+        Debug.D("BBBBBBBBBBBbb "+dialogView);
+        if (null!=dialogView){
+            setContentView(dialogView);
+        }
+        return this;
+    }
+
+
     public final Dialog setContentView(ViewDataBinding binding){
         return setContentView(binding,null);
     }
@@ -93,7 +120,6 @@ public class Dialog {
         return null!=context?LayoutInflater.from(context):null;
     }
 
-
     public final Dialog setContentView(View view, int[] padding, ViewGroup.LayoutParams params){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
@@ -101,7 +127,6 @@ public class Dialog {
                 view.setPadding(padding[0],padding[1],padding[2],padding[3]);
             }
             if (view.getParent()==null){
-                mRoot=new WeakReference<>(view);
                 dialog.setContentView(view,null!=params?params:new ViewGroup.LayoutParams
                         (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }
@@ -115,8 +140,9 @@ public class Dialog {
      }
 
     public final View getRoot(){
-        WeakReference<View> reference=mRoot;
-         return null!=reference?reference.get():null;
+        android.app.Dialog dialog=mDialog;
+        Window window=null!=dialog?dialog.getWindow():null;
+        return null!=window?window.getDecorView():null;
      }
 
     public final boolean show(){
@@ -203,7 +229,7 @@ public class Dialog {
         return null!=params?params.gravity:def;
     }
 
-    public final Dialog gravity(int gravity){
+    public final Dialog setGravity(int gravity){
         Window window=getWindow();
         if (null!=window){
             window.setGravity(gravity);

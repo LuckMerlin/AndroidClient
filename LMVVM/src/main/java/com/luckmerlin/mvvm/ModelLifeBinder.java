@@ -10,15 +10,12 @@ import com.luckmerlin.core.proguard.PublishMethods;
  * TODO
  */
 public final class ModelLifeBinder implements PublishMethods{
+    private final static ModelLifeBinderImpl mInstance=new ModelLifeBinderImpl();
     private ModelLifeBinder(){
 
     }
 
     public static boolean bindActivityLife(boolean enable, Context context){
-        return new ModelLifeBinderImpl().bindActivityLife(enable, context);
+        return mInstance.bindActivityLife(enable, context);
     }
-
-//    public static boolean bindComponentLife(boolean enable, Context context){
-//        return new LifeBinderImpl().bindComponentLife(enable, context);
-//    }
 }

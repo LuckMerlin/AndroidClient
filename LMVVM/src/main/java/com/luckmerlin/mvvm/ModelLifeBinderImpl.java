@@ -20,6 +20,7 @@ import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.databinding.ActivityRootFinder;
 import com.luckmerlin.databinding.DataBindingUtil;
 import com.luckmerlin.databinding.MatchBinding;
+import com.luckmerlin.databinding.Model;
 import com.luckmerlin.databinding.ModelBinder;
 import com.luckmerlin.databinding.ModelClassFinder;
 import com.luckmerlin.mvvm.activity.OnActivityCreate;
@@ -147,7 +148,7 @@ class ModelLifeBinderImpl implements Application.ActivityLifecycleCallbacks{
                         if (null!=activity&&activity instanceof OnServiceBindChange){
                             ((OnServiceBindChange)activity).onServiceBindChanged(null, name);
                         }
-                        if (null!=model&&model instanceof OnBroadcastReceive){
+                        if (null!=model&&model instanceof OnServiceBindChange){
                             ((OnServiceBindChange)model).onServiceBindChanged(null, name);
                         }
                     }
@@ -157,7 +158,7 @@ class ModelLifeBinderImpl implements Application.ActivityLifecycleCallbacks{
                         if (null!=activity&&activity instanceof OnServiceBindChange){
                             ((OnServiceBindChange)activity).onServiceBindChanged(service, name);
                         }
-                        if (null!=model&&model instanceof OnBroadcastReceive){
+                        if (null!=model&&model instanceof OnServiceBindChange){
                             ((OnServiceBindChange)model).onServiceBindChanged(service, name);
                         }
                     }
@@ -167,7 +168,7 @@ class ModelLifeBinderImpl implements Application.ActivityLifecycleCallbacks{
                         if (null!=activity&&activity instanceof OnServiceBindChange){
                             ((OnServiceBindChange)activity).onServiceBindChanged(null, name);
                         }
-                        if (null!=model&&model instanceof OnBroadcastReceive){
+                        if (null!=model&&model instanceof OnServiceBindChange){
                             ((OnServiceBindChange)model).onServiceBindChanged(null, name);
                         }
                     }}:null;
@@ -255,13 +256,6 @@ class ModelLifeBinderImpl implements Application.ActivityLifecycleCallbacks{
         }
         return false;
     }
-
-//    public  synchronized boolean bindComponentLife(boolean enable, Context context) {
-//        return bindLife(context,enable,(app,en)->{
-//            app.unregisterComponentCallbacks(LifeBinderImpl.this);
-//            if (enable){ app.registerComponentCallbacks(LifeBinderImpl.this); }
-//        });
-//    }
 
     public synchronized boolean bindActivityLife(boolean enable,Context context){
         return bindLife(context,enable,(app,en)->{

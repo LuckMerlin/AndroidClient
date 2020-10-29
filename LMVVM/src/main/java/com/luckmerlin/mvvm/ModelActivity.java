@@ -3,6 +3,8 @@ package com.luckmerlin.mvvm;
 import android.app.Activity;
 import android.content.Context;
 
+import com.luckmerlin.databinding.Model;
+
 /**
  * @deprecated
  */

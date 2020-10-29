@@ -10,18 +10,22 @@
         <import type="com.luckmerlin.test.R"/>
     </data>
     <FrameLayout
+        android:id="@+id/ffffffffff"
+        android:background="#f00"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{vm.ddd}" />
+
         <androidx.recyclerview.widget.RecyclerView
-            android:adapter="@{vm.snapAdapter}"
+            android:adapter="@{vm.adapter}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
         <LinearLayout
             android:orientation="vertical"
+            android:visibility="gone"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">

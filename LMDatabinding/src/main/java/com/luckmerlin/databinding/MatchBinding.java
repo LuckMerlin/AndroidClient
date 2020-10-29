@@ -37,4 +37,16 @@ public final class MatchBinding implements PublishFields, PublishMethods {
     public final Object getCurrent() {
         return mCurrent;
     }
+
+    @Override
+
+    public String toString() {
+        return "MatchBinding{" +
+                "mSetMethod=" + mSetMethod +
+                ", mGetMethod=" + mGetMethod +
+                ", mViewBinding=" + mViewBinding +
+                ", mCurrent=" + mCurrent +
+                ", mType=" + mType +
+                '}';
+    }
 }

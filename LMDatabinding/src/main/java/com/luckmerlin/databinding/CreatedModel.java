@@ -5,10 +5,10 @@ import com.luckmerlin.core.proguard.PublishFields;
 
 public final class CreatedModel implements PublishFields {
     public final MatchBinding mMatchBinding;
-    public final LModel mModel;
+    public final Model mModel;
     public final View mRoot;
 
-    protected CreatedModel(LModel model,View root,MatchBinding matchBinding){
+    protected CreatedModel(Model model, View root, MatchBinding matchBinding){
         mModel=model;
         mRoot=root;
         mMatchBinding=matchBinding;

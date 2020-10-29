@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+    <data>
+    <import type="com.luckmerlin.databinding.view.Touch"/>
+    </data>
+    <TextView
+        android:text="sdfasdfadfa"
+        binding:lmBinding="@{Touch.dispatch(Touch.CLICK,`dsdfsa`)}"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</layout>

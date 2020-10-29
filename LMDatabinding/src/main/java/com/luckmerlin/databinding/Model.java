@@ -21,7 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-public abstract class LModel implements PublishMethods, PublishProtectedMethod {
+public abstract class Model implements PublishMethods, PublishProtectedMethod {
     private WeakReference<View> mRootView=null;
 
     public final View findViewById(int viewId,View def){
