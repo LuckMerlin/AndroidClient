@@ -11,8 +11,9 @@ import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
- public final class ModelBinder implements PublishMethods {
+public final class ModelBinder implements PublishMethods {
 
     public MatchBinding bindModelForView(View view,String debug){
         ViewDataBinding binding=null!=view&&DataBindingUtil.checkDataBindingEnable(false)? DataBindingUtil.getBinding(view):null;
@@ -29,8 +30,18 @@ import java.lang.reflect.Method;
             if (null!=modelRoot&&null!=setMethod&&null!=modelBinding&&null!=lModel){
                 Class[] types=setMethod.getParameterTypes();//Check model set invalid
                 Class modelType=null!=types&&types.length==1?types[0]:null;
-                if (null==modelType||!modelType.getName().equals(lModel.getClass().getName())){
+                String modelTypeName=null!=modelType?modelType.getName():null;
+                Class lmModelClass=lModel.getClass();
+                if (null==modelType||null==lmModelClass){
                     return null;
+                }
+                if (!modelTypeName.equals(lmModelClass.getName())){
+                    //Check if inner model instance
+                    Type innerSuperClass=lmModelClass.getGenericSuperclass();
+                    if (null==innerSuperClass||!(innerSuperClass instanceof Class)||
+                            !modelTypeName.equals(((Class)innerSuperClass).getName())){
+                        return null;
+                    }
                 }
                 if (lModel.attachRoot(modelRoot,debug)){
                     try {
@@ -104,7 +115,8 @@ import java.lang.reflect.Method;
                 Object modelObj=((OnModelResolve)lModel).onResolveModel();
                 View modelView=null!=modelObj?new ViewCreator().create(context,modelObj):null;
                 MatchBinding matchBinding=null!=modelView?new ModelCreator().findModel(modelView,null):null;
-                return null!=matchBinding?new ModelBinder().bindModelForMatchBinding(modelView.getContext(),matchBinding,debug):null;
+                return null!=matchBinding?new ModelBinder().bindModelForCreateModel
+                        (new CreatedModel(lModel,modelView,matchBinding),debug):null;
             }
             return null;
         }else if (object instanceof Integer&&null!=context){

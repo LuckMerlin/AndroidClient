@@ -26,6 +26,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -74,12 +75,23 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return false;
     }
 
+    public final boolean setMinLines(int lines,String debug){
+
+        return false;
+    }
+
+    protected Integer onResolveDataLayoutId(ViewGroup parent){
+        //Do nothing
+        return null;
+    }
+
     @Override
     public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final LayoutInflater in=LayoutInflater.from(parent.getContext());
         RecyclerView.ViewHolder viewHolder=onCreateViewHolder(in,viewType,parent);
         if (viewHolder ==null){
             Integer integer= onResolveViewTypeLayoutId(viewType);
+            integer=null==integer&&viewType==TYPE_DATA?onResolveDataLayoutId(parent):integer;
             ViewDataBinding binding=null!=integer&&integer!= Resources.ID_NULL?DataBindingUtil.inflate(in,integer,parent,false):null;
             viewHolder= null!=binding?new BindingViewHolder(binding):null;
         }
@@ -278,6 +290,10 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             return true;
         }
         return false;
+    }
+
+    public final boolean add(T data){
+        return add(data,false,null);
     }
 
     public final boolean add(T data,boolean exceptExist,String debug){

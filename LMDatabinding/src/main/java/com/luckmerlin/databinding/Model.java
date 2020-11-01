@@ -20,9 +20,13 @@ import com.luckmerlin.core.proguard.PublishProtectedMethod;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public abstract class Model implements PublishMethods, PublishProtectedMethod {
     private WeakReference<View> mRootView=null;
+    private Map<Object,Long> mDispatchHolders;
 
     public final View findViewById(int viewId,View def){
         return findViewById(getRoot(),viewId,def);
@@ -48,6 +52,68 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
             return post(()->Toast.makeText(context, msg, Toast.LENGTH_SHORT).show(),0);
         }
         return false;
+    }
+
+    public final boolean toast(int textId,Object ... args){
+        return toast(getString(textId,null,args));
+    }
+
+    public final String getString(int textId,String def,Object ... args){
+        com.luckmerlin.databinding.Resources resources=new com.luckmerlin.databinding.Resources();
+        return null!=resources?resources.getString(getResources(),textId,def,args):def;
+    }
+
+    public final android.content.res.Resources getResources(){
+        Context context = getContext();
+        return null!=context?context.getResources():null;
+    }
+
+    public final Model addDispatchHolder(Object object){
+        if (null!=object){
+            Map<Object,Long> dispatchHolder=mDispatchHolders;
+            dispatchHolder=null!=dispatchHolder?dispatchHolder:(mDispatchHolders=new WeakHashMap<>());
+            synchronized (dispatchHolder){
+                dispatchHolder.put(object,System.currentTimeMillis());
+            }
+        }
+        return this;
+    }
+
+    public final Model removeDispatchHolder(Object object){
+        Map<Object,Long> dispatchHolder=mDispatchHolders;
+        if (null!=dispatchHolder){
+            synchronized (dispatchHolder){
+                if (null!=object){
+                    dispatchHolder.remove(object);
+                }
+                if (dispatchHolder.size()<=0){
+                    mDispatchHolders=null;
+                }
+            }
+        }
+        return this;
+    }
+
+    private final boolean removeAllDispatchHolder(String debug){
+        Map<Object,Long> dispatchHolder=mDispatchHolders;
+        if (null!=dispatchHolder){
+            synchronized (dispatchHolder){
+                dispatchHolder.clear();
+                mDispatchHolders=null;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public final Collection<Object> getDispatchHolders(){
+        Map<Object,Long> dispatchHolder=mDispatchHolders;
+        if (null!=dispatchHolder){
+            synchronized (dispatchHolder){
+                return dispatchHolder.keySet();
+            }
+        }
+        return null;
     }
 
     public final boolean post(Runnable runnable){
@@ -268,9 +334,10 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
         WeakReference<View> reference=mRootView;
         if (null!=reference){
             Debug.D("Detach model root "+this+" "+(null!=debug?debug:"."));
+            mRootView=null;
             View root=reference.get();
             reference.clear();
-            mRootView=null;
+            removeAllDispatchHolder("While root detach.");
             if (null!=root){
                 onRootDetached();
                 return true;

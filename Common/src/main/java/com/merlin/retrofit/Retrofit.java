@@ -34,6 +34,7 @@ public class Retrofit {
         OkHttpClient client = createClient();
         mBuilder = null!=client?new retrofit2.Retrofit.Builder().client(client).addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create()):null;
+        Reply dd;
     }
 
     public final <T>T prepare(Class<T>  cls,String url){

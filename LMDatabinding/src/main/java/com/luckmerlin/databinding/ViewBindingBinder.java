@@ -1,5 +1,6 @@
 package com.luckmerlin.databinding;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -7,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -374,6 +376,12 @@ public final class ViewBindingBinder implements PublishMethods {
             if (null!=context&&isMatched(matchable.onMatch(context))){
                 return true;
             }
+            if (null!=context&&!(context instanceof Activity)&&(context instanceof ContextThemeWrapper)){
+                Context innerContext=((ContextThemeWrapper)context).getBaseContext();
+                if (null!=innerContext&&isMatched(matchable.onMatch(innerContext))){
+                    return true;
+                }
+            }
             context=null!=context?context.getApplicationContext():null;
             if (null!=context&&isMatched(matchable.onMatch(context))){
                 return true;
@@ -381,6 +389,7 @@ public final class ViewBindingBinder implements PublishMethods {
         }
         return false;
     }
+
 
     private final boolean isMatched(Integer match){
         return null!=match&&match==Matchable.MATCHED;
@@ -392,7 +401,18 @@ public final class ViewBindingBinder implements PublishMethods {
             if (null!=(null!=binding?new ModelClassFinder().findModel(binding,(o)->{
                 MatchBinding matchBinding=null!=o&&o instanceof MatchBinding?(MatchBinding)o:null;
                 Object current=null!=matchBinding?matchBinding.getCurrent():null;
-                return null!=current?matchable.onMatch(current):null;
+                Integer match= null!=current?matchable.onMatch(current):null;
+                if ((null==match||match!=Matchable.MATCHED)&&null!=current&&current instanceof Model){
+                    Collection<Object> objects=((Model)current).getDispatchHolders();
+                    if (null!=objects&&objects.size()>0){
+                        for (Object child:objects) {
+                            if (null!=(match=(null!=child?matchable.onMatch(child):null))&&match==Matchable.MATCHED){
+                                break;
+                            }
+                        }
+                    }
+                }
+                return match;
             }):null)){
                 return true;
             }

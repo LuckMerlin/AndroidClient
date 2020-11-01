@@ -10,31 +10,14 @@ public  class BindingMethodIterator {
 
     public final MatchBinding iterate(ViewDataBinding binding, Matchable matchable){
         final Class bindingClass=null!=binding?binding.getClass().getSuperclass():null;
-        MatchBinding matchBinding= null!=bindingClass?iterate(bindingClass,null):null;
-        if (null!=matchBinding){
-            Method getMethod=matchBinding.mGetMethod;
-            if (null!=getMethod){
-                boolean access=getMethod.isAccessible();
-                try {
-                    getMethod.setAccessible(true);
-                    Object result=getMethod.invoke(binding);
-                    matchBinding.setCurrent(result);
-                    Integer matched=null!=matchable?matchable.onMatch(matchBinding):null;
-                    if (null==matched||matched!=Matchable.MATCHED){
-                        return null;
-                    }
-                } catch (Exception e) {
-                    Debug.E("Exception iterate binding model.e="+e,e);
-                    return null;
-                }finally {
-                    getMethod.setAccessible(access);
-                }
-            }
-        }
-        return matchBinding;
+        return null!=bindingClass?iterate(bindingClass,binding,matchable):null;
     }
 
     public final MatchBinding iterate(Class bindingClass, Matchable matchable){
+        return iterate(bindingClass,null,matchable);
+    }
+
+    private final MatchBinding iterate(Class bindingClass,ViewDataBinding binding, Matchable matchable){
         if (null!=bindingClass){
             Method[] methods=null!=bindingClass?bindingClass.getDeclaredMethods():null;
             if (null!=methods&&methods.length>0){
@@ -52,7 +35,25 @@ public  class BindingMethodIterator {
                     try {
                         Method getMethod=bindingClass.getDeclaredMethod(methodName.replaceFirst("set","get"));
                         if (null!=getMethod){
-                            MatchBinding matchBinding=new MatchBinding(method,getMethod,type,null,null);
+                            ViewDataBinding currentBinding=null;
+                            Object current=null;
+                            if (null!=binding){//Get current object
+                               Class[] parameters=getMethod.getParameterTypes();
+                               Class returnCls=null==parameters||parameters.length<=0?getMethod.getReturnType():null;
+                               if (null!=returnCls&&!returnCls.getName().equals(void.class.getName())){
+                                   boolean access=getMethod.isAccessible();
+                                   try {
+                                       getMethod.setAccessible(true);
+                                       current=getMethod.invoke(binding);
+                                       currentBinding=binding;
+                                   }catch (Exception e){
+                                       //Do nothing
+                                   }finally {
+                                       getMethod.setAccessible(access);
+                                   }
+                               }
+                            }
+                            MatchBinding matchBinding=new MatchBinding(method,getMethod,type, current,currentBinding);
                             Integer matched=Matchable.MATCHED;
                             if (null!=matchable){
                                 matched=matchable.onMatch(matchBinding);

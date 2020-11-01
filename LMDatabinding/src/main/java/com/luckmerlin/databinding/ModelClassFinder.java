@@ -4,6 +4,7 @@ import android.view.View;
 
 import androidx.databinding.ViewDataBinding;
 
+import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.match.Matchable;
 
@@ -16,7 +17,8 @@ public class ModelClassFinder extends BindingMethodIterator implements PublishMe
             ViewDataBinding binding=DataBindingUtil.getBinding(modelRoot);
             MatchBinding matchBinding=null!=binding?findModel(binding,matchable):null;
             if (null!=matchBinding&&null==matchBinding.mViewBinding){
-                matchBinding=new MatchBinding(matchBinding.mSetMethod,matchBinding.mGetMethod, matchBinding.mType,matchBinding.getCurrent(),binding);
+                matchBinding=new MatchBinding(matchBinding.mSetMethod,matchBinding.mGetMethod,
+                        matchBinding.mType,matchBinding.getCurrent(),binding);
             }
             return matchBinding;
         }

@@ -1,34 +1,29 @@
 package com.luckmerlin.databinding.dialog;
 
-import android.app.Activity;
-import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.ContentProvider;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.transition.Transition;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
-
-import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.MatchBinding;
 import com.luckmerlin.databinding.Model;
 import com.luckmerlin.databinding.ModelBinder;
-import com.luckmerlin.databinding.touch.OnViewClick;
-
-import java.lang.ref.WeakReference;
+import com.luckmerlin.databinding.ModelClassFinder;
 
 public class Dialog implements PublishMethods{
     private final android.app.Dialog mDialog;
+    private Object mDispatchHolder;
 
     public Dialog(Context context){
         this(context,null);
@@ -46,6 +41,29 @@ public class Dialog implements PublishMethods{
         mDialog=dialog;
         if (null!=dialog){
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setOnShowListener((DialogInterface dlg)-> {
+                onDialogShow();
+                Model model=getContentModel();
+                if (null!=model){
+                    model.addDispatchHolder(Dialog.this);
+                    Object dispatch=mDispatchHolder;
+                    if (null!=dispatch){
+                        model.addDispatchHolder(dispatch);
+                    }
+                }
+            });
+            dialog.setOnDismissListener((DialogInterface dlg)-> {
+                onDialogDismiss();
+                Object innerDispatchHolder=mDispatchHolder;
+                mDispatchHolder=null;
+                Model model=getContentModel();
+                if (null!=model){
+                    model.removeDispatchHolder(Dialog.this);
+                    if (null!=innerDispatchHolder){
+                        model.removeDispatchHolder(innerDispatchHolder);
+                    }
+                }
+            });
             Window window=dialog.getWindow();
             if (null!=window){
                 if (null!=windowType){
@@ -65,6 +83,26 @@ public class Dialog implements PublishMethods{
         Window window=getWindow();
         if (null!=window){
             window.setSoftInputMode(mode);
+        }
+        return this;
+    }
+
+    public final Dialog setEnterTransition(Transition transition){
+        Window window=getWindow();
+        if (null!=window){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.setEnterTransition(transition);
+            }
+        }
+        return this;
+    }
+
+    public final Dialog setExitTransition(Transition transition){
+        Window window=getWindow();
+        if (null!=window){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.setExitTransition(transition);
+            }
         }
         return this;
     }
@@ -91,16 +129,50 @@ public class Dialog implements PublishMethods{
     }
 
     public final Dialog setContentView(Model model){
+        return setContentView(model,null,null);
+    }
+
+    public final Dialog setContentView(Model model,ViewGroup.LayoutParams params){
+        return setContentView(model,null,params);
+    }
+
+    public final Dialog setContentView(Model model, int[] padding){
+        return setContentView(model,padding,null);
+    }
+
+    public final Model getContentModel(){
+        View root=getContentRoot();
+        MatchBinding matchBinding=null!=root?new ModelClassFinder().findModel(root,null):null;
+        Object currentObject=null!=matchBinding?matchBinding.getCurrent():null;
+        return null!=currentObject&&currentObject instanceof Model?((Model)currentObject):null;
+    }
+
+    public final View getContentRoot(){
+         Window window=getWindow();
+         View decorView=null!=window?window.getDecorView():null;
+         decorView= null!=decorView?decorView.findViewById(android.R.id.content):null;
+         if (null!=decorView&&decorView instanceof ViewGroup){
+             ViewGroup vg=(ViewGroup)decorView;
+             int count=vg.getChildCount();
+             View child=null;
+             for (int i = 0; i < count; i++) {
+                 if (null!=(child=vg.getChildAt(i))&&child.getVisibility()==View.VISIBLE){
+                    return child;
+                 }
+             }
+         }
+         return null;
+    }
+
+    public final Dialog setContentView(Model model, int[] padding, ViewGroup.LayoutParams params){
         Context context=null!=model&&!model.isRootAttached()?getContext():null;
         MatchBinding matchBinding=null!=context?new ModelBinder().bindModelForObject(context,model,"While set dialog content view."):null;
         View dialogView=null!=matchBinding?matchBinding.getRoot():null;
-        Debug.D("BBBBBBBBBBBbb "+dialogView);
         if (null!=dialogView){
-            setContentView(dialogView);
+            setContentView(dialogView,padding,params);
         }
         return this;
     }
-
 
     public final Dialog setContentView(ViewDataBinding binding){
         return setContentView(binding,null);
@@ -120,6 +192,10 @@ public class Dialog implements PublishMethods{
         return null!=context?LayoutInflater.from(context):null;
     }
 
+    protected void onRootChanged(View current,View last){
+        //Do nothing
+    }
+
     public final Dialog setContentView(View view, int[] padding, ViewGroup.LayoutParams params){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&null!=view&&null==view.getParent()){
@@ -127,8 +203,10 @@ public class Dialog implements PublishMethods{
                 view.setPadding(padding[0],padding[1],padding[2],padding[3]);
             }
             if (view.getParent()==null){
+                View current=getRoot();
                 dialog.setContentView(view,null!=params?params:new ViewGroup.LayoutParams
                         (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                onRootChanged(view,current);
             }
         }
         return this;
@@ -146,12 +224,7 @@ public class Dialog implements PublishMethods{
      }
 
     public final boolean show(){
-        return show(null,true);
-    }
-
-    public final boolean show(OnViewClick click){
-        return show(click,null!=click&&(click instanceof ContentProvider ||click instanceof Activity ||
-                click instanceof Service ||click instanceof BroadcastReceiver));
+        return show(null);
     }
 
     protected void onDialogShow(){
@@ -162,10 +235,15 @@ public class Dialog implements PublishMethods{
         //Do nothing
     }
 
-    public final boolean show(OnViewClick click, boolean weak){
+    public final boolean show(Object dispatchHolder){
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&!dialog.isShowing()){
-            onDialogShow();
+            Object current=mDispatchHolder;
+            Model model=null!=current?getContentModel():null;
+            if (null!=model){
+                model.removeDispatchHolder(current);
+            }
+            mDispatchHolder=dispatchHolder;
             dialog.show();
             return true;
         }
@@ -176,7 +254,6 @@ public class Dialog implements PublishMethods{
         android.app.Dialog dialog=mDialog;
         if (null!=dialog&&dialog.isShowing()){
             dialog.dismiss();
-            onDialogDismiss();
         }
         return this;
     }
@@ -193,6 +270,10 @@ public class Dialog implements PublishMethods{
             return ""+((TextView)view).getText();
         }
         return def;
+    }
+
+    public final Object getDispatchHolder() {
+        return mDispatchHolder;
     }
 
     public final Dialog setCanceledOnTouchOutside(boolean flag){

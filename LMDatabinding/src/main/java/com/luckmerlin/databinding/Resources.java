@@ -8,8 +8,22 @@ import android.os.Build;
 
  final class Resources {
 
+    public String getString(android.content.res.Resources resources, int textId, String def,Object ... args){
+        try {
+            return null!=resources?resources.getString(textId,args):def;
+        }catch (Exception e){
+            //Do nothing
+        }
+        return def;
+    }
+
     public CharSequence getText(android.content.res.Resources resources, int textId, CharSequence def){
-        return null!=resources?resources.getText(textId,def):null;
+        try {
+            return null!=resources?resources.getText(textId,def):def;
+        }catch (Exception e){
+            //Do nothing
+        }
+        return def;
     }
 
     public Integer getColorFromText(String colorText, Integer def){
