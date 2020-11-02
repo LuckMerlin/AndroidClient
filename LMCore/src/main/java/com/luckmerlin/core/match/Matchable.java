@@ -1,4 +1,4 @@
-package com.luckmerlin.match;
+package com.luckmerlin.core.match;
 
 import com.luckmerlin.core.proguard.PublishFields;
 import com.luckmerlin.core.proguard.PublishMethods;

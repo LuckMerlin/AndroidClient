@@ -2,48 +2,49 @@ package com.luckmerlin.test;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import com.luckmerlin.file.media.MediaFile;
+import com.luckmerlin.file.media.MediaScanner;
+import com.luckmerlin.file.media.OnMediaScanFinish;
 
-import com.luckmerlin.core.debug.Debug;
-import com.luckmerlin.databinding.OnModelResolve;
-import com.luckmerlin.databinding.dialog.AlertDialog;
-import com.luckmerlin.databinding.dialog.Dialog;
-import com.luckmerlin.databinding.touch.OnViewClick;
-import com.luckmerlin.mvvm.ModelLifeBinder;
-import com.luckmerlin.test.databinding.ActivityMainBinding;
+import java.util.List;
 
-public class MainActivity extends Activity implements OnViewClick {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AlertDialog dialog=new AlertDialog(this);
-        dialog.setContentView(new NotifyDialogModel(){
-
-                              }
-        );
-        dialog.show(new OnViewClick() {
+//        AlertDialog dialog=new AlertDialog(this);
+//        dialog.setContentView(new NotifyDialogModel(){
+//
+//                              }
+//        );
+//        dialog.show(new OnViewClick() {
+//            @Override
+//            public boolean onViewClick(View view, int resId, int count, Object tag) {
+//                Debug.D("DDDonViewClickDDDDDDDDDD  "+view+" "+resId);
+//                return false;
+//            }
+//        });
+        MediaScanner scanner=new MediaScanner();
+        scanner.scanImages(this, true, null,new OnMediaScanFinish() {
             @Override
-            public boolean onViewClick(View view, int resId, int count, Object tag) {
-                Debug.D("DDDonViewClickDDDDDDDDDD  "+view+" "+resId);
-                return false;
+            public void onScanFinish(int what, String note, Uri src, List<MediaFile> files) {
+
             }
-        });
+        },null);
+
     }
 
     @Override
 
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        ModelLifeBinder.bindActivityLife(true,this);
+//        ModelLifeBinder.bindActivityLife(true,this);
     }
 
-    @Override
-    public boolean onViewClick(View view, int resId, int count, Object tag) {
-        Debug.D("DDDDDDDDDDDDD  "+view+" "+resId);
-        return false;
-    }
 }

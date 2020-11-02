@@ -14,7 +14,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -32,9 +32,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ':LMVVM')
-    implementation project(path: ':LMDatabinding')
+//    implementation project(path: ':LMVVM')
+//    implementation project(path: ':LMDatabinding')
     implementation project(path: ':LMCore')
-    implementation project(path: ':LMDRAdapter')
+//    implementation project(path: ':LMDRAdapter')
+    implementation project(path: ':FileScanner')
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
 }
