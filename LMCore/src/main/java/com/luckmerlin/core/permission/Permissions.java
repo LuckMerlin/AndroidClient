@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 
 public final class Permissions {
 //       <uses-permission android:name="android.permission.CAMERA" />
@@ -69,6 +71,34 @@ public final class Permissions {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat
         }
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (activity instanceof RequestPermissionsRequestCodeValidator) {
+                ((RequestPermissionsRequestCodeValidator) activity)
+                        .validateRequestPermissionsRequestCode(requestCode);
+            }
+            activity.requestPermissions(permissions, requestCode);
+        } else if (activity instanceof OnRequestPermissionsResultCallback) {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    final int[] grantResults = new int[permissions.length];
+
+                    PackageManager packageManager = activity.getPackageManager();
+                    String packageName = activity.getPackageName();
+
+                    final int permissionCount = permissions.length;
+                    for (int i = 0; i < permissionCount; i++) {
+                        grantResults[i] = packageManager.checkPermission(
+                                permissions[i], packageName);
+                    }
+
+                    ((OnRequestPermissionsResultCallback) activity).onRequestPermissionsResult(
+                            requestCode, permissions, grantResults);
+                }
+            });
+        }
+
         return false;
     }
 }
