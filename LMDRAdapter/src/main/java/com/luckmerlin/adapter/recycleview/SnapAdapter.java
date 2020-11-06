@@ -14,7 +14,7 @@ public class SnapAdapter<T> extends ListAdapter<T> implements PublishMethods {
         this(null,values);
     }
 
-    public SnapAdapter(PagerSnapHelper snapHelper,T  ...values){
+    public SnapAdapter(PagerSnapHelper snapHelper, T  ...values){
         this(snapHelper,null!=values&&values.length>0? Arrays.asList(values):null);
     }
 
@@ -22,7 +22,7 @@ public class SnapAdapter<T> extends ListAdapter<T> implements PublishMethods {
         this(null,list);
     }
 
-    public SnapAdapter(PagerSnapHelper snapHelper,Collection<T> list){
+    public SnapAdapter(PagerSnapHelper snapHelper, Collection<T> list){
         super(list);
         mHelper=null!=snapHelper?snapHelper:new PagerSnapHelper();
     }

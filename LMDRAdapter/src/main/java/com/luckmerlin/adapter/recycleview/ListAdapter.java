@@ -169,14 +169,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return (dataCount<=0?0:dataCount)+1+increase;
     }
 
-    protected Integer getItemViewType(int position,int size) {
-        return TYPE_DATA;
-    }
-
-    @Override
-    public final int getItemViewType(int position) {
-        List<T> data=mData;
-        int size=null!=data?data.size():0;
+    protected int onResolveItemViewType(int position,int size,T data) {
         if (size<=0){
             return TYPE_EMPTY;
         }
@@ -187,7 +180,14 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         if (position == size){
             return TYPE_TAIL;
         }
-        return getItemViewType(position,size);
+        return TYPE_DATA;
+    }
+
+    @Override
+    public final int getItemViewType(int position) {
+        List<T> data=mData;
+        int size=null!=data?data.size():0;
+        return onResolveItemViewType(position,size,position>=0&&position<size?data.get(position):null);
     }
 
     public final int getDataCount(){
@@ -351,7 +351,6 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     public final boolean insert(int index,List<T> data,String debug) {
         return add(index, data, true,debug);
     }
-
 
     public final boolean replace(int index,T data,String debug) {
         if (null!=data&&index>=0){
@@ -526,11 +525,11 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         if (null!=recyclerView){
             mRecyclerView=new WeakReference<>(recyclerView);
         }
-        onAttachedRecyclerView(recyclerView);
         RecyclerView.LayoutManager manager=null!=recyclerView?onResolveLayoutManager(recyclerView):null;
         if (null!=manager&&null!=recyclerView){
             recyclerView.setLayoutManager(manager);
         }
+        onAttachedRecyclerView(recyclerView);
     }
 
     @Override

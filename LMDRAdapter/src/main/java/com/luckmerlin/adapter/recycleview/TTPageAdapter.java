@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import com.luckmerlin.adapter.OnPageLoadFinish;
+import com.luckmerlin.adapter.TTOnPageLoadFinish;
 import com.luckmerlin.core.Canceler;
 import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
@@ -20,19 +20,19 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter<T>
-        implements OnMoreLoadable, PublishMethods, PublishProtectedMethod {
+public abstract class TTPageAdapter<D,T,M extends TTPageData<T>> extends ListAdapter<T>
+        implements TTOnMoreLoadable, PublishMethods, PublishProtectedMethod {
     private Page<D> mCurrentPage;
     private Page<D> mLoadingPage;
     private WeakHashMap<OnPageLoadUpdate,Object> mUpdateListeners;
-    private PageData<T> mLastPage;
+    private TTPageData<T> mLastPage;
 
 
-    public PageAdapter(T  ...values){
+    public TTPageAdapter(T  ...values){
         this(null!=values&&values.length>0? Arrays.asList(values):null);
     }
 
-    public PageAdapter(Collection<T> list){
+    public TTPageAdapter(Collection<T> list){
         super(list);
     }
 
@@ -42,9 +42,9 @@ public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter
         void onPageLoadUpdate(int state, boolean idle, Page page);
     }
 
-    protected abstract Canceler onPageLoad(D arg, int from, OnPageLoadFinish<M> finish);
+    protected abstract Canceler onPageLoad(D arg, int from, TTOnPageLoadFinish<M> finish);
 
-    private final boolean fillPage(PageData<T> page,boolean reset){
+    private final boolean fillPage(TTPageData<T> page, boolean reset){
         if (null==page){
             return false;
         }
@@ -90,7 +90,7 @@ public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter
         return mCurrentPage;
     }
 
-    public final PageData<T> getLastPage() {
+    public final TTPageData<T> getLastPage() {
         return mLastPage;
     }
 
@@ -173,7 +173,7 @@ public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter
         return loadPage(new Page<>(arg,0,null),true,debug);
     }
 
-    protected void onNoMoreData(PageData<T> data){
+    protected void onNoMoreData(TTPageData<T> data){
     }
 
     private boolean loadPage(Page<D> page,boolean reset,String debug){
@@ -230,7 +230,7 @@ public abstract class PageAdapter<D,T,M extends PageData<T>> extends ListAdapter
         return false;
     }
 
-    protected void onPageLoadSucceed(D arg,PageData<T> page,String debug){
+    protected void onPageLoadSucceed(D arg, TTPageData<T> page, String debug){
         //Do nothing
     }
 

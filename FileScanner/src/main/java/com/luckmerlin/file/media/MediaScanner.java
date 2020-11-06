@@ -30,12 +30,13 @@ public final class MediaScanner implements Callback{
             notifyScanFinish(ARGS_INVALID,"Context or resolver NULL.",uri,files,callback);
             return false;
         }
-//        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
-
-        Cursor cursor=null;
+       Cursor cursor=null;
         try {
-            cursor = resolver.query(uri, new String[]{MediaStore.Images.Media._ID,
-                            MediaStore.Images.Media.DATE_MODIFIED},selection, selectionArgs,
+            cursor = resolver.query(uri, new String[]{MediaStore.Images.Media._ID,MediaStore.Images.Media.DATE_ADDED,
+                            MediaStore.Images.Media.MIME_TYPE,MediaStore.Images.Media.ORIENTATION,
+                            MediaStore.Images.Media.WIDTH,MediaStore.Images.Media.HEIGHT,MediaStore.Images.Media.TITLE,
+                            MediaStore.Images.Media.LATITUDE,MediaStore.Images.Media.LONGITUDE,MediaStore.Images.Media.DISPLAY_NAME,
+                            MediaStore.Images.Media.SIZE, MediaStore.Images.Media.DATE_MODIFIED},selection, selectionArgs,
                     null!=sort?sort:MediaStore.Images.Media.DATE_MODIFIED);
             if (null==cursor){
                 Debug.W("Can't scan images while cursor invalid.");
@@ -43,15 +44,15 @@ public final class MediaScanner implements Callback{
                 return false;
             }
             if (cursor.getCount()<=0){
-                Debug.D("ddddddddd  ");
                 notifyScanFinish(SUCCEED,null,uri,files,callback);
                 return false;
             }
             cursor.moveToFirst();
             do {
-                Debug.D("EEEEEEEEEEee ddd ");
-                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                Debug.D("EEEEEEEEEEee "+path);
+                long mediaId = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+                Uri mediaUri= Uri.withAppendedPath(uri, "" + mediaId);
+                Debug.D("EEEEEEEEEEee "+mediaId+" "+mediaUri
+                );
             }while (cursor.moveToNext());
             notifyScanFinish(SUCCEED,null,uri,files,callback);
            return true;

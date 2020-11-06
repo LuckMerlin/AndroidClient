@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
@@ -17,15 +16,15 @@ import com.luckmerlin.databinding.ModelBinder;
 
 import java.util.List;
 
-public class PagerAdapter<T> extends SnapAdapter<T> implements PublishProtectedMethod {
+public class ViewPagerAdapter<T> extends SnapAdapter<T> implements PublishProtectedMethod {
 
-    public PagerAdapter(T ...pages){
+    public ViewPagerAdapter(T ...pages){
         super(pages);
     }
 
     @Override
     protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater layoutInflater, int type, ViewGroup viewGroup) {
-        return type==TYPE_DATA?new PageViewHolder(viewGroup) :super.onCreateViewHolder(layoutInflater, type, viewGroup);
+        return type==TYPE_DATA?new ViewPageHolder(viewGroup) :super.onCreateViewHolder(layoutInflater, type, viewGroup);
     }
 
     protected Integer onResolveLayoutOrientation(){
@@ -41,7 +40,7 @@ public class PagerAdapter<T> extends SnapAdapter<T> implements PublishProtectedM
     }
 
     protected final boolean tryBindBindingView(RecyclerView.ViewHolder holder,String debug){
-        View itemRoot=null!=holder?holder instanceof PageViewHolder?((PageViewHolder)holder).getRoot():holder.itemView:null;
+        View itemRoot=null!=holder?holder instanceof ViewPageHolder ?((ViewPageHolder)holder).getRoot():holder.itemView:null;
         ViewDataBinding binding=null!=itemRoot? DataBindingUtil.getBinding(itemRoot):null;
         return null!= binding&&null!=new ModelBinder().bindModelForObject(itemRoot.getContext(),binding,debug);
     }
@@ -54,8 +53,8 @@ public class PagerAdapter<T> extends SnapAdapter<T> implements PublishProtectedM
 
     @Override
     protected void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, ViewDataBinding binding, int i1, T page, @NonNull List<Object> list) {
-        if (null!=viewHolder&&viewHolder instanceof PageViewHolder){
-            ((PageViewHolder)viewHolder).inflateLayout(page);
+        if (null!=viewHolder&&viewHolder instanceof ViewPageHolder){
+            ((ViewPageHolder)viewHolder).inflateLayout(page);
         }
     }
 

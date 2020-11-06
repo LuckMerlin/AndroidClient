@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.ViewCreator;
 
-public class PageViewHolder extends ViewHolder implements PublishMethods {
+public class ViewPageHolder extends ViewHolder implements PublishMethods {
 
-    public PageViewHolder(ViewGroup viewGroup) {
+    public ViewPageHolder(ViewGroup viewGroup) {
         super(new FrameLayout(viewGroup.getContext()));
         View view=itemView;
         if (null!=view){

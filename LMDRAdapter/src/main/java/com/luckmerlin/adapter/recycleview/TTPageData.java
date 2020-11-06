@@ -5,16 +5,16 @@ import com.luckmerlin.core.proguard.PublishMethods;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageData<T> implements PublishMethods {
+public class TTPageData<T> implements PublishMethods {
     private long length;
     private int from;
     private ArrayList<T> data;
 
-    public PageData(){
+    public TTPageData(){
         this(0,null,-1);
     }
 
-    public PageData(int from, ArrayList<T> data, long length){
+    public TTPageData(int from, ArrayList<T> data, long length){
         this.from=from;
         this.length=length;
         this.data=data;
