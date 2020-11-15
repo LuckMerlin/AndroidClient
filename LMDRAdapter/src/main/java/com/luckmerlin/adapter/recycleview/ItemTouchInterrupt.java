@@ -17,6 +17,35 @@ public class ItemTouchInterrupt extends ItemTouchHelper.Callback implements Publ
     public final static int RIGHT=ItemTouchHelper.RIGHT;
     public final static int UP=ItemTouchHelper.UP;
     public final static int DOWN=ItemTouchHelper.DOWN;
+    private Integer mMove;
+    private Integer mSlide;
+
+    public ItemTouchInterrupt(){
+        this(null,null);
+    }
+
+    public ItemTouchInterrupt(Integer move,Integer slide){
+        mMove=move;
+        mSlide=slide;
+    }
+
+    public final ItemTouchInterrupt setMove(Integer move) {
+        this.mMove = move;
+        return this;
+    }
+
+    public final ItemTouchInterrupt setSlide(Integer slide) {
+        this.mSlide = slide;
+        return this;
+    }
+
+    public final Integer getMove() {
+        return mMove;
+    }
+
+    public final Integer getSlide() {
+        return mSlide;
+    }
 
     protected Integer onResolveMove(RecyclerView.ViewHolder holder, RecyclerView.LayoutManager manager){
         //Do nothing
@@ -40,8 +69,10 @@ public class ItemTouchInterrupt extends ItemTouchHelper.Callback implements Publ
             if (null!=adapter){
                 RecyclerView.LayoutManager manager=recyclerView.getLayoutManager();
                 Integer moveFlag=onResolveMove(viewHolder,manager);
+                moveFlag=null!=moveFlag?moveFlag:mMove;
                 moveFlag=null!=moveFlag?moveFlag:adapter instanceof ItemMoveEnable ?((ItemMoveEnable)adapter).onResolveMove(viewHolder,manager):null;
                 Integer swipeFlag=onResolveSlide(viewHolder,manager);
+                swipeFlag=null!=swipeFlag?swipeFlag:mSlide;
                 swipeFlag=null!=swipeFlag?swipeFlag:adapter instanceof ItemSlideEnable ?((ItemSlideEnable)adapter).onResolveSlide(viewHolder,manager):null;
                 if (null!=moveFlag||null!=swipeFlag){
                     return makeMovementFlags(null!=moveFlag?moveFlag:0, null!=swipeFlag?swipeFlag:0);//第一个参数拖动，第二个删除侧滑
@@ -84,14 +115,18 @@ public class ItemTouchInterrupt extends ItemTouchHelper.Callback implements Publ
             final Object data=listAdapter.getItemData(position);
             if (null!=data) {
                 Boolean removed=onItemSlideRemove(position,data,direction,viewHolder);
-                listAdapter.removeData(data, "After slide remover call.");
                 if ((null==removed||!removed)&&adapter instanceof OnItemSlideRemove){
                     ((OnItemSlideRemove)adapter).onItemSlideRemove(position, data, direction, viewHolder, new Remover() {
                         @Override
                         public void remove(boolean needRemove) {
-                            if (!needRemove) {
-                                listAdapter.insert(position,data, "After slide remover not remove callback.");
+                            if (needRemove){
+                                listAdapter.removeData(data, "After slide remover call.");
+                            }else{
+                                listAdapter.notifyItemChanged(position);
                             }
+//                            if (!needRemove) {
+//                                listAdapter.insert(position,data, "After slide remover not remove callback.");
+//                            }
                         }
                     });
                 }
