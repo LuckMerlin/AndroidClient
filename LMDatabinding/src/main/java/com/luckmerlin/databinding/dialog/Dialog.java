@@ -66,6 +66,7 @@ public class Dialog implements PublishMethods{
             });
             Window window=dialog.getWindow();
             if (null!=window){
+                window.setDimAmount(0);
                 if (null!=windowType){
                     window.setType(windowType);
                 }
@@ -288,6 +289,17 @@ public class Dialog implements PublishMethods{
         android.app.Dialog dialog=mDialog;
         if (null!=dialog){
             dialog.setCancelable(flag);
+        }
+        return this;
+    }
+
+    public final Dialog setSize(int width,int height){
+        Window window=getWindow();
+        WindowManager.LayoutParams params= null!=window?window.getAttributes():null;
+        if (null!=params){
+            params.width=width;
+            params.height=height;
+            window.setAttributes(params);
         }
         return this;
     }

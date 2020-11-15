@@ -6,19 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.luckmerlin.adapter.recycleview.OnSectionLoadFinish;
-import com.luckmerlin.adapter.recycleview.SectionListAdapter;
-import com.luckmerlin.adapter.recycleview.SectionRequest;
 import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.debug.Dump;
-import com.luckmerlin.core.permission.OnPermissionRequestFinish;
-import com.luckmerlin.core.permission.Permissions;
 import com.luckmerlin.file.media.MediaFile;
 import com.luckmerlin.file.media.MediaScanner;
 import com.luckmerlin.file.media.OnMediaScanFinish;
@@ -62,11 +57,12 @@ public class MainActivity extends Activity {
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
 //        startActivityForResult(Intent.createChooser(intent, "选择图片"), 2002);
-
-
+        Debug.D("发送到发送到 e  ");
+        SwipeRefreshLayout layout=new SwipeRefreshLayout(this);
         RecyclerView recyclerView=new RecyclerView(this);
         recyclerView.setAdapter(new DDD());
-        setContentView(recyclerView);
+        layout.addView(recyclerView);
+        setContentView(layout);
 
 
 //        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -6,12 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.luckmerlin.core.proguard.PublishProtectedMethod;
-import com.luckmerlin.databinding.DataBindingUtil;
 import com.luckmerlin.databinding.ModelBinder;
 
 import java.util.List;

@@ -13,7 +13,7 @@ import com.luckmerlin.databinding.DataBindingUtil;
 import com.luckmerlin.databinding.MatchBinding;
 import com.luckmerlin.databinding.ModelBinder;
 import com.luckmerlin.databinding.ModelClassFinder;
-import com.luckmerlin.match.Matchable;
+import com.luckmerlin.core.match.Matchable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

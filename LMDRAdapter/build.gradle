@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-def buildVersion="#0.0.22"
+def buildVersion="#0.0.31"
 if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
     apply plugin: 'com.novoda.bintray-release'
 }
@@ -27,8 +27,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
     }
 
     dataBinding {
@@ -52,6 +52,6 @@ if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly 'androidx.recyclerview:recyclerview:1.0.0'
-    compileOnly 'com.luckmerlin.library:core:0.0.9'
-    compileOnly 'com.luckmerlin.library:databinding:0.0.36'
+    compileOnly 'com.luckmerlin.library:core:0.0.10'
+    compileOnly 'com.luckmerlin.library:databinding:0.0.50'
 }

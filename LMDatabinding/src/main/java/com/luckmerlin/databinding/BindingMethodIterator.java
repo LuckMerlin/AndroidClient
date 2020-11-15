@@ -3,7 +3,7 @@ package com.luckmerlin.databinding;
 import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.core.debug.Debug;
-import com.luckmerlin.match.Matchable;
+import com.luckmerlin.core.match.Matchable;
 import java.lang.reflect.Method;
 
 public  class BindingMethodIterator {

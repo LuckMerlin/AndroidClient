@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-def buildVersion="#0.0.48"
+def buildVersion="#0.0.50"
 if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) {
     apply plugin: 'com.novoda.bintray-release'
 }
@@ -18,11 +18,11 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles  'proguard-rules.pro'
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles 'proguard-rules.pro'
         }
     }
@@ -53,5 +53,5 @@ if (null!=buildVersion&&buildVersion.length()>0&&!buildVersion.startsWith("#")) 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly 'androidx.recyclerview:recyclerview:1.0.0'
-    compileOnly 'com.luckmerlin.library:core:0.0.9'
+    compileOnly 'com.luckmerlin.library:core:0.0.10'
 }

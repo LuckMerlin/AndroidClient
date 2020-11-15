@@ -1,15 +1,10 @@
 package com.luckmerlin.databinding;
 
 import android.view.View;
-
 import androidx.databinding.ViewDataBinding;
 
-import com.luckmerlin.core.debug.Debug;
+import com.luckmerlin.core.match.Matchable;
 import com.luckmerlin.core.proguard.PublishMethods;
-import com.luckmerlin.match.Matchable;
-
-import java.lang.reflect.Method;
-
 public class ModelClassFinder extends BindingMethodIterator implements PublishMethods {
 
     public final MatchBinding findModel(View modelRoot, Matchable matchable){

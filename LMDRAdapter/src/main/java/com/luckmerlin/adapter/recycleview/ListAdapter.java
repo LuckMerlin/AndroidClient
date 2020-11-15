@@ -1,18 +1,17 @@
 package com.luckmerlin.adapter.recycleview;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -26,19 +25,18 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         implements LayoutManagerResolver, PublishMethods,PublishProtectedMethod, PublishFields {
     private List<T> mData;
-    private Handler mHandler;
     public final static int TYPE_NONE=0;
     public final static int TYPE_TAIL=-1;
     public final static int TYPE_EMPTY=-3;
     public final static int TYPE_DATA=-4;
     public final static int TYPE_HEAD=-5;
     private WeakReference<RecyclerView> mRecyclerView;
+    private ItemTouchHelper mItemTouchHelper;
     private final SparseArray<RecyclerView.ViewHolder> mFixHolder=new SparseArray<>();
 
     public ListAdapter(T  ...values){
@@ -46,7 +44,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 
     public ListAdapter(Collection<T>  list){
-        add(list,true,"");
+        add(list,"");
     }
 
     protected Integer onResolveViewTypeLayoutId(int viewType){
@@ -75,25 +73,19 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return false;
     }
 
-    public final boolean setMinLines(int lines,String debug){
-
-        return false;
-    }
-
     protected Integer onResolveDataLayoutId(ViewGroup parent){
         //Do nothing
         return null;
     }
 
     @Override
-    public final RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final LayoutInflater in=LayoutInflater.from(parent.getContext());
         RecyclerView.ViewHolder viewHolder=onCreateViewHolder(in,viewType,parent);
         if (viewHolder ==null){
             Integer integer= onResolveViewTypeLayoutId(viewType);
             integer=null==integer&&viewType==TYPE_DATA?onResolveDataLayoutId(parent):integer;
-            ViewDataBinding binding=null!=integer&&integer!= Resources.ID_NULL?DataBindingUtil.inflate(in,integer,parent,false):null;
-            viewHolder= null!=binding?new BindingViewHolder(binding):null;
+            viewHolder=generateViewHolder(null,parent,integer,false);
         }
         if (null==viewHolder){
             switch (viewType){
@@ -119,12 +111,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return viewHolder;
     }
 
-    protected void onBindViewHolder(RecyclerView.ViewHolder holder,int viewType,ViewDataBinding binding,int position,T data, @NonNull List<Object> payloads){
+    protected void onBindViewHolder(RecyclerView.ViewHolder holder,int viewType,ViewDataBinding binding,int position,T data, List<Object> payloads){
         //Do nothing
     }
 
     @Override
-    public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+    public final void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
         super.onBindViewHolder(holder, position, payloads);
         ViewDataBinding binding=null!=holder&&holder instanceof BindingViewHolder?((BindingViewHolder)holder).getBinding():null;
         T data=getItemData(position);
@@ -140,7 +132,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public final void onBindViewHolder( RecyclerView.ViewHolder holder, int position) {
         //Do nothing
     }
 
@@ -196,6 +188,10 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 
     public final boolean clean(){
+        return clean(null);
+    }
+
+    public final boolean clean(String debug){
         List<T> data=mData;
         int size=null!=data?data.size():0;
         if (size>0){
@@ -209,7 +205,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     public final ArrayList<T> getData() {
         List<T> data=mData;
         int length=null!=data?data.size():0;
-        ArrayList<T> result=length>0?new ArrayList<>(length):null;
+        ArrayList<T> result=length>0?new ArrayList<T>(length):null;
         return null!=result&&result.addAll(data)?result:null;
     }
 
@@ -293,28 +289,57 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     }
 
     public final boolean add(T data){
-        return add(data,false,null);
+        return add(data,null);
     }
 
-    public final boolean add(T data,boolean exceptExist,String debug){
-        List<T> list=null!=data?new ArrayList<>():null;
-        return null!=list&&list.add(data)&&add(-1,list,exceptExist,debug);
+    public final boolean add(T data,String debug){
+        List<T> list=null!=data?new ArrayList<T>():null;
+        return null!=list&&list.add(data)&&add(-1,list,debug);
     }
 
-    public final boolean add(Collection<T> data,boolean exceptExist,String debug) {
-        return null!=data&&data.size()>0&&add(-1,data,exceptExist,debug);
+    public final boolean add(Collection<T> data,String debug) {
+        return null!=data&&data.size()>0&&add(-1,data,debug);
     }
 
-    public final boolean add(int index,T data,boolean exceptExist,String debug) {
+    public final boolean add(int index,T data,String debug) {
         if (null!=data){
             List<T> list=new ArrayList<T>(1);
             list.add(data);
-            return add(index,list,exceptExist,debug);
+            return add(index,list,debug);
         }
         return false;
     }
 
-    public final boolean add(int index,Collection<T> data,boolean exceptExist,String debug) {
+    public final boolean add(int index,Collection<T> data,String debug) {
+        if (null!=data&&data.size()>0) {
+            List<T> list = mData;
+            list = null != list ? list : (mData = new ArrayList<>());
+            synchronized (list) {
+                int from=list.size();
+                list.addAll(index>=0&&index<from?index:from,data);
+                notifyItemRangeInserted(from,list.size()-from);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final boolean replace(T data,String debug){
+        List<T> list= null!=data?mData:null;
+        int index=null!=list?list.indexOf(data):-1;
+        return index>=0&&replace(index,data,debug);
+    }
+
+    public final boolean insert(int index,T data,String debug) {
+        if (null!=data){
+            List list=new ArrayList(1);
+            list.add(data);
+            return insert(index,list,true,debug);
+        }
+        return false;
+    }
+
+    public final boolean insert(int index,List<T> data,boolean exceptExist,String debug) {
         if (null!=data&&data.size()>0){
             List<T> list=mData;
             list=null!=list?list:(mData=new ArrayList<>());
@@ -331,25 +356,6 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             return true;
         }
         return false;
-    }
-
-    public final boolean replace(T data,String debug){
-        List<T> list= null!=data?mData:null;
-        int index=null!=list?list.indexOf(data):-1;
-        return index>=0&&replace(index,data,debug);
-    }
-
-    public final boolean insert(int index,T data,String debug) {
-        if (null!=data){
-            List list=new ArrayList(1);
-            list.add(data);
-            return insert(index,list,debug);
-        }
-        return false;
-    }
-
-    public final boolean insert(int index,List<T> data,String debug) {
-        return add(index, data, true,debug);
     }
 
     public final boolean replace(int index,T data,String debug) {
@@ -410,12 +416,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null!=data&&index(data)>=0;
     }
 
-    protected void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding){
+    protected void onViewAttachedToWindow(RecyclerView.ViewHolder holder, View view, ViewDataBinding binding){
         //Do nothing
     }
 
     @Override
-    public final void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder) {
+    public final void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
         super.onViewAttachedToWindow(holder);
         if (null!=holder){
             View view=holder.itemView;
@@ -424,12 +430,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    protected void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder, View view, ViewDataBinding binding){
+    protected void onViewDetachedFromWindow( RecyclerView.ViewHolder holder, View view, ViewDataBinding binding){
         //Do nothing
     }
 
     @Override
-    public final void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+    public final void onViewDetachedFromWindow( RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
         if (null!=holder){
             View view=holder.itemView;
@@ -438,7 +444,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    public void onAttachedRecyclerView(RecyclerView recyclerView) {
+    protected void onAttachedRecyclerView(RecyclerView recyclerView) {
         //Do nothing
     }
 
@@ -480,7 +486,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return null!=rv?rv.getLayoutManager():null;
     }
 
-    public void onDetachedRecyclerView(RecyclerView recyclerView) {
+    protected void onDetachedRecyclerView(RecyclerView recyclerView) {
         //Do nothing
     }
 
@@ -514,8 +520,43 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return new LinearLayoutManager(rv.getContext(),RecyclerView.VERTICAL,false);
     }
 
+    protected void onResolveFixedViewItem(RecyclerView recyclerView){
+        //Do nothing
+    }
+
+    protected final LayoutInflater getLayoutInflater(Context context){
+        context=null!=context?context:getAdapterContext();
+        return null!=context?LayoutInflater.from(context):null;
+    }
+
+    protected final RecyclerView.ViewHolder generateViewHolder(Context context,Integer layoutId) {
+        return generateViewHolder(context,null,layoutId,false);
+    }
+
+    protected final RecyclerView.ViewHolder generateViewHolder(Context context, ViewGroup parent,Integer layoutId,boolean attachToParent){
+        if (null==layoutId||layoutId==0) {
+            return null;
+        }
+        context=null==context&&null!=parent?parent.getContext():context;
+        LayoutInflater inflater=null!=context?getLayoutInflater(context):null;
+        try {
+            if (null!=inflater) {
+                ViewDataBinding binding=DataBindingUtil.inflate(inflater,layoutId,parent,attachToParent);
+                if (null!=binding){
+                    return new BindingViewHolder(binding);
+                }else{//If not binding layout
+                    View rootView=inflater.inflate(layoutId,parent,attachToParent);
+                    return null!=rootView?new ViewHolder(rootView):null;
+                }
+            }
+        }catch (Exception e){
+            Debug.E("Exception create view holder."+layoutId+" "+e,e);
+        }
+        return null;
+    }
+
     @Override
-    public final void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+    public final void onAttachedToRecyclerView( RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         WeakReference<RecyclerView> view=mRecyclerView;
         if (null!=view){
@@ -524,22 +565,33 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
         if (null!=recyclerView){
             mRecyclerView=new WeakReference<>(recyclerView);
+            onResolveFixedViewItem(recyclerView);
         }
         RecyclerView.LayoutManager manager=null!=recyclerView?onResolveLayoutManager(recyclerView):null;
         if (null!=manager&&null!=recyclerView){
             recyclerView.setLayoutManager(manager);
         }
+        Object object=this instanceof OnItemTouchResolver?((OnItemTouchResolver)this).onResolveItemTouch(recyclerView):null;
+        if (null!=object&&object instanceof ItemTouchHelper){
+            (mItemTouchHelper=((ItemTouchHelper)object)).attachToRecyclerView(recyclerView);
+        }
         onAttachedRecyclerView(recyclerView);
     }
 
     @Override
-    public final void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+    public final void onDetachedFromRecyclerView( RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         WeakReference<RecyclerView> view=mRecyclerView;
         if (null!=view){
             mRecyclerView=null;
             view.clear();
         }
+        ItemTouchHelper itemTouchHelper=mItemTouchHelper;
+        if (null!=itemTouchHelper){
+            mItemTouchHelper=null;
+            itemTouchHelper.attachToRecyclerView(null);
+        }
         onDetachedRecyclerView(recyclerView);
+        mFixHolder.clear();
     }
 }

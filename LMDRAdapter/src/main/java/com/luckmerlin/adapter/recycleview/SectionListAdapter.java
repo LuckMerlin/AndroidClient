@@ -1,311 +1,300 @@
 package com.luckmerlin.adapter.recycleview;
+import android.view.ViewParent;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.luckmerlin.adapter.OnSectionLoadFinish;
 import com.luckmerlin.core.Canceler;
 import com.luckmerlin.core.debug.Debug;
 
-public abstract class SectionListAdapter<T> extends ListAdapter<T> {
-    private SectionRequest mLoading;
-    private boolean mAutoReset=true;
-    private final ScrollListener mListener=new ScrollListener();
+import java.util.List;
 
-    protected abstract Canceler onSectionLoad(SectionRequest request, OnSectionLoadFinish callback);
+public class SectionListAdapter<A,T> extends ListAdapter<T> {
+    private SectionRequest<A> mLoadingNext, mLoadingPre;
+    private LastSection<A> mPreLastSection, mNextLastSection;
+    private boolean mAutoLoad = true;
+    private boolean mDetachCancel = true;
 
-    protected void onAttachRecyclerView(RecyclerView recyclerView){
-       //Do nothing
-   }
+    private final DragLoadMoreTouchListener mListener = new DragLoadMoreTouchListener() {
+        @Override
+        protected void onDragMore(RecyclerView rv, boolean next, float shiftX, float shiftY) {
+            if (next){
+                loadNextSection(null,false,"While drag load more.");
+            }else{
+                loadPreSection(null,false,"While drag load more.");
+            }
+        }
+    };
 
-    protected void onDetachRecyclerView(RecyclerView recyclerView){
+    protected void onLoadStatusChange(SectionRequest<A> request,boolean loading){
         //Do nothing
     }
 
-    public final boolean resetSection(String debug){
-        
+    protected Canceler onPreSectionLoad(SectionRequest<A> request,OnSectionLoadFinish callback,String debug){
+        //Do nothing
+        return null;
+    }
+
+    protected Canceler onNextSectionLoad(SectionRequest<A> request,OnSectionLoadFinish callback,String debug){
+        //Do nothing
+        return null;
+    }
+
+    private void onSectionLoadStatusChange(SectionRequest<A> request,final boolean loading){
+        if (null!=request&&!request.isNext()){
+            RecyclerView recyclerView=getRecyclerView();
+            ViewParent parent=null!=recyclerView?recyclerView.getParent():null;
+            if (null!=parent&&parent instanceof SwipeRefreshLayout){
+                final SwipeRefreshLayout layout=((SwipeRefreshLayout)parent);
+                layout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        layout.setRefreshing(loading);
+                    }
+                });
+            }
+        }
+        onLoadStatusChange(request,loading);
+    }
+
+    public SectionListAdapter() {
+        this(true, true);
+    }
+
+    public SectionListAdapter(boolean autoLoad, boolean detachCancel) {
+        mAutoLoad = autoLoad;
+        mDetachCancel = detachCancel;
+    }
+
+    protected void onAttachRecyclerView(RecyclerView recyclerView) {
+        //Do nothing
+    }
+
+    protected void onDetachRecyclerView(RecyclerView recyclerView) {
+        //Do nothing
+    }
+
+    public final boolean isAllLoaded(boolean next){
+        LastSection section=next?mNextLastSection:mPreLastSection;
+        return null!=section&&section.mLength==section.mSize;
+    }
+
+    public final boolean resetSection(String debug) {
+        return resetSection(null, null, debug);
+    }
+
+    public final boolean resetSection(A arg, Boolean insert, String debug) {
+        //If exist loading request,cancel it
+        cancelLoading("Before reset section " + (null != debug ? debug : "."));
+        super.clean(debug);
+        mPreLastSection=mNextLastSection=null;
+        return loadNextSection(arg, insert, debug);
+    }
+
+    public final int getPreLastSectionSize(){
+        LastSection section=mPreLastSection;
+        return null!=section?section.mSize:-1;
+    }
+
+    public final A getNextLastSectionArg(){
+        LastSection<A> section=mNextLastSection;
+        return null!=section?section.mArg:null;
+    }
+
+    public final A getPreLastSectionArg(){
+        LastSection<A> section=mPreLastSection;
+        return null!=section?section.mArg:null;
+    }
+
+    public final int getNextLastSectionSize(){
+        LastSection section=mNextLastSection;
+        return null!=section?section.mSize:-1;
+    }
+
+    public final boolean loadPreSection(A arg,Boolean insert, String debug) {
+        if (null != mLoadingPre) {//Exist loading
+            Debug.W("Fail load pre section while exist pre loading " + (null != debug ? debug : "."));
+            return false;
+        }else if (isAllLoaded(false)){
+            return false;//All already loaded
+        }
+        LastSection<A> section=mPreLastSection;
+        return loadSection(new SectionRequest<A>(null!=section?section.mArg:arg,
+                null!=section?section.mSize:0, false), insert, debug);
+    }
+
+    final boolean loadNextSection(A arg, String debug) {
+        return loadNextSection(arg,false,debug);
+    }
+
+    final boolean loadNextSection(A arg,Boolean insert, String debug) {
+        if (null != mLoadingNext) {//Exist loading
+            Debug.W("Fail load next section while exist next loading " + (null != debug ? debug : "."));
+            return false;
+        }else if (isAllLoaded(true)){
+            return false;//All already loaded
+        }
+        LastSection<A> section=mNextLastSection;
+        return loadSection(new SectionRequest<A>(null!=section?section.mArg:arg,
+                null!=section?section.mSize:0, true), insert, debug);
+    }
+
+    synchronized boolean loadSection(final SectionRequest<A> request, Boolean insert, String debug) {
+        if (null != request) {
+            final boolean actionInsert = null != insert && insert;
+            if (request.isNext()) {
+                if (null == mLoadingNext) {
+                    mLoadingNext = request;
+                    final OnSectionLoadFinish callback=new OnSectionLoadFinish<A,T>() {
+                        @Override
+                        public void onSectionLoadFinish(boolean succeed, String note, Section<A,T> section) {
+                            SectionRequest current = mLoadingNext;
+                            if (null != current && current == request) {
+                                //Clean while load fail
+                                current.mCanceler=null;
+                                mLoadingNext = null;
+                                List<T> data = succeed && null != section ? section.getData() : null;
+                                int size=succeed&&null!=data?data.size():-1;
+                                if (size > 0) {
+                                    LastSection lastSection=new LastSection(request.getArg(),request.getFrom()+size,section.getLength());
+                                    mNextLastSection=(actionInsert?  insert(getDataCount(), data,
+                                            false, "After load section succeed."):
+                                            add(data, "After load section succeed."))?lastSection:mNextLastSection;
+                                }
+                                onSectionLoadStatusChange(request,false);
+                            }
+                        }
+                    };
+                    onSectionLoadStatusChange(request,true);
+                    if (null != (request.mCanceler = onNextSectionLoad(request,callback, debug))) {
+                        return true;
+                    }
+                    callback.onSectionLoadFinish(false,"Fail.",null);//Clean while fail
+                    return false;
+                }
+            } else {
+                if (null == mLoadingPre) {
+                    mLoadingPre = request;
+                    final OnSectionLoadFinish callback= new OnSectionLoadFinish<A,T>() {
+                        @Override
+                        public void onSectionLoadFinish(boolean succeed, String note, Section<A,T> section) {
+                            SectionRequest current = mLoadingPre;
+                            if (null != current && current == request) {
+                                current.mCanceler=null;
+                                mLoadingPre = null;
+                                List<T> data = succeed && null != section ? section.getData() : null;
+                                int size=succeed&&null!=data?data.size():-1;
+                                if (size> 0) {
+                                    LastSection lastSection=new LastSection(request.getArg(),request.getFrom()+size,section.getLength());
+                                    mPreLastSection=(actionInsert?  insert(getDataCount(), data,
+                                            false, "After load section succeed."):
+                                            add(data, "After load section succeed."))?lastSection:mPreLastSection;
+                                }
+                                onSectionLoadStatusChange(request,false);
+                            }//Clean while load fail
+                        }
+                    };
+                    onSectionLoadStatusChange(request,true);
+                    if (null != (request.mCanceler = onPreSectionLoad(request, callback, debug))) {
+                        return true;
+                    }
+                    callback.onSectionLoadFinish(false,"Fail.",null);//Clean while fail
+                    return false;
+                }
+            }
+        }
         return false;
     }
 
+    public final boolean cancelLoading(String debug) {
+        return cancelNextLoading(debug) | cancelPreLoading(debug);
+    }
+
+    public synchronized final boolean cancelPreLoading(String debug) {
+        SectionRequest preloading = mLoadingPre;
+        mLoadingPre = null;
+        if (null != preloading) {
+            Debug.D("Cancel pre section loading " + (null != debug ? debug : "."));
+            return preloading.cancel(true, debug);
+        }
+        return false;
+    }
+
+    public final boolean cancelNextLoading(String debug) {
+        SectionRequest nextLoading = mLoadingNext;
+        mLoadingNext = null;
+        if (null != nextLoading) {
+            Debug.D("Cancel next section loading " + (null != debug ? debug : "."));
+            return nextLoading.cancel(true, debug);
+        }
+        return false;
+    }
+
+    public final boolean isAutoLoad() {
+        return mAutoLoad;
+    }
+
+    public final boolean isDetachCancel() {
+        return mDetachCancel;
+    }
+
     @Override
-    public final void onAttachedRecyclerView(RecyclerView recyclerView) {
+    protected final void onAttachedRecyclerView(RecyclerView recyclerView) {
         super.onAttachedRecyclerView(recyclerView);
-        if (null!=recyclerView){
-            recyclerView.addOnScrollListener(mListener);
+        if (null != recyclerView) {
+            recyclerView.addOnItemTouchListener(mListener);
         }
         onAttachRecyclerView(recyclerView);
-        if (mAutoReset) {
+        if (mAutoLoad) {
             resetSection("While attached recycle view.");
         }
     }
 
     @Override
-    public final void onDetachedRecyclerView(RecyclerView recyclerView) {
+    protected final void onDetachedRecyclerView(RecyclerView recyclerView) {
         super.onDetachedRecyclerView(recyclerView);
-        if (null!=recyclerView){
-            recyclerView.removeOnScrollListener(mListener);
+        if (null != recyclerView) {
+            recyclerView.removeOnItemTouchListener(mListener);
         }
+        cancelLoading("While adapter detached recycler view.");
         onDetachRecyclerView(recyclerView);
     }
 
-
-    private static class ScrollListener extends RecyclerView.OnScrollListener{
-
-        @Override
-        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
+    protected final boolean notifySectionLoadFinish(boolean succeed, String note, Section<A,T> section,OnSectionLoadFinish<A,T> callback){
+        if (null!=callback){
+            callback.onSectionLoadFinish(succeed,note,section);
+            return true;
         }
-
-        @Override
-        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-            if (null!=recyclerView&&newState == RecyclerView.SCROLL_STATE_IDLE) { //当前状态为停止滑动
-                if (!recyclerView.canScrollVertically(1)) { // 到达底部
-                    Debug.D("WWWWWWWWWWWWWWw 底部");
-//                    Toast.makeText(SessionActivity.this, "到达底部", Toast.LENGTH_SHORT).show();
-                } else if (!recyclerView.canScrollVertically(-1)) { // 到达顶部
-                    Debug.D("WWWWWWWWWWWWWWw 顶部");
-//                    Toast.makeText(SessionActivity.this, "到达顶部", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
+        return false;
     }
 
+    protected final Canceler generateCanceler(final Canceler...cancelers){
+        return new Canceler(){
+            @Override
+            public boolean cancel(boolean b, String s) {
+                if (null!=cancelers&&cancelers.length>0){
+                    for (Canceler canceler:cancelers) {
+                        if (null!=canceler){
+                            canceler.cancel(b,s);
+                        }
+                    }
+                }
+                return true;
+            }
+        };
+    }
 
-    //    public final boolean empty() {
-//        boolean succeed=super.clean();
-//        mCurrentPage=null;
-//        mLastPage=null;
-//        return succeed;
-//    }
-//
-//    public boolean resetAdapter(String debug){
-//        Page<D> page=mCurrentPage;
-//        Debug.D("Reset current page "+page+" "+(null!=debug?debug:"."));
-//        D arg=null!=page?page.mArg:null;
-//        return loadPage(new Page<>(arg,0,null),true,debug);
-//    }
-//
-//    public final boolean isCurrentArgEquals(D arg){
-//        Page<D> page=mCurrentPage;
-//        D currArg=null!=page?page.mArg:null;
-//        return (null==currArg&&null==arg)||(null!=currArg&&null!=arg&&currArg.equals(arg));
-//    }
-//
-//    public final boolean isLoadingArgEquals(D arg){
-//        Page<D> page=mLoadingPage;
-//        D loadingArg=null!=page?page.mArg:null;
-//        return (null==loadingArg&&null==arg)||(null!=loadingArg&&null!=arg&&loadingArg.equals(arg));
-//    }
-//
-//    public final Page<D> getCurrentPage() {
-//        return mCurrentPage;
-//    }
-//
-//    public final PageData<T> getLastPage() {
-//        return mLastPage;
-//    }
-//
-//    public final Page<D> getLoadingPage() {
-//        return mLoadingPage;
-//    }
-//
-//    public final boolean isLoading(){
-//        return null!=getLoadingPage();
-//    }
-//
-//    public final D getLoadingPageArg(){
-//        Page<D> data=mLoadingPage;
-//        return null!=data?data.mArg:null;
-//    }
-//
-//    @Override
-//    public final boolean onLoadMore(RecyclerView rv, int state, String debug) {
-//        if (isAllLoaded()){
-////            Context context=null!=rv?rv.getContext():null;
-////            if (null!=context){
-////                Toast.makeText(context, R.string.noMoreData,Toast.LENGTH_SHORT).show();
-////            }
-//            return false;
-//        }
-//        RecyclerView.LayoutManager manager=null!=rv?rv.getLayoutManager():null;
-//        if (null!=manager){
-//            if (manager instanceof LinearLayoutManager){
-//                LinearLayoutManager lm=(LinearLayoutManager)manager;
-//                int firstPosition=lm.findFirstVisibleItemPosition();
-//                View view=lm.findViewByPosition(firstPosition);
-//                int[] location = new int[2];
-//                int orientation=lm.getOrientation();
-//                if (orientation==LinearLayoutManager.VERTICAL){
-//                    rv.getLocationInWindow(location);
-//                    int rvTop=location[1];
-//                    if (null!=view) {
-//                        view.getLocationInWindow(location);
-//                        int viewTop = location[1] - view.getTop();
-//                        if (viewTop == rvTop){
-//                            return loadNextPage("After page not full " + (null != debug ? debug : "."));
-//                        }
-//                    }
-//                    return resetAdapter("After page pull down.");
-//                }else if (orientation==LinearLayoutManager.HORIZONTAL){
-//                    rv.getLocationInWindow(location);
-//                    int rvLeft=location[0];
-//                    if (null!=view) {
-//                        view.getLocationInWindow(location);
-//                        int viewLeft = location[0] - view.getLeft();
-//                        return viewLeft == rvLeft ? loadNextPage("After page not full " +
-//                                (null != debug ? debug : ".")) : resetAdapter("After page pull left.");
-//                    }
-//                }
-//            }else if (manager instanceof StaggeredGridLayoutManager){
-////                ((StaggeredGridLayoutManager)manager).f
-//            }
-//        }
-//        return false;
-//    }
-//
-//    public final boolean isAllLoaded(){
-//        Page<D> page=mCurrentPage;
-//        Long total=null!=page?page.mTotal:null;
-//        return null!=total&&getDataCount()>=total;
-//    }
-//
-//    public final boolean loadNextPage(String debug){
-//        Page<D> current=mCurrentPage;
-//        int size=getDataCount();
-//        return !isLoading()&&null!=current&&loadPage(new Page<>(current.mArg,size,null),false,debug);
-//    }
-//
-//    public final boolean loadPage(D arg,String debug){
-//        Page<D> current=mCurrentPage;
-//        D currArg=null!=current?current.mArg:null;
-//        if ((null==arg&&null==currArg)||(null!=currArg&&null!=arg&&currArg.equals(arg))){
-//            return loadPage(new Page<>(arg,(null==current?0:current.mFrom),null),false,debug);
-//        }
-//        return loadPage(new Page<>(arg,0,null),true,debug);
-//    }
-//
-//    protected void onNoMoreData(PageData<T> data){
-//    }
-//
-//    private boolean loadPage(Page<D> page,boolean reset,String debug){
-//        if (null!=page){
-//            final int from=page.mFrom;
-//            Page<D> loading=mLoadingPage;
-//            Canceler canceler=null;
-//            if (null!=loading){
-//                if (isPageEquals(loading,page)) {
-//                    Debug.W("Not need load page while exist loading." + loading);
-//                    return false;
-//                }
-//                D args=loading.mArg;
-//                D pageArgs=page.mArg;
-//                if (null!=(canceler=!(null==pageArgs&&null==args)&&(null==pageArgs||null==args||
-//                        !pageArgs.equals(args))?loading.mCanceler:null)){
-//                    canceler.cancel(true,"Before load new arg page "+args+" new="+pageArgs);
-//                }
-//            }
-//            mLoadingPage=page;
-//            notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_START,true,page);
-//            Debug.D("Load page "+ page.mArg+" from "+from+" "+(null!=debug?debug:"."));
-//            if(null==(canceler=onPageLoad(page.mArg,from,(what, note, data, arg)->{
-//                boolean idle=isPageEquals(mLoadingPage,page);
-//                notifyPageUpdate(OnPageLoadUpdate.UPDATE_PAGE_END,idle,page);
-//                if (idle){
-//                    page.mCanceler=null;
-//                    mLoadingPage=null;
-//                    switch (what){
-////                        case What.WHAT_OUT_OF_BOUNDS://Get through
-////                            onNoMoreData(data);
-////                        case What.WHAT_SUCCEED:
-////                            long total=null!=data?data.getLength():-1;
-////                            if (total>=0){
-////                                mCurrentPage=new Page<>(page.mArg,page.mFrom,total);
-////                                fillPage(data,reset);
-////                            }
-////                            onPageLoadSucceed(page.mArg,data,debug);
-////                            break;
-//                        default:
-//                            Debug.D("Fail load page "+page.mArg+" from "+from+" "+(null!=debug?debug:".")+" "+this);
-//                            break;
-//                    }
-//                } }))&&isPageEquals(mLoadingPage,page)){
-//                Debug.W("Fail load page "+page.mArg+" from "+from+" "+(null!=debug?debug:".")+" "+this);
-//                page.mCanceler=null;
-//                mLoadingPage=null;
-//                return false;
-//            }
-//            page.mCanceler=canceler;
-//            return true;
-//        }
-//        Debug.W("Can't load page data.page="+page);
-//        return false;
-//    }
-//
-//    protected void onPageLoadSucceed(D arg,PageData<T> page,String debug){
-//        //Do nothing
-//    }
-//
-//    private boolean isPageEquals(Page<D> page1,Page<D>  page2){
-//        return (null==page1&&null==page2)||(null!=page1&&null!=page2&&page1.equals(page2));
-//    }
-//
-//    public final static class Page<T> {
-//        private final int mFrom;
-//        private final Long mTotal;
-//        private final T mArg;
-//        private Canceler mCanceler;
-//
-//        private Page(T arg,int from, Long total){
-//            mArg=arg;
-//            mFrom=from;
-//            mTotal=total;
-//        }
-//
-//        @Override
-//        public boolean equals(@Nullable Object obj) {
-//            if (null!=obj&&obj instanceof Page){
-//                Page page=(Page)obj;
-//                return mFrom==page.mFrom&&((null==mArg&&null==page.mArg)||(
-//                        mArg.equals(page.mArg)));
-//            }
-//            return super.equals(obj);
-//        }
-//
-//        @NonNull
-//        @Override
-//        public String toString() {
-//            return ""+mArg+" "+mFrom+" "+super.toString();
-//        }
-//    }
-//
-//    public final boolean add(OnPageLoadUpdate update){
-//        if (null!=update){
-//            WeakHashMap<OnPageLoadUpdate,Object> reference=mUpdateListeners;
-//            reference=null!=reference?reference:(mUpdateListeners=new WeakHashMap<>(1));
-//            synchronized (reference){
-//                if (!reference.containsKey(update)){
-//                    reference.put(update,System.currentTimeMillis());
-//                    return true;
-//                }
-//                return false;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    private void notifyPageUpdate(int state,boolean idle,Page page){
-//        WeakHashMap<OnPageLoadUpdate,Object> reference=mUpdateListeners;
-//        Set<OnPageLoadUpdate> set=null!=reference?reference.keySet():null;
-//        if (null!=set){
-//            synchronized (set){
-//                for (OnPageLoadUpdate update:set) {
-//                    if (null!=update){
-//                        update.onPageLoadUpdate(state,idle,page);
-//                    }
-//                }
-//            }
-//        }
-//    }
+    static class LastSection<T> {
+        private final T mArg;
+        private final int mSize;
+        private final int mLength;
 
+        LastSection(T arg,int size,int length){
+            mArg=arg;
+            mSize=size;
+            mLength=length;
+        }
+    }
 
 }

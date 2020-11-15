@@ -21,7 +21,7 @@ import android.widget.TextView;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.luckmerlin.core.debug.Debug;
+import com.luckmerlin.core.match.Matchable;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.text.OnEditActionChange;
 import com.luckmerlin.databinding.text.OnEditActionChangeListener;
@@ -37,8 +37,6 @@ import com.luckmerlin.databinding.view.ImageResTag;
 import com.luckmerlin.databinding.view.Text;
 import com.luckmerlin.databinding.view.TextResTag;
 import com.luckmerlin.databinding.view.Touch;
-import com.luckmerlin.match.Matchable;
-
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
@@ -308,7 +306,7 @@ public final class ViewBindingBinder implements PublishMethods {
         final boolean dispatchClick=(dispatchEvent&Touch.CLICK)!=0;
         if (dispatchClick||(null!=object&&(object instanceof OnViewClick||object instanceof OnSingleTapClick))){
             int dither=touch.getClickDither();
-            final int finalDither=dither<0?400:dither;
+            final int finalDither=dither<0?200:dither;
             final Object[] ditherObject=new Object[2];
             final View.OnClickListener clickListener=(View v)->{
                 Object clickCount=ditherObject[1];
