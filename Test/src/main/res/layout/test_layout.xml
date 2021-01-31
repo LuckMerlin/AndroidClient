@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="#0f0"
-    android:layout_marginBottom="5dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <Button
-        android:text="sfdasdfasdfas"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:binding="http://schemas.android.com/apk/res-auto">
+  <data>
+      <variable
+          name="vm"
+          type="com.luckmerlin.test.DDD" />
+      <import type="com.luckmerlin.databinding.view.Touch"/>
+  </data>
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:text="lohai "
+            android:textSize="20sp"
+            android:padding="50dp"
+            binding:lmBinding="@{Touch.dispatch(Touch.CLICK,`ddddd`)}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:adapter="@{vm.testAdapter}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</layout>

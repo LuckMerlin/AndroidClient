@@ -2,6 +2,8 @@ package com.merlin.browser;
 
 import android.view.View;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.merlin.api.OnApiFinish;
 import com.merlin.api.PageData;
 import com.merlin.api.Reply;
@@ -23,6 +25,11 @@ import com.merlin.api.Label;
 import com.merlin.api.What;
 
 public class NasFileBrowser extends FileBrowser {
+
+    @Override
+    public Object onResolveItemTouch(RecyclerView recyclerView) {
+        return null;
+    }
 
     private interface Api{
         @POST("/file/browser")

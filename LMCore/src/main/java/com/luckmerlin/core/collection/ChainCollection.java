@@ -2,6 +2,8 @@ package com.luckmerlin.core.collection;
 
 import android.os.Build;
 
+import com.luckmerlin.core.proguard.PublishMethods;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -10,18 +12,18 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class Chain<T> implements Collection<T>{
+public final class ChainCollection<T> implements Collection<T>, PublishMethods {
     private final Collection<T> mCollections;
 
-    public Chain(){
+    public ChainCollection(){
         this(1);
     }
 
-    public Chain(int initialCapacity){
+    public ChainCollection(int initialCapacity){
         this(new ArrayList<T>(initialCapacity<=0?0:initialCapacity));
     }
 
-    public Chain(Collection<T> collections){
+    public ChainCollection(Collection<T> collections){
         mCollections=collections;
     }
 
@@ -75,7 +77,7 @@ public final class Chain<T> implements Collection<T>{
         return null!=collection&&null!=o&&collection.add(o);
     }
 
-    public Chain<T> addInChain(T o){
+    public ChainCollection<T> addInChain(T o){
         add(o);
         return this;
     }
@@ -98,7 +100,7 @@ public final class Chain<T> implements Collection<T>{
         return null;
     }
 
-    public Chain<T> removeInChain(Object o,boolean equals) {
+    public ChainCollection<T> removeInChain(Object o, boolean equals) {
         if (null!=o&&!remove(o)&&equals){
             T child=index(o);
             if (null!=child){
@@ -114,7 +116,7 @@ public final class Chain<T> implements Collection<T>{
         return null!=collection&&collection.addAll(c);
     }
 
-    public Chain<T> addAllInChain(Collection c) {
+    public ChainCollection<T> addAllInChain(Collection c) {
         if (null!=c){
             addAll(c);
         }
@@ -130,7 +132,7 @@ public final class Chain<T> implements Collection<T>{
         return false;
     }
 
-    public Chain<T> removeIfInChain(Predicate filter) {
+    public ChainCollection<T> removeIfInChain(Predicate filter) {
         if (null!=filter){
             removeIf(filter);
         }
@@ -145,7 +147,7 @@ public final class Chain<T> implements Collection<T>{
         }
     }
 
-    public Chain<T> clearInChain() {
+    public ChainCollection<T> clearInChain() {
         clear();
         return this;
     }
@@ -196,7 +198,7 @@ public final class Chain<T> implements Collection<T>{
         return null!=collection&&collection.retainAll(c);
     }
 
-    public Chain<T> retainAllInChain(Collection c) {
+    public ChainCollection<T> retainAllInChain(Collection c) {
         retainAll(c);
         return this;
     }
@@ -207,7 +209,7 @@ public final class Chain<T> implements Collection<T>{
         return null!=collection&&collection.removeAll(c);
     }
 
-    public Chain<T> removeAllInChain(Collection c) {
+    public ChainCollection<T> removeAllInChain(Collection c) {
         removeAll(c);
         return this;
     }

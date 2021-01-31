@@ -47,15 +47,16 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         add(list,"");
     }
 
-    protected Integer onResolveViewTypeLayoutId(int viewType){
+    protected Object onResolveViewHolder(LayoutInflater in,int viewType,ViewGroup parent){
         return null;
     }
 
-    protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater in,int viewType,ViewGroup parent){
-        return null;
+    public final RecyclerView.ViewHolder getFixHolder(int type) {
+        SparseArray<RecyclerView.ViewHolder> fixHolder=mFixHolder;
+        return null!=fixHolder?fixHolder.get(type):null;
     }
 
-    public final boolean setFixHolder(int type,View view){
+    public final boolean setFixHolder(int type, View view){
         return null!=view&&null==view.getParent()&&setFixHolder(type,new RecyclerView.ViewHolder(view){});
     }
 
@@ -73,19 +74,67 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         return false;
     }
 
-    protected Integer onResolveDataLayoutId(ViewGroup parent){
+    protected Object onResolveDataViewHolder(ViewGroup parent){
         //Do nothing
         return null;
+    }
+
+    public final boolean notifyItemChangedSafe(int index){
+        if (index>=0&&index<getDataCount()){
+            super.notifyItemChanged(index);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean notifyItemChangedSafe(int index,Object playload){
+        if (index>=0&&index<getDataCount()){
+            super.notifyItemChanged(index,playload);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean notifyItemInsertedSafe(int index){
+        if (index>=0&&index<getDataCount()){
+            super.notifyItemInserted(index);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean notifyItemInserted(int fromPosition, int toPosition){
+        if (fromPosition>=0&&fromPosition<=toPosition){
+            super.notifyItemRangeChanged(fromPosition,toPosition);
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean notifyItemsChanged(Object ...objects){
+        if (null!=objects&&objects.length>0){
+            for (Object child:objects) {
+                notifyItemChangedSafe(index(child));
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
     public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final LayoutInflater in=LayoutInflater.from(parent.getContext());
-        RecyclerView.ViewHolder viewHolder=onCreateViewHolder(in,viewType,parent);
-        if (viewHolder ==null){
-            Integer integer= onResolveViewTypeLayoutId(viewType);
-            integer=null==integer&&viewType==TYPE_DATA?onResolveDataLayoutId(parent):integer;
-            viewHolder=generateViewHolder(null,parent,integer,false);
+        RecyclerView.ViewHolder viewHolder=null;
+        Object object=onResolveViewHolder(in,viewType,parent);
+        if (null!=object){
+            object=object instanceof Integer?generateViewHolder(null,parent, (Integer)object,false):object;
+            viewHolder=null!=object&&object instanceof RecyclerView.ViewHolder?((RecyclerView.ViewHolder)object):null;
+        }
+        if (viewHolder ==null&&viewType==TYPE_DATA){
+            if (null!=(object=onResolveDataViewHolder(parent))){
+                object=object instanceof Integer?generateViewHolder(null,parent, (Integer)object,false):object;
+                viewHolder=null!=object&&object instanceof RecyclerView.ViewHolder?((RecyclerView.ViewHolder)object):null;
+            }
         }
         if (null==viewHolder){
             switch (viewType){
@@ -166,7 +215,7 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             return TYPE_EMPTY;
         }
         SparseArray<RecyclerView.ViewHolder> fixHolder=mFixHolder;
-        if (position == 1&&(null!=fixHolder&&null!=fixHolder.get(TYPE_HEAD))){
+        if (position == 0&&(null!=fixHolder&&null!=fixHolder.get(TYPE_HEAD))){
             return TYPE_HEAD;
         }
         if (position == size){
@@ -572,6 +621,11 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
             recyclerView.setLayoutManager(manager);
         }
         Object object=this instanceof OnItemTouchResolver?((OnItemTouchResolver)this).onResolveItemTouch(recyclerView):null;
+        if (null!=object){
+            if (!(object instanceof ItemTouchHelper)&&(object instanceof ItemTouchInterrupt)){
+                object=new ItemTouchHelper((ItemTouchInterrupt)object);
+            }
+        }
         if (null!=object&&object instanceof ItemTouchHelper){
             (mItemTouchHelper=((ItemTouchHelper)object)).attachToRecyclerView(recyclerView);
         }

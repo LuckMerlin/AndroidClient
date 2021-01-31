@@ -97,7 +97,6 @@ public final class Permissions {
         return notGranted;
     }
 
-
     public boolean request(final Activity activity,OnPermissionRequestFinish callback,final String ... permissions) {
         return request(activity,2008,callback,permissions);
     }

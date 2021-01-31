@@ -1,4 +1,6 @@
 package com.luckmerlin.databinding.touch;
 
-public interface TouchListener {
+import com.luckmerlin.core.proguard.PublishMethods;
+
+public interface TouchListener extends PublishMethods {
 }

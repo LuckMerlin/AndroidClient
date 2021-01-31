@@ -8,11 +8,12 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.luckmerlin.core.proguard.PublishMethods;
+import com.luckmerlin.core.proguard.PublishProtectedMethod;
 
 import java.util.Collections;
 import java.util.List;
 
-public class ItemTouchInterrupt extends ItemTouchHelper.Callback implements PublishMethods {
+public class ItemTouchInterrupt extends ItemTouchHelper.Callback implements PublishMethods, PublishProtectedMethod {
     public final static int LEFT=ItemTouchHelper.LEFT;
     public final static int RIGHT=ItemTouchHelper.RIGHT;
     public final static int UP=ItemTouchHelper.UP;
@@ -115,20 +116,20 @@ public class ItemTouchInterrupt extends ItemTouchHelper.Callback implements Publ
             final Object data=listAdapter.getItemData(position);
             if (null!=data) {
                 Boolean removed=onItemSlideRemove(position,data,direction,viewHolder);
-                if ((null==removed||!removed)&&adapter instanceof OnItemSlideRemove){
-                    ((OnItemSlideRemove)adapter).onItemSlideRemove(position, data, direction, viewHolder, new Remover() {
-                        @Override
-                        public void remove(boolean needRemove) {
-                            if (needRemove){
-                                listAdapter.removeData(data, "After slide remover call.");
-                            }else{
-                                listAdapter.notifyItemChanged(position);
-                            }
-//                            if (!needRemove) {
-//                                listAdapter.insert(position,data, "After slide remover not remove callback.");
-//                            }
+                final Remover remover=new Remover() {
+                    @Override
+                    public void remove(boolean needRemove) {
+                        if (needRemove){
+                            listAdapter.removeData(data, "After slide remover call.");
+                        }else{
+                            listAdapter.notifyItemChanged(position);
                         }
-                    });
+                    }
+                };
+                if ((null==removed||!removed)&&adapter instanceof OnItemSlideRemove){
+                    ((OnItemSlideRemove)adapter).onItemSlideRemove(position, data, direction, viewHolder,remover);
+                }else{
+                    remover.remove(false);
                 }
             }
         }

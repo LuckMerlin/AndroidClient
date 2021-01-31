@@ -33,9 +33,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 //    implementation project(path: ':LMVVM')
-//    implementation project(path: ':LMDatabinding')
+    implementation project(path: ':LMDatabinding')
     implementation project(path: ':LMCore')
     implementation project(path: ':LMDRAdapter')
     implementation project(path: ':FileScanner')
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation project(path: ':LMVVM')
+    implementation project(path: ':Plugin')
 }

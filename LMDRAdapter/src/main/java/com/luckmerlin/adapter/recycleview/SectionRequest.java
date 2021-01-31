@@ -6,34 +6,44 @@ import com.luckmerlin.core.proguard.PublishMethods;
 public final class SectionRequest<T> implements Canceler,PublishMethods {
     private final boolean mNext;
     private final T mArg;
-    private final int mFrom;
+    private final long mFrom;
+    private final long mLimit;
     Canceler mCanceler;
 
-    SectionRequest(T arg,int from,boolean next){
+    public SectionRequest(T arg,long from,boolean next){
+        this(arg,from,60,next);
+    }
+
+    public SectionRequest(T arg,long from,int limit,boolean next){
         mArg=arg;
+        mLimit=limit;
         mFrom=from;
         mNext=next;
     }
 
-    public int getFrom() {
+    public final long getFrom() {
         return mFrom;
     }
 
-    public T getArg() {
+    public final T getArg() {
         return mArg;
     }
 
-    public boolean isNext() {
+    public final long getLimit() {
+        return mLimit;
+    }
+
+    public final boolean isNext() {
         return mNext;
     }
 
-    public boolean isArgEqual(Object arg) {
+    public final boolean isArgEqual(Object arg) {
         T current=mArg;
         return (null==current||null==arg)||(null!=current&&null!=arg&&current.equals(arg));
     }
 
     @Override
-    public boolean cancel(boolean b, String s) {
+    public final boolean cancel(boolean b, String s) {
         Canceler canceler=mCanceler;
         return null!=canceler&&canceler.cancel(b,s);
     }

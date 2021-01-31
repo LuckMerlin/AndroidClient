@@ -8,14 +8,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.databinding.ViewDataBinding;
+
 import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.core.proguard.PublishProtectedMethod;
+import com.luckmerlin.databinding.dialog.PopupWindow;
+import com.luckmerlin.databinding.touch.TouchListener;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -27,6 +33,7 @@ import java.util.WeakHashMap;
 public abstract class Model implements PublishMethods, PublishProtectedMethod {
     private WeakReference<View> mRootView=null;
     private Map<Object,Long> mDispatchHolders;
+    private PopupWindow mPopWindow;
 
     public final View findViewById(int viewId,View def){
         return findViewById(getRoot(),viewId,def);
@@ -154,6 +161,10 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
 
     public final View inflate(Context context, int layoutId, ViewGroup parent){
         return null!=context?View.inflate(context,layoutId,parent):null;
+    }
+
+    public final ViewDataBinding inflateBinding(Context context, int layoutId, ViewGroup parent,boolean attach){
+        return null!=context?DataBindingUtil.inflate(LayoutInflater.from(context),layoutId,parent,attach):null;
     }
 
     public final <T extends Activity> T getActivity(Class<T> cls){
@@ -349,6 +360,45 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
 
     protected void onRootDetached(){
         //Do nothing
+    }
+
+    protected final boolean showAtLocationAsContext(View parent,Object root, TouchListener listener) {
+        return showAtLocation(parent,root,listener,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
+    }
+
+    protected final boolean showAtLocation(View parent,Object root, TouchListener listener,Integer dismissFlag) {
+        return showAtLocation(parent,root, Gravity.CENTER,0,0,listener,dismissFlag);
+    }
+
+    protected final boolean showAtLocation(View parent, Object rootObject, int gravity, int x, int y, TouchListener listener, Integer dismissFlag){
+        if (null==rootObject){
+            return false;
+        }else if (rootObject instanceof View&&(null==((View)rootObject).getParent())){
+            PopupWindow popupWindow=fetchPopWindow();
+            if (null!=popupWindow) {
+                popupWindow.setContentView(((View)rootObject));
+                dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
+                popupWindow.showAtLocation(parent, gravity, x, y, listener, dismissFlag);
+                return true;
+            }
+            return false;
+        } else if (rootObject instanceof Model){
+            Model model=(Model)rootObject;
+            MatchBinding matchBinding=null!=model?new ModelBinder().bindModelForObject(getContext(),model,"Before show view at location."):null;
+            return null!=matchBinding&&showAtLocation(parent,matchBinding.mViewBinding,gravity,x,y,listener,dismissFlag);
+        }else if (rootObject instanceof ViewDataBinding){
+            return showAtLocation(parent,((ViewDataBinding)rootObject).getRoot(),gravity,x,y,listener,dismissFlag);
+        }
+        return false;
+    }
+
+    private PopupWindow fetchPopWindow(){
+        PopupWindow currentPopWindow=mPopWindow;
+        return null!=currentPopWindow?currentPopWindow:(mPopWindow=new PopupWindow(true,(window)->{
+            PopupWindow curr=mPopWindow;
+            if (null!=curr&&null!=window&&curr==window){
+                mPopWindow=null;
+            } }));
     }
 
 }

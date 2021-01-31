@@ -23,8 +23,8 @@ public class ViewPagerAdapter<T> extends SnapAdapter<T> implements PublishProtec
     }
 
     @Override
-    protected RecyclerView.ViewHolder onCreateViewHolder(LayoutInflater layoutInflater, int type, ViewGroup viewGroup) {
-        return type==TYPE_DATA?new ViewPageHolder(viewGroup) :super.onCreateViewHolder(layoutInflater, type, viewGroup);
+    protected Object onResolveDataViewHolder(ViewGroup parent) {
+        return null!=parent?new ViewPageHolder(parent):null;
     }
 
     protected Integer onResolveLayoutOrientation(){

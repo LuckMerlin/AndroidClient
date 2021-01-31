@@ -267,7 +267,7 @@ class ModelLifeBinderImpl implements Application.ActivityLifecycleCallbacks{
     private boolean bindLife(Context context, boolean enable, OnLifeBind onLifeBind){
         if (null!=onLifeBind){
             try {
-                context=null!=context?context.getApplicationContext():null;
+                context=null!=context?context instanceof Application?context:context.getApplicationContext():null;
             }catch (Exception e){
                 Debug.D("Can't bind model life! You must make register after call activity's super.attachBaseContext(newBase)");
             }

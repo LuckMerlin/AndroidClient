@@ -21,6 +21,7 @@ import android.widget.TextView;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.match.Matchable;
 import com.luckmerlin.core.proguard.PublishMethods;
 import com.luckmerlin.databinding.text.OnEditActionChange;
@@ -283,14 +284,16 @@ public final class ViewBindingBinder implements PublishMethods {
         final int dispatchEvent=null!=dispatch?dispatch:Touch.NONE;
         final Object finalTagObject=tagObject;
         final boolean dispatchTouch=(dispatchEvent&Touch.TOUCH)!=0;
-        final int finalResTagId=null!=resTagId?resTagId:0;
+        final int finalResTagId=null!=resTagId&&resTagId!=0?resTagId:view.getId();
         if (dispatchTouch||(null!=object&&object instanceof OnViewTouch)){
             view.setOnTouchListener((View v, MotionEvent event)->{
                 final Object finalObject=getTagObject(finalTagObject);
                 final Matchable matchable=(Object argObject)-> null!=argObject&&argObject instanceof
-                        OnViewTouch&&((OnViewTouch)argObject).onViewTouched(view, finalResTagId,event,finalObject)?Matchable.BREAK:Matchable.CONTINUE;
+                        OnViewTouch&&((OnViewTouch)argObject).onViewTouched(view, finalResTagId,
+                        event,finalObject)?Matchable.BREAK:Matchable.CONTINUE;
                 TouchListener touchListener=touch.getListener();
-                return (null!=touchListener&&dispatchEvent(view,touchListener,false,matchable))||dispatchEvent(view, object,dispatchTouch,matchable);
+                return (null!=touchListener&&dispatchEvent(view,touchListener,false,
+                        matchable))||dispatchEvent(view, object,dispatchTouch,matchable);
             });
         }
         final boolean dispatchLongClick=(dispatchEvent&Touch.LONG_CLICK)!=0;
@@ -298,9 +301,11 @@ public final class ViewBindingBinder implements PublishMethods {
             view.setOnLongClickListener((View v)->{
                 final Object finalObject=getTagObject(finalTagObject);
                 Matchable matchable=(Object argObject)-> null!=argObject&&argObject instanceof OnViewLongClick&&
-                        ((OnViewLongClick)argObject).onViewLongClick(view,finalResTagId,finalObject)?Matchable.BREAK:Matchable.CONTINUE;
+                        ((OnViewLongClick)argObject).onViewLongClick(view,finalResTagId,finalObject)?
+                        Matchable.BREAK:Matchable.CONTINUE;
                 TouchListener listener=touch.getListener();
-                return (null!=listener&&dispatchEvent(view,listener,false,matchable))||dispatchEvent(view, object,dispatchLongClick,matchable);
+                return (null!=listener&&dispatchEvent(view,listener,false,matchable))||
+                        dispatchEvent(view, object,dispatchLongClick,matchable);
             });
         }
         final boolean dispatchClick=(dispatchEvent&Touch.CLICK)!=0;
@@ -310,21 +315,27 @@ public final class ViewBindingBinder implements PublishMethods {
             final Object[] ditherObject=new Object[2];
             final View.OnClickListener clickListener=(View v)->{
                 Object clickCount=ditherObject[1];
-                final int finalClickCount=null!=clickCount&&clickCount instanceof Integer &&((Integer)clickCount)>0?(Integer) clickCount:0;
+                final int finalClickCount=null!=clickCount&&clickCount instanceof Integer &&
+                        ((Integer)clickCount)>0?(Integer) clickCount:1;
                 final Object finalObject=getTagObject(finalTagObject);
-                if (finalClickCount==1){
-                    final Matchable matchable=(Object argObj)-> null!=argObj&&argObj instanceof
-                            OnSingleTapClick&&((OnSingleTapClick)argObj).onViewSingleTap(view, finalResTagId,finalObject)?Matchable.MATCHED:Matchable.CONTINUE;
-                    TouchListener listener=touch.getListener();
-                    if ((null!=listener&&dispatchEvent(view,listener,false,matchable))|| dispatchEvent(view, object,dispatchClick,matchable)){
-                        return;
+                //
+                final Matchable matchable=(Object argObj)->{
+                    if (null!=argObj){
+                        if (argObj instanceof OnViewClick&&
+                                ((OnViewClick)argObj).onViewClick(view, finalResTagId, finalClickCount,finalObject)){
+                            return Matchable.MATCHED;
+                        }else if (finalClickCount==1&&argObj instanceof OnSingleTapClick
+                        &&((OnSingleTapClick)argObj).onViewSingleTap(view, finalResTagId,finalObject)){
+                            return Matchable.MATCHED;
+                        }
                     }
-                }
-                final Matchable matchable=(Object argObj)-> null!=argObj&&argObj instanceof
-                        OnViewClick&&((OnViewClick)argObj).onViewClick(view, finalResTagId,finalClickCount,finalObject)?Matchable.MATCHED:Matchable.CONTINUE;
+                    return Matchable.CONTINUE;
+                };
+                //
                 TouchListener listener=touch.getListener();
-                if ((null!=listener&&dispatchEvent(view,listener,false,matchable))||dispatchEvent(view, object,dispatchClick,matchable)){
-                    //Do nothing
+                if ((null!=listener&&dispatchEvent(view,listener,false,matchable))||
+                        dispatchEvent(view, object,dispatchClick,matchable)){
+                    return;
                 }
             };
             view.setOnClickListener((View v)-> {
@@ -362,14 +373,6 @@ public final class ViewBindingBinder implements PublishMethods {
             if (dispatchEventToViewModel(view,matchable)){
                 return true;
             }
-            Adapter adapter=view instanceof AdapterView ?((AdapterView)view).getAdapter():null;
-            if (null!=adapter&&isMatched(matchable.onMatch(adapter))){
-                return true;
-            }
-            Object reAdapter=view instanceof RecyclerView ?((RecyclerView)view).getAdapter():null;
-            if (null!=reAdapter&&isMatched(matchable.onMatch(reAdapter))){
-                return true;
-            }
             Context context=view.getContext();
             if (null!=context&&isMatched(matchable.onMatch(context))){
                 return true;
@@ -395,6 +398,14 @@ public final class ViewBindingBinder implements PublishMethods {
 
     private boolean dispatchEventToViewModel(View view, Matchable matchable){
         if (null!=view&&null!=matchable){
+            Adapter adapter=view instanceof AdapterView ?((AdapterView)view).getAdapter():null;
+            if (null!=adapter&&isMatched(matchable.onMatch(adapter))){
+                return true;
+            }
+            Object reAdapter=view instanceof RecyclerView ?((RecyclerView)view).getAdapter():null;
+            if (null!=reAdapter&&isMatched(matchable.onMatch(reAdapter))){
+                return true;
+            }
             ViewDataBinding binding=DataBindingUtil.getBinding(view);
             if (null!=(null!=binding?new ModelClassFinder().findModel(binding,(o)->{
                 MatchBinding matchBinding=null!=o&&o instanceof MatchBinding?(MatchBinding)o:null;

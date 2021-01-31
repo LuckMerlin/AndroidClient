@@ -110,13 +110,7 @@ public abstract class BrowserAdapter<T extends Path> extends PageAdapter<String,
         return null!=pageData&&pageData instanceof Folder ?(Folder)pageData:null;
     }
 
-    @Override
-    public Object onResolveItemTouch(RecyclerView recyclerView) {
-        return new ItemTouchInterrupt(){
-            @Override
-            protected Integer onResolveSlide(RecyclerView.ViewHolder holder, RecyclerView.LayoutManager manager) {
-                return new ItemSlideRemover().onResolveSlide(holder,manager);
-            }
-        };
-    }
+
+
+
 }

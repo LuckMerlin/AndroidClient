@@ -27,21 +27,22 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
         }
     };
 
-    protected void onLoadStatusChange(SectionRequest<A> request,boolean loading){
+    protected void onLoadStatusChange(SectionRequest<A> request,boolean loading,boolean next){
         //Do nothing
     }
 
-    protected Canceler onPreSectionLoad(SectionRequest<A> request,OnSectionLoadFinish callback,String debug){
-        //Do nothing
-        return null;
-    }
-
-    protected Canceler onNextSectionLoad(SectionRequest<A> request,OnSectionLoadFinish callback,String debug){
+    protected Canceler onPreSectionLoad(SectionRequest<A> request,OnSectionLoadFinish<A,T> callback,String debug){
         //Do nothing
         return null;
     }
 
-    private void onSectionLoadStatusChange(SectionRequest<A> request,final boolean loading){
+    protected Canceler onNextSectionLoad(SectionRequest<A> request,
+                                         OnSectionLoadFinish<A,T> callback,String debug){
+        //Do nothing
+        return null;
+    }
+
+    private void onSectionLoadStatusChange(SectionRequest<A> request,final boolean loading,boolean next){
         if (null!=request&&!request.isNext()){
             RecyclerView recyclerView=getRecyclerView();
             ViewParent parent=null!=recyclerView?recyclerView.getParent():null;
@@ -55,7 +56,7 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
                 });
             }
         }
-        onLoadStatusChange(request,loading);
+        onLoadStatusChange(request,loading,next);
     }
 
     public SectionListAdapter() {
@@ -81,18 +82,50 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
     }
 
     public final boolean resetSection(String debug) {
-        return resetSection(null, null, debug);
+        return resetSection(null,debug);
     }
 
-    public final boolean resetSection(A arg, Boolean insert, String debug) {
+    public final boolean resetSection(OnSectionLoadFinish<A,T> finalCallback,String debug) {
+        return resetSection(null, null,finalCallback, debug);
+    }
+
+    public final boolean resetSection(A arg, Boolean insert,final   OnSectionLoadFinish<A,T> finalCallback,String debug) {
         //If exist loading request,cancel it
         cancelLoading("Before reset section " + (null != debug ? debug : "."));
         super.clean(debug);
         mPreLastSection=mNextLastSection=null;
-        return loadNextSection(arg, insert, debug);
+        return loadNextSection(arg, insert, new OnSectionLoadFinish<A, T>() {
+            @Override
+            public void onSectionLoadFinish(boolean succeed, String note, Section<A, T> section) {
+                if (null!=finalCallback){
+                    finalCallback.onSectionLoadFinish(succeed,note,section);
+                }
+                onReset(succeed,section);
+            }}, debug);
     }
 
-    public final int getPreLastSectionSize(){
+    protected void onReset(boolean succeed,Section<A,T> section) {
+        //Do nothing
+    }
+
+    public final A getLatestSectionArg(){
+        LastSection<A> nextLastSection=mNextLastSection;
+        LastSection<A> preLastSection=mPreLastSection;
+        long nextLastTime=null!=nextLastSection?nextLastSection.mTime:0;
+        long preLastTime=null!=preLastSection?preLastSection.mTime:0;
+        LastSection<A> section= nextLastTime>preLastTime?nextLastSection:preLastSection;
+        return null!=section?section.mArg:null;
+    }
+
+    public final LastSection<A> getNextLastSection() {
+        return mNextLastSection;
+    }
+
+    public final LastSection<A> getPreLastSection() {
+        return mPreLastSection;
+    }
+
+    public final long getPreLastSectionSize(){
         LastSection section=mPreLastSection;
         return null!=section?section.mSize:-1;
     }
@@ -107,7 +140,7 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
         return null!=section?section.mArg:null;
     }
 
-    public final int getNextLastSectionSize(){
+    public final long getNextLastSectionSize(){
         LastSection section=mNextLastSection;
         return null!=section?section.mSize:-1;
     }
@@ -128,7 +161,11 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
         return loadNextSection(arg,false,debug);
     }
 
-    final boolean loadNextSection(A arg,Boolean insert, String debug) {
+    final boolean loadNextSection(A arg,Boolean insert,String debug) {
+        return loadNextSection(arg,insert,null,debug);
+    }
+
+    final boolean loadNextSection(A arg,Boolean insert, OnSectionLoadFinish<A,T> finalCallback,String debug) {
         if (null != mLoadingNext) {//Exist loading
             Debug.W("Fail load next section while exist next loading " + (null != debug ? debug : "."));
             return false;
@@ -137,10 +174,14 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
         }
         LastSection<A> section=mNextLastSection;
         return loadSection(new SectionRequest<A>(null!=section?section.mArg:arg,
-                null!=section?section.mSize:0, true), insert, debug);
+                null!=section?section.mSize:0, true), insert,finalCallback, debug);
     }
 
-    synchronized boolean loadSection(final SectionRequest<A> request, Boolean insert, String debug) {
+    synchronized boolean loadSection(final SectionRequest<A> request, Boolean insert,String debug) {
+        return loadSection(request,insert,null,debug);
+    }
+
+    synchronized boolean loadSection(final SectionRequest<A> request, Boolean insert,final OnSectionLoadFinish<A,T> finalCallback,String debug) {
         if (null != request) {
             final boolean actionInsert = null != insert && insert;
             if (request.isNext()) {
@@ -157,16 +198,20 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
                                 List<T> data = succeed && null != section ? section.getData() : null;
                                 int size=succeed&&null!=data?data.size():-1;
                                 if (size > 0) {
-                                    LastSection lastSection=new LastSection(request.getArg(),request.getFrom()+size,section.getLength());
+                                    LastSection lastSection=new LastSection(request.getArg(),
+                                            request.getFrom()+size,section.getTotal(),System.currentTimeMillis());
                                     mNextLastSection=(actionInsert?  insert(getDataCount(), data,
                                             false, "After load section succeed."):
                                             add(data, "After load section succeed."))?lastSection:mNextLastSection;
                                 }
-                                onSectionLoadStatusChange(request,false);
+                                onSectionLoadStatusChange(request,false,true);
+                            }
+                            if (null!=finalCallback){
+                                finalCallback.onSectionLoadFinish(succeed,note,section);
                             }
                         }
                     };
-                    onSectionLoadStatusChange(request,true);
+                    onSectionLoadStatusChange(request,true,true);
                     if (null != (request.mCanceler = onNextSectionLoad(request,callback, debug))) {
                         return true;
                     }
@@ -186,16 +231,17 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
                                 List<T> data = succeed && null != section ? section.getData() : null;
                                 int size=succeed&&null!=data?data.size():-1;
                                 if (size> 0) {
-                                    LastSection lastSection=new LastSection(request.getArg(),request.getFrom()+size,section.getLength());
+                                    LastSection lastSection=new LastSection(request.getArg(),
+                                            request.getFrom()+size,section.getTotal(),System.currentTimeMillis());
                                     mPreLastSection=(actionInsert?  insert(getDataCount(), data,
                                             false, "After load section succeed."):
                                             add(data, "After load section succeed."))?lastSection:mPreLastSection;
                                 }
-                                onSectionLoadStatusChange(request,false);
+                                onSectionLoadStatusChange(request,false,false);
                             }//Clean while load fail
                         }
                     };
-                    onSectionLoadStatusChange(request,true);
+                    onSectionLoadStatusChange(request,true,false);
                     if (null != (request.mCanceler = onPreSectionLoad(request, callback, debug))) {
                         return true;
                     }
@@ -287,13 +333,19 @@ public class SectionListAdapter<A,T> extends ListAdapter<T> {
 
     static class LastSection<T> {
         private final T mArg;
-        private final int mSize;
-        private final int mLength;
+        private final long mSize;
+        private final long mLength;
+        private final long mTime;
 
-        LastSection(T arg,int size,int length){
+        LastSection(T arg,long size,long length,long time){
             mArg=arg;
             mSize=size;
             mLength=length;
+            mTime=time;
+        }
+
+        public long getTime() {
+            return mTime;
         }
     }
 

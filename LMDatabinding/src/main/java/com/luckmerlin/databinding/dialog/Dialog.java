@@ -295,11 +295,8 @@ public class Dialog implements PublishMethods{
 
     public final Dialog setSize(int width,int height){
         Window window=getWindow();
-        WindowManager.LayoutParams params= null!=window?window.getAttributes():null;
-        if (null!=params){
-            params.width=width;
-            params.height=height;
-            window.setAttributes(params);
+        if (null!=window){
+            window.setLayout(width,height);
         }
         return this;
     }

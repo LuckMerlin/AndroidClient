@@ -44,6 +44,10 @@ public final class Touch implements BindingObject,PublishMethods, PublishFields 
         return dispatch(dispatch,null);
     }
 
+    public static Touch dither(Integer dispatch,Object tag){
+        return dispatch(dispatch,tag).dither();
+    }
+
     public static Touch dispatch(Integer dispatch,Object tag){
         return dispatch(dispatch,null,tag);
     }
@@ -82,6 +86,15 @@ public final class Touch implements BindingObject,PublishMethods, PublishFields 
         if (null!=runnable){
             mListener=new WeakReference<>(runnable);
         }
+        return this;
+    }
+
+    public Touch dither(){
+        return dither(200);
+    }
+
+    public Touch dither(int dither){
+        mClickDither=dither;
         return this;
     }
 
