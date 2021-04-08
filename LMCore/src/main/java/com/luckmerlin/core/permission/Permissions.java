@@ -23,9 +23,6 @@ import java.util.Locale;
 import java.util.WeakHashMap;
 
 public final class Permissions {
-//       <uses-permission android:name="android.permission.CAMERA" />
-//    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-//    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     private static WeakHashMap<Activity,Requesting> mRequestingPermissions;
 
     public boolean isGranted(Context context,String ... permissions){

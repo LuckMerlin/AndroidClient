@@ -198,7 +198,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return null!=collection&&collection.retainAll(c);
     }
 
-    public ChainCollection<T> retainAllInChain(Collection c) {
+    public ChainCollection<T> chainRetainAllIn(Collection c) {
         retainAll(c);
         return this;
     }
@@ -209,7 +209,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return null!=collection&&collection.removeAll(c);
     }
 
-    public ChainCollection<T> removeAllInChain(Collection c) {
+    public ChainCollection<T> chainRemoveAll(Collection c) {
         removeAll(c);
         return this;
     }

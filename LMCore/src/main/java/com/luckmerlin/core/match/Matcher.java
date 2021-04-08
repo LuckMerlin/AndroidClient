@@ -14,7 +14,7 @@ public class Matcher implements PublishMethods {
     public final<T> List<T> match(T[] values, Matchable matchable, int max){
         int length=null!=values?values.length:0;
         if (length>0){
-            List<T> list=new ArrayList<>(length>=max?max:length);
+            List<T> list=new ArrayList<>(length>=max?length:Math.max(0,max));
             synchronized (values) {
                 for (T child : values) {
                     if (list.size() >= max) {
