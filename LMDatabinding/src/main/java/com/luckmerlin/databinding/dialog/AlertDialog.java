@@ -18,6 +18,9 @@ import com.luckmerlin.core.match.Matchable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * @deprecated
+ */
 public class AlertDialog extends Dialog {
     private final ObservableField<Object> mTitle=new ObservableField<>();
     private final ObservableField<Object> mLeft=new ObservableField<>();

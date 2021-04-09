@@ -2,10 +2,8 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:binding="http://schemas.android.com/apk/res-auto">
   <data>
-      <variable
-          name="vm"
-          type="com.luckmerlin.test.DDD" />
-      <import type="com.luckmerlin.databinding.view.Touch"/>
+      <variable name="vm" type="com.luckmerlin.test.DDD" />
+      <import type="com.luckmerlin.databinding.ui.TouchBinding"/>
   </data>
     <LinearLayout
         android:orientation="vertical"
@@ -16,11 +14,7 @@
             android:text="lohai "
             android:textSize="20sp"
             android:padding="50dp"
-            binding:lmBinding="@{Touch.dispatch(Touch.CLICK,`ddddd`)}"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <androidx.recyclerview.widget.RecyclerView
-            android:adapter="@{vm.testAdapter}"
+            binding:lmBinding="@{TouchBinding.}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>

@@ -1,25 +1,16 @@
 package com.luckmerlin.core.permission;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
-import android.view.ViewGroup;
-
 import com.luckmerlin.core.debug.Debug;
-
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.WeakHashMap;
 
 public final class Permissions {

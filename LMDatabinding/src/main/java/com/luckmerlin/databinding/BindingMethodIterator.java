@@ -6,6 +6,9 @@ import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.match.Matchable;
 import java.lang.reflect.Method;
 
+/**
+ * @deprecated
+ */
 public  class BindingMethodIterator {
 
     public final MatchBinding iterate(ViewDataBinding binding, Matchable matchable){

@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.luckmerlin.test"
-        minSdkVersion 29
+        minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -35,9 +35,9 @@ dependencies {
 //    implementation project(path: ':LMVVM')
     implementation project(path: ':LMDatabinding')
     implementation project(path: ':LMCore')
-    implementation project(path: ':LMDRAdapter')
-    implementation project(path: ':FileScanner')
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation project(path: ':LMVVM')
-    implementation project(path: ':Plugin')
+//    implementation project(path: ':LMDRAdapter')
+//    implementation project(path: ':FileScanner')
+//    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+//    implementation project(path: ':LMVVM')
+//    implementation project(path: ':Plugin')
 }

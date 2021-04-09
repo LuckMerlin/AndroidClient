@@ -1,37 +1,44 @@
 package com.luckmerlin.test;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
+import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import androidx.annotation.Nullable;
+import com.luckmerlin.databinding.ViewBindingBinder;
+import com.luckmerlin.databinding.dialog.PopupWindow;
+import com.luckmerlin.databinding.view.Touch;
 
-import com.luckmerlin.core.debug.Debug;
-import com.luckmerlin.databinding.OnModelResolve;
-import com.luckmerlin.mvvm.ModelLifeBinder;
-import com.luckmerlin.plugin.MPlugin;
+public class MainActivity extends Activity  {
 
-import java.io.IOException;
-
-public class MainActivity extends Activity implements OnModelResolve {
-
-//    @Override
-//    protected void attachBaseContext(Context newBase) {
-//        super.attachBaseContext(newBase);
-//        ModelLifeBinder.bindActivityLife(true,this);
-//        try {
-//            ClassLoader classLoader=new MPlugin().createClassLoader(this,getResources().getAssets()
-//                    .open("testplug-debug.apk"),null,null,null);
-//            //
-//            Class cls=classLoader.loadClass("com.example.testplug.CSDK");
-//            Debug.D("DDDDDDDDDD  "+cls);
-//        } catch (Exception e) {
-//            Debug.D("DDDDDDDDDDDDD "+e);
-//            e.printStackTrace();
-//        }
-//    }
+    PopupWindow popupWindow=new PopupWindow(true);
 
     @Override
-    public Object onResolveModel() {
-        Debug.D("EEEEEEEEEEEEEEEEEEE ");
-        return R.layout.test_layout;
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.test_layout);
+//        FrameLayout frameLayout=new FrameLayout(this);
+//        Button button=new Button(this);
+//        button.setText("牛不");
+//        new ViewBindingBinder().bind(button,Touch.dispatch(Touch.CLICK));
+//        frameLayout.addView(button,new FrameLayout.LayoutParams
+//                (ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//        setContentView(frameLayout);
+//        button.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                ImageButton imageButton=new ImageButton(MainActivity.this);
+//                imageButton.setImageResource(R.drawable.ic_menu_normal);
+//                popupWindow.setContentView(imageButton);
+////                new Dialog(MainActivity.this).setContentView(imageButton).show();
+////
+//                new ViewBindingBinder().bind(imageButton,Touch.dispatch(Touch.CLICK));
+////                //
+//                popupWindow.showAsDropDown(button,0,0,PopupWindow.DISMISS_INNER_MASK);
+//            }
+//        },5000);
     }
+
 }

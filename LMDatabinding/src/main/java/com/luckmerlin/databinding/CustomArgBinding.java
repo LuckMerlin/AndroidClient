@@ -4,7 +4,10 @@ import android.view.View;
 
 import java.lang.ref.WeakReference;
 
-public class CustomArgBinding implements CustomBinding {
+/**
+ * @deprecated
+ */
+public class CustomArgBinding implements BindingObject {
     private Object mArg;
 
     public final CustomArgBinding setArg(Object arg){
@@ -33,6 +36,6 @@ public class CustomArgBinding implements CustomBinding {
     }
 
     public static CustomArgBinding arg(Object arg,boolean lifeWeak){
-        return new CustomArgBinding().setArg(lifeWeak?new LifeObjectPackager().pack(arg):arg);
+        return new CustomArgBinding().setArg(lifeWeak?new LifeObjectPackager().pack(lifeWeak,arg):arg);
     }
 }

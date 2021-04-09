@@ -1,17 +1,17 @@
 package com.luckmerlin.databinding.view;
 
 import com.luckmerlin.core.proguard.PublishMethods;
-import com.luckmerlin.databinding.BindingObject;
+import com.luckmerlin.databinding.IBinding;
 
-public class Image implements BindingObject,PublishMethods {
+public class Image implements IBinding,PublishMethods {
     private Object mSrc;
     private Object mBackground;
 
-    Image(){
+    public Image(){
         this(null,null);
     }
 
-    Image(Object image,Object background){
+    public Image(Object image,Object background){
         mBackground=background;
         mSrc=image;
     }

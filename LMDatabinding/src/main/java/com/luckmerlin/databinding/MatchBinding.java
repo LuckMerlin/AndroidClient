@@ -9,6 +9,9 @@ import com.luckmerlin.core.proguard.PublishMethods;
 
 import java.lang.reflect.Method;
 
+/**
+ * @deprecated
+ */
 public final class MatchBinding implements PublishFields, PublishMethods {
     public final Method mSetMethod;
     public final Method mGetMethod;

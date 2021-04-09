@@ -1,14 +1,13 @@
 package com.luckmerlin.databinding;
 
 import android.view.View;
-import com.luckmerlin.core.proguard.PublishMethods;
 
-public class BindingAdapter implements PublishMethods {
+public final class BindingAdapter {
 
     @androidx.databinding.BindingAdapter("lmBinding")
-    public static void setViewValue(View view, BindingObject lmBinding) {
+    public static void setViewValue(View view, IBinding lmBinding) {
         if (null!=view&&null!=lmBinding){
-            new ViewBindingBinder().bind(view,lmBinding);
+            new BindingInvoker().invoke(view,lmBinding);
         }
     }
 

@@ -12,15 +12,24 @@ import androidx.databinding.ViewDataBinding;
 import com.luckmerlin.core.debug.Debug;
 import com.luckmerlin.core.proguard.PublishMethods;
 
+import java.lang.reflect.Method;
+
 /**
  * Create LuckMerlin
  * Date 10:58 2020/8/13
  * TODO Uitls
  */
- public final class DataBindingUtil implements PublishMethods {
+ public class DataBindingUtil implements PublishMethods {
 
-   public  static ViewDataBinding getBinding(View view){
-        return null!=view&&checkDataBindingEnable(false)?androidx.databinding.DataBindingUtil.getBinding(view):null;
+   public Object getBinding(View view){
+       Class utilClass=null!=view?util():null;
+       try {
+           Method method=null!=utilClass?utilClass.getDeclaredMethod("getBinding",View.class):null;
+           return null!=method?method.invoke(null,view):null;
+       } catch (Exception e) {
+          //Do nothing
+       }
+       return null;
     }
 
     public static ViewDataBinding inflate(LayoutInflater inflater, int layoutId){
@@ -49,6 +58,22 @@ import com.luckmerlin.core.proguard.PublishMethods;
             }
         }
         return false;
+    }
+
+    Class mUtilClass;
+
+    final Class util(){
+        if (null==mUtilClass){
+            Class cls=null;
+            try {
+                cls= Class.forName("androidx.databinding.DataBindingUtil");
+            } catch (Exception e) {
+                //Do nothing
+            }
+            mUtilClass=null==cls?void.class:cls;
+        }
+        Class cls=mUtilClass;
+        return null!=cls&&!cls.getName().equals(void.class.getName())?cls:null;
     }
 
 }

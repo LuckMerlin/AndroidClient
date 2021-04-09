@@ -65,6 +65,11 @@ public final class ChainMap<K,V> implements Map<K,V>,PublishMethods {
         return null!=map?map.remove(key):null;
     }
 
+    ChainMap chainRemove(Object key){
+        remove(key);
+        return this;
+    }
+
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         Map<K,V> map=null!=m?mMap:null;
@@ -73,12 +78,22 @@ public final class ChainMap<K,V> implements Map<K,V>,PublishMethods {
         }
     }
 
+    ChainMap chainPutAll(Map<? extends K, ? extends V> m){
+        putAll(m);
+        return this;
+    }
+
     @Override
     public void clear() {
         Map<K,V> map=mMap;
         if (null!=map){
             map.clear();
         }
+    }
+
+    ChainMap chainClear(){
+        clear();
+        return this;
     }
 
     @Override

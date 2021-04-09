@@ -10,6 +10,10 @@ import com.luckmerlin.core.proguard.PublishMethods;
 
 import java.lang.reflect.Constructor;
 
+
+/**
+ * @deprecated
+ */
 public final class ViewCreator implements PublishMethods {
 
     public final View create(Context context, Object object){

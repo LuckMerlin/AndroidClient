@@ -3,6 +3,9 @@ import android.view.View;
 
 import com.luckmerlin.core.proguard.PublishFields;
 
+/**
+ * @deprecated
+ */
 public final class CreatedModel implements PublishFields {
     public final MatchBinding mMatchBinding;
     public final Model mModel;

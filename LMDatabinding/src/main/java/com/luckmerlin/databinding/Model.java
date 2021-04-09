@@ -75,6 +75,9 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
         return null!=context?context.getResources():null;
     }
 
+    /**
+     * @deprecated
+     */
     public final Model addDispatchHolder(Object object){
         if (null!=object){
             Map<Object,Long> dispatchHolder=mDispatchHolders;
@@ -113,6 +116,9 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
         return false;
     }
 
+    /**
+     * @deprecated
+     */
     public final Collection<Object> getDispatchHolders(){
         Map<Object,Long> dispatchHolder=mDispatchHolders;
         if (null!=dispatchHolder){
@@ -362,15 +368,15 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
         //Do nothing
     }
 
-    protected final boolean showAtLocationAsContext(View parent,Object root, TouchListener listener) {
-        return showAtLocation(parent,root,listener,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
+    protected final boolean showAtLocationAsContext(View parent,Object root) {
+        return showAtLocation(parent,root,PopupWindow.DISMISS_OUT_MASK|PopupWindow.DISMISS_INNER_MASK);
     }
 
-    protected final boolean showAtLocation(View parent,Object root, TouchListener listener,Integer dismissFlag) {
-        return showAtLocation(parent,root, Gravity.CENTER,0,0,listener,dismissFlag);
+    protected final boolean showAtLocation(View parent,Object root, Integer dismissFlag) {
+        return showAtLocation(parent,root, Gravity.CENTER,0,0,dismissFlag);
     }
 
-    protected final boolean showAtLocation(View parent, Object rootObject, int gravity, int x, int y, TouchListener listener, Integer dismissFlag){
+    protected final boolean showAtLocation(View parent, Object rootObject, int gravity, int x, int y,  Integer dismissFlag){
         if (null==rootObject){
             return false;
         }else if (rootObject instanceof View&&(null==((View)rootObject).getParent())){
@@ -378,16 +384,25 @@ public abstract class Model implements PublishMethods, PublishProtectedMethod {
             if (null!=popupWindow) {
                 popupWindow.setContentView(((View)rootObject));
                 dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
-                popupWindow.showAtLocation(parent, gravity, x, y, listener, dismissFlag);
+                popupWindow.showAtLocation(parent, gravity, x, y, dismissFlag);
                 return true;
             }
             return false;
         } else if (rootObject instanceof Model){
             Model model=(Model)rootObject;
             MatchBinding matchBinding=null!=model?new ModelBinder().bindModelForObject(getContext(),model,"Before show view at location."):null;
-            return null!=matchBinding&&showAtLocation(parent,matchBinding.mViewBinding,gravity,x,y,listener,dismissFlag);
+            return null!=matchBinding&&showAtLocation(parent,matchBinding.mViewBinding,gravity,x,y,dismissFlag);
         }else if (rootObject instanceof ViewDataBinding){
-            return showAtLocation(parent,((ViewDataBinding)rootObject).getRoot(),gravity,x,y,listener,dismissFlag);
+            return showAtLocation(parent,((ViewDataBinding)rootObject).getRoot(),gravity,x,y,dismissFlag);
+        }
+        return false;
+    }
+
+    protected final boolean dismissPopWindow(){
+        PopupWindow currentPopWindow=mPopWindow;
+        if (null!=currentPopWindow){
+            currentPopWindow.dismiss();
+            return true;
         }
         return false;
     }

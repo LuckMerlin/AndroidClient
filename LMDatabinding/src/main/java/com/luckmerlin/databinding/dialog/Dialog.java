@@ -21,6 +21,9 @@ import com.luckmerlin.databinding.Model;
 import com.luckmerlin.databinding.ModelBinder;
 import com.luckmerlin.databinding.ModelClassFinder;
 
+/**
+ * @deprecated
+ */
 public class Dialog implements PublishMethods{
     private final android.app.Dialog mDialog;
     private Object mDispatchHolder;
@@ -205,8 +208,12 @@ public class Dialog implements PublishMethods{
             }
             if (view.getParent()==null){
                 View current=getRoot();
-                dialog.setContentView(view,null!=params?params:new ViewGroup.LayoutParams
-                        (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                params=null!=params?params:new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                dialog.setContentView(view,params);
+                Window window=dialog.getWindow();
+                if (null!=window){
+                    window.setLayout(params.width,params.height);
+                }
                 onRootChanged(view,current);
             }
         }
@@ -245,7 +252,15 @@ public class Dialog implements PublishMethods{
                 model.removeDispatchHolder(current);
             }
             mDispatchHolder=dispatchHolder;
+            Window window=getWindow();
+            if (null!=window){
+                window.setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+            }
             dialog.show();
+            if (null!=window){
+                fullScreenImmersive(window.getDecorView());
+                window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+            }
             return true;
         }
         return false;
@@ -330,6 +345,19 @@ public class Dialog implements PublishMethods{
     public final Context getContext(){
         android.app.Dialog dialog=mDialog;
         return null!=dialog?dialog.getContext():null;
+    }
+
+    public final boolean fullScreenImmersive(View view) {
+        if (null!=view&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            view.setSystemUiVisibility(uiOptions);
+        }
+        return false;
     }
 
 }

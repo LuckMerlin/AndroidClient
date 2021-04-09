@@ -7,11 +7,13 @@ import android.content.ContentProvider;
 
 import java.lang.ref.WeakReference;
 
-public final class LifeObjectPackager {
 
-    public Object pack(Object object){
+final class LifeObjectPackager {
+
+    public Object pack(boolean lifeWeak,Object object){
         if (null!=object) {
-            if (object instanceof Activity || object instanceof Service || object instanceof BroadcastReceiver || object instanceof ContentProvider) {
+            if (lifeWeak||object instanceof Activity || object instanceof Service
+                    || object instanceof BroadcastReceiver || object instanceof ContentProvider) {
                 return new WeakReference<>(object);
             }
         }

@@ -3,9 +3,9 @@ package com.luckmerlin.databinding.view;
 import android.view.ViewGroup;
 
 import com.luckmerlin.core.proguard.PublishMethods;
-import com.luckmerlin.databinding.BindingObject;
+import com.luckmerlin.databinding.IBinding;
 
-public final class View implements BindingObject, PublishMethods {
+public final class View implements IBinding, PublishMethods {
     public final static int ADD=2011;
     public final static int REPLACE=2012;
     public final static int SET=2013;

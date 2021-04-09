@@ -6,6 +6,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 
+/**
+ * @deprecated
+ */
  final class Resources {
 
     public String getString(android.content.res.Resources resources, int textId, String def,Object ... args){

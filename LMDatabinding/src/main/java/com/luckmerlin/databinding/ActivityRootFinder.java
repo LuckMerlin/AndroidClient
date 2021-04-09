@@ -3,9 +3,11 @@ package com.luckmerlin.databinding;
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.luckmerlin.core.proguard.PublishMethods;
 
+/**
+ * @deprecated
+ */
 public class ActivityRootFinder implements PublishMethods {
 
     public final View getActivityFirstRoot(Activity activity){

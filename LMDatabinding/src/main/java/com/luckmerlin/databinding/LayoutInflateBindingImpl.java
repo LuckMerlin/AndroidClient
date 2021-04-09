@@ -9,6 +9,9 @@ import androidx.databinding.ViewDataBinding;
 
 import java.util.Collection;
 
+/**
+ * @deprecated
+ */
 final class LayoutInflateBindingImpl {
 
     public boolean inflateLayout(View view, Object layout){

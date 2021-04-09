@@ -5,6 +5,9 @@ import androidx.databinding.ViewDataBinding;
 
 import com.luckmerlin.core.match.Matchable;
 import com.luckmerlin.core.proguard.PublishMethods;
+/**
+ * @deprecated
+ */
 public class ModelClassFinder extends BindingMethodIterator implements PublishMethods {
 
     public final MatchBinding findModel(View modelRoot, Matchable matchable){

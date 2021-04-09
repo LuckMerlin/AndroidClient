@@ -12,6 +12,9 @@ import com.luckmerlin.core.proguard.PublishMethods;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+/**
+ * @deprecated
+ */
 
 public final class ModelBinder implements PublishMethods {
 

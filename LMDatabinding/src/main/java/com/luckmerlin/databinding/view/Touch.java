@@ -2,12 +2,12 @@ package com.luckmerlin.databinding.view;
 
 import com.luckmerlin.core.proguard.PublishFields;
 import com.luckmerlin.core.proguard.PublishMethods;
-import com.luckmerlin.databinding.BindingObject;
+import com.luckmerlin.databinding.IBinding;
 import com.luckmerlin.databinding.touch.TouchListener;
 
 import java.lang.ref.WeakReference;
 
-public final class Touch implements BindingObject,PublishMethods, PublishFields {
+public final class Touch implements IBinding,PublishMethods, PublishFields {
     public final static int NONE=0; //0x 0000 0000
     public final static int CLICK=1; //0x 0000 0001
     public final static int LONG_CLICK=2; // 0000 0010

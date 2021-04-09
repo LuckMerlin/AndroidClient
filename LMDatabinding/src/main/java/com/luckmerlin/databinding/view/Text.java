@@ -4,12 +4,12 @@ import android.util.TypedValue;
 
 import com.luckmerlin.core.proguard.PublishFields;
 import com.luckmerlin.core.proguard.PublishMethods;
-import com.luckmerlin.databinding.BindingObject;
+import com.luckmerlin.databinding.IBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Text implements BindingObject,PublishMethods, PublishFields {
+public class Text implements IBinding,PublishMethods, PublishFields {
     public final static int UNIT_DIP= TypedValue.COMPLEX_UNIT_DIP;
     public final static int UNIT_IN= TypedValue.COMPLEX_UNIT_IN;
     public final static int UNIT_MM= TypedValue.COMPLEX_UNIT_MM;

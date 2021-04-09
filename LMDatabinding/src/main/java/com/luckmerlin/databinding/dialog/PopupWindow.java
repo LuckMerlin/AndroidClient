@@ -1,21 +1,31 @@
 package com.luckmerlin.databinding.dialog;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import com.luckmerlin.databinding.touch.TouchListener;
 
-public class PopupWindow {
+import androidx.databinding.ViewDataBinding;
+
+import com.luckmerlin.core.proguard.PublishFields;
+import com.luckmerlin.core.proguard.PublishMethods;
+import com.luckmerlin.databinding.MatchBinding;
+import com.luckmerlin.databinding.Model;
+import com.luckmerlin.databinding.ModelBinder;
+
+/**
+ * @deprecated
+ */
+public final class PopupWindow implements PublishMethods, PublishFields {
     private final android.widget.PopupWindow mWindow=new android.widget.PopupWindow();
     private Drawable mBackground;
+    public final static int DISMISS_NONE=0x00;//0000
     public final static int DISMISS_OUT_MASK=0x01;//0001
     public final static int DISMISS_INNER_MASK=0x02;//0010
     private int mDismissFlag=0;
     private Integer mAppliedDismissFlag;
-    private TouchListener mTouchListener;
 
     public interface OnDismissListener{
         void onDismiss(PopupWindow popupWindow);
@@ -30,7 +40,6 @@ public class PopupWindow {
         setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         android.widget.PopupWindow window=mWindow;
         window.setOnDismissListener(()->{
-            mTouchListener=null;
             View view=window.getContentView();
             ViewParent parent=null!=view?view.getParent():null;
             if (null!=parent&&parent instanceof ViewGroup){
@@ -40,7 +49,7 @@ public class PopupWindow {
                 listener.onDismiss(this);
             }
         });
-        setDismissFlag(mDismissFlag|(touchable?DISMISS_OUT_MASK:0));
+        setDismissFlag(mDismissFlag|(touchable?DISMISS_OUT_MASK:DISMISS_NONE));
     }
 
     public final PopupWindow setDismissFlag(int flag){
@@ -57,17 +66,6 @@ public class PopupWindow {
             if (null==mAppliedDismissFlag||(flag!=mAppliedDismissFlag)){
                 mAppliedDismissFlag=flag;
                 window.setOutsideTouchable((flag&DISMISS_OUT_MASK)>0);
-                window.setTouchInterceptor(null);
-                if ((flag&DISMISS_INNER_MASK)>0){
-                    window.setTouchInterceptor(( v, event)->{
-                        int action=event.getAction();
-                        if (action==MotionEvent.ACTION_UP||action==MotionEvent.ACTION_CANCEL){
-                            v.setVisibility(View.GONE);
-                            v.postDelayed(()->dismiss(),200);
-                        }
-                        return false;
-                    });
-                }
                 return true;
             }
         }
@@ -82,6 +80,16 @@ public class PopupWindow {
         return this;
     }
 
+    public final PopupWindow setSize(Integer width,Integer height){
+        if (null!=width){
+            setWidth(width);
+        }
+        if (null!=height){
+            setHeight(height);
+        }
+        return this;
+    }
+    
     public final PopupWindow setHeight(int height){
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&window.getHeight()!=height){
@@ -94,53 +102,72 @@ public class PopupWindow {
         return showAtLocation(parent, Gravity.CENTER,0,0,flag);
     }
 
+    public PopupWindow showAtLocation(View parent, int gravity, int x, int y) {
+        return showAtLocation(parent,gravity,x,y,mDismissFlag);
+    }
+
     public PopupWindow showAtLocation(View parent, int gravity, int x, int y,Integer dismissFlag){
-        return showAtLocation(parent,gravity,x,y,null,dismissFlag);
-    }
-
-    public PopupWindow showAtLocation(View parent, int gravity, int x, int y,TouchListener interrupter) {
-        return showAtLocation(parent,gravity,x,y,interrupter,mDismissFlag);
-    }
-
-    public PopupWindow showAtLocation(View parent, int gravity, int x, int y,TouchListener interrupter,Integer dismissFlag){
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&null!=parent) {
             if (null!=dismissFlag){
                 applyDismissFlag(dismissFlag);
             }
             window.showAtLocation(parent, gravity, x, y);
-            mTouchListener=null!=interrupter?interrupter:mTouchListener;
         }
         return this;
     }
 
-    public PopupWindow showAsDropDown(View anchor, int x, int y,TouchListener interrupter,Integer dismissFlag) {
+    public final PopupWindow showAsDropDown(View anchor, int x, int y,Integer dismissFlag) {
         android.widget.PopupWindow window=mWindow;
         if (null!=window&&null!=anchor) {
-            View contentView=null!=interrupter?getContentView():null;
             if (null!=dismissFlag){
                 applyDismissFlag(dismissFlag);
             }
             window.showAsDropDown(anchor,x,y);
-            mTouchListener=null!=interrupter?interrupter:mTouchListener;
+        }
+        return this;
+    }
+
+    public final PopupWindow showAtLocation(View parent, Object rootObject, int gravity, int x, int y, Integer dismissFlag){
+        if (setContentViewInner(rootObject)){
+            dismissFlag = null == dismissFlag ? PopupWindow.DISMISS_OUT_MASK | PopupWindow.DISMISS_INNER_MASK : dismissFlag;
+            showAtLocation(parent, gravity, x, y, dismissFlag);
         }
         return this;
     }
 
     public PopupWindow setContentView(View view){
-        android.widget.PopupWindow window=mWindow;
-        if (null!=window&&null!=view&&null==view.getParent()){
-            Drawable drawable=mBackground;
-            window.setBackgroundDrawable(drawable);
-            window.setContentView(view);
-            applyDismissFlag(mDismissFlag);
+        setContentViewInner(view);
+        return this;
+    }
+
+    public PopupWindow setContentView(Context context,Model model){
+        if (null!=model){
+            MatchBinding matchBinding=null!=model?new ModelBinder().bindModelForObject(
+                    context,model,"Before show view at location."):null;
+            if (null!=matchBinding){
+                setContentViewInner(matchBinding);
+            }
         }
         return this;
     }
 
-    public PopupWindow setTouchListener(TouchListener touchListener) {
-        this.mTouchListener = touchListener;
-        return this;
+    private boolean setContentViewInner(Object rootObject){
+        if (null==rootObject){
+            return false;
+        }
+        android.widget.PopupWindow window=mWindow;
+        if (rootObject instanceof View&&(null==((View)rootObject).getParent())){
+            Drawable drawable=mBackground;
+            window.setBackgroundDrawable(drawable);
+            window.setContentView((View)rootObject);
+            applyDismissFlag(mDismissFlag);
+            return true;
+        }else if (rootObject instanceof ViewDataBinding){
+            ViewDataBinding binding=(ViewDataBinding)rootObject;
+            return setContentViewInner(binding.getRoot());
+        }
+        return false;
     }
 
     public final PopupWindow setOutsideTouchable(boolean touchable){
@@ -162,6 +189,7 @@ public class PopupWindow {
     }
 
     public final boolean isShowing(){
-        return null!=getContentView();
+        android.widget.PopupWindow window=mWindow;
+        return null!=window&&window.isShowing();
     }
 }

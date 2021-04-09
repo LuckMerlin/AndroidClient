@@ -23,6 +23,7 @@
 -dontskipnonpubliclibraryclassmembers
 -dontpreverify
 -verbose
+-keepparameternames
 -keepattributes Exceptions
 -keepattributes Signature
 -keepattributes InnerClasses

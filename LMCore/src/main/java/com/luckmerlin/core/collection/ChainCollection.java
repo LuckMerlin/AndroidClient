@@ -77,7 +77,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return null!=collection&&null!=o&&collection.add(o);
     }
 
-    public ChainCollection<T> addInChain(T o){
+    public ChainCollection<T> chainAdd(T o){
         add(o);
         return this;
     }
@@ -100,7 +100,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return null;
     }
 
-    public ChainCollection<T> removeInChain(Object o, boolean equals) {
+    public ChainCollection<T> chainRemove(Object o, boolean equals) {
         if (null!=o&&!remove(o)&&equals){
             T child=index(o);
             if (null!=child){
@@ -116,7 +116,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return null!=collection&&collection.addAll(c);
     }
 
-    public ChainCollection<T> addAllInChain(Collection c) {
+    public ChainCollection<T> chainAddAll(Collection c) {
         if (null!=c){
             addAll(c);
         }
@@ -132,7 +132,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return false;
     }
 
-    public ChainCollection<T> removeIfInChain(Predicate filter) {
+    public ChainCollection<T> chainRemoveIf(Predicate filter) {
         if (null!=filter){
             removeIf(filter);
         }
@@ -147,7 +147,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         }
     }
 
-    public ChainCollection<T> clearInChain() {
+    public ChainCollection<T> chainClear() {
         clear();
         return this;
     }
@@ -198,7 +198,7 @@ public final class ChainCollection<T> implements Collection<T>, PublishMethods {
         return null!=collection&&collection.retainAll(c);
     }
 
-    public ChainCollection<T> chainRetainAllIn(Collection c) {
+    public ChainCollection<T> chainRetainAll(Collection c) {
         retainAll(c);
         return this;
     }

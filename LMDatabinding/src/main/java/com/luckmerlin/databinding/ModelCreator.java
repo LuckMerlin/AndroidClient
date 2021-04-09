@@ -11,6 +11,9 @@ import com.luckmerlin.core.debug.Debug;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
+/**
+ * @deprecated
+ */
 class ModelCreator extends ModelClassFinder {
 
     public final CreatedModel createModel(Context context, Object object,String debug) {
